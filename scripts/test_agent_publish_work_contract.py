@@ -207,6 +207,18 @@ class AgentPublishWorkContractTests(unittest.TestCase):
             self.assertEqual(hot["activeModelRoutes"], [])
             self.assertEqual(hot["works"][0]["workId"], "task-integration-1")
             self.assertEqual(hot["works"][0]["status"], "done")
+            handoffs = json.loads((data / "handoff-queue.json").read_text())["handoffs"]
+            self.assertEqual(len(handoffs), 1)
+            handoff = handoffs[0]
+            self.assertEqual(handoff["workId"], "task-integration-1")
+            self.assertEqual(handoff["runId"], task["runId"])
+            self.assertEqual(handoff["originClaimHash"], task["originClaimHash"])
+            self.assertEqual(handoff["senderEventId"], handoff["id"])
+            self.assertEqual(
+                [receipt["kind"] for receipt in handoff["receipts"]],
+                ["sent", "acknowledged", "terminal"],
+            )
+            self.assertEqual(handoff["terminalResultStatus"], "done")
 
 
 if __name__ == "__main__":

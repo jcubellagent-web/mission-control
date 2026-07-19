@@ -13,10 +13,13 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from handoff_receipt_bridge import HandoffReceiptError, record_receipt
+
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = Path(os.environ.get("CONTROL_TOWER_DATA_DIR", ROOT / "data"))
 TASK_QUEUE = DATA_DIR / "agent-task-queue.json"
+HANDOFF_QUEUE = DATA_DIR / "handoff-queue.json"
 
 AGENT_LABELS = {
     "josh": "Josh 2.0",
@@ -107,7 +110,7 @@ def publish(
     *,
     task: dict[str, Any] | None = None,
     phase: str = "handoff",
-) -> None:
+) -> dict[str, Any]:
     cmd = [
         sys.executable,
         str(ROOT / "scripts" / "agent_publish.py"),
@@ -139,7 +142,12 @@ def publish(
             cmd.append("--route-unverified")
     if job:
         cmd.append("--job")
-    run(cmd, check=True)
+    proc = run(cmd, check=True)
+    try:
+        payload = json.loads(proc.stdout or "{}")
+    except json.JSONDecodeError as exc:
+        raise SystemExit("Local canonical publish returned an invalid receipt.") from exc
+    return payload if isinstance(payload, dict) else {}
 
 
 def create_task(args: argparse.Namespace) -> dict[str, Any]:
@@ -181,12 +189,14 @@ def create_task(args: argparse.Namespace) -> dict[str, Any]:
 
 
 def sync_task_queue(remote: dict[str, str]) -> None:
-    if not TASK_QUEUE.exists():
-        return
     if is_local_remote(remote):
         return
-    destination = f"{remote['ssh']}:{remote['path']}/data/agent-task-queue.json"
-    run(["scp", str(TASK_QUEUE), destination])
+    missing = [path.name for path in (TASK_QUEUE, HANDOFF_QUEUE) if not path.exists()]
+    if missing:
+        raise SystemExit(f"Cannot prove a remote handoff without: {', '.join(missing)}")
+    for path in (TASK_QUEUE, HANDOFF_QUEUE):
+        destination = f"{remote['ssh']}:{remote['path']}/data/{path.name}"
+        run(["scp", str(path), destination])
 
 
 def block_task_receipt(task: dict[str, Any], requester: str, error: str) -> None:
@@ -211,44 +221,36 @@ def publish_remote_receipt(agent: str, task: dict[str, Any]) -> tuple[str, str]:
     detail = f"Received JOSHeX request. Task id: {task['id']}. Objective: {task.get('objective') or task['title']}"
     if is_local_remote(remote):
         return title, detail
-    base_args = [
+    receipt_args = [
         remote["python"],
-        "scripts/agent_publish.py",
+        "scripts/handoff_receipt_bridge.py",
+        "--handoff-path", "data/handoff-queue.json",
+        "acknowledge",
         "--agent", agent,
-        "--type", "handoff",
-        "--status", "active",
-        "--title", compact(title, 180),
-        "--tool", "agent_delegate.py",
-        "--detail", compact(detail, 500),
         "--work-id", str(task["workId"]),
         "--run-id", str(task["runId"]),
-        "--generation", str(task.get("generation") or 1),
-        "--origin", str(task.get("origin") or "agent-delegate"),
         "--origin-claim-hash", str(task["originClaimHash"]),
-        "--work-event", "update",
-        "--phase", "instruction-received",
+        "--task-id", str(task["id"]),
     ]
-    if task.get("modelFamily"):
-        base_args.extend(["--model-family", str(task["modelFamily"])])
-    if task.get("modelId"):
-        base_args.extend(["--model-id", str(task["modelId"])])
-    if task.get("routeVerified"):
-        base_args.append("--route-verified")
-    else:
-        base_args.append("--route-unverified")
-    brain_args = [
-        *base_args,
-        "--brain-feed",
-        "--job",
-        "--rollup",
-    ]
-    event_args = [*base_args, "--job", "--rollup"]
     remote_cmd = (
         f"cd {shlex.quote(remote['path'])} && "
-        f"({' '.join(shlex.quote(part) for part in brain_args)}) || "
-        f"({' '.join(shlex.quote(part) for part in event_args)})"
+        f"({' '.join(shlex.quote(part) for part in receipt_args)})"
     )
-    run(["ssh", remote["ssh"], remote_cmd])
+    proc = run(["ssh", remote["ssh"], remote_cmd])
+    try:
+        payload = json.loads(proc.stdout or "{}")
+    except json.JSONDecodeError as exc:
+        raise SystemExit("Remote acknowledgement returned invalid evidence.") from exc
+    receipt = payload.get("receipt", {}) if isinstance(payload, dict) else {}
+    expected = {
+        "kind": "acknowledged",
+        "agent": agent,
+        "workId": str(task["workId"]),
+        "runId": str(task["runId"]),
+        "taskId": str(task["id"]),
+    }
+    if not payload.get("ok") or any(str(receipt.get(key) or "") != value for key, value in expected.items()):
+        raise SystemExit("Remote acknowledgement did not match the exact handoff identity.")
     return title, detail
 
 
@@ -288,9 +290,30 @@ def main() -> int:
             sync_task_queue(REMOTE_HOSTS[args.to])
             receipt_title, receipt_detail = publish_remote_receipt(args.to, task)
             if receipt_title:
-                publish(args.to, "handoff", "active", receipt_title, receipt_detail, True, task=task, phase="instruction-received")
+                published = publish(
+                    args.to,
+                    "status",
+                    "active",
+                    receipt_title,
+                    receipt_detail,
+                    True,
+                    task=task,
+                    phase="instruction-received",
+                )
+                event = published.get("event", {}) if isinstance(published, dict) else {}
+                record_receipt(
+                    DATA_DIR / "handoff-queue.json",
+                    kind="acknowledged",
+                    agent=args.to,
+                    work_id=task.get("workId"),
+                    run_id=task.get("runId"),
+                    origin_claim_hash=task.get("originClaimHash"),
+                    event_id=event.get("id"),
+                    task_id=task.get("id"),
+                    recorded_at=event.get("time"),
+                )
             receipt["ok"] = True
-        except SystemExit as exc:
+        except (SystemExit, HandoffReceiptError) as exc:
             receipt["error"] = str(exc)
             block_task_receipt(task, args.requester, receipt["error"])
             if not args.allow_offline:

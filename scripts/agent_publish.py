@@ -23,6 +23,7 @@ from control_tower_work_store import (
     new_id as new_work_id,
     publish_work_event,
 )
+from handoff_receipt_bridge import write_new_handoff
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -559,11 +560,13 @@ def append_decision(event: dict[str, Any], tags: list[str]) -> None:
     locked_update(DECISIONS_PATH, "decisions", record)
 
 
-def append_handoff_record(event: dict[str, Any], target: str, path: Path | None = None) -> None:
+def append_handoff_record(event: dict[str, Any], target: str, path: Path | None = None) -> dict[str, Any]:
     record = {
         "id": event["id"],
         "workId": event["workId"],
         "runId": event["runId"],
+        "originClaimHash": event["originClaimHash"],
+        "senderEventId": event["id"],
         "time": event["time"],
         "from": event["agent"],
         "fromLabel": event["agentLabel"],
@@ -574,7 +577,9 @@ def append_handoff_record(event: dict[str, Any], target: str, path: Path | None 
         "path": dashboard_handoff_path(path),
         "privacy": event["privacy"],
     }
-    locked_update(HANDOFF_QUEUE_PATH, "handoffs", record)
+    # Handoff history is append-only.  The bridge merges an idempotent retry
+    # without truncating legacy rows or erasing acknowledgements/results.
+    return write_new_handoff(HANDOFF_QUEUE_PATH, record)
 
 
 def dashboard_handoff_path(path: Path | None) -> str:

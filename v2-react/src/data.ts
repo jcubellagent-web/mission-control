@@ -604,6 +604,7 @@ async function loadFallback(): Promise<MissionControlState> {
     modelUsage: dashboard?.modelUsage || sidecars.modelUsage,
     modelRouter: dashboard?.modelRouter,
     reliabilityUpgrades: dashboard?.reliabilityUpgrades || sidecars.reliabilityUpgrades,
+    brainAtlas: dashboard?.brainAtlas,
     capabilityStack: dashboard?.capabilityStack,
     capabilityInventory: dashboard?.capabilityInventory,
     capabilityWatch: dashboard?.capabilityWatch,

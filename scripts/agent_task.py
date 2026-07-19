@@ -19,6 +19,7 @@ from control_tower_work_store import (
     origin_digest,
     safe_identifier,
 )
+from handoff_receipt_bridge import HandoffReceiptError, record_receipt
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -151,7 +152,8 @@ def publish_event(
     task: dict[str, Any] | None = None,
     phase: str = "",
     work_event: str = "auto",
-) -> None:
+    handoff_to: str = "",
+) -> dict[str, Any]:
     publish_status = (
         "planned"
         if status == "queued"
@@ -194,6 +196,8 @@ def publish_event(
             cmd.append("--route-verified")
         else:
             cmd.append("--route-unverified")
+    if handoff_to:
+        cmd.extend(["--handoff-to", handoff_to])
     if brain_feed:
         cmd.append("--brain-feed")
     if job:
@@ -203,6 +207,45 @@ def publish_event(
         raise SystemExit(
             compact(result.stderr.strip() or result.stdout.strip() or "Canonical work publish failed", 500)
         )
+    try:
+        payload = json.loads(result.stdout or "{}")
+    except json.JSONDecodeError as exc:
+        raise SystemExit("Canonical work publish returned an invalid receipt.") from exc
+    return payload if isinstance(payload, dict) else {}
+
+
+def record_task_handoff_receipt(
+    task: dict[str, Any],
+    *,
+    kind: str,
+    agent: str,
+    event: dict[str, Any],
+    status: str = "",
+) -> dict[str, Any] | None:
+    """Bridge a task lifecycle event to its exact cross-agent handoff row.
+
+    Tasks created before the receipt bridge may not have an exact handoff row;
+    those rows remain untouched and are surfaced by the read-only report.
+    """
+    if str(task.get("requester") or "") == str(task.get("owner") or ""):
+        return None
+    try:
+        return record_receipt(
+            DATA_DIR / "handoff-queue.json",
+            kind=kind,
+            agent=agent,
+            work_id=task.get("workId"),
+            run_id=task.get("runId"),
+            origin_claim_hash=task.get("originClaimHash"),
+            event_id=event.get("id"),
+            task_id=task.get("id"),
+            status=status,
+            recorded_at=event.get("time"),
+        )
+    except HandoffReceiptError as exc:
+        if "No handoff matches" in str(exc):
+            return None
+        raise
 
 
 def publish_to_brain_feed(args: argparse.Namespace) -> bool:
@@ -289,6 +332,7 @@ def create(args: argparse.Namespace) -> dict[str, Any]:
             task=task,
             phase="delegating",
             work_event="start",
+            handoff_to=owner,
         )
     publish_event(
         owner,
@@ -323,7 +367,17 @@ def set_status(args: argparse.Namespace, status: str) -> dict[str, Any]:
         )
         previous_status = str(task.get("status") or "queued")
         effective_status = previous_status if getattr(args, "work_event", "") == "heartbeat" else status
-        if previous_status in {"done", "blocked", "error", "cancelled"} and effective_status not in {"done", "blocked", "error", "cancelled"}:
+        terminal_statuses = {"done", "blocked", "error", "cancelled"}
+        if (
+            previous_status in terminal_statuses
+            and effective_status in terminal_statuses
+            and effective_status != previous_status
+        ):
+            raise SystemExit(
+                f"Task is already terminal as {previous_status}; reopen it with a non-terminal "
+                f"transition before changing the terminal outcome to {effective_status}."
+            )
+        if previous_status in terminal_statuses and effective_status not in terminal_statuses:
             task["generation"] = int(task.get("generation") or 1) + 1
             task["runId"] = new_id("run")
         task["status"] = effective_status
@@ -358,7 +412,7 @@ def set_status(args: argparse.Namespace, status: str) -> dict[str, Any]:
     effective_status = result["status"]
     title = f"Task {effective_status}: {result['title']}"
     detail = args.summary or args.note or result.get("objective") or title
-    publish_event(
+    publish_result = publish_event(
         result["owner"],
         "complete" if effective_status == "done" else "blocked" if effective_status in {"blocked", "error"} else "status",
         effective_status,
@@ -370,6 +424,22 @@ def set_status(args: argparse.Namespace, status: str) -> dict[str, Any]:
         phase=getattr(args, "phase", "") or effective_status,
         work_event=getattr(args, "work_event", "update"),
     )
+    published_event = publish_result.get("event", {}) if isinstance(publish_result, dict) else {}
+    if getattr(args, "cmd", "") != "handoff" and effective_status in {"accepted", "active"}:
+        record_task_handoff_receipt(
+            result,
+            kind="acknowledged",
+            agent=result["owner"],
+            event=published_event,
+        )
+    elif effective_status in {"done", "blocked", "error", "cancelled"}:
+        record_task_handoff_receipt(
+            result,
+            kind="terminal",
+            agent=result["owner"],
+            event=published_event,
+            status=effective_status,
+        )
     return result
 
 

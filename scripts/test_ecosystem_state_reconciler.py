@@ -3,14 +3,82 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import os
+import subprocess
+import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
+from unittest import mock
 
 import ecosystem_state_reconciler as subject
 
 
 class ReconcilerTests(unittest.TestCase):
+    def test_main_holds_publisher_locks_across_snapshot_and_write(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            for name, key in (
+                ("agent-task-queue.json", "tasks"),
+                ("handoff-queue.json", "handoffs"),
+                ("codex-jobs.json", "jobs"),
+                ("shared-events.json", "events"),
+            ):
+                (root / name).write_text(json.dumps({key: []}), encoding="utf-8")
+            attempted = root / "writer-attempted"
+            acquired = root / "writer-acquired"
+            handoff_lock = root / "handoff-queue.lock"
+            child_code = (
+                "import fcntl, pathlib, sys; "
+                "attempted=pathlib.Path(sys.argv[1]); "
+                "acquired=pathlib.Path(sys.argv[2]); "
+                "lock_path=pathlib.Path(sys.argv[3]); "
+                "attempted.write_text('yes'); "
+                "handle=lock_path.open('a+'); "
+                "fcntl.flock(handle.fileno(), fcntl.LOCK_EX); "
+                "acquired.write_text('yes'); "
+                "handle.close()"
+            )
+            child: subprocess.Popen[str] | None = None
+
+            def fake_reconcile(data_dir: Path, _now: dt.datetime):
+                nonlocal child
+                child = subprocess.Popen(
+                    [
+                        sys.executable,
+                        "-B",
+                        "-c",
+                        child_code,
+                        str(attempted),
+                        str(acquired),
+                        str(handoff_lock),
+                    ],
+                    env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
+                )
+                deadline = time.monotonic() + 3
+                while not attempted.exists() and time.monotonic() < deadline:
+                    time.sleep(0.01)
+                self.assertTrue(attempted.exists())
+                self.assertFalse(acquired.exists())
+                return {"documents": {}, "summary": {"ok": True}}
+
+            argv = [
+                "ecosystem_state_reconciler.py",
+                "--data-dir", str(root),
+                "--dry-run",
+            ]
+            with (
+                mock.patch.object(sys, "argv", argv),
+                mock.patch.object(subject, "reconcile", side_effect=fake_reconcile),
+                mock.patch("builtins.print"),
+            ):
+                self.assertEqual(subject.main(), 0)
+            self.assertIsNotNone(child)
+            child.wait(timeout=5)
+            self.assertEqual(child.returncode, 0)
+            self.assertTrue(acquired.exists())
+
     def test_canonical_work_ids_never_fuzzy_match_a_different_task(self) -> None:
         now = dt.datetime(2026, 7, 15, 12, tzinfo=dt.timezone.utc)
         with tempfile.TemporaryDirectory() as raw:

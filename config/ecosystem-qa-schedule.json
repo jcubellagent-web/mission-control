@@ -21,6 +21,57 @@
       "severity": "p0"
     },
     {
+      "id": "memory-operations-snapshot",
+      "owner": "josh2",
+      "team": "Memory safety and reuse telemetry",
+      "schedule": {"intervalMinutes": 5, "offset": 2},
+      "command": ["python3", "scripts/memory_registry.py", "export"],
+      "timeoutSeconds": 30,
+      "severity": "p1"
+    },
+    {
+      "id": "reliability-reuse-evaluator",
+      "owner": "joshex",
+      "team": "Reliability golden gates",
+      "schedule": {"intervalMinutes": 60, "offset": 6},
+      "command": [
+        "python3",
+        "scripts/reliability_reuse_eval.py",
+        "--run-contract-checks",
+        "--contract-timeout-seconds",
+        "20"
+      ],
+      "timeoutSeconds": 45,
+      "severity": "p1"
+    },
+    {
+      "id": "brain-atlas-snapshot",
+      "owner": "josh2",
+      "team": "Verified operational graph",
+      "schedule": {"intervalMinutes": 10, "offset": 8},
+      "command": [
+        "python3",
+        "scripts/brain_atlas.py",
+        "--output",
+        "data/brain-atlas.json",
+        "--days",
+        "7",
+        "--max-nodes",
+        "100"
+      ],
+      "timeoutSeconds": 30,
+      "severity": "p2"
+    },
+    {
+      "id": "reliability-scorecard",
+      "owner": "josh2",
+      "team": "Reliability evidence",
+      "schedule": {"intervalMinutes": 5, "offset": 4},
+      "command": ["python3", "scripts/reliability_scorecard.py"],
+      "timeoutSeconds": 30,
+      "severity": "p1"
+    },
+    {
       "id": "lifecycle-reconcile",
       "owner": "jain",
       "team": "Data integrity",

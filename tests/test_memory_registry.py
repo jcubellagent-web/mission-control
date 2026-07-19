@@ -1,0 +1,251 @@
+from __future__ import annotations
+
+import json
+import os
+import sqlite3
+import subprocess
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+CLI = ROOT / "scripts" / "memory_registry.py"
+
+
+class MemoryRegistryTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.temporary = tempfile.TemporaryDirectory(prefix="memory-registry-test-")
+        self.addCleanup(self.temporary.cleanup)
+        self.folder = Path(self.temporary.name)
+        self.database = self.folder / "registry.sqlite"
+        self.env = dict(os.environ)
+        self.env["MEMORY_REGISTRY_DB"] = str(self.database)
+        self.env["MEMORY_OPERATIONS_PATH"] = str(self.folder / "status.json")
+        self.cli("init")
+
+    def run_raw(self, *args: str, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            [sys.executable, str(CLI), *args],
+            cwd=ROOT,
+            env=env or self.env,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+    def cli(self, *args: str, env: dict[str, str] | None = None) -> dict:
+        process = self.run_raw(*args, env=env)
+        if process.returncode != 0:
+            self.fail(f"command failed ({process.returncode}): {process.stderr or process.stdout}")
+        return json.loads(process.stdout)
+
+    def create_memory(self, label: str, *, privacy: str, owner: str = "jaimes") -> str:
+        proposal = self.cli(
+            "propose",
+            "--agent", "jaimes",
+            "--type", "fact",
+            "--subject", f"Privacy fixture {label}",
+            "--predicate", "has state",
+            "--value", "ready",
+            "--owner", owner,
+            "--visibility", "shared",
+            "--privacy", privacy,
+            "--source", f"test:{label}",
+            "--evidence", "unit test",
+            "--confidence", "0.99",
+        )
+        approved = self.cli("approve", "--id", proposal["id"], "--reviewer", "joshex")
+        return approved["recordId"]
+
+    def retrieve_ids(self, agent: str) -> set[str]:
+        result = self.cli(
+            "retrieve", "--agent", agent, "--query", "Privacy fixture", "--limit", "20"
+        )
+        return {str(row["id"]) for row in result["results"]}
+
+    def test_privacy_is_deny_by_default_outside_owner_and_joshex(self) -> None:
+        dashboard = self.create_memory("dashboard", privacy="dashboard-safe")
+        public = self.create_memory("public", privacy="public")
+        agent_private = self.create_memory("agent private", privacy="agent-private")
+        sensitive_account = self.create_memory("sensitive account", privacy="sensitive-account")
+        unknown = self.create_memory("unknown", privacy="mystery-internal")
+
+        public_ids = {dashboard, public}
+        all_ids = {dashboard, public, agent_private, sensitive_account, unknown}
+        self.assertEqual(self.retrieve_ids("jain"), public_ids)
+        self.assertEqual(self.retrieve_ids("josh2"), public_ids)
+        self.assertEqual(self.retrieve_ids("jaimes"), all_ids)
+        self.assertEqual(self.retrieve_ids("joshex"), all_ids)
+        privacy = self.cli("privacy-check")
+        self.assertTrue(privacy["ok"])
+        self.assertRegex(privacy["checkedAt"], r"^\d{4}-\d{2}-\d{2}T.*Z$")
+        self.assertEqual(privacy["activePublic"], 2)
+        self.assertEqual(privacy["activeOwnerPrivate"], 3)
+        self.assertEqual(privacy["unknownLabelsOwnerScoped"], 1)
+        self.assertEqual(privacy["crossOwnerPrivateLeaks"], 0)
+
+    def test_owner_private_candidate_is_not_auto_promoted(self) -> None:
+        self.cli(
+            "propose", "--agent", "jaimes", "--type", "fact",
+            "--subject", "Private candidate", "--predicate", "has state", "--value", "ready",
+            "--owner", "jaimes", "--visibility", "shared", "--privacy", "agent-private",
+            "--source", "test:private", "--evidence", "unit test", "--confidence", "0.99",
+        )
+        review = self.cli("review", "--apply-safe")
+        self.assertEqual(review["promoted"], 0)
+        self.assertEqual(review["pending"], 1)
+
+    def test_preflight_hashes_context_and_tracks_selected_then_used(self) -> None:
+        memory_id = self.create_memory("preflight", privacy="dashboard-safe")
+        work_id = "work-private-marker"
+        run_id = "run-private-marker"
+        session_id = "session-private-marker"
+        preflight = self.cli(
+            "preflight", "--agent", "jain", "--query", "Privacy fixture private-query-marker",
+            "--work-id", work_id, "--run-id", run_id, "--session-id", session_id,
+        )
+        rendered = json.dumps(preflight)
+        self.assertTrue(preflight["proceed"])
+        self.assertFalse(preflight["failOpen"])
+        self.assertNotIn("private-query-marker", rendered)
+        self.assertNotIn(work_id, rendered)
+        self.assertNotIn(run_id, rendered)
+        self.assertNotIn(session_id, rendered)
+
+        selected = self.cli(
+            "reuse-outcome", "--agent", "jain", "--retrieval-id", preflight["retrievalId"],
+            "--memory-id", memory_id, "--outcome", "selected", "--reason-code", "context-only",
+            "--work-id", work_id, "--run-id", run_id, "--session-id", session_id,
+        )
+        used = self.cli(
+            "reuse-outcome", "--agent", "jain", "--retrieval-id", preflight["retrievalId"],
+            "--memory-id", memory_id, "--outcome", "used", "--reason-code", "applied",
+            "--work-id", work_id, "--run-id", run_id, "--session-id", session_id,
+        )
+        duplicate = self.cli(
+            "reuse-outcome", "--agent", "jain", "--retrieval-id", preflight["retrievalId"],
+            "--memory-id", memory_id, "--outcome", "used", "--reason-code", "applied",
+        )
+        self.assertEqual(selected["outcome"], "selected")
+        self.assertEqual(used["outcome"], "used")
+        self.assertTrue(duplicate["duplicate"])
+
+        connection = sqlite3.connect(self.database)
+        row = connection.execute(
+            "SELECT query_hash,work_id_hash,run_id_hash,session_id_hash,preflight FROM retrieval_events WHERE id=?",
+            (preflight["retrievalId"],),
+        ).fetchone()
+        reuse_rows = connection.execute(
+            "SELECT outcome,reason_code,work_id_hash,run_id_hash,session_id_hash FROM memory_reuse_events ORDER BY outcome",
+        ).fetchall()
+        connection.close()
+        self.assertEqual(row[4], 1)
+        self.assertNotIn(work_id, row)
+        self.assertNotIn(run_id, row)
+        self.assertNotIn(session_id, row)
+        self.assertEqual({item[0] for item in reuse_rows}, {"selected", "used"})
+        self.assertTrue(all(item[2] == row[1] and item[3] == row[2] and item[4] == row[3] for item in reuse_rows))
+
+        status = self.cli("status")
+        self.assertEqual(status["retrieval"]["preflights7d"], 1)
+        self.assertEqual(status["retrieval"]["selected30d"], 1)
+        self.assertEqual(status["retrieval"]["used30d"], 1)
+        self.assertEqual(status["retrieval"]["selectedUseRate"], 100.0)
+
+    def test_used_requires_selected_and_context_must_match(self) -> None:
+        memory_id = self.create_memory("ordered outcome", privacy="dashboard-safe")
+        preflight = self.cli(
+            "preflight", "--agent", "jain", "--query", "Privacy fixture ordered outcome",
+            "--work-id", "work-a",
+        )
+        used_first = self.run_raw(
+            "reuse-outcome", "--agent", "jain", "--retrieval-id", preflight["retrievalId"],
+            "--memory-id", memory_id, "--outcome", "used",
+        )
+        self.assertNotEqual(used_first.returncode, 0)
+        mismatch = self.run_raw(
+            "reuse-outcome", "--agent", "jain", "--retrieval-id", preflight["retrievalId"],
+            "--memory-id", memory_id, "--outcome", "selected", "--work-id", "work-b",
+        )
+        self.assertNotEqual(mismatch.returncode, 0)
+
+        unbound = self.cli(
+            "preflight", "--agent", "jain", "--query", "Privacy fixture ordered outcome"
+        )
+        self.cli(
+            "reuse-outcome", "--agent", "jain", "--retrieval-id", unbound["retrievalId"],
+            "--memory-id", memory_id, "--outcome", "selected", "--work-id", "work-a",
+        )
+        changed_after_selection = self.run_raw(
+            "reuse-outcome", "--agent", "jain", "--retrieval-id", unbound["retrievalId"],
+            "--memory-id", memory_id, "--outcome", "used", "--work-id", "work-b",
+        )
+        self.assertNotEqual(changed_after_selection.returncode, 0)
+
+    def test_preflight_fails_open_when_registry_is_unavailable(self) -> None:
+        env = dict(self.env)
+        env["MEMORY_REGISTRY_DB"] = str(self.folder)
+        result = self.cli(
+            "preflight", "--agent", "jain", "--query", "safe fail open",
+            "--work-id", "work-private-marker", env=env,
+        )
+        self.assertTrue(result["ok"])
+        self.assertTrue(result["proceed"])
+        self.assertTrue(result["failOpen"])
+        self.assertEqual(result["status"], "unavailable")
+        self.assertEqual(result["results"], [])
+        self.assertNotIn("work-private-marker", json.dumps(result))
+
+    def test_ignored_feedback_reduces_quality_rate(self) -> None:
+        memory_id = self.create_memory("quality", privacy="dashboard-safe")
+        retrieval = self.cli(
+            "retrieve", "--agent", "jain", "--query", "Privacy fixture quality", "--limit", "3"
+        )
+        for outcome in ("helpful", "ignored"):
+            self.cli(
+                "feedback", "--agent", "jain", "--retrieval-id", retrieval["retrievalId"],
+                "--memory-id", memory_id, "--outcome", outcome, "--reason", "unit-test outcome",
+            )
+        status = self.cli("status")
+        self.assertEqual(status["retrieval"]["feedback30d"], 2)
+        self.assertEqual(status["retrieval"]["qualityRate"], 50.0)
+
+    def test_existing_retrieval_schema_is_migrated_additively(self) -> None:
+        legacy_database = self.folder / "legacy.sqlite"
+        connection = sqlite3.connect(legacy_database)
+        connection.execute(
+            """CREATE TABLE retrieval_events (
+              id TEXT PRIMARY KEY,time TEXT NOT NULL,agent TEXT NOT NULL,scope TEXT NOT NULL,
+              query_hash TEXT NOT NULL,term_count INTEGER NOT NULL,matched_count INTEGER NOT NULL,
+              latency_ms REAL NOT NULL,memory_ids_json TEXT NOT NULL,outcome TEXT NOT NULL
+            )"""
+        )
+        connection.execute(
+            "INSERT INTO retrieval_events VALUES (?,?,?,?,?,?,?,?,?,?)",
+            ("retrieval-legacy", "2026-01-01T00:00:00Z", "jain", "ecosystem", "hash", 1, 0, 1.0, "[]", "miss"),
+        )
+        connection.commit()
+        connection.close()
+
+        env = dict(self.env)
+        env["MEMORY_REGISTRY_DB"] = str(legacy_database)
+        env["MEMORY_OPERATIONS_PATH"] = str(self.folder / "legacy-status.json")
+        self.cli("init", env=env)
+        connection = sqlite3.connect(legacy_database)
+        columns = {row[1] for row in connection.execute("PRAGMA table_info(retrieval_events)")}
+        legacy = connection.execute(
+            "SELECT id,work_id_hash,run_id_hash,session_id_hash,preflight FROM retrieval_events WHERE id='retrieval-legacy'"
+        ).fetchone()
+        reuse_table = connection.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='memory_reuse_events'"
+        ).fetchone()
+        connection.close()
+        self.assertTrue({"work_id_hash", "run_id_hash", "session_id_hash", "preflight"}.issubset(columns))
+        self.assertEqual(legacy, ("retrieval-legacy", None, None, None, 0))
+        self.assertIsNotNone(reuse_table)
+
+
+if __name__ == "__main__":
+    unittest.main()

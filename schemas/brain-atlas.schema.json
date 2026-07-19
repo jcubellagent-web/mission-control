@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://control-tower.local/schemas/brain-atlas.schema.json",
+  "title": "Control Tower Brain Atlas",
+  "description": "A bounded, dashboard-safe graph derived only from accepted Control Tower work receipts.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "status",
+    "empty",
+    "emptyReason",
+    "source",
+    "window",
+    "limits",
+    "counts",
+    "policy",
+    "nodes",
+    "edges"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "generatedAt": {"type": "string", "format": "date-time"},
+    "status": {"type": "string", "enum": ["ready", "empty", "unavailable"]},
+    "empty": {"type": "boolean"},
+    "emptyReason": {
+      "type": ["string", "null"],
+      "enum": [
+        null,
+        "no-receipts-in-window",
+        "no-verified-receipts-in-window",
+        "node-cap-excluded-all-receipts",
+        "source-missing",
+        "source-unavailable",
+        "unsupported-source-schema",
+        "unsupported-source-version",
+        "generated-payload-invalid"
+      ]
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "verified", "schemaVersion", "revision"],
+      "properties": {
+        "name": {"const": "control-tower-work-ledger"},
+        "verified": {"type": "boolean"},
+        "schemaVersion": {"type": ["integer", "null"], "minimum": 1},
+        "revision": {"type": ["integer", "null"], "minimum": 0}
+      }
+    },
+    "window": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["days", "start", "end"],
+      "properties": {
+        "days": {"type": "integer", "minimum": 1, "maximum": 7},
+        "start": {"type": "string", "format": "date-time"},
+        "end": {"type": "string", "format": "date-time"}
+      }
+    },
+    "limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["maxNodes", "hardMaxNodes"],
+      "properties": {
+        "maxNodes": {"type": "integer", "minimum": 1, "maximum": 100},
+        "hardMaxNodes": {"const": 100}
+      }
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["nodes", "edges", "agents", "works", "receipts", "models", "sourceRowsInWindow", "excluded"],
+      "properties": {
+        "nodes": {"type": "integer", "minimum": 0, "maximum": 100},
+        "edges": {"type": "integer", "minimum": 0},
+        "agents": {"type": "integer", "minimum": 0, "maximum": 4},
+        "works": {"type": "integer", "minimum": 0, "maximum": 100},
+        "receipts": {"type": "integer", "minimum": 0, "maximum": 100},
+        "models": {"type": "integer", "minimum": 0, "maximum": 100},
+        "sourceRowsInWindow": {"type": "integer", "minimum": 0},
+        "excluded": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["timeOutOfWindow", "legacyOrInvalid", "capacityReceipts", "capacityRoutes", "unverifiedRoutes", "unsafeVerifiedRoutes"],
+          "properties": {
+            "timeOutOfWindow": {"type": "integer", "minimum": 0},
+            "legacyOrInvalid": {"type": "integer", "minimum": 0},
+            "capacityReceipts": {"type": "integer", "minimum": 0},
+            "capacityRoutes": {"type": "integer", "minimum": 0},
+            "unverifiedRoutes": {"type": "integer", "minimum": 0},
+            "unsafeVerifiedRoutes": {"type": "integer", "minimum": 0}
+          }
+        }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["identifiers", "edges", "content", "excludedFields"],
+      "properties": {
+        "identifiers": {"type": "string", "maxLength": 120},
+        "edges": {"type": "string", "maxLength": 140},
+        "content": {"type": "string", "maxLength": 100},
+        "excludedFields": {
+          "type": "array",
+          "minItems": 10,
+          "uniqueItems": true,
+          "items": {"type": "string", "maxLength": 40}
+        }
+      }
+    },
+    "nodes": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {"$ref": "#/$defs/node"}
+    },
+    "edges": {
+      "type": "array",
+      "maxItems": 300,
+      "items": {"$ref": "#/$defs/edge"}
+    }
+  },
+  "$defs": {
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "label", "observedAt", "receiptCount"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^(agent|work|receipt|model):[A-Za-z0-9._:-]{1,80}$"},
+        "kind": {"type": "string", "enum": ["agent", "work", "receipt", "model"]},
+        "label": {"type": "string", "minLength": 1, "maxLength": 140},
+        "status": {
+          "type": "string",
+          "enum": ["accepted", "planned", "routed", "active", "verifying", "done", "blocked", "error", "cancelled"]
+        },
+        "observedAt": {"type": "string", "format": "date-time"},
+        "receiptCount": {"type": "integer", "minimum": 0},
+        "generation": {"type": "integer", "minimum": 1},
+        "sequence": {"type": "integer", "minimum": 1},
+        "routeVerified": {"type": "boolean"},
+        "family": {"type": "string", "enum": ["codex", "antigravity", "ollama", "grok"]},
+        "modelId": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/+\\-]{0,119}$"}
+      }
+    },
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "source", "target", "evidenceReceipt", "observedAt"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^edge:[a-f0-9]{24}$"},
+        "kind": {"type": "string", "enum": ["owns", "emitted", "verified-route"]},
+        "source": {"type": "string", "pattern": "^(agent|work|receipt|model):[A-Za-z0-9._:-]{1,80}$"},
+        "target": {"type": "string", "pattern": "^(agent|work|receipt|model):[A-Za-z0-9._:-]{1,80}$"},
+        "evidenceReceipt": {"type": "string", "pattern": "^receipt:[a-f0-9]{24}$"},
+        "observedAt": {"type": "string", "format": "date-time"}
+      }
+    }
+  }
+}

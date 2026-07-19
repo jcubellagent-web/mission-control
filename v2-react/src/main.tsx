@@ -72,6 +72,15 @@ type LiveCueState = {
   rows: Record<string, number>;
   focus: SectionCueKey | null;
 };
+type BrainAtlas = NonNullable<MissionControlState["brainAtlas"]>;
+type BrainAtlasNode = BrainAtlas["nodes"][number];
+type BrainAtlasEdge = BrainAtlas["edges"][number];
+type BrainAtlasView = {
+  nodes: BrainAtlasNode[];
+  edges: BrainAtlasEdge[];
+  candidateReceipts: number;
+  shownReceipts: number;
+};
 
 type KioskPulse = {
   tone: "clear" | "watch" | "risk";
@@ -86,6 +95,7 @@ type KioskPulse = {
 const CHANGE_CUE_MS = 3200;
 const LIVE_REFRESH_MS = 10_000;
 const MIN_EXPECTED_OPERATOR_JOBS = 12;
+const BRAIN_ATLAS_VISIBLE_RECEIPTS = 6;
 
 const JOSH_HEADSHOT_URL = new URL("../../assets/josh-headshot.jpg", import.meta.url).href;
 
@@ -759,6 +769,9 @@ function sectionSignatures(state: MissionControlState): Record<SectionCueKey, st
     }),
     system: compactSignature({
       reliability: state.reliabilityUpgrades?.items?.map((row) => [row.id, row.status, row.signal, row.next]),
+      brainAtlas: state.brainAtlas
+        ? [state.brainAtlas.generatedAt, state.brainAtlas.status, state.brainAtlas.counts.nodes, state.brainAtlas.counts.edges]
+        : null,
       operationalAlerts: (state.operationalAlerts || []).map((row) => [row.id, row.priority, row.title, row.detail, row.created_at]),
       source: state.source,
     }),
@@ -999,6 +1012,7 @@ function App() {
   const [dataError, setDataError] = useState<string | null>(null);
   const [liveMode, setLiveMode] = useState<"connected" | "polling">("polling");
   const [quietMode, setQuietMode] = useState(true);
+  const [supportView, setSupportView] = useState<"finops" | "atlas">("finops");
   const [displayState, setDisplayState] = useState<ControlTowerDisplayState>({});
   const [nightModeOverride, setNightModeOverride] = useState<boolean | null>(null);
   const [clockNow, setClockNow] = useState(() => new Date());
@@ -1184,16 +1198,42 @@ function App() {
         <section id="brain-feed" className={`brain-hero-panel${sectionCueClass("brain", liveCues)}`}>
           <SectionCue label={liveCues.focus === "brain" ? "focus" : "updated"} />
           <BrainHero state={state} statuses={statusByAgent} quietMode={quietMode} onNavigate={navigateToPanel} liveCues={liveCues} />
-          <section className="support-grid" aria-label="Control Tower support modules">
-            <MemoizedFinOpsDashboard
-              wallet={state.agenticCrypto}
-              modelUsage={state.modelUsage}
-              modelRouter={state.modelRouter}
-              statuses={state.statuses}
-              activeModelRoutes={state.activeModelRoutes || []}
-              loading={loading}
-              onRefresh={() => refreshAgenticCrypto(true)}
-            />
+          <section className={`support-grid is-support-tabbed is-${supportView}`} aria-label="Control Tower support modules">
+            <div className="support-module-tabs" role="tablist" aria-label="Support module view">
+              <button
+                type="button"
+                role="tab"
+                data-support-view="finops"
+                aria-selected={supportView === "finops"}
+                className={supportView === "finops" ? "selected" : ""}
+                onClick={() => setSupportView("finops")}
+              >
+                FinOps
+              </button>
+              <button
+                type="button"
+                role="tab"
+                data-support-view="atlas"
+                aria-selected={supportView === "atlas"}
+                className={supportView === "atlas" ? "selected" : ""}
+                onClick={() => setSupportView("atlas")}
+              >
+                Brain Atlas
+              </button>
+            </div>
+            {supportView === "atlas" ? (
+              <BrainAtlasPanel atlas={state.brainAtlas} />
+            ) : (
+              <MemoizedFinOpsDashboard
+                wallet={state.agenticCrypto}
+                modelUsage={state.modelUsage}
+                modelRouter={state.modelRouter}
+                statuses={state.statuses}
+                activeModelRoutes={state.activeModelRoutes || []}
+                loading={loading}
+                onRefresh={() => refreshAgenticCrypto(true)}
+              />
+            )}
           </section>
         </section>
         <aside className="right-rail">
@@ -2979,6 +3019,253 @@ function ReliabilityUpgradesPanel({ upgrades }: { upgrades?: MissionControlState
           </article>
         ))}
       </div>
+    </section>
+  );
+}
+
+const BRAIN_ATLAS_LAYER_ORDER: BrainAtlasNode["kind"][] = ["agent", "work", "receipt", "model"];
+const BRAIN_ATLAS_LAYER_X: Record<BrainAtlasNode["kind"], number> = {
+  agent: 98,
+  work: 362,
+  receipt: 638,
+  model: 902,
+};
+const BRAIN_ATLAS_LAYER_LABEL: Record<BrainAtlasNode["kind"], string> = {
+  agent: "Agent",
+  work: "Work",
+  receipt: "Receipt",
+  model: "Verified model",
+};
+
+function brainAtlasEmptyMessage(reason?: string | null) {
+  const messages: Record<string, string> = {
+    "no-receipts-in-window": "No accepted receipts were recorded in the seven-day window.",
+    "no-verified-receipts-in-window": "No receipts passed the exact identity and evidence checks in this window.",
+    "node-cap-excluded-all-receipts": "The bounded source could not fit a complete exact receipt path.",
+    "source-missing": "Brain Atlas has not been generated on this host yet.",
+    "source-unavailable": "The read-only receipt ledger was unavailable when this view was generated.",
+    "unsupported-source-schema": "The receipt ledger schema is not supported by this Atlas version.",
+    "unsupported-source-version": "The receipt ledger version is not supported by this Atlas version.",
+    "generated-payload-invalid": "The generated Atlas failed its dashboard-safe validation boundary.",
+  };
+  return messages[String(reason || "")] || "No verified receipt paths are available.";
+}
+
+function brainAtlasView(atlas: BrainAtlas | undefined, focusId: string): BrainAtlasView {
+  if (!atlas || atlas.status !== "ready" || !atlas.nodes.length) {
+    return { nodes: [], edges: [], candidateReceipts: 0, shownReceipts: 0 };
+  }
+  const byId = new Map(atlas.nodes.map((node) => [node.id, node]));
+  const receipts = atlas.nodes
+    .filter((node) => node.kind === "receipt")
+    .sort((a, b) => timeValue(b.observedAt) - timeValue(a.observedAt));
+  const selected = focusId === "all" ? undefined : byId.get(focusId);
+  let candidates = receipts;
+  if (selected) {
+    const receiptIds = new Set<string>();
+    if (selected.kind === "receipt") receiptIds.add(selected.id);
+    atlas.edges.forEach((edge) => {
+      if (edge.source === selected.id || edge.target === selected.id || edge.evidenceReceipt === selected.id) {
+        receiptIds.add(edge.evidenceReceipt);
+      }
+    });
+    candidates = receipts.filter((node) => receiptIds.has(node.id));
+  }
+  const shown = candidates.slice(0, BRAIN_ATLAS_VISIBLE_RECEIPTS);
+  const shownReceiptIds = new Set(shown.map((node) => node.id));
+  const edges = atlas.edges.filter((edge) => shownReceiptIds.has(edge.evidenceReceipt));
+  const nodeIds = new Set<string>();
+  shown.forEach((node) => nodeIds.add(node.id));
+  edges.forEach((edge) => {
+    nodeIds.add(edge.source);
+    nodeIds.add(edge.target);
+  });
+  if (selected) nodeIds.add(selected.id);
+  const nodes = atlas.nodes
+    .filter((node) => nodeIds.has(node.id))
+    .sort((a, b) => {
+      const layerDelta = BRAIN_ATLAS_LAYER_ORDER.indexOf(a.kind) - BRAIN_ATLAS_LAYER_ORDER.indexOf(b.kind);
+      return layerDelta || timeValue(b.observedAt) - timeValue(a.observedAt) || a.label.localeCompare(b.label);
+    });
+  return {
+    nodes,
+    edges: edges.filter((edge) => nodeIds.has(edge.source) && nodeIds.has(edge.target)),
+    candidateReceipts: candidates.length,
+    shownReceipts: shown.length,
+  };
+}
+
+function brainAtlasNodeOption(node: BrainAtlasNode) {
+  const observed = fmtTime(node.observedAt);
+  if (node.kind === "receipt") return `Receipt - ${node.label} - ${observed}`;
+  return `${BRAIN_ATLAS_LAYER_LABEL[node.kind]} - ${node.label}`;
+}
+
+function brainAtlasNodeSubline(node: BrainAtlasNode) {
+  if (node.kind === "agent") return `${node.receiptCount} receipt${node.receiptCount === 1 ? "" : "s"}`;
+  if (node.kind === "work") return `generation ${node.generation || 1} - ${displayStatus(node.status)}`;
+  if (node.kind === "receipt") return `sequence ${node.sequence || 1} - ${displayStatus(node.status)}`;
+  return "route verified";
+}
+
+function BrainAtlasPanel({ atlas }: { atlas?: BrainAtlas }) {
+  const [focusId, setFocusId] = useState("all");
+  useEffect(() => {
+    if (focusId !== "all" && !atlas?.nodes.some((node) => node.id === focusId)) setFocusId("all");
+  }, [atlas?.generatedAt, atlas?.nodes, focusId]);
+  const view = useMemo(() => brainAtlasView(atlas, focusId), [atlas, focusId]);
+  const graphHeight = 386;
+  const positions = useMemo(() => {
+    const next = new Map<string, { x: number; y: number; node: BrainAtlasNode }>();
+    BRAIN_ATLAS_LAYER_ORDER.forEach((kind) => {
+      const layerNodes = view.nodes.filter((node) => node.kind === kind);
+      const available = graphHeight - 78;
+      layerNodes.forEach((node, index) => {
+        next.set(node.id, {
+          x: BRAIN_ATLAS_LAYER_X[kind],
+          y: 48 + (available * (index + 1)) / (layerNodes.length + 1),
+          node,
+        });
+      });
+    });
+    return next;
+  }, [view.nodes]);
+  const age = ageMinutes(atlas?.generatedAt);
+  const stale = Number.isFinite(age) && age > 60;
+  const unavailable = !atlas || atlas.status === "unavailable";
+  const tone = unavailable ? "risk" : stale || atlas.status === "empty" ? "watch" : "clear";
+  const sourceExcluded = atlas
+    ? atlas.counts.excluded.capacityReceipts + atlas.counts.excluded.capacityRoutes
+    : 0;
+  const viewLimited = view.candidateReceipts > view.shownReceipts;
+  const focusNeeded = Boolean(
+    atlas?.status === "ready"
+    && (atlas.nodes.length > view.nodes.length || atlas.counts.receipts > BRAIN_ATLAS_VISIBLE_RECEIPTS),
+  );
+  const selectedNode = focusId === "all" ? undefined : atlas?.nodes.find((node) => node.id === focusId);
+
+  return (
+    <section className={`brain-atlas-panel is-${tone}`} aria-label="Brain Atlas exact receipt graph">
+      <header className="brain-atlas-header">
+        <div>
+          <p><GitBranch size={13} />Operational receipt map</p>
+          <h2>Brain Atlas</h2>
+        </div>
+        <span className={`brain-atlas-state is-${tone}`}>
+          {unavailable ? "Unavailable" : atlas?.status === "empty" ? "Empty" : stale ? `Stale - ${ageLabel(atlas?.generatedAt)}` : `Fresh - ${ageLabel(atlas?.generatedAt)}`}
+        </span>
+      </header>
+
+      <div className="brain-atlas-scope" aria-label="Brain Atlas scope and evidence policy">
+        <span>7-day window</span>
+        <span>{atlas?.limits.maxNodes || 100}-node ceiling</span>
+        <span>Exact receipt edges only</span>
+        <span>{atlas?.source.verified ? "Source verified" : "Source not verified"}</span>
+      </div>
+
+      {focusNeeded ? (
+        <label className="brain-atlas-focus" htmlFor="brain-atlas-focus-node">
+          <span>Exact-node focus</span>
+          <select id="brain-atlas-focus-node" value={focusId} onChange={(event) => setFocusId(event.target.value)}>
+            <option value="all">Recent exact receipt paths</option>
+            {atlas?.nodes.map((node) => <option key={node.id} value={node.id}>{brainAtlasNodeOption(node)}</option>)}
+          </select>
+        </label>
+      ) : null}
+
+      {atlas?.status === "ready" && view.nodes.length ? (
+        <div className="brain-atlas-plot">
+          <svg
+            viewBox={`0 0 1000 ${graphHeight}`}
+            role="img"
+            aria-labelledby="brain-atlas-title brain-atlas-description"
+            preserveAspectRatio="xMidYMid meet"
+          >
+            <title id="brain-atlas-title">Exact agent to work to receipt to verified model paths</title>
+            <desc id="brain-atlas-description">
+              Showing {view.nodes.length} of {atlas.counts.nodes} bounded nodes and {view.edges.length} of {atlas.counts.edges} exact receipt-backed edges from the last seven days. No inferred relationships are shown.
+            </desc>
+            {BRAIN_ATLAS_LAYER_ORDER.map((kind) => (
+              <text key={kind} className="brain-atlas-layer-label" x={BRAIN_ATLAS_LAYER_X[kind]} y="22" textAnchor="middle">
+                {BRAIN_ATLAS_LAYER_LABEL[kind]}
+              </text>
+            ))}
+            <g className="brain-atlas-edges">
+              {view.edges.map((edge) => {
+                const source = positions.get(edge.source);
+                const target = positions.get(edge.target);
+                if (!source || !target) return null;
+                const sourceHalf = source.node.kind === "receipt" ? 9 : 78;
+                const targetHalf = target.node.kind === "receipt" ? 9 : 78;
+                const startX = source.x + sourceHalf;
+                const endX = target.x - targetHalf;
+                const bend = Math.max(28, (endX - startX) * 0.42);
+                return (
+                  <path
+                    key={edge.id}
+                    className={edge.kind === "verified-route" ? "is-verified" : ""}
+                    d={`M ${startX} ${source.y} C ${startX + bend} ${source.y}, ${endX - bend} ${target.y}, ${endX} ${target.y}`}
+                    vectorEffect="non-scaling-stroke"
+                  >
+                    <title>{BRAIN_ATLAS_LAYER_LABEL[source.node.kind]} to {BRAIN_ATLAS_LAYER_LABEL[target.node.kind]} - exact {edge.kind} receipt edge</title>
+                  </path>
+                );
+              })}
+            </g>
+            <g className="brain-atlas-nodes">
+              {view.nodes.map((node) => {
+                const position = positions.get(node.id);
+                if (!position) return null;
+                const primary = compactText(node.label, node.kind === "model" ? 24 : 20);
+                const subline = brainAtlasNodeSubline(node);
+                return (
+                  <g key={node.id} className={`brain-atlas-node is-${node.kind}`} transform={`translate(${position.x} ${position.y})`}>
+                    <title>{node.label} - {subline} - observed {fmtTime(node.observedAt)}</title>
+                    {node.kind === "receipt"
+                      ? <circle r="9" />
+                      : <rect x="-78" y="-19" width="156" height="38" rx="6" />}
+                    {node.kind === "receipt" ? (
+                      <>
+                        <text className="brain-atlas-receipt-label" x="0" y="-15" textAnchor="middle">{primary}</text>
+                        <text className="brain-atlas-receipt-subline" x="0" y="25" textAnchor="middle">#{node.sequence || 1}</text>
+                      </>
+                    ) : (
+                      <>
+                        <text className="brain-atlas-node-label" x="0" y="-2" textAnchor="middle">{primary}</text>
+                        <text className="brain-atlas-node-subline" x="0" y="11" textAnchor="middle">{compactText(subline, 25)}</text>
+                      </>
+                    )}
+                  </g>
+                );
+              })}
+            </g>
+          </svg>
+        </div>
+      ) : (
+        <div className="brain-atlas-empty" role="status">
+          <GitBranch size={22} aria-hidden="true" />
+          <strong>{atlas?.status === "empty" ? "No exact paths in this window" : "Atlas evidence unavailable"}</strong>
+          <p>{brainAtlasEmptyMessage(atlas?.emptyReason)}</p>
+        </div>
+      )}
+
+      <footer className="brain-atlas-footer" aria-live="polite">
+        <span>
+          {atlas?.status === "ready"
+            ? `View ${view.nodes.length}/${atlas.counts.nodes} nodes - ${view.edges.length}/${atlas.counts.edges} edges${selectedNode ? ` - focused on ${selectedNode.label}` : ""}`
+            : `Updated ${fmtTime(atlas?.generatedAt)}`}
+        </span>
+        <em>
+          {[
+            sourceExcluded
+              ? `Source cap excluded ${sourceExcluded} path element${sourceExcluded === 1 ? "" : "s"}`
+              : "No source-cap exclusions",
+            viewLimited
+              ? `view limited to ${view.shownReceipts}/${view.candidateReceipts} newest exact receipts`
+              : "",
+          ].filter(Boolean).join(" - ")}
+        </em>
+      </footer>
     </section>
   );
 }

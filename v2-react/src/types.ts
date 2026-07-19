@@ -179,6 +179,64 @@ export type OperationalAlert = {
   created_at: string;
 };
 
+export type BrainAtlasNode = {
+  id: string;
+  kind: "agent" | "work" | "receipt" | "model";
+  label: string;
+  status?: "accepted" | "planned" | "routed" | "active" | "verifying" | "done" | "blocked" | "error" | "cancelled";
+  observedAt: string;
+  receiptCount: number;
+  generation?: number;
+  sequence?: number;
+  routeVerified?: boolean;
+  family?: "codex" | "antigravity" | "ollama" | "grok";
+  modelId?: string;
+};
+
+export type BrainAtlasEdge = {
+  id: string;
+  kind: "owns" | "emitted" | "verified-route";
+  source: string;
+  target: string;
+  evidenceReceipt: string;
+  observedAt: string;
+};
+
+export type BrainAtlas = {
+  schemaVersion: 1;
+  generatedAt: string;
+  status: "ready" | "empty" | "unavailable";
+  empty: boolean;
+  emptyReason: string | null;
+  source: {
+    name: "control-tower-work-ledger";
+    verified: boolean;
+    schemaVersion: number | null;
+    revision: number | null;
+  };
+  window: { days: 7; start: string | null; end: string | null };
+  limits: { maxNodes: number; hardMaxNodes: 100 };
+  counts: {
+    nodes: number;
+    edges: number;
+    agents: number;
+    works: number;
+    receipts: number;
+    models: number;
+    sourceRowsInWindow: number;
+    excluded: {
+      timeOutOfWindow: number;
+      legacyOrInvalid: number;
+      capacityReceipts: number;
+      capacityRoutes: number;
+      unverifiedRoutes: number;
+      unsafeVerifiedRoutes: number;
+    };
+  };
+  nodes: BrainAtlasNode[];
+  edges: BrainAtlasEdge[];
+};
+
 export type MissionControlState = {
   source: string;
   statuses: AgentStatus[];
@@ -194,6 +252,7 @@ export type MissionControlState = {
   modelUsage?: ModelUsage;
   modelRouter?: ModelRouter;
   reliabilityUpgrades?: ReliabilityUpgrades;
+  brainAtlas?: BrainAtlas;
   capabilityStack?: CapabilityStackItem[];
   capabilityInventory?: CapabilityInventory;
   capabilityWatch?: CapabilityWatch;

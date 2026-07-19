@@ -8,6 +8,7 @@ shown as currently running. Queued approvals remain queued and are annotated.
 from __future__ import annotations
 
 import argparse
+from contextlib import ExitStack
 import datetime as dt
 import fcntl
 import json
@@ -241,11 +242,30 @@ def main() -> int:
         except BlockingIOError:
             print(json.dumps({"ok": True, "status": "skipped_locked"}))
             return 0
-        result = reconcile(args.data_dir, utc_now())
-        if not args.dry_run:
-            for path, document in result["documents"].items():
-                atomic_write(path, document)
-            atomic_write(args.data_dir / "ecosystem-lifecycle-qc.json", result["summary"])
+        # Hold the same per-document locks used by publishers from the first
+        # read through the final atomic replacements. Without this, a receipt
+        # appended while reconciliation was running could be overwritten by
+        # the older in-memory handoff snapshot.
+        source_paths = sorted(
+            (
+                args.data_dir / "agent-task-queue.json",
+                args.data_dir / "handoff-queue.json",
+                args.data_dir / "codex-jobs.json",
+                args.data_dir / "shared-events.json",
+            ),
+            key=str,
+        )
+        with ExitStack() as document_locks:
+            for source_path in source_paths:
+                source_lock = document_locks.enter_context(
+                    source_path.with_suffix(".lock").open("a+", encoding="utf-8")
+                )
+                fcntl.flock(source_lock.fileno(), fcntl.LOCK_EX)
+            result = reconcile(args.data_dir, utc_now())
+            if not args.dry_run:
+                for path, document in result["documents"].items():
+                    atomic_write(path, document)
+                atomic_write(args.data_dir / "ecosystem-lifecycle-qc.json", result["summary"])
         print(json.dumps(result["summary"], indent=2))
     return 0
 

@@ -30,6 +30,7 @@ from todays_jobs_projection import (  # noqa: E402
     materialize_today_jobs,
     parse_crontab_definitions,
 )
+from handoff_receipt_bridge import receipt_state, terminal_result_receipt  # noqa: E402
 try:
     import tomllib
 except ModuleNotFoundError:  # pragma: no cover - Python <3.11 fallback
@@ -74,6 +75,7 @@ CAPABILITY_INVENTORY_PATH = ROOT.parent / "data" / "capability-inventory.json"
 CAPABILITY_WATCH_PATH = ROOT.parent / "data" / "capability-watch.json"
 AUTOMATION_ROLLOUT_PATH = ROOT.parent / "data" / "automation-rollout.json"
 RELIABILITY_UPGRADES_PATH = ROOT.parent / "data" / "reliability-upgrades.json"
+BRAIN_ATLAS_PATH = ROOT.parent / "data" / "brain-atlas.json"
 AGENT_TRACE_SUMMARY_PATH = ROOT.parent / "data" / "agent-trace-summary.json"
 TELEGRAM_AI_BOT_FEATURES_PATH = ROOT.parent / "data" / "telegram-ai-bot-features.json"
 RUNTIME_LAYOUT_PATH = ROOT.parent / "data" / "mission-control-runtime-layout.json"
@@ -152,7 +154,7 @@ def source_freshness() -> Dict[str, Any]:
 
 LIVE_DASHBOARD_KEYS = {
     "actionRequired", "agentBrainFeeds", "agentBus", "agentContextRegistry", "agentControl",
-    "brainFeed", "capabilityInventory", "capabilityStack", "capabilityWatch", "codingVisibility",
+    "brainAtlas", "brainFeed", "capabilityInventory", "capabilityStack", "capabilityWatch", "codingVisibility",
     "codexJobs", "crons", "generatedAt", "jaimesBrainFeed", "jainBrainFeed", "joshBrainFeed",
     "lastUpdated", "liveObjectives", "machineHealth", "memoryOperations", "modelRouter", "modelUsage",
     "recentActivity", "reliabilityUpgrades", "runtimeLayout", "sharedOperatingLayer", "sourceFreshness",
@@ -212,6 +214,336 @@ def _project_capability_inventory(value: Any) -> Dict[str, Any]:
     return projected
 
 
+BRAIN_ATLAS_NODE_FIELD_ORDER = (
+    "id", "kind", "label", "status", "observedAt", "receiptCount",
+    "generation", "sequence", "routeVerified", "family", "modelId",
+)
+BRAIN_ATLAS_NODE_FIELDS = frozenset(BRAIN_ATLAS_NODE_FIELD_ORDER)
+BRAIN_ATLAS_EDGE_FIELD_ORDER = (
+    "id", "kind", "source", "target", "evidenceReceipt", "observedAt",
+)
+BRAIN_ATLAS_EDGE_FIELDS = frozenset(BRAIN_ATLAS_EDGE_FIELD_ORDER)
+BRAIN_ATLAS_STATUSES = frozenset({
+    "accepted", "planned", "routed", "active", "verifying", "done",
+    "blocked", "error", "cancelled",
+})
+BRAIN_ATLAS_EMPTY_REASONS = frozenset({
+    "no-receipts-in-window", "no-verified-receipts-in-window",
+    "node-cap-excluded-all-receipts", "source-missing", "source-unavailable",
+    "unsupported-source-schema", "unsupported-source-version",
+    "generated-payload-invalid",
+})
+BRAIN_ATLAS_EXCLUDED_FIELDS = (
+    "timeOutOfWindow", "legacyOrInvalid", "capacityReceipts", "capacityRoutes",
+    "unverifiedRoutes", "unsafeVerifiedRoutes",
+)
+BRAIN_ATLAS_AGENT_LABELS = {
+    "agent:joshex": "JOSHeX",
+    "agent:josh2": "JOSH 2.0",
+    "agent:jaimes": "JAIMES",
+    "agent:jain": "J.A.I.N",
+}
+BRAIN_ATLAS_HASHED_ID = re.compile(r"^(work|receipt|model):[a-f0-9]{24}$")
+BRAIN_ATLAS_EDGE_ID = re.compile(r"^edge:[a-f0-9]{24}$")
+BRAIN_ATLAS_MODEL_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/+\-]{0,119}$")
+
+
+def _brain_atlas_unavailable(now_iso: str, reason: str) -> Dict[str, Any]:
+    safe_reason = reason if reason in BRAIN_ATLAS_EMPTY_REASONS else "generated-payload-invalid"
+    return {
+        "schemaVersion": 1,
+        "generatedAt": now_iso,
+        "status": "unavailable",
+        "empty": True,
+        "emptyReason": safe_reason,
+        "source": {
+            "name": "control-tower-work-ledger",
+            "verified": False,
+            "schemaVersion": None,
+            "revision": None,
+        },
+        "window": {"days": 7, "start": None, "end": None},
+        "limits": {"maxNodes": 100, "hardMaxNodes": 100},
+        "counts": {
+            "nodes": 0,
+            "edges": 0,
+            "agents": 0,
+            "works": 0,
+            "receipts": 0,
+            "models": 0,
+            "sourceRowsInWindow": 0,
+            "excluded": {name: 0 for name in BRAIN_ATLAS_EXCLUDED_FIELDS},
+        },
+        "nodes": [],
+        "edges": [],
+    }
+
+
+def _brain_atlas_time(value: Any) -> dt.datetime | None:
+    if not isinstance(value, str) or not value:
+        return None
+    try:
+        parsed = dt.datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except (TypeError, ValueError):
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=dt.timezone.utc)
+    return parsed.astimezone(dt.timezone.utc)
+
+
+def _brain_atlas_count(value: Any, maximum: int = 10_000_000) -> int | None:
+    if type(value) is not int or value < 0 or value > maximum:
+        return None
+    return value
+
+
+def sanitize_brain_atlas(value: Any, now_iso: str) -> Dict[str, Any]:
+    """Fail closed to a counts-only unavailable state on any graph violation.
+
+    The source generator already emits hashed identifiers and exact receipt
+    edges. This second boundary keeps arbitrary labels, raw IDs, unknown fields,
+    and inferred relationships out of dashboard-data.json and the live kiosk.
+    """
+
+    fallback_reason = "source-missing" if not isinstance(value, dict) or not value else "generated-payload-invalid"
+    fallback = _brain_atlas_unavailable(now_iso, fallback_reason)
+    if not isinstance(value, dict):
+        return fallback
+    source_top = {
+        "schemaVersion", "generatedAt", "status", "empty", "emptyReason",
+        "source", "window", "limits", "counts", "policy", "nodes", "edges",
+    }
+    sanitized_top = source_top - {"policy"}
+    if set(value) not in (source_top, sanitized_top) or value.get("schemaVersion") != 1:
+        return fallback
+
+    generated_at = _brain_atlas_time(value.get("generatedAt"))
+    current = _brain_atlas_time(now_iso)
+    status = value.get("status")
+    empty = value.get("empty")
+    reason = value.get("emptyReason")
+    if (
+        generated_at is None
+        or current is None
+        or generated_at > current + dt.timedelta(minutes=2)
+        or status not in {"ready", "empty", "unavailable"}
+        or type(empty) is not bool
+        or (reason is not None and reason not in BRAIN_ATLAS_EMPTY_REASONS)
+    ):
+        return fallback
+
+    source = value.get("source")
+    window = value.get("window")
+    limits = value.get("limits")
+    counts = value.get("counts")
+    policy = value.get("policy", {})
+    raw_nodes = value.get("nodes")
+    raw_edges = value.get("edges")
+    if not all(isinstance(item, dict) for item in (source, window, limits, counts, policy)):
+        return fallback
+    if not isinstance(raw_nodes, list) or not isinstance(raw_edges, list):
+        return fallback
+    if set(source) != {"name", "verified", "schemaVersion", "revision"}:
+        return fallback
+    if source.get("name") != "control-tower-work-ledger" or type(source.get("verified")) is not bool:
+        return fallback
+    source_schema = source.get("schemaVersion")
+    source_revision = source.get("revision")
+    if source_schema is not None and _brain_atlas_count(source_schema, 100) is None:
+        return fallback
+    if source_revision is not None and _brain_atlas_count(source_revision) is None:
+        return fallback
+
+    if set(window) != {"days", "start", "end"} or window.get("days") != 7:
+        return fallback
+    window_start = _brain_atlas_time(window.get("start"))
+    window_end = _brain_atlas_time(window.get("end"))
+    if (
+        window_start is None
+        or window_end is None
+        or abs((window_end - window_start) - dt.timedelta(days=7)) > dt.timedelta(seconds=1)
+        or abs(window_end - generated_at) > dt.timedelta(seconds=1)
+    ):
+        return fallback
+    if set(limits) != {"maxNodes", "hardMaxNodes"}:
+        return fallback
+    max_nodes = _brain_atlas_count(limits.get("maxNodes"), 100)
+    if max_nodes is None or max_nodes < 1 or limits.get("hardMaxNodes") != 100:
+        return fallback
+    if len(raw_nodes) > max_nodes or len(raw_nodes) > 100 or len(raw_edges) > 300:
+        return fallback
+
+    nodes: List[Dict[str, Any]] = []
+    node_kinds: Dict[str, str] = {}
+    kind_counts = {"agent": 0, "work": 0, "receipt": 0, "model": 0}
+    for raw in raw_nodes:
+        if not isinstance(raw, dict) or set(raw) - BRAIN_ATLAS_NODE_FIELDS:
+            return fallback
+        node_id = raw.get("id")
+        kind = raw.get("kind")
+        label = raw.get("label")
+        observed_at = _brain_atlas_time(raw.get("observedAt"))
+        receipt_count = _brain_atlas_count(raw.get("receiptCount"), 100_000)
+        if (
+            not isinstance(node_id, str)
+            or node_id in node_kinds
+            or kind not in kind_counts
+            or not isinstance(label, str)
+            or observed_at is None
+            or not window_start <= observed_at <= window_end
+            or receipt_count is None
+        ):
+            return fallback
+        required = {"id", "kind", "label", "observedAt", "receiptCount"}
+        if kind == "agent":
+            if set(raw) != required or BRAIN_ATLAS_AGENT_LABELS.get(node_id) != label:
+                return fallback
+        elif kind == "work":
+            required |= {"status", "generation"}
+            if (
+                set(raw) != required
+                or not BRAIN_ATLAS_HASHED_ID.fullmatch(node_id)
+                or not re.fullmatch(r"Work [a-f0-9]{8}", label)
+                or raw.get("status") not in BRAIN_ATLAS_STATUSES
+                or (_brain_atlas_count(raw.get("generation"), 1_000_000) or 0) < 1
+            ):
+                return fallback
+        elif kind == "receipt":
+            required |= {"status", "generation", "sequence", "routeVerified"}
+            if (
+                set(raw) != required
+                or not BRAIN_ATLAS_HASHED_ID.fullmatch(node_id)
+                or label not in {"Start receipt", "Update receipt", "Heartbeat receipt", "Terminal receipt"}
+                or raw.get("status") not in BRAIN_ATLAS_STATUSES
+                or (_brain_atlas_count(raw.get("generation"), 1_000_000) or 0) < 1
+                or (_brain_atlas_count(raw.get("sequence"), 1_000_000) or 0) < 1
+                or type(raw.get("routeVerified")) is not bool
+            ):
+                return fallback
+        else:
+            required |= {"family", "modelId"}
+            family = raw.get("family")
+            model_id = raw.get("modelId")
+            if (
+                set(raw) != required
+                or not BRAIN_ATLAS_HASHED_ID.fullmatch(node_id)
+                or family not in {"codex", "antigravity", "ollama", "grok"}
+                or not isinstance(model_id, str)
+                or not BRAIN_ATLAS_MODEL_ID.fullmatch(model_id)
+                or label != f"{family}/{model_id}"
+            ):
+                return fallback
+        node_kinds[node_id] = kind
+        kind_counts[kind] += 1
+        nodes.append({key: raw[key] for key in BRAIN_ATLAS_NODE_FIELD_ORDER if key in raw})
+
+    edges: List[Dict[str, Any]] = []
+    edge_ids: set[str] = set()
+    emitted_pairs: set[tuple[str, str]] = set()
+    owns_pairs: List[tuple[str, str]] = []
+    for raw in raw_edges:
+        if not isinstance(raw, dict) or set(raw) != BRAIN_ATLAS_EDGE_FIELDS:
+            return fallback
+        edge_id = raw.get("id")
+        kind = raw.get("kind")
+        source_id = raw.get("source")
+        target_id = raw.get("target")
+        receipt_id = raw.get("evidenceReceipt")
+        observed_at = _brain_atlas_time(raw.get("observedAt"))
+        if (
+            not isinstance(edge_id, str)
+            or not BRAIN_ATLAS_EDGE_ID.fullmatch(edge_id)
+            or edge_id in edge_ids
+            or kind not in {"owns", "emitted", "verified-route"}
+            or source_id not in node_kinds
+            or target_id not in node_kinds
+            or node_kinds.get(receipt_id) != "receipt"
+            or observed_at is None
+            or not window_start <= observed_at <= window_end
+        ):
+            return fallback
+        expected = {
+            "owns": ("agent", "work"),
+            "emitted": ("work", "receipt"),
+            "verified-route": ("receipt", "model"),
+        }[kind]
+        if (node_kinds[source_id], node_kinds[target_id]) != expected:
+            return fallback
+        if kind == "emitted":
+            if receipt_id != target_id:
+                return fallback
+            emitted_pairs.add((source_id, receipt_id))
+        elif kind == "verified-route" and receipt_id != source_id:
+            return fallback
+        elif kind == "owns":
+            owns_pairs.append((target_id, receipt_id))
+        edge_ids.add(edge_id)
+        edges.append({key: raw[key] for key in BRAIN_ATLAS_EDGE_FIELD_ORDER})
+    if any(pair not in emitted_pairs for pair in owns_pairs):
+        return fallback
+
+    expected_count_fields = {
+        "nodes", "edges", "agents", "works", "receipts", "models",
+        "sourceRowsInWindow", "excluded",
+    }
+    if set(counts) != expected_count_fields or not isinstance(counts.get("excluded"), dict):
+        return fallback
+    excluded = counts["excluded"]
+    if set(excluded) != set(BRAIN_ATLAS_EXCLUDED_FIELDS):
+        return fallback
+    safe_excluded: Dict[str, int] = {}
+    for name in BRAIN_ATLAS_EXCLUDED_FIELDS:
+        count = _brain_atlas_count(excluded.get(name))
+        if count is None:
+            return fallback
+        safe_excluded[name] = count
+    source_rows = _brain_atlas_count(counts.get("sourceRowsInWindow"))
+    if (
+        source_rows is None
+        or counts.get("nodes") != len(nodes)
+        or counts.get("edges") != len(edges)
+        or counts.get("agents") != kind_counts["agent"]
+        or counts.get("works") != kind_counts["work"]
+        or counts.get("receipts") != kind_counts["receipt"]
+        or counts.get("models") != kind_counts["model"]
+    ):
+        return fallback
+    if status == "ready" and (empty is not False or not nodes or source.get("verified") is not True or reason is not None):
+        return fallback
+    if status == "empty" and (empty is not True or nodes or edges or source.get("verified") is not True or reason is None):
+        return fallback
+    if status == "unavailable" and (empty is not True or nodes or edges or source.get("verified") is not False or reason is None):
+        return fallback
+
+    return {
+        "schemaVersion": 1,
+        "generatedAt": value["generatedAt"],
+        "status": status,
+        "empty": empty,
+        "emptyReason": reason,
+        "source": {
+            "name": "control-tower-work-ledger",
+            "verified": source["verified"],
+            "schemaVersion": source_schema,
+            "revision": source_revision,
+        },
+        "window": {"days": 7, "start": window["start"], "end": window["end"]},
+        "limits": {"maxNodes": max_nodes, "hardMaxNodes": 100},
+        "counts": {
+            "nodes": len(nodes),
+            "edges": len(edges),
+            "agents": kind_counts["agent"],
+            "works": kind_counts["work"],
+            "receipts": kind_counts["receipt"],
+            "models": kind_counts["model"],
+            "sourceRowsInWindow": source_rows,
+            "excluded": safe_excluded,
+        },
+        "nodes": nodes,
+        "edges": edges,
+    }
+
+
 def build_live_dashboard(dashboard: Dict[str, Any]) -> Dict[str, Any]:
     """Project rendered kiosk fields while retaining the full audit payload separately."""
     live = {key: value for key, value in dashboard.items() if key in LIVE_DASHBOARD_KEYS}
@@ -222,6 +554,10 @@ def build_live_dashboard(dashboard: Dict[str, Any]) -> Dict[str, Any]:
     )
     live["runtimeLayout"] = _project_mapping(dashboard.get("runtimeLayout"), RUNTIME_LAYOUT_LIVE_FIELDS)
     live["capabilityInventory"] = _project_capability_inventory(dashboard.get("capabilityInventory"))
+    live["brainAtlas"] = sanitize_brain_atlas(
+        dashboard.get("brainAtlas"),
+        str(dashboard.get("lastUpdated") or utc_iso()),
+    )
     return live
 
 
@@ -960,8 +1296,43 @@ def fetch_shared_operating_layer(now_iso: str) -> Dict[str, Any]:
         for task in tasks
         if task.get("id")
     }
+    task_statuses_by_work_id: Dict[str, set[str]] = {}
+    for task in tasks:
+        work_id = str(task.get("workId") or "")
+        if work_id:
+            task_statuses_by_work_id.setdefault(work_id, set()).add(
+                str(task.get("status") or "").lower()
+            )
 
     def handoff_points_to_closed_task(handoff: Dict[str, Any]) -> bool:
+        explicit_task_id = str(
+            handoff.get("receivingTaskId") or handoff.get("taskId") or ""
+        )
+        if (
+            explicit_task_id
+            and task_status_by_id.get(explicit_task_id) in terminal_task_statuses
+        ):
+            return True
+        work_id = str(handoff.get("workId") or "")
+        if (
+            work_id
+            and task_statuses_by_work_id.get(work_id, set()) & terminal_task_statuses
+        ):
+            return True
+        # The canonical task ledger is authoritative when a later terminal
+        # transition supersedes an older blocked/error receipt.  If no exact
+        # terminal task is present, the receipt can still close a legacy row.
+        terminal_receipt = terminal_result_receipt(handoff)
+        if terminal_receipt:
+            receipt_closes = str(terminal_receipt.get("status") or "").lower() in {
+                "done", "cancelled"
+            }
+            if receipt_closes:
+                return True
+        if explicit_task_id or work_id:
+            return False
+        # Text extraction remains a legacy-only fallback.  Canonical rows must
+        # never jump lifecycles merely because titles contain similar words.
         text = " ".join(
             str(handoff.get(key) or "")
             for key in ("id", "title", "detail", "path")
@@ -969,12 +1340,20 @@ def fetch_shared_operating_layer(now_iso: str) -> Dict[str, Any]:
         task_ids = re.findall(r"\btask-[a-z0-9-]+", text.lower())
         return any(task_status_by_id.get(task_id) in terminal_task_statuses for task_id in task_ids)
 
-    open_handoffs = [
-        h for h in handoffs
-        if h.get("privacy") == "dashboard-safe"
-        and h.get("status") in {"open", "blocked"}
-        and not handoff_points_to_closed_task(h)
-    ]
+    open_handoffs = []
+    for source_handoff in handoffs:
+        if not isinstance(source_handoff, dict) or source_handoff.get("privacy") != "dashboard-safe":
+            continue
+        handoff = dict(source_handoff)
+        receipt_summary = receipt_state(handoff)
+        if receipt_summary.get("terminalStatus") in {"blocked", "error"}:
+            handoff["status"] = "blocked"
+        if handoff.get("status") not in {"open", "blocked"}:
+            continue
+        if handoff_points_to_closed_task(handoff):
+            continue
+        handoff["receiptState"] = receipt_summary
+        open_handoffs.append(handoff)
     attention_handoffs = [h for h in open_handoffs if h.get("status") == "blocked"]
     superseded_event_ids = superseded_blocked_event_ids(events)
     blocked_events = [
@@ -4935,6 +5314,13 @@ def main() -> None:
         "items": [],
         "metrics": [],
     })
+    # #JAIMES: Brain Atlas is a read-only, bounded receipt projection. Fail
+    # closed instead of forwarding malformed labels, raw identifiers, or
+    # inferred relationships into either dashboard payload.
+    dashboard["brainAtlas"] = sanitize_brain_atlas(
+        load_json_file(BRAIN_ATLAS_PATH, {}),
+        now_iso,
+    )
     dashboard["agentTraceSummary"] = load_json_file(AGENT_TRACE_SUMMARY_PATH, {
         "generatedAt": now_iso,
         "status": "not-configured",

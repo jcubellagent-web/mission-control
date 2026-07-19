@@ -9,6 +9,8 @@ import re
 from pathlib import Path
 from typing import Any
 
+from handoff_receipt_bridge import receipt_state, terminal_result_receipt
+
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "data"
@@ -167,8 +169,19 @@ def handoff_rows(agent: str) -> list[dict[str, Any]]:
     payload = read_json(DATA_DIR / "handoff-queue.json", {"handoffs": []})
     rows = payload.get("handoffs", []) if isinstance(payload, dict) else []
     out = []
-    for row in rows:
-        if not isinstance(row, dict) or row.get("status") not in OPEN_HANDOFF_STATUSES:
+    for source_row in rows:
+        if not isinstance(source_row, dict):
+            continue
+        if source_row.get("privacy") not in {None, "", "dashboard-safe"}:
+            continue
+        row = dict(source_row)
+        terminal = terminal_result_receipt(row)
+        if terminal and terminal.get("status") in {"done", "cancelled"}:
+            continue
+        state = receipt_state(row)
+        if state.get("terminalStatus") in {"blocked", "error"}:
+            row["status"] = "blocked"
+        if row.get("status") not in OPEN_HANDOFF_STATUSES:
             continue
         from_agent = str(row.get("from") or "").lower()
         to_agent = str(row.get("to") or "").lower()
@@ -182,6 +195,9 @@ def handoff_rows(agent: str) -> list[dict[str, Any]]:
             "from": row.get("from"),
             "to": row.get("to"),
             "time": row.get("time") or row.get("updatedAt") or "",
+            "workId": row.get("workId"),
+            "runId": row.get("runId"),
+            "receiptState": state,
         })
     return out[:6]
 
