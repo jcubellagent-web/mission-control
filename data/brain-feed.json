@@ -3,17 +3,17 @@
   "agent": "JOSH 2.0",
   "active": true,
   "reportedActive": true,
-  "status": "done",
-  "objective": "Done: 3 of 3 agents fresh; Mission Control current; model-route health is attention because Ollama local runtime is unreachable",
-  "detail": "josh2-codex-luna on josh2; fast Inbox coordination",
-  "updatedAt": "2026-07-19T20:32:25Z",
-  "checkedAt": "2026-07-19T20:32:25Z",
-  "currentTool": "exec",
+  "status": "active",
+  "objective": "Receiving: restore OpenCLAW health by resolving local model access and database write warnings",
+  "detail": "josh2-codex-terra on josh2; trusted execution/integration",
+  "updatedAt": "2026-07-19T20:35:25Z",
+  "checkedAt": "2026-07-19T20:35:25Z",
+  "currentTool": "telegram",
   "steps": [
     {
-      "label": "Done - 3 of 3 agents fresh; Mission Control current; model-route health is attention because Ollama local runtime is unreachable",
-      "status": "done",
-      "tool": "exec"
+      "label": "Receiving - restore OpenCLAW health by resolving local model access and database write warnings",
+      "status": "active",
+      "tool": "telegram"
     }
   ],
   "source": "josh2-local-live-feed",
@@ -21,14 +21,14 @@
   "model": "GPT-5.6-terra",
   "messageReceived": "2026-07-19T00:42:44Z",
   "localLiveFeed": true,
-  "workId": "work-telegram-7d7c5b8378f1e2eeb97dc18b",
-  "runId": "run-telegram-db28dc74c46bd3663f43dcbd",
+  "workId": "work-telegram-7760997b12ad625ab5bfa8a3",
+  "runId": "run-telegram-7b97d2f6587a483779920c8f",
   "generation": 1,
   "sequence": 2,
   "phase": "active",
-  "originClaimHash": "c9e7b7d752661adc3f3b0988f99d488b633ef7e6d046fb195c901f5c496b71a6",
+  "originClaimHash": "5cf644f53bdbef62d6c027baaf5867672a33ba9a19892e3610ed0594bf25e9ad",
   "modelFamily": "codex",
-  "modelId": "gpt-5.6-luna",
+  "modelId": "gpt-5.6-terra",
   "routeVerified": false,
-  "leaseUntil": "2026-07-19T20:34:36.000Z"
+  "leaseUntil": "2026-07-19T20:38:07.000Z"
 }
