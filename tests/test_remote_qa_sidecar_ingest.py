@@ -124,6 +124,14 @@ class RemoteQaSidecarValidationTests(unittest.TestCase):
         self.assertIn("blackbox metrics must contain only allowlisted aggregate fields", issues)
         self.assertIn("forbidden raw/private-content keys detected", issues)
 
+    def test_accepts_current_today_jobs_contract_issue_template(self) -> None:
+        payload = blackbox_payload(
+            status="attention",
+            ok=False,
+            issues=["live payload missing fields: todayJobs"],
+        )
+        self.assertEqual([], ingest.validate_blackbox(payload, now=NOW))
+
 
 class RemoteQaSidecarPromotionTests(unittest.TestCase):
     def setUp(self) -> None:

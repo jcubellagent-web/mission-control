@@ -67,7 +67,7 @@ def main() -> int:
             live = raw
     except Exception as exc:
         issues.append(f"Control Tower fetch failed: {type(exc).__name__}")
-    required = {"lastUpdated", "sourceUpdatedAt", "brainFeed", "crons", "runtimeLayout"}
+    required = {"lastUpdated", "sourceUpdatedAt", "brainFeed", "todayJobs", "runtimeLayout"}
     missing = sorted(required - set(live))
     if missing:
         issues.append("live payload missing fields: " + ", ".join(missing))

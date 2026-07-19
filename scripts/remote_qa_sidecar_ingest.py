@@ -98,7 +98,7 @@ SCOPE_PATTERN = re.compile(r"counts-only completed work-card audit over the last
 BLACKBOX_ISSUE_PATTERNS = (
     re.compile(r"live payload is not an object"),
     re.compile(r"Control Tower fetch failed: [A-Za-z_][A-Za-z0-9_]{0,79}"),
-    re.compile(r"live payload missing fields: (?:lastUpdated|sourceUpdatedAt|brainFeed|crons|runtimeLayout)(?:, (?:lastUpdated|sourceUpdatedAt|brainFeed|crons|runtimeLayout))*"),
+    re.compile(r"live payload missing fields: (?:lastUpdated|sourceUpdatedAt|brainFeed|crons|todayJobs|runtimeLayout)(?:, (?:lastUpdated|sourceUpdatedAt|brainFeed|crons|todayJobs|runtimeLayout))*"),
     re.compile(r"source freshness exceeds 5 minutes \((?:unknown|-?[0-9]+(?:\.[0-9]+)?)\)"),
     re.compile(r"dashboard generation exceeds 5 minutes \((?:unknown|-?[0-9]+(?:\.[0-9]+)?)\)"),
     re.compile(r"local-network dashboard latency exceeds 500 ms \(-?[0-9]+(?:\.[0-9]+)?\)"),
