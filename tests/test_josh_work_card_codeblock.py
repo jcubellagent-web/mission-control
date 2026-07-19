@@ -176,6 +176,26 @@ def test_final_summary_is_html_preformatted_and_bounded():
     assert "Approval needed:" in body
 
 
+def test_weak_generated_success_is_downgraded_without_inventing_results():
+    rendered = card.build_completion_summary(
+        title="Evaluate Agent Robinhood for safe Robinhood trading support",
+        status="done",
+        model="unverified",
+        route="unverified",
+        now="Assessment complete",
+        done=["Reviewing product claims, code, and trade risks"],
+        next_step="No action needed.",
+        blocker="None",
+    )
+    body = card.html.unescape(rendered.removeprefix("<pre>").removesuffix("</pre>"))
+    assert "Complete: No" in body
+    assert "Detailed findings were not" in body
+    assert "Missing facts were not inferred" in body
+    assert "Closed out:" not in body
+    assert "Verified the worker execution" not in body
+    assert "Prepared the result" not in body
+
+
 def test_live_progress_has_a_ten_cell_visual_bar():
     lines = card.progress_lines(
         ["Received Telegram task", "Objective determined: Inbox health check", "Asynchronous worker started"],
@@ -557,7 +577,7 @@ def test_final_success_without_receipt_is_quarantined_on_retry(monkeypatch, tmp_
         done="Completed request|Verified result|Prepared final", next="No action needed.",
         blocker="None", eta="", ack_message_id="", buttons="", buttons_file="",
         routing_buttons=False, approval_buttons=False, no_buttons=True,
-        no_final_summary=False, final_text_file="", timeout=15,
+        no_final_summary=False, separate_final_summary=True, final_text_file="", timeout=15,
         chat_id="-1003589561528", thread_id="1", dry_run=False, no_brain_feed=True,
     )
     assert card.upsert_card(args, "done") == 1
@@ -636,6 +656,7 @@ def test_live_receipt_is_checkpointed_before_final_retry(monkeypatch, tmp_path):
         approval_buttons=False,
         no_buttons=True,
         no_final_summary=False,
+        separate_final_summary=True,
         final_text_file="",
         timeout=15,
         chat_id="-1003589561528",
@@ -714,6 +735,7 @@ def test_needs_attention_card_reaches_100_before_structured_final(monkeypatch, t
         approval_buttons=False,
         no_buttons=True,
         no_final_summary=False,
+        separate_final_summary=True,
         final_text_file="",
         timeout=15,
         chat_id="-1003589561528",
@@ -776,25 +798,227 @@ def test_final_text_file_accepts_canonical_structured_text():
         path = Path(tmp) / "final.html"
         value = """<pre>Model: codex/gpt-5.6-luna
    | Route: Josh 2.0 Inbox
-   | Why: verified execution
+   | Why: verified assessment
 
-Complete: Yes - objective complete.
+Complete: Yes - assessment complete.
 
 What was done:
-- Routed the Inbox request.
-- Verified worker execution.
-- Prepared the final result.
+- Confirmed Agent RH monitors only
+  Robinhood Chain signals.
+- Determined it cannot trade a
+  Robinhood brokerage account.
+- Identified credential and wallet
+  access as avoidable risks.
+- Recommended read-only signal use
+  without credentials or wallets.
 
 Issues:
-n/a
+- Connecting credentials would create
+  avoidable account-control risk.
 
 Appropriate next steps:
-No action needed.
+- Use Agent RH only as a read-only
+  research signal.
+- Do not connect brokerage, wallet,
+  or trading credentials.
 
 Approval needed:
-n/a</pre>"""
+- n/a</pre>"""
         path.write_text(value, encoding="utf-8")
         assert card.load_final_text_file(str(path)) == value
+
+
+def test_final_text_file_rejects_weak_agent_rh_completion_card():
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "final.html"
+        value = """<pre>Model: unverified | Route: unverified
+   | Why: reported work-card outcome
+
+Complete: Yes - Evaluate Agent RH
+   for safe trading support complete
+
+What was done:
+- Reviewing product claims, code, and
+  trade risks.
+- Read-only Robinhood Chain signal
+  source; not brokerage automation.
+- Assessment complete.
+
+Issues:
+- n/a
+
+Appropriate next steps:
+- No action needed.
+
+Approval needed:
+- n/a</pre>"""
+        path.write_text(value, encoding="utf-8")
+        with pytest.raises(SystemExit, match="not substantive"):
+            card.load_final_text_file(str(path))
+
+
+def test_final_text_file_accepts_concrete_topic17_repair_outcomes():
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "final.html"
+        value = """<pre>Model: codex/gpt-5.6-sol
+   | Route: JAIMES execution
+   | Why: origin-route repair
+
+Complete: Yes - routing fixed
+
+What was done:
+- Missing topic metadata caused
+  edits to enter the wrong chat.
+- 26 misplaced card records were
+  repaired without deleting history.
+- Duplicate fast-ack cards were
+  disabled; one owner remains.
+
+Issues:
+- n/a
+
+Appropriate next steps:
+- Keep a Topic 17 route canary.
+
+Approval needed:
+- n/a</pre>"""
+        path.write_text(value, encoding="utf-8")
+        assert card.load_final_text_file(str(path)) == value
+
+
+def test_final_text_file_rejects_duplicate_why_header():
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "final.html"
+        value = """<pre>Model: codex/gpt-5.6-sol
+   | Route: JAIMES execution
+   | Why: primary | Why: duplicate
+
+Complete: No - malformed header
+
+What was done:
+- Preserved the source response.
+- Identified a duplicate field.
+- Kept the result fail closed.
+
+Issues:
+- Header is malformed.
+
+Appropriate next steps:
+- Regenerate one verified header.
+
+Approval needed:
+- n/a</pre>"""
+        path.write_text(value, encoding="utf-8")
+        with pytest.raises(SystemExit, match="canonical ordered final contract"):
+            card.load_final_text_file(str(path))
+
+
+def test_topic1_bare_terminal_defers_then_substantive_final_uses_single_slot(monkeypatch, tmp_path):
+    monkeypatch.setattr(card, "STATE_PATH", tmp_path / "cards.json")
+    monkeypatch.setattr(card, "LOCK_PATH", tmp_path / "cards.lock")
+    monkeypatch.setattr(card, "publish_brain_feed", lambda *args, **kwargs: None)
+    sends: list[str] = []
+    edits: list[str] = []
+    card.save_state({
+        "cards": {
+            "agent-rh-assessment": {
+                "title": "Evaluate Agent Robinhood for safe trading support",
+                "header_message_id": 201,
+                "message_id": 202,
+                "final_message_id": None,
+                "ack_message_id": "",
+                "status": "running",
+                "started_at": "2026-07-18T16:30:00Z",
+                "updated_at": "2026-07-18T16:31:00Z",
+                "done": ["Reviewing product claims, code, and trade risks"],
+                "work_log": ["Reviewing product claims, code, and trade risks"],
+                "route": "route=luna; reason=Inbox assessment",
+                "model": "codex/gpt-5.6-luna",
+                "renderer": "legacy",
+                "chat_id": "-1003589561528",
+                "thread_id": "1",
+            }
+        }
+    })
+
+    def edit_live(message_id, *_args, **_kwargs):
+        edits.append(f"live:{message_id}")
+        return {"ok": True, "result": {"message_id": int(message_id)}}
+
+    def send_final(text, *_args, **_kwargs):
+        sends.append(text)
+        return {"ok": True, "result": {"message_id": 303}}
+
+    monkeypatch.setattr(card, "edit_card", edit_live)
+    monkeypatch.setattr(card, "send_final_summary", send_final)
+    args = argparse.Namespace(
+        key="agent-rh-assessment",
+        title="Evaluate Agent Robinhood for safe trading support",
+        model="codex/gpt-5.6-luna",
+        route="route=luna; reason=Inbox assessment",
+        now="Assessment complete",
+        done="Read-only Robinhood Chain signal source; not brokerage automation",
+        next="No action needed.",
+        blocker="None",
+        eta="",
+        ack_message_id="",
+        buttons="",
+        buttons_file="",
+        routing_buttons=False,
+        approval_buttons=False,
+        no_buttons=True,
+        no_final_summary=False,
+        separate_final_summary=False,
+        final_text_file="",
+        timeout=15,
+        chat_id="-1003589561528",
+        thread_id="1",
+        dry_run=False,
+        no_brain_feed=True,
+    )
+
+    assert card.upsert_card(args, "done") == 0
+    deferred = card.load_state()["cards"]["agent-rh-assessment"]
+    assert deferred["status"] == "done"
+    assert deferred["final_message_id"] is None
+    assert sends == []
+
+    final_path = tmp_path / "substantive-final.html"
+    final_path.write_text("""<pre>Model: codex/gpt-5.6-luna
+   | Route: Josh 2.0 Inbox
+   | Why: verified assessment
+
+Complete: Yes - assessment complete.
+
+What was done:
+- Confirmed Agent RH monitors only
+  Robinhood Chain signals.
+- Determined it cannot trade a
+  Robinhood brokerage account.
+- Identified credential and wallet
+  access as avoidable risks.
+- Recommended read-only signal use
+  without credentials or wallets.
+
+Issues:
+- Connecting credentials would create
+  avoidable account-control risk.
+
+Appropriate next steps:
+- Use Agent RH only as a read-only
+  research signal.
+- Do not connect brokerage, wallet,
+  or trading credentials.
+
+Approval needed:
+- n/a</pre>""", encoding="utf-8")
+    args.final_text_file = str(final_path)
+    assert card.upsert_card(args, "done") == 0
+    delivered = card.load_state()["cards"]["agent-rh-assessment"]
+    assert delivered["final_message_id"] == 303
+    assert len(sends) == 1
+    assert "Confirmed Agent RH monitors only" in sends[0]
+    assert edits == ["live:202", "live:202"]
 
 
 def test_unrelated_cards_do_not_hold_global_state_lock_across_network_io(monkeypatch, tmp_path):

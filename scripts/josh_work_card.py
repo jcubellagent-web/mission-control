@@ -85,6 +85,67 @@ LIVE_STAGES = ("Accepted", "Planned", "Routed", "Working", "Verifying", "Deliver
 HEADER_LABEL_WIDTH = 9
 HEADER_VALUE_WIDTH = CARD_WRAP_WIDTH - HEADER_LABEL_WIDTH - 4
 
+# A final card is useful only when it carries the result, not merely the fact
+# that a worker reached its terminal state.  Keep these checks local to the
+# delivery boundary so a weak work-card close cannot consume Topic 1's single
+# final-message slot before the native answer arrives.
+SUMMARY_STATUS_FILLER_PATTERNS = (
+    re.compile(
+        r"^(?:the\s+)?(?:assessment|analysis|review|request|task|work|objective|"
+        r"execution|result|summary|final(?:\s+(?:response|result))?|lifecycle|"
+        r"delivery|card|format(?:ting)?)\s+(?:is\s+|was\s+|has\s+been\s+)?"
+        r"(?:complete(?:d)?|done|finished|closed|prepared|delivered|verified|recovered)\.?$",
+        re.I,
+    ),
+    re.compile(
+        r"^(?:completed|closed\s+out|finished|verified|prepared|delivered)\s+"
+        r"(?:the\s+)?(?:request|task|work|objective|execution|result|summary|"
+        r"final(?:\s+(?:response|result))?|lifecycle|delivery|card|format(?:ting)?)\.?$",
+        re.I,
+    ),
+    re.compile(r"^(?:agent|worker)\s+(?:work\s+)?reached\s+final\s+review\.?$", re.I),
+    re.compile(r"^(?:live\s+)?card\s+(?:ordering|lifecycle)\s+(?:was\s+)?(?:preserved|closed)\.?$", re.I),
+    re.compile(r"^(?:response\s+)?format(?:ting)?\s+(?:was\s+)?recovered\.?$", re.I),
+)
+SUMMARY_PROCESS_PREFIX = re.compile(
+    r"^(?:review(?:ed|ing)?|check(?:ed|ing)?|analyz(?:ed|ing)|assess(?:ed|ing)?|"
+    r"investigat(?:ed|ing)|research(?:ed|ing)?)\b",
+    re.I,
+)
+SUMMARY_CONCRETE_RESULT = re.compile(
+    r"\b(?:confirmed|found|identified|determined|show(?:s|ed)?|reveal(?:s|ed)?|"
+    r"state(?:s|d)?|support(?:s|ed)?|cannot|can't|does\s+not|only|recommend(?:s|ed|ation)?|"
+    r"avoid|do\s+not|risk|fixed|changed|added|removed|updated|implemented|configured|"
+    r"differ(?:s|ed|ent)?|caus(?:e|es|ed)|repair(?:s|ed)?|(?:en|dis)abl(?:e|es|ed|ing)|"
+    r"reconcil(?:e|es|ed)|retir(?:e|es|ed)|replac(?:e|es|ed)|rerout(?:e|es|ed)|"
+    r"passed|failed|blocked|resolved|deployed|monitor(?:s|ed)?|trade(?:s|d)?|"
+    r"credential|wallet|source)\b",
+    re.I,
+)
+SUMMARY_PROCESS_RESULT = re.compile(
+    r"\b(?:confirmed|found|identified|determined|show(?:s|ed)?|reveal(?:s|ed)?|"
+    r"cannot|can't|does\s+not|only|recommend(?:s|ed|ation)?|fixed|changed|added|"
+    r"removed|updated|implemented|differ(?:s|ed|ent)?|caus(?:e|es|ed)|repair(?:s|ed)?|"
+    r"(?:en|dis)abl(?:e|es|ed|ing)|reconcil(?:e|es|ed)|retir(?:e|es|ed)|"
+    r"replac(?:e|es|ed)|rerout(?:e|es|ed)|passed|failed|blocked|resolved|deployed)\b",
+    re.I,
+)
+SUMMARY_RISK_OR_LIMITATION = re.compile(
+    r"\b(?:risk|cannot|can't|does\s+not|unsupported|limitation|avoid|do\s+not|"
+    r"blocked|failed|failure|unsafe|credential|wallet)\b",
+    re.I,
+)
+SUMMARY_RECOMMENDATION_OR_ACTION = re.compile(
+    r"\b(?:recommend(?:s|ed|ation)?|should|next\s+step|follow[- ]?up|retry|"
+    r"avoid|do\s+not|use\s+.+\s+only|connect|install|approve)\b",
+    re.I,
+)
+SUMMARY_NO_ACTION_SUPPORT = re.compile(
+    r"\b(?:resolved|fixed|deployed|passed|healthy|fully\s+(?:complete|verified)|"
+    r"no\s+(?:remaining|further)\s+(?:issue|work|action)|already\s+(?:configured|complete))\b",
+    re.I,
+)
+
 
 def now_label() -> str:
     return dt.datetime.now().astimezone().strftime("%H:%M %Z")
@@ -403,6 +464,11 @@ def rich_cards_enabled(chat_id: str | int | None, thread_id: str | int | None) -
     if raw in {"1", "true", "yes", "on"}:
         return True
     return str(chat_id or "") == CONTROL_CENTER_CHAT_ID and str(thread_id or "") == INBOX_THREAD_ID
+
+
+def is_inbox_topic(chat_id: str | int | None, thread_id: str | int | None) -> bool:
+    normalized_chat = str(chat_id or "").removeprefix("telegram:")
+    return normalized_chat == CONTROL_CENTER_CHAT_ID and str(thread_id or "") == INBOX_THREAD_ID
 
 
 def task_headers_enabled(chat_id: str | int | None, thread_id: str | int | None) -> bool:
@@ -1065,6 +1131,103 @@ def latest_change_text(status: str, now: str, done: list[str]) -> str:
     return "Card created; no new update yet."
 
 
+def unique_summary_items(items: list[str]) -> list[str]:
+    """Return compact, de-duplicated summary items without changing their order."""
+    result: list[str] = []
+    seen: set[str] = set()
+    for item in items:
+        value = compact(html.unescape(str(item or "")), limit=180).strip(" -")
+        marker = value.casefold()
+        if value and marker not in seen:
+            result.append(value)
+            seen.add(marker)
+    return result
+
+
+def is_status_only_summary_item(item: str) -> bool:
+    """Identify process/status prose that does not tell Josh what was learned."""
+    value = compact(html.unescape(str(item or "")), limit=220)
+    if not value:
+        return True
+    if any(pattern.fullmatch(value) for pattern in SUMMARY_STATUS_FILLER_PATTERNS):
+        return True
+    # "Reviewed the docs" is activity, not a finding.  A process-prefixed
+    # sentence becomes useful only when it also states a concrete outcome.
+    return bool(SUMMARY_PROCESS_PREFIX.search(value) and not SUMMARY_PROCESS_RESULT.search(value))
+
+
+def substantive_summary_items(items: list[str]) -> list[str]:
+    return [item for item in unique_summary_items(items) if not is_status_only_summary_item(item)]
+
+
+def is_no_action_item(item: str) -> bool:
+    normalized = " ".join(str(item or "").strip().lower().rstrip(".").split())
+    return normalized in {"no action", "no action needed", "none", "n/a", "na", "not applicable"}
+
+
+def summary_semantic_issues(
+    *,
+    complete_yes: bool,
+    model: str,
+    route: str,
+    why: str = "",
+    done_items: list[str],
+    issue_items: list[str],
+    next_items: list[str],
+) -> list[str]:
+    """Validate that a successful final contains findings rather than ceremony."""
+    problems: list[str] = []
+    done = unique_summary_items(done_items)
+    substantive = substantive_summary_items(done)
+    issues = [item for item in unique_summary_items(issue_items) if not is_empty_issue(item)]
+    next_steps = unique_summary_items(next_items)
+    combined_results = " ".join([*substantive, *next_steps])
+
+    if complete_yes:
+        if any("unverified" in str(value or "").lower() for value in (model, route, why)):
+            problems.append("Complete: Yes requires verified Model, Route, and Why values")
+        if not 3 <= len(done) <= 5:
+            problems.append("Complete: Yes requires 3-5 What was done bullets")
+        if len(substantive) < 3:
+            problems.append("What was done must contain at least three substantive findings, outcomes, or changes")
+        result_count = sum(bool(SUMMARY_CONCRETE_RESULT.search(item)) for item in substantive)
+        if result_count < 2:
+            problems.append("What was done must state at least two concrete results")
+
+    has_risk_or_limitation = bool(SUMMARY_RISK_OR_LIMITATION.search(combined_results))
+    if has_risk_or_limitation and not issues:
+        problems.append("Risks and limitations must be surfaced under Issues")
+
+    no_action = bool(next_steps) and all(is_no_action_item(item) for item in next_steps)
+    if no_action:
+        has_recommendation = bool(SUMMARY_RECOMMENDATION_OR_ACTION.search(" ".join(substantive)))
+        has_explicit_support = bool(SUMMARY_NO_ACTION_SUPPORT.search(" ".join(substantive)))
+        if (
+            not complete_yes
+            or issues
+            or has_risk_or_limitation
+            or has_recommendation
+            or not has_explicit_support
+        ):
+            problems.append("No action needed is not supported by the reported result")
+    return problems
+
+
+def truthful_incomplete_steps(items: list[str]) -> list[str]:
+    """Preserve real details, then meet the card shape without inventing success."""
+    result = substantive_summary_items(items)[:5]
+    for disclosure in (
+        "Detailed findings were not captured in the work card.",
+        "Missing facts were not inferred to fill the final summary.",
+        "A substantive final response is still required.",
+    ):
+        if len(result) >= 3:
+            break
+        if disclosure not in result:
+            result.append(disclosure)
+    return result[:5]
+
+
 def build_completion_summary(
     *,
     title: str,
@@ -1076,36 +1239,56 @@ def build_completion_summary(
     model: str = "",
     route: str = "",
 ) -> str:
-    complete = "Yes" if status == "done" else "No"
     complete_title = compact(title, fallback="objective", limit=120)
-    complete_detail = f"{complete_title} complete" if complete == "Yes" else f"{complete_title} not complete"
-
-    steps = list(done or [])
+    steps = unique_summary_items(list(done or []))
     if now and now not in steps:
         steps.append(now)
-    for fallback in (
-        f"Closed out: {title}",
-        "Verified the worker execution state.",
-        "Prepared the result for Telegram delivery.",
-    ):
-        if len(steps) >= 3:
-            break
-        if fallback not in steps:
-            steps.append(fallback)
-
     issues = [] if is_empty_issue(blocker) else parse_list(blocker) or [blocker]
     next_steps = parse_list(next_step)
-    if not next_steps:
-        next_steps = ["Approve the next safe step for the issue."] if issues else ["No action needed."]
-    approval_needed = [*next_steps, "Adjust the plan", "Cancel this task"] if issues else ["n/a"]
     model_line = model or os.environ.get("JOSH_WORK_CARD_MODEL") or "unverified"
     route_facts = parse_route_facts(route)
     route_label = route_facts.get("route") or route_facts.get("lane") or compact(route, fallback="unverified", limit=90)
+    complete_requested = status == "done"
     why = route_facts.get("reason") or route_facts.get("why") or (
         "verified task execution" if status == "done" and "unverified" not in model_line.lower() and not model_line.lower().startswith("planned ")
         else "reported work-card outcome"
     )
-
+    quality_issues = summary_semantic_issues(
+        complete_yes=complete_requested,
+        model=model_line,
+        route=route_label,
+        why=why,
+        done_items=steps,
+        issue_items=issues,
+        next_items=next_steps or ["No action needed."],
+    )
+    complete = "Yes" if complete_requested and not quality_issues else "No"
+    if complete == "No" and complete_requested:
+        steps = truthful_incomplete_steps(steps)
+        issues = unique_summary_items([
+            *issues,
+            "The work card did not capture enough concrete findings for a reliable final summary.",
+        ])
+        next_steps = ["Retry the final response with concrete findings and a supported recommendation."]
+    else:
+        steps = substantive_summary_items(steps) if complete == "Yes" else truthful_incomplete_steps(steps)
+        if not next_steps:
+            if issues:
+                next_steps = ["Approve the next safe step for the issue."]
+            elif status == "paused":
+                next_steps = ["Send the next instruction when ready."]
+            elif complete == "No":
+                next_steps = ["Review the incomplete result and retry with concrete findings."]
+            else:
+                next_steps = ["No action needed."]
+    if complete == "No" and next_steps and all(is_no_action_item(item) for item in next_steps):
+        next_steps = ["Review the incomplete result and retry with concrete findings."]
+    complete_detail = (
+        f"{complete_title} complete"
+        if complete == "Yes"
+        else ("detailed findings are incomplete" if complete_requested else f"{complete_title} not complete")
+    )
+    approval_needed = [*next_steps, "Adjust the plan", "Cancel this task"] if issues else ["n/a"]
     def final_lines(items: list[str], fallback: str) -> list[str]:
         clean = [compact(item, limit=180) for item in items if compact(item, limit=180)]
         return [line for item in (clean[:5] or [fallback]) for line in hanging_bullet_lines(item)]
@@ -1116,7 +1299,7 @@ def build_completion_summary(
         *hanging_status_lines(f"Complete: {complete} - {complete_detail}"),
         "",
         "What was done:",
-        *final_lines(steps, f"Closed out: {title}"),
+        *final_lines(steps, "Detailed findings were not captured."),
         "",
         "Issues:",
         *final_lines(issues, "n/a"),
@@ -1502,6 +1685,30 @@ def telegram_message_not_modified(result: dict) -> bool:
     return "message is not modified" in str(result.get("error", "")).lower()
 
 
+def final_section_items(lines: list[str], start: int, end: int, label: str) -> list[str]:
+    """Reconstruct wrapped bullets (and legacy plain values) from one section."""
+    values: list[str] = []
+    inline = lines[start][len(label):].strip()
+    if inline:
+        values.append(inline)
+    current = ""
+    for line in lines[start + 1:end]:
+        if line.startswith("- "):
+            if current:
+                values.append(current)
+            current = line[2:].strip()
+        elif line.startswith("  ") and current:
+            current = f"{current} {line.strip()}".strip()
+        elif line.strip():
+            if current:
+                values.append(current)
+                current = ""
+            values.append(line.strip())
+    if current:
+        values.append(current)
+    return unique_summary_items(values)
+
+
 def load_final_text_file(path: str) -> str:
     text = Path(path).read_text(encoding="utf-8").strip()
     if not text:
@@ -1519,17 +1726,23 @@ def load_final_text_file(path: str) -> str:
     ordered = all(position >= 0 for position in positions) and positions == sorted(positions) and len(set(positions)) == len(positions)
     header_lines = [line for line in lines[:positions[0]] if line.strip()] if ordered else []
     header = " ".join(line.strip() for line in header_lines)
-    header_valid = bool(re.fullmatch(r"Model:\s*.+?\s*\|\s*Route:\s*.+?\s*\|\s*Why:\s*.+", header, flags=re.I))
+    header_valid = bool(re.fullmatch(
+        r"Model:\s*[^|]+?\s*\|\s*Route:\s*[^|]+?\s*\|\s*Why:\s*[^|]+",
+        header,
+        flags=re.I,
+    ))
     header_wrap_valid = bool(header_lines) and all(line.startswith("   ") for line in header_lines[1:])
     done_lines = lines[positions[1] + 1:positions[2]] if ordered else []
     done_bullets = [line for line in done_lines if line.startswith("- ")]
     done_wrap_valid = all(line.startswith(("- ", "  ")) or not line.strip() for line in done_lines)
     required_values = []
+    section_values: dict[str, list[str]] = {}
     if ordered:
         for index, label in enumerate(labels):
             end = positions[index + 1] if index + 1 < len(positions) else len(lines)
-            block = [lines[positions[index]][len(label):].strip(), *[line.strip() for line in lines[positions[index] + 1:end]]]
-            required_values.append(" ".join(value for value in block if value).strip())
+            values = final_section_items(lines, positions[index], end, label)
+            section_values[label] = values
+            required_values.append(" ".join(values).strip())
     if (
         not ordered
         or not complete_valid
@@ -1542,6 +1755,24 @@ def load_final_text_file(path: str) -> str:
         raise SystemExit(
             "--final-text-file must use the canonical ordered final contract with verified Model/Route/Why, Complete: Yes/No, and 3-5 What was done bullets"
         )
+    header_match = re.fullmatch(
+        r"Model:\s*([^|]+?)\s*\|\s*Route:\s*([^|]+?)\s*\|\s*Why:\s*([^|]+)",
+        header,
+        flags=re.I,
+    )
+    assert header_match is not None  # guarded by header_valid above
+    complete_yes = bool(re.search(r"(?m)^Complete:\s+Yes\b", plain, flags=re.I))
+    semantic_issues = summary_semantic_issues(
+        complete_yes=complete_yes,
+        model=header_match.group(1),
+        route=header_match.group(2),
+        why=header_match.group(3),
+        done_items=section_values.get("What was done:", []),
+        issue_items=section_values.get("Issues:", []),
+        next_items=section_values.get("Appropriate next steps:", []),
+    )
+    if semantic_issues:
+        raise SystemExit("--final-text-file is not substantive: " + "; ".join(semantic_issues))
     return text
 
 
@@ -1596,7 +1827,9 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
         if not ack_message_id and status == "running" and title and title.lower() not in {"latest telegram task received", "determining objective"}:
             ack_message_id = claim_pending_ack(args.key)
         terminal_status = status in {"done", "failed", "paused"}
-        #JAIMES: keep the live card visible through completion, then send one distinct final card for its concise outcome.
+        #JAIMES: keep the live card visible through completion.  In Topic 1 the
+        # native answer owns the single final slot unless a validated file is
+        # supplied or a caller explicitly opts into a generated summary.
         text = build_card(
             title=title,
             status=status,
@@ -1625,6 +1858,14 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
         if terminal_status and args.final_text_file:
             final_text = load_final_text_file(args.final_text_file)
         else:
+            generated_final_allowed = (
+                terminal_status
+                and not args.no_final_summary
+                and (
+                    not is_inbox_topic(chat_id, thread_id)
+                    or bool(getattr(args, "separate_final_summary", False))
+                )
+            )
             final_text = build_completion_summary(
                 title=title,
                 status=status,
@@ -1634,7 +1875,7 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
                 blocker=args.blocker or "None",
                 model=model,
                 route=route,
-            ) if terminal_status and not args.no_final_summary else ""
+            ) if generated_final_allowed else ""
 
         if args.dry_run:
             print(json.dumps({
@@ -1995,6 +2236,7 @@ def main() -> int:
               scripts/josh_work_card.py start --key mc-fix --title "Control Tower fix" --now "reading files"
               scripts/josh_work_card.py update --key mc-fix --now "running tests" --done "patched CSS|py_compile passed"
               scripts/josh_work_card.py done --key mc-fix --done "tests passed|pushed main"
+              scripts/josh_work_card.py done --key mc-fix --final-text-file /private/path/final.html
             """
         ),
     )
@@ -2014,10 +2256,11 @@ def main() -> int:
     parser.add_argument("--routing-buttons", action="store_true", help="Show routing/model buttons on active cards only when steering is useful")
     parser.add_argument("--approval-buttons", action="store_true", help="Show approval buttons on the final summary when issues require approval")
     parser.add_argument("--no-buttons", action="store_true")
-    #JAIMES: default lifecycle preserves the live card and emits one final outcome card; opt out only for deliberately card-only runs.
-    parser.add_argument("--no-final-summary", action="store_true", help="Complete the live card without a separate final summary card")
+    #JAIMES: Topic 1 reserves its final slot for the validated native answer;
+    # other topics keep the historical generated-summary default.
+    parser.add_argument("--no-final-summary", action="store_true", help="Complete the live card without a generated final summary card")
     parser.add_argument("--final-text-file", help="Private file containing already-normalized Telegram HTML or escaped text")
-    parser.add_argument("--separate-final-summary", action="store_true", help="Compatibility no-op; separate final summary cards are the default")
+    parser.add_argument("--separate-final-summary", action="store_true", help="Explicitly generate a separate final summary (Topic 1 normally waits for --final-text-file)")
     parser.add_argument("--timeout", type=int, default=15)
     parser.add_argument("--chat-id", help="Telegram chat id override for group or direct routing")
     parser.add_argument("--thread-id", help="Telegram forum topic id override for group-topic routing")

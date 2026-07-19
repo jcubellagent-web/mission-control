@@ -79,9 +79,9 @@ class FakeLiveModule:
 Complete: Yes - QA complete
 
 What was done:
-- reaction verified
-- live card verified
-- terminal state verified
+- Confirmed eyes reaction delivery.
+- Verified that header rendered.
+- 6 terminal checks passed.
 
 Issues:
 - n/a
@@ -218,6 +218,147 @@ def test_validate_requires_one_preformatted_final_block() -> None:
     text = FakeLiveModule().build_completion_summary().removeprefix("<pre>").removesuffix("</pre>")
 
     assert "final summary must be one Telegram HTML pre block" in stress.validate(text, FakeLiveModule())
+
+
+def test_validate_rejects_the_weak_agent_rh_status_only_card() -> None:
+    text = """<pre>Model: unverified
+   | Route: unverified
+   | Why: reported work-card outcome
+
+Complete: Yes - assessment complete
+
+What was done:
+- Reviewing product claims, code,
+  and trade risks.
+- Read-only Robinhood Chain signal
+  source; not brokerage trading.
+  Do not connect credentials.
+- Assessment complete.
+
+Issues:
+- n/a
+
+Appropriate next steps:
+- No action needed.
+
+Approval needed:
+- n/a</pre>"""
+
+    problems = stress.validate(text, FakeLiveModule())
+
+    assert "Complete Yes requires verified model, route, and why values" in problems
+    assert "Complete Yes requires at least 3 unique substantive findings" in problems
+    assert "Complete Yes cannot use status or process filler as findings" in problems
+    assert "Complete Yes requires at least 2 concrete findings or outcomes" in problems
+    assert "risk or limitation requires a substantive Issues entry" in problems
+    assert "No action needed conflicts with issues or recommendations" in problems
+
+
+def test_validate_accepts_a_substantive_agent_rh_assessment() -> None:
+    text = """<pre>Model: openai/gpt-5.6
+   | Route: Josh 2.0 Inbox
+   | Why: product assessment
+
+Complete: Yes - assessment completed
+
+What was done:
+- Confirmed Agent RH only monitors
+  Robinhood Chain signals.
+- Found it cannot trade a Robinhood
+  brokerage account.
+- Identified credential and trade
+  control risks.
+
+Issues:
+- Credentials could expose wallets.
+
+Appropriate next steps:
+- Keep signals read-only; avoid keys.
+
+Approval needed:
+- n/a</pre>"""
+
+    assert stress.validate(text, FakeLiveModule()) == []
+
+
+def test_validate_accepts_concrete_topic17_repair_outcomes() -> None:
+    text = """<pre>Model: openai-codex/gpt-5.6-sol
+   | Route: JAIMES execution
+   | Why: origin-route repair
+
+Complete: Yes - routing fixed
+
+What was done:
+- Missing topic metadata caused
+  edits to enter the wrong chat.
+- 26 misplaced card records were
+  repaired without deleting history.
+- Duplicate fast-ack cards were
+  disabled; one owner remains.
+
+Issues:
+- n/a
+
+Appropriate next steps:
+- Keep a Topic 17 route canary.
+
+Approval needed:
+- n/a</pre>"""
+
+    assert stress.validate(text, FakeLiveModule()) == []
+
+
+def test_validate_rejects_duplicate_why_header() -> None:
+    text = """<pre>Model: openai-codex/gpt-5.6-sol
+   | Route: JAIMES execution
+   | Why: primary | Why: duplicate
+
+Complete: No - malformed header
+
+What was done:
+- Preserved the source response.
+- Identified a duplicate field.
+- Kept the result fail closed.
+
+Issues:
+- Header is malformed.
+
+Appropriate next steps:
+- Regenerate one verified header.
+
+Approval needed:
+- n/a</pre>"""
+
+    assert "final summary header must contain exactly one Model, Route, and Why field" in stress.validate(
+        text,
+        FakeLiveModule(),
+    )
+
+
+def test_validate_allows_truthful_complete_no_deficiency_cards() -> None:
+    text = """<pre>Model: unverified
+   | Route: Josh 2.0 Inbox
+   | Why: format recovery
+
+Complete: No - findings incomplete
+
+What was done:
+- The source lacked three findings.
+- Missing facts were not invented.
+- A detailed result was not captured.
+
+Issues:
+- Detailed findings were not captured.
+
+Appropriate next steps:
+- Retry with evidence and findings.
+
+Approval needed:
+- Retry with evidence and findings.
+- Adjust the plan.
+- Cancel this task.</pre>"""
+
+    assert stress.validate(text, FakeLiveModule()) == []
 
 
 def test_live_target_requires_numeric_ids_and_explicit_production_confirmation() -> None:

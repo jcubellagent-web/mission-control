@@ -36,9 +36,9 @@ function canonicalFinal(overrides = {}) {
     "",
     "What was done:",
     ...(overrides.done || [
-      "- Updated the requested behavior.",
-      "- Verified ordering and receipts.",
-      "- Preserved one final response.",
+      "- Changed the Inbox final gate.",
+      "- Added semantic summary checks.",
+      "- Ran 64 tests; all 64 passed.",
     ]),
     "",
     "Issues:",
@@ -897,6 +897,8 @@ test("validates one concise canonical final and derives truthful terminal status
   assert.equal(parseCanonicalFinalSummary(canonicalFinal()).terminalStatus, "done");
   const approval = parseCanonicalFinalSummary(canonicalFinal({
     complete: "No - release pending.",
+    issues: "Production release is waiting.",
+    next: "Approve the production release.",
     approval: "Approve the production release.",
   }));
   assert.equal(approval.ok, true);
@@ -906,9 +908,96 @@ test("validates one concise canonical final and derives truthful terminal status
   assert.equal(parseCanonicalFinalSummary(canonicalFinal(), { expectedModel: "openai/other-model" }).reason, "unverified-model-line");
 });
 
+test("rejects status-only completion bullets and unverified completion headers", () => {
+  const statusOnly = parseCanonicalFinalSummary(canonicalFinal({
+    done: [
+      "- Assessment is complete.",
+      "- Verified worker execution state.",
+      "- Prepared the final summary.",
+    ],
+  }));
+  assert.equal(statusOnly.ok, false);
+  assert.equal(statusOnly.reason, "what-was-done-status-filler");
+  assert.equal(parseCanonicalFinalSummary(canonicalFinal({ model: "unverified" })).reason, "unverified-header-line");
+  assert.equal(parseCanonicalFinalSummary(canonicalFinal({ route: "unknown" })).reason, "unverified-header-line");
+  assert.equal(parseCanonicalFinalSummary(canonicalFinal({ why: "reported unverified route" })).reason, "unverified-header-line");
+});
+
+test("requires at least two concrete findings or outcomes for Complete Yes", () => {
+  const vague = parseCanonicalFinalSummary(canonicalFinal({
+    done: [
+      "- Read the product documentation.",
+      "- Compared the account options.",
+      "- Summarized the available material.",
+    ],
+  }));
+  assert.equal(vague.ok, false);
+  assert.equal(vague.reason, "what-was-done-concrete-outcome-count");
+});
+
+test("rejects hidden risks and unjustified no-action conclusions", () => {
+  const hiddenRisk = parseCanonicalFinalSummary(canonicalFinal({
+    done: [
+      "- Identified a credential risk.",
+      "- Found wallet access was exposed.",
+      "- Confirmed write controls stayed on.",
+    ],
+    next: "Review the account controls.",
+  }));
+  assert.equal(hiddenRisk.reason, "issues-required-for-risk-or-limitation");
+
+  const ignoredRecommendation = parseCanonicalFinalSummary(canonicalFinal({
+    done: [
+      "- Found the account is read-only.",
+      "- Confirmed credentials stay offline.",
+      "- Recommended keeping access local.",
+    ],
+  }));
+  assert.equal(ignoredRecommendation.reason, "no-action-conflicts-with-summary");
+});
+
+test("accepts a substantive Agent RH assessment with findings and next steps", () => {
+  const parsed = parseCanonicalFinalSummary(canonicalFinal({
+    done: [
+      "- Confirmed Agent RH only monitors",
+      "  Robinhood Chain signals.",
+      "- Found it cannot trade a Robinhood",
+      "  brokerage account.",
+      "- Identified credential and trade",
+      "  control risks.",
+    ],
+    issues: "Credentials could expose wallets.",
+    next: "Keep signals read-only; avoid keys.",
+  }));
+  assert.equal(parsed.ok, true);
+  assert.equal(parsed.terminalStatus, "done");
+});
+
+test("accepts concrete Topic 17 repair outcomes and rejects duplicate Why headers", () => {
+  const parsed = parseCanonicalFinalSummary(canonicalFinal({
+    done: [
+      "- Missing topic metadata caused",
+      "  edits to enter the wrong chat.",
+      "- 26 misplaced card records were",
+      "  repaired without deleting history.",
+      "- Duplicate fast-ack cards were",
+      "  disabled; one owner remains.",
+    ],
+    next: "Keep a Topic 17 route canary.",
+  }));
+  assert.equal(parsed.ok, true);
+  assert.equal(parsed.terminalStatus, "done");
+
+  const duplicateWhy = parseCanonicalFinalSummary(canonicalFinal({
+    why: "primary | Why: duplicate",
+  }));
+  assert.equal(duplicateWhy.ok, false);
+  assert.equal(duplicateWhy.reason, "invalid-model-route-line");
+});
+
 test("normalizes a malformed final into the canonical mobile contract", () => {
   const recovered = buildRecoveryFinalSummary(
-    "Completed the code change. Tests passed. Production is healthy.",
+    "Changed the Inbox final gate. Added semantic summary checks. 64 Node tests passed. The task is complete.",
     "openai/gpt-5.6",
   );
   const parsed = parseCanonicalFinalSummary(recovered, { expectedModel: "openai/gpt-5.6" });
@@ -916,6 +1005,19 @@ test("normalizes a malformed final into the canonical mobile contract", () => {
   assert.equal(parsed.terminalStatus, "done");
   assert.equal(recovered.startsWith("<pre>"), true);
   assert.equal(recovered.slice(5, -6).split("\n").every((line) => [...line].length <= 38), true);
+});
+
+test("weak malformed recovery is truthful and never invents success padding", () => {
+  const recovered = buildRecoveryFinalSummary(
+    "Assessment complete. Reviewed the request. Prepared the final summary.",
+    "openai/gpt-5.6",
+  );
+  const parsed = parseCanonicalFinalSummary(recovered, { expectedModel: "openai/gpt-5.6" });
+  assert.equal(parsed.ok, true);
+  assert.match(parsed.sections.Complete, /^No\b/);
+  assert.match(parsed.sections.Issues, /findings were not captured/i);
+  assert.match(parsed.sections["Appropriate next steps"], /retry/i);
+  assert.doesNotMatch(recovered, /Agent work reached final review|Live card ordering|formatting was recovered/i);
 });
 
 test("malformed-final recovery preserves incomplete and approval semantics", () => {

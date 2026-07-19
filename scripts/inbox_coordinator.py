@@ -93,7 +93,7 @@ SECRET_VALUE_PATTERNS = (
     re.compile(r"\bBearer\s+[A-Za-z0-9._~+/=-]{8,}\b", re.I),
     re.compile(r"(?im)\b(password|passwd|token|api[_ -]?key|secret)\s*[:=]\s*([^\s,;]{4,})"),
 )
-WORKER_OUTPUT_CONTRACT = """Return a concise structured result using exactly these plain-text sections in this order: Complete: Yes or No plus whether the objective was completed; What was done: 3-5 tight bullets; Issues: bullets or n/a; Appropriate next steps: one useful next action or No action needed.; Approval needed: one approval bullet per issue when approval is genuinely required, otherwise n/a. Do not include a Model line or claim a provider, model, host, worker, route, or latency; the verified delivery layer adds those facts. Never repeat or reveal passwords, tokens, API keys, cookies, OAuth payloads, or other secret values."""
+WORKER_OUTPUT_CONTRACT = """Return a concise structured result using exactly these plain-text sections in this order: Complete: Yes or No plus whether the objective was completed; What was done: 3-5 unique, source-supported bullets that state concrete findings, outcomes, or changes; Issues: bullets or n/a; Appropriate next steps: one evidence-based recommendation or next action; Approval needed: one approval bullet per issue when approval is genuinely required, otherwise n/a. For an assessment, review, or research request, surface the key findings and recommendation instead of merely saying the assessment or review finished. Generic process statements such as task complete, execution verified, result prepared, or summary delivered are not findings and must not be used to fill the bullets. Put every reported risk or limitation in Issues as well as the relevant finding. Use No action needed only when the findings explicitly support that conclusion and there are no issues, risks, limitations, approvals, or recommendations to act on. Do not include a Model line or claim a provider, model, host, worker, route, or latency; the verified delivery layer adds those facts. Never repeat or reveal passwords, tokens, API keys, cookies, OAuth payloads, or other secret values."""
 FINAL_SECTION_LABELS = {
     "complete": "Complete:",
     "done": "What was done:",
@@ -101,6 +101,50 @@ FINAL_SECTION_LABELS = {
     "next": "Appropriate next steps:",
     "approval": "Approval needed:",
 }
+
+EMPTY_FINAL_ITEMS = frozenset({"n/a", "na", "none"})
+MISSING_FINDINGS_ISSUE = "Detailed findings were not captured well enough to verify completion."
+RETRY_FINDINGS_NEXT_STEP = "Retry the task and require three to five concrete findings or outcomes plus an evidence-based recommendation."
+STATUS_ONLY_FINAL_PATTERNS = tuple(
+    re.compile(pattern, re.I)
+    for pattern in (
+        r"^(?:the )?(?:assessment|review|task|request|work|job)(?: (?:was|is))? (?:complete|completed|finished|done|closed)[.!]?$",
+        r"^(?:completed|finished|reviewed|checked|processed|handled) (?:the )?(?:requested )?(?:task|request|work|assessment|review)[.!]?$",
+        r"^(?:verified|confirmed) (?:the )?(?:(?:worker )?(?:runtime|execution|delivery|route|workflow)|worker)(?: (?:was|is))? (?:complete|completed|successful|verified)?[.!]?$",
+        r"^(?:prepared|generated|delivered|sent|formatted) (?:the )?(?:final )?(?:result|response|summary|card)(?: for .+ delivery)?[.!]?$",
+        r"^(?:agent )?work reached final review[.!]?$",
+        r"^live card ordering (?:was )?preserved[.!]?$",
+        r"^response formatting (?:was )?(?:recovered|verified)[.!]?$",
+        r"^(?:acknowledged|routed)(?: the)? request(?: .+)?[.!]?$",
+    )
+)
+CONCRETE_RESULT_SIGNAL = re.compile(
+    r"\b(?:found|identified|confirmed|determined|discovered|revealed?|show(?:s|ed)?|"
+    r"describ(?:e|es|ed)|indicat(?:e|es|ed)|support(?:s|ed)?|does(?: not)?|cannot|can't|"
+    r"can|will|prevent(?:s|ed)?|allow(?:s|ed)?|requir(?:e|es|ed)|includ(?:e|es|ed)|"
+    r"exclud(?:e|es|ed)|monitor(?:s|ed)?|trad(?:e|es|ed)|connect(?:s|ed)?|creat(?:e|es|ed)|"
+    r"pos(?:e|es|ed)|risk|limitation|read[- ]only|us(?:e|es|ed)|recommend(?:s|ed|ation)?|"
+    r"fix(?:es|ed)?|patch(?:es|ed)?|chang(?:e|es|ed)|updat(?:e|es|ed)|add(?:s|ed)?|"
+    r"remov(?:e|es|ed)|implement(?:s|ed)?|configur(?:e|es|ed)|creat(?:e|es|ed)|"
+    r"migrat(?:e|es|ed)|deploy(?:s|ed)?|pass(?:es|ed)?|fail(?:s|ed)?|block(?:s|ed)?|"
+    r"resolv(?:e|es|ed)|reduc(?:e|es|ed)|increas(?:e|es|ed)|decreas(?:e|es|ed)|"
+    r"compar(?:e|es|ed)|estimat(?:e|es|ed)|measur(?:e|es|ed)|validat(?:e|es|ed))\b",
+    re.I,
+)
+CONCRETE_EVIDENCE_SIGNAL = re.compile(
+    r"(?:https?://|(?:^|\s)/[A-Za-z0-9_.-]+/|\b[A-Za-z0-9_.-]+\.(?:py|js|ts|json|md|ya?ml)\b|\b\d+(?:\.\d+)+(?:\b|%))",
+    re.I,
+)
+RISK_OR_LIMITATION_SIGNAL = re.compile(
+    r"\b(?:risk|risks|risky|limitation|limitations|limited|cannot|can't|unable|unsupported|"
+    r"not supported|do not|don't|avoid|blocked|blocker|warning|caution)\b",
+    re.I,
+)
+ACTION_OR_RECOMMENDATION_SIGNAL = re.compile(
+    r"\b(?:recommend(?:s|ed|ation)?|should|must|follow[- ]?up|next step|do not|don't|avoid|consider)\b",
+    re.I,
+)
+NO_ACTION_SIGNAL = re.compile(r"^no (?:further )?actions? (?:(?:is|are) )?(?:needed|required)\b", re.I)
 
 
 ROUTES: dict[str, dict[str, Any]] = {
@@ -595,6 +639,62 @@ def clean_final_item(value: str, limit: int = 700) -> str:
     return text
 
 
+def unique_final_items(values: list[str], *, limit: int = 5) -> list[str]:
+    items: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        item = clean_final_item(value)
+        empty_candidate = item.lower().strip().rstrip(".")
+        normalized = re.sub(r"[^a-z0-9]+", " ", item.lower()).strip()
+        if not item or empty_candidate in EMPTY_FINAL_ITEMS or normalized in seen:
+            continue
+        seen.add(normalized)
+        items.append(item)
+        if len(items) >= limit:
+            break
+    return items
+
+
+def is_status_only_final_item(value: str) -> bool:
+    text = clean_final_item(value)
+    return not text or any(pattern.fullmatch(text) for pattern in STATUS_ONLY_FINAL_PATTERNS)
+
+
+def is_substantive_final_item(value: str) -> bool:
+    text = clean_final_item(value)
+    words = re.findall(r"[A-Za-z0-9][A-Za-z0-9'._/-]*", text)
+    return len(text) >= 24 and len(words) >= 4 and not is_status_only_final_item(text)
+
+
+def is_concrete_result_item(value: str) -> bool:
+    text = clean_final_item(value)
+    return is_substantive_final_item(text) and bool(
+        CONCRETE_RESULT_SIGNAL.search(text) or CONCRETE_EVIDENCE_SIGNAL.search(text)
+    )
+
+
+def no_action_item(value: str) -> bool:
+    return bool(NO_ACTION_SIGNAL.match(clean_final_item(value)))
+
+
+def incomplete_summary_done_items(source_items: list[str], concrete_count: int) -> list[str]:
+    """Preserve real details and fill shape only with transparent deficiency facts."""
+    preserved = [item for item in source_items if is_substantive_final_item(item)][:4]
+    deficiency_facts = [
+        f"The supplied summary contained {len(source_items)} unique result bullet(s), including {concrete_count} concrete finding(s) or outcome(s).",
+        "Completion requires three to five substantive source-provided bullets with concrete findings or outcomes.",
+        "No missing findings were inferred or invented.",
+    ]
+    combined = unique_final_items([*preserved, *deficiency_facts], limit=5)
+    if not any(item in deficiency_facts for item in combined):
+        combined = unique_final_items([*preserved[:4], deficiency_facts[0]], limit=5)
+    for fact in deficiency_facts:
+        if len(combined) >= 3:
+            break
+        combined = unique_final_items([*combined, fact], limit=5)
+    return combined
+
+
 def parse_model_sections(output: str) -> dict[str, Any]:
     cleaned = html.unescape(str(output or "")).replace("\r\n", "\n").replace("\r", "\n")
     cleaned = re.sub(r"</?pre>", "", cleaned, flags=re.I)
@@ -638,27 +738,80 @@ def parse_model_sections(output: str) -> dict[str, Any]:
         else:
             loose.append(item)
 
-    if not sections["done"]:
-        sections["done"] = loose[:5] or ["Completed the requested Inbox worker task."]
-    while len(sections["done"]) < 3:
-        additions = [
-            "Verified the worker execution completed.",
-            "Prepared the result for deterministic Telegram delivery.",
-        ]
-        candidate = additions[len(sections["done"]) - 1]
-        if candidate not in sections["done"]:
-            sections["done"].append(candidate)
-        else:
-            break
-    sections["done"] = sections["done"][:5]
-    sections["issues"] = [item for item in sections["issues"] if item.lower() not in {"n/a", "na", "none"}][:5]
-    sections["next"] = [item for item in sections["next"] if item.lower() not in {"n/a", "na", "none"}][:5]
-    sections["approval"] = [item for item in sections["approval"] if item.lower() not in {"n/a", "na", "none"}][:5]
+    source_done = unique_final_items(sections["done"] or loose, limit=6)
+    source_issues = unique_final_items(sections["issues"])
+    source_next = unique_final_items(sections["next"])
+    source_approval = unique_final_items(sections["approval"])
+    substantive_done = [item for item in source_done if is_substantive_final_item(item)]
+    concrete_done = [item for item in source_done if is_concrete_result_item(item)]
+    quality_issues: list[str] = []
+
     if not complete_declared:
-        sections["issues"].append("Worker did not return a verifiable completion status.")
-    if not sections["next"]:
-        sections["next"] = ["No action needed."] if complete and not sections["issues"] else ["Review the listed issue before retrying."]
-    return {"complete": complete, "completeDeclared": complete_declared, **sections}
+        quality_issues.append("Worker did not return a verifiable completion status.")
+    if complete:
+        if not 3 <= len(source_done) <= 5:
+            quality_issues.append("A completion claim requires three to five unique result bullets.")
+        if len(substantive_done) != len(source_done):
+            quality_issues.append("Status or delivery-process text was used in place of substantive findings or outcomes.")
+        if len(concrete_done) < 2:
+            quality_issues.append("The completion claim did not include enough concrete findings or outcomes.")
+        if not source_next:
+            quality_issues.append("The completion claim did not include an evidence-based next step.")
+
+        reported_text = " ".join([*source_done, *source_next, *source_approval])
+        reported_risk = bool(RISK_OR_LIMITATION_SIGNAL.search(reported_text))
+        if reported_risk and not source_issues:
+            quality_issues.append("A reported risk or limitation was not reflected in Issues.")
+
+        no_action_requested = any(no_action_item(item) for item in source_next)
+        no_action_conflict = bool(
+            source_issues
+            or source_approval
+            or reported_risk
+            or ACTION_OR_RECOMMENDATION_SIGNAL.search(" ".join(source_done))
+            or any(not no_action_item(item) for item in source_next)
+        )
+        if no_action_requested and no_action_conflict:
+            quality_issues.append("The No action needed conclusion was not supported by the reported findings.")
+
+    summary_sufficient = bool(complete and complete_declared and not quality_issues)
+    if summary_sufficient:
+        return {
+            "complete": True,
+            "completeDeclared": True,
+            "summarySufficient": True,
+            "summaryQualityIssues": [],
+            "done": source_done,
+            "issues": source_issues,
+            "next": source_next,
+            "approval": source_approval,
+        }
+
+    if complete or not complete_declared:
+        issues = unique_final_items([MISSING_FINDINGS_ISSUE, *source_issues, *quality_issues])
+        return {
+            "complete": False,
+            "completeDeclared": complete_declared,
+            "summarySufficient": False,
+            "summaryQualityIssues": quality_issues,
+            "done": incomplete_summary_done_items(source_done, len(concrete_done)),
+            "issues": issues,
+            "next": [RETRY_FINDINGS_NEXT_STEP],
+            "approval": source_approval,
+        }
+
+    # A worker may truthfully report Complete: No. Preserve its facts and issue
+    # rather than inventing a successful result or silently changing its advice.
+    return {
+        "complete": False,
+        "completeDeclared": True,
+        "summarySufficient": False,
+        "summaryQualityIssues": [],
+        "done": source_done,
+        "issues": source_issues,
+        "next": source_next or ["Review the listed issue before retrying."],
+        "approval": source_approval,
+    }
 
 
 def render_final_html(route: dict[str, Any], execution: dict[str, Any], output: str) -> str:
@@ -1046,7 +1199,11 @@ def deliver_result(job_id: str, snapshot: dict[str, Any], route: dict[str, Any],
     model_label = f"provider={execution.get('actualProvider') or route.get('provider')}; model={execution.get('actualModel') or 'unverified'}; worker={execution.get('actualWorker') or route.get('worker')}; host={execution.get('actualHost') or route.get('host')}"
     route_label = f"route={route.get('routeId')}; reason={route.get('routingReason')}; fallback={route.get('fallback') or 'none'}"
     sections = parse_model_sections(output)
-    task_complete = bool(execution.get("executionVerified") and sections.get("complete"))
+    task_complete = bool(
+        execution.get("executionVerified")
+        and sections.get("complete")
+        and sections.get("summarySufficient")
+    )
     command = "done" if task_complete else "fail"
     cmd = [
         sys.executable,
@@ -1123,7 +1280,12 @@ def run_worker(job_id: str) -> dict[str, Any]:
         delivered = deliver_result(job_id, snapshot, route, execution, output)
         if not delivered:
             raise RuntimeError("delivery failed")
-        task_complete = bool(execution.get("executionVerified") and parse_model_sections(output).get("complete"))
+        parsed_sections = parse_model_sections(output)
+        task_complete = bool(
+            execution.get("executionVerified")
+            and parsed_sections.get("complete")
+            and parsed_sections.get("summarySufficient")
+        )
         outcome = "done" if task_complete else "failed"
         if not task_complete:
             error_code = "model_reported_incomplete"
@@ -1139,7 +1301,11 @@ def run_worker(job_id: str) -> dict[str, Any]:
         if execution.get("executionVerified") and output:
             delivered = deliver_result(job_id, snapshot, route, execution, output)
             if delivered:
-                outcome = "done" if parse_model_sections(output).get("complete") else "failed"
+                recovered_sections = parse_model_sections(output)
+                outcome = "done" if (
+                    recovered_sections.get("complete")
+                    and recovered_sections.get("summarySufficient")
+                ) else "failed"
         else:
             failure_execution = {
                 "actualHost": route.get("host") or "unverified",
@@ -1856,7 +2022,11 @@ def recover(job_id: str = "") -> dict[str, Any]:
             delivered = deliver_result(job_id, snapshot, route, execution, output)
         except Exception:
             delivered = False
-        complete = bool(parse_model_sections(output).get("complete"))
+        recovered_sections = parse_model_sections(output)
+        complete = bool(
+            recovered_sections.get("complete")
+            and recovered_sections.get("summarySufficient")
+        )
         with state_lock():
             state = read_json(STATE_PATH, {"jobs": {}})
             job = (state.get("jobs") or {}).get(job_id)

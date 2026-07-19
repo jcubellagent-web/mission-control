@@ -297,6 +297,69 @@ function bulletCount(block) {
   return count;
 }
 
+function bulletItems(block) {
+  if (block.inline) return [];
+  const items = [];
+  for (const line of block.tail) {
+    if (line.startsWith("- ")) {
+      items.push(line.slice(2).trim());
+    } else if (line.startsWith("  ") && items.length) {
+      items[items.length - 1] = `${items[items.length - 1]} ${line.trim()}`.trim();
+    } else {
+      return [];
+    }
+  }
+  return items;
+}
+
+const STATUS_ONLY_PATTERNS = [
+  /\b(?:assessment|task|work|review|objective|request)\s+(?:is\s+)?(?:complete|completed|done|finished|closed)\b/i,
+  /\bcompleted\s+(?:the\s+)?requested\s+(?:task|work|review|assessment)\b/i,
+  /\b(?:checked|reviewed)\s+(?:the\s+)?(?:request|task|objective)\b/i,
+  /\bverified\s+(?:the\s+)?(?:worker|runtime|agent|execution)(?:\s+(?:state|status))?\b/i,
+  /\b(?:result|summary|final(?:\s+(?:answer|response))?)\s+(?:was\s+)?(?:prepared|delivered|sent|posted)\b/i,
+  /\b(?:prepared|delivered|sent|posted)\s+(?:the\s+)?(?:result|summary|final(?:\s+(?:answer|response))?)\b/i,
+  /\b(?:closed|completed)\s+(?:the\s+)?(?:task\s+)?lifecycle\b/i,
+  /\bagent work reached final review\b/i,
+  /\blive card ordering (?:was )?preserved\b/i,
+  /\bresponse formatting (?:was )?recovered\b/i,
+];
+
+const CONCRETE_RESULT_PATTERN = /\b(?:added|changed|confirmed|created|determined|differ(?:s|ed|ent)?|caus(?:e|es|ed)|repair(?:s|ed)?|(?:en|dis)abl(?:e|es|ed|ing)|failed|fixed|found|healthy|identified|implemented|passed|rejected|removed|reproduced|resolved|restored|returned|supports?|unsupported|updated|verified\s+(?:that|correctly|successfully|\d+)|cannot|can['’]?t|does not|did not|risk|limitation|recommend(?:ed|ation)?|\d+\s+(?:tests?|checks?|cases?)\b)\b/i;
+const RISK_OR_LIMITATION_PATTERN = /\b(?:risk|limitation|cannot|can['’]?t|could not|does not|did not|unsupported|blocked|failed|failure|unable|do not|don['’]?t|avoid)\b/i;
+const RECOMMENDATION_PATTERN = /\b(?:recommend(?:ed|ation)?|should|must|next step|follow[- ]?up|do not|don['’]?t|avoid|needs? to|requires?)\b/i;
+const UNVERIFIED_HEADER_PATTERN = /(?:\b(?:unverified|unknown|unset|not verified)\b|^(?:n\/?a|none)$)/i;
+
+function normalizedBullet(value) {
+  return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+function isStatusOnlyBullet(value) {
+  const text = String(value || "").trim();
+  return !text || STATUS_ONLY_PATTERNS.some((pattern) => pattern.test(text));
+}
+
+function isSubstantiveBullet(value) {
+  const text = String(value || "").trim();
+  return text.length >= 18
+    && text.split(/\s+/).filter(Boolean).length >= 4
+    && !isStatusOnlyBullet(text)
+    && !/^(?:n\/?a|none|no action needed)\.?$/i.test(text);
+}
+
+function hasConcreteResult(value) {
+  return CONCRETE_RESULT_PATTERN.test(String(value || ""));
+}
+
+function summaryQualityFailure(items) {
+  const unique = new Set(items.map(normalizedBullet));
+  if (unique.size !== items.length) return "what-was-done-duplicate-bullets";
+  if (items.some(isStatusOnlyBullet)) return "what-was-done-status-filler";
+  if (items.some((item) => !isSubstantiveBullet(item))) return "what-was-done-not-substantive";
+  if (items.filter(hasConcreteResult).length < 2) return "what-was-done-concrete-outcome-count";
+  return "";
+}
+
 function verifiedRuntimeModel(event = {}) {
   const provider = stringValue(event.provider);
   const model = stringValue(event.model);
@@ -329,7 +392,7 @@ export function parseCanonicalFinalSummary(content, options = {}) {
   if (!headerLines.length || !headerLines[0].startsWith("Model:")) return finalFailure("missing-model-route-line");
   if (headerLines.slice(1).some((line) => !line.startsWith("   "))) return finalFailure("invalid-header-wrap");
   const header = headerLines.map((line) => line.trim()).join(" ").replace(/\s+/g, " ");
-  const headerMatch = /^Model:\s*(.+?)\s*\|\s*Route:\s*(.+?)\s*\|\s*Why:\s*(.+)$/i.exec(header);
+  const headerMatch = /^Model:\s*([^|]+?)\s*\|\s*Route:\s*([^|]+?)\s*\|\s*Why:\s*([^|]+)$/i.exec(header);
   if (!headerMatch || headerMatch.slice(1).some((value) => !value.trim())) return finalFailure("invalid-model-route-line");
   const expectedModel = stringValue(options.expectedModel).toLowerCase();
   if (expectedModel && headerMatch[1].trim().toLowerCase() !== expectedModel) {
@@ -354,6 +417,22 @@ export function parseCanonicalFinalSummary(content, options = {}) {
   }
   const approvalNeeded = !noApproval;
   const completeYes = /^yes\b/i.test(complete) && !/\b(?:not|partial|blocked|failed)\b/i.test(complete);
+  const doneItems = bulletItems(blocks["What was done"]);
+  if (completeYes) {
+    if (headerMatch.slice(1).some((value) => UNVERIFIED_HEADER_PATTERN.test(value.trim()))) {
+      return finalFailure("unverified-header-line", sections);
+    }
+    const qualityFailure = summaryQualityFailure(doneItems);
+    if (qualityFailure) return finalFailure(qualityFailure, sections);
+  }
+  const resultText = doneItems.join(" ");
+  const hasRiskOrLimitation = RISK_OR_LIMITATION_PATTERN.test(`${resultText} ${nextSteps}`);
+  const noActionNeeded = /^(?:no action needed)\.?$/i.test(nextSteps.trim());
+  if (noIssue && hasRiskOrLimitation) return finalFailure("issues-required-for-risk-or-limitation", sections);
+  if (noActionNeeded && (!noIssue || approvalNeeded || RECOMMENDATION_PATTERN.test(resultText))) {
+    return finalFailure("no-action-conflicts-with-summary", sections);
+  }
+  if (approvalNeeded && noIssue) return finalFailure("approval-requires-issue", sections);
   const explicitFailure = /\b(?:failed|failure|fatal|unrecoverable error)\b/i.test(`${complete} ${issues}`);
   const terminalStatus = completeYes && !approvalNeeded
     ? "done"
@@ -413,33 +492,52 @@ function escapeTelegramHtml(value) {
 }
 
 export function buildRecoveryFinalSummary(content, expectedModel = "") {
-  const plain = String(content || "")
+  const source = String(content || "")
+    .replace(/<\/?pre>/gi, "\n")
     .replace(/<[^>]*>/g, " ")
     .replace(/[*_`#>]+/g, " ")
-    .replace(/\b(?:Complete|What was done|Issues|Appropriate next steps|Approval needed)\s*:/gi, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-  const fragments = plain
-    .split(/(?<=[.!?])\s+|\s*[|•]\s*/)
-    .map((item) => item.replace(/^[-\s]+/, "").trim())
-    .filter(Boolean)
+    .replace(/^\s*Model:[^\n]*(?:\n\s{3}[^\n]*)*/gim, "\n")
+    .replace(/\b(?:Complete|What was done|Issues|Appropriate next steps|Approval needed)\s*:/gi, "\n")
+    .replace(/\r/g, "\n");
+  const plain = source.replace(/\s+/g, " ").trim();
+  const seen = new Set();
+  const sourceFragments = source
+    .split(/\n+|(?<=[.!?])\s+|\s*[|•]\s*/)
+    .map((item) => item.replace(/^[-\s]+/, "").replace(/\s+/g, " ").trim())
+    .filter((item) => item && !/^(?:n\/?a|none|no action needed)\.?$/i.test(item))
+    .filter((item) => {
+      const normalized = normalizedBullet(item);
+      if (!normalized || seen.has(normalized)) return false;
+      seen.add(normalized);
+      return true;
+    });
+  const fragments = sourceFragments
+    .filter((item) => isSubstantiveBullet(item))
     .slice(0, 5);
-  for (const fallback of [
-    "Agent work reached final review.",
-    "Live card ordering was preserved.",
-    "Response formatting was recovered.",
-  ]) {
-    if (fragments.length >= 3) break;
-    if (!fragments.includes(fallback)) fragments.push(fallback);
-  }
   const failed = /\b(?:failed|failure|fatal|blocked|could not|unable)\b/i.test(plain);
   const incomplete = /\b(?:not complete|not completed|not done|incomplete|partial|pending|waiting|still needs?|remains?)\b/i.test(plain);
   const approvalNeeded = /\b(?:waiting for approval|approval (?:needed|required|pending)|needs? approval|approve|sign[- ]?off|permission required|cannot\b[^.]{0,80}\bwithout approval|can['’]t\b[^.]{0,80}\bwithout approval)\b/i.test(plain)
     && !/\b(?:no approval|approval (?:is )?not (?:needed|required)|can (?:proceed|continue|release|deploy) without approval)\b/i.test(plain);
-  const complete = !failed
+  const sourceQualitySufficient = fragments.length >= 3
+    && fragments.filter(hasConcreteResult).length >= 2;
+  const complete = sourceQualitySufficient
+    && !failed
     && !incomplete
     && !approvalNeeded
     && /\b(?:completed|successfully completed|is complete|work is done|tests? passed|released|deployed)\b/i.test(plain);
+  const recoveryItems = [...fragments];
+  if (!sourceQualitySufficient) {
+    for (const disclosure of [
+      "The source lacked three concrete findings.",
+      "Missing facts were not inferred or invented.",
+      "A detailed result was not captured.",
+    ]) {
+      if (recoveryItems.length >= 3) break;
+      recoveryItems.push(disclosure);
+    }
+  }
+  const riskFragment = sourceFragments.find((item) => RISK_OR_LIMITATION_PATTERN.test(item));
+  const recommendation = sourceFragments.find((item) => RECOMMENDATION_PATTERN.test(item));
   const model = stringValue(expectedModel, "unverified");
   const lines = [
     ...fixedWidthLines(`Model: ${model} | Route: Josh 2.0 Inbox | Why: format recovery`),
@@ -448,22 +546,31 @@ export function buildRecoveryFinalSummary(content, expectedModel = "") {
       ? "Complete: Yes - agent reported completion."
       : failed
         ? "Complete: No - agent reported a problem."
-        : "Complete: No - completion was not explicit."),
+        : !sourceQualitySufficient
+          ? "Complete: No - findings were incomplete."
+          : "Complete: No - completion was not explicit."),
     "",
     "What was done:",
-    ...fragments.flatMap((item) => fixedWidthLines(item, "- ", "  ")),
+    ...recoveryItems.slice(0, 5).flatMap((item) => fixedWidthLines(item, "- ", "  ")),
     "",
     "Issues:",
-    ...fixedWidthLines(failed
-      ? "Agent reported an issue in its result."
+    ...(failed
+      ? fixedWidthLines(riskFragment || "The source reports a failure or blocker.", "- ", "  ")
       : approvalNeeded
-        ? "The result still requires approval."
+        ? fixedWidthLines("The source says approval is required.", "- ", "  ")
         : incomplete
-          ? "The result was not yet complete."
-          : "Final format was repaired automatically.", "- ", "  "),
+          ? fixedWidthLines("The source says the work is incomplete.", "- ", "  ")
+          : !sourceQualitySufficient
+            ? fixedWidthLines("Detailed findings were not captured.", "- ", "  ")
+            : riskFragment
+              ? fixedWidthLines(riskFragment, "- ", "  ")
+              : ["n/a"]),
     "",
     "Appropriate next steps:",
-    ...fixedWidthLines(complete ? "No action needed." : "Review the recovered result and next step."),
+    ...fixedWidthLines(recommendation
+      || (complete
+        ? "No action needed."
+        : "Retry with evidence, findings, and a recommendation.")),
     "",
     "Approval needed:",
     ...(approvalNeeded
@@ -609,7 +716,7 @@ export async function gateTelegramFinalization(event = {}, ctx = {}, config = {}
       action: "revise",
       reason: "The Telegram final response must be one concise structured summary before it can be delivered.",
       retry: {
-        instruction: `Rewrite the same result as one Telegram HTML <pre> block. Start with Model: ${expectedModel || "<verified provider/model>"} | Route: <actual lane> | Why: <verified reason>. Then use Complete: Yes/No, What was done: with 3-5 bullets, Issues:, Appropriate next steps:, and Approval needed: in that exact order. Use plain text only inside the block, pre-wrap every physical line to at most 38 columns, keep the whole response under 3,500 bytes, and do not add another live card.`,
+        instruction: `Rewrite the same result as one Telegram HTML <pre> block. Start with Model: ${expectedModel || "<verified provider/model>"} | Route: <actual lane> | Why: <verified reason>. Then use Complete: Yes/No, What was done: with 3-5 unique, concrete findings, outcomes, or changes from the actual work (never task-status, delivery, card, or formatting filler), Issues:, Appropriate next steps: that surfaces any recommendation or follow-up, and Approval needed: in that exact order. Do not claim No action needed when the result identifies a risk, limitation, issue, or recommendation. Use plain text only inside the block, pre-wrap every physical line to at most 38 columns, keep the whole response under 3,500 bytes, and do not add another live card.`,
         idempotencyKey: `telegram-final-format:${identity}`,
         maxAttempts: 2,
       },

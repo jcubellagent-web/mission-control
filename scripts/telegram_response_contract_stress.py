@@ -38,6 +38,43 @@ MILESTONE_UPDATES = (
 )
 CANARY_JOURNAL_ENV = "TELEGRAM_CANARY_CLEANUP_JOURNAL"
 
+STATUS_ONLY_PATTERNS = (
+    re.compile(r"\b(?:assessment|task|work|review|objective|request)\s+(?:is\s+)?(?:complete|completed|done|finished|closed)\b", re.I),
+    re.compile(r"\bcompleted\s+(?:the\s+)?requested\s+(?:task|work|review|assessment)\b", re.I),
+    re.compile(r"\b(?:checked|reviewed)\s+(?:the\s+)?(?:request|task|objective)\b", re.I),
+    re.compile(r"\bverified\s+(?:the\s+)?(?:worker|runtime|agent|execution)(?:\s+(?:state|status))?\b", re.I),
+    re.compile(r"\b(?:result|summary|final(?:\s+(?:answer|response))?)\s+(?:was\s+)?(?:prepared|delivered|sent|posted)\b", re.I),
+    re.compile(r"\b(?:prepared|delivered|sent|posted)\s+(?:the\s+)?(?:result|summary|final(?:\s+(?:answer|response))?)\b", re.I),
+    re.compile(r"\b(?:closed|completed)\s+(?:the\s+)?(?:task\s+)?lifecycle\b", re.I),
+    re.compile(r"\bagent work reached final review\b", re.I),
+    re.compile(r"\blive card ordering (?:was )?preserved\b", re.I),
+    re.compile(r"\bresponse formatting (?:was )?recovered\b", re.I),
+)
+CONCRETE_RESULT_PATTERN = re.compile(
+    r"\b(?:added|changed|confirmed|created|determined|differ(?:s|ed|ent)?|caus(?:e|es|ed)|"
+    r"repair(?:s|ed)?|(?:en|dis)abl(?:e|es|ed|ing)|failed|fixed|found|healthy|"
+    r"identified|implemented|passed|rejected|removed|reproduced|resolved|restored|returned|supports?|"
+    r"unsupported|updated|reconcil(?:e|es|ed)|retir(?:e|es|ed)|replac(?:e|es|ed)|"
+    r"rerout(?:e|es|ed)|mov(?:e|es|ed)|prevent(?:s|ed)?|preserv(?:e|es|ed)|"
+    r"verified\s+(?:that|correctly|successfully|\d+)|cannot|can['’]?t|does not|did not|risk|limitation|"
+    r"recommend(?:ed|ation)?|\d+\s+(?:tests?|checks?|cases?))\b",
+    re.I,
+)
+RISK_OR_LIMITATION_PATTERN = re.compile(
+    r"\b(?:risk|limitation|cannot|can['’]?t|could not|does not|did not|unsupported|blocked|failed|"
+    r"failure|unable|do not|don['’]?t|avoid)\b",
+    re.I,
+)
+RECOMMENDATION_PATTERN = re.compile(
+    r"\b(?:recommend(?:ed|ation)?|should|must|next step|follow[- ]?up|do not|don['’]?t|avoid|"
+    r"needs? to|requires?)\b",
+    re.I,
+)
+UNVERIFIED_HEADER_PATTERN = re.compile(
+    r"(?:\b(?:unverified|unknown|unset|not verified)\b|^(?:n/?a|none)$)",
+    re.I,
+)
+
 
 def canary_journal_path() -> Path | None:
     value = os.environ.get(CANARY_JOURNAL_ENV, "").strip()
@@ -111,6 +148,58 @@ def pre_text(text: str) -> str:
     return html.unescape(re.sub(r"^\s*<pre>|</pre>\s*$", "", text, flags=re.I))
 
 
+def _section_body(plain: str, start_label: str, end_label: str | None) -> str:
+    start = plain.find(start_label)
+    if start < 0:
+        return ""
+    start += len(start_label)
+    end = plain.find(end_label, start) if end_label else len(plain)
+    if end < 0:
+        end = len(plain)
+    return plain[start:end].strip()
+
+
+def _bullet_items(block: str) -> list[str]:
+    items: list[str] = []
+    for raw_line in block.splitlines():
+        if not raw_line.strip():
+            continue
+        if raw_line.startswith("- "):
+            items.append(raw_line[2:].strip())
+        elif raw_line.startswith("  ") and items:
+            items[-1] = f"{items[-1]} {raw_line.strip()}".strip()
+        else:
+            return []
+    return items
+
+
+def _normalized_item(value: str) -> str:
+    return re.sub(r"[^a-z0-9]+", " ", value.lower()).strip()
+
+
+def _status_only(value: str) -> bool:
+    text = value.strip()
+    return not text or any(pattern.search(text) for pattern in STATUS_ONLY_PATTERNS)
+
+
+def _substantive(value: str) -> bool:
+    text = value.strip()
+    return (
+        len(text) >= 18
+        and len(text.split()) >= 4
+        and not _status_only(text)
+        and not re.fullmatch(r"(?:n/?a|none|no action needed)\.?", text, flags=re.I)
+    )
+
+
+def _no_issue(value: str) -> bool:
+    return bool(re.fullmatch(r"(?:-\s*)?(?:n/?a|none)\.?", value.strip(), flags=re.I))
+
+
+def _no_action(value: str) -> bool:
+    return bool(re.fullmatch(r"(?:-\s*)?no action needed\.?", value.strip(), flags=re.I))
+
+
 def validate(text: str, module=None) -> list[str]:
     problems: list[str] = []
     if not re.fullmatch(r"\s*<pre>[\s\S]*</pre>\s*", text, flags=re.I):
@@ -124,8 +213,11 @@ def validate(text: str, module=None) -> list[str]:
     for forbidden in ("<b>", "</b>", "**", "Objective Complete:", "TLDR:", "Challenges/Blockers:", "•"):
         if forbidden in text:
             problems.append(f"forbidden formatting remains: {forbidden}")
-    if "Approval needed:\n- n/a" not in plain:
-        problems.append("no-approval completion must end with n/a")
+    approval = _section_body(plain, "Approval needed:", None)
+    if not approval:
+        problems.append("Approval needed must be n/a or contain at least one bullet")
+    elif not _no_issue(approval) and not _bullet_items(approval):
+        problems.append("Approval needed must be n/a or contain at least one bullet")
     width = module.display_width if module and hasattr(module, "display_width") else len
     if max((width(line) for line in plain.splitlines()), default=0) > CARD_WIDTH:
         problems.append(f"a rendered line exceeds {CARD_WIDTH} display columns")
@@ -133,12 +225,48 @@ def validate(text: str, module=None) -> list[str]:
         problems.append("verified model/route disclosure is not the first line")
     if not re.search(r"^Complete: (?:Yes|No)\b", plain, flags=re.M):
         problems.append("Complete must start with Yes or No")
+    complete_at = plain.find("Complete:")
+    header = " ".join(
+        line.strip()
+        for line in plain[:complete_at].splitlines()
+        if line.strip()
+    )
+    header_match = re.fullmatch(
+        r"Model:\s*([^|]+?)\s*\|\s*Route:\s*([^|]+?)\s*\|\s*Why:\s*([^|]+)",
+        header,
+        flags=re.I,
+    )
+    if not header_match:
+        problems.append("final summary header must contain exactly one Model, Route, and Why field")
     done_start = plain.find("What was done:")
     issues_start = plain.find("Issues:")
+    done_items: list[str] = []
     if done_start >= 0 and issues_start > done_start:
-        bullets = [line for line in plain[done_start:issues_start].splitlines() if line.startswith("- ")]
-        if not 3 <= len(bullets) <= 5:
+        done_items = _bullet_items(_section_body(plain, "What was done:", "Issues:"))
+        if not 3 <= len(done_items) <= 5:
             problems.append("What was done must contain 3-5 bullets")
+    complete_yes = bool(re.search(r"^Complete: Yes\b", plain, flags=re.M))
+    issues = _section_body(plain, "Issues:", "Appropriate next steps:")
+    next_steps = _section_body(plain, "Appropriate next steps:", "Approval needed:")
+    if complete_yes:
+        if not header_match or any(UNVERIFIED_HEADER_PATTERN.search(value.strip()) for value in header_match.groups()):
+            problems.append("Complete Yes requires verified model, route, and why values")
+        normalized = [_normalized_item(item) for item in done_items]
+        substantive = [item for item in done_items if _substantive(item)]
+        if len(set(normalized)) < 3 or len(substantive) < 3:
+            problems.append("Complete Yes requires at least 3 unique substantive findings")
+        if any(_status_only(item) for item in done_items):
+            problems.append("Complete Yes cannot use status or process filler as findings")
+        if sum(bool(CONCRETE_RESULT_PATTERN.search(item)) for item in done_items) < 2:
+            problems.append("Complete Yes requires at least 2 concrete findings or outcomes")
+    result_text = " ".join(done_items)
+    if _no_issue(issues) and RISK_OR_LIMITATION_PATTERN.search(f"{result_text} {next_steps}"):
+        problems.append("risk or limitation requires a substantive Issues entry")
+    if _no_action(next_steps) and (
+        not _no_issue(issues)
+        or RECOMMENDATION_PATTERN.search(result_text)
+    ):
+        problems.append("No action needed conflicts with issues or recommendations")
     return problems
 
 
@@ -419,9 +547,13 @@ def render_stress(module, iterations: int) -> dict:
             status="done",
             model=model,
             route=route,
-            now="Final response delivered",
-            done=["Reaction path verified", "Header and live card verified", "Retry and cleanup verified"],
-            next_step="No action needed.",
+            now="Confirmed the canary final retained one delivery receipt",
+            done=[
+                "Confirmed each inbound task receives one reaction and one header.",
+                "Verified 69 plugin cases reject duplicate or malformed finals.",
+                "Found cleanup retries preserve exact Telegram message IDs.",
+            ],
+            next_step="Review the next scheduled canary result.",
             blocker="None",
         )
         problems.extend(validate(final, module))
@@ -442,9 +574,13 @@ def render_final_stress(module, iterations: int) -> dict:
             title=f"Verify Telegram response contract iteration {index + 1}",
             status="done",
             model="system/transport-canary",
-            now="Final response delivered",
-            done=["Ownership verified", "Live card verified", "Structured final verified"],
-            next_step="No action needed.",
+            now="Confirmed the canary final retained one delivery receipt",
+            done=[
+                "Confirmed exact topic ownership for the synthetic request.",
+                "Verified the live card reaches its terminal delivery state.",
+                "Found the structured final preserves findings and next steps.",
+            ],
+            next_step="Review the next scheduled canary result.",
             blocker="None",
         )
         problems.extend(validate(final, module))
@@ -839,15 +975,22 @@ def main() -> int:
         else home / ".openclaw/workspace/mission-control/scripts/jaimes_work_card.py"
     )
     module = load_module(script)
-    rendered = module.build_completion_summary(
+    summary_args = dict(
         title="Primary topic readiness",
         status="done",
         model="openai/gpt-5.6-terra" if args.role == "josh2" else "openai-codex/gpt-5.6-sol",
-        now="Transport and formatting verified",
-        done=["Ownership verified", "Shared memory available", "Live card completed"],
-        next_step="No action needed.",
+        now="Confirmed the readiness canary retained one delivery receipt",
+        done=[
+            "Confirmed exact topic ownership for the readiness request.",
+            "Verified shared memory is available to the selected agent route.",
+            "Found the live card and substantive final preserve their required order.",
+        ],
+        next_step="Review the next scheduled canary result.",
         blocker="None",
     )
+    if args.role == "josh2":
+        summary_args["route"] = "route=josh2-inbox; reason=verified readiness canary; owner=josh2"
+    rendered = module.build_completion_summary(**summary_args)
     problems = validate(rendered, module)
     stress = (
         render_stress(module, max(1, args.iterations))

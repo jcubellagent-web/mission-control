@@ -482,7 +482,7 @@ def test_stale_terminal_close_claim_is_recovered_without_operator_action(monkeyp
     assert recovered["terminal_close_recovered_at"]
 
 
-def test_close_before_final_fails_closed_until_interpreted_card_exists(monkeypatch, tmp_path):
+def test_close_before_final_allows_exact_native_fallback_without_durable_surface(monkeypatch, tmp_path):
     monkeypatch.setattr(watcher, "STATE_PATH", tmp_path / "fast-ack.json")
     monkeypatch.setattr(watcher, "WORK_CARD_STATE_PATH", tmp_path / "work-cards.json")
     started = utc_now()
@@ -490,9 +490,35 @@ def test_close_before_final_fails_closed_until_interpreted_card_exists(monkeypat
     watcher.save_json(watcher.WORK_CARD_STATE_PATH, {"cards": {}})
     with patch.object(watcher, "run_cmd") as run_cmd:
         result = watcher.close_before_final(terminal_args())
-    assert result["ok"] is False
-    assert result["status"] == "awaiting-objective-card"
+    assert result["ok"] is True
+    assert result["status"] == "no-card-required"
     run_cmd.assert_not_called()
+    persisted = watcher.load_json(watcher.STATE_PATH, {})["active_cards"]["run-1"]
+    assert persisted["status"] == "done"
+    assert persisted["no_card_required"] is True
+    assert persisted["native_fallback_finalized_at"]
+
+
+def test_close_before_final_keeps_uninterpreted_owned_or_visible_runs_fail_closed(monkeypatch, tmp_path):
+    monkeypatch.setattr(watcher, "STATE_PATH", tmp_path / "fast-ack.json")
+    monkeypatch.setattr(watcher, "WORK_CARD_STATE_PATH", tmp_path / "work-cards.json")
+    watcher.save_json(watcher.WORK_CARD_STATE_PATH, {"cards": {}})
+    durable_variants = (
+        {"coordinator_owned": True, "job_id": "job-1"},
+        {"card_start_ok": True},
+        {"header_message_id": "4101"},
+        {"live_message_id": "4102"},
+    )
+    for index, durable in enumerate(durable_variants):
+        card = pending_card(utc_now())
+        card.update(durable)
+        watcher.save_json(watcher.STATE_PATH, {"active_cards": {"run-1": card}})
+        with patch.object(watcher, "run_cmd") as run_cmd:
+            result = watcher.close_before_final(terminal_args())
+        assert result["ok"] is False, index
+        assert result["status"] == "awaiting-objective-card", index
+        assert not watcher.load_json(watcher.STATE_PATH, {})["active_cards"]["run-1"].get("no_card_required")
+        run_cmd.assert_not_called()
 
 
 def test_close_before_final_is_idempotent_for_terminal_card(monkeypatch, tmp_path):

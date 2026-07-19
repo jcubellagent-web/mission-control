@@ -3023,6 +3023,29 @@ def release_terminal_card_close(run_key: str, card_key: str) -> None:
             save_json(STATE_PATH, latest)
 
 
+def is_native_fallback_placeholder(card: dict[str, Any] | None) -> bool:
+    """Prove that a pending run never acquired a coordinator-owned surface.
+
+    A native OpenCLAW fallback may finalize only when the exact-run placeholder
+    has no durable worker or Telegram-card evidence.  Any ownership or surface
+    receipt keeps the transactional close gate fail-closed.
+    """
+    if not isinstance(card, dict):
+        return False
+    return bool(
+        card.get("requires_objective_interpretation")
+        and str(card.get("status") or "").lower() in {
+            "pending-interpretation",
+            "awaiting-objective-interpretation",
+        }
+        and not card.get("coordinator_owned")
+        and not str(card.get("job_id") or "").strip()
+        and not card.get("card_start_ok")
+        and not positive_telegram_message_id(card.get("header_message_id"))
+        and not positive_telegram_message_id(card.get("live_message_id"))
+    )
+
+
 def close_before_final(args: argparse.Namespace) -> dict[str, Any]:
     """Close the existing live card before OpenCLAW may deliver its final reply."""
     final_summary = sys.stdin.read().strip() if getattr(args, "final_from_stdin", False) else ""
@@ -3038,6 +3061,13 @@ def close_before_final(args: argparse.Namespace) -> dict[str, Any]:
             state = {}
         adopt_interpreted_work_cards(state, meta=meta)
         selected = select_terminal_card(state, args, meta)
+        if selected and is_native_fallback_placeholder(selected[1]):
+            _run_key, placeholder = selected
+            placeholder["no_card_required"] = True
+            placeholder["status"] = "done"
+            placeholder["ended_at"] = utc_now()
+            placeholder["last_card_update_at"] = placeholder["ended_at"]
+            placeholder["native_fallback_finalized_at"] = placeholder["ended_at"]
         save_json(STATE_PATH, state)
 
     if not selected:
