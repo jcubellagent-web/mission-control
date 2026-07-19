@@ -26,6 +26,31 @@ Create or reuse an issue only for:
 
 Do not create issues for instant answers, short checks, routine health checks, heartbeats, normal cron success, individual Telegram replies, live-card edits, transient telemetry, self-healed alerts, or same-session microtasks unless they reveal a durable defect.
 
+## Opt-In Task Path
+
+For a qualifying Control Tower task, opt in explicitly rather than projecting the whole queue:
+
+```bash
+python3 scripts/agent_task.py create \
+  --owner <agent> --title "<dashboard-safe title>" --objective "<dashboard-safe objective>" \
+  --durable --area "<one configured Area>" \
+  --acceptance-criterion "<dashboard-safe criterion>"
+```
+
+`agent_delegate.py` accepts the same `--durable`, `--area`, and repeatable `--acceptance-criterion` arguments. The task lifecycle writes a sanitized idempotent intent to `data/linear-work-intents.json`; heartbeats never write intents, and a newer boundary supersedes older pending state for the same `workId`.
+
+For a verified existing task that predates the bridge, use `agent_task.py track --id <task> --agent <agent> --area <Area> --acceptance-criterion <criterion>` once. Do not backfill raw queue history until latest state is reconciled.
+
+After a durable task command returns `linear.syncState: pending`, the connected Codex lane must:
+
+1. from a noncanonical host, run `python3 scripts/linear_work_intent.py flush-local` so any fail-open transport spool is replayed, then run `python3 scripts/linear_work_intent.py pending --route-to <agent>` (the latter proxies to the Josh 2.0 canonical outbox);
+2. atomically claim it with `linear_work_intent.py claim --intent-id <intent> --consumer <agent>` and retain the short-lived claim token;
+3. search Linear using the intent's stable `workId`, then create or update one issue with the supplied state, Agent label, Area label, priority, objective, and acceptance criteria;
+4. run `linear_work_intent.py ack --intent-id <intent> --claim-token <claim> --issue-id <JCU-n> --verified-work-id <workId>`;
+5. on connector failure, run `linear_work_intent.py fail` with the same intent, claim token, verified work ID, and `--error-code connector_unavailable`, then retry later.
+
+Never infer durability for tasks created without `--durable`. Reconcile latest terminal task/proposal state before any historical backfill.
+
 ## Create And Update
 
 - Use project `Agent Ecosystem` and team `Jcubellagent`.
@@ -40,6 +65,8 @@ Do not create issues for instant answers, short checks, routine health checks, h
 ## Connector Routing
 
 JOSHeX, Josh 2.0, and JAIMES use their connected Linear Codex tools. Standalone J.A.I.N, Hermes, or OpenCLAW processes without a Linear tool delegate the sanitized issue operation to the JAIMES or Josh 2.0 Codex lane. Connector failure is fail-open for execution: preserve the stable work reference in Control Tower and retry the same issue operation later.
+
+Create J.A.I.N durable work through `agent_delegate.py`; every meaningful lifecycle boundary refreshes one stable, non-durable JAIMES connector task for the source `workId`, so the delegated operation cannot remain silent or point at a superseded intent. The outbox is canonical on Josh 2.0 and rejects stale generation/revision writes. If canonical transport is temporarily unavailable, `flush-local` replays only the newest retryable boundary without blocking the underlying task.
 
 Do not export or reuse the Codex connector OAuth token. Add separate headless authentication only for a concrete unattended workflow and keep it in the approved 1Password/Keychain path.
 

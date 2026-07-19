@@ -176,6 +176,10 @@ def create_task(args: argparse.Namespace) -> dict[str, Any]:
         cmd.extend(["--model-id", args.model_id])
     if args.route_verified:
         cmd.append("--route-verified")
+    if args.durable:
+        cmd.extend(["--durable", "--area", args.area])
+        for criterion in args.acceptance_criterion or []:
+            cmd.extend(["--acceptance-criterion", criterion])
     if args.job:
         cmd.append("--job")
     for cap in args.capability or []:
@@ -186,6 +190,18 @@ def create_task(args: argparse.Namespace) -> dict[str, Any]:
         cmd += ["--due-at", args.due_at]
     proc = run(cmd)
     return json.loads(proc.stdout)["task"]
+
+
+def create_linear_connector_task(task: dict[str, Any]) -> dict[str, Any] | None:
+    metadata = task.get("linear") if isinstance(task.get("linear"), dict) else {}
+    connector_id = str(metadata.get("connectorTaskId") or "")
+    if not connector_id or not TASK_QUEUE.exists():
+        return None
+    try:
+        queue = json.loads(TASK_QUEUE.read_text())
+    except (OSError, json.JSONDecodeError):
+        return None
+    return next((row for row in queue.get("tasks", []) if row.get("id") == connector_id), None)
 
 
 def sync_task_queue(remote: dict[str, str]) -> None:
@@ -277,11 +293,20 @@ def main() -> int:
     parser.add_argument("--model-family", default="")
     parser.add_argument("--model-id", default="")
     parser.add_argument("--route-verified", action="store_true")
+    parser.add_argument("--durable", action="store_true", help="Opt the delegated task into durable Linear tracking")
+    parser.add_argument("--area", default="", help="Exactly one configured Linear Area label")
+    parser.add_argument(
+        "--acceptance-criterion",
+        action="append",
+        default=[],
+        help="Dashboard-safe acceptance criterion; repeat for multiple criteria",
+    )
     args = parser.parse_args()
     args.to = canonical_agent(args.to)
     args.requester = canonical_agent(args.requester)
 
     task = create_task(args)
+    linear_connector_task = create_linear_connector_task(task)
 
     receipt = {"attempted": False, "ok": False, "error": ""}
     if args.to in REMOTE_HOSTS and not args.no_remote_receipt:
@@ -319,7 +344,12 @@ def main() -> int:
             if not args.allow_offline:
                 raise
 
-    print(json.dumps({"ok": True, "task": task, "remoteReceipt": receipt}, indent=2))
+    print(json.dumps({
+        "ok": True,
+        "task": task,
+        "linearConnectorTask": linear_connector_task,
+        "remoteReceipt": receipt,
+    }, indent=2))
     return 0
 
 

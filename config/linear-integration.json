@@ -22,6 +22,20 @@
     "verifiedAt": "2026-07-19T19:19:00Z",
     "headlessCredentialRequired": false
   },
+  "intentBridge": {
+    "enabled": true,
+    "path": "data/linear-work-intents.json",
+    "optInFlag": "--durable",
+    "requiredFields": ["area", "acceptanceCriteria"],
+    "latestStateWins": true,
+    "connectorExecution": "connected_codex_lane",
+    "canonicalHost": "josh2",
+    "canonicalSshTarget": "josh2.0@josh2",
+    "canonicalRoot": "/Users/josh2.0/.openclaw/workspace/mission-control",
+    "canonicalPython": "/opt/homebrew/bin/python3",
+    "claimCommand": "scripts/linear_work_intent.py claim",
+    "ackCommand": "scripts/linear_work_intent.py ack"
+  },
   "tracking": {
     "createFor": [
       "approved_enhancement",
@@ -43,7 +57,7 @@
       "self_healed_alert",
       "same_session_microtask"
     ],
-    "updateAt": ["accepted", "started", "blocked", "verifying", "completed", "cancelled"],
+    "updateAt": ["planned", "accepted", "active", "blocked", "verifying", "done", "cancelled"],
     "searchKeyOrder": ["workId", "proposalId", "durableObjective"],
     "oneIssueAcrossHandoffs": true
   },

@@ -14,6 +14,19 @@ Before creating:
 4. Select exactly one `Agent` label and one `Area` label; Linear label groups are mutually exclusive.
 5. Include dashboard-safe acceptance criteria and the stable Control Tower reference.
 
+For new qualifying work, use the explicit task bridge:
+
+```bash
+python3 scripts/agent_task.py create --owner <agent> \
+  --title "<safe title>" --objective "<safe objective>" \
+  --durable --area "<Area>" \
+  --acceptance-criterion "<criterion>"
+```
+
+The same flags work through `agent_delegate.py`. A durable boundary creates a sanitized pending intent; heartbeats and non-durable tasks do not. On a noncanonical host, run `python3 scripts/linear_work_intent.py flush-local` first to replay any fail-open transport spool. Then list the owning lane with `python3 scripts/linear_work_intent.py pending --route-to <agent>`, claim the intent for the connected agent, search/upsert the issue using the connected Linear tool, and persist the stable reference with `linear_work_intent.py ack --intent-id <intent> --claim-token <claim> --issue-id <JCU-n> --verified-work-id <workId>`. Every J.A.I.N durable lifecycle boundary refreshes one stable, non-durable JAIMES connector task keyed to the source `workId`; it always resolves the latest intent instead of retaining a superseded ID. Connector failure is recorded with the same claim plus a machine-safe error code and retried without blocking the underlying task.
+
+For a confirmed existing task created before this bridge, enable tracking once with `agent_task.py track --id <task> --agent <agent> --area <Area> --acceptance-criterion <criterion>`. Reconcile latest state first; never bulk-project raw queue history.
+
 Lifecycle mapping:
 
 - Accepted, planned, or routed: `Todo`

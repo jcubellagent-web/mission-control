@@ -130,9 +130,10 @@ Control Tower remains the source of truth for live execution, heartbeats, queues
 
 - Apply `agent-skills/linear-work-tracking/SKILL.md` and `config/linear-integration.json` before creating or updating ecosystem issues.
 - Search by Control Tower `workId` or proposal ID before creating an issue. Reuse one issue across handoffs and lifecycle changes.
+- Create qualifying shared tasks with `agent_task.py` or `agent_delegate.py --durable --area <Area> --acceptance-criterion <criterion>`. Claim the returned Josh 2.0-canonical sanitized intent, process it with the connected Linear tool, and acknowledge its verified `JCU-*` issue ID; tasks without `--durable` never enter Linear.
 - Update Linear only at meaningful boundaries: accepted, started, blocked, verifying, completed, or cancelled. Never mirror heartbeats, routine jobs, Telegram replies, live-card edits, transient telemetry, or self-healed alerts.
 - Linear ownership does not grant or bypass a shared-source edit lease. Agents may prepare, research, test unrelated surfaces, and coordinate in parallel while the canonical lease continues to protect source edits.
-- JOSHeX, Josh 2.0, and JAIMES use their connected Linear Codex tools. J.A.I.N delegates durable issue writes to the JAIMES Codex lane until a verified headless connector is intentionally added.
+- JOSHeX, Josh 2.0, and JAIMES use their connected Linear Codex tools. J.A.I.N delegates durable issue writes to one stable JAIMES connector task per source `workId` until a verified headless connector is intentionally added. Noncanonical lanes run `linear_work_intent.py flush-local` before consuming intents so temporary canonical transport failures are replayed.
 - Store only dashboard-safe objectives, acceptance criteria, owner lane, priority, approval state, stable work references, and safe artifact links. Never store raw prompts, raw emails, private account content, OAuth payloads, tokens, cookies, or credentials.
 
 #JAIMES: Linear tracks durable work boundaries; Control Tower remains authoritative for live state and shared edit leases remain mandatory.
