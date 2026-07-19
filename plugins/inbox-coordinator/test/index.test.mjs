@@ -518,8 +518,28 @@ test("returns handled only after a valid durable queue receipt", async () => {
   assert.equal(prompt, "private prompt");
 });
 
-test("Josh receipt requires reaction, card start, header, live card, and job", () => {
+test("Josh receipt requires reaction, card start, required surfaces, and job", () => {
   assert.equal(validJoshClaimReceipt(joshReceipt()), true);
+  assert.equal(validJoshClaimReceipt(joshReceipt({
+    header_message_id: "",
+    header_required: false,
+    surface_contract: "live-only-v2",
+  })), true);
+  assert.equal(validJoshClaimReceipt(joshReceipt({
+    header_message_id: "",
+    header_required: false,
+    surface_contract: "header-live-v1",
+  })), false);
+  assert.equal(validJoshClaimReceipt(joshReceipt({
+    header_message_id: "",
+    header_required: true,
+    surface_contract: "live-only-v2",
+  })), false);
+  assert.equal(validJoshClaimReceipt(joshReceipt({
+    header_message_id: "",
+    header_required: false,
+    surface_contract: "future-contract",
+  })), false);
   for (const invalid of [
     { reaction_ok: false },
     { card_start_ok: false },
@@ -906,6 +926,28 @@ test("validates one concise canonical final and derives truthful terminal status
   assert.equal(parseCanonicalFinalSummary("two loose bullets").ok, false);
   assert.equal(parseCanonicalFinalSummary(canonicalFinal({ done: ["- Only one bullet."] })).ok, false);
   assert.equal(parseCanonicalFinalSummary(canonicalFinal(), { expectedModel: "openai/other-model" }).reason, "unverified-model-line");
+  const rich = [
+    "<b>JOSH 2.0 · COMPLETE</b>",
+    "<code>Model: openai/gpt-5.6 | Route: Josh 2.0 Inbox | Why: verified execution</code>",
+    "",
+    "<blockquote><b>Complete:</b> Yes - objective completed.</blockquote>",
+    "",
+    "<b>What was done:</b>",
+    "• Changed the Inbox final gate.",
+    "• Added semantic summary checks.",
+    "• Ran 64 tests; all 64 passed.",
+    "",
+    "<b>Issues:</b>",
+    "• None",
+    "",
+    "<b>Appropriate next steps:</b>",
+    "• No action needed.",
+    "",
+    "<b>Approval needed:</b>",
+    "• None",
+  ].join("\n");
+  assert.equal(parseCanonicalFinalSummary(rich).terminalStatus, "done");
+  assert.equal(rich.startsWith("<pre>"), false);
 });
 
 test("rejects status-only completion bullets and unverified completion headers", () => {
@@ -1003,8 +1045,8 @@ test("normalizes a malformed final into the canonical mobile contract", () => {
   const parsed = parseCanonicalFinalSummary(recovered, { expectedModel: "openai/gpt-5.6" });
   assert.equal(parsed.ok, true);
   assert.equal(parsed.terminalStatus, "done");
-  assert.equal(recovered.startsWith("<pre>"), true);
-  assert.equal(recovered.slice(5, -6).split("\n").every((line) => [...line].length <= 38), true);
+  assert.equal(recovered.startsWith("<b>JOSH 2.0 · COMPLETE</b>"), true);
+  assert.equal(recovered.startsWith("<pre>"), false);
 });
 
 test("weak malformed recovery is truthful and never invents success padding", () => {

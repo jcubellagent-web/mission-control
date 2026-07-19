@@ -23,6 +23,12 @@ assert spec and spec.loader
 spec.loader.exec_module(card)
 
 
+def plain_html(value: str) -> str:
+    value = re.sub(r"<br\s*/?>", "\n", value, flags=re.I)
+    value = re.sub(r"<[^>]+>", "", value)
+    return card.html.unescape(value)
+
+
 def test_card_state_writes_are_private(tmp_path, monkeypatch):
     state_path = tmp_path / "josh_work_cards.json"
     state_path.write_text("{}\n", encoding="utf-8")
@@ -165,7 +171,7 @@ def test_live_card_is_html_preformatted_and_bounded():
     assert "fixed-width renderer" not in body
 
 
-def test_final_summary_is_html_preformatted_and_bounded():
+def test_final_summary_is_polished_proportional_html():
     rendered = card.build_completion_summary(
         title="Render final response summaries in fixed-width Telegram code blocks",
         status="done",
@@ -174,11 +180,12 @@ def test_final_summary_is_html_preformatted_and_bounded():
         next_step="No action needed.",
         blocker="None",
     )
-    assert rendered.startswith("<pre>") and rendered.endswith("</pre>")
-    body = card.html.unescape(rendered.removeprefix("<pre>").removesuffix("</pre>"))
-    assert max(map(card.display_width, body.splitlines())) <= card.CARD_WRAP_WIDTH
+    assert rendered.startswith("<b>JOSH 2.0 ·")
+    assert not rendered.startswith("<pre>")
+    body = plain_html(rendered)
     assert "What was done:" in body
     assert "Approval needed:" in body
+    assert "• " in rendered
 
 
 def test_weak_generated_success_is_downgraded_without_inventing_results():
@@ -192,7 +199,7 @@ def test_weak_generated_success_is_downgraded_without_inventing_results():
         next_step="No action needed.",
         blocker="None",
     )
-    body = card.html.unescape(rendered.removeprefix("<pre>").removesuffix("</pre>"))
+    body = plain_html(rendered)
     assert "Complete: No" in body
     assert "Detailed findings were not" in body
     assert "Missing facts were not inferred" in body
@@ -211,7 +218,7 @@ def test_finished_assessment_stays_complete_when_the_finding_is_negative():
         next_step="Do not connect brokerage credentials.",
         blocker="Brokerage trading support is unsupported.",
     )
-    body = card.html.unescape(rendered.removeprefix("<pre>").removesuffix("</pre>"))
+    body = plain_html(rendered)
     assert "Complete: Yes" in body
     assert "brokerage automation is" in body
     assert "Issues:" in body
@@ -293,9 +300,9 @@ def test_terminal_needs_attention_closes_delivery_lifecycle_at_100_percent():
     )
 
     assert "Progress [██████████] 6/6" in card.html.unescape(legacy)
-    assert "JOSH 2.0 · Needs attention" in rich
-    assert "Progress [██████████] 6/6" in rich
-    assert "checkbox" not in rich
+    assert "JOSH 2.0 · NEEDS ATTENTION" in rich
+    assert "██████████ 100% · stage 6/6" in rich
+    assert rich.count(" checked") == 6
 
 
 def test_worker_visibility_exposes_owner_and_delegated_worker_cleanly():
@@ -307,7 +314,7 @@ def test_worker_visibility_exposes_owner_and_delegated_worker_cleanly():
     assert "jaimes-grok-public" not in " ".join(rows)
 
 
-def test_rich_card_uses_the_same_compact_fixed_width_commentary_contract():
+def test_rich_card_uses_native_blocks_and_collapsible_activity():
     rendered = card.build_rich_card(
         title="Verify Inbox routing",
         status="running",
@@ -318,14 +325,15 @@ def test_rich_card_uses_the_same_compact_fixed_width_commentary_contract():
         started_at="2026-07-15T05:00:00Z",
         updated="2026-07-15T05:01:15Z",
     )
-    assert rendered.startswith("<pre>") and rendered.endswith("</pre>")
-    body = card.html.unescape(rendered.removeprefix("<pre>").removesuffix("</pre>"))
-    assert len(body.splitlines()) <= 22
-    assert max(map(card.display_width, body.splitlines())) <= card.CARD_WRAP_WIDTH
-    assert "JOSH 2.0 · Working" in body
-    assert "Recent activity" not in body
-    assert "Asynchronous worker" not in body
-    assert "Elapsed 1m 15s" in body
+    assert rendered.startswith("<h3>")
+    assert not rendered.startswith("<pre>")
+    assert "<p><b>Objective</b><br>" in rendered
+    assert "<code>codex/gpt-5.6-luna</code>" in rendered
+    assert "<blockquote><b>Now</b><br>" in rendered
+    assert rendered.count('type="checkbox"') == 6
+    assert "<details><summary>Recent activity" in rendered
+    assert "<footer>elapsed 1m 15s" in rendered
+    assert "Asynchronous worker" not in rendered
     assert re.search(r"[█░]{10}", rendered)
 
 
@@ -352,15 +360,57 @@ def test_task_header_is_a_bounded_fixed_width_table():
     assert "│Models   │ codex/gpt-5.6-luna" in body
 
 
-def test_task_header_defaults_only_to_control_center_inbox(monkeypatch):
+def test_task_header_is_opt_in_for_diagnostics(monkeypatch):
     monkeypatch.delenv(card.TASK_HEADER_ENV, raising=False)
-    assert card.task_headers_enabled("-1003589561528", "1")
-    assert card.task_headers_enabled("telegram:-1003589561528", "1")
+    assert not card.task_headers_enabled("-1003589561528", "1")
+    assert not card.task_headers_enabled("telegram:-1003589561528", "1")
     assert card.is_inbox_topic("telegram:-1003589561528", "1")
     assert not card.task_headers_enabled("-1003589561528", "17")
+    monkeypatch.setenv(card.TASK_HEADER_ENV, "1")
+    assert card.task_headers_enabled("-1003589561528", "1")
+
+
+def test_new_inbox_card_defaults_to_versioned_live_only_surface(monkeypatch, tmp_path):
+    monkeypatch.delenv(card.TASK_HEADER_ENV, raising=False)
+    monkeypatch.setattr(card, "STATE_PATH", tmp_path / "cards.json")
+    monkeypatch.setattr(card, "LOCK_PATH", tmp_path / "cards.lock")
+    monkeypatch.setattr(card, "publish_brain_feed", lambda *args, **kwargs: None)
+    monkeypatch.setattr(card, "claim_pending_ack", lambda key: "")
+    monkeypatch.setattr(
+        card,
+        "send_card",
+        lambda *args, **kwargs: pytest.fail("the default Inbox flow must not send a task header"),
+    )
+    monkeypatch.setattr(
+        card,
+        "send_rich_message",
+        lambda *args, **kwargs: {
+            "ok": True,
+            "native_rich_message": True,
+            "result": {"message_id": 202},
+        },
+    )
+    args = argparse.Namespace(
+        key="live-only-default", title="Assess Telegram health read-only",
+        model="provider=codex; model=gpt-5.6-terra; worker=josh2-codex-terra; host=josh2",
+        route="route=terra; owner=josh2; reason=verified Telegram assessment; fallback=none",
+        now="Telegram health verified", done="Objective determined: Assess Telegram health read-only",
+        next="Continue automatically", blocker="None", eta="", ack_message_id="",
+        buttons="", buttons_file="", routing_buttons=False, approval_buttons=False,
+        no_buttons=True, no_final_summary=False, final_text_file="", timeout=15,
+        chat_id="-1003589561528", thread_id="1", dry_run=False, no_brain_feed=True,
+    )
+
+    assert card.upsert_card(args, "running") == 0
+    persisted = card.load_state()["cards"]["live-only-default"]
+    assert persisted["header_message_id"] is None
+    assert persisted["message_id"] == 202
+    assert persisted["header_required"] is False
+    assert persisted["surface_contract"] == "live-only-v2"
 
 
 def test_header_is_persisted_before_live_send_and_not_duplicated_on_retry(monkeypatch, tmp_path):
+    monkeypatch.setenv(card.TASK_HEADER_ENV, "1")
     state_path = tmp_path / "cards.json"
     monkeypatch.setattr(card, "STATE_PATH", state_path)
     monkeypatch.setattr(card, "LOCK_PATH", tmp_path / "cards.lock")
@@ -422,6 +472,7 @@ def test_header_is_persisted_before_live_send_and_not_duplicated_on_retry(monkey
 
 
 def test_indeterminate_header_send_is_quarantined_on_retry(monkeypatch, tmp_path):
+    monkeypatch.setenv(card.TASK_HEADER_ENV, "1")
     monkeypatch.setattr(card, "STATE_PATH", tmp_path / "cards.json")
     monkeypatch.setattr(card, "LOCK_PATH", tmp_path / "cards.lock")
     monkeypatch.setattr(card, "publish_brain_feed", lambda *args, **kwargs: None)
@@ -478,6 +529,7 @@ def test_indeterminate_header_send_is_quarantined_on_retry(monkeypatch, tmp_path
 
 
 def test_header_success_without_receipt_is_quarantined_on_retry(monkeypatch, tmp_path):
+    monkeypatch.setenv(card.TASK_HEADER_ENV, "1")
     monkeypatch.setattr(card, "STATE_PATH", tmp_path / "cards.json")
     monkeypatch.setattr(card, "LOCK_PATH", tmp_path / "cards.lock")
     monkeypatch.setattr(card, "publish_brain_feed", lambda *args, **kwargs: None)
@@ -790,13 +842,18 @@ def test_needs_attention_card_reaches_100_before_structured_final(monkeypatch, t
 
     assert card.upsert_card(args, "failed") == 0
     assert [call[0] for call in calls] == ["edit_live", "send_final"]
-    assert "Progress [██████████] 6/6" in calls[0][2]
     if renderer == "rich":
+        assert "██████████ 100% · stage 6/6" in calls[0][2]
+        assert calls[0][2].count(" checked") == 6
         assert "Progress [██████████] 6/6" in card.html.unescape(calls[0][3])
+    else:
+        assert "Progress [██████████] 6/6" in calls[0][2]
     persisted = card.load_state()["cards"]["failed-terminal-order"]
     assert persisted["status"] == "failed"
     assert persisted["message_id"] == 202
     assert persisted["final_message_id"] == 303
+    assert persisted["header_required"] is True
+    assert persisted["surface_contract"] == "header-live-v1"
 
 
 def test_ambiguous_rich_send_does_not_create_a_second_fallback(monkeypatch):
@@ -868,6 +925,31 @@ Appropriate next steps:
 
 Approval needed:
 - n/a</pre>"""
+        path.write_text(value, encoding="utf-8")
+        assert card.load_final_text_file(str(path)) == value
+
+
+def test_final_text_file_accepts_polished_proportional_html():
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "final.html"
+        value = """<b>JOSH 2.0 · COMPLETE</b>
+<code>Model: codex/gpt-5.6-terra | Route: Josh 2.0 Inbox | Why: verified Telegram assessment</code>
+
+<blockquote><b>Complete:</b> Yes - Telegram assessment complete</blockquote>
+
+<b>What was done:</b>
+• Confirmed Telegram is connected to the verified Josh 2.0 gateway.
+• Verified the native live card rendered all six progress stages.
+• Confirmed every response-contract check passed with no remaining work.
+
+<b>Issues:</b>
+• None
+
+<b>Appropriate next steps:</b>
+• No action needed.
+
+<b>Approval needed:</b>
+• None"""
         path.write_text(value, encoding="utf-8")
         assert card.load_final_text_file(str(path)) == value
 

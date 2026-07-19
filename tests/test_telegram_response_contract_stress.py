@@ -59,6 +59,10 @@ class FakeLiveModule:
     def telegram_cooldown_active(self):
         return None
 
+    @staticmethod
+    def task_headers_enabled(_chat_id, _thread_id) -> bool:
+        return False
+
     def build_task_header(self, **_kwargs) -> str:
         return "<pre>Objective | synthetic QA\nOwner     | Josh 2.0\nAgent     | system\nModels    | transport canary</pre>"
 
@@ -69,28 +73,45 @@ class FakeLiveModule:
         return "<pre>JOSH 2.0 · Verifying\nProgress [████████░░] 5/6\n\nNow\nVerifying the result.</pre>"
 
     def build_rich_card(self, *, status: str, **_kwargs) -> str:
-        if status == "done":
-            return "<pre>JOSH 2.0 · Complete\nProgress [██████████] 6/6\n\nNow\nResult verified and ready.</pre>"
-        return "<pre>JOSH 2.0 · Verifying\nProgress [████████░░] 5/6\n\nNow\nVerifying the result.</pre>"
+        terminal = status == "done"
+        phase = "COMPLETE" if terminal else "LIVE WORK"
+        progress = "██████████ 100% · stage 6/6" if terminal else "████████░░ 83% · stage 5/6"
+        labels = ("Accepted", "Planned", "Routed", "Working", "Verifying", "Delivered")
+        checklist = "".join(
+            f'<li><input type="checkbox"{" checked" if terminal else ""}>{label}</li>'
+            for label in labels
+        )
+        return (
+            f"<h3>JOSH 2.0 · {phase}</h3>"
+            "<p><b>Objective</b><br>Verify the Telegram response contract</p>"
+            "<p><code>system/transport-canary</code> · Josh 2.0 owns delivery</p>"
+            f"<pre>{progress}\n{'complete' if terminal else 'verifying'}</pre>"
+            f"<blockquote><b>Now</b><br>{'Result verified and ready.' if terminal else 'Verifying the result.'}</blockquote>"
+            f"<h4>Progress</h4><ul>{checklist}</ul>"
+            "<h4>Active work</h4><ul><li>Josh 2.0 · owner/coordinator</li></ul>"
+            "<details><summary>Recent activity (1)</summary><ul><li>Telegram response contract verified.</li></ul></details>"
+            "<footer>elapsed 1s · updated 00:00 EDT</footer>"
+        )
 
     def build_completion_summary(self, **_kwargs) -> str:
-        return """<pre>Model: x | Route: qa | Why: test
+        return """<b>JOSH 2.0 · COMPLETE</b>
+<code>Model: system/test | Route: qa | Why: transport test</code>
 
-Complete: Yes - QA complete
+<blockquote><b>Complete:</b> Yes - QA complete</blockquote>
 
-What was done:
-- Confirmed eyes reaction delivery.
-- Verified that header rendered.
-- 6 terminal checks passed.
+<b>What was done:</b>
+• Confirmed the eyes reaction reached the exact Telegram topic.
+• Verified the native live card closed at all six stages.
+• Confirmed exactly one final delivery passed with no remaining work.
 
-Issues:
-- n/a
+<b>Issues:</b>
+• None
 
-Appropriate next steps:
-- No action needed.
+<b>Appropriate next steps:</b>
+• No action needed.
 
-Approval needed:
-- n/a</pre>"""
+<b>Approval needed:</b>
+• None"""
 
     def send_card(self, text, *_args, **_kwargs) -> dict:
         stage = "header" if "Objective" in text else "anchor"
@@ -178,7 +199,7 @@ class FakeBasicModule:
         return {"ok": self.delete_allowed, "error": "retention policy" if not self.delete_allowed else ""}
 
 
-def test_render_stress_covers_header_progress_rich_terminal_and_final_contracts() -> None:
+def test_render_stress_covers_optional_header_progress_rich_terminal_and_final_contracts() -> None:
     if work_card is None:
         pytest.skip("full staged tree is required for the renderer integration test")
     result = stress.render_stress(work_card, 5)
@@ -214,10 +235,15 @@ Approval needed:
     assert "a rendered line exceeds 38 display columns" in stress.validate(text, module)
 
 
-def test_validate_requires_one_preformatted_final_block() -> None:
-    text = FakeLiveModule().build_completion_summary().removeprefix("<pre>").removesuffix("</pre>")
+def test_validate_accepts_polished_final_and_rejects_unformatted_plain_text() -> None:
+    text = FakeLiveModule().build_completion_summary()
 
-    assert "final summary must be one Telegram HTML pre block" in stress.validate(text, FakeLiveModule())
+    assert stress.validate(text, FakeLiveModule()) == []
+    plain = stress.final_plain_text(text)
+    assert "final summary must use the polished proportional contract or its pre fallback" in stress.validate(
+        plain,
+        FakeLiveModule(),
+    )
 
 
 def test_validate_rejects_the_weak_agent_rh_status_only_card() -> None:
@@ -395,18 +421,20 @@ def test_live_canary_closes_card_at_6_of_6_then_sends_exactly_one_final(monkeypa
     assert result["ok"] is True
     assert module.card_statuses[-1] == "done"
     terminal_edit = [call for call in module.calls if call[0] == "edit_rich"][-1]
-    assert "Progress [██████████] 6/6" in terminal_edit[2]
+    assert "██████████ 100% · stage 6/6" in terminal_edit[2]
+    assert terminal_edit[2].count(" checked") == 6
+    assert not terminal_edit[2].startswith("<pre>")
     assert "Progress [██████████] 6/6" in terminal_edit[3]
     assert result["timing"]["checks"]["terminalLiveCard100Percent"] is True
     assert result["final"] == {
         "attempts": 1,
         "successes": 1,
-        "messageIds": ["104"],
+        "messageIds": ["103"],
         "exactlyOne": True,
     }
     assert len([call for call in module.calls if call[0] == "send_final"]) == 1
-    assert result["cleanup"]["attempted"] == 4
-    assert result["cleanup"]["deleted"] == 4
+    assert result["cleanup"]["attempted"] == 3
+    assert result["cleanup"]["deleted"] == 3
     assert "synthetic cumulative response timing" in result["scope"]
     assert "after the canary anchor receipt" in result["scope"]
     assert "never p95 or inbound-path evidence" in result["scope"]
@@ -440,17 +468,16 @@ def test_live_canary_excludes_anchor_setup_from_response_slo(monkeypatch) -> Non
     assert result["ok"] is True
     assert result["timing"]["setupMs"] == 3_000.0
     assert result["timing"]["cumulativeMs"]["eyes"] == 100.0
-    assert result["timing"]["cumulativeMs"]["header"] == 300.0
-    assert result["timing"]["cumulativeMs"]["liveCard"] == 500.0
+    assert "header" not in result["timing"]["cumulativeMs"]
+    assert result["timing"]["cumulativeMs"]["liveCard"] == 300.0
 
 
 @pytest.mark.parametrize(
     ("stage", "expected_send_stages", "expect_live_send"),
     [
         ("reaction", ["anchor"], False),
-        ("header", ["anchor", "header"], False),
-        ("live", ["anchor", "header"], True),
-        ("edit", ["anchor", "header"], True),
+        ("live", ["anchor"], True),
+        ("edit", ["anchor"], True),
     ],
 )
 def test_live_canary_fails_closed_and_cleans_up_after_structural_failure(
@@ -482,15 +509,21 @@ def test_live_canary_reports_and_deletes_an_indeterminate_known_id(monkeypatch) 
     result = stress.live_canary(module, "-1001", "1")
 
     assert result["ok"] is False
-    assert result["cleanup"]["indeterminateIds"] == ["103"]
+    assert result["cleanup"]["indeterminateIds"] == ["102"]
     assert result["cleanup"]["indeterminateStages"] == []
-    assert ("delete", "103") in module.calls
+    assert ("delete", "102") in module.calls
     assert result["final"]["attempts"] == 0
 
 
 def test_live_canary_reports_raw_timeout_as_unknown_indeterminate_stage(monkeypatch) -> None:
     monkeypatch.setattr(stress.time, "sleep", lambda _seconds: None)
-    module = FakeLiveModule(fail_stage="header", fail_error="socket timeout after write")
+
+    class HeaderEnabledModule(FakeLiveModule):
+        @staticmethod
+        def task_headers_enabled(_chat_id, _thread_id) -> bool:
+            return True
+
+    module = HeaderEnabledModule(fail_stage="header", fail_error="socket timeout after write")
 
     result = stress.live_canary(module, "-1001", "1")
 
@@ -510,11 +543,11 @@ def test_live_canary_counts_one_failed_final_attempt_and_returned_id_without_ret
     assert result["final"] == {
         "attempts": 1,
         "successes": 0,
-        "messageIds": ["104"],
+        "messageIds": ["103"],
         "exactlyOne": False,
     }
     assert len([call for call in module.calls if call[0] == "send_final"]) == 1
-    assert ("delete", "104") in module.calls
+    assert ("delete", "103") in module.calls
     assert "exactly-one-final contract failed" in result["failures"]
 
 
@@ -522,21 +555,21 @@ def test_cleanup_uses_retry_after_and_continues_after_one_id_raises(monkeypatch)
     sleeps: list[float] = []
     monkeypatch.setattr(stress.time, "sleep", sleeps.append)
     module = FakeLiveModule()
-    module.delete_behaviors["104"] = [
+    module.delete_behaviors["103"] = [
         {"ok": False, "cooldown": {"retry_after_seconds": 2}},
         {"ok": True},
     ]
-    module.delete_behaviors["103"] = [RuntimeError("delete exploded")] * 3
+    module.delete_behaviors["102"] = [RuntimeError("delete exploded")] * 3
 
     result = stress.live_canary(module, "-1001", "1")
 
     assert result["ok"] is False
-    assert result["cleanup"]["attempted"] == 4
-    assert result["cleanup"]["deleted"] == 3
-    assert result["cleanup"]["failedIds"] == ["103"]
-    assert result["cleanup"]["records"][0]["messageId"] == "104"
+    assert result["cleanup"]["attempted"] == 3
+    assert result["cleanup"]["deleted"] == 2
+    assert result["cleanup"]["failedIds"] == ["102"]
+    assert result["cleanup"]["records"][0]["messageId"] == "103"
     assert result["cleanup"]["records"][0]["waitsSeconds"] == [2.05]
-    assert ("delete", "102") in module.calls and ("delete", "101") in module.calls
+    assert ("delete", "101") in module.calls
     assert 2.05 in sleeps
 
 
@@ -587,7 +620,7 @@ def test_live_canary_journals_intent_before_each_message_send_and_clears_after_c
             assert stage in payload["indeterminateStages"]
 
         def send_card(self, text, *args, **kwargs) -> dict:
-            self._assert_intent("task-header" if "Objective" in text else "anchor")
+            self._assert_intent("anchor")
             return super().send_card(text, *args, **kwargs)
 
         def send_rich_message(self, rich, legacy, *args, **kwargs) -> dict:
@@ -610,14 +643,14 @@ def test_live_canary_retains_private_journal_when_cleanup_fails(monkeypatch, tmp
     journal = tmp_path / "private" / "pending.json"
     monkeypatch.setenv(stress.CANARY_JOURNAL_ENV, str(journal))
     module = FakeLiveModule()
-    module.delete_behaviors["103"] = [{"ok": False, "error": "retention policy"}] * 3
+    module.delete_behaviors["102"] = [{"ok": False, "error": "retention policy"}] * 3
 
     result = stress.live_canary(module, "-1001", "1")
     payload = json.loads(journal.read_text(encoding="utf-8"))
 
     assert result["ok"] is False
     assert payload["stage"] == "cleanup-pending"
-    assert payload["messageIds"] == ["103"]
+    assert payload["messageIds"] == ["102"]
     assert payload["indeterminateStages"] == []
     assert journal.stat().st_mode & 0o777 == 0o600
 

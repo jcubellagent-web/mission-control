@@ -148,6 +148,14 @@ def pre_text(text: str) -> str:
     return html.unescape(re.sub(r"^\s*<pre>|</pre>\s*$", "", text, flags=re.I))
 
 
+def final_plain_text(text: str) -> str:
+    value = re.sub(r"<br\s*/?>", "\n", text, flags=re.I)
+    value = re.sub(r"</(?:blockquote|p|h[1-6]|li|details|summary|footer)>", "\n", value, flags=re.I)
+    value = re.sub(r"<[^>]+>", "", value)
+    value = html.unescape(value).replace("\r\n", "\n").replace("\r", "\n")
+    return "\n".join(re.sub(r"^\s*•\s+", "- ", line) for line in value.splitlines()).strip()
+
+
 def _section_body(plain: str, start_label: str, end_label: str | None) -> str:
     start = plain.find(start_label)
     if start < 0:
@@ -202,15 +210,16 @@ def _no_action(value: str) -> bool:
 
 def validate(text: str, module=None) -> list[str]:
     problems: list[str] = []
-    if not re.fullmatch(r"\s*<pre>[\s\S]*</pre>\s*", text, flags=re.I):
-        problems.append("final summary must be one Telegram HTML pre block")
-    plain = pre_text(text)
+    legacy_pre = bool(re.fullmatch(r"\s*<pre>[\s\S]*</pre>\s*", text, flags=re.I))
+    if not legacy_pre and not text.startswith("<b>JOSH 2.0 ·"):
+        problems.append("final summary must use the polished proportional contract or its pre fallback")
+    plain = pre_text(text) if legacy_pre else final_plain_text(text)
     positions = [plain.find(label) for label in LABELS]
     if any(pos < 0 for pos in positions):
         problems.append("one or more final-summary labels are missing")
     elif positions != sorted(positions):
         problems.append("final-summary labels are out of order")
-    for forbidden in ("<b>", "</b>", "**", "Objective Complete:", "TLDR:", "Challenges/Blockers:", "•"):
+    for forbidden in ("**", "Objective Complete:", "TLDR:", "Challenges/Blockers:"):
         if forbidden in text:
             problems.append(f"forbidden formatting remains: {forbidden}")
     approval = _section_body(plain, "Approval needed:", None)
@@ -219,18 +228,18 @@ def validate(text: str, module=None) -> list[str]:
     elif not _no_issue(approval) and not _bullet_items(approval):
         problems.append("Approval needed must be n/a or contain at least one bullet")
     width = module.display_width if module and hasattr(module, "display_width") else len
-    if max((width(line) for line in plain.splitlines()), default=0) > CARD_WIDTH:
+    if legacy_pre and max((width(line) for line in plain.splitlines()), default=0) > CARD_WIDTH:
         problems.append(f"a rendered line exceeds {CARD_WIDTH} display columns")
-    if not plain.startswith("Model:"):
-        problems.append("verified model/route disclosure is not the first line")
     if not re.search(r"^Complete: (?:Yes|No)\b", plain, flags=re.M):
         problems.append("Complete must start with Yes or No")
     complete_at = plain.find("Complete:")
-    header = " ".join(
+    header_lines = [
         line.strip()
         for line in plain[:complete_at].splitlines()
         if line.strip()
-    )
+    ]
+    model_index = next((index for index, line in enumerate(header_lines) if line.startswith("Model:")), -1)
+    header = " ".join(header_lines[model_index:]) if model_index >= 0 else ""
     header_match = re.fullmatch(
         r"Model:\s*([^|]+?)\s*\|\s*Route:\s*([^|]+?)\s*\|\s*Why:\s*([^|]+)",
         header,
@@ -463,6 +472,8 @@ def render_stress(module, iterations: int) -> dict:
     model = "system/transport-canary"
     for index in range(iterations):
         title = f"Verify Telegram Inbox response contract under deterministic load iteration {index + 1}"
+        # Exercise the optional diagnostic header renderer offline. Production
+        # Inbox delivery is headerless unless explicitly opted in.
         header = module.build_task_header(title=title, model=model, route=route)
         header_plain = pre_text(header)
         for label in ("Objective", "Owner", "Agent", "Models"):
@@ -510,19 +521,21 @@ def render_stress(module, iterations: int) -> dict:
             updated="2026-01-01T00:00:06Z",
             started_at="2026-01-01T00:00:00Z",
         )
-        rich_plain = pre_text(rich)
-        if not re.fullmatch(r"\s*<pre>[\s\S]*</pre>\s*", rich, flags=re.I):
-            problems.append("rich live card is not one fixed-width pre block")
-        for required in ("JOSH 2.0 · Complete", "Progress [██████████] 6/6", "Now"):
+        rich_plain = final_plain_text(rich)
+        if not rich.startswith("<h3>") or rich.startswith("<pre>"):
+            problems.append("rich live card is not using native block markup")
+        for required in ("JOSH 2.0 · COMPLETE", "██████████ 100% · stage 6/6", "Now"):
             if required not in rich_plain:
                 problems.append(f"rich live card missing {required}")
-        if len(rich_plain.splitlines()) > 22:
-            problems.append("rich live card exceeds 22 visible lines")
-        if max((module.display_width(line) for line in rich_plain.splitlines()), default=0) > CARD_WIDTH:
-            problems.append("rich live card exceeds 38 display columns")
+        if rich.count('type="checkbox"') != len(MILESTONE_UPDATES):
+            problems.append("rich live card is missing the six-stage checklist")
+        if rich.count(" checked") != len(MILESTONE_UPDATES):
+            problems.append("terminal rich live card did not check every stage")
+        if "<details><summary>Recent activity" not in rich or "<footer>" not in rich:
+            problems.append("rich live card is missing collapsible activity or timing")
         if re.search(
             r"(?i)(?:tool:|action:|brain feed|search_files|read_file|"
-            r"<details>|type=\"checkbox\"|recent activity)",
+            r"/(?:Users|private|tmp|var)/)",
             rich,
         ):
             problems.append("rich live card exposes implementation activity")
@@ -554,10 +567,11 @@ def render_stress(module, iterations: int) -> dict:
             updated="2026-01-01T00:00:06Z",
             started_at="2026-01-01T00:00:00Z",
         )
-        for rendered in (pre_text(failed_legacy), pre_text(failed_rich)):
-            if "Progress [██████████] 6/6" not in rendered:
-                problems.append("needs-attention terminal card did not close through stage 6/6")
-        if "Needs attention" not in failed_rich:
+        if "Progress [██████████] 6/6" not in pre_text(failed_legacy):
+            problems.append("needs-attention legacy card did not close through stage 6/6")
+        if "██████████ 100% · stage 6/6" not in final_plain_text(failed_rich):
+            problems.append("needs-attention rich card did not close through stage 6/6")
+        if "NEEDS ATTENTION" not in failed_rich:
             problems.append("failed terminal rich card lost its needs-attention outcome label")
 
         final = module.build_completion_summary(
@@ -567,7 +581,7 @@ def render_stress(module, iterations: int) -> dict:
             route=route,
             now="Confirmed the canary final retained one delivery receipt",
             done=[
-                "Confirmed each inbound task receives one reaction and one header.",
+                "Confirmed each inbound task receives one reaction and one native rich live card.",
                 "Verified 69 plugin cases reject duplicate or malformed finals.",
                 "Found cleanup retries preserve exact Telegram message IDs.",
             ],
@@ -700,7 +714,7 @@ def basic_live_canary(module, chat_id: str, thread_id: str) -> dict:
 
 
 def live_canary(module, chat_id: str, thread_id: str) -> dict:
-    if not all(hasattr(module, name) for name in ("build_task_header", "build_card", "build_rich_card", "send_rich_message", "edit_rich_card")):
+    if not all(hasattr(module, name) for name in ("build_card", "build_rich_card", "send_rich_message", "edit_rich_card")):
         return basic_live_canary(module, chat_id, thread_id)
     start = time.monotonic()
     response_start: float | None = None
@@ -721,6 +735,8 @@ def live_canary(module, chat_id: str, thread_id: str) -> dict:
     title = "Temporary Telegram Inbox response canary"
     renderer = "unknown"
     pending_send_stage: str | None = None
+    header_checker = getattr(module, "task_headers_enabled", None)
+    header_required = bool(header_checker(chat_id, thread_id)) if callable(header_checker) else False
 
     def before_send(stage: str) -> None:
         nonlocal pending_send_stage
@@ -770,7 +786,7 @@ def live_canary(module, chat_id: str, thread_id: str) -> dict:
         exactly_one_final = final_attempts == 1 and final_successes == 1 and len(final_ids) == 1
         synthetic_checks = {
             "eyesUnder2s": stage_ms.get("eyes", float("inf")) <= 2_000,
-            "headerUnder5s": stage_ms.get("header", float("inf")) <= 5_000,
+            "headerUnder5s": (not header_required) or stage_ms.get("header", float("inf")) <= 5_000,
             "liveCardUnder8s": stage_ms.get("liveCard", float("inf")) <= 8_000,
             "terminalLiveCard100Percent": terminal_render_verified and terminal_edit_verified,
             "exactlyOneFinal": exactly_one_final,
@@ -788,6 +804,7 @@ def live_canary(module, chat_id: str, thread_id: str) -> dict:
             "ok": not result_failures,
             "scope": "synthetic cumulative response timing begins after the canary anchor receipt; never p95 or inbound-path evidence",
             "renderer": renderer,
+            "headerRequired": header_required,
             "timing": {
                 "kind": "synthetic cumulative response timing after anchor receipt",
                 "setupMs": setup_ms,
@@ -841,19 +858,23 @@ def live_canary(module, chat_id: str, thread_id: str) -> dict:
             failures.append("eyes reaction failed")
             return finish()
 
-        before_send("task-header")
-        header = module.send_card(
-            module.build_task_header(title=title, model=model, route=route),
-            None,
-            15,
-            chat_id=chat_id,
-            thread_id=thread_id,
-        )
-        header_id = track_delivery(header, "task-header")
-        stage_ms["header"] = round((time.monotonic() - response_start) * 1000, 1)
-        if not header.get("ok") or not header_id:
-            failures.append("task header send failed")
-            return finish()
+        if header_required:
+            if not hasattr(module, "build_task_header"):
+                failures.append("diagnostic task header is enabled but its renderer is unavailable")
+                return finish()
+            before_send("task-header")
+            header = module.send_card(
+                module.build_task_header(title=title, model=model, route=route),
+                None,
+                15,
+                chat_id=chat_id,
+                thread_id=thread_id,
+            )
+            header_id = track_delivery(header, "task-header")
+            stage_ms["header"] = round((time.monotonic() - response_start) * 1000, 1)
+            if not header.get("ok") or not header_id:
+                failures.append("task header send failed")
+                return finish()
 
         first_items = list(MILESTONE_UPDATES[:2])
         legacy = module.build_card(
@@ -908,9 +929,10 @@ def live_canary(module, chat_id: str, thread_id: str) -> dict:
                 done=items[:-1],
             )
             if terminal:
-                terminal_render_verified = all(
-                    "Progress [██████████] 6/6" in rendered
-                    for rendered in (pre_text(legacy), pre_text(rich))
+                terminal_render_verified = (
+                    "Progress [██████████] 6/6" in pre_text(legacy)
+                    and "██████████ 100% · stage 6/6" in final_plain_text(rich)
+                    and rich.count(" checked") == len(MILESTONE_UPDATES)
                 )
                 if not terminal_render_verified:
                     failures.append("terminal live card did not render the closed 6/6 state")
@@ -942,7 +964,11 @@ def live_canary(module, chat_id: str, thread_id: str) -> dict:
             model=model,
             route=route,
             now="Final response delivered",
-            done=["Eyes reaction verified", "Header and live card verified", "Terminal live card verified"],
+            done=[
+                "Confirmed the eyes reaction reached the exact Inbox topic.",
+                "Verified the native rich live card closed through all six stages.",
+                "Confirmed exactly one final delivery passed with no remaining work.",
+            ],
             next_step="No action needed.",
             blocker="None",
         )

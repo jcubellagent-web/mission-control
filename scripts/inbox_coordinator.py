@@ -2198,31 +2198,34 @@ def fixed_width_lines(value: str, *, width: int = 38, subsequent_indent: str = "
 
 def format_final(args: argparse.Namespace) -> str:
     complete = "Yes" if args.complete else "No"
+    status = "COMPLETE" if args.complete else "NEEDS ATTENTION"
+
+    def bullets(items: list[str], fallback: str) -> list[str]:
+        values = items or [fallback]
+        return [f"• {html.escape(str(item))}" for item in values]
+
+    # Use only Bot API-supported HTML tags here. The live card uses native
+    # Rich Messages; the result remains a proportional, readable message even
+    # on clients that do not yet render the richer block vocabulary.
     lines = [
-        f"Model: {args.model} | Route: {args.route} | Why: {args.why}",
+        f"<b>JOSH 2.0 · {status}</b>",
+        f"<code>{html.escape(f'Model: {args.model} | Route: {args.route} | Why: {args.why}')}</code>",
         "",
-        f"Complete: {complete}",
+        f"<blockquote><b>Complete:</b> {complete}</blockquote>",
         "",
-        "What was done:",
-        *[f"- {item}" for item in args.done],
+        "<b>What was done:</b>",
+        *bullets(args.done, "Detailed findings were not captured."),
         "",
-        "Issues:",
-        *([f"- {item}" for item in args.issue] if args.issue else ["- n/a"]),
+        "<b>Issues:</b>",
+        *bullets(args.issue, "None"),
         "",
-        "Appropriate next steps:",
-        *([f"- {item}" for item in args.next] if args.next else ["- No action needed."]),
+        "<b>Appropriate next steps:</b>",
+        *bullets(args.next, "No action needed."),
         "",
-        "Approval needed:",
-        *([f"- {item}" for item in args.approval] if args.approval else ["- n/a"]),
+        "<b>Approval needed:</b>",
+        *bullets(args.approval, "None"),
     ]
-    wrapped: list[str] = []
-    for line in lines:
-        if not line:
-            wrapped.append("")
-            continue
-        subsequent = "  " if line.startswith("- ") else "   "
-        wrapped.extend(fixed_width_lines(line, width=38, subsequent_indent=subsequent))
-    return f"<pre>{html.escape(chr(10).join(wrapped))}</pre>"
+    return "\n".join(lines)
 
 
 def parse_health(raw: str) -> dict[str, bool] | None:

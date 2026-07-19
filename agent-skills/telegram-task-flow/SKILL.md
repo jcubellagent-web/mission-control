@@ -11,9 +11,9 @@ Use this whenever a Telegram-facing task needs to feel clear, live, and low-nois
 
 1. Acknowledge an owned Telegram task immediately with an eyes reaction. A runtime may use one short editable acknowledgement when reactions are unavailable, but it must not leave a duplicate acknowledgement bubble.
 2. Resolve the objective from the current user request only. First identify the intent, concrete target, and desired outcome; then write a short operator objective in the agent's own words. Do not repeat the user's full prompt, lightly trim its courtesy words, or expose media/file identifiers. Treat quoted prior objectives, pasted cards, screenshots, compaction summaries, and example final templates as evidence—not as the live objective. When correcting an old card, use the correction being requested now as the objective. If the fast intake path cannot produce a genuine interpretation, keep only the acknowledgement reaction and wait for the main agent to determine the objective; do not publish a placeholder or prompt copy to Telegram or Control Tower.
-3. After the objective and planned route are known, send one compact immutable task-header receipt inside a 38-column Telegram HTML `<pre>` block. Use a table layout with Objective, Owner, Agent, and Models. The objective must be a short operator summary in the agent's own words, never a pasted or near-copy version of the request. As a mechanical safeguard, do not reuse a six-word span from the current request. Show the selected named agent/sub-agent; when the worker has no formal persona name, label it as a `system`. List every model currently selected in the planned route without claiming an unverified switch.
-4. Start one editable live work card immediately after the task header. Context compaction, session rollover, replayed history, and framework continuation markers are not new tasks: never send a new header, objective acknowledgement, or card. Resume by editing the existing origin-scoped live card, append work cumulatively, close it at 100%, then send only the final summary.
-5. Keep the live work card concise and plain-English. The Inbox topic may use Telegram Rich Messages for native headings, milestone checklists, collapsible recent activity, and footers. Always keep the fixed-width HTML `<pre>` renderer as the automatic fallback and pre-wrap that fallback for mobile at 38 columns: emoji/check rows use a three-space hanging indent on every continuation line, while plain `- ` bullets use two spaces. Do not expose raw shell commands, file paths, JSON flags, or tool internals unless needed to explain a blocker.
+3. After the objective and planned route are known, start one editable native rich live card carrying the concise objective, verified worker/model, progress, current phase, and timing. A compact immutable task header is a diagnostic opt-in only; it is not part of the normal Inbox conversation.
+4. Context compaction, session rollover, replayed history, and framework continuation markers are not new tasks: never send a new header, objective acknowledgement, or card. Resume by editing the existing origin-scoped live card, append work cumulatively, close it at 100%, then send only the final summary.
+5. Keep the live work card concise and plain-English. The Inbox topic defaults to Telegram Rich Messages with native headings, milestone checklists, collapsible recent activity, and footers. Always keep the fixed-width HTML `<pre>` renderer as the automatic fallback and pre-wrap that fallback for mobile at 38 columns: emoji/check rows use a three-space hanging indent on every continuation line, while plain `- ` bullets use two spaces. Do not expose raw shell commands, file paths, JSON flags, or tool internals unless needed to explain a blocker.
 6. Append useful progress lines as work happens instead of replacing the whole story. Preserve the same card across compaction and restart recovery. If the log gets too long, consolidate older finished checks into one short "Earlier:" line and keep the latest readable steps visible.
 7. Do not show routing buttons by default. Auto-route unless the user truly needs to steer.
 8. End with the agreed final summary template.
@@ -21,21 +21,21 @@ Use this whenever a Telegram-facing task needs to feel clear, live, and low-nois
 
 ## Inbox Rich Live Cards
 
-For Topic `1`, the visible sequence is: eyes reaction → immutable task header → editable live card → structured final summary. New live cards default to the native Rich Message renderer when Telegram accepts it. Existing cards keep their original renderer for their full lifecycle.
+For Topic `1`, the visible sequence is: eyes reaction → one editable native-rich live card → one polished structured final. New live cards default to the native Rich Message renderer when Telegram accepts it. Existing cards keep their original renderer for their full lifecycle.
 
-- Keep exactly one immutable task header, one editable live card, and one separate structured final summary.
-- Persist the header message ID before sending the live card. If live-card delivery fails, retries must reuse the existing header instead of posting another one.
+- Keep exactly one editable live card and one separate structured final summary. Do not add a normal acknowledgement or task-header bubble.
+- Persist a versioned start receipt. The normal `live-only-v2` receipt must carry `header_required: false`, the editable live-card ID, and the durable worker job ID. A diagnostic `header-live-v1` receipt must carry both header and live-card IDs. Fail closed when the receipt does not prove every surface required by its declared version.
 - Show milestone-derived progress: Accepted, Planned, Routed, Working, Verifying, Delivered. Do not advance progress because duplicate log messages accumulated.
 - Show Josh 2.0 as the visible owner and list the verified active worker/model beneath him. Humanize internal worker identifiers before display.
 - Show elapsed time and the last rendered update time. Long-running coordinator jobs must continue producing heartbeat edits so the card does not look frozen.
 - Put older operational updates inside one collapsed `Recent activity` details block. Do not expose chain-of-thought, raw commands, secrets, private account content, or connector payloads.
 - If `sendRichMessage` or a rich edit fails, replace or continue the same message through the fixed-width HTML fallback. Never create a second fallback card.
 - `JOSH_TELEGRAM_RICH_CARDS=0` disables the native renderer. An explicit true value enables it outside Topic `1`; otherwise Topic `1` is the only default native-rich surface.
-- `JOSH_TELEGRAM_TASK_HEADERS=0` disables the header. An explicit true value enables it outside Topic `1`; otherwise Topic `1` is the only default header surface.
+- `JOSH_TELEGRAM_TASK_HEADERS=1` explicitly enables the diagnostic header. It is disabled by default in every topic.
 
 ## Final Summary Template
 
-Render the entire final summary inside a Telegram HTML `<pre>` block using the same 38-column fixed-width geometry as live cards. Use plain-text labels inside the block: no Markdown bold, headings, or other emphasis. Pre-wrap every dynamic line server-side; plain `- ` bullets use two-space continuation indents and other wrapped rows use three spaces.
+Render the final as proportional Telegram HTML with a bold outcome heading, a compact verified model/route line, a completion callout, bold section labels, and concise bullets. Do not wrap the normal final in one whole-message code block. Keep the 38-column HTML `<pre>` version as the automatic definitive-error fallback only; pre-wrap every fallback line server-side.
 
 - `Complete:` Yes or No plus whether the objective was completed.
 - `What was done:` 3-5 tight bullets.
@@ -59,7 +59,7 @@ The primary Telegram group is `J.A.I.N Control Center` (`-1003589561528`).
 - The non-owner observes silently unless mentioned or explicitly delegated work.
 - Replies and editable cards stay in the originating topic.
 - Never let both bots answer the same untagged request.
-- Topic `1` uses the header-first live-work tier defined above. Topic `17` retains its current one-live-card-plus-final tier until its renderer is separately upgraded.
+- Topic `1` uses the native-rich live-card-plus-final tier defined above. Topic `17` retains its current one-live-card-plus-final tier until its renderer is separately upgraded.
 - Runtime-specific mechanics may differ, but visible labels, model disclosure, summary order, approval buttons, and low-noise behavior must remain consistent.
 
 ## Model Disclosure

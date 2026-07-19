@@ -503,13 +503,15 @@ def is_inbox_topic(chat_id: str | int | None, thread_id: str | int | None) -> bo
 
 
 def task_headers_enabled(chat_id: str | int | None, thread_id: str | int | None) -> bool:
-    """Default the persistent task header on only for the owned Inbox topic."""
+    """Keep the diagnostic task header opt-in.
+
+    The native Inbox card already carries the objective, owner, route, and
+    progress. A second immutable header duplicates those facts and makes the
+    human conversation feel unlike Codex. Operators can still enable it with
+    ``JOSH_TELEGRAM_TASK_HEADERS=1`` for transport diagnostics.
+    """
     raw = os.environ.get(TASK_HEADER_ENV, "").strip().lower()
-    if raw in {"0", "false", "no", "off"}:
-        return False
-    if raw in {"1", "true", "yes", "on"}:
-        return True
-    return normalized_chat_id(chat_id) == CONTROL_CENTER_CHAT_ID and str(thread_id or "") == INBOX_THREAD_ID
+    return raw in {"1", "true", "yes", "on"}
 
 
 def human_worker_name(value: str) -> str:
@@ -1493,29 +1495,32 @@ def build_completion_summary(
         if complete == "Yes"
         else ("detailed findings are incomplete" if complete_requested else f"{complete_title} not complete")
     )
-    approval_needed = [*next_steps, "Adjust the plan", "Cancel this task"] if issues else ["n/a"]
-    def final_lines(items: list[str], fallback: str) -> list[str]:
-        clean = [compact(item, limit=180) for item in items if compact(item, limit=180)]
-        return [line for item in (clean[:5] or [fallback]) for line in hanging_bullet_lines(item)]
+    approval_needed = [*next_steps, "Adjust the plan", "Cancel this task"] if issues else ["None"]
 
+    def rich_bullets(items: list[str], fallback: str) -> list[str]:
+        clean = [compact(item, limit=180) for item in items if compact(item, limit=180)]
+        return [f"• {html.escape(item)}" for item in (clean[:5] or [fallback])]
+
+    status_heading = "COMPLETE" if complete == "Yes" else "NEEDS ATTENTION"
     lines = [
-        *hanging_status_lines(f"Model: {friendly_model_line(model_line)} | Route: {route_label} | Why: {why}"),
+        f"<b>JOSH 2.0 · {status_heading}</b>",
+        f"<code>{html.escape(f'Model: {friendly_model_line(model_line)} | Route: {route_label} | Why: {why}')}</code>",
         "",
-        *hanging_status_lines(f"Complete: {complete} - {complete_detail}"),
+        f"<blockquote><b>Complete:</b> {html.escape(complete)} - {html.escape(complete_detail)}</blockquote>",
         "",
-        "What was done:",
-        *final_lines(steps, "Detailed findings were not captured."),
+        "<b>What was done:</b>",
+        *rich_bullets(steps, "Detailed findings were not captured."),
         "",
-        "Issues:",
-        *final_lines(issues, "n/a"),
+        "<b>Issues:</b>",
+        *rich_bullets(issues, "None"),
         "",
-        "Appropriate next steps:",
-        *final_lines(next_steps, "No action needed."),
+        "<b>Appropriate next steps:</b>",
+        *rich_bullets(next_steps, "No action needed."),
         "",
-        "Approval needed:",
-        *final_lines(approval_needed, "n/a"),
+        "<b>Approval needed:</b>",
+        *rich_bullets(approval_needed, "None"),
     ]
-    return f"<pre>{html.escape(html.unescape(chr(10).join(lines)))}</pre>"
+    return "\n".join(lines)
 
 
 def build_card(
@@ -1561,21 +1566,65 @@ def build_rich_card(
     updated: str | None = None,
     started_at: str | None = None,
 ) -> str:
-    """Render the same fixed-width card through Telegram's native rich lane."""
+    """Render the Codex-style Inbox card with native Telegram blocks.
+
+    ``build_card`` remains the fixed-width transport fallback. This primary
+    renderer must use genuinely native blocks so a successful rich transport
+    cannot be recorded as rich while still displaying as one code block.
+    """
     done = done or []
     model_line = model or os.environ.get("JOSH_WORK_CARD_MODEL") or current_direct_session_model() or "unknown"
-    lines = compact_card_lines(
-        status=status,
-        model=model_line,
-        route=route,
-        now=now,
-        done=done,
-        next_step=next_step,
-        blocker=blocker,
-        updated=updated,
-        started_at=started_at,
+    live_items = append_log(done, [now] if now else [])
+    phase, position = compact_phase(status, live_items, route=route)
+    percent = 100 if is_terminal_lifecycle_status(status) else round((position / len(LIVE_STAGES)) * 100)
+    filled = max(0, min(10, round(percent / 10)))
+    bar = "█" * filled + "░" * (10 - filled)
+    heading = {
+        "running": "JOSH 2.0 · LIVE WORK",
+        "done": "JOSH 2.0 · COMPLETE",
+        "failed": "JOSH 2.0 · NEEDS ATTENTION",
+        "paused": "JOSH 2.0 · PAUSED",
+    }.get(status, f"JOSH 2.0 · {phase.upper()}")
+    step = polished_now_text(status, now, live_items, route=route)
+
+    stage_items: list[str] = []
+    for index, label in enumerate(LIVE_STAGES, start=1):
+        checked = " checked" if is_terminal_lifecycle_status(status) or index < position else ""
+        active = index == position and not is_terminal_lifecycle_status(status)
+        label_html = f"<mark>{html.escape(label)}</mark>" if active else html.escape(label)
+        stage_items.append(f'<li><input type="checkbox"{checked}>{label_html}</li>')
+
+    workers = "".join(
+        f"<li>{html.escape(line)}</li>"
+        for line in worker_visibility_lines(model_line, route, status)
     )
-    return f"<pre>{html.escape(html.unescape(chr(10).join(lines)))}</pre>"
+    activity = semantic_milestones(live_items, limit=8)
+    activity_html = "".join(f"<li>{html.escape(item)}</li>" for item in activity)
+    if not activity_html:
+        activity_html = "<li>Waiting for the first verified update.</li>"
+    updated_at = parse_timestamp(updated)
+    updated_text = updated_at.astimezone().strftime("%H:%M %Z") if updated_at else now_label()
+    issue = "" if is_empty_issue(blocker) else compact(clean_live_text(blocker), limit=180)
+    next_text = meaningful_next_text(next_step)
+
+    blocks = [
+        f"<h3>{html.escape(heading)}</h3>",
+        f"<p><b>Objective</b><br>{html.escape(operator_objective(title))}</p>",
+        f"<p><code>{html.escape(friendly_model_line(model_line))}</code> · Josh 2.0 owns delivery</p>",
+        f"<pre>{bar} {percent}% · stage {position}/{len(LIVE_STAGES)}\n{html.escape(phase.lower())}</pre>",
+        f"<blockquote><b>Now</b><br>{html.escape(step)}</blockquote>",
+        f"<h4>Progress</h4><ul>{''.join(stage_items)}</ul>",
+        f"<h4>Active work</h4><ul>{workers}</ul>",
+    ]
+    if issue:
+        blocks.append(f"<blockquote><b>Needs attention</b><br>{html.escape(issue)}</blockquote>")
+    if next_text:
+        blocks.append(f"<p><b>Next</b><br>{html.escape(next_text)}</p>")
+    blocks.extend([
+        f"<details><summary>Recent activity ({len(activity)})</summary><ul>{activity_html}</ul></details>",
+        f"<footer>{html.escape(elapsed_text(started_at, updated))} · updated {html.escape(updated_text)}</footer>",
+    ])
+    return "".join(blocks)
 
 
 def api_call(method: str, payload: dict, timeout: int = 15) -> dict:
@@ -1870,24 +1919,44 @@ def load_final_text_file(path: str) -> str:
     if not text:
         raise SystemExit("--final-text-file must not be empty")
     match = re.fullmatch(r"<pre>([\s\S]*)</pre>", text, flags=re.I)
-    if not match:
-        raise SystemExit("--final-text-file must use the canonical ordered final contract inside one <pre> block")
-    plain = html.unescape(match.group(1)).strip("\n").replace("\r\n", "\n").replace("\r", "\n")
-    lines = plain.splitlines()
-    if not lines or any(len(line) > CARD_WRAP_WIDTH for line in lines):
+    legacy_pre = bool(match)
+    if legacy_pre:
+        plain = html.unescape(match.group(1)).strip("\n").replace("\r\n", "\n").replace("\r", "\n")
+    else:
+        if len(text.encode("utf-8")) > 3500:
+            raise SystemExit("--final-text-file must stay under the Telegram result budget")
+        unsupported = re.sub(
+            r"</?(?:b|strong|i|em|u|s|code|blockquote)>|<br\s*/?>",
+            "",
+            text,
+            flags=re.I,
+        )
+        if re.search(r"<[^>]+>", unsupported):
+            raise SystemExit("--final-text-file contains unsupported Telegram HTML")
+        plain = re.sub(r"<br\s*/?>", "\n", text, flags=re.I)
+        plain = re.sub(r"</blockquote>", "\n", plain, flags=re.I)
+        plain = re.sub(r"<[^>]+>", "", plain)
+        plain = html.unescape(plain).strip("\n").replace("\r\n", "\n").replace("\r", "\n")
+    lines = [re.sub(r"^\s*•\s+", "- ", line) for line in plain.splitlines()]
+    plain = "\n".join(lines)
+    if not lines or (legacy_pre and any(len(line) > CARD_WRAP_WIDTH for line in lines)):
         raise SystemExit("--final-text-file must pre-wrap every line to the canonical 38-column geometry")
     labels = ["Complete:", "What was done:", "Issues:", "Appropriate next steps:", "Approval needed:"]
     positions = [next((index for index, line in enumerate(lines) if line.startswith(label)), -1) for label in labels]
     complete_valid = bool(re.search(r"(?m)^Complete:\s+(?:Yes|No)\b", plain))
     ordered = all(position >= 0 for position in positions) and positions == sorted(positions) and len(set(positions)) == len(positions)
-    header_lines = [line for line in lines[:positions[0]] if line.strip()] if ordered else []
+    all_header_lines = [line for line in lines[:positions[0]] if line.strip()] if ordered else []
+    model_index = next((index for index, line in enumerate(all_header_lines) if line.startswith("Model:")), -1)
+    header_lines = all_header_lines[model_index:] if model_index >= 0 else []
     header = " ".join(line.strip() for line in header_lines)
     header_valid = bool(re.fullmatch(
         r"Model:\s*[^|]+?\s*\|\s*Route:\s*[^|]+?\s*\|\s*Why:\s*[^|]+",
         header,
         flags=re.I,
     ))
-    header_wrap_valid = bool(header_lines) and all(line.startswith("   ") for line in header_lines[1:])
+    header_wrap_valid = bool(header_lines) and (
+        not legacy_pre or all(line.startswith("   ") for line in header_lines[1:])
+    )
     done_lines = lines[positions[1] + 1:positions[2]] if ordered else []
     done_bullets = [line for line in done_lines if line.startswith("- ")]
     done_wrap_valid = all(line.startswith(("- ", "  ")) or not line.strip() for line in done_lines)
@@ -1977,6 +2046,19 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
         ack_message_id = args.ack_message_id or existing.get("ack_message_id")
         chat_id = args.chat_id or existing.get("chat_id") or os.environ.get("JOSH_TELEGRAM_CHAT_ID")
         thread_id = args.thread_id or existing.get("thread_id") or os.environ.get("JOSH_TELEGRAM_THREAD_ID")
+        declared_surface_contract = str(existing.get("surface_contract") or "")
+        if declared_surface_contract == "live-only-v2":
+            header_required = False
+        elif declared_surface_contract == "header-live-v1":
+            header_required = True
+        elif "header_required" in existing:
+            header_required = bool(existing.get("header_required"))
+        elif existing.get("header_message_id"):
+            # Preserve legacy cards for their full lifecycle.
+            header_required = True
+        else:
+            header_required = task_headers_enabled(chat_id, thread_id)
+        surface_contract = "header-live-v1" if header_required else "live-only-v2"
         model = model or current_session_model(str(chat_id or ""), str(thread_id or "")) or "unverified"
         started_at = str(existing.get("started_at") or utc_now())
         updated_at = utc_now()
@@ -2077,6 +2159,8 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
                 "chat_id": chat_id,
                 "thread_id": thread_id,
                 "next_step": args.next or existing.get("next_step") or "",
+                "header_required": header_required,
+                "surface_contract": surface_contract,
             }
             for surface in ("header", "live", "final"):
                 for suffix in ("delivery_status", "delivery_error_at"):
@@ -2089,7 +2173,7 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
 
         header_message_id = existing.get("header_message_id")
         header_action = None
-        if not header_message_id and not existing.get("message_id") and task_headers_enabled(chat_id, thread_id):
+        if not header_message_id and not existing.get("message_id") and header_required:
             if existing.get("header_delivery_status") == "indeterminate":
                 print(json.dumps({
                     "ok": False,
@@ -2177,6 +2261,8 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
                 "chat_id": chat_id,
                 "thread_id": thread_id,
                 "next_step": args.next or existing.get("next_step") or "",
+                "header_required": header_required,
+                "surface_contract": surface_contract,
             }
             save_card_state(args.key, state)
             existing = cards[args.key]
@@ -2367,6 +2453,8 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
             "chat_id": chat_id,
             "thread_id": thread_id,
             "next_step": args.next or existing.get("next_step") or "",
+            "header_required": header_required,
+            "surface_contract": surface_contract,
         }
         save_card_state(args.key, state)
         publish_brain_feed(args, status)
@@ -2376,6 +2464,8 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
             "action": action,
             "final_action": final_action,
             "renderer": renderer,
+            "header_required": header_required,
+            "surface_contract": surface_contract,
             "key": args.key,
             "header_message_id": header_message_id,
             "message_id": message_id,

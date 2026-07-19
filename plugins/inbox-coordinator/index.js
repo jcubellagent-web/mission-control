@@ -280,7 +280,8 @@ function finalSectionBlock(lines, positions, name) {
 }
 
 function joinedSection(block) {
-  return [block.inline, ...block.tail.map((line) => line.trim())].filter(Boolean).join(" ").trim();
+  return [block.inline, ...block.tail.map((line) => line.trim().replace(/^-\s+/, ""))]
+    .filter(Boolean).join(" ").trim();
 }
 
 function bulletCount(block) {
@@ -373,11 +374,30 @@ export function parseCanonicalFinalSummary(content, options = {}) {
     return finalFailure("final-too-long");
   }
   const pre = /^<pre>([\s\S]*)<\/pre>$/i.exec(text);
-  if (!pre) return finalFailure("missing-pre-wrapper");
-  const body = decodeFinalHtml(pre[1]).replace(/\r\n?/g, "\n").replace(/^\n|\n$/g, "");
-  if (!body || /<\/?[a-z][^>]*>/i.test(body)) return finalFailure("non-plain-pre-content");
-  const lines = body.split("\n");
-  if (lines.some((line) => Array.from(line).length > 38)) return finalFailure("line-over-38-columns");
+  const legacyPre = Boolean(pre);
+  let body;
+  if (legacyPre) {
+    body = decodeFinalHtml(pre[1]).replace(/\r\n?/g, "\n").replace(/^\n|\n$/g, "");
+    if (!body || /<\/?[a-z][^>]*>/i.test(body)) return finalFailure("non-plain-pre-content");
+  } else {
+    const unsupported = text.replace(
+      /<\/?(?:b|strong|i|em|u|s|code|blockquote|p|h[1-6]|ul|li|details|summary|footer)>|<br\s*\/?>/gi,
+      "",
+    );
+    if (/<[^>]+>/.test(unsupported)) return finalFailure("unsupported-rich-final-tag");
+    body = text
+      .replace(/<br\s*\/?>/gi, "\n")
+      .replace(/<\/(?:blockquote|p|h[1-6]|li|details|summary|footer)>/gi, "\n")
+      .replace(/<[^>]+>/g, "");
+    body = decodeFinalHtml(body).replace(/\r\n?/g, "\n").replace(/^\n|\n$/g, "");
+  }
+  const lines = body.split("\n").map((line) => {
+    const normalized = line.replace(/^\s*•\s+/, "- ");
+    return legacyPre ? normalized : normalized.trim();
+  });
+  if (legacyPre && lines.some((line) => Array.from(line).length > 38)) {
+    return finalFailure("line-over-38-columns");
+  }
 
   const positions = FINAL_SECTION_NAMES.map((name) => lines.findIndex((line) => line.startsWith(`${name}:`)));
   if (positions.some((position) => position < 0)) {
@@ -388,9 +408,13 @@ export function parseCanonicalFinalSummary(content, options = {}) {
     return finalFailure("section-order");
   }
 
-  const headerLines = lines.slice(0, positions[0]).filter((line) => line.trim());
-  if (!headerLines.length || !headerLines[0].startsWith("Model:")) return finalFailure("missing-model-route-line");
-  if (headerLines.slice(1).some((line) => !line.startsWith("   "))) return finalFailure("invalid-header-wrap");
+  const allHeaderLines = lines.slice(0, positions[0]).filter((line) => line.trim());
+  const modelIndex = allHeaderLines.findIndex((line) => line.startsWith("Model:"));
+  const headerLines = modelIndex >= 0 ? allHeaderLines.slice(modelIndex) : [];
+  if (!headerLines.length) return finalFailure("missing-model-route-line");
+  if (legacyPre && headerLines.slice(1).some((line) => !line.startsWith("   "))) {
+    return finalFailure("invalid-header-wrap");
+  }
   const header = headerLines.map((line) => line.trim()).join(" ").replace(/\s+/g, " ");
   const headerMatch = /^Model:\s*([^|]+?)\s*\|\s*Route:\s*([^|]+?)\s*\|\s*Why:\s*([^|]+)$/i.exec(header);
   if (!headerMatch || headerMatch.slice(1).some((value) => !value.trim())) return finalFailure("invalid-model-route-line");
@@ -539,45 +563,49 @@ export function buildRecoveryFinalSummary(content, expectedModel = "") {
   const riskFragment = sourceFragments.find((item) => RISK_OR_LIMITATION_PATTERN.test(item));
   const recommendation = sourceFragments.find((item) => RECOMMENDATION_PATTERN.test(item));
   const model = stringValue(expectedModel, "unverified");
-  const lines = [
-    ...fixedWidthLines(`Model: ${model} | Route: Josh 2.0 Inbox | Why: format recovery`),
-    "",
-    ...fixedWidthLines(complete
-      ? "Complete: Yes - agent reported completion."
-      : failed
-        ? "Complete: No - agent reported a problem."
+  const completeText = complete
+    ? "Yes - agent reported completion."
+    : failed
+      ? "No - agent reported a problem."
+      : !sourceQualitySufficient
+        ? "No - findings were incomplete."
+        : "No - completion was not explicit.";
+  const issues = failed
+    ? [riskFragment || "The source reports a failure or blocker."]
+    : approvalNeeded
+      ? ["The source says approval is required."]
+      : incomplete
+        ? ["The source says the work is incomplete."]
         : !sourceQualitySufficient
-          ? "Complete: No - findings were incomplete."
-          : "Complete: No - completion was not explicit."),
+          ? ["Detailed findings were not captured."]
+          : riskFragment
+            ? [riskFragment]
+            : ["None"];
+  const nextStep = recommendation
+    || (complete ? "No action needed." : "Retry with evidence, findings, and a recommendation.");
+  const approvals = approvalNeeded
+    ? ["Review and approve the requested next step."]
+    : ["None"];
+  const bulletLines = (items) => items.map((item) => `• ${escapeTelegramHtml(item)}`);
+  const lines = [
+    `<b>JOSH 2.0 · ${complete ? "COMPLETE" : "NEEDS ATTENTION"}</b>`,
+    `<code>${escapeTelegramHtml(`Model: ${model} | Route: Josh 2.0 Inbox | Why: format recovery`)}</code>`,
     "",
-    "What was done:",
-    ...recoveryItems.slice(0, 5).flatMap((item) => fixedWidthLines(item, "- ", "  ")),
+    `<blockquote><b>Complete:</b> ${escapeTelegramHtml(completeText)}</blockquote>`,
     "",
-    "Issues:",
-    ...(failed
-      ? fixedWidthLines(riskFragment || "The source reports a failure or blocker.", "- ", "  ")
-      : approvalNeeded
-        ? fixedWidthLines("The source says approval is required.", "- ", "  ")
-        : incomplete
-          ? fixedWidthLines("The source says the work is incomplete.", "- ", "  ")
-          : !sourceQualitySufficient
-            ? fixedWidthLines("Detailed findings were not captured.", "- ", "  ")
-            : riskFragment
-              ? fixedWidthLines(riskFragment, "- ", "  ")
-              : ["n/a"]),
+    "<b>What was done:</b>",
+    ...bulletLines(recoveryItems.slice(0, 5)),
     "",
-    "Appropriate next steps:",
-    ...fixedWidthLines(recommendation
-      || (complete
-        ? "No action needed."
-        : "Retry with evidence, findings, and a recommendation.")),
+    "<b>Issues:</b>",
+    ...bulletLines(issues),
     "",
-    "Approval needed:",
-    ...(approvalNeeded
-      ? fixedWidthLines("Review and approve the requested next step.", "- ", "  ")
-      : ["n/a"]),
+    "<b>Appropriate next steps:</b>",
+    ...bulletLines([nextStep]),
+    "",
+    "<b>Approval needed:</b>",
+    ...bulletLines(approvals),
   ];
-  return `<pre>${escapeTelegramHtml(lines.join("\n"))}</pre>`;
+  return lines.join("\n");
 }
 
 export function terminalHelperArgs(event = {}, ctx = {}, config = {}) {
@@ -703,6 +731,9 @@ function recentTerminalGate(event = {}, ctx = {}) {
 function terminalShapedOutbound(content) {
   const text = decodeFinalHtml(String(content || ""))
     .replace(/<\/?pre>/gi, "")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/(?:blockquote|p|h[1-6]|li|details|summary|footer)>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
     .replace(/\r\n?/g, "\n");
   if (!/(?:^|\n)\s*Complete\s*:/i.test(text)) return false;
   const markers = [
@@ -734,7 +765,7 @@ export async function gateTelegramFinalization(event = {}, ctx = {}, config = {}
       action: "revise",
       reason: "The Telegram final response must be one concise structured summary before it can be delivered.",
       retry: {
-        instruction: `Rewrite the same result as one Telegram HTML <pre> block. Start with Model: ${expectedModel || "<verified provider/model>"} | Route: <actual lane> | Why: <verified reason>. Then use Complete: Yes/No, What was done: with 3-5 unique, concrete findings, outcomes, or changes from the actual work (never task-status, delivery, card, or formatting filler), Issues:, Appropriate next steps: that surfaces any recommendation or follow-up, and Approval needed: in that exact order. Do not claim No action needed when the result identifies a risk, limitation, issue, or recommendation. Use plain text only inside the block, pre-wrap every physical line to at most 38 columns, keep the whole response under 3,500 bytes, and do not add another live card.`,
+        instruction: `Rewrite the same result as one polished Telegram HTML response. Start with a bold JOSH 2.0 completion heading and a code-formatted Model: ${expectedModel || "<verified provider/model>"} | Route: <actual lane> | Why: <verified reason> line. Then use Complete: Yes/No, What was done: with 3-5 unique, concrete findings, outcomes, or changes from the actual work (never task-status, delivery, card, or formatting filler), Issues:, Appropriate next steps:, and Approval needed: in that exact order. Use proportional text, bold section labels, and bullet characters; do not wrap the whole response in <pre>. Do not claim No action needed when the result identifies a risk, limitation, issue, or recommendation. Keep the whole response under 3,500 bytes and do not add another live card.`,
         idempotencyKey: `telegram-final-format:${identity}`,
         maxAttempts: 2,
       },
@@ -1069,14 +1100,26 @@ function parseReceipt(stdout) {
 
 export function validJoshClaimReceipt(stdout) {
   const receipt = parseReceipt(stdout);
+  const surfaceContract = receipt?.surface_contract || "";
+  const knownContract = !surfaceContract
+    || surfaceContract === "header-live-v1"
+    || surfaceContract === "live-only-v2";
+  const headerRequired = surfaceContract !== "live-only-v2";
+  const declarationConsistent = surfaceContract === "live-only-v2"
+    ? receipt?.header_required !== true
+    : surfaceContract === "header-live-v1"
+      ? receipt?.header_required !== false
+      : receipt?.header_required !== false;
   return Boolean(
     receipt
+    && knownContract
+    && declarationConsistent
     && receipt.ok === true
     && receipt.status === "queued"
     && receipt.reaction_ok === true
     && receipt.card_start_ok === true
-    && positiveTelegramId(receipt.header_message_id)
     && positiveTelegramId(receipt.live_message_id)
+    && (!headerRequired || positiveTelegramId(receipt.header_message_id))
     && typeof receipt.job_id === "string"
     && receipt.job_id.trim(),
   );

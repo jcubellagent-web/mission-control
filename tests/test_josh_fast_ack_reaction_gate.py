@@ -38,6 +38,16 @@ def test_inbox_health_request_is_not_misclassified_as_gmail() -> None:
     assert watcher.objective_from_prompt(prompt) == "Verify Inbox routing and health"
 
 
+def test_trailing_no_change_constraint_cannot_replace_health_objective() -> None:
+    prompt = (
+        "Read-only acceptance check: assess current Telegram health and give me three concrete findings. "
+        "Make no changes."
+    )
+    assert watcher.current_request_text(prompt).startswith("assess current Telegram health")
+    assert watcher.current_request_text(prompt) != "Make no changes"
+    assert watcher.objective_from_prompt(prompt) == "Assess Telegram health read-only"
+
+
 def test_gmail_objective_requires_email_context() -> None:
     assert watcher.objective_from_prompt("Please triage my Gmail inbox") == "Triage Gmail inbox"
     assert watcher.objective_from_prompt("Please review the Inbox workflow") != "Triage Gmail inbox"

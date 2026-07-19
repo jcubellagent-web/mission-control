@@ -14,11 +14,13 @@ placed in a process argument, cache, or plugin log.
 
 The default helper is the canonical checked-in
 `mission-control/scripts/josh_telegram_fast_ack.py`, not the legacy workspace
-copy. A Josh claim is accepted only after its exact receipt proves the eyes
-reaction, successful card start, immutable header ID, editable live-card ID,
-and durable worker job ID. A timeout after the helper may have produced visible
-Telegram effects is retained as indeterminate and suppresses an unsafe native
-fallback; a clean failure before any possible effects remains fail-open.
+copy. A Josh claim is accepted only after its exact versioned receipt proves
+the eyes reaction, successful card start, editable live-card ID, and durable
+worker job ID. The normal `live-only-v2` receipt declares
+`header_required: false`; the diagnostic `header-live-v1` receipt must also
+prove its immutable header ID. A timeout after the helper may have produced
+visible Telegram effects is retained as indeterminate and suppresses an unsafe
+native fallback; a clean failure before any possible effects remains fail-open.
 
 Inbound `message_received` correlations are consumed one-to-one. This keeps a
 burst of global `before_dispatch` hooks from binding multiple requests to the

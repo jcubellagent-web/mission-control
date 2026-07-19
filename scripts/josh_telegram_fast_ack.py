@@ -665,13 +665,26 @@ def work_card_state_receipt(card_key: str) -> dict[str, Any]:
     card = cards.get(card_key) if isinstance(cards, dict) else {}
     if not isinstance(card, dict):
         card = {}
+    header_message_id = positive_telegram_message_id(card.get("header_message_id"))
+    declared_contract = str(card.get("surface_contract") or "")
+    if declared_contract == "live-only-v2":
+        header_required = False
+    elif declared_contract == "header-live-v1":
+        header_required = True
+    elif "header_required" in card:
+        header_required = bool(card.get("header_required"))
+    else:
+        # Missing state and legacy state retain the stricter old requirement.
+        header_required = True
     return {
-        "header_message_id": positive_telegram_message_id(card.get("header_message_id")),
+        "header_message_id": header_message_id,
         "live_message_id": positive_telegram_message_id(card.get("message_id")),
         "final_message_id": positive_telegram_message_id(card.get("final_message_id")),
         "status": str(card.get("status") or ""),
         "header_delivery_status": str(card.get("header_delivery_status") or ""),
         "live_delivery_status": str(card.get("live_delivery_status") or ""),
+        "header_required": header_required,
+        "surface_contract": str(card.get("surface_contract") or ("header-live-v1" if header_required else "live-only-v2")),
     }
 
 
@@ -681,11 +694,29 @@ def parse_work_card_start_receipt(card_key: str, result: dict[str, Any]) -> dict
     persisted = work_card_state_receipt(card_key)
     header_message_id = positive_telegram_message_id(payload.get("header_message_id")) or persisted["header_message_id"]
     live_message_id = positive_telegram_message_id(payload.get("message_id") or payload.get("live_message_id")) or persisted["live_message_id"]
+    surface_contract = str(payload.get("surface_contract") or persisted["surface_contract"])
+    declared_header_required = payload.get("header_required") if "header_required" in payload else None
+    if surface_contract == "live-only-v2":
+        header_required = False
+        declaration_consistent = declared_header_required in {None, False}
+    elif surface_contract == "header-live-v1":
+        header_required = True
+        declaration_consistent = declared_header_required in {None, True}
+    else:
+        # Unknown and legacy receipts keep the stricter historical surface.
+        header_required = True
+        declaration_consistent = not surface_contract
     return {
         "command_ok": bool(result.get("ok")),
         "header_message_id": header_message_id,
         "live_message_id": live_message_id,
-        "surface_ok": bool(header_message_id and live_message_id),
+        "surface_ok": bool(
+            declaration_consistent
+            and live_message_id
+            and (header_message_id or not header_required)
+        ),
+        "header_required": header_required,
+        "surface_contract": surface_contract,
         "persisted_status": persisted["status"],
         "header_delivery_status": persisted["header_delivery_status"],
         "live_delivery_status": persisted["live_delivery_status"],
@@ -697,10 +728,10 @@ def parse_work_card_start_receipt(card_key: str, result: dict[str, Any]) -> dict
 
 
 def safe_same_key_card_retry(card_key: str, receipt: dict[str, Any]) -> bool:
-    """Retry only when the header is durable and no live send is ambiguous."""
+    """Retry only when every required prior surface is durable and unambiguous."""
     persisted = work_card_state_receipt(card_key)
     return bool(
-        persisted["header_message_id"]
+        (persisted["header_message_id"] or not persisted["header_required"])
         and not persisted["live_message_id"]
         and persisted["header_delivery_status"].lower() != "indeterminate"
         and persisted["live_delivery_status"].lower() != "indeterminate"
@@ -709,11 +740,17 @@ def safe_same_key_card_retry(card_key: str, receipt: dict[str, Any]) -> bool:
     )
 
 
+def receipt_requires_header(receipt: dict[str, Any]) -> bool:
+    """Honor the versioned live-only contract while keeping old receipts safe."""
+    return str(receipt.get("surface_contract") or "") != "live-only-v2"
+
+
 def run_work_card_start(cmd: list[str]) -> dict[str, Any]:
     try:
-        # The child has two bounded Telegram sends (header + live). Keep the
-        # parent alive long enough for its timeout handler to persist an
-        # indeterminate receipt instead of killing it after request write.
+        # The child has one bounded live-card send, plus an optional diagnostic
+        # header send. Keep the parent alive long enough for its timeout
+        # handler to persist an indeterminate receipt instead of killing it
+        # after request write.
         return dict(run_cmd(cmd, timeout=25))
     except subprocess.TimeoutExpired:
         return {"ok": False, "returncode": -1, "stdout": "", "stderr": "work-card start timed out"}
@@ -865,6 +902,8 @@ def adopt_interpreted_work_cards(
             "header_message_id": positive_telegram_message_id(visible.get("header_message_id")),
             "live_message_id": positive_telegram_message_id(visible.get("message_id")),
             "card_start_ok": bool(visible.get("message_id")),
+            "header_required": str(visible.get("surface_contract") or "") != "live-only-v2",
+            "surface_contract": str(visible.get("surface_contract") or "header-live-v1"),
             "requires_objective_interpretation": False,
             "objective_interpreted": True,
             "adopted_at": utc_now(),
@@ -1359,7 +1398,7 @@ CONTROL_TOWER_STATUS_RE = re.compile(
 
 
 def current_request_text(text: str) -> str:
-    """Exclude pasted status-card rows before objective classification."""
+    """Select the actionable ask, never a trailing safety constraint."""
     embedded_card_row = re.compile(
         r"^(?:[🎯🤖📊⏱️✅⚠️➡️🔐]\s*)?"
         r"(?:objective|model|steps?|eta|complete|what was done|issues|"
@@ -1386,9 +1425,39 @@ def current_request_text(text: str) -> str:
         for p in re.split(r"(?<=[.!?])\s+|\n+", "\n".join(eligible))
         if p.strip()
     ]
-    request_markers = ("please", "can you", "could you", "would you", "fix ", "make ", "change ", "add ", "remove ", "check ", "find ", "build ", "run ", "verify ")
-    candidates = [p for p in parts if any(marker in p.lower() for marker in request_markers)]
-    return candidates[-1] if candidates else " ".join(eligible)
+    normalized_parts = [
+        re.sub(r"^read[- ]only\s+acceptance\s+check\s*:\s*", "", part, flags=re.I).strip()
+        for part in parts
+    ]
+    constraint_only = re.compile(
+        r"^(?:(?:please\s+)?(?:make|do)\s+no\s+changes|"
+        r"(?:please\s+)?do\s+not\s+(?:make|apply|change|edit)\b|"
+        r"read[- ]only(?:\s+only)?)[.!]?$",
+        re.I,
+    )
+    intent = re.compile(
+        r"\b(?:assess|audit|check|evaluate|examine|find|fix|implement|inspect|"
+        r"investigate|repair|review|run|test|validate|verify|build|add|remove|update)\b",
+        re.I,
+    )
+    leading_intent = re.compile(
+        r"^(?:(?:please\s+)?|(?:can|could|would)\s+you\s+)(?:assess|audit|check|"
+        r"evaluate|examine|find|fix|implement|inspect|investigate|repair|review|"
+        r"run|test|validate|verify|build|add|remove|update)\b",
+        re.I,
+    )
+    candidates = [part for part in normalized_parts if part and intent.search(part) and not constraint_only.fullmatch(part)]
+    if not candidates:
+        return " ".join(eligible)
+    selected = max(candidates, key=lambda part: (3 if leading_intent.search(part) else 2, len(part.split())))
+    has_no_change_constraint = any(
+        constraint_only.fullmatch(part)
+        or re.search(r"\b(?:read[- ]only|make no changes|do not make changes)\b", part, re.I)
+        for part in parts
+    )
+    if has_no_change_constraint and not re.search(r"\b(?:read[- ]only|without (?:making )?changes)\b", selected, re.I):
+        selected = f"{selected} read-only"
+    return selected
 
 
 OBJECTIVE_MAX_WORDS = 12
@@ -1547,6 +1616,8 @@ def topic_objective(lowered: str) -> str:
 def summarize_objective(text: str) -> str:
     clean = " ".join(current_request_text(text).split())
     lowered = clean.lower()
+    if "telegram" in lowered and "health" in lowered and "read-only" in lowered:
+        return "Assess Telegram health read-only"
     if "objective" in lowered and any(
         marker in lowered for marker in ("copy", "quote", "similar", "own words", "interpret", "paraphrase")
     ):
@@ -1586,7 +1657,7 @@ def summarize_objective(text: str) -> str:
     clean = LEADING_REQUEST_RE.sub("", clean).strip(" .")
     # Turn an unmatched request into a short operator objective rather than a
     # clipped copy of the user's sentence. This stays deterministic so the
-    # required task header does not wait on another model call.
+    # required live card does not wait on another model call.
     clean = re.split(r"\s+(?:so that|so I can|and then|and make|and ensure)\b", clean, maxsplit=1, flags=re.I)[0]
     verb_rewrites = (
         (r"^(?:deep[- ]?scan|scan)\s+", "Audit "),
@@ -2051,6 +2122,8 @@ def send_ack(
     card_start_attempts = 0
     header_message_id = ""
     live_message_id = ""
+    header_required = False
+    surface_contract = "live-only-v2"
     card_start_ok = True
     if not dry_run and start_visible_card:
         if not telegram_claim_not_cancelled(effect_protocol):
@@ -2106,6 +2179,8 @@ def send_ack(
             card_receipt = parse_work_card_start_receipt(key, card_start)
         header_message_id = str(card_receipt.get("header_message_id") or "")
         live_message_id = str(card_receipt.get("live_message_id") or "")
+        header_required = bool(card_receipt.get("header_required"))
+        surface_contract = str(card_receipt.get("surface_contract") or ("header-live-v1" if header_required else "live-only-v2"))
         card_start_ok = bool(card_receipt.get("surface_ok")) if exact_control_center_inbox(meta) else bool(card_start.get("ok"))
         effect_state = (
             "surface-started"
@@ -2117,7 +2192,7 @@ def send_ack(
         update_telegram_effect(
             effect_protocol,
             state=effect_state,
-            stage="header-live-card",
+            stage="header-live-card" if header_required else "live-card",
             reaction_ok=bool(ack_sent),
             header_message_id=header_message_id,
             live_message_id=live_message_id,
@@ -2128,7 +2203,7 @@ def send_ack(
         return {
             "ok": False,
             "status": "surface-failed",
-            "error": "inbox_header_or_live_receipt_missing",
+            "error": "inbox_required_surface_receipt_missing",
             "reaction_ok": bool(ack_sent),
             "ack_message_id": ack_message_id,
             "key": key,
@@ -2143,6 +2218,8 @@ def send_ack(
             "card_start_attempts": card_start_attempts,
             "header_message_id": header_message_id,
             "live_message_id": live_message_id,
+            "header_required": header_required,
+            "surface_contract": surface_contract,
             "surface_indeterminate": bool(card_receipt.get("surface_indeterminate")),
             "card_start_receipt": str(card_start.get("stdout") or ""),
         }
@@ -2179,6 +2256,8 @@ def send_ack(
         "card_start_attempts": card_start_attempts,
         "header_message_id": header_message_id,
         "live_message_id": live_message_id,
+        "header_required": header_required,
+        "surface_contract": surface_contract,
         "card_start_receipt": str(card_start.get("stdout") or ""),
     }
 
@@ -2624,6 +2703,8 @@ def select_terminal_card(
         "header_message_id": positive_telegram_message_id(work_card.get("header_message_id")),
         "live_message_id": positive_telegram_message_id(work_card.get("message_id")),
         "card_start_ok": bool(work_card.get("message_id")),
+        "header_required": str(work_card.get("surface_contract") or "") != "live-only-v2",
+        "surface_contract": str(work_card.get("surface_contract") or "header-live-v1"),
         "objective_interpreted": True,
         "requires_objective_interpretation": False,
         "started_at": str(work_card.get("started_at") or work_card.get("updated_at") or utc_now()),
@@ -3119,7 +3200,7 @@ def close_before_final(args: argparse.Namespace) -> dict[str, Any]:
                 "live_message_id": receipt["live_message_id"],
                 "terminal_status": persisted_status,
             }
-    if not receipt["header_message_id"] or not receipt["live_message_id"]:
+    if not receipt["live_message_id"] or (receipt["header_required"] and not receipt["header_message_id"]):
         return {
             "ok": False,
             "status": "incomplete-card-surface",
@@ -3306,11 +3387,12 @@ def claim_inbox(args: argparse.Namespace) -> dict[str, Any]:
     if exact_control_center_inbox(meta) and not args.dry_run:
         header_message_id = positive_telegram_message_id(ack.get("header_message_id"))
         live_message_id = positive_telegram_message_id(ack.get("live_message_id"))
-        if not ack.get("card_start_ok") or not header_message_id or not live_message_id:
+        header_required = receipt_requires_header(ack)
+        if not ack.get("card_start_ok") or not live_message_id or (header_required and not header_message_id):
             publish_josh(
                 "Inbox task surface needs retry",
                 "error",
-                "The helper did not prove both Topic 1 message receipts; no worker was queued and native fallback remains available.",
+                "The helper did not prove the required Topic 1 live-card receipt; no worker was queued and native fallback remains available.",
             )
             return {
                 "ok": False,
@@ -3320,6 +3402,8 @@ def claim_inbox(args: argparse.Namespace) -> dict[str, Any]:
                 "card_start_ok": False,
                 "header_message_id": header_message_id,
                 "live_message_id": live_message_id,
+                "header_required": header_required,
+                "surface_contract": str(ack.get("surface_contract") or ("header-live-v1" if header_required else "live-only-v2")),
                 "surface_indeterminate": bool(ack.get("surface_indeterminate")),
             }
 
@@ -3377,6 +3461,8 @@ def claim_inbox(args: argparse.Namespace) -> dict[str, Any]:
             "card_start_ok": bool(ack.get("card_start_ok")),
             "header_message_id": str(ack.get("header_message_id") or ""),
             "live_message_id": str(ack.get("live_message_id") or ""),
+            "header_required": receipt_requires_header(ack),
+            "surface_contract": str(ack.get("surface_contract") or ("header-live-v1" if receipt_requires_header(ack) else "live-only-v2")),
             "job_id": "",
             "key": ack.get("key"),
         }
@@ -3419,6 +3505,8 @@ def claim_inbox(args: argparse.Namespace) -> dict[str, Any]:
         "card_start_ok": bool(ack.get("card_start_ok")),
         "header_message_id": str(ack.get("header_message_id") or ""),
         "live_message_id": str(ack.get("live_message_id") or ""),
+        "header_required": receipt_requires_header(ack),
+        "surface_contract": str(ack.get("surface_contract") or ("header-live-v1" if receipt_requires_header(ack) else "live-only-v2")),
         "started_at": ack.get("last_card_update_at"),
         "last_progress_at": ack.get("last_card_update_at"),
         "last_card_update_at": ack.get("last_card_update_at"),
@@ -3433,6 +3521,8 @@ def claim_inbox(args: argparse.Namespace) -> dict[str, Any]:
         "card_start_ok": bool(ack.get("card_start_ok")),
         "header_message_id": str(ack.get("header_message_id") or ""),
         "live_message_id": str(ack.get("live_message_id") or ""),
+        "header_required": receipt_requires_header(ack),
+        "surface_contract": str(ack.get("surface_contract") or ("header-live-v1" if receipt_requires_header(ack) else "live-only-v2")),
     }
     if not args.dry_run:
         persist_claim_state(stable, active_card, last_claim)
@@ -3451,6 +3541,8 @@ def claim_inbox(args: argparse.Namespace) -> dict[str, Any]:
         "card_start_ok": bool(ack.get("card_start_ok")),
         "header_message_id": str(ack.get("header_message_id") or ""),
         "live_message_id": str(ack.get("live_message_id") or ""),
+        "header_required": receipt_requires_header(ack),
+        "surface_contract": str(ack.get("surface_contract") or ("header-live-v1" if receipt_requires_header(ack) else "live-only-v2")),
         "job_id": str((job or {}).get("jobId") or ""),
         "route_id": str((route or {}).get("routeId") or ""),
         "deduplicated": bool(envelope.get("deduplicated")) if isinstance(envelope, dict) else False,

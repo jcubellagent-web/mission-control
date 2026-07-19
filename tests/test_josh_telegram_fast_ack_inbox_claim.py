@@ -45,6 +45,52 @@ def test_send_ack_starts_card_with_workspace_helper_and_returns_receipt():
     assert result["card_start_receipt"] == card_receipt
 
 
+def test_live_only_v2_receipt_is_a_complete_topic_surface():
+    receipt = watcher.parse_work_card_start_receipt(
+        "missing-card-state",
+        {
+            "ok": True,
+            "stdout": json.dumps({
+                "ok": True,
+                "header_required": False,
+                "surface_contract": "live-only-v2",
+                "header_message_id": None,
+                "message_id": 444,
+            }),
+        },
+    )
+    assert receipt["surface_ok"] is True
+    assert receipt["header_required"] is False
+    assert receipt["surface_contract"] == "live-only-v2"
+    assert receipt["header_message_id"] == ""
+    assert receipt["live_message_id"] == "444"
+
+
+def test_contradictory_or_unknown_surface_contracts_fail_closed():
+    for payload in (
+        {
+            "header_required": False,
+            "surface_contract": "header-live-v1",
+            "message_id": 444,
+        },
+        {
+            "header_required": True,
+            "surface_contract": "live-only-v2",
+            "message_id": 444,
+        },
+        {
+            "header_required": False,
+            "surface_contract": "future-contract",
+            "message_id": 444,
+        },
+    ):
+        receipt = watcher.parse_work_card_start_receipt(
+            "missing-card-state",
+            {"ok": True, "stdout": json.dumps({"ok": True, **payload})},
+        )
+        assert receipt["surface_ok"] is False
+
+
 def test_reaction_happens_before_route_and_skill_probes():
     order = []
     event = {"session_id": "session", "ts": "2026-07-15T04:23:21Z", "run_id": "before-dispatch:1", "message_id": "42", "prompt": "Check the Inbox"}
@@ -114,6 +160,8 @@ def test_claim_inbox_refuses_queue_without_topic_surface_receipts():
         "card_start_ok": False,
         "header_message_id": "101",
         "live_message_id": "",
+        "header_required": True,
+        "surface_contract": "header-live-v1",
         "surface_indeterminate": False,
     }
     run_cmd.assert_not_called()
@@ -161,6 +209,8 @@ def test_queue_failure_preserves_all_durable_surface_receipts():
         "card_start_ok": True,
         "header_message_id": "401",
         "live_message_id": "402",
+        "header_required": True,
+        "surface_contract": "header-live-v1",
         "job_id": "",
         "key": "card-904",
     }
@@ -254,11 +304,53 @@ def test_valid_coordinator_envelope_returns_verified_queue_receipt():
         "card_start_ok": True,
         "header_message_id": "601",
         "live_message_id": "602",
+        "header_required": True,
+        "surface_contract": "header-live-v1",
         "job_id": "job-906",
         "route_id": "luna",
         "deduplicated": False,
     }
     persist.assert_called_once()
+
+
+def test_claim_accepts_one_versioned_live_card_without_task_header():
+    args = argparse.Namespace(
+        run_id="telegram-message:-1003589561528:1:907",
+        message_id="907",
+        chat_id=watcher.CONTROL_CENTER_CHAT_ID,
+        thread_id="1",
+        session_key="session",
+        dry_run=False,
+    )
+    ack = {
+        "ok": True,
+        "reaction_ok": True,
+        "card_start_ok": True,
+        "header_message_id": "",
+        "live_message_id": "702",
+        "header_required": False,
+        "surface_contract": "live-only-v2",
+        "key": "card-907",
+        "objective": "Assess Telegram health read-only",
+        "model": "model",
+        "route": "route",
+        "route_plan": {"routeId": "terra"},
+        "last_card_update_at": watcher.utc_now(),
+    }
+    envelope = {"job": {"jobId": "job-907"}, "route": {"routeId": "terra"}}
+    with patch("sys.stdin.read", return_value="Read-only Telegram health check"), \
+         patch.object(watcher, "send_ack", return_value=ack), \
+         patch.object(watcher, "run_cmd", return_value={"ok": True, "stdout": json.dumps(envelope), "stderr": ""}), \
+         patch.object(watcher, "persist_claim_state") as persist:
+        result = watcher.claim_inbox(args)
+
+    assert result["ok"] is True
+    assert result["header_message_id"] == ""
+    assert result["live_message_id"] == "702"
+    assert result["header_required"] is False
+    assert result["surface_contract"] == "live-only-v2"
+    persisted_card = persist.call_args.args[1]
+    assert persisted_card["header_required"] is False
 
 
 def test_card_start_retries_once_only_after_durable_header(monkeypatch, tmp_path):

@@ -3,6 +3,7 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import re
 import stat
 import tempfile
 import unittest
@@ -102,7 +103,7 @@ class InboxCoordinatorTests(unittest.TestCase):
         self.assertIs(route["policyAllowed"], False)
         self.assertIn("privacy policy blocked", route["fallback"])
 
-    def test_final_summary_is_deterministic_pre_block(self):
+    def test_final_summary_is_deterministic_proportional_html(self):
         coordinator = load_module()
 
         class Args:
@@ -116,15 +117,16 @@ class InboxCoordinatorTests(unittest.TestCase):
             approval = []
 
         text = coordinator.format_final(Args)
-        self.assertTrue(text.startswith("<pre>"))
-        self.assertTrue(text.endswith("</pre>"))
+        self.assertTrue(text.startswith("<b>JOSH 2.0 · COMPLETE</b>"))
+        self.assertFalse(text.startswith("<pre>"))
         decoded = html.unescape(text)
+        plain = re.sub(r"<[^>]+>", "", decoded)
         self.assertIn("Model: codex/gpt-5.6-luna | Route:", decoded)
         self.assertIn("Josh 2.0 Inbox coordinator | Why:", decoded)
         self.assertIn("fast coordination", decoded)
-        self.assertIn("Complete: Yes", decoded)
-        self.assertIn("- n/a", decoded)
-        self.assertLessEqual(max(coordinator.display_width(line) for line in decoded.removeprefix("<pre>").removesuffix("</pre>").splitlines()), 38)
+        self.assertIn("Complete: Yes", plain)
+        self.assertIn("• None", decoded)
+        self.assertIn("<blockquote>", decoded)
 
     def test_telemetry_excludes_prompt_and_output(self):
         coordinator = load_module()
@@ -253,11 +255,11 @@ class InboxCoordinatorTests(unittest.TestCase):
             "Complete: Yes\nWhat was done:\n- The Inbox route confirmed a successful response from the selected public model.\n- The delivery layer removed the worker identity before formatting the Telegram card.\n- The redaction check confirmed token: abcdefghijklmnop was removed before the final message.\nIssues:\n- n/a\nAppropriate next steps:\n- No action needed.\nApproval needed:\n- n/a",
         )
         decoded = html.unescape(text)
-        body = decoded.removeprefix("<pre>").removesuffix("</pre>")
+        body = re.sub(r"<[^>]+>", "", decoded)
         flat = " ".join(body.split())
-        self.assertTrue(text.startswith("<pre>"))
-        self.assertTrue(text.endswith("</pre>"))
-        self.assertTrue(body.startswith("Model: xai/grok-test | Route:"))
+        self.assertTrue(text.startswith("<b>JOSH 2.0 · COMPLETE</b>"))
+        self.assertFalse(text.startswith("<pre>"))
+        self.assertIn("Model: xai/grok-test | Route:", body)
         self.assertIn("Complete: Yes", body)
         self.assertIn("What was done:", body)
         self.assertIn("Issues:", body)
@@ -269,7 +271,7 @@ class InboxCoordinatorTests(unittest.TestCase):
         self.assertNotIn("**", decoded)
         self.assertNotIn("abcdefghijklmnop", decoded)
         self.assertIn("[redacted]", decoded)
-        self.assertLessEqual(max(coordinator.display_width(line) for line in body.splitlines()), 38)
+        self.assertIn("• ", text)
 
     def test_weak_assessment_is_downgraded_without_invented_results(self):
         coordinator = load_module()
@@ -376,7 +378,8 @@ class InboxCoordinatorTests(unittest.TestCase):
                 )
             self.assertIs(delivered, True)
             self.assertEqual(commands[0][2], "fail")
-            self.assertIn("Complete: No", html.unescape(rendered[0]))
+            plain = re.sub(r"<[^>]+>", "", html.unescape(rendered[0]))
+            self.assertIn("Complete: No", plain)
             self.assertIn(coordinator.MISSING_FINDINGS_ISSUE, html.unescape(rendered[0]).replace("\n  ", " "))
 
     def test_unstructured_or_unverified_output_never_claims_completion(self):
@@ -388,7 +391,11 @@ class InboxCoordinatorTests(unittest.TestCase):
             "modelVerified": False,
             "executionVerified": False,
         }
-        body = html.unescape(coordinator.render_final_html(route, execution, "Worker stopped before producing a result."))
+        body = re.sub(
+            r"<[^>]+>",
+            "",
+            html.unescape(coordinator.render_final_html(route, execution, "Worker stopped before producing a result.")),
+        )
         self.assertIn("Model: unverified", body)
         self.assertIn("Complete: No", body)
         self.assertIn("Worker execution was not verified.", body)
