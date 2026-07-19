@@ -212,6 +212,49 @@ class MemoryRegistryTest(unittest.TestCase):
         self.assertEqual(status["retrieval"]["feedback30d"], 2)
         self.assertEqual(status["retrieval"]["qualityRate"], 50.0)
 
+    def test_activity_export_is_counts_only_and_updates_on_retrieval(self) -> None:
+        memory_id = self.create_memory("live activity", privacy="dashboard-safe")
+        private_query = "Privacy fixture live activity raw-query-marker"
+        retrieval = self.cli(
+            "retrieve", "--agent", "joshex", "--query", private_query, "--limit", "3"
+        )
+        status_path = Path(self.env["MEMORY_OPERATIONS_PATH"])
+        status = json.loads(status_path.read_text(encoding="utf-8"))
+        activity = status["activity"]
+
+        self.assertEqual(activity["schemaVersion"], 1)
+        self.assertTrue(activity["source"]["verified"])
+        self.assertTrue(activity["privacy"]["countsOnly"])
+        self.assertFalse(activity["privacy"]["queryIncluded"])
+        self.assertFalse(activity["privacy"]["contentIncluded"])
+        self.assertFalse(activity["privacy"]["rawIdentifiersIncluded"])
+        self.assertGreaterEqual(activity["counts"]["retrievals"], 1)
+        self.assertGreaterEqual(activity["counts"]["hits"], 1)
+        self.assertIsNotNone(activity["lastObservedAt"]["retrieval"])
+        self.assertEqual(
+            next(row for row in activity["agents"] if row["agent"] == "joshex")["retrievals"],
+            1,
+        )
+
+        rendered = json.dumps(status)
+        self.assertNotIn(private_query, rendered)
+        self.assertNotIn("raw-query-marker", rendered)
+        self.assertNotIn(retrieval["retrievalId"], rendered)
+        self.assertNotIn(memory_id, rendered)
+        self.assertNotIn("events", activity)
+
+    def test_preflight_immediately_exports_activity(self) -> None:
+        self.create_memory("preflight activity", privacy="dashboard-safe")
+        self.cli(
+            "preflight", "--agent", "jain", "--query", "Privacy fixture preflight activity",
+            "--work-id", "private-work-marker",
+        )
+        status = json.loads(Path(self.env["MEMORY_OPERATIONS_PATH"]).read_text(encoding="utf-8"))
+        activity = status["activity"]
+        self.assertGreaterEqual(activity["counts"]["retrievals"], 1)
+        self.assertEqual(next(row for row in activity["agents"] if row["agent"] == "jain")["retrievals"], 1)
+        self.assertNotIn("private-work-marker", json.dumps(status))
+
     def test_existing_retrieval_schema_is_migrated_additively(self) -> None:
         legacy_database = self.folder / "legacy.sqlite"
         connection = sqlite3.connect(legacy_database)

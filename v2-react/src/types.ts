@@ -237,6 +237,63 @@ export type BrainAtlas = {
   edges: BrainAtlasEdge[];
 };
 
+export type MemoryActivityAgent = {
+  agent: AgentId;
+  retrievals: number;
+  hits: number;
+  misses: number;
+  lastRetrievalAt: string | null;
+};
+
+export type MemoryActivity = {
+  schemaVersion: 1;
+  generatedAt: string;
+  windowMinutes: number;
+  motionWindowSeconds: number;
+  source: { name: "governed-memory-registry"; verified: boolean };
+  privacy: {
+    queryIncluded: false;
+    contentIncluded: false;
+    rawIdentifiersIncluded: false;
+    reasonsIncluded: false;
+    countsOnly: true;
+  };
+  counts: {
+    retrievals: number;
+    hits: number;
+    misses: number;
+    selected: number;
+    used: number;
+    reuseIgnored: number;
+    feedback: number;
+    helpful: number;
+    feedbackIgnored: number;
+    corrected: number;
+    harmful: number;
+    proposed: number;
+    promoted: number;
+  };
+  lastObservedAt: {
+    retrieval: string | null;
+    hit: string | null;
+    miss: string | null;
+    selected: string | null;
+    used: string | null;
+    reuseIgnored: string | null;
+    feedback: string | null;
+    corrected: string | null;
+    proposed: string | null;
+    promoted: string | null;
+  };
+  agents: MemoryActivityAgent[];
+};
+
+export type MemoryOperations = Record<string, unknown> & {
+  updatedAt?: string;
+  status?: string;
+  activity?: MemoryActivity;
+};
+
 export type MissionControlState = {
   source: string;
   statuses: AgentStatus[];
@@ -262,7 +319,7 @@ export type MissionControlState = {
   sharedOperatingLayer?: Record<string, unknown>;
   agentControl?: Record<string, unknown>;
   agentContextRegistry?: Record<string, unknown>;
-  memoryOperations?: Record<string, unknown>;
+  memoryOperations?: MemoryOperations;
   codingVisibility?: Record<string, unknown>;
   trackedTasks?: Array<Record<string, unknown>>;
   agentBus?: Array<Record<string, unknown>>;

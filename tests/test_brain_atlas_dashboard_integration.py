@@ -256,28 +256,60 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertTrue(all(edge["kind"] in {"owns", "emitted", "verified-route"} for edge in clean["edges"]))
         self.assertEqual(clean, written["brainAtlas"])
 
-    def test_ui_contract_is_fixed_layered_and_motionless(self) -> None:
+    def test_ui_contract_is_fixed_layered_and_evidence_driven(self) -> None:
         main = (MISSION_CONTROL / "v2-react" / "src" / "main.tsx").read_text(encoding="utf-8")
         styles = (MISSION_CONTROL / "v2-react" / "src" / "styles.css").read_text(encoding="utf-8")
         component = main[main.index("const BRAIN_ATLAS_LAYER_ORDER"):main.index("function AgentWorkBoard")]
-        atlas_styles = styles[styles.index("/* Brain Atlas is a fixed evidence diagram") :]
 
         self.assertIn('["agent", "work", "receipt", "model"]', component)
-        self.assertIn("Exact receipt edges only", component)
+        self.assertIn("Operational receipt evidence", component)
+        self.assertIn("exact receipt-backed edges", component)
         self.assertIn("No inferred relationships are shown", component)
+        self.assertIn("verifiedMemoryActivity(rawActivity)", component)
+        self.assertIn("memorySignalIsRecent", component)
+        self.assertIn('data-evidence-source="governed-memory-registry"', component)
+        self.assertIn("data-observed-at", component)
+        self.assertIn('recent("used") ? " is-live" : ""', component)
+        self.assertIn("Moving paths require a recent exact registry timestamp", component)
+        self.assertIn("This does not expose memory content or internal model reasoning", component)
+        self.assertIn("not learned", component)
         self.assertNotIn("forceSimulation", component)
         self.assertNotIn("d3-force", component)
-        self.assertNotIn("animation:", atlas_styles)
+        self.assertNotIn("Math.random", component)
 
-    def test_atlas_uses_an_operator_tab_without_compressing_finops(self) -> None:
+        self.assertIn(".memory-flow-edge.is-live {", styles)
+        self.assertIn("animation: memory-flow-travel 1.05s linear infinite;", styles)
+        self.assertIn("@keyframes memory-flow-travel", styles)
+        reduced_motion = styles[styles.index("@media (prefers-reduced-motion: reduce)", styles.index("@keyframes memory-flow-travel")) :]
+        self.assertIn(".memory-flow-edge.is-live", reduced_motion)
+        self.assertIn("animation: none !important;", reduced_motion)
+
+    def test_atlas_and_finops_are_always_visible_in_matched_grid_cells(self) -> None:
         main = (MISSION_CONTROL / "v2-react" / "src" / "main.tsx").read_text(encoding="utf-8")
         styles = (MISSION_CONTROL / "v2-react" / "src" / "styles.css").read_text(encoding="utf-8")
+        dashboard = main[main.index('<section className="kiosk-grid">'):main.index("function BrainHero")]
+        desktop_layout = styles[styles.index("/* Control Tower v11") : styles.index("#brain-atlas.brain-atlas-panel")]
 
-        self.assertIn('useState<"finops" | "atlas">("finops")', main)
-        self.assertIn('data-support-view="atlas"', main)
-        self.assertIn('supportView === "atlas" ? (', main)
-        self.assertIn(".support-grid.is-support-tabbed", styles)
-        self.assertNotIn(":has(.brain-atlas-panel):has(.finops-dashboard)", styles)
+        self.assertIn("<BrainAtlasPanel", dashboard)
+        self.assertIn("<MemoizedFinOpsDashboard", dashboard)
+        self.assertLess(dashboard.index("<BrainAtlasPanel"), dashboard.index("<MemoizedFinOpsDashboard"))
+        self.assertNotIn("supportView", main)
+        self.assertNotIn("data-support-view", main)
+        self.assertNotIn('useState<"finops" | "atlas">', main)
+
+        self.assertIn('"live jobs"', desktop_layout)
+        self.assertIn('"atlas finops"', desktop_layout)
+        self.assertIn("grid-template-rows: minmax(0, 44fr) minmax(0, 56fr)", desktop_layout)
+        self.assertIn(".kiosk-grid > #brain-atlas { grid-area: atlas; }", desktop_layout)
+        self.assertIn(".kiosk-grid > #finops-dashboard { grid-area: finops; }", desktop_layout)
+        self.assertIn("height: 100% !important;", desktop_layout)
+
+    def test_kiosk_respects_user_motion_preference_and_guard_protects_launcher(self) -> None:
+        launcher = (MISSION_CONTROL / "scripts" / "open_mission_control_kiosk.sh").read_text(encoding="utf-8")
+        guard = (MISSION_CONTROL / "scripts" / "control_tower_change_guard.py").read_text(encoding="utf-8")
+
+        self.assertNotIn("--force-prefers-reduced-motion", launcher)
+        self.assertIn('"scripts/open_mission_control_kiosk.sh"', guard)
 
     def test_handoff_receipt_bridge_support_is_preserved(self) -> None:
         source = UPDATE_SCRIPT.read_text(encoding="utf-8")

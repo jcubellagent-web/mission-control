@@ -75,6 +75,7 @@ type LiveCueState = {
 type BrainAtlas = NonNullable<MissionControlState["brainAtlas"]>;
 type BrainAtlasNode = BrainAtlas["nodes"][number];
 type BrainAtlasEdge = BrainAtlas["edges"][number];
+type MemoryActivity = NonNullable<NonNullable<MissionControlState["memoryOperations"]>["activity"]>;
 type BrainAtlasView = {
   nodes: BrainAtlasNode[];
   edges: BrainAtlasEdge[];
@@ -1012,7 +1013,6 @@ function App() {
   const [dataError, setDataError] = useState<string | null>(null);
   const [liveMode, setLiveMode] = useState<"connected" | "polling">("polling");
   const [quietMode, setQuietMode] = useState(true);
-  const [supportView, setSupportView] = useState<"finops" | "atlas">("finops");
   const [displayState, setDisplayState] = useState<ControlTowerDisplayState>({});
   const [nightModeOverride, setNightModeOverride] = useState<boolean | null>(null);
   const [clockNow, setClockNow] = useState(() => new Date());
@@ -1195,48 +1195,11 @@ function App() {
       <KioskPulseStrip pulse={pulse} liveMode={liveMode} dataError={dataError} />
 
       <section className="kiosk-grid">
-        <section id="brain-feed" className={`brain-hero-panel${sectionCueClass("brain", liveCues)}`}>
+        <section id="brain-feed" className={`brain-hero-panel brain-hero-panel--single${sectionCueClass("brain", liveCues)}`}>
           <SectionCue label={liveCues.focus === "brain" ? "focus" : "updated"} />
           <BrainHero state={state} statuses={statusByAgent} quietMode={quietMode} onNavigate={navigateToPanel} liveCues={liveCues} />
-          <section className={`support-grid is-support-tabbed is-${supportView}`} aria-label="Control Tower support modules">
-            <div className="support-module-tabs" role="tablist" aria-label="Support module view">
-              <button
-                type="button"
-                role="tab"
-                data-support-view="finops"
-                aria-selected={supportView === "finops"}
-                className={supportView === "finops" ? "selected" : ""}
-                onClick={() => setSupportView("finops")}
-              >
-                FinOps
-              </button>
-              <button
-                type="button"
-                role="tab"
-                data-support-view="atlas"
-                aria-selected={supportView === "atlas"}
-                className={supportView === "atlas" ? "selected" : ""}
-                onClick={() => setSupportView("atlas")}
-              >
-                Brain Atlas
-              </button>
-            </div>
-            {supportView === "atlas" ? (
-              <BrainAtlasPanel atlas={state.brainAtlas} />
-            ) : (
-              <MemoizedFinOpsDashboard
-                wallet={state.agenticCrypto}
-                modelUsage={state.modelUsage}
-                modelRouter={state.modelRouter}
-                statuses={state.statuses}
-                activeModelRoutes={state.activeModelRoutes || []}
-                loading={loading}
-                onRefresh={() => refreshAgenticCrypto(true)}
-              />
-            )}
-          </section>
         </section>
-        <aside className="right-rail">
+        <div className="right-rail">
           <JobsRail
             jobs={state.jobs}
             todayJobs={state.todayJobs}
@@ -1245,7 +1208,17 @@ function App() {
             quietMode={quietMode}
             liveCues={liveCues}
           />
-        </aside>
+        </div>
+        <BrainAtlasPanel atlas={state.brainAtlas} memoryOperations={state.memoryOperations} />
+        <MemoizedFinOpsDashboard
+          wallet={state.agenticCrypto}
+          modelUsage={state.modelUsage}
+          modelRouter={state.modelRouter}
+          statuses={state.statuses}
+          activeModelRoutes={state.activeModelRoutes || []}
+          loading={loading}
+          onRefresh={() => refreshAgenticCrypto(true)}
+        />
       </section>
     </main>
   );
@@ -2280,7 +2253,7 @@ function FinOpsDashboard({
       <header className="finops-header">
         <div>
           <p>FinOps Dashboard</p>
-          <h2>Provider usage, subscriptions, and wallet</h2>
+          <h2>Usage, subscriptions &amp; wallet</h2>
         </div>
         <div className="finops-actions">
           <span className={`crypto-status ${cryptoStatusClass(freshness.status)}`}><ShieldCheck size={13} />Wallet {freshness.label}</span>
@@ -3108,13 +3081,85 @@ function brainAtlasNodeSubline(node: BrainAtlasNode) {
   return "route verified";
 }
 
-function BrainAtlasPanel({ atlas }: { atlas?: BrainAtlas }) {
+type MemorySignalKey = keyof MemoryActivity["lastObservedAt"];
+
+const MEMORY_SIGNAL_LABELS: Record<MemorySignalKey, string> = {
+  retrieval: "Retrieval observed",
+  hit: "Recall hit",
+  miss: "Recall miss",
+  selected: "Memory selected",
+  used: "Memory use verified",
+  reuseIgnored: "Memory result ignored",
+  feedback: "Outcome recorded",
+  corrected: "Correction proposed",
+  proposed: "Candidate proposed",
+  promoted: "Governed memory updated",
+};
+
+function verifiedMemoryActivity(activity?: MemoryActivity): activity is MemoryActivity {
+  return Boolean(
+    activity
+    && activity.schemaVersion === 1
+    && activity.source?.name === "governed-memory-registry"
+    && activity.source.verified === true
+    && activity.privacy?.countsOnly === true
+    && activity.privacy.queryIncluded === false
+    && activity.privacy.contentIncluded === false
+    && activity.privacy.rawIdentifiersIncluded === false,
+  );
+}
+
+function memorySignalIsRecent(value: string | null | undefined, windowSeconds: number) {
+  const observed = timeValue(value);
+  return observed > 0 && Date.now() - observed <= windowSeconds * 1_000;
+}
+
+function latestMemorySignal(activity?: MemoryActivity) {
+  if (!activity) return null;
+  return (Object.entries(activity.lastObservedAt) as Array<[MemorySignalKey, string | null]>)
+    .filter(([, observedAt]) => timeValue(observedAt) > 0)
+    .sort((a, b) => timeValue(b[1]) - timeValue(a[1]))[0] || null;
+}
+
+function BrainAtlasPanel({
+  atlas,
+  memoryOperations,
+}: {
+  atlas?: BrainAtlas;
+  memoryOperations?: MissionControlState["memoryOperations"];
+}) {
   const [focusId, setFocusId] = useState("all");
   useEffect(() => {
     if (focusId !== "all" && !atlas?.nodes.some((node) => node.id === focusId)) setFocusId("all");
   }, [atlas?.generatedAt, atlas?.nodes, focusId]);
   const view = useMemo(() => brainAtlasView(atlas, focusId), [atlas, focusId]);
-  const graphHeight = 386;
+  const rawActivity = memoryOperations?.activity;
+  const activity = verifiedMemoryActivity(rawActivity) ? rawActivity : undefined;
+  const memoryRegistry = recordRow(memoryOperations?.registry);
+  const memoryReview = recordRow(memoryOperations?.review);
+  const motionWindowSeconds = Math.min(300, Math.max(15, Number(activity?.motionWindowSeconds || 90)));
+  const count = (key: keyof MemoryActivity["counts"]) => Number(activity?.counts[key] || 0);
+  const recent = (key: MemorySignalKey) => memorySignalIsRecent(activity?.lastObservedAt[key], motionWindowSeconds);
+  const latestSignal = latestMemorySignal(activity);
+  const latestSignalRecent = latestSignal ? memorySignalIsRecent(latestSignal[1], motionWindowSeconds) : false;
+  const activityStateLabel = !activity
+    ? "Memory telemetry unavailable"
+    : latestSignal
+      ? `${latestSignalRecent ? "Live" : "Idle"} - ${MEMORY_SIGNAL_LABELS[latestSignal[0]]} ${ageLabel(latestSignal[1])}`
+      : `Idle - no activity in ${activity.windowMinutes}m`;
+  const retrievals = count("retrievals");
+  const hits = count("hits");
+  const uses = count("used");
+  const hitRate = retrievals ? `${Math.round((hits / retrievals) * 100)}%` : "--";
+  const byAgent = new Map((activity?.agents || []).map((row) => [row.agent, row]));
+  const flowAgents = HERO_AGENT_ORDER.map((agent) => byAgent.get(agent) || {
+    agent,
+    retrievals: 0,
+    hits: 0,
+    misses: 0,
+    lastRetrievalAt: null,
+  });
+  const graphHeight = 188;
   const positions = useMemo(() => {
     const next = new Map<string, { x: number; y: number; node: BrainAtlasNode }>();
     BRAIN_ATLAS_LAYER_ORDER.forEach((kind) => {
@@ -3133,7 +3178,7 @@ function BrainAtlasPanel({ atlas }: { atlas?: BrainAtlas }) {
   const age = ageMinutes(atlas?.generatedAt);
   const stale = Number.isFinite(age) && age > 60;
   const unavailable = !atlas || atlas.status === "unavailable";
-  const tone = unavailable ? "risk" : stale || atlas.status === "empty" ? "watch" : "clear";
+  const tone = unavailable && !activity ? "risk" : stale || !activity || atlas?.status === "empty" ? "watch" : "clear";
   const sourceExcluded = atlas
     ? atlas.counts.excluded.capacityReceipts + atlas.counts.excluded.capacityRoutes
     : 0;
@@ -3145,22 +3190,118 @@ function BrainAtlasPanel({ atlas }: { atlas?: BrainAtlas }) {
   const selectedNode = focusId === "all" ? undefined : atlas?.nodes.find((node) => node.id === focusId);
 
   return (
-    <section className={`brain-atlas-panel is-${tone}`} aria-label="Brain Atlas exact receipt graph">
+    <section
+      id="brain-atlas"
+      className={`brain-atlas-panel is-${tone}${latestSignalRecent ? " has-live-memory-flow" : ""}`}
+      data-memory-flow-state={latestSignalRecent ? "live" : activity ? "idle" : "unavailable"}
+      aria-label="Brain Atlas governed memory activity and receipt evidence"
+    >
       <header className="brain-atlas-header">
         <div>
-          <p><GitBranch size={13} />Operational receipt map</p>
+          <p><GitBranch size={13} />Governed external memory</p>
           <h2>Brain Atlas</h2>
         </div>
-        <span className={`brain-atlas-state is-${tone}`}>
-          {unavailable ? "Unavailable" : atlas?.status === "empty" ? "Empty" : stale ? `Stale - ${ageLabel(atlas?.generatedAt)}` : `Fresh - ${ageLabel(atlas?.generatedAt)}`}
+        <span className={`brain-atlas-state is-${tone}${latestSignalRecent ? " is-live" : ""}`} aria-live="polite">
+          {activityStateLabel}
         </span>
       </header>
 
       <div className="brain-atlas-scope" aria-label="Brain Atlas scope and evidence policy">
-        <span>7-day window</span>
-        <span>{atlas?.limits.maxNodes || 100}-node ceiling</span>
-        <span>Exact receipt edges only</span>
-        <span>{atlas?.source.verified ? "Source verified" : "Source not verified"}</span>
+        <span>{activity?.windowMinutes || 30}-minute live window</span>
+        <span>Counts and timing only</span>
+        <span>No memory contents</span>
+        <span>{activity?.source.verified ? "Registry verified" : "Registry not verified"}</span>
+      </div>
+
+      <div className="memory-flow-metrics" aria-label="Memory activity summary">
+        <article><span>Retrievals</span><strong>{retrievals}</strong><em>last {activity?.windowMinutes || 30}m</em></article>
+        <article><span>Recall hit rate</span><strong>{hitRate}</strong><em>{hits} exact hit{hits === 1 ? "" : "s"}</em></article>
+        <article className={uses ? "is-verified" : "is-idle"}><span>Explicit uses</span><strong>{uses}</strong><em>{uses ? "selected + used" : "no use receipt"}</em></article>
+        <article><span>Durable memory</span><strong>{Number(memoryRegistry.active || 0)}</strong><em>{Number(memoryReview.pending || 0)} candidate{Number(memoryReview.pending || 0) === 1 ? "" : "s"}</em></article>
+      </div>
+
+      <div className="memory-flow-map">
+        <svg
+          viewBox="0 0 1000 238"
+          role="img"
+          aria-labelledby="memory-flow-title memory-flow-description"
+          preserveAspectRatio="xMidYMid meet"
+          data-evidence-source="governed-memory-registry"
+        >
+          <title id="memory-flow-title">Verified governed memory activity</title>
+          <desc id="memory-flow-description">
+            Counts-only flow from agent retrieval through recall, explicit use, feedback, candidate review, and durable memory. Moving paths require a recent exact registry timestamp. This does not expose memory content or internal model reasoning.
+          </desc>
+          <g className="memory-flow-edges" aria-hidden="true">
+            {flowAgents.map((row, index) => {
+              const y = 22 + index * 52;
+              const live = memorySignalIsRecent(row.lastRetrievalAt, motionWindowSeconds);
+              return (
+                <path
+                  key={`agent-flow-${row.agent}`}
+                  className={`memory-flow-edge is-retrieval${live ? " is-live" : ""}`}
+                  data-operation="retrieval"
+                  data-observed-at={row.lastRetrievalAt || undefined}
+                  d={`M 168 ${y + 19} C 198 ${y + 19}, 202 119, 232 119`}
+                />
+              );
+            })}
+            <path className={`memory-flow-edge is-hit${recent("hit") ? " is-live" : ""}`} data-operation="hit" data-observed-at={activity?.lastObservedAt.hit || undefined} d="M 372 119 C 392 119, 408 119, 430 119" />
+            <path className={`memory-flow-edge is-used${recent("used") ? " is-live" : ""}`} data-operation="used" data-observed-at={activity?.lastObservedAt.used || undefined} d="M 576 119 C 610 119, 606 58, 640 58" />
+            <path className={`memory-flow-edge is-feedback${recent("feedback") ? " is-live" : ""}`} data-operation="feedback" data-observed-at={activity?.lastObservedAt.feedback || undefined} d="M 576 119 C 610 119, 606 181, 640 181" />
+            <path className={`memory-flow-edge is-proposed${recent("proposed") || recent("corrected") ? " is-live" : ""}`} data-operation="proposed" data-observed-at={activity?.lastObservedAt.proposed || activity?.lastObservedAt.corrected || undefined} d="M 784 181 C 802 181, 812 181, 830 181" />
+            <path className={`memory-flow-edge is-promoted${recent("promoted") ? " is-live" : ""}`} data-operation="promoted" data-observed-at={activity?.lastObservedAt.promoted || undefined} d="M 902 154 C 902 134, 902 103, 902 84" />
+            <path className={`memory-flow-edge is-promoted is-return${recent("promoted") ? " is-live" : ""}`} data-operation="promoted" data-observed-at={activity?.lastObservedAt.promoted || undefined} d="M 830 57 C 756 10, 514 10, 504 92" />
+          </g>
+          <g className="memory-flow-nodes">
+            {flowAgents.map((row, index) => {
+              const y = 22 + index * 52;
+              const live = memorySignalIsRecent(row.lastRetrievalAt, motionWindowSeconds);
+              return (
+                <g key={row.agent} className={`memory-flow-node is-agent${live ? " is-live" : ""}`} data-agent={row.agent}>
+                  <rect x="18" y={y} width="150" height="38" rx="7" />
+                  <text className="memory-flow-node-title" x="30" y={y + 16}>{AGENTS[row.agent].label}</text>
+                  <text className="memory-flow-node-detail" x="30" y={y + 30}>{row.retrievals} retrieval{row.retrievals === 1 ? "" : "s"}</text>
+                </g>
+              );
+            })}
+            <g className={`memory-flow-node is-recall${recent("retrieval") ? " is-live" : ""}`}>
+              <rect x="232" y="92" width="140" height="54" rx="9" />
+              <text className="memory-flow-node-title" x="302" y="115" textAnchor="middle">Recall</text>
+              <text className="memory-flow-node-detail" x="302" y="132" textAnchor="middle">{retrievals} queried · {count("misses")} miss</text>
+            </g>
+            <g className={`memory-flow-node is-registry${recent("hit") || recent("promoted") ? " is-live" : ""}`}>
+              <rect x="430" y="92" width="146" height="54" rx="9" />
+              <text className="memory-flow-node-title" x="503" y="115" textAnchor="middle">Memory registry</text>
+              <text className="memory-flow-node-detail" x="503" y="132" textAnchor="middle">{Number(memoryRegistry.active || 0)} governed records</text>
+            </g>
+            <g className={`memory-flow-node is-applied${recent("used") ? " is-live" : ""}`}>
+              <rect x="640" y="31" width="144" height="54" rx="9" />
+              <text className="memory-flow-node-title" x="712" y="54" textAnchor="middle">Applied</text>
+              <text className="memory-flow-node-detail" x="712" y="71" textAnchor="middle">{uses} explicit use receipt{uses === 1 ? "" : "s"}</text>
+            </g>
+            <g className={`memory-flow-node is-feedback${recent("feedback") ? " is-live" : ""}`}>
+              <rect x="640" y="154" width="144" height="54" rx="9" />
+              <text className="memory-flow-node-title" x="712" y="177" textAnchor="middle">Outcome</text>
+              <text className="memory-flow-node-detail" x="712" y="194" textAnchor="middle">{count("feedback")} feedback receipt{count("feedback") === 1 ? "" : "s"}</text>
+            </g>
+            <g className={`memory-flow-node is-candidate${recent("proposed") || recent("corrected") ? " is-live" : ""}`}>
+              <rect x="830" y="154" width="144" height="54" rx="9" />
+              <text className="memory-flow-node-title" x="902" y="177" textAnchor="middle">Candidate</text>
+              <text className="memory-flow-node-detail" x="902" y="194" textAnchor="middle">{count("proposed")} proposed · not learned</text>
+            </g>
+            <g className={`memory-flow-node is-durable${recent("promoted") ? " is-live" : ""}`}>
+              <rect x="830" y="31" width="144" height="54" rx="9" />
+              <text className="memory-flow-node-title" x="902" y="54" textAnchor="middle">Durable</text>
+              <text className="memory-flow-node-detail" x="902" y="71" textAnchor="middle">{count("promoted")} governed promotion{count("promoted") === 1 ? "" : "s"}</text>
+            </g>
+          </g>
+        </svg>
+      </div>
+
+      <div className="brain-atlas-evidence-label">
+        <span>Operational receipt evidence</span>
+        <em>{atlas?.source.verified ? `${atlas.counts.nodes} nodes · ${atlas.counts.edges} exact edges` : "source unavailable"}</em>
       </div>
 
       {focusNeeded ? (

@@ -45,6 +45,44 @@ def valid_kiosk_legibility_measurements() -> dict[str, object]:
     return {
         "pageOverflowX": 0,
         "pageOverflowY": 0,
+        "layout": {
+            "liveWork": {"fullyInViewport": True},
+            "todayJobs": {"fullyInViewport": True},
+            "brainAtlas": {"fullyInViewport": True},
+            "finops": {"fullyInViewport": True},
+            "atlasFinopsTopDelta": 0,
+            "atlasFinopsHeightDelta": 0,
+            "jobsAboveFinopsGap": 7,
+            "liveAboveAtlasGap": 7,
+        },
+        "memory": {
+            "flowState": "live",
+            "reducedMotion": False,
+            "evidenceSource": "governed-memory-registry",
+            "edges": [
+                {
+                    "operation": "retrieval",
+                    "observedAt": "2026-01-01T00:00:00Z",
+                    "evidenceValid": True,
+                    "ageSeconds": 10,
+                    "live": True,
+                    "animationName": "memory-flow-travel",
+                    "animated": True,
+                },
+                {
+                    "operation": "used",
+                    "observedAt": "",
+                    "evidenceValid": False,
+                    "ageSeconds": None,
+                    "live": False,
+                    "animationName": "none",
+                    "animated": False,
+                },
+            ],
+            "liveEdgeCount": 1,
+            "animatedEdgeCount": 1,
+            "animatedInactiveCount": 0,
+        },
         "liveWork": {
             "objectives": [{"fontSize": 24, "clipped": False}],
             "names": [{"fontSize": 17, "clipped": False}],
@@ -55,23 +93,23 @@ def valid_kiosk_legibility_measurements() -> dict[str, object]:
             "bodyPresent": True,
             "bodyBottomDeadSpace": 9,
             "bodyBottomOvershoot": 0,
-            "walletWidth": 224,
+            "walletWidth": 670,
             "panelOverflowX": 0,
             "panelOverflowY": 0,
             "walletActionCount": 4,
             "visibleDetailFeeds": 0,
-            "metricBandCount": 2,
-            "metricCounts": [5, 4],
+            "metricBandCount": 1,
+            "metricCounts": [5],
             "providerCount": 4,
             "providerGeometry": [
-                {"provider": "codex", "width": 245, "height": 108, "overflowX": 0, "overflowY": 0, "routeColor": "#65D1D5"},
-                {"provider": "antigravity", "width": 245, "height": 108, "overflowX": 0, "overflowY": 0, "routeColor": "#72D69A"},
-                {"provider": "ollama", "width": 245, "height": 108, "overflowX": 0, "overflowY": 0, "routeColor": "#A8ABB3"},
-                {"provider": "grok", "width": 245, "height": 108, "overflowX": 0, "overflowY": 0, "routeColor": "#1677FF"},
+                {"provider": "codex", "width": 199, "height": 124, "overflowX": 0, "overflowY": 0, "routeColor": "#65D1D5"},
+                {"provider": "antigravity", "width": 199, "height": 124, "overflowX": 0, "overflowY": 0, "routeColor": "#72D69A"},
+                {"provider": "ollama", "width": 199, "height": 124, "overflowX": 0, "overflowY": 0, "routeColor": "#A8ABB3"},
+                {"provider": "grok", "width": 199, "height": 124, "overflowX": 0, "overflowY": 0, "routeColor": "#1677FF"},
             ],
-            "providerNames": [{"fontSize": 14, "clipped": False}],
-            "providerBodies": [{"fontSize": 11, "clipped": False}],
-            "providerMetadata": [{"fontSize": 10, "clipped": False}],
+            "providerNames": [{"fontSize": 12, "clipped": False}],
+            "providerBodies": [{"fontSize": 8, "clipped": False}],
+            "providerMetadata": [{"fontSize": 8, "clipped": False}],
             "ledgerPresent": True,
             "ledgerOverflowX": 0,
             "ledgerOverflowY": 0,
@@ -79,12 +117,13 @@ def valid_kiosk_legibility_measurements() -> dict[str, object]:
             "ledgerRowMinHeight": 22,
             "healthPresent": True,
             "healthCount": 4,
-            "healthHeight": 76,
+            "healthHeight": 56,
             "healthOverflowX": 0,
             "healthOverflowY": 0,
         },
         "todayJobs": {
             "rowCount": 139,
+            "declaredRowCount": 139,
             "nonGreenRowCount": 94,
             "nonGreenSummaryCount": 3,
             "reasonTriggerCount": 97,
@@ -215,7 +254,7 @@ def test_missing_bundled_and_system_browsers_remains_fatal(monkeypatch: pytest.M
     ]
 
 
-def test_playwright_probes_preserve_desktop_mobile_and_add_kiosk_1920() -> None:
+def test_playwright_probes_cover_responsive_reference_and_reduced_motion_contracts() -> None:
     screenshot = Path("/tmp/control-tower-layout.png")
 
     probes = runtime_layout.playwright_probe_specs(screenshot)
@@ -224,11 +263,15 @@ def test_playwright_probes_preserve_desktop_mobile_and_add_kiosk_1920() -> None:
         ("desktop", {"width": 1440, "height": 1000}),
         ("mobile", {"width": 390, "height": 844}),
         ("kiosk-1920", {"width": 1920, "height": 1080}),
+        ("reference-2048", {"width": 2048, "height": 1228}),
+        ("kiosk-reduced-motion", {"width": 1920, "height": 1080}),
     ]
     assert [path.name for _, _, path in probes if path] == [
         "control-tower-layout.png",
         "control-tower-layout-mobile.png",
         "control-tower-layout-kiosk-1920.png",
+        "control-tower-layout-reference-2048.png",
+        "control-tower-layout-kiosk-reduced-motion.png",
     ]
 
 
@@ -236,10 +279,82 @@ def test_kiosk_legibility_accepts_exact_contract_boundaries() -> None:
     assert runtime_layout.validate_kiosk_legibility(valid_kiosk_legibility_measurements()) == []
 
 
+def test_layout_accepts_idle_atlas_only_when_no_path_is_live_or_animated() -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    memory = measurements["memory"]
+    assert isinstance(memory, dict)
+    memory["flowState"] = "idle"
+    edges = memory["edges"]
+    assert isinstance(edges, list)
+    for edge in edges:
+        assert isinstance(edge, dict)
+        edge["live"] = False
+        edge["animationName"] = "none"
+        edge["animated"] = False
+    memory["liveEdgeCount"] = 0
+    memory["animatedEdgeCount"] = 0
+
+    assert runtime_layout.validate_control_tower_layout(measurements, label="reference-2048") == []
+
+
+def test_layout_accepts_exact_live_path_without_animation_in_reduced_motion() -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    memory = measurements["memory"]
+    assert isinstance(memory, dict)
+    memory["reducedMotion"] = True
+    edges = memory["edges"]
+    assert isinstance(edges, list)
+    live_edge = edges[0]
+    assert isinstance(live_edge, dict)
+    live_edge["animationName"] = "none"
+    live_edge["animated"] = False
+    memory["animatedEdgeCount"] = 0
+
+    assert runtime_layout.validate_control_tower_layout(
+        measurements,
+        label="kiosk-reduced-motion",
+        expect_reduced_motion=True,
+    ) == []
+
+
+def test_layout_rejects_live_animation_after_exact_evidence_expires() -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    memory = measurements["memory"]
+    assert isinstance(memory, dict)
+    edges = memory["edges"]
+    assert isinstance(edges, list)
+    live_edge = edges[0]
+    assert isinstance(live_edge, dict)
+    live_edge["ageSeconds"] = runtime_layout.MEMORY_ACTIVITY_MAX_AGE_SECONDS + 1
+
+    failures = runtime_layout.validate_control_tower_layout(measurements, label="reference-2048")
+
+    assert any("live retrieval path evidence is 101s old" in failure for failure in failures)
+
+
 def test_kiosk_legibility_reports_every_regression() -> None:
     measurements = valid_kiosk_legibility_measurements()
     measurements["pageOverflowX"] = 6
     measurements["pageOverflowY"] = 7
+    layout = measurements["layout"]
+    assert isinstance(layout, dict)
+    atlas = layout["brainAtlas"]
+    assert isinstance(atlas, dict)
+    atlas["fullyInViewport"] = False
+    layout["atlasFinopsTopDelta"] = 3
+    layout["atlasFinopsHeightDelta"] = 4
+    layout["jobsAboveFinopsGap"] = -2
+    layout["liveAboveAtlasGap"] = -3
+    memory = measurements["memory"]
+    assert isinstance(memory, dict)
+    memory["evidenceSource"] = "decorative-animation"
+    memory["animatedInactiveCount"] = 1
+    edges = memory["edges"]
+    assert isinstance(edges, list)
+    live_edge = edges[0]
+    assert isinstance(live_edge, dict)
+    live_edge["evidenceValid"] = False
+    live_edge["ageSeconds"] = 101
     live_work = measurements["liveWork"]
     assert isinstance(live_work, dict)
     live_work["objectives"] = [{"fontSize": 23.5, "clipped": True}]
@@ -250,30 +365,33 @@ def test_kiosk_legibility_reports_every_regression() -> None:
     assert isinstance(finops, dict)
     finops["bodyBottomDeadSpace"] = 11
     finops["bodyBottomOvershoot"] = 3
-    finops["walletWidth"] = 240
+    finops["walletWidth"] = 720
     finops["panelOverflowX"] = 2
     finops["walletActionCount"] = 3
     finops["visibleDetailFeeds"] = 1
-    finops["metricCounts"] = [5, 5]
+    finops["metricBandCount"] = 2
+    finops["metricCounts"] = [5, 4]
     finops["providerCount"] = 3
     provider_geometry = finops["providerGeometry"]
     assert isinstance(provider_geometry, list)
-    provider_geometry[0]["width"] = 244
-    provider_geometry[0]["height"] = 107
+    provider_geometry[0]["width"] = 189
+    provider_geometry[0]["height"] = 117
     provider_geometry[0]["overflowX"] = 2
     provider_geometry[0]["routeColor"] = "#FFFFFF"
-    finops["providerNames"] = [{"fontSize": 13.5, "clipped": True}]
-    finops["providerBodies"] = [{"fontSize": 10.5, "clipped": True}]
-    finops["providerMetadata"] = [{"fontSize": 9.5, "clipped": True}]
+    finops["providerNames"] = [{"fontSize": 11.5, "clipped": True}]
+    finops["providerBodies"] = [{"fontSize": 7.5, "clipped": True}]
+    finops["providerMetadata"] = [{"fontSize": 7.5, "clipped": True}]
     finops["ledgerOverflowX"] = 2
     finops["ledgerOverflowY"] = 2
     finops["ledgerRowCount"] = 10
     finops["ledgerRowMinHeight"] = 21
     finops["healthCount"] = 3
-    finops["healthHeight"] = 91
+    finops["healthHeight"] = 59
     finops["healthOverflowY"] = 2
     today_jobs = measurements["todayJobs"]
     assert isinstance(today_jobs, dict)
+    today_jobs["declaredRowCount"] = 138
+    today_jobs["scrollOverflowY"] = 0
     today_jobs["nonGreenSummaryCount"] = 2
     today_jobs["reasonTriggerCount"] = 4
     today_jobs["missingReasonCount"] = 1
@@ -290,6 +408,16 @@ def test_kiosk_legibility_reports_every_regression() -> None:
     expected_fragments = (
         "horizontal page overflow",
         "vertical page overflow",
+        "Brain Atlas is not fully in the initial viewport",
+        "Brain Atlas / FinOps top delta",
+        "Brain Atlas / FinOps height delta",
+        "Today's Jobs must remain above FinOps",
+        "Live Work must remain above Brain Atlas",
+        "renders 139 rows but declares 138",
+        "Today's Jobs is not using its shorter scroll viewport",
+        "memory flow is not registry-verified",
+        "live retrieval path lacks an exact observed-at timestamp",
+        "unevidenced Brain Atlas path is animated",
         "Live Work objective minimum font",
         "Live Work objective has 1 clipped",
         "Live Work name minimum font",
@@ -329,7 +457,6 @@ def test_kiosk_legibility_reports_every_regression() -> None:
         "Today's Jobs pending summary does not explain future versus failed",
         "Today's Jobs current-time marker is missing or unlabeled",
         "Today's Jobs auto-follow state is ready",
-        "Today's Jobs current-time marker is 50px from center",
         "Today's Jobs rowgroup contains a non-row timeline child",
     )
     assert all(any(fragment in failure for failure in failures) for fragment in expected_fragments)
@@ -339,6 +466,8 @@ def test_kiosk_legibility_reports_every_regression() -> None:
 @pytest.mark.parametrize(
     ("path", "expected"),
     [
+        (("layout", "brainAtlas"), "Brain Atlas is not initially visible"),
+        (("memory", "evidenceSource"), "Brain Atlas memory flow is not registry-verified"),
         (("liveWork", "objectives"), "Live Work objective measurements are missing"),
         (("finops", "providerMetadata"), "FinOps provider metadata measurements are missing"),
         (("finops", "ledgerPresent"), "FinOps model ledger is missing"),

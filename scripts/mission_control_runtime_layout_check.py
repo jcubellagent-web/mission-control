@@ -37,29 +37,39 @@ DEFAULT_OUT = DATA / "mission-control-runtime-layout.json"
 LIVE_DATA = DATA / "control-tower-live.json"
 DASHBOARD_FALLBACK = DATA / "dashboard-data.json"
 DEFAULT_KIOSK_URL = "http://127.0.0.1:5174/"
-REQUIRED_TEXT = ("Josh 2.0 | Control Tower", "Live Work Board", "Today's Jobs")
-REQUIRED_IDS = ("brain-feed", "today-jobs")
+REQUIRED_TEXT = (
+    "Josh 2.0 | Control Tower",
+    "Live Work Board",
+    "Today's Jobs",
+    "Brain Atlas",
+    "FinOps Dashboard",
+)
+REQUIRED_IDS = ("brain-feed", "today-jobs", "brain-atlas", "finops-dashboard")
 REQUIRED_ARIA_LABELS = ("Control Tower summary", "Live Work Board")
 #JAIMES: Keep kiosk-distance typography and FinOps geometry in the permanent
 # 1920x1080 runtime guard so compact desktop/mobile checks cannot mask a regression.
 KIOSK_PROBE_LABEL = "kiosk-1920"
 KIOSK_VIEWPORT = {"width": 1920, "height": 1080}
+REFERENCE_PROBE_LABEL = "reference-2048"
+REFERENCE_VIEWPORT = {"width": 2048, "height": 1228}
+REDUCED_MOTION_PROBE_LABEL = "kiosk-reduced-motion"
+MEMORY_ACTIVITY_MAX_AGE_SECONDS = 100.0
 KIOSK_LEGIBILITY_THRESHOLDS = {
     "liveObjectiveFont": 24.0,
     "liveNameFont": 17.0,
     "liveDescriptionFont": 12.5,
     "liveSecondaryFont": 10.5,
     "finopsBottomDeadSpace": 10.0,
-    "finopsWalletWidthMin": 220.0,
-    "finopsWalletWidthMax": 230.0,
-    "providerNameFont": 14.0,
-    "providerBodyFont": 11.0,
-    "providerMetadataFont": 10.0,
-    "providerCardWidth": 245.0,
-    "providerCardHeight": 108.0,
+    "finopsWalletWidthMin": 640.0,
+    "finopsWalletWidthMax": 700.0,
+    "providerNameFont": 12.0,
+    "providerBodyFont": 8.0,
+    "providerMetadataFont": 8.0,
+    "providerCardWidth": 190.0,
+    "providerCardHeight": 118.0,
     "ledgerRowHeight": 22.0,
-    "healthHeightMin": 76.0,
-    "healthHeightMax": 90.0,
+    "healthHeightMin": 54.0,
+    "healthHeightMax": 58.0,
 }
 INTERNAL_TEXT_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("private filesystem path", re.compile(r"(?:/Users/|/home/)[^\s<]{2,}", re.I)),
@@ -111,6 +121,21 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
         clipped: lineBoxClipped || outsideOwner || (!titledEllipsis && (overflowX > 1 || overflowY > 1)),
       };
     });
+  const panelRect = (selector) => {
+    const element = document.querySelector(selector);
+    if (!visible(element)) return null;
+    const rect = element.getBoundingClientRect();
+    return {
+      top: round(rect.top),
+      left: round(rect.left),
+      right: round(rect.right),
+      bottom: round(rect.bottom),
+      width: round(rect.width),
+      height: round(rect.height),
+      fullyInViewport: rect.top >= -1 && rect.left >= -1
+        && rect.right <= root.clientWidth + 1 && rect.bottom <= root.clientHeight + 1,
+    };
+  };
   const panel = document.querySelector('#finops-dashboard');
   const body = document.querySelector('#finops-dashboard .finops-command-grid');
   const wallet = document.querySelector('#finops-dashboard [data-finops-region="wallet"]');
@@ -119,7 +144,7 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
   const providerCards = [...document.querySelectorAll('#finops-dashboard [data-finops-region="provider"]')].filter(visible);
   const metricBands = [...document.querySelectorAll('#finops-dashboard [data-finops-metric-band]')].filter(visible);
   const ledgerRows = [...document.querySelectorAll('#finops-dashboard .finops-ledger-row')].filter(visible);
-  const panelRect = panel ? panel.getBoundingClientRect() : null;
+  const finopsRect = panel ? panel.getBoundingClientRect() : null;
   const bodyRect = body ? body.getBoundingClientRect() : null;
   const walletRect = wallet ? wallet.getBoundingClientRect() : null;
   const healthRect = health ? health.getBoundingClientRect() : null;
@@ -157,10 +182,49 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
   const directChildrenValid = jobsScroller
     ? [...jobsScroller.children].every((element) => element.getAttribute('role') === 'row' || element.classList.contains('today-jobs-empty'))
     : false;
+  const livePanelRect = panelRect('#brain-feed');
+  const jobsPanelRect = panelRect('#today-jobs');
+  const atlasPanelRect = panelRect('#brain-atlas');
+  const finopsPanelRect = panelRect('#finops-dashboard');
+  const declaredJobsLabel = document.querySelector('#today-jobs .today-jobs-summary')?.getAttribute('aria-label') || '';
+  const declaredJobsMatch = declaredJobsLabel.match(/^(\d+)\s+job occurrences today$/i);
+  const memoryEdges = [...document.querySelectorAll('#brain-atlas .memory-flow-edge')].map((element) => {
+    const observedAt = String(element.getAttribute('data-observed-at') || '');
+    const observedMs = Date.parse(observedAt);
+    const animationName = getComputedStyle(element).animationName;
+    return {
+      operation: String(element.getAttribute('data-operation') || ''),
+      observedAt,
+      evidenceValid: Boolean(observedAt) && Number.isFinite(observedMs),
+      ageSeconds: Number.isFinite(observedMs) ? round((Date.now() - observedMs) / 1000) : null,
+      live: element.classList.contains('is-live'),
+      animationName,
+      animated: animationName !== 'none',
+    };
+  });
   return {
     viewport: {width: root.clientWidth, height: root.clientHeight},
     pageOverflowX: round(Math.max(0, root.scrollWidth - root.clientWidth)),
     pageOverflowY: round(Math.max(0, root.scrollHeight - root.clientHeight)),
+    layout: {
+      liveWork: livePanelRect,
+      todayJobs: jobsPanelRect,
+      brainAtlas: atlasPanelRect,
+      finops: finopsPanelRect,
+      atlasFinopsTopDelta: atlasPanelRect && finopsPanelRect ? round(Math.abs(atlasPanelRect.top - finopsPanelRect.top)) : null,
+      atlasFinopsHeightDelta: atlasPanelRect && finopsPanelRect ? round(Math.abs(atlasPanelRect.height - finopsPanelRect.height)) : null,
+      jobsAboveFinopsGap: jobsPanelRect && finopsPanelRect ? round(finopsPanelRect.top - jobsPanelRect.bottom) : null,
+      liveAboveAtlasGap: livePanelRect && atlasPanelRect ? round(atlasPanelRect.top - livePanelRect.bottom) : null,
+    },
+    memory: {
+      flowState: document.querySelector('#brain-atlas')?.getAttribute('data-memory-flow-state') || '',
+      reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+      evidenceSource: document.querySelector('#brain-atlas .memory-flow-map svg')?.getAttribute('data-evidence-source') || '',
+      edges: memoryEdges,
+      liveEdgeCount: memoryEdges.filter((edge) => edge.live).length,
+      animatedEdgeCount: memoryEdges.filter((edge) => edge.animated).length,
+      animatedInactiveCount: memoryEdges.filter((edge) => edge.animated && !edge.live).length,
+    },
     liveWork: {
       objectives: measurements('.brain-hero.is-flight-deck .agent-objective-main', '.agent-hero-card'),
       names: measurements('.brain-hero.is-flight-deck .agent-name-lockup strong', '.agent-hero-card'),
@@ -168,9 +232,9 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
       secondary: measurements('.brain-hero.is-flight-deck .agent-hero-card > p', '.agent-hero-card'),
     },
     finops: {
-      bodyPresent: Boolean(panelRect && bodyRect),
-      bodyBottomDeadSpace: panelRect && healthRect ? round(Math.max(0, panelRect.bottom - healthRect.bottom)) : null,
-      bodyBottomOvershoot: panelRect && bodyRect ? round(Math.max(0, bodyRect.bottom - panelRect.bottom)) : null,
+      bodyPresent: Boolean(finopsRect && bodyRect),
+      bodyBottomDeadSpace: finopsRect && healthRect ? round(Math.max(0, finopsRect.bottom - healthRect.bottom)) : null,
+      bodyBottomOvershoot: finopsRect && bodyRect ? round(Math.max(0, bodyRect.bottom - finopsRect.bottom)) : null,
       walletWidth: walletRect ? round(walletRect.width) : null,
       panelOverflowX: panel ? round(Math.max(0, panel.scrollWidth - panel.clientWidth)) : null,
       panelOverflowY: panel ? round(Math.max(0, panel.scrollHeight - panel.clientHeight)) : null,
@@ -183,7 +247,8 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
       providerNames: measurements('#finops-dashboard .finops-provider-name > strong', '.finops-provider-simple'),
       providerBodies: measurements('#finops-dashboard .finops-provider-purpose', '.finops-provider-simple'),
       providerMetadata: measurements(
-        '#finops-dashboard .finops-provider-name p, '
+        '#finops-dashboard .finops-provider-name p > span, '
+        + '#finops-dashboard .finops-provider-name p > em, '
         + '#finops-dashboard .finops-provider-state strong, '
         + '#finops-dashboard .finops-provider-utilization span',
         '.finops-provider-simple'
@@ -201,6 +266,7 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
     },
     todayJobs: {
       rowCount: document.querySelectorAll('#today-jobs .today-job-row').length,
+      declaredRowCount: declaredJobsMatch ? Number(declaredJobsMatch[1]) : null,
       nonGreenRowCount: nonGreenRows.length,
       nonGreenSummaryCount: nonGreenSummaries.length,
       reasonTriggerCount: reasonTriggers.length,
@@ -481,7 +547,7 @@ def launch_playwright_browser(playwright: Any) -> tuple[Any, dict[str, Any]]:
 
 
 def playwright_probe_specs(screenshot_path: Path | None) -> tuple[tuple[str, dict[str, int], Path | None], ...]:
-    """Return the stable responsive probes plus the physical-kiosk viewport."""
+    """Return responsive, physical-kiosk, reference, and accessibility probes."""
     return (
         ("desktop", {"width": 1440, "height": 1000}, screenshot_path),
         (
@@ -493,6 +559,16 @@ def playwright_probe_specs(screenshot_path: Path | None) -> tuple[tuple[str, dic
             KIOSK_PROBE_LABEL,
             dict(KIOSK_VIEWPORT),
             screenshot_path.with_name(f"{screenshot_path.stem}-{KIOSK_PROBE_LABEL}{screenshot_path.suffix}") if screenshot_path else None,
+        ),
+        (
+            REFERENCE_PROBE_LABEL,
+            dict(REFERENCE_VIEWPORT),
+            screenshot_path.with_name(f"{screenshot_path.stem}-{REFERENCE_PROBE_LABEL}{screenshot_path.suffix}") if screenshot_path else None,
+        ),
+        (
+            REDUCED_MOTION_PROBE_LABEL,
+            dict(KIOSK_VIEWPORT),
+            screenshot_path.with_name(f"{screenshot_path.stem}-{REDUCED_MOTION_PROBE_LABEL}{screenshot_path.suffix}") if screenshot_path else None,
         ),
     )
 
@@ -532,11 +608,128 @@ def _font_and_clipping_failures(
     return failures
 
 
+def validate_control_tower_layout(
+    measurements: Any,
+    *,
+    label: str,
+    expect_reduced_motion: bool = False,
+) -> list[str]:
+    """Validate the initial four-panel composition and evidence-bound motion."""
+    if not isinstance(measurements, dict):
+        return [f"{label}: layout measurements are missing"]
+    failures: list[str] = []
+
+    for axis in ("pageOverflowX", "pageOverflowY"):
+        overflow = _number(measurements.get(axis))
+        if overflow < 0:
+            failures.append(f"{label}: {axis} measurement is missing")
+        elif overflow != 0:
+            failures.append(f"{label}: {axis} is {_px(overflow)} (requires zero page overflow)")
+
+    layout = measurements.get("layout") if isinstance(measurements.get("layout"), dict) else {}
+    for key, panel_label in (
+        ("liveWork", "Live Work"),
+        ("todayJobs", "Today's Jobs"),
+        ("brainAtlas", "Brain Atlas"),
+        ("finops", "FinOps"),
+    ):
+        panel = layout.get(key)
+        if not isinstance(panel, dict):
+            failures.append(f"{label}: {panel_label} is not initially visible")
+        elif panel.get("fullyInViewport") is not True:
+            failures.append(f"{label}: {panel_label} is not fully in the initial viewport")
+
+    for key, delta_label in (
+        ("atlasFinopsTopDelta", "Brain Atlas / FinOps top delta"),
+        ("atlasFinopsHeightDelta", "Brain Atlas / FinOps height delta"),
+    ):
+        delta = _number(layout.get(key))
+        if delta < 0:
+            failures.append(f"{label}: {delta_label} is missing")
+        elif delta > 2:
+            failures.append(f"{label}: {delta_label} is {_px(delta)} (requires <= 2px)")
+
+    for key, order_label in (
+        ("jobsAboveFinopsGap", "Today's Jobs must remain above FinOps"),
+        ("liveAboveAtlasGap", "Live Work must remain above Brain Atlas"),
+    ):
+        gap = _number(layout.get(key))
+        if gap < 0:
+            failures.append(f"{label}: {order_label} (overlap {_px(abs(gap))})")
+
+    today_jobs = measurements.get("todayJobs") if isinstance(measurements.get("todayJobs"), dict) else {}
+    row_count = int(_number(today_jobs.get("rowCount"), missing=-1.0))
+    declared_count = int(_number(today_jobs.get("declaredRowCount"), missing=-1.0))
+    if row_count <= 0:
+        failures.append(f"{label}: Today's Jobs has no rendered occurrence rows")
+    if declared_count < 0:
+        failures.append(f"{label}: Today's Jobs declared row count is missing")
+    elif row_count != declared_count:
+        failures.append(
+            f"{label}: Today's Jobs renders {row_count} rows but declares {declared_count}; "
+            "the shorter viewport must retain the full data set"
+        )
+    if _number(today_jobs.get("scrollOverflowY"), missing=0.0) <= 1:
+        failures.append(f"{label}: Today's Jobs is not using its shorter scroll viewport")
+    if today_jobs.get("directChildrenValid") is not True:
+        failures.append(f"{label}: Today's Jobs rowgroup contains a non-row timeline child")
+
+    memory = measurements.get("memory") if isinstance(measurements.get("memory"), dict) else {}
+    if memory.get("evidenceSource") != "governed-memory-registry":
+        failures.append(f"{label}: Brain Atlas memory flow is not registry-verified")
+    reduced_motion = memory.get("reducedMotion")
+    if reduced_motion is not expect_reduced_motion:
+        failures.append(
+            f"{label}: prefers-reduced-motion is {reduced_motion!r} "
+            f"(requires {expect_reduced_motion!r})"
+        )
+    flow_state = str(memory.get("flowState") or "")
+    if flow_state not in {"live", "idle", "unavailable"}:
+        failures.append(f"{label}: Brain Atlas memory flow state is missing or invalid")
+    edges = memory.get("edges") if isinstance(memory.get("edges"), list) else []
+    if not edges:
+        failures.append(f"{label}: Brain Atlas memory flow edges are missing")
+    live_edges = [edge for edge in edges if isinstance(edge, dict) and edge.get("live") is True]
+    animated_edges = [edge for edge in edges if isinstance(edge, dict) and edge.get("animated") is True]
+    for edge in live_edges:
+        operation = str(edge.get("operation") or "unknown")
+        age_seconds = _number(edge.get("ageSeconds"))
+        if edge.get("evidenceValid") is not True:
+            failures.append(f"{label}: live {operation} path lacks an exact observed-at timestamp")
+        elif age_seconds < -5 or age_seconds > MEMORY_ACTIVITY_MAX_AGE_SECONDS:
+            failures.append(
+                f"{label}: live {operation} path evidence is {age_seconds:g}s old "
+                f"(requires -5s to {MEMORY_ACTIVITY_MAX_AGE_SECONDS:g}s)"
+            )
+    if int(_number(memory.get("animatedInactiveCount"), missing=-1.0)) != 0:
+        failures.append(f"{label}: an unevidenced Brain Atlas path is animated")
+    if flow_state == "live" and not live_edges:
+        failures.append(f"{label}: Brain Atlas reports live activity without an exact live path")
+    if flow_state != "live" and live_edges:
+        failures.append(f"{label}: Brain Atlas exposes live paths while its state is {flow_state}")
+    if expect_reduced_motion:
+        if animated_edges:
+            failures.append(f"{label}: reduced-motion mode still animates {len(animated_edges)} Brain Atlas path(s)")
+    else:
+        animation_mismatches = [
+            edge for edge in live_edges
+            if str(edge.get("animationName") or "") != "memory-flow-travel"
+        ]
+        if animation_mismatches:
+            failures.append(f"{label}: {len(animation_mismatches)} exact live Brain Atlas path(s) are not animated")
+        if len(animated_edges) != len(live_edges):
+            failures.append(
+                f"{label}: Brain Atlas animation count {len(animated_edges)} does not match "
+                f"exact live path count {len(live_edges)}"
+            )
+    return failures
+
+
 def validate_kiosk_legibility(measurements: Any) -> list[str]:
     """Validate the permanent 1920x1080 distance-legibility contract."""
     if not isinstance(measurements, dict):
         return [f"{KIOSK_PROBE_LABEL}: legibility measurements are missing"]
-    failures: list[str] = []
+    failures = validate_control_tower_layout(measurements, label=KIOSK_PROBE_LABEL)
     page_overflow_x = _number(measurements.get("pageOverflowX"))
     page_overflow_y = _number(measurements.get("pageOverflowY"))
     if page_overflow_x > 2:
@@ -591,10 +784,10 @@ def validate_kiosk_legibility(measurements: Any) -> list[str]:
         failures.append(f"{KIOSK_PROBE_LABEL}: FinOps wallet action count is {finops.get('walletActionCount')} (requires 4)")
     if finops.get("visibleDetailFeeds") != 0:
         failures.append(f"{KIOSK_PROBE_LABEL}: FinOps overview exposes transaction/activity detail feeds")
-    if finops.get("metricBandCount") != 2 or finops.get("metricCounts") != [5, 4]:
+    if finops.get("metricBandCount") != 1 or finops.get("metricCounts") != [5]:
         failures.append(
             f"{KIOSK_PROBE_LABEL}: FinOps metric hierarchy is {finops.get('metricBandCount')} band(s) "
-            f"with {finops.get('metricCounts')} cells (requires [5, 4])"
+            f"with {finops.get('metricCounts')} cells (requires one compact 5-cell band)"
         )
     if finops.get("providerCount") != 4:
         failures.append(f"{KIOSK_PROBE_LABEL}: FinOps provider count is {finops.get('providerCount')} (requires 4)")
@@ -722,6 +915,9 @@ def playwright_render(url: str, timeout: float, screenshot_path: Path | None) ->
             probes = playwright_probe_specs(screenshot_path)
             for label, viewport, probe_screenshot in probes:
                 page = browser.new_page(viewport=viewport, device_scale_factor=1)
+                page.emulate_media(
+                    reduced_motion="reduce" if label == REDUCED_MOTION_PROBE_LABEL else "no-preference"
+                )
 
                 def on_console(message: Any, *, probe_label: str = label) -> None:
                     location = message.location or {}
@@ -775,13 +971,21 @@ def playwright_render(url: str, timeout: float, screenshot_path: Path | None) ->
                 )
                 if overflow.get("pageOverflow", 0) > 2:
                     failures.append(f"{label}: horizontal page overflow is {overflow['pageOverflow']}px")
-                kiosk_legibility = None
-                if label == KIOSK_PROBE_LABEL:
-                    kiosk_legibility = page.evaluate(KIOSK_LEGIBILITY_EVALUATION)
-                    # The kiosk-specific validator supersedes the generic
-                    # horizontal message and also covers vertical overflow.
+                runtime_measurements = None
+                if label in {KIOSK_PROBE_LABEL, REFERENCE_PROBE_LABEL, REDUCED_MOTION_PROBE_LABEL}:
+                    runtime_measurements = page.evaluate(KIOSK_LEGIBILITY_EVALUATION)
+                    # The full-layout validators supersede the generic
+                    # horizontal message and also cover vertical overflow,
+                    # initial visibility, panel geometry, jobs, and motion.
                     failures = [failure for failure in failures if failure != f"{label}: horizontal page overflow is {overflow['pageOverflow']}px"]
-                    failures.extend(validate_kiosk_legibility(kiosk_legibility))
+                    if label == KIOSK_PROBE_LABEL:
+                        failures.extend(validate_kiosk_legibility(runtime_measurements))
+                    else:
+                        failures.extend(validate_control_tower_layout(
+                            runtime_measurements,
+                            label=label,
+                            expect_reduced_motion=label == REDUCED_MOTION_PROBE_LABEL,
+                        ))
                 probe_evidence = {
                     "name": label,
                     "width": viewport["width"],
@@ -790,8 +994,8 @@ def playwright_render(url: str, timeout: float, screenshot_path: Path | None) ->
                     "semantics": semantics,
                     "overflow": overflow,
                 }
-                if kiosk_legibility is not None:
-                    probe_evidence["legibility"] = kiosk_legibility
+                if runtime_measurements is not None:
+                    probe_evidence["runtimeLayout"] = runtime_measurements
                 viewport_evidence.append(probe_evidence)
                 if probe_screenshot:
                     probe_screenshot.parent.mkdir(parents=True, exist_ok=True)
@@ -826,7 +1030,7 @@ def playwright_render(url: str, timeout: float, screenshot_path: Path | None) ->
     return row(
         "rendered-react",
         "pass",
-        "Desktop, mobile, and 1920x1080 kiosk semantics, console, network, overflow, and legibility verified",
+        "Desktop, mobile, 1920x1080 kiosk, 2048x1228 reference, and reduced-motion semantics, layout, motion, console, network, overflow, and legibility verified",
         evidence=evidence,
     ), leaks, screenshot_written
 
@@ -972,7 +1176,9 @@ def self_test() -> int:
     <html><body><h1>Josh 2.0 | Control Tower</h1>
     <section aria-label="Control Tower summary"></section>
     <section id="brain-feed" aria-label="Live Work Board">Live Work Board</section>
-    <aside id="today-jobs">Today's Jobs</aside></body></html>
+    <aside id="today-jobs">Today's Jobs</aside>
+    <section id="brain-atlas">Brain Atlas</section>
+    <section id="finops-dashboard">FinOps Dashboard</section></body></html>
     """
     failures, leaks, _ = analyze_rendered_html(good)
     bad_failures, bad_leaks, _ = analyze_rendered_html(good.replace("Today's Jobs", "/Users/private/token"))
@@ -985,6 +1191,35 @@ def self_test() -> int:
     good_kiosk = {
         "pageOverflowX": 0,
         "pageOverflowY": 0,
+        "layout": {
+            "liveWork": {"fullyInViewport": True},
+            "todayJobs": {"fullyInViewport": True},
+            "brainAtlas": {"fullyInViewport": True},
+            "finops": {"fullyInViewport": True},
+            "atlasFinopsTopDelta": 0,
+            "atlasFinopsHeightDelta": 0,
+            "jobsAboveFinopsGap": 7,
+            "liveAboveAtlasGap": 7,
+        },
+        "memory": {
+            "flowState": "live",
+            "reducedMotion": False,
+            "evidenceSource": "governed-memory-registry",
+            "edges": [
+                {
+                    "operation": "retrieval",
+                    "observedAt": "2026-01-01T00:00:00Z",
+                    "evidenceValid": True,
+                    "ageSeconds": 10,
+                    "live": True,
+                    "animationName": "memory-flow-travel",
+                    "animated": True,
+                },
+            ],
+            "liveEdgeCount": 1,
+            "animatedEdgeCount": 1,
+            "animatedInactiveCount": 0,
+        },
         "liveWork": {
             "objectives": [{"fontSize": 24, "clipped": False}],
             "names": [{"fontSize": 17, "clipped": False}],
@@ -995,23 +1230,23 @@ def self_test() -> int:
             "bodyPresent": True,
             "bodyBottomDeadSpace": 9,
             "bodyBottomOvershoot": 0,
-            "walletWidth": 224,
+            "walletWidth": 670,
             "panelOverflowX": 0,
             "panelOverflowY": 0,
             "walletActionCount": 4,
             "visibleDetailFeeds": 0,
-            "metricBandCount": 2,
-            "metricCounts": [5, 4],
+            "metricBandCount": 1,
+            "metricCounts": [5],
             "providerCount": 4,
             "providerGeometry": [
-                {"provider": "codex", "width": 282, "height": 123, "overflowX": 0, "overflowY": 0, "routeColor": "#65D1D5"},
-                {"provider": "antigravity", "width": 282, "height": 123, "overflowX": 0, "overflowY": 0, "routeColor": "#72D69A"},
-                {"provider": "ollama", "width": 282, "height": 123, "overflowX": 0, "overflowY": 0, "routeColor": "#A8ABB3"},
-                {"provider": "grok", "width": 282, "height": 123, "overflowX": 0, "overflowY": 0, "routeColor": "#1677FF"},
+                {"provider": "codex", "width": 199, "height": 124, "overflowX": 0, "overflowY": 0, "routeColor": "#65D1D5"},
+                {"provider": "antigravity", "width": 199, "height": 124, "overflowX": 0, "overflowY": 0, "routeColor": "#72D69A"},
+                {"provider": "ollama", "width": 199, "height": 124, "overflowX": 0, "overflowY": 0, "routeColor": "#A8ABB3"},
+                {"provider": "grok", "width": 199, "height": 124, "overflowX": 0, "overflowY": 0, "routeColor": "#1677FF"},
             ],
-            "providerNames": [{"fontSize": 16, "clipped": False}],
-            "providerBodies": [{"fontSize": 11, "clipped": False}],
-            "providerMetadata": [{"fontSize": 10, "clipped": False}],
+            "providerNames": [{"fontSize": 12, "clipped": False}],
+            "providerBodies": [{"fontSize": 8, "clipped": False}],
+            "providerMetadata": [{"fontSize": 8, "clipped": False}],
             "ledgerPresent": True,
             "ledgerOverflowX": 0,
             "ledgerOverflowY": 0,
@@ -1019,12 +1254,13 @@ def self_test() -> int:
             "ledgerRowMinHeight": 23,
             "healthPresent": True,
             "healthCount": 4,
-            "healthHeight": 78,
+            "healthHeight": 56,
             "healthOverflowX": 0,
             "healthOverflowY": 0,
         },
         "todayJobs": {
             "rowCount": 113,
+            "declaredRowCount": 113,
             "nonGreenRowCount": 64,
             "nonGreenSummaryCount": 3,
             "reasonTriggerCount": 67,
@@ -1042,8 +1278,8 @@ def self_test() -> int:
     bad_kiosk = json.loads(json.dumps(good_kiosk))
     bad_kiosk["pageOverflowY"] = 8
     bad_kiosk["liveWork"]["objectives"][0]["clipped"] = True
-    bad_kiosk["finops"]["walletWidth"] = 240
-    bad_kiosk["finops"]["metricCounts"] = [5, 5]
+    bad_kiosk["finops"]["walletWidth"] = 720
+    bad_kiosk["finops"]["metricCounts"] = [5, 4]
     bad_kiosk["finops"]["providerGeometry"][0]["routeColor"] = "#FFFFFF"
     good_kiosk_failures = validate_kiosk_legibility(good_kiosk)
     bad_kiosk_failures = validate_kiosk_legibility(bad_kiosk)

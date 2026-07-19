@@ -81,7 +81,6 @@ open -na "$CHROME_APP" --args \
   --no-first-run \
   --disable-session-crashed-bubble \
   --disable-infobars \
-  --force-prefers-reduced-motion \
   --hide-scrollbars \
   --app="$URL" \
   --kiosk \

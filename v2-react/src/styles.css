@@ -13960,7 +13960,7 @@ a:focus-visible,
 }
 
 /* Control Tower kiosk visibility contract: distance-readable work first, complete FinOps second. */
-@media (min-width: 1361px) and (min-height: 850px) {
+@media (min-width: 1501px) and (min-height: 850px) {
   .app-shell.hero-shell {
     box-sizing: border-box !important;
     width: calc(100vw - 16px) !important;
@@ -14970,7 +14970,7 @@ body,
   text-align: center;
 }
 
-@media (min-width: 1361px) and (min-height: 850px) {
+@media (min-width: 1501px) and (min-height: 850px) {
   .brain-hero.is-flight-deck .brain-agent-stage {
     grid-template-columns: minmax(0, 1fr) !important;
   }
@@ -16613,5 +16613,596 @@ body,
 @media (max-width: 980px) {
   .support-module-tabs {
     top: 6px;
+  }
+}
+
+/* Control Tower v11 — persistent Brain Atlas, compact Jobs, and matched lower panels. */
+@media (min-width: 1501px) and (min-height: 850px) {
+  .kiosk-grid {
+    grid-template-columns: minmax(0, 1.72fr) minmax(500px, 0.98fr) !important;
+    grid-template-rows: minmax(0, 44fr) minmax(0, 56fr) !important;
+    grid-template-areas:
+      "live jobs"
+      "atlas finops";
+    gap: 7px !important;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .kiosk-grid > .brain-hero-panel { grid-area: live; }
+  .kiosk-grid > .right-rail { grid-area: jobs; }
+  .kiosk-grid > #brain-atlas { grid-area: atlas; }
+  .kiosk-grid > #finops-dashboard { grid-area: finops; }
+
+  .kiosk-grid > .brain-hero-panel,
+  .kiosk-grid > .right-rail,
+  .kiosk-grid > #brain-atlas,
+  .kiosk-grid > #finops-dashboard {
+    width: 100%;
+    height: 100% !important;
+    min-width: 0;
+    min-height: 0 !important;
+    overflow: hidden;
+  }
+
+  .kiosk-grid > .brain-hero-panel {
+    grid-template-rows: minmax(0, 1fr) !important;
+  }
+
+  .kiosk-grid > .right-rail .jobs-occurrence-rail {
+    gap: 5px !important;
+    padding: 8px !important;
+  }
+
+  .kiosk-grid > .right-rail .today-jobs-summary article {
+    min-height: 44px;
+    padding-block: 4px;
+  }
+
+  .kiosk-grid > .right-rail .today-jobs-head h2 {
+    font-size: 21px !important;
+  }
+}
+
+#brain-atlas.brain-atlas-panel {
+  display: flex !important;
+  flex-direction: column;
+  gap: 5px !important;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 9px !important;
+  background: #061726 !important;
+  padding: 9px 10px 8px !important;
+}
+
+#brain-atlas .brain-atlas-header {
+  min-height: 38px;
+}
+
+#brain-atlas .brain-atlas-header h2 {
+  font-size: 21px;
+}
+
+#brain-atlas .brain-atlas-state {
+  max-width: min(48%, 430px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#brain-atlas .brain-atlas-state.is-live {
+  border-color: rgba(88, 238, 154, 0.62);
+  color: #8ff5c4;
+  background: rgba(44, 194, 118, 0.13);
+  box-shadow: 0 0 18px rgba(88, 238, 154, 0.1);
+}
+
+#brain-atlas .brain-atlas-scope {
+  flex: 0 0 auto;
+}
+
+.memory-flow-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  flex: 0 0 50px;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(85, 215, 255, 0.15);
+  border-radius: 6px;
+  background: #071d2e;
+}
+
+.memory-flow-metrics article {
+  display: grid;
+  align-content: center;
+  gap: 1px;
+  min-width: 0;
+  padding: 5px 10px;
+}
+
+.memory-flow-metrics article + article {
+  border-left: 1px solid rgba(85, 215, 255, 0.12);
+}
+
+.memory-flow-metrics span,
+.memory-flow-metrics em {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 800;
+  line-height: 1;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.memory-flow-metrics strong {
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1;
+}
+
+.memory-flow-metrics article.is-verified strong { color: var(--green); }
+.memory-flow-metrics article.is-idle strong { color: var(--soft); }
+
+.memory-flow-map {
+  flex: 1 1 168px;
+  min-width: 0;
+  min-height: 148px;
+  overflow: hidden;
+  border: 1px solid rgba(85, 215, 255, 0.15);
+  border-radius: 7px;
+  background:
+    radial-gradient(circle at 51% 50%, rgba(44, 177, 199, 0.075), transparent 38%),
+    #03111f;
+}
+
+.memory-flow-map svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.memory-flow-edge {
+  fill: none;
+  stroke: rgba(114, 149, 168, 0.38);
+  stroke-width: 1.3;
+  vector-effect: non-scaling-stroke;
+}
+
+.memory-flow-edge.is-hit,
+.memory-flow-edge.is-promoted { stroke: rgba(88, 238, 154, 0.46); }
+.memory-flow-edge.is-used { stroke: rgba(101, 205, 245, 0.48); }
+.memory-flow-edge.is-feedback,
+.memory-flow-edge.is-proposed { stroke: rgba(180, 140, 255, 0.45); }
+
+.memory-flow-edge.is-live {
+  stroke-width: 2.2;
+  stroke-dasharray: 7 13;
+  animation: memory-flow-travel 1.05s linear infinite;
+  filter: drop-shadow(0 0 4px currentColor);
+}
+
+.memory-flow-node rect {
+  fill: #071d2e;
+  stroke: rgba(101, 205, 245, 0.34);
+  stroke-width: 1.15;
+  vector-effect: non-scaling-stroke;
+}
+
+.memory-flow-node.is-agent rect { stroke: rgba(101, 205, 245, 0.44); }
+.memory-flow-node.is-registry rect,
+.memory-flow-node.is-durable rect { stroke: rgba(88, 238, 154, 0.48); }
+.memory-flow-node.is-feedback rect,
+.memory-flow-node.is-candidate rect { stroke: rgba(180, 140, 255, 0.48); }
+.memory-flow-node.is-applied rect { stroke: rgba(101, 205, 245, 0.5); }
+
+.memory-flow-node.is-live rect {
+  fill: rgba(12, 42, 58, 0.98);
+  stroke-width: 2;
+  filter: drop-shadow(0 0 6px rgba(88, 238, 154, 0.32));
+}
+
+.memory-flow-node-title {
+  fill: #ecf8fc;
+  font-size: 12px;
+  font-weight: 850;
+  pointer-events: none;
+}
+
+.memory-flow-node-detail {
+  fill: #8da8b7;
+  font-size: 9px;
+  pointer-events: none;
+}
+
+@keyframes memory-flow-travel {
+  to { stroke-dashoffset: -40; }
+}
+
+.brain-atlas-evidence-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex: 0 0 17px;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 8.5px;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.brain-atlas-evidence-label span,
+.brain-atlas-evidence-label em {
+  overflow: hidden;
+  font-style: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#brain-atlas .brain-atlas-focus {
+  flex: 0 0 27px;
+}
+
+#brain-atlas .brain-atlas-plot,
+#brain-atlas .brain-atlas-empty {
+  flex: 0.54 1 96px;
+  min-height: 80px;
+}
+
+#brain-atlas .brain-atlas-plot svg {
+  min-height: 0;
+}
+
+#brain-atlas .brain-atlas-layer-label {
+  font-size: 12px;
+}
+
+#brain-atlas .brain-atlas-node-label,
+#brain-atlas .brain-atlas-receipt-label {
+  font-size: 10px;
+}
+
+#brain-atlas .brain-atlas-footer {
+  flex: 0 0 14px;
+}
+
+@media (min-width: 1501px) and (min-height: 850px) {
+  .kiosk-grid > #finops-dashboard.finops-quiet-layout {
+    grid-template-rows: 40px minmax(0, 1fr) 56px !important;
+    gap: 5px !important;
+    padding: 8px !important;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-header {
+    min-height: 40px !important;
+    max-height: 40px !important;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-header h2 {
+    font-size: 16px !important;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-header p {
+    font-size: 8px !important;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-actions > span:nth-of-type(2) {
+    display: none !important;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-actions span,
+  .kiosk-grid > #finops-dashboard .finops-actions button {
+    min-height: 28px !important;
+    padding: 4px 7px !important;
+    font-size: 9px !important;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-actions button {
+    min-width: 0 !important;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-command-grid {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: 72px minmax(0, 1fr);
+    gap: 5px;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-wallet-rail {
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-wallet-actions {
+    display: none;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-wallet-summary {
+    grid-template-columns: 0.82fr 1.28fr 1fr;
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-wallet-summary > div {
+    padding: 6px 8px !important;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-wallet-summary > div + div {
+    border-top: 0 !important;
+    border-left: 1px solid var(--finops-divider) !important;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-wallet-total strong {
+    font-size: 21px !important;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-overview {
+    grid-template-rows: 52px minmax(0, 1fr);
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-metric-stack {
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-metric-band.is-secondary {
+    display: none;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-metric-band article {
+    padding: 4px 6px !important;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-metric-band article > span {
+    font-size: 8px !important;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-metric-band article > strong,
+  .kiosk-grid > #finops-dashboard .finops-metric-value > strong {
+    font-size: 12px !important;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-main-grid {
+    grid-template-columns: minmax(0, 1.55fr) minmax(232px, 1fr);
+    gap: 5px;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-provider-grid {
+    gap: 4px !important;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-provider-simple {
+    gap: 3px;
+    padding: 5px 6px;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-provider-identity {
+    grid-template-columns: 26px minmax(0, 1fr) auto;
+    gap: 5px;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-provider-glyph {
+    width: 25px;
+    height: 25px;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-provider-glyph svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-provider-name > strong {
+    font-size: 12px;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-provider-name p,
+  .kiosk-grid > #finops-dashboard .finops-provider-purpose {
+    font-size: 8px !important;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-provider-utilization strong {
+    font-size: 16px;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-ledger-table {
+    grid-template-rows: 31px minmax(0, 1fr);
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-ledger-table > header {
+    grid-template-rows: 17px 13px;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-ledger-columns,
+  .kiosk-grid > #finops-dashboard .finops-ledger-row {
+    grid-template-columns: minmax(0, 1.4fr) minmax(38px, .75fr) minmax(34px, .55fr) minmax(38px, .58fr) minmax(36px, .6fr);
+    gap: 3px;
+    font-size: 8px;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-ledger-row strong {
+    font-size: 8.5px;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-health-rail article {
+    grid-template-columns: 19px minmax(0, 1fr);
+    gap: 5px;
+    padding: 5px 7px;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-health-rail article > svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-health-rail article strong {
+    font-size: 11px;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-health-rail article small,
+  .kiosk-grid > #finops-dashboard .finops-health-rail article span {
+    font-size: 7px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .memory-flow-edge.is-live {
+    animation: none !important;
+    stroke-dasharray: 4 4;
+  }
+}
+
+@media (min-width: 1501px) and (max-height: 849px) {
+  .hero-shell {
+    height: auto !important;
+    min-height: 100vh;
+    overflow: visible !important;
+  }
+
+  .kiosk-grid {
+    grid-template-columns: minmax(0, 1.72fr) minmax(500px, 0.98fr) !important;
+    grid-template-rows: 400px 520px !important;
+    grid-template-areas:
+      "live jobs"
+      "atlas finops";
+  }
+
+  .kiosk-grid > .brain-hero-panel { grid-area: live; }
+  .kiosk-grid > .right-rail { grid-area: jobs; }
+  .kiosk-grid > #brain-atlas { grid-area: atlas; }
+  .kiosk-grid > #finops-dashboard { grid-area: finops; }
+}
+
+@media (max-width: 1500px) {
+  .hero-shell {
+    height: auto !important;
+    min-height: 100vh;
+    overflow: visible !important;
+  }
+
+  .kiosk-grid {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto !important;
+    grid-template-areas:
+      "live"
+      "jobs"
+      "atlas"
+      "finops";
+    gap: 7px !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .kiosk-grid > .brain-hero-panel {
+    grid-area: live;
+    min-width: 0;
+    min-height: 500px;
+  }
+
+  .kiosk-grid > .right-rail {
+    grid-area: jobs;
+    display: grid !important;
+    width: 100%;
+    height: clamp(420px, 58vh, 560px) !important;
+    min-width: 0;
+    min-height: 0 !important;
+    max-height: 560px;
+    overflow: hidden !important;
+  }
+
+  .kiosk-grid > .right-rail .jobs-occurrence-rail {
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .kiosk-grid > .right-rail .today-jobs-table,
+  .kiosk-grid > .right-rail .today-jobs-scroll {
+    min-height: 0 !important;
+  }
+
+  .kiosk-grid > .right-rail .today-jobs-scroll {
+    max-height: 100%;
+    overflow-y: auto !important;
+  }
+
+  .kiosk-grid > #brain-atlas {
+    grid-area: atlas;
+    min-width: 0;
+    min-height: 520px;
+  }
+
+  .kiosk-grid > #finops-dashboard {
+    grid-area: finops;
+    min-width: 0;
+    min-height: 620px;
+  }
+}
+
+@media (min-width: 981px) and (max-width: 1500px) {
+  .kiosk-grid > .brain-hero-panel {
+    height: clamp(500px, 64vh, 620px) !important;
+    min-height: 0 !important;
+    max-height: 620px;
+    overflow: hidden !important;
+    grid-template-rows: minmax(0, 1fr) !important;
+  }
+}
+
+@media (max-width: 980px) {
+  .memory-flow-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    flex-basis: 96px;
+  }
+
+  .memory-flow-metrics article:nth-child(3) {
+    border-left: 0;
+    border-top: 1px solid rgba(85, 215, 255, 0.12);
+  }
+
+  .memory-flow-metrics article:nth-child(4) {
+    border-top: 1px solid rgba(85, 215, 255, 0.12);
+  }
+
+  #brain-atlas .brain-atlas-state {
+    max-width: 54%;
+  }
+
+  .today-jobs-table-head,
+  .today-job-row {
+    grid-template-columns: 58px minmax(96px, 1fr) minmax(68px, 0.55fr) 74px !important;
+    gap: 6px;
+  }
+
+  .today-jobs-table-head > :nth-child(5),
+  .today-job-row > :nth-child(5) {
+    display: none;
+  }
+
+  .today-job-name {
+    min-width: 0;
+  }
+
+  .today-job-name strong {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .today-job-name em {
+    display: none;
+  }
+}
+
+@media (max-width: 360px) {
+  .today-jobs-table-head,
+  .today-job-row {
+    grid-template-columns: 54px minmax(0, 1fr) 72px !important;
+  }
+
+  .today-jobs-table-head > :nth-child(3),
+  .today-job-row > :nth-child(3) {
+    display: none;
   }
 }

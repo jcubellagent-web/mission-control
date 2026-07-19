@@ -61,6 +61,9 @@ AGENT_ALIASES = {
     "codex": "joshex",
 }
 TOKEN_RE = re.compile(r"[a-z0-9][a-z0-9_.-]{2,}", re.I)
+MEMORY_ACTIVITY_WINDOW_MINUTES = 30
+MEMORY_ACTIVITY_MOTION_SECONDS = 90
+MEMORY_ACTIVITY_AGENTS = ("joshex", "josh2", "jaimes", "jain")
 
 
 def utc_now() -> dt.datetime:
@@ -565,6 +568,7 @@ def reuse_preflight(args: argparse.Namespace) -> dict[str, Any]:
     try:
         db = connect()
         result = retrieve(db, args, preflight=True)
+        export_status(db)
         result.update({
             "ok": True,
             "proceed": True,
@@ -759,6 +763,121 @@ def privacy_audit_payload(db: sqlite3.Connection) -> dict[str, Any]:
     }
 
 
+def memory_activity_payload(db: sqlite3.Connection) -> dict[str, Any]:
+    """Return bounded, counts-only telemetry for the Control Tower Atlas.
+
+    The dashboard can show that a governed memory operation happened, but it
+    never receives queries, memory content, raw identifiers, source paths,
+    feedback reasons, or workflow context hashes.
+    """
+
+    now = utc_now()
+    window_start = iso(now - dt.timedelta(minutes=MEMORY_ACTIVITY_WINDOW_MINUTES))
+    retrieval = db.execute(
+        """SELECT COUNT(*) AS total,
+                  SUM(CASE WHEN outcome='hit' THEN 1 ELSE 0 END) AS hits,
+                  SUM(CASE WHEN outcome='miss' THEN 1 ELSE 0 END) AS misses,
+                  MAX(time) AS last_at,
+                  MAX(CASE WHEN outcome='hit' THEN time END) AS last_hit_at,
+                  MAX(CASE WHEN outcome='miss' THEN time END) AS last_miss_at
+           FROM retrieval_events WHERE time >= ?""",
+        (window_start,),
+    ).fetchone()
+    reuse = db.execute(
+        """SELECT SUM(CASE WHEN outcome='selected' THEN 1 ELSE 0 END) AS selected,
+                  SUM(CASE WHEN outcome='used' THEN 1 ELSE 0 END) AS used,
+                  SUM(CASE WHEN outcome='ignored' THEN 1 ELSE 0 END) AS ignored,
+                  MAX(CASE WHEN outcome='selected' THEN time END) AS last_selected_at,
+                  MAX(CASE WHEN outcome='used' THEN time END) AS last_used_at,
+                  MAX(CASE WHEN outcome='ignored' THEN time END) AS last_ignored_at
+           FROM memory_reuse_events WHERE time >= ?""",
+        (window_start,),
+    ).fetchone()
+    feedback = db.execute(
+        """SELECT COUNT(*) AS total,
+                  SUM(CASE WHEN outcome='helpful' THEN 1 ELSE 0 END) AS helpful,
+                  SUM(CASE WHEN outcome='ignored' THEN 1 ELSE 0 END) AS ignored,
+                  SUM(CASE WHEN outcome='corrected' THEN 1 ELSE 0 END) AS corrected,
+                  SUM(CASE WHEN outcome='harmful' THEN 1 ELSE 0 END) AS harmful,
+                  MAX(time) AS last_at,
+                  MAX(CASE WHEN outcome='corrected' THEN time END) AS last_corrected_at
+           FROM memory_feedback WHERE time >= ?""",
+        (window_start,),
+    ).fetchone()
+    candidates = db.execute(
+        """SELECT
+                  SUM(CASE WHEN proposed_at >= ? THEN 1 ELSE 0 END) AS proposed,
+                  SUM(CASE WHEN status='active' AND reviewed_at >= ? THEN 1 ELSE 0 END) AS promoted,
+                  MAX(CASE WHEN proposed_at >= ? THEN proposed_at END) AS last_proposed_at,
+                  MAX(CASE WHEN status='active' AND reviewed_at >= ? THEN reviewed_at END) AS last_promoted_at
+           FROM memory_candidates""",
+        (window_start, window_start, window_start, window_start),
+    ).fetchone()
+    agent_rows = {
+        canonical_agent(row["agent"]): row
+        for row in db.execute(
+            """SELECT agent,COUNT(*) AS total,
+                      SUM(CASE WHEN outcome='hit' THEN 1 ELSE 0 END) AS hits,
+                      SUM(CASE WHEN outcome='miss' THEN 1 ELSE 0 END) AS misses,
+                      MAX(time) AS last_at
+               FROM retrieval_events WHERE time >= ? GROUP BY agent""",
+            (window_start,),
+        ).fetchall()
+    }
+    agents = []
+    for agent in MEMORY_ACTIVITY_AGENTS:
+        row = agent_rows.get(agent)
+        agents.append({
+            "agent": agent,
+            "retrievals": int(row["total"] or 0) if row else 0,
+            "hits": int(row["hits"] or 0) if row else 0,
+            "misses": int(row["misses"] or 0) if row else 0,
+            "lastRetrievalAt": row["last_at"] if row else None,
+        })
+    return {
+        "schemaVersion": 1,
+        "generatedAt": iso(now),
+        "windowMinutes": MEMORY_ACTIVITY_WINDOW_MINUTES,
+        "motionWindowSeconds": MEMORY_ACTIVITY_MOTION_SECONDS,
+        "source": {"name": "governed-memory-registry", "verified": True},
+        "privacy": {
+            "queryIncluded": False,
+            "contentIncluded": False,
+            "rawIdentifiersIncluded": False,
+            "reasonsIncluded": False,
+            "countsOnly": True,
+        },
+        "counts": {
+            "retrievals": int(retrieval["total"] or 0),
+            "hits": int(retrieval["hits"] or 0),
+            "misses": int(retrieval["misses"] or 0),
+            "selected": int(reuse["selected"] or 0),
+            "used": int(reuse["used"] or 0),
+            "reuseIgnored": int(reuse["ignored"] or 0),
+            "feedback": int(feedback["total"] or 0),
+            "helpful": int(feedback["helpful"] or 0),
+            "feedbackIgnored": int(feedback["ignored"] or 0),
+            "corrected": int(feedback["corrected"] or 0),
+            "harmful": int(feedback["harmful"] or 0),
+            "proposed": int(candidates["proposed"] or 0),
+            "promoted": int(candidates["promoted"] or 0),
+        },
+        "lastObservedAt": {
+            "retrieval": retrieval["last_at"],
+            "hit": retrieval["last_hit_at"],
+            "miss": retrieval["last_miss_at"],
+            "selected": reuse["last_selected_at"],
+            "used": reuse["last_used_at"],
+            "reuseIgnored": reuse["last_ignored_at"],
+            "feedback": feedback["last_at"],
+            "corrected": feedback["last_corrected_at"],
+            "proposed": candidates["last_proposed_at"],
+            "promoted": candidates["last_promoted_at"],
+        },
+        "agents": agents,
+    }
+
+
 def status_payload(db: sqlite3.Connection) -> dict[str, Any]:
     counts = {row["status"]: row["count"] for row in db.execute("SELECT status,COUNT(*) AS count FROM memory_records GROUP BY status")}
     candidates = {row["status"]: row["count"] for row in db.execute("SELECT status,COUNT(*) AS count FROM memory_candidates GROUP BY status")}
@@ -841,6 +960,7 @@ def status_payload(db: sqlite3.Connection) -> dict[str, Any]:
         "agentAccess": {
             "josh2": "local CLI", "jaimes": "shared SSH client", "jain": "shared SSH client", "joshex": "oversight SSH client",
         },
+        "activity": memory_activity_payload(db),
         "privacy": privacy_audit_payload(db),
     }
 
@@ -933,7 +1053,9 @@ def main() -> int:
     elif args.command == "privacy-check": result = privacy_audit_payload(db)
     elif args.command == "status": result = status_payload(db)
     else: result = export_status(db)
-    if args.command not in {"retrieve", "privacy-check", "status", "export"}:
+    if args.command == "retrieve":
+        export_status(db)
+    elif args.command not in {"privacy-check", "status", "export"}:
         export_status(db)
     print(json.dumps(result, indent=2))
     return 0
