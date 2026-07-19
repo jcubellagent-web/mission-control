@@ -1858,6 +1858,9 @@ def self_test() -> int:
                 "secondaryGlyphHeights": [7.2],
                 "layerGlyphHeights": [9.5],
                 "nodeOverlapCount": 0,
+                "htmlTextOverflowCount": 0,
+                "svgTextOverflowCount": 0,
+                "svgTextOverlapCount": 0,
             },
         },
         "liveWork": {
