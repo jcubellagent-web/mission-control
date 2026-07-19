@@ -157,7 +157,12 @@ def test_live_card_is_html_preformatted_and_bounded():
     assert rendered.startswith("<pre>") and rendered.endswith("</pre>")
     body = card.html.unescape(rendered.removeprefix("<pre>").removesuffix("</pre>"))
     assert max(map(card.display_width, body.splitlines())) <= card.CARD_WRAP_WIDTH
-    assert "\n✅ action: patch — updated the\n   fixed-width renderer\n" in rendered
+    assert len(body.splitlines()) <= 22
+    assert "JOSH 2.0 ·" in body
+    assert "Now" in body
+    assert "action:" not in body.lower()
+    assert "terminal" not in body.lower()
+    assert "fixed-width renderer" not in body
 
 
 def test_final_summary_is_html_preformatted_and_bounded():
@@ -196,6 +201,22 @@ def test_weak_generated_success_is_downgraded_without_inventing_results():
     assert "Prepared the result" not in body
 
 
+def test_finished_assessment_stays_complete_when_the_finding_is_negative():
+    rendered = card.build_completion_summary(
+        title="Evaluate Agent Robinhood for safe Robinhood trading support",
+        status="done",
+        model="openai/gpt-5.6-terra",
+        route="route=direct; reason=verified read-only assessment",
+        done=["Confirmed the signal source is read-only; brokerage automation is unsupported."],
+        next_step="Do not connect brokerage credentials.",
+        blocker="Brokerage trading support is unsupported.",
+    )
+    body = card.html.unescape(rendered.removeprefix("<pre>").removesuffix("</pre>"))
+    assert "Complete: Yes" in body
+    assert "brokerage automation is" in body
+    assert "Issues:" in body
+
+
 def test_live_progress_has_a_ten_cell_visual_bar():
     lines = card.progress_lines(
         ["Received Telegram task", "Objective determined: Inbox health check", "Asynchronous worker started"],
@@ -221,6 +242,22 @@ def test_progress_is_based_on_verified_milestones_not_update_volume():
     )
     assert early == noisy
     assert early[0] == 50
+
+
+def test_compact_progress_ignores_a_large_raw_tool_burst():
+    route = "route=terra; owner=josh2; reason=trusted execution"
+    baseline = card.compact_phase(
+        ["Received Telegram task", "Objective determined: Verify Inbox routing"],
+        "running",
+        route=route,
+    )
+    noisy = card.compact_phase(
+        ["Received Telegram task", "Objective determined: Verify Inbox routing"]
+        + [f"tool: read_file - /Users/josh2.0/private/file-{index}.py" for index in range(40)],
+        "running",
+        route=route,
+    )
+    assert baseline == noisy == ("Routed", 3)
 
 
 def test_terminal_needs_attention_closes_delivery_lifecycle_at_100_percent():
@@ -255,10 +292,10 @@ def test_terminal_needs_attention_closes_delivery_lifecycle_at_100_percent():
         done=items,
     )
 
-    assert "100% · stage 6/6" in card.html.unescape(legacy)
-    assert "JOSH 2.0 · NEEDS ATTENTION" in rich
-    assert "100% · stage 6/6" in rich
-    assert rich.count('type="checkbox" checked') == len(card.LIVE_STAGES)
+    assert "Progress [██████████] 6/6" in card.html.unescape(legacy)
+    assert "JOSH 2.0 · Needs attention" in rich
+    assert "Progress [██████████] 6/6" in rich
+    assert "checkbox" not in rich
 
 
 def test_worker_visibility_exposes_owner_and_delegated_worker_cleanly():
@@ -270,7 +307,7 @@ def test_worker_visibility_exposes_owner_and_delegated_worker_cleanly():
     assert "jaimes-grok-public" not in " ".join(rows)
 
 
-def test_rich_card_uses_native_blocks_and_collapsible_activity():
+def test_rich_card_uses_the_same_compact_fixed_width_commentary_contract():
     rendered = card.build_rich_card(
         title="Verify Inbox routing",
         status="running",
@@ -281,16 +318,21 @@ def test_rich_card_uses_native_blocks_and_collapsible_activity():
         started_at="2026-07-15T05:00:00Z",
         updated="2026-07-15T05:01:15Z",
     )
-    assert rendered.startswith("<h3>JOSH 2.0 · LIVE WORK</h3>")
-    assert '<input type="checkbox" checked>' in rendered
-    assert "<details><summary>Recent activity" in rendered
-    assert "<footer>elapsed 1m 15s" in rendered
+    assert rendered.startswith("<pre>") and rendered.endswith("</pre>")
+    body = card.html.unescape(rendered.removeprefix("<pre>").removesuffix("</pre>"))
+    assert len(body.splitlines()) <= 22
+    assert max(map(card.display_width, body.splitlines())) <= card.CARD_WRAP_WIDTH
+    assert "JOSH 2.0 · Working" in body
+    assert "Recent activity" not in body
+    assert "Asynchronous worker" not in body
+    assert "Elapsed 1m 15s" in body
     assert re.search(r"[█░]{10}", rendered)
 
 
 def test_rich_cards_default_only_to_control_center_inbox(monkeypatch):
     monkeypatch.delenv(card.RICH_CARD_ENV, raising=False)
     assert card.rich_cards_enabled("-1003589561528", "1")
+    assert card.rich_cards_enabled("telegram:-1003589561528", "1")
     assert not card.rich_cards_enabled("-1003589561528", "17")
     assert not card.rich_cards_enabled("6218150306", "")
 
@@ -313,6 +355,8 @@ def test_task_header_is_a_bounded_fixed_width_table():
 def test_task_header_defaults_only_to_control_center_inbox(monkeypatch):
     monkeypatch.delenv(card.TASK_HEADER_ENV, raising=False)
     assert card.task_headers_enabled("-1003589561528", "1")
+    assert card.task_headers_enabled("telegram:-1003589561528", "1")
+    assert card.is_inbox_topic("telegram:-1003589561528", "1")
     assert not card.task_headers_enabled("-1003589561528", "17")
 
 
@@ -746,9 +790,9 @@ def test_needs_attention_card_reaches_100_before_structured_final(monkeypatch, t
 
     assert card.upsert_card(args, "failed") == 0
     assert [call[0] for call in calls] == ["edit_live", "send_final"]
-    assert "100% · stage 6/6" in calls[0][2]
+    assert "Progress [██████████] 6/6" in calls[0][2]
     if renderer == "rich":
-        assert "100% · stage 6/6" in card.html.unescape(calls[0][3])
+        assert "Progress [██████████] 6/6" in card.html.unescape(calls[0][3])
     persisted = card.load_state()["cards"]["failed-terminal-order"]
     assert persisted["status"] == "failed"
     assert persisted["message_id"] == 202

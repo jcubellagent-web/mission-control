@@ -11,6 +11,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -39,6 +40,15 @@ HEADER_VALUE_WIDTH = 25
 DEFAULT_RECONCILE_MAX_AGE_SECONDS = 12 * 60 * 60
 ACTIVE_WORK_CARD_STATUSES = {"active", "running"}
 TERMINAL_FAST_ACK_STATUSES = {"done", "failed", "paused", "retired", "complete", "completed"}
+CONTROL_TOWER_SSH_HOST = os.environ.get("CONTROL_TOWER_SSH_HOST", "josh2.0@josh2")
+CONTROL_TOWER_REMOTE_ROOT = os.environ.get(
+    "CONTROL_TOWER_REMOTE_ROOT",
+    "/Users/josh2.0/.openclaw/workspace/mission-control",
+)
+CONTROL_TOWER_REMOTE_PYTHON = os.environ.get(
+    "CONTROL_TOWER_REMOTE_PYTHON",
+    "/opt/homebrew/bin/python3",
+)
 ENV_PATHS = [
     HOME / ".hermes" / ".env",
     HOME / ".openclaw" / "service-env" / "ai.openclaw.gateway.env",
@@ -756,61 +766,84 @@ def simplify_live_detail(value: str) -> str:
     return compact(text, limit=90)
 
 
-def live_line(item: str) -> str:
+INTERNAL_PATH_RE = re.compile(
+    r"(?:^|\s)(?:~?/|/(?:Users|private|var|tmp|etc)/)|"
+    r"\b[\w.-]+\.(?:py|js|ts|tsx|json|plist|sh|log|db)\b",
+    re.I,
+)
+GENERIC_NEXT_RE = re.compile(
+    r"(?i)^(?:keep working|continue working|work automatically|show buttons only|"
+    r"update this card|see the final summary|no action needed|finish verification)\b"
+)
+
+
+def semantic_progress_detail(item: str) -> str:
+    """Convert runtime telemetry into one safe, operator-facing milestone."""
     text = clean_live_text(item)
-    lower = text.lower()
     if not text:
-        return "- waiting: first update"
-    # Already-categorized rows must remain idempotent. Adding a bullet here
-    # shifts fixed-width code-block rows and breaks their hanging indent.
-    if text.startswith(("🧭 ", "🧰 ", "⚙️ ", "🧠 ", "🧪 ", "✅ ", "🏁 ", "🔧 ", "⏳ ")):
-        return text
-    if lower.startswith("received"):
-        return f"📥 received: {text.removeprefix('Received').strip() or 'task'}"
-    if lower.startswith("objective determined:"):
-        return f"📌 objective: {text.split(':', 1)[1].strip()}"
-    if lower.startswith("model selected:"):
-        return f"🤖 model: {text.split(':', 1)[1].strip()}"
-    if lower.startswith(("skill selected:", "skill:", "skill applied:")):
-        return f"🧭 skill: {text.split(':', 1)[1].strip()}"
-    if lower.startswith("decision:"):
-        return f"🧠 decision: {text.split(':', 1)[1].strip()}"
-    if lower.startswith("tool result:"):
-        return f"✅ tool: {text.split(':', 1)[1].strip()}"
-    if lower.startswith("tool:"):
-        return f"🧰 tool: {text.split(':', 1)[1].strip()}"
-    if lower.startswith("action completed:"):
-        return f"✅ action: {text.split(':', 1)[1].strip()}"
-    if lower.startswith("action:"):
-        return f"⚙️ action: {text.split(':', 1)[1].strip()}"
-    if lower.startswith("verification passed:"):
-        return f"✅ verify: {text.split(':', 1)[1].strip()}"
-    if lower.startswith("verification:"):
-        return f"🧪 verify: {text.split(':', 1)[1].strip()}"
-    if lower.startswith(("local check | running", "local check | checking", "system check | running", "system check | checking")):
-        return f"🔧 step: {simplify_live_detail(text)}"
-    if lower.startswith(("local check | completed", "system check | completed")):
-        return f"✅ done: {simplify_live_detail(text)}"
-    if lower.startswith(("running ", "checking ", "reading ", "tracing ", "updating ", "loading ", "reloading ", "publishing ", "researching ", "using ", "tool:")):
-        detail = text.split(":", 1)[1].strip() if lower.startswith("tool:") else text
-        return f"🔧 step: {simplify_live_detail(detail)}"
-    if lower.startswith(("finished ", "completed checking ", "completed ", "done:")):
-        detail = text.split(":", 1)[1].strip() if lower.startswith("done:") else text
-        return f"✅ done: {simplify_live_detail(detail)}"
-    if lower in {"summary sent", "final summary sent"} or lower.startswith("final response"):
-        return "🏁 final: summary sent"
-    if lower.startswith("still working"):
-        return "⏳ working: waiting for the current model or tool step to finish"
+        return ""
+    lower = text.lower()
+    if "brain feed" in lower or INTERNAL_PATH_RE.search(text):
+        return ""
     commandish = unwrap_shell_command(text).lower()
-    if commandish.startswith(("cd ", "python3 ", "openclaw ", "npm ", "hermes ", "launchctl ", "curl ", "git ", "rg ", "sed ", "ssh ", "scp ", "jq ")):
-        return f"🔧 step: {describe_shell_command(text)}"
-    return f"• {compact(text, limit=90)}"
+    if commandish.startswith((
+        "cd ", "python3 ", "openclaw ", "npm ", "hermes ", "launchctl ",
+        "curl ", "git ", "rg ", "sed ", "ssh ", "scp ", "jq ",
+    )):
+        return ""
+    text = re.sub(r"^[^\w]+", "", text).strip()
+    lower = text.lower()
+    if lower.startswith((
+        "received", "objective determined:", "model selected:", "skill selected:",
+        "skill:", "skill applied:",
+    )):
+        return ""
+    for prefix in (
+        "tool result:", "tool:", "action completed:", "action:",
+        "verification passed:", "verification:", "decision:",
+    ):
+        if lower.startswith(prefix):
+            detail = text[len(prefix):].strip()
+            if "—" in detail:
+                detail = detail.split("—", 1)[1].strip()
+            elif " - " in detail:
+                detail = detail.split(" - ", 1)[1].strip()
+            elif prefix.startswith("tool"):
+                return ""
+            text = detail
+            lower = text.lower()
+            break
+    if not text or "brain feed" in lower or INTERNAL_PATH_RE.search(text):
+        return ""
+    if lower in {"summary sent", "final summary sent"} or lower.startswith("final response"):
+        return "Summary ready"
+    if lower.startswith("still working"):
+        return "Still working on the current check"
+    text = re.sub(
+        r"^(?:finished|completed checking|completed|done|running|checking|reading|"
+        r"tracing|updating|loading|reloading|publishing|researching|using)\s+",
+        "",
+        text,
+        flags=re.I,
+    ).strip()
+    return compact(text, limit=90)
+
+
+def live_line(item: str) -> str:
+    detail = semantic_progress_detail(item)
+    if not detail:
+        return ""
+    lower = clean_live_text(item).lower()
+    completed = lower.startswith((
+        "tool result:", "action completed:", "verification passed:", "decision:",
+        "finished ", "completed checking ", "completed ", "done:",
+    )) or detail == "Summary ready"
+    return f"{'✓' if completed else '-'} {detail}"
 
 
 def plain_progress_text(item: str) -> str:
     text = live_line(item)
     text = re.sub(r"^[^\w]+", "", text).strip()
-    text = re.sub(r"^(?:step|done|objective|model|skill|working|received|final):\s*", "", text, flags=re.I).strip()
     return compact(text, limit=90)
 
 
@@ -888,26 +921,25 @@ def is_complete_status(status: str) -> bool:
 
 
 def progress_lines(items: list[str], status: str, planned_steps: int = 0) -> list[str]:
-    clean = []
-    for item in items:
-        text = live_line(item)
-        if text and text not in clean:
-            clean.append(text)
     complete_status = is_complete_status(status)
-    if not clean:
+    raw = [clean_live_text(item) for item in items if clean_live_text(item)]
+    if not raw:
         if complete_status:
             return ["Progress: ██████████ 100% - complete", ""]
         return ["Progress: ░░░░░░░░░░ 0% - starting", ""]
 
-    combined = " ".join(clean).lower()
+    combined = " ".join(raw).lower()
     phase_hits = [
-        any(marker in combined for marker in ("📥 received", "📌 objective")),
-        any(marker in combined for marker in ("📌 objective", "🤖 model", "🧭 skill", "route", "runbook")),
-        any(marker in combined for marker in ("🔧", "⚙️ action", "🧰 tool", "✅ action", "✅ tool", "implement", "deploy", "build")),
-        any(marker in combined for marker in ("🧪 verify", "✅ verify", "verified", "test", "passed", "healthy")),
+        any(marker in combined for marker in ("received", "objective determined")),
+        any(marker in combined for marker in ("model selected", "skill selected", "route", "runbook")),
+        any(marker in combined for marker in ("action", "tool", "implement", "deploy", "build", "running")),
+        any(marker in combined for marker in ("verification", "verified", "test", "passed", "healthy")),
     ]
     done_count = sum(phase_hits)
-    active_count = sum(1 for line in clean if line.startswith(("🔧", "⏳", "⚙️", "🧰", "🧪")))
+    active_count = sum(
+        1 for line in raw
+        if any(marker in line.lower() for marker in ("action", "tool", "running", "checking", "verification"))
+    )
     total = max(4, int(planned_steps or 0))
     if complete_status:
         percent = 100
@@ -1005,24 +1037,18 @@ def check_lines(items: list[str], *, fallback: str, limit: int = 4) -> list[str]
     return [html.escape(hanging_wrap(f"✓ {item}")) for item in clean[-limit:]] if clean else [fallback]
 
 
-def activity_lines(items: list[str], *, fallback: str, limit: int = 12) -> list[str]:
-    """Render cumulative categorized activity while retaining key early choices."""
+def activity_lines(items: list[str], *, fallback: str, limit: int = 3) -> list[str]:
+    """Render at most three semantic milestones, consolidating older checks."""
+    limit = max(1, min(3, int(limit or 3)))
     clean: list[str] = []
     for item in items:
         text = live_line(item)
-        if text.startswith(("📥", "📌", "🤖")):
-            continue
         text = compact(text, limit=132)
         if text and text not in clean:
             clean.append(text)
     if len(clean) > limit:
-        anchors: list[str] = []
-        for prefix in ("🧭", "🧠"):
-            match = next((item for item in clean if item.startswith(prefix)), None)
-            if match and match not in anchors:
-                anchors.append(match)
-        recent = clean[-max(1, limit - len(anchors)):]
-        clean = anchors + [item for item in recent if item not in anchors]
+        earlier = len(clean) - max(1, limit - 1)
+        clean = [f"… {earlier} earlier checks", *clean[-max(1, limit - 1):]]
     return [html.escape(hanging_wrap(item)) for item in clean] if clean else [fallback]
 
 
@@ -1050,48 +1076,37 @@ def build_card(
         "paused": "⏸️ <b>JAIMES — Paused</b>",
     }.get(status, f"<b>JAIMES — {html.escape(status.title())}</b>")
     current_plain = current_step_text(status, now, live_items)
-    current = live_line(now or current_plain)
+    current = semantic_progress_detail(now or current_plain) or current_plain
     phase = live_phase(status, current_plain)
-    completed = [item for item in done if live_line(item).startswith(("🧭", "🧠", "🧰", "⚙️", "🧪", "✅", "🏁"))]
-    if not completed:
-        completed = [item for item in done if clean_live_text(item)][-3:]
-    evidence = [
-        plain_progress_text(item) for item in done
-        if any(marker in clean_live_text(item).lower() for marker in ("test", "verified", "passed", "healthy", "built", "deployed", "saved"))
-    ][-3:]
+    completed = [item for item in done if semantic_progress_detail(item)]
     blocker_items = [] if is_empty_issue(blocker) else parse_list(blocker) or [blocker]
-    next_items = parse_list(next_step) or default_next_steps(status, bool(blocker_items))
+    next_items = [
+        item for item in parse_list(next_step)
+        if not GENERIC_NEXT_RE.match(clean_live_text(item))
+    ]
     progress_raw = progress_lines(live_items, status, planned_steps=planned_steps)[0].replace("Progress:", "").strip()
     progress = progress_raw.split(" - ", 1)[0] + f" · {phase}"
 
     lines = [
         status_line,
-        f"🤖 {html.escape(friendly_model_line(model_line))}",
+        f"Model: {html.escape(friendly_model_line(model_line))}",
         "",
-        "<b>🎯 Objective</b>",
+        "Objective",
         html.escape(hanging_wrap(operator_objective(title))),
         "",
-        "<b>📊 Progress</b>",
+        "Progress",
         html.escape(progress),
         "",
-        "<b>🔄 Now</b>",
+        "Now",
         html.escape(hanging_wrap(current)),
-        "",
-        "<b>✅ Completed</b>",
-        *activity_lines(completed, fallback="Nothing completed yet", limit=12),
     ]
-    if evidence:
-        lines += ["", "<b>🔎 Evidence</b>", *check_lines(evidence, fallback="", limit=3)]
-    lines += [
-        "",
-        "<b>🚧 Blocker</b>",
-        *(plain_bullet_lines(blocker_items, limit=2) if blocker_items else ["None"]),
-        "",
-        "<b>⏭️ Next</b>",
-        *plain_bullet_lines(next_items, limit=2),
-        "",
-        f"Updated {updated or now_label()}",
-    ]
+    if completed:
+        lines += ["", "Done", *activity_lines(completed, fallback="", limit=3)]
+    if blocker_items:
+        lines += ["", "Blocker", *plain_bullet_lines(blocker_items, limit=2)]
+    if next_items:
+        lines += ["", "Next", *plain_bullet_lines(next_items, limit=2)]
+    lines += ["", f"Updated {updated or now_label()}"]
     if eta:
         lines.insert(-1, f"ETA {html.escape(compact(eta))}")
     rendered = "\n".join(lines).replace("<b>", "").replace("</b>", "")
@@ -1250,18 +1265,26 @@ def edit_objective_message(
     return api_call("editMessageText", payload, timeout=timeout)
 
 
-def publish_brain_feed(args: argparse.Namespace, status: str) -> None:
+def publish_brain_feed(
+    args: argparse.Namespace,
+    status: str,
+    *,
+    work_id: str = "",
+    run_id: str = "",
+) -> bool:
     if args.no_brain_feed and (args.dry_run or os.environ.get("ALLOW_NO_BRAIN_FEED") == "1"):
-        return
+        return True
+    if bool(work_id) != bool(run_id):
+        # Never let the canonical publisher synthesize half of an identity;
+        # a partial pair would split one Telegram task into two ledger rows.
+        return False
     mapped = {
         "running": "active",
         "done": "done",
         "failed": "error",
         "paused": "info",
     }.get(status, "active")
-    cmd = [
-        sys.executable,
-        str(ROOT / "scripts" / "agent_publish.py"),
+    publish_args = [
         "--agent",
         "jaimes",
         "--type",
@@ -1278,10 +1301,39 @@ def publish_brain_feed(args: argparse.Namespace, status: str) -> None:
         "dashboard-safe",
         "--brain-feed",
     ]
+    if work_id:
+        publish_args += ["--work-id", work_id]
+    if run_id:
+        publish_args += ["--run-id", run_id]
+    remote_command = "cd {} && {}".format(
+        shlex.quote(CONTROL_TOWER_REMOTE_ROOT),
+        shlex.join([
+            CONTROL_TOWER_REMOTE_PYTHON,
+            f"{CONTROL_TOWER_REMOTE_ROOT}/scripts/agent_publish.py",
+            *publish_args,
+        ]),
+    )
+    cmd = [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ConnectTimeout=4",
+        CONTROL_TOWER_SSH_HOST,
+        remote_command,
+    ]
     try:
-        subprocess.run(cmd, cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=12, check=False)
+        result = subprocess.run(
+            cmd,
+            cwd=ROOT,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=12,
+            check=False,
+        )
+        return result.returncode == 0
     except Exception:
-        return
+        return False
 
 
 def approval_buttons(args: argparse.Namespace) -> list | None:
@@ -1316,6 +1368,14 @@ def load_buttons(args: argparse.Namespace, status: str) -> list | None:
 def _upsert_card(args: argparse.Namespace, status: str) -> int:
     state = load_state()
     cards = state.setdefault("cards", {})
+    action = str(getattr(args, "action", "start" if status == "running" else status))
+    if args.key not in cards and action != "start":
+        print(json.dumps({
+            "ok": False,
+            "action": "missing_live_card",
+            "error": f"{action} cannot create a new Telegram card; start must own the first surface.",
+        }, indent=2), file=sys.stderr)
+        return 1
     existing = cards.get(args.key, {})
     title = args.title or existing.get("title") or args.key
     new_done = parse_list(args.done)
@@ -1339,6 +1399,47 @@ def _upsert_card(args: argparse.Namespace, status: str) -> int:
         render_now = (new_done[-1] if new_done else previous_current) or "Finished and verified the result"
     route = args.route or existing.get("route") or ""
     model = args.model or existing.get("model") or ""
+    supplied_identity = {
+        "work_id": str(getattr(args, "work_id", "") or ""),
+        "run_id": str(getattr(args, "run_id", "") or ""),
+        "task_started_at": str(getattr(args, "task_started_at", "") or ""),
+    }
+    for field, supplied in supplied_identity.items():
+        recorded = str(existing.get(field) or "")
+        if supplied and recorded and supplied != recorded:
+            print(json.dumps({
+                "ok": False,
+                "action": "task_identity_conflict",
+                "error": f"{field} is already bound to a different task identity.",
+            }, indent=2), file=sys.stderr)
+            return 1
+    work_id = supplied_identity["work_id"] or str(existing.get("work_id") or "")
+    run_id = supplied_identity["run_id"] or str(existing.get("run_id") or "")
+    task_started_at = supplied_identity["task_started_at"] or str(
+        existing.get("task_started_at") or ""
+    )
+    supplied_final_message_id = str(getattr(args, "final_message_id", "") or "")
+    prior_final_message_id = str(existing.get("final_message_id") or "")
+    if supplied_final_message_id and prior_final_message_id and supplied_final_message_id != prior_final_message_id:
+        print(json.dumps({
+            "ok": False,
+            "action": "final_message_link_conflict",
+            "error": "A different final Telegram message is already linked to this task.",
+        }, indent=2), file=sys.stderr)
+        return 1
+    final_delivery_verified_by = str(
+        getattr(args, "final_delivery_verified_by", "")
+        or existing.get("final_delivery_verified_by")
+        or ""
+    )
+    final_delivery_confirmed_at = str(existing.get("final_delivery_confirmed_at") or "")
+    if supplied_final_message_id and final_delivery_verified_by and not final_delivery_confirmed_at:
+        final_delivery_confirmed_at = (
+            dt.datetime.now(dt.timezone.utc)
+            .replace(microsecond=0)
+            .isoformat()
+            .replace("+00:00", "Z")
+        )
     objective_message_id = args.ack_message_id or existing.get("ack_message_id")
     ack_message_id = "" if args.separate_message else objective_message_id
     chat_id = args.chat_id or existing.get("chat_id") or os.environ.get("TELEGRAM_TARGET_CHAT_ID") or os.environ.get("TELEGRAM_CHAT_ID")
@@ -1420,6 +1521,11 @@ def _upsert_card(args: argparse.Namespace, status: str) -> int:
             "retention": "persistent-edit-only",
             "chat_id": chat_id,
             "thread_id": thread_id,
+            "work_id": work_id,
+            "run_id": run_id,
+            "task_started_at": task_started_at,
+            "final_delivery_verified_by": final_delivery_verified_by,
+            "final_delivery_confirmed_at": final_delivery_confirmed_at,
         }
         for surface in ("header", "live", "final"):
             for suffix in ("delivery_status", "delivery_error_at"):
@@ -1568,7 +1674,7 @@ def _upsert_card(args: argparse.Namespace, status: str) -> int:
             "error": "Telegram accepted the live card without returning a message id",
         }, indent=2), file=sys.stderr)
         return 1
-    final_message_id = existing.get("final_message_id")
+    final_message_id = supplied_final_message_id or existing.get("final_message_id")
     existing = persist_checkpoint(
         header_id=header_message_id,
         live_id=message_id,
@@ -1666,10 +1772,20 @@ def _upsert_card(args: argparse.Namespace, status: str) -> int:
         "retention": "persistent-edit-only",
         "chat_id": chat_id,
         "thread_id": thread_id,
+        "work_id": work_id,
+        "run_id": run_id,
+        "task_started_at": task_started_at,
+        "final_delivery_verified_by": final_delivery_verified_by,
+        "final_delivery_confirmed_at": final_delivery_confirmed_at,
     }
     save_state(state)
-    publish_brain_feed(args, status)
-    print(json.dumps({
+    control_tower_published = bool(publish_brain_feed(
+        args,
+        status,
+        work_id=work_id,
+        run_id=run_id,
+    ))
+    output = {
         "ok": True,
         "header_action": header_action,
         "action": action,
@@ -1678,7 +1794,11 @@ def _upsert_card(args: argparse.Namespace, status: str) -> int:
         "header_message_id": header_message_id,
         "message_id": message_id,
         "final_message_id": final_message_id,
-    }, indent=2))
+        "control_tower_published": control_tower_published,
+    }
+    if not control_tower_published:
+        output["control_tower_warning"] = "Canonical Control Tower publication was not confirmed."
+    print(json.dumps(output, indent=2))
     return 0
 
 
@@ -1715,6 +1835,11 @@ def main() -> int:
     parser.add_argument("--separate-message", action="store_true", help="Keep the objective bubble and send the work card as its own persistent message")
     parser.add_argument("--chat-id")
     parser.add_argument("--thread-id")
+    parser.add_argument("--work-id", help="Canonical Control Tower work identifier")
+    parser.add_argument("--run-id", help="Canonical Control Tower run identifier")
+    parser.add_argument("--task-started-at", help="UTC timestamp of the originating Telegram task")
+    parser.add_argument("--final-message-id", help="Telegram message ID confirmed by the Hermes adapter")
+    parser.add_argument("--final-delivery-verified-by", help="Runtime component that confirmed final delivery")
     parser.add_argument("--buttons")
     parser.add_argument("--buttons-file")
     parser.add_argument("--routing-buttons", action="store_true", help="Show routing/model buttons on active cards only when steering is useful")
@@ -1754,6 +1879,10 @@ def main() -> int:
         parser.error("--key is required for start, update, done, fail, and pause")
     if args.buttons and args.buttons_file:
         parser.error("Use either --buttons or --buttons-file, not both")
+    if args.final_message_id and (
+        not str(args.final_message_id).isdigit() or int(str(args.final_message_id)) <= 0
+    ):
+        parser.error("--final-message-id must be a positive Telegram message identifier")
 
     status = {
         "start": "running",

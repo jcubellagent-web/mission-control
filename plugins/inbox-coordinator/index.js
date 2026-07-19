@@ -700,6 +700,24 @@ function recentTerminalGate(event = {}, ctx = {}) {
   return gate;
 }
 
+function terminalShapedOutbound(content) {
+  const text = decodeFinalHtml(String(content || ""))
+    .replace(/<\/?pre>/gi, "")
+    .replace(/\r\n?/g, "\n");
+  if (!/(?:^|\n)\s*Complete\s*:/i.test(text)) return false;
+  const markers = [
+    /(?:^|\n)\s*Model\s*:/i,
+    /(?:^|\n)\s*What was done\s*:/i,
+    /(?:^|\n)\s*Passed\s*:/i,
+    /(?:^|\n)\s*Failed\s*:/i,
+    /(?:^|\n)\s*Issues\s*:/i,
+    /(?:^|\n)\s*Handoff\s*:/i,
+    /(?:^|\n)\s*Normal Telegram use\s*:/i,
+    /(?:^|\n)\s*(?:Appropriate next steps|Next|Approval needed)\s*:/i,
+  ];
+  return markers.filter((pattern) => pattern.test(text)).length >= 2;
+}
+
 export async function gateTelegramFinalization(event = {}, ctx = {}, config = {}, logger = console) {
   if (!exactInboxTarget(event, ctx, config)) return undefined;
   const expectedModel = verifiedRuntimeModel(event);
@@ -746,9 +764,19 @@ export async function enforceTelegramFinalDelivery(event = {}, ctx = {}, config 
   if (!exactInboxTarget(event, ctx, config)) return undefined;
   const prior = recentTerminalGate(event, ctx);
   // message_sending is a generic outbound hook. Without a preceding natural
-  // finalization marker, this is an interim/system message and must not touch
-  // the task card.
-  if (!prior) return undefined;
+  // finalization marker, interim/system messages remain untouched.  A
+  // terminal-shaped assistant message is different: sending it directly would
+  // bypass the canonical close/final path and create the quoted duplicate seen
+  // in Inbox.  Fail closed until before_agent_finalize records the exact run.
+  if (!prior) {
+    if (terminalShapedOutbound(event.content)) {
+      return {
+        cancel: true,
+        cancelReason: "A terminal Inbox response must pass the canonical final-delivery gate.",
+      };
+    }
+    return undefined;
+  }
   if (prior.suppressNativeFinal) {
     terminalDeliveryGates.delete(terminalGateKey(event, ctx));
     return {

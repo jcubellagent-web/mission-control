@@ -146,6 +146,33 @@ SUMMARY_NO_ACTION_SUPPORT = re.compile(
     re.I,
 )
 
+# An assessment can finish successfully while its finding is negative.  Keep
+# task completion separate from whether the assessed system is ready or safe.
+ASSESSMENT_OBJECTIVE = re.compile(
+    r"^(?:assess|audit|check|evaluate|inspect|review|run\b.*\bcanary|"
+    r"stress[- ]?test|test|validate|verify)\b",
+    re.I,
+)
+
+# Telegram commentary is an operator surface, not a trace viewer.  These are
+# useful in logs/Control Tower but never as user-facing milestones.
+INTERNAL_ACTIVITY = re.compile(
+    r"(?:\bbrain feed\b|\blive[- ]?card\b|\bwork[- ]?card\b|"
+    r"\bstate visibility\b|\bpublishing the current phase\b|"
+    r"\bformatting (?:the )?final\b|\bsearch_files\b|\bread_file\b|"
+    r"\bapply_patch\b|\bexec(?:ute)? command\b|\bpython\d*(?:\.\d+)?\b|"
+    r"(?:^|[\s(])/(?:Users|private|tmp|var)/|\bscripts?/[^\s]+|"
+    r"\.(?:py|js|mjs|ts|tsx|jsx|json|md|sh|plist|ya?ml|toml|sql|log)(?:\s|$))",
+    re.I,
+)
+SEMANTIC_MILESTONE = re.compile(
+    r"\b(?:accept(?:ed|ance)|blocked|canary|complete(?:d)?|deployed|failed|"
+    r"fixed|found|fresh|healthy|identified|linked|missing|passed|queued|"
+    r"ready|repaired|resolved|restored|routed|safe|unsafe|unavailable|"
+    r"verified|\d+\s*(?:/\s*\d+|failures?|tests?|checks?|cases?))\b",
+    re.I,
+)
+
 
 def now_label() -> str:
     return dt.datetime.now().astimezone().strftime("%H:%M %Z")
@@ -456,6 +483,11 @@ def parse_route_facts(value: str) -> dict[str, str]:
     return facts
 
 
+def normalized_chat_id(chat_id: str | int | None) -> str:
+    """Return one canonical Telegram chat id for every helper call shape."""
+    return str(chat_id or "").removeprefix("telegram:")
+
+
 def rich_cards_enabled(chat_id: str | int | None, thread_id: str | int | None) -> bool:
     """Default native Rich Messages on only for the owned Inbox topic."""
     raw = os.environ.get(RICH_CARD_ENV, "").strip().lower()
@@ -463,12 +495,11 @@ def rich_cards_enabled(chat_id: str | int | None, thread_id: str | int | None) -
         return False
     if raw in {"1", "true", "yes", "on"}:
         return True
-    return str(chat_id or "") == CONTROL_CENTER_CHAT_ID and str(thread_id or "") == INBOX_THREAD_ID
+    return normalized_chat_id(chat_id) == CONTROL_CENTER_CHAT_ID and str(thread_id or "") == INBOX_THREAD_ID
 
 
 def is_inbox_topic(chat_id: str | int | None, thread_id: str | int | None) -> bool:
-    normalized_chat = str(chat_id or "").removeprefix("telegram:")
-    return normalized_chat == CONTROL_CENTER_CHAT_ID and str(thread_id or "") == INBOX_THREAD_ID
+    return normalized_chat_id(chat_id) == CONTROL_CENTER_CHAT_ID and str(thread_id or "") == INBOX_THREAD_ID
 
 
 def task_headers_enabled(chat_id: str | int | None, thread_id: str | int | None) -> bool:
@@ -478,7 +509,7 @@ def task_headers_enabled(chat_id: str | int | None, thread_id: str | int | None)
         return False
     if raw in {"1", "true", "yes", "on"}:
         return True
-    return str(chat_id or "") == CONTROL_CENTER_CHAT_ID and str(thread_id or "") == INBOX_THREAD_ID
+    return normalized_chat_id(chat_id) == CONTROL_CENTER_CHAT_ID and str(thread_id or "") == INBOX_THREAD_ID
 
 
 def human_worker_name(value: str) -> str:
@@ -1003,6 +1034,163 @@ def live_lines(items: list[str], *, fallback: str = "waiting: first update", lim
     ]
 
 
+def semantic_activity_text(item: str) -> str:
+    """Return one user-meaningful milestone, never an implementation trace."""
+    text = clean_live_text(html.unescape(str(item or "")))
+    text = re.sub(r"^[^\w\d]+", "", text).strip()
+    lowered = text.lower()
+    if not text or lowered.startswith(("action:", "tool:", "command:", "terminal:")):
+        return ""
+    if INTERNAL_ACTIVITY.search(text):
+        return ""
+    if lowered.startswith((
+        "received telegram", "objective determined:", "model selected:",
+        "skill selected:", "worker started", "asynchronous worker started",
+        "still working", "current phase:",
+    )):
+        return ""
+    text = re.sub(r"^(?:update|done|result|verified)\s*:\s*", "", text, flags=re.I).strip()
+    if not SEMANTIC_MILESTONE.search(text):
+        return ""
+    return compact(text.rstrip(" .") + ".", limit=62)
+
+
+def semantic_milestones(items: list[str], *, limit: int = 3) -> list[str]:
+    """Keep only the latest distinct operator outcomes for the live card."""
+    clean: list[str] = []
+    seen: set[str] = set()
+    for item in items:
+        text = semantic_activity_text(item)
+        marker = text.casefold()
+        if text and marker not in seen:
+            clean.append(text)
+            seen.add(marker)
+    return clean[-limit:]
+
+
+def compact_milestone_position(items: list[str], status: str, *, route: str = "") -> int:
+    """Derive visible progress from phase signals, never trace volume."""
+    if is_terminal_lifecycle_status(status):
+        return len(LIVE_STAGES)
+    lowered = [clean_live_text(item).lower() for item in items if clean_live_text(item)]
+    position = 1 if lowered else 0
+    if any(any(token in item for token in ("objective determined", "plan approved", "planned route")) for item in lowered):
+        position = max(position, 2)
+    if parse_route_facts(route) or any(any(token in item for token in ("route selected", "routed", "delegated", "worker queued")) for item in lowered):
+        position = max(position, 3)
+    if any(any(token in item for token in ("worker started", "execution started", "work started")) for item in lowered):
+        position = max(position, 4)
+    semantic = [semantic_activity_text(item).lower() for item in items]
+    semantic = [item for item in semantic if item]
+    if semantic:
+        position = max(position, 4)
+    if any(any(token in item for token in ("verified", "verification", "passed", "failed", "canary", "confirmed")) for item in semantic):
+        position = max(position, 5)
+    return min(len(LIVE_STAGES) - 1, position)
+
+
+def compact_phase(status: str, items: list[str], *, route: str = "") -> tuple[str, int]:
+    position = compact_milestone_position(items, status, route=route)
+    if is_complete_status(status):
+        return "Complete", len(LIVE_STAGES)
+    if is_terminal_lifecycle_status(status):
+        return "Needs attention", len(LIVE_STAGES)
+    if status == "paused":
+        return "Paused", max(1, position)
+    if not position:
+        return "Accepted", 0
+    return LIVE_STAGES[min(position, len(LIVE_STAGES)) - 1], position
+
+
+def polished_now_text(status: str, now: str, items: list[str], *, route: str = "") -> str:
+    candidate = semantic_activity_text(now)
+    if candidate:
+        return candidate
+    if is_complete_status(status):
+        return "Result verified and ready."
+    if is_terminal_lifecycle_status(status):
+        return "Finished; the result needs attention."
+    if status == "paused":
+        return "Paused until the next instruction."
+    phase, _ = compact_phase(status, items, route=route)
+    return {
+        "Accepted": "Task accepted.",
+        "Planned": "Planning the safest path.",
+        "Routed": "Routing the work.",
+        "Working": "Working through the task.",
+        "Verifying": "Verifying the result.",
+    }.get(phase, "Working through the task.")
+
+
+def meaningful_next_text(value: str) -> str:
+    text = clean_live_text(value)
+    normalized = text.lower().rstrip(".")
+    if not text or normalized in {
+        "none", "n/a", "no action needed", "keep working",
+        "keep working and update this card when the phase changes",
+    }:
+        return ""
+    if INTERNAL_ACTIVITY.search(text):
+        return ""
+    return compact(text, limit=62)
+
+
+def compact_card_lines(
+    *,
+    status: str,
+    model: str,
+    route: str,
+    now: str,
+    done: list[str],
+    next_step: str = "",
+    blocker: str = "None",
+    updated: str | None = None,
+    started_at: str | None = None,
+) -> list[str]:
+    """Build one quiet Codex-like commentary card capped at 22 rows."""
+    live_items = append_log(done, [now] if now else [])
+    phase, position = compact_phase(status, live_items, route=route)
+    filled = max(0, min(10, round((position / len(LIVE_STAGES)) * 10)))
+    bar = "█" * filled + "░" * (10 - filled)
+    issue = "" if is_empty_issue(blocker) else compact(clean_live_text(blocker), limit=62)
+    next_text = meaningful_next_text(next_step)
+    special_sections = int(bool(issue)) + int(bool(next_text))
+    milestone_limit = 1 if special_sections == 2 else 2 if special_sections == 1 else 3
+    worker_limit = 0 if special_sections == 2 else 1 if special_sections == 1 else 2
+    milestones = semantic_milestones(live_items, limit=milestone_limit)
+    workers = [compact(row, limit=60) for row in worker_visibility_lines(model, route, status)[:worker_limit]]
+
+    lines = [
+        *hanging_status_lines(f"JOSH 2.0 · {phase}"),
+        *hanging_status_lines(f"Progress [{bar}] {position}/{len(LIVE_STAGES)}"),
+        "",
+        "Now",
+        *hanging_status_lines(compact(polished_now_text(status, now, live_items, route=route), limit=62)),
+    ]
+
+    def add_section(label: str, values: list[str]) -> None:
+        if not values:
+            return
+        lines.extend(["", label])
+        for value in values:
+            lines.extend(hanging_bullet_lines(value)[:2])
+
+    add_section("Done", milestones)
+    add_section("Active", workers)
+    add_section("Blocker", [issue] if issue else [])
+    add_section("Next", [next_text] if next_text else [])
+
+    timing = hanging_status_lines(f"{elapsed_text(started_at, updated).capitalize()} · updated {now_label()}")
+    if len(lines) + len(timing) < 22:
+        lines.append("")
+    lines.extend(timing)
+    # The section budgets above normally land at <=22.  This final guard keeps
+    # unusual wide glyphs or route labels from growing the Telegram bubble.
+    if len(lines) > 22:
+        lines = lines[:max(0, 22 - len(timing))] + timing
+    return lines
+
+
 COMPLETE_STATUSES = {"done", "complete", "completed", "final", "finished", "success"}
 #JAIMES: terminal delivery completion is distinct from whether the requested objective succeeded.
 TERMINAL_LIFECYCLE_STATUSES = {*COMPLETE_STATUSES, "failed", "failure", "error"}
@@ -1262,7 +1450,24 @@ def build_completion_summary(
         issue_items=issues,
         next_items=next_steps or ["No action needed."],
     )
-    complete = "Yes" if complete_requested and not quality_issues else "No"
+    substantive_steps = substantive_summary_items(steps)
+    assessment_result = (
+        complete_requested
+        and bool(ASSESSMENT_OBJECTIVE.search(complete_title))
+        and any(SUMMARY_CONCRETE_RESULT.search(item) for item in substantive_steps)
+    )
+    # Negative readiness/safety findings do not make a finished assessment an
+    # unfinished task.  Only bypass narrative-count complaints; missing route
+    # identity, hidden risk, or contradictory next steps still fail closed.
+    non_narrative_issues = [
+        issue for issue in quality_issues
+        if issue not in {
+            "Complete: Yes requires 3-5 What was done bullets",
+            "What was done must contain at least three substantive findings, outcomes, or changes",
+            "What was done must state at least two concrete results",
+        }
+    ]
+    complete = "Yes" if complete_requested and (not quality_issues or (assessment_result and not non_narrative_issues)) else "No"
     if complete == "No" and complete_requested:
         steps = truthful_incomplete_steps(steps)
         issues = unique_summary_items([
@@ -1329,40 +1534,17 @@ def build_card(
 ) -> str:
     done = done or []
     model_line = model or os.environ.get("JOSH_WORK_CARD_MODEL") or current_direct_session_model() or "unknown"
-    live_items = append_log(done, [now] if now else [])
-    
-    card_title = {
-        "running": "⏳ Live work - in progress",
-        "done": "✅ Work complete",
-        "failed": "⚠️ Work needs attention",
-        "paused": "⏸️ Work paused",
-    }.get(status, f"Live work status: {status}")
-    
-    #JAIMES: live cards use the stable six-section mobile layout inside a Telegram code block; progress detail belongs under one shared timeline.
-    lines = [
-        *hanging_status_lines(f"🤖 Model: {friendly_model_line(model_line)} ({resolve_auth_path(model_line)})"),
-        *hanging_status_lines(f"🧭 Path: {friendly_route_line(route)}"),
-        card_title,
-        "📌 Objective:",
-        *hanging_bullet_lines(operator_objective(title)),
-        "",
-        "⚡️ Current step:",
-        *hanging_bullet_lines(current_step_text(status, now, live_items)),
-        "",
-        "📈 Progress:",
-        *progress_lines(live_items, status, route=route),
-        "🪜 Stages:",
-        *(line for row in stage_rows(live_items, status, route=route) for line in hanging_status_lines(row)),
-        "",
-        "👥 Active work:",
-        *(line for row in worker_visibility_lines(model_line, route, status) for line in hanging_bullet_lines(row)),
-        "",
-        "🕒 Timing:",
-        *hanging_status_lines(f"{elapsed_text(started_at, updated)} · updated {now_label()}"),
-        "",
-        "🗂 Recent activity:",
-        *live_lines(live_items, fallback="complete" if is_terminal_lifecycle_status(status) else "waiting: first update", limit=5),
-    ]
+    lines = compact_card_lines(
+        status=status,
+        model=model_line,
+        route=route,
+        now=now,
+        done=done,
+        next_step=next_step,
+        blocker=blocker,
+        updated=updated,
+        started_at=started_at,
+    )
     return f"<pre>{html.escape(html.unescape(chr(10).join(lines)))}</pre>"
 
 
@@ -1374,52 +1556,26 @@ def build_rich_card(
     route: str = "",
     now: str = "",
     done: list[str] | None = None,
+    next_step: str = "",
+    blocker: str = "None",
     updated: str | None = None,
     started_at: str | None = None,
 ) -> str:
-    """Render the Codex-style Inbox card with Telegram Rich Message blocks."""
+    """Render the same fixed-width card through Telegram's native rich lane."""
     done = done or []
     model_line = model or os.environ.get("JOSH_WORK_CARD_MODEL") or current_direct_session_model() or "unknown"
-    live_items = append_log(done, [now] if now else [])
-    position = milestone_count(live_items, status, route=route)
-    percent, detail = progress_phase(live_items, status, route=route)
-    filled = max(0, min(10, round(percent / 10)))
-    bar = "█" * filled + "░" * (10 - filled)
-    heading = {
-        "running": "JOSH 2.0 · LIVE WORK",
-        "done": "JOSH 2.0 · COMPLETE",
-        "failed": "JOSH 2.0 · NEEDS ATTENTION",
-        "paused": "JOSH 2.0 · PAUSED",
-    }.get(status, f"JOSH 2.0 · {status.upper()}")
-    step = current_step_text(status, now, live_items)
-
-    stage_items = []
-    for index, label in enumerate(LIVE_STAGES, start=1):
-        checked = " checked" if is_terminal_lifecycle_status(status) or index < position else ""
-        active = index == position and not is_terminal_lifecycle_status(status)
-        label_html = f"<mark>{html.escape(label)}</mark>" if active else html.escape(label)
-        stage_items.append(f'<li><input type="checkbox"{checked}>{label_html}</li>')
-
-    workers = "".join(f"<li>{html.escape(line)}</li>" for line in worker_visibility_lines(model_line, route, status))
-    activity = []
-    for item in live_items[-8:]:
-        rendered = html.unescape(live_line(item))
-        activity.append(f"<li>{html.escape(rendered)}</li>")
-    activity_html = "".join(activity) or "<li>Waiting for the first verified update.</li>"
-    updated_label = parse_timestamp(updated)
-    updated_text = updated_label.astimezone().strftime("%H:%M %Z") if updated_label else now_label()
-
-    return "".join([
-        f"<h3>{html.escape(heading)}</h3>",
-        f"<p><b>Objective</b><br>{html.escape(operator_objective(title))}</p>",
-        f"<p><code>{html.escape(friendly_model_line(model_line))}</code> · Josh 2.0 owns delivery</p>",
-        f"<pre>{bar} {percent}% · stage {position}/{len(LIVE_STAGES)}\n{html.escape(detail)}</pre>",
-        f"<blockquote><b>Now</b><br>{html.escape(step)}</blockquote>",
-        f"<h4>Progress</h4><ul>{''.join(stage_items)}</ul>",
-        f"<h4>Active work</h4><ul>{workers}</ul>",
-        f"<details><summary>Recent activity ({len(live_items)})</summary><ul>{activity_html}</ul></details>",
-        f"<footer>{html.escape(elapsed_text(started_at, updated))} · updated {html.escape(updated_text)}</footer>",
-    ])
+    lines = compact_card_lines(
+        status=status,
+        model=model_line,
+        route=route,
+        now=now,
+        done=done,
+        next_step=next_step,
+        blocker=blocker,
+        updated=updated,
+        started_at=started_at,
+    )
+    return f"<pre>{html.escape(html.unescape(chr(10).join(lines)))}</pre>"
 
 
 def api_call(method: str, payload: dict, timeout: int = 15) -> dict:
@@ -1850,6 +2006,8 @@ def upsert_card(args: argparse.Namespace, status: str) -> int:
             route=route,
             now=args.now or "",
             done=done,
+            next_step=args.next or "",
+            blocker=args.blocker or "None",
             updated=updated_at,
             started_at=started_at,
         )

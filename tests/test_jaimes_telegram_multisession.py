@@ -136,6 +136,52 @@ class MultiSessionWatcherTests(unittest.TestCase):
         self.assertEqual(result["sent"], [])
         send.assert_not_called()
 
+    def test_awaiting_objective_result_never_registers_active_or_pending_state(self) -> None:
+        self.add_user("older", "transport metadata before an unresolved request")
+
+        def awaiting(event, model, state, dry_run, meta):
+            return {
+                "ok": True,
+                "status": "awaiting-objective-interpretation",
+                "requires_objective_interpretation": True,
+                "ack_message_id": "",
+                "key": "unresolved-key",
+                "model": model,
+                "route": "",
+                "objective": "",
+                "run_id": event["run_id"],
+                "last_card_update_at": watcher.utc_now(),
+            }
+
+        with patch.object(watcher, "send_ack", side_effect=awaiting):
+            watcher.poll_once()
+        saved = json.loads(self.state.read_text())
+        self.assertEqual(saved["active_cards"], {})
+        self.assertNotIn("latest_pending_ack", saved)
+        self.assertNotIn("unresolved-key", saved.get("processed_task_keys", []))
+
+    def test_result_without_positive_message_receipt_is_never_pending(self) -> None:
+        self.add_user("older", "verify no-receipt handling")
+
+        def no_receipt(event, model, state, dry_run, meta):
+            return {
+                "ok": True,
+                "ack_message_id": "0",
+                "key": "no-receipt-key",
+                "model": model,
+                "route": "JAIMES verified execution",
+                "objective": "Verify no-receipt handling",
+                "run_id": event["run_id"],
+                "last_card_update_at": watcher.utc_now(),
+            }
+
+        with patch.object(watcher, "send_ack", side_effect=no_receipt):
+            watcher.poll_once()
+        saved = json.loads(self.state.read_text())
+        self.assertEqual(saved["active_cards"], {})
+        self.assertNotIn("latest_pending_ack", saved)
+        self.assertNotIn("no-receipt-key", saved.get("processed_task_keys", []))
+
     def test_stale_prompt_in_older_session_is_consumed_silently(self) -> None:
         self.add_user("older", "historical task", age=watcher.STALE_BOOTSTRAP_SECONDS + 30)
         with patch.object(watcher, "send_ack", side_effect=self.fake_ack) as send:
@@ -780,6 +826,34 @@ class MultiSessionWatcherTests(unittest.TestCase):
         reaction.assert_not_called()
         run.assert_not_called()
 
+    def test_question_mark_followup_stays_on_current_card_and_rekeys_run(self) -> None:
+        started = watcher.utc_now()
+        card = {
+            "key": "assessment-card",
+            "objective": "Assess Agent RH safely",
+            "status": "active",
+            "telegram_chat_id": "-1003589561528",
+            "telegram_thread_id": "17",
+            "started_at": started,
+        }
+        state = {"active_cards": {"telegram-message-40": card}}
+        event = {
+            "prompt": "??",
+            "run_id": "telegram-message-41",
+            "db_message_id": "41",
+        }
+        meta = {
+            "telegram_chat_id": "-1003589561528",
+            "telegram_thread_id": "17",
+        }
+        self.assertTrue(watcher.attach_contextual_followup(state, event, meta))
+        self.assertNotIn("telegram-message-40", state["active_cards"])
+        continued = state["active_cards"]["telegram-message-41"]
+        self.assertIs(continued, card)
+        self.assertEqual(continued["followup_message_ids"], ["41"])
+        self.assertEqual(continued["continued_from_run_ids"], ["telegram-message-40"])
+        self.assertFalse(watcher.contextual_followup_prompt("check the Sorare lineup"))
+
     def test_progress_burst_is_coalesced_to_one_edit(self) -> None:
         active = {
             "telegram-message-9": {
@@ -808,6 +882,131 @@ class MultiSessionWatcherTests(unittest.TestCase):
         self.assertEqual(len(updates), 1)
         self.assertEqual(run.call_count, 1)
         self.assertIn("e2", state["processed_progress_events"])
+
+    def test_model_completed_waits_for_confirmed_telegram_delivery(self) -> None:
+        state = {
+            "active_cards": {
+                "telegram-message-9": {
+                    "key": "card-key", "objective": "Test task", "model": "model",
+                    "route": "route", "status": "active", "session_id": "older",
+                    "telegram_chat_id": "-1003589561528", "telegram_thread_id": "17",
+                    "last_card_update_at": watcher.utc_now(),
+                }
+            },
+            "processed_progress_events": [],
+        }
+        event = {
+            "event_id": "complete-9",
+            "run_id": "telegram-message-9",
+            "type": "model.completed",
+            "summary": "Model response prepared",
+            "final_text": "final",
+        }
+        update_patch = self.patches[3]
+        update_patch.stop()
+        try:
+            with patch.dict("os.environ", {"JAIMES_TELEGRAM_LIVE_CARDS": "1"}), \
+                 patch.object(watcher, "recent_progress_events", return_value=[event]), \
+                 patch.object(watcher, "run_cmd", return_value={"ok": True}) as run, \
+                 patch.object(watcher, "publish_jaimes"):
+                watcher.update_active_cards(state, "older")
+        finally:
+            update_patch.start()
+        command = run.call_args.args[0]
+        self.assertEqual(command[2], "update")
+        self.assertTrue(any("awaiting Telegram delivery" in item for item in command))
+        card = state["active_cards"]["telegram-message-9"]
+        self.assertEqual(card["status"], "active")
+        self.assertTrue(card["model_completed_at"])
+
+    def test_adapter_success_receipt_closes_watcher_card(self) -> None:
+        work_state = Path(self.tmp.name) / "jaimes_work_cards.json"
+        work_state.write_text(json.dumps({"cards": {
+            "card-key": {
+                "status": "done",
+                "updated_at": "2026-07-18T18:00:00Z",
+                "work_log": ["Final summary delivered"],
+                "final_message_id": "3914",
+                "work_id": "work-current",
+                "run_id": "run-current",
+                "task_started_at": "2026-07-18T17:59:00Z",
+            }
+        }}))
+        state = {"active_cards": {"run-9": {
+            "key": "card-key",
+            "objective": "Test task",
+            "model": "openai-codex/gpt-5.6-sol",
+            "work_id": "work-current",
+            "ledger_run_id": "run-current",
+            "task_started_at": "2026-07-18T17:59:00Z",
+            "status": "active",
+        }}}
+        with patch.object(watcher, "JAIMES_WORK_CARD_STATE_PATH", work_state), \
+             patch.object(watcher, "publish_jaimes") as publish:
+            confirmed = watcher.reconcile_adapter_confirmed_deliveries(state)
+        self.assertEqual(confirmed, 1)
+        card = state["active_cards"]["run-9"]
+        self.assertEqual(card["status"], "done")
+        self.assertEqual(card["final_contract_status"], "canonical")
+        self.assertEqual(card["final_delivery_verified_by"], "hermes-adapter-success")
+        self.assertEqual(card["native_final_message_id"], "3914")
+        self.assertEqual(card["final_message_id"], "3914")
+        publish.assert_called_once()
+
+    def test_adapter_receipt_without_final_message_id_does_not_close_watcher_card(self) -> None:
+        work_state = Path(self.tmp.name) / "jaimes_work_cards.json"
+        work_state.write_text(json.dumps({"cards": {
+            "card-key": {
+                "status": "done",
+                "updated_at": "2026-07-18T18:00:00Z",
+                "work_log": ["Final summary delivered"],
+                "work_id": "work-current",
+                "run_id": "run-current",
+                "task_started_at": "2026-07-18T17:59:00Z",
+            }
+        }}))
+        state = {"active_cards": {"run-9": {
+            "key": "card-key",
+            "objective": "Test task",
+            "work_id": "work-current",
+            "ledger_run_id": "run-current",
+            "task_started_at": "2026-07-18T17:59:00Z",
+            "status": "active",
+        }}}
+        with patch.object(watcher, "JAIMES_WORK_CARD_STATE_PATH", work_state), \
+             patch.object(watcher, "publish_jaimes") as publish:
+            confirmed = watcher.reconcile_adapter_confirmed_deliveries(state)
+        self.assertEqual(confirmed, 0)
+        self.assertEqual(state["active_cards"]["run-9"]["status"], "active")
+        publish.assert_not_called()
+
+    def test_adapter_receipt_for_different_run_does_not_close_watcher_card(self) -> None:
+        work_state = Path(self.tmp.name) / "jaimes_work_cards.json"
+        work_state.write_text(json.dumps({"cards": {
+            "card-key": {
+                "status": "done",
+                "updated_at": "2026-07-18T18:00:00Z",
+                "work_log": ["Final summary delivered"],
+                "final_message_id": "3914",
+                "work_id": "work-current",
+                "run_id": "run-other",
+                "task_started_at": "2026-07-18T17:59:00Z",
+            }
+        }}))
+        state = {"active_cards": {"run-9": {
+            "key": "card-key",
+            "objective": "Test task",
+            "work_id": "work-current",
+            "ledger_run_id": "run-current",
+            "task_started_at": "2026-07-18T17:59:00Z",
+            "status": "active",
+        }}}
+        with patch.object(watcher, "JAIMES_WORK_CARD_STATE_PATH", work_state), \
+             patch.object(watcher, "publish_jaimes") as publish:
+            confirmed = watcher.reconcile_adapter_confirmed_deliveries(state)
+        self.assertEqual(confirmed, 0)
+        self.assertEqual(state["active_cards"]["run-9"]["status"], "active")
+        publish.assert_not_called()
 
     def test_unstructured_native_final_is_edited_in_place_before_card_closes(self) -> None:
         user_id = self.add_user("older", "run the health check")
@@ -883,6 +1082,202 @@ class MultiSessionWatcherTests(unittest.TestCase):
         self.assertEqual(card["final_contract_status"], "waiting_for_telegram_delivery_id")
         edit.assert_not_called()
         run.assert_not_called()
+
+    def test_status_only_completion_is_demoted_without_invented_success(self) -> None:
+        rendered = watcher.structured_final_text(
+            """Complete: Yes
+What was done:
+- Assessment complete.
+- Verified the runtime outcome.
+- Prepared the result for Telegram delivery.
+Issues:
+n/a
+Appropriate next steps:
+No action needed.
+Approval needed:
+n/a""",
+            objective="Assess Agent RH",
+            model="openai-codex/gpt-5.6-sol",
+            route="JAIMES verified execution",
+        )
+        plain = watcher.html.unescape(rendered)
+        normalized = " ".join(plain.split())
+        self.assertIn("Complete: No", normalized)
+        self.assertIn("did not include enough concrete", normalized)
+        self.assertIn("without inventing missing facts", normalized)
+        self.assertNotIn("Verified the runtime outcome", normalized)
+        self.assertNotIn("Prepared the result for Telegram", normalized)
+
+    def test_agent_rh_findings_and_recommendation_remain_complete(self) -> None:
+        rendered = watcher.structured_final_text(
+            """Complete: Yes
+What was done:
+- Confirmed Agent RH monitors Robinhood Chain activity only.
+- Found it cannot trade a Robinhood brokerage account.
+- Identified credential and automated trade-control risks.
+- Recommended read-only signal use without connected credentials or wallets.
+Issues:
+- Connecting credentials would create avoidable account-control risk.
+Appropriate next steps:
+- Keep Agent RH read-only and do not connect credentials or wallets.
+Approval needed:
+n/a""",
+            objective="Assess Agent RH for safe Robinhood use",
+            model="openai-codex/gpt-5.6-sol",
+            route="JAIMES verified execution",
+        )
+        plain = watcher.html.unescape(rendered)
+        self.assertIn("Complete: Yes", plain)
+        self.assertIn("cannot trade a Robinhood", plain)
+        self.assertIn("read-only", plain)
+        self.assertNotIn("No action needed", plain)
+        self.assertTrue(watcher.final_contract_is_canonical(rendered))
+
+    def test_topic17_repair_findings_remain_complete_and_route_why_is_not_duplicated(self) -> None:
+        rendered = watcher.structured_final_text(
+            """Complete: Yes
+What was done:
+- The live LaunchAgent used a different fast-ack script than the previously patched copy.
+- Missing chat/topic metadata caused heartbeat edits to default into the JAIMES DM; 26 misplaced cards and records were repaired.
+- Duplicate fast-ack cards were disabled, leaving jaimes_live_card.py as the sole card owner; Topic 17 routing then verified correctly.
+Issues:
+- n/a
+Appropriate next steps:
+- Keep an origin-route canary that verifies every Topic 17 card update remains in Topic 17.
+Approval needed:
+- n/a""",
+            objective="Summarize and review",
+            model="openai-codex/gpt-5.6-sol",
+            route="JAIMES verified execution | Why: heavy workhorse reasoning",
+        )
+        plain = watcher.html.unescape(rendered)
+        normalized = " ".join(plain.split())
+        self.assertIn("Complete: Yes", normalized)
+        self.assertEqual(plain.count("Why:"), 1)
+        self.assertIn("26 misplaced cards", normalized)
+        self.assertIn("cards were disabled", normalized)
+        self.assertIn("jaimes_live_card.py", normalized)
+        self.assertIn("heavy workhorse reasoning", normalized)
+        self.assertIn("origin-route canary", normalized)
+        self.assertNotIn("Detailed findings were not captured", normalized)
+        self.assertNotIn("Retry with evidence", normalized)
+        self.assertTrue(watcher.final_contract_is_canonical(rendered))
+        self.assertLessEqual(max(map(len, plain.removeprefix("<pre>").removesuffix("</pre>").splitlines())), 38)
+
+    def test_july_11_session_history_is_downgraded_for_july_18_current_task(self) -> None:
+        rendered = watcher.structured_final_text(
+            """Model: openai-codex/gpt-5.6-sol | Route: session-history verification | Why: prior repair record checked
+Complete: Yes
+What was done:
+- The live LaunchAgent used a different fast-ack script than the previously patched copy.
+- Missing chat/topic metadata caused heartbeat edits to default into the JAIMES DM; 26 misplaced cards and records were repaired.
+- Duplicate fast-ack cards were disabled, leaving jaimes_live_card.py as the sole card owner; Topic 17 routing then verified correctly.
+Issues:
+- n/a
+Appropriate next steps:
+- Keep an origin-route canary that verifies every Topic 17 card update remains in Topic 17.
+Approval needed:
+- n/a""",
+            objective="Verify today's Topic 17 response-contract deployment",
+            model="openai-codex/gpt-5.6-sol",
+            route="JAIMES verified execution",
+            work_id="work-20260718",
+            run_id="run-20260718",
+            task_started_at="2026-07-18T19:39:36Z",
+            response_recorded_at="2026-07-18T19:40:41Z",
+        )
+        plain = watcher.html.unescape(rendered)
+        normalized = " ".join(plain.split())
+        self.assertIn("Complete: No", normalized)
+        self.assertIn("not bound to the current", normalized)
+        self.assertIn("Retry using evidence produced", normalized)
+        self.assertNotIn("26 misplaced cards", normalized)
+        self.assertNotIn("jaimes_live_card.py", normalized)
+        self.assertNotIn("work-20260718", plain)
+        self.assertNotIn("run-20260718", plain)
+        self.assertTrue(watcher.final_contract_is_canonical(rendered))
+        self.assertLessEqual(
+            max(map(len, plain.removeprefix("<pre>").removesuffix("</pre>").splitlines())),
+            38,
+        )
+
+    def test_explicit_july_11_history_request_may_use_session_history(self) -> None:
+        rendered = watcher.structured_final_text(
+            """Model: openai-codex/gpt-5.6-sol | Route: session-history verification | Why: requested historical review
+Complete: Yes
+What was done:
+- Confirmed the July 11 repair changed the active fast-ack script.
+- Found topic metadata had caused misplaced card updates.
+- Verified the prior repair disabled duplicate card ownership.
+Issues:
+- n/a
+Appropriate next steps:
+- Keep the historical record for future comparison.
+Approval needed:
+- n/a""",
+            objective="Summarize the historical July 11 Topic 17 repair",
+            model="openai-codex/gpt-5.6-sol",
+            route="JAIMES verified execution",
+            work_id="work-20260718",
+            run_id="run-20260718",
+            task_started_at="2026-07-18T19:39:36Z",
+        )
+        plain = watcher.html.unescape(rendered)
+        self.assertIn("Complete: Yes", plain)
+        self.assertIn("July 11 repair", plain)
+        self.assertTrue(watcher.final_contract_is_canonical(rendered))
+
+    def test_current_run_evidence_binding_is_private_and_complete(self) -> None:
+        rendered = watcher.structured_final_text(
+            """Model: openai-codex/gpt-5.6-sol | Route: session-history verification | Why: current run inspected
+Evidence: workId=work-private-20260718 | runId=run-private-20260718 | observedAt=2026-07-18T19:40:00Z | mode=current
+Complete: Yes
+What was done:
+- Confirmed the current adapter validates the final before Telegram delivery.
+- Found the current work card reaches final-ready before the send begins.
+- Verified the current card closes only after the adapter confirms delivery.
+Issues:
+- n/a
+Appropriate next steps:
+- Keep the current-run evidence canary enabled.
+Approval needed:
+- n/a""",
+            objective="Verify today's Topic 17 delivery contract",
+            model="openai-codex/gpt-5.6-sol",
+            route="JAIMES verified execution",
+            work_id="work-private-20260718",
+            run_id="run-private-20260718",
+            task_started_at="2026-07-18T19:39:36Z",
+        )
+        plain = watcher.html.unescape(rendered)
+        self.assertIn("Complete: Yes", plain)
+        self.assertNotIn("work-private-20260718", plain)
+        self.assertNotIn("run-private-20260718", plain)
+        self.assertNotIn("observedAt", plain)
+        self.assertTrue(watcher.final_contract_is_canonical(rendered))
+
+    def test_final_contract_rejects_duplicate_why_header(self) -> None:
+        malformed = """<pre>Model: openai-codex/gpt-5.6-sol |
+   Route: JAIMES execution |
+   Why: primary | Why: duplicate
+
+Complete: No - malformed header
+
+What was done:
+- Preserved the source response.
+- Identified a duplicate field.
+- Kept the result fail closed.
+
+Issues:
+- Header is malformed.
+
+Appropriate next steps:
+- Regenerate one verified header.
+
+Approval needed:
+- n/a</pre>"""
+
+        self.assertFalse(watcher.final_contract_is_canonical(malformed))
 
     def test_compaction_adjacent_replay_is_suppressed(self) -> None:
         timestamp = time.time()

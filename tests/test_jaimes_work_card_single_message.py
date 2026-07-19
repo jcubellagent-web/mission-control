@@ -33,6 +33,70 @@ def test_default_state_path_is_absolute_and_workspace_scoped():
     assert card.STATE_PATH == card.ROOT.parent / "memory" / "jaimes_work_cards.json"
 
 
+def test_brain_feed_publish_uses_canonical_josh_ledger_with_identity():
+    args = SimpleNamespace(
+        no_brain_feed=False,
+        dry_run=False,
+        title="Lifecycle canary",
+        key="lifecycle-canary",
+        now="Verifying final delivery",
+        next="",
+        blocker="",
+    )
+    completed = subprocess.CompletedProcess(args=[], returncode=0)
+    with patch.object(card.subprocess, "run", return_value=completed) as run:
+        assert card.publish_brain_feed(
+            args,
+            "done",
+            work_id="work-20260718",
+            run_id="run-20260718",
+        ) is True
+
+    command = run.call_args.args[0]
+    assert command[:5] == ["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=4"]
+    assert command[5] == card.CONTROL_TOWER_SSH_HOST
+    remote_command = command[6]
+    assert card.CONTROL_TOWER_REMOTE_ROOT in remote_command
+    assert f"{card.CONTROL_TOWER_REMOTE_ROOT}/scripts/agent_publish.py" in remote_command
+    assert "--work-id work-20260718" in remote_command
+    assert "--run-id run-20260718" in remote_command
+    assert "--status done" in remote_command
+    assert str(card.ROOT / "scripts" / "agent_publish.py") not in command
+
+
+def test_brain_feed_publish_never_falls_back_to_local_ledger_on_remote_failure():
+    args = SimpleNamespace(
+        no_brain_feed=False,
+        dry_run=False,
+        title="Lifecycle canary",
+        key="lifecycle-canary",
+        now="Publishing",
+        next="",
+        blocker="",
+    )
+    completed = subprocess.CompletedProcess(args=[], returncode=255)
+    with patch.object(card.subprocess, "run", return_value=completed) as run:
+        assert card.publish_brain_feed(args, "running") is False
+    assert run.call_count == 1
+    assert run.call_args.args[0][0] == "ssh"
+
+
+def test_brain_feed_publish_rejects_a_partial_task_identity():
+    args = SimpleNamespace(
+        no_brain_feed=False,
+        dry_run=False,
+        title="Lifecycle canary",
+        key="lifecycle-canary",
+        now="Publishing",
+        next="",
+        blocker="",
+    )
+    with patch.object(card.subprocess, "run") as run:
+        assert card.publish_brain_feed(args, "running", work_id="work-only") is False
+        assert card.publish_brain_feed(args, "running", run_id="run-only") is False
+    run.assert_not_called()
+
+
 def test_ack_message_is_adopted_instead_of_sending_duplicate():
     args = SimpleNamespace(
         key="single-card", title="Fix duplicate cards", model="model", route="route",
@@ -441,7 +505,7 @@ def test_live_card_delete_is_blocked_without_explicit_override():
     urlopen.assert_not_called()
 
 
-def test_live_card_shows_skills_tools_actions_and_decisions():
+def test_live_card_hides_runtime_plumbing_and_keeps_semantic_milestones():
     text = card.build_card(
         title="Improve live-card transparency",
         status="running",
@@ -457,15 +521,13 @@ def test_live_card_shows_skills_tools_actions_and_decisions():
         next_step="Reload and verify the watcher",
         blocker="None",
     )
-    for expected in (
-        "🔄 Now", "🧰 tool: search_files", "✅ Completed",
-        "🧭 skill:", "🧠 decision:", "✅ tool:",
-        "✅ action:", "✅ verify:", "⏭️ Next",
-    ):
+    for expected in ("Now", "Done", "updated the card format", "regression checks", "Next"):
         assert expected in text
+    for hidden in ("search_files", "read_file", "tool:", "action:", "skill:"):
+        assert hidden not in text.lower()
 
 
-def test_complete_card_keeps_cumulative_major_steps_and_final_marker():
+def test_complete_card_consolidates_history_and_keeps_final_marker():
     steps = [
         "Skill applied: telegram-task-flow — loaded the workflow",
         "Decision: preserve cumulative major-step history",
@@ -484,27 +546,22 @@ def test_complete_card_keeps_cumulative_major_steps_and_final_marker():
         blocker="None",
     )
     normalized = " ".join(text.split())
-    for expected in (
-        "🧭 skill: telegram-task-flow",
-        "🧠 decision: preserve cumulative major-step history",
-        "✅ tool: search_files",
-        "✅ action: patch",
-        "✅ verify: terminal",
-        "🏁 final: summary sent",
-    ):
+    for expected in ("earlier checks", "regression checks", "Summary ready"):
         assert expected in normalized
+    for hidden in ("skill:", "tool:", "action:", "verify:", "search_files"):
+        assert hidden not in normalized.lower()
 
 
-def test_long_history_keeps_early_skill_and_decision_plus_recent_steps():
+def test_long_history_is_consolidated_to_three_semantic_rows():
     steps = [
         "Skill applied: telegram-task-flow — workflow",
         "Decision: keep the cumulative ledger",
-    ] + [f"Action completed: phase {i} — result" for i in range(1, 16)]
+    ] + [f"Action completed: phase {i} — completed phase {i}" for i in range(1, 16)]
     lines = card.activity_lines(steps, fallback="none", limit=12)
-    assert any("🧭 skill:" in line for line in lines)
-    assert any("🧠 decision:" in line for line in lines)
+    assert any("earlier checks" in line for line in lines)
     assert any("phase 15" in line for line in lines)
-    assert len(lines) == 12
+    assert len(lines) == 3
+    assert all("action:" not in line.lower() and "skill:" not in line.lower() for line in lines)
 
 
 def test_emoji_rows_use_code_block_hanging_indent():
@@ -521,9 +578,9 @@ def test_emoji_rows_use_code_block_hanging_indent():
     assert max(map(len, rows)) <= card.CARD_WRAP_WIDTH
 
 
-def test_preformatted_code_block_row_is_not_prefixed_with_bullet():
+def test_preformatted_runtime_row_is_humanized_without_internal_label():
     row = "✅ action: terminal — running a bounded system operation"
-    assert card.live_line(row) == row
+    assert card.live_line(row) == "- a bounded system operation"
     rendered = card.build_card(
         title="Fix code-block alignment",
         status="running",
@@ -533,8 +590,8 @@ def test_preformatted_code_block_row_is_not_prefixed_with_bullet():
         next_step="No action needed.",
         blocker="None",
     )
-    assert "\n✅ action: terminal — running a bounded\n   system operation\n" in rendered
-    assert "• ✅ action" not in rendered
+    assert "a bounded system operation" in rendered
+    assert "action:" not in rendered.lower()
 
 
 def test_dash_rows_use_two_space_hanging_indent():
@@ -733,3 +790,121 @@ def test_reconcile_cli_uses_default_age_and_does_not_require_key(capsys):
         dry_run=True,
     )
     assert json.loads(capsys.readouterr().out) == receipt
+
+
+def test_adapter_final_message_receipt_is_persisted_with_exact_task_identity(tmp_path):
+    state_path = tmp_path / "cards.json"
+    state_path.write_text(json.dumps({"cards": {"linked-card": {
+        "title": "Verify Topic 17 delivery",
+        "message_id": "3900",
+        "ack_message_id": "3900",
+        "status": "running",
+        "work_log": ["Final summary validated; sending now"],
+        "current_step": "Final summary validated; sending now",
+        "model": "openai-codex/gpt-5.6-sol",
+        "route": "JAIMES verified execution",
+        "chat_id": "-1003589561528",
+        "thread_id": "17",
+        "work_id": "work-20260718",
+        "run_id": "run-20260718",
+        "task_started_at": "2026-07-18T19:39:36Z",
+    }}}), encoding="utf-8")
+    args = SimpleNamespace(
+        key="linked-card", title="Verify Topic 17 delivery",
+        model="openai-codex/gpt-5.6-sol", route="JAIMES verified execution",
+        now="Final summary delivered", done="Final summary delivered",
+        next="See the final summary for findings and next steps.", blocker="None", eta="",
+        ack_message_id="", separate_message=False,
+        chat_id="-1003589561528", thread_id="17",
+        work_id="work-20260718", run_id="run-20260718",
+        task_started_at="2026-07-18T19:39:36Z",
+        final_message_id="3914", final_delivery_verified_by="hermes-adapter-success",
+        buttons=None, buttons_file=None, routing_buttons=False,
+        approval_buttons=False, no_buttons=True, final_summary=False,
+        no_final_summary=True, timeout=15, dry_run=False, no_brain_feed=False,
+    )
+    with patch.object(card, "STATE_PATH", state_path), \
+         patch.object(card, "LOCK_PATH", tmp_path / "cards.lock"), \
+         patch.object(card, "edit_card", return_value={"ok": True}), \
+         patch.object(card, "send_card") as send, \
+         patch.object(card, "publish_brain_feed", return_value=True) as publish:
+        assert card.upsert_card(args, "done") == 0
+    send.assert_not_called()
+    publish.assert_called_once_with(
+        args,
+        "done",
+        work_id="work-20260718",
+        run_id="run-20260718",
+    )
+
+    saved = json.loads(state_path.read_text(encoding="utf-8"))["cards"]["linked-card"]
+    assert saved["final_message_id"] == "3914"
+    assert saved["final_delivery_verified_by"] == "hermes-adapter-success"
+    assert saved["final_delivery_confirmed_at"].startswith("2026-")
+    assert saved["work_id"] == "work-20260718"
+    assert saved["run_id"] == "run-20260718"
+    assert saved["task_started_at"] == "2026-07-18T19:39:36Z"
+
+
+def test_existing_final_message_link_rejects_a_different_receipt(tmp_path):
+    state_path = tmp_path / "cards.json"
+    state_path.write_text(json.dumps({"cards": {"linked-card": {
+        "title": "Verify Topic 17 delivery",
+        "message_id": "3900",
+        "final_message_id": "3914",
+        "status": "done",
+    }}}), encoding="utf-8")
+    args = SimpleNamespace(
+        key="linked-card", title="Verify Topic 17 delivery", model="model", route="route",
+        now="Final summary delivered", done="Final summary delivered", next="", blocker="None", eta="",
+        ack_message_id="", separate_message=False, chat_id="-1003589561528", thread_id="17",
+        work_id="work-20260718", run_id="run-20260718",
+        task_started_at="2026-07-18T19:39:36Z",
+        final_message_id="3915", final_delivery_verified_by="hermes-adapter-success",
+        buttons=None, buttons_file=None, routing_buttons=False,
+        approval_buttons=False, no_buttons=True, final_summary=False,
+        no_final_summary=True, timeout=15, dry_run=False, no_brain_feed=False,
+    )
+    with patch.object(card, "STATE_PATH", state_path), \
+         patch.object(card, "LOCK_PATH", tmp_path / "cards.lock"), \
+         patch.object(card, "edit_card") as edit, \
+         patch.object(card, "send_card") as send, \
+         patch.object(card, "publish_brain_feed"):
+        assert card.upsert_card(args, "done") == 1
+    edit.assert_not_called()
+    send.assert_not_called()
+    saved = json.loads(state_path.read_text(encoding="utf-8"))["cards"]["linked-card"]
+    assert saved["final_message_id"] == "3914"
+
+
+def test_existing_task_identity_cannot_be_rebound(tmp_path):
+    state_path = tmp_path / "cards.json"
+    state_path.write_text(json.dumps({"cards": {"linked-card": {
+        "title": "Verify Topic 17 delivery",
+        "message_id": "3900",
+        "status": "running",
+        "work_id": "work-original",
+        "run_id": "run-original",
+        "task_started_at": "2026-07-18T19:39:36Z",
+    }}}), encoding="utf-8")
+    args = SimpleNamespace(
+        key="linked-card", title="Verify Topic 17 delivery", model="model", route="route",
+        now="Working", done="", next="", blocker="None", eta="",
+        ack_message_id="", separate_message=False, chat_id="-1003589561528", thread_id="17",
+        work_id="work-other", run_id="run-original",
+        task_started_at="2026-07-18T19:39:36Z",
+        final_message_id="", final_delivery_verified_by="",
+        buttons=None, buttons_file=None, routing_buttons=False,
+        approval_buttons=False, no_buttons=True, final_summary=False,
+        no_final_summary=True, timeout=15, dry_run=False, no_brain_feed=False,
+    )
+    with patch.object(card, "STATE_PATH", state_path), \
+         patch.object(card, "LOCK_PATH", tmp_path / "cards.lock"), \
+         patch.object(card, "edit_card") as edit, \
+         patch.object(card, "send_card") as send, \
+         patch.object(card, "publish_brain_feed"):
+        assert card.upsert_card(args, "running") == 1
+    edit.assert_not_called()
+    send.assert_not_called()
+    saved = json.loads(state_path.read_text(encoding="utf-8"))["cards"]["linked-card"]
+    assert saved["work_id"] == "work-original"

@@ -1,5 +1,6 @@
 import importlib.util
 import sqlite3
+import sys
 import time
 from pathlib import Path
 
@@ -9,7 +10,12 @@ def load_module():
     spec = importlib.util.spec_from_file_location("jaimes_fast_ack_guard", path)
     module = importlib.util.module_from_spec(spec)
     assert spec and spec.loader
-    spec.loader.exec_module(module)
+    scripts_dir = str(path.parent)
+    sys.path.insert(0, scripts_dir)
+    try:
+        spec.loader.exec_module(module)
+    finally:
+        sys.path.remove(scripts_dir)
     return module
 
 
@@ -86,14 +92,15 @@ def test_objective_copy_complaint_maps_to_interpreted_intent():
 
 def test_near_copy_gate_defers_telegram_and_control_tower(monkeypatch):
     watcher = load_module()
-    monkeypatch.setattr(watcher, "objective_from_prompt", lambda _prompt: "Please stabilize the live card")
+    prompt = "Please stabilize the live card"
+    monkeypatch.setattr(watcher, "objective_from_prompt", lambda _prompt: prompt)
     monkeypatch.setattr(watcher, "objective_is_near_copy", lambda _prompt, _objective: True)
     monkeypatch.setattr(watcher, "semantic_reinterpretation", lambda _prompt: "")
     monkeypatch.setattr(watcher, "skill_for_prompt", lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("must wait before skill selection")))
     monkeypatch.setattr(watcher, "publish_jaimes", lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("must not publish")))
     monkeypatch.setattr(watcher, "run_cmd", lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("must not start a card")))
     result = watcher.send_ack(
-        {"platform_message_id": "42", "db_message_id": "7", "ts": "2026-07-13T20:00:00Z", "prompt": "Please stabilize the live card", "run_id": "telegram-message-7"},
+        {"platform_message_id": "42", "db_message_id": "7", "ts": "2026-07-13T20:00:00Z", "prompt": prompt, "run_id": "telegram-message-7"},
         model="openai-codex/gpt-5.6-sol",
         state={},
         dry_run=True,

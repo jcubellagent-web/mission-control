@@ -18,6 +18,23 @@ CARD_ROW_RE = re.compile(
     r"appropriate next steps|approval needed|status|progress)\s*(?::|$)",
     re.I,
 )
+TRANSPORT_PREFIX_RE = re.compile(
+    r"^(?:\[J(?:\|[^\]]+)?\]\s*|TEST\s+ID\s*:\s*\S+\s*)",
+    re.I,
+)
+ACTION_VERBS = (
+    "test", "testing", "validate", "validating", "verify", "confirm", "check",
+    "fix", "repair", "resolve", "correct", "review", "audit", "inspect",
+    "examine", "assess", "look at", "add", "build", "create", "implement",
+    "update", "upgrade", "change", "redesign", "optimize", "improve", "sync",
+    "synchronize", "reconcile", "align", "run", "execute",
+)
+ACTIONABLE_RE = re.compile(
+    rf"\b(?:(?:please\s+)?(?:can|could|would|may)\s+you(?:\s+please)?\s+|"
+    rf"please\s+|i\s+want\s+you\s+to\s+|make\s+sure\s+)?"
+    rf"(?:{'|'.join(re.escape(value) for value in ACTION_VERBS)})\b.+$",
+    re.I,
+)
 
 
 def current_request_text(prompt: str) -> str:
@@ -30,6 +47,10 @@ def current_request_text(prompt: str) -> str:
     skip_value = False
     for raw_line in raw.splitlines():
         line = raw_line.strip()
+        # A transport marker may occupy a row by itself or prefix the actual
+        # request. Remove only the marker so a same-line imperative survives.
+        while line and TRANSPORT_PREFIX_RE.match(line):
+            line = TRANSPORT_PREFIX_RE.sub("", line, count=1).strip()
         if not line:
             continue
         if re.fullmatch(r"(?:🎯\s*)?objective", line, re.I):
@@ -38,7 +59,10 @@ def current_request_text(prompt: str) -> str:
         if skip_value:
             skip_value = False
             continue
-        if CARD_ROW_RE.match(line) or line.startswith(("```", "[media attached:")):
+        if (
+            CARD_ROW_RE.match(line)
+            or line.startswith(("```", "[media attached:"))
+        ):
             continue
         lines.append(line)
     return " ".join(lines).strip()
@@ -85,6 +109,12 @@ def objective_is_near_copy(prompt: str, objective: str) -> bool:
 def semantic_reinterpretation(prompt: str) -> str:
     """Turn common imperatives into outcome-oriented objective labels."""
     request = current_request_text(prompt).strip(" .?!")
+    # Hermes transport rows and test identifiers can precede the actual ask.
+    # Prefer the first actionable imperative so intake does not mistake that
+    # metadata (or a short context sentence) for the objective.
+    actionable = ACTIONABLE_RE.search(request)
+    if actionable:
+        request = actionable.group(0)
     request = re.sub(r"^(?:@[a-z0-9_.-]+\s+)+", "", request, flags=re.I)
     request = COURTESY_RE.sub("", request).strip(" .?!")
     patterns = (
@@ -103,6 +133,11 @@ def semantic_reinterpretation(prompt: str) -> str:
         target = " ".join(match.group(1).strip(" .?!").split())
         if not target:
             return ""
+        target_words = target.split()
+        if len(target_words) > 5:
+            # This is a deterministic fallback, not a prompt echo. Retain the
+            # subject and outcome nouns while breaking long copied word runs.
+            target = " ".join([*target_words[:3], *target_words[-2:]])
         allowance = max(12, 80 - len(action) - len(outcome) - 2)
         target = target[:allowance].rstrip(" ,.;:-")
         return f"{action} {target} {outcome}"[:80].rstrip()

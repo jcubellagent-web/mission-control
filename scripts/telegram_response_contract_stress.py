@@ -475,7 +475,12 @@ def render_stress(module, iterations: int) -> dict:
         for position in range(1, len(MILESTONE_UPDATES) + 1):
             items = list(MILESTONE_UPDATES[:position])
             status = "done" if position == len(MILESTONE_UPDATES) else "running"
-            counts.append(module.milestone_count(items, status, route=route))
+            progress_counter = getattr(
+                module,
+                "compact_milestone_position",
+                module.milestone_count,
+            )
+            counts.append(progress_counter(items, status, route=route))
             legacy = module.build_card(
                 title=title,
                 status=status,
@@ -505,13 +510,26 @@ def render_stress(module, iterations: int) -> dict:
             updated="2026-01-01T00:00:06Z",
             started_at="2026-01-01T00:00:00Z",
         )
-        for required in ("<details>", "<footer>", 'type="checkbox"', "100%", "stage 6/6"):
-            if required not in rich:
+        rich_plain = pre_text(rich)
+        if not re.fullmatch(r"\s*<pre>[\s\S]*</pre>\s*", rich, flags=re.I):
+            problems.append("rich live card is not one fixed-width pre block")
+        for required in ("JOSH 2.0 · Complete", "Progress [██████████] 6/6", "Now"):
+            if required not in rich_plain:
                 problems.append(f"rich live card missing {required}")
+        if len(rich_plain.splitlines()) > 22:
+            problems.append("rich live card exceeds 22 visible lines")
+        if max((module.display_width(line) for line in rich_plain.splitlines()), default=0) > CARD_WIDTH:
+            problems.append("rich live card exceeds 38 display columns")
+        if re.search(
+            r"(?i)(?:tool:|action:|brain feed|search_files|read_file|"
+            r"<details>|type=\"checkbox\"|recent activity)",
+            rich,
+        ):
+            problems.append("rich live card exposes implementation activity")
 
         # A terminal workflow can complete its delivery lifecycle even when
-        # the objective result is Complete: No. Keep NEEDS ATTENTION truthful,
-        # but require the same Delivered/100% terminal contract before final.
+        # the objective result is Complete: No. Keep Needs attention truthful,
+        # but require the same closed 6/6 delivery contract before final.
         failed_items = [
             *MILESTONE_UPDATES[:-1],
             "Structured issue summary prepared",
@@ -537,9 +555,9 @@ def render_stress(module, iterations: int) -> dict:
             started_at="2026-01-01T00:00:00Z",
         )
         for rendered in (pre_text(failed_legacy), pre_text(failed_rich)):
-            if "100%" not in rendered or "stage 6/6" not in rendered:
-                problems.append("needs-attention terminal card did not close at 100% through stage 6/6")
-        if "NEEDS ATTENTION" not in failed_rich:
+            if "Progress [██████████] 6/6" not in rendered:
+                problems.append("needs-attention terminal card did not close through stage 6/6")
+        if "Needs attention" not in failed_rich:
             problems.append("failed terminal rich card lost its needs-attention outcome label")
 
         final = module.build_completion_summary(
@@ -891,12 +909,11 @@ def live_canary(module, chat_id: str, thread_id: str) -> dict:
             )
             if terminal:
                 terminal_render_verified = all(
-                    marker in rendered
+                    "Progress [██████████] 6/6" in rendered
                     for rendered in (pre_text(legacy), pre_text(rich))
-                    for marker in ("100%", "stage 6/6")
                 )
                 if not terminal_render_verified:
-                    failures.append("terminal live card did not render 100% at stage 6/6")
+                    failures.append("terminal live card did not render the closed 6/6 state")
                     return finish()
             edited = module.edit_rich_card(
                 live_id,
@@ -962,14 +979,20 @@ def main() -> int:
     parser.add_argument("--chat-id", default=PRODUCTION_CHAT_ID)
     parser.add_argument("--thread-id")
     parser.add_argument(
+        "--work-card-path",
+        help="offline-only override for the renderer under test",
+    )
+    parser.add_argument(
         "--confirm-production-canary",
         action="store_true",
         help="allow temporary canary messages in production Inbox topic 1",
     )
     args = parser.parse_args()
+    if args.live and args.work_card_path:
+        parser.error("--work-card-path is available only for offline render stress")
 
     home = Path.home()
-    script = (
+    script = Path(args.work_card_path).expanduser() if args.work_card_path else (
         home / ".openclaw/workspace/scripts/josh_work_card.py"
         if args.role == "josh2"
         else home / ".openclaw/workspace/mission-control/scripts/jaimes_work_card.py"

@@ -22,6 +22,8 @@ import time
 from pathlib import Path
 from typing import Any, Callable
 
+from jaimes_completion_evidence import write_completion_evidence
+
 
 HOME = Path.home()
 WORKSPACE = HOME / ".openclaw" / "workspace"
@@ -31,6 +33,7 @@ SESSION_DIR = SESSIONS_PATH.parent
 HERMES_SESSION_DIR = HERMES_SESSIONS_PATH.parent
 HERMES_STATE_DB = HOME / ".hermes" / "state.db"
 STATE_PATH = HOME / ".openclaw" / "telegram" / "jaimes_fast_ack_state.json"
+JAIMES_WORK_CARD_STATE_PATH = WORKSPACE / "memory" / "jaimes_work_cards.json"
 HANDOFF_DIR = HOME / ".openclaw" / "telegram" / "jaimes_handoff_receipts"
 DIRECT_SESSION_KEYS = (
     "agent:main:telegram:dm:6218150306",
@@ -64,8 +67,14 @@ X_INTELLIGENCE_QUEUE = WORKSPACE / "memory" / "x_intelligence_intake_queue.jsonl
 X_STATUS_URL_RE = re.compile(r"https?://(?:www\.)?(?:x\.com|twitter\.com)/[A-Za-z0-9_]{1,15}/status/\d+", re.I)
 TELEGRAM_META_PATTERN = re.compile(r"Conversation info.*?```\s*\n\nSender .*?```\s*\n\n", re.S)
 
-if str(WORKSPACE / "mission-control" / "scripts") not in sys.path:
-    sys.path.insert(0, str(WORKSPACE / "mission-control" / "scripts"))
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+canonical_scripts = str(WORKSPACE / "mission-control" / "scripts")
+if canonical_scripts not in sys.path:
+    # Keep the executing script's siblings authoritative. Appending the
+    # canonical fallback also makes isolated regression copies truly isolated.
+    sys.path.append(canonical_scripts)
 
 try:
     import jaimes_work_card as work_card  # type: ignore
@@ -142,7 +151,7 @@ def apply_telegram_target(payload: dict[str, Any], meta: dict[str, Any] | None =
 
 
 def work_card_target_args(meta: dict[str, Any] | None) -> list[str]:
-    """Persist the originating Telegram chat/topic into work-card state."""
+    """Persist the originating Telegram target and task identity."""
     if not meta:
         return []
     chat_id = meta.get("telegram_chat_id") or meta.get("chat_id")
@@ -152,6 +161,15 @@ def work_card_target_args(meta: dict[str, Any] | None) -> list[str]:
         args += ["--chat-id", str(chat_id)]
     if thread_id not in {None, ""}:
         args += ["--thread-id", str(thread_id)]
+    work_id = meta.get("work_id")
+    run_id = meta.get("ledger_run_id") or meta.get("work_run_id")
+    task_started_at = meta.get("task_started_at") or meta.get("started_at")
+    if work_id not in {None, ""}:
+        args += ["--work-id", str(work_id)]
+    if run_id not in {None, ""}:
+        args += ["--run-id", str(run_id)]
+    if task_started_at not in {None, ""}:
+        args += ["--task-started-at", str(task_started_at)]
     return args
 
 
@@ -353,6 +371,28 @@ def _handoff_id(value: Any, *, allow_negative: bool = False) -> str:
     return text
 
 
+def positive_message_id(value: Any) -> str:
+    """Return a confirmed Telegram message id or an empty string."""
+    text = str(value or "").strip()
+    return text if text.isdigit() and int(text) > 0 else ""
+
+
+def registerable_ack_result(result: dict[str, Any]) -> bool:
+    """Only a concrete, objective-bound surface may become active state."""
+    if not result.get("ok"):
+        return False
+    if str(result.get("status") or "").strip().lower() == "awaiting-objective-interpretation":
+        return False
+    if result.get("requires_objective_interpretation"):
+        return False
+    return bool(
+        str(result.get("key") or "").strip()
+        and str(result.get("objective") or "").strip()
+        and str(result.get("route") or "").strip()
+        and positive_message_id(result.get("ack_message_id"))
+    )
+
+
 def handoff_identity(chat_id: Any, thread_id: Any, message_id: Any) -> tuple[str, str, str]:
     chat = _handoff_id(chat_id, allow_negative=True)
     thread = _handoff_id(thread_id)
@@ -551,6 +591,7 @@ def recover_accepted_handoff_card(
         "telegram_chat_id": str(meta.get("telegram_chat_id") or ""),
         "telegram_thread_id": str(meta.get("telegram_thread_id") or ""),
         "session_id": str(event.get("session_id") or meta.get("sessionId") or ""),
+        "task_started_at": str(event.get("ts") or record.get("accepted_at") or utc_now()),
         "started_at": str(record.get("accepted_at") or utc_now()),
         "last_progress_at": str(record.get("accepted_at") or utc_now()),
         "last_card_update_at": str(record.get("accepted_at") or utc_now()),
@@ -914,7 +955,7 @@ def final_assistant_record_after(session_id: str, user_message_id: int) -> dict[
         upper_id = int(next_user[0]) if next_user and next_user[0] else 2**63 - 1
         row = con.execute(
             """
-            SELECT id, content, platform_message_id FROM messages
+            SELECT id, content, platform_message_id, timestamp FROM messages
              WHERE session_id = ? AND role = 'assistant'
                AND id > ? AND id < ? AND TRIM(COALESCE(content, '')) != ''
              ORDER BY id DESC LIMIT 1
@@ -927,6 +968,9 @@ def final_assistant_record_after(session_id: str, user_message_id: int) -> dict[
             "id": int(row[0]),
             "content": str(row[1] or ""),
             "platform_message_id": str(row[2] or ""),
+            "recorded_at": dt.datetime.fromtimestamp(
+                float(row[3]), dt.timezone.utc
+            ).isoformat().replace("+00:00", "Z") if row[3] is not None else "",
         }
     finally:
         con.close()
@@ -955,11 +999,212 @@ FINAL_SECTION_ALIASES = {
 
 def clean_final_item(value: str) -> str:
     text = html.unescape(re.sub(r"<[^>]+>", " ", str(value or "")))
-    text = re.sub(r"[`*_#]", "", text)
+    # Output is rendered inside a preformatted block, where underscores are
+    # literal identifier characters rather than Markdown emphasis. Preserve
+    # names such as ``jaimes_live_card.py`` while still removing markup that
+    # would create visual noise in the canonical summary.
+    text = re.sub(r"[`*#]", "", text)
     text = re.sub(r"^[\s>\-•]+", "", text)
     text = re.sub(r"^\d+[.)]\s*", "", text)
     text = " ".join(text.split()).strip(" :-")
     return text[:260]
+
+
+FINAL_STATUS_ONLY_RE = re.compile(
+    r"(?i)^(?:the\s+)?(?:assessment|analysis|review|task|request|work|worker execution|"
+    r"runtime outcome|result|summary|final review|live[- ]work lifecycle)\s+"
+    r"(?:is\s+|was\s+)?(?:complete|completed|done|finished|verified|prepared|closed)\.?$"
+)
+FINAL_RESULT_SIGNAL_RE = re.compile(
+    r"(?i)\b(?:confirmed|found|identified|determined|changed|fixed|added|removed|"
+    r"implemented|differ(?:s|ed|ent)?|caus(?:e|es|ed)|repair(?:s|ed)?|"
+    r"(?:en|dis)abl(?:e|es|ed|ing)|reconcil(?:e|es|ed)|retir(?:e|es|ed)|"
+    r"replac(?:e|es|ed)|rerout(?:e|es|ed)|mov(?:e|es|ed)|prevent(?:s|ed)?|"
+    r"preserv(?:e|es|ed)|verified|completed|executed|ran|processed|measured|"
+    r"recorded|delivered|returned|produced|passed|failed|"
+    r"cannot|can't|could not|does not|"
+    r"unsupported|risk|recommend(?:ed|ation)?|should|avoid|blocked|requires?|"
+    r"increased|decreased|matched|differs?|supports?)\b"
+)
+FINAL_NUMERIC_RESULT_RE = re.compile(
+    r"(?i)(?:\b\d+(?:\.\d+)?\s*/\s*\d+(?:\.\d+)?\b|"
+    r"\b\d+(?:\.\d+)?\s*%\b|"
+    r"\b(?:failures?|errors?|tasks?|outputs?|hashes?|rounds?|latency)\s*[:=]?\s*\d)",
+)
+FINAL_BENCHMARK_FRACTION_RE = re.compile(r"\b\d+\s*/\s*\d+\b")
+FINAL_ZERO_FAILURE_RE = re.compile(
+    r"(?i)(?:\b(?:failures?|errors?)\s*[:=]?\s*0\b|\b0\s+(?:failures?|errors?)\b)"
+)
+FINAL_RISK_RE = re.compile(
+    r"(?i)\b(?:risk|cannot|can't|could not|does not|unsupported|unsafe|avoid|"
+    r"do not|blocked|failure|failed|limitation|credential|permission)\b"
+)
+FINAL_RECOMMENDATION_RE = re.compile(
+    r"(?i)\b(?:recommend(?:ed|ation)?|next|should|use\b|avoid|do not|retry|"
+    r"follow[- ]?up|proceed|keep|remove|add|enable|disable|review)\b"
+)
+FINAL_NO_ACTION_RE = re.compile(
+    r"(?i)\b(?:no action needed|no further action|nothing else (?:is )?needed)\b"
+)
+FINAL_EVIDENCE_FIELD_RE = re.compile(
+    r"(?i)\b(workId|runId|observedAt|mode)\s*[:=]\s*([^|\n]+)"
+)
+FINAL_SESSION_HISTORY_RE = re.compile(r"(?i)\bsession[- ]history\b")
+FINAL_HISTORICAL_OBJECTIVE_RE = re.compile(
+    r"(?i)\b(?:historical|history|retrospective|archive|archived|previous|prior|"
+    r"earlier|past|last\s+(?:run|week|month))\b"
+)
+
+
+def parse_final_timestamp(value: str) -> dt.datetime | None:
+    try:
+        parsed = dt.datetime.fromisoformat(str(value or "").replace("Z", "+00:00"))
+    except (TypeError, ValueError):
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=dt.timezone.utc)
+    return parsed.astimezone(dt.timezone.utc)
+
+
+def final_evidence_fields(text: str) -> dict[str, str]:
+    """Read the private provenance line that the formatter removes."""
+    fields: dict[str, str] = {}
+    for raw in str(text or "").splitlines():
+        if not re.match(r"(?i)^\s*Evidence\s*:", raw):
+            continue
+        for name, value in FINAL_EVIDENCE_FIELD_RE.findall(raw):
+            fields[name.lower()] = clean_final_item(value)
+    return fields
+
+
+def final_source_uses_session_history(text: str) -> bool:
+    header = re.search(
+        r"(?im)^Model:\s*[^|\n]+\s*\|\s*Route:\s*([^|\n]+)",
+        str(text or ""),
+    )
+    return bool(header and FINAL_SESSION_HISTORY_RE.search(header.group(1)))
+
+
+def final_evidence_problems(
+    text: str,
+    *,
+    objective: str,
+    work_id: str = "",
+    run_id: str = "",
+    task_started_at: str = "",
+    response_recorded_at: str = "",
+) -> list[str]:
+    """Fail closed when a current task is answered from unbound old history."""
+    task_time = parse_final_timestamp(task_started_at)
+    response_time = parse_final_timestamp(response_recorded_at)
+    if task_time and response_time and response_time < task_time:
+        return ["The response record predates the current Telegram task."]
+
+    if FINAL_HISTORICAL_OBJECTIVE_RE.search(str(objective or "")):
+        return []
+
+    fields = final_evidence_fields(text)
+    problems: list[str] = []
+    expected = {
+        "workid": str(work_id or ""),
+        "runid": str(run_id or ""),
+    }
+    for name, value in expected.items():
+        observed = str(fields.get(name) or "")
+        if observed and value and observed != value:
+            problems.append(f"The evidence {name} does not match the current task.")
+
+    observed_at = parse_final_timestamp(fields.get("observedat", ""))
+    if task_time and observed_at and observed_at < task_time:
+        problems.append("The cited evidence predates the current Telegram task.")
+
+    historical_mode = str(fields.get("mode") or "").lower() in {
+        "historical", "history", "session-history", "session history",
+    }
+    session_history = historical_mode or final_source_uses_session_history(text)
+    has_current_context = bool(work_id or run_id or task_started_at)
+    if session_history and has_current_context:
+        if work_id and fields.get("workid") != work_id:
+            problems.append("Session-history evidence is not bound to the current work record.")
+        if run_id and fields.get("runid") != run_id:
+            problems.append("Session-history evidence is not bound to the current run.")
+        if task_time and (not observed_at or observed_at < task_time):
+            problems.append("Session-history evidence was not observed during the current task.")
+    return list(dict.fromkeys(problems))
+
+
+def stale_evidence_sections(problems: list[str]) -> tuple[bool, dict[str, list[str]]]:
+    """Replace stale claims with a truthful current-run retry result."""
+    return False, {
+        "done": [
+            "Held the response before treating historical findings as current results.",
+            "Preserved the current task identity for a focused evidence retry.",
+            "No unbound session-history claim was accepted as current evidence.",
+        ],
+        "issues": unique_final_items(problems)[:5],
+        "next": ["Retry using evidence produced and identified for the current task and run."],
+        "approval": [],
+    }
+
+
+def split_final_items(value: str) -> list[str]:
+    """Extract source statements without manufacturing result bullets."""
+    cleaned = clean_final_item(value)
+    if not cleaned:
+        return []
+    parts = re.split(r"(?<=[.!?])\s+|\s*[|•]\s*", cleaned)
+    return [item for item in (clean_final_item(part) for part in parts) if item]
+
+
+def unique_final_items(items: list[str]) -> list[str]:
+    result: list[str] = []
+    seen: set[str] = set()
+    for item in items:
+        cleaned = clean_final_item(item)
+        key = re.sub(r"\W+", " ", cleaned.lower()).strip()
+        if cleaned and key and key not in seen:
+            seen.add(key)
+            result.append(cleaned)
+    return result
+
+
+def substantive_final_item(value: str) -> bool:
+    cleaned = clean_final_item(value)
+    if len(cleaned.split()) < 4 or FINAL_STATUS_ONLY_RE.fullmatch(cleaned):
+        return False
+    lowered = cleaned.lower()
+    return not any(marker in lowered for marker in (
+        "verified the runtime outcome",
+        "prepared the result for telegram delivery",
+        "closed the live-work lifecycle",
+        "closed the live work lifecycle",
+        "agent work reached final review",
+        "response formatting was recovered",
+        "live card ordering was preserved",
+        "checked the request and identified the unresolved issue",
+    ))
+
+
+def truthful_incomplete_sections(
+    sections: dict[str, list[str]],
+    issue: str,
+) -> tuple[bool, dict[str, list[str]]]:
+    preserved = [item for item in unique_final_items(sections["done"]) if substantive_final_item(item)]
+    for statement in (
+        "The agent response did not include enough concrete findings or outcomes.",
+        "Available details were preserved without inventing missing facts.",
+        "A focused retry is required to produce a useful final summary.",
+    ):
+        if len(preserved) >= 3:
+            break
+        preserved.append(statement)
+    sections["done"] = unique_final_items(preserved)[:5]
+    sections["issues"] = unique_final_items([*sections["issues"], issue])[:5]
+    sections["next"] = [
+        "Retry with evidence, concrete findings, and a supported recommendation."
+    ]
+    sections["approval"] = []
+    return False, sections
 
 
 def parse_final_sections(text: str) -> tuple[bool, dict[str, list[str]]]:
@@ -974,39 +1219,119 @@ def parse_final_sections(text: str) -> tuple[bool, dict[str, list[str]]]:
         if complete_match:
             explicit_complete = complete_match.group(1).lower() == "yes"
             if complete_match.group(2):
-                sections["done" if explicit_complete else "issues"].append(clean_final_item(complete_match.group(2)))
+                sections["done" if explicit_complete else "issues"].extend(
+                    split_final_items(complete_match.group(2))
+                )
             continue
         normalized = re.sub(r"[^a-z; ]", "", line.lower()).strip()
         if normalized in FINAL_SECTION_ALIASES:
             current = FINAL_SECTION_ALIASES[normalized]
             continue
-        if re.match(r"(?i)^(?:model|route|objective|status)\s*:", line):
+        if re.match(r"(?i)^(?:model|route|objective|status|evidence)\s*:", line):
             continue
         if line.lower() not in {"n/a", "na", "none", "not applicable"}:
-            sections[current].append(line)
+            sections[current].extend(split_final_items(line))
+
+    sections = {key: unique_final_items(values) for key, values in sections.items()}
 
     if explicit_complete is None:
         failure_text = " ".join(sections["issues"] + sections["done"]).lower()
         explicit_complete = not any(marker in failure_text for marker in (
             "couldn't", "could not", "failed", "blocked", "unavailable", "not complete", "needs attention",
         ))
-    if not sections["done"]:
-        sections["done"] = ["Completed the requested work and prepared this verified result."] if explicit_complete else ["Checked the request and identified the unresolved issue."]
-    for fallback in (
-        "Verified the runtime outcome.",
-        "Prepared the result for Telegram delivery.",
-        "Closed the live-work lifecycle.",
-    ):
-        if len(sections["done"]) >= 3:
-            break
-        if fallback not in sections["done"]:
-            sections["done"].append(fallback)
-    return explicit_complete, sections
+    source_text = html.unescape(str(text or ""))
+    substantive = [item for item in sections["done"] if substantive_final_item(item)]
+    result_bearing = [
+        item for item in substantive
+        if FINAL_RESULT_SIGNAL_RE.search(item) or FINAL_NUMERIC_RESULT_RE.search(item)
+    ]
+    benchmark_success = bool(
+        explicit_complete
+        and FINAL_BENCHMARK_FRACTION_RE.search(source_text)
+        and FINAL_ZERO_FAILURE_RE.search(source_text)
+    )
+    risk_items = [
+        item for item in substantive
+        if FINAL_RISK_RE.search(item) and not FINAL_ZERO_FAILURE_RE.search(item)
+    ]
+    if risk_items and not sections["issues"]:
+        # Copying a source statement into Issues surfaces the limitation
+        # without inferring a fact that the agent did not provide.
+        sections["issues"] = risk_items[:5]
+
+    recommendation_items = [item for item in substantive if FINAL_RECOMMENDATION_RE.search(item)]
+    if not sections["next"] and recommendation_items:
+        sections["next"] = recommendation_items[:3]
+    no_action_match = FINAL_NO_ACTION_RE.search(source_text)
+    if not sections["next"] and no_action_match:
+        sections["next"] = [no_action_match.group(0).rstrip(".") + "."]
+    if benchmark_success and not sections["next"]:
+        sections["next"] = ["No action needed."]
+
+    no_action = any(FINAL_NO_ACTION_RE.search(item) for item in sections["next"])
+    recommendation_or_risk = bool(recommendation_items or risk_items or sections["issues"])
+    quality_problems: list[str] = []
+    if explicit_complete:
+        if len(substantive) < 3 and not benchmark_success:
+            quality_problems.append("fewer than three substantive source-provided findings")
+        if len(result_bearing) < 2 and not benchmark_success:
+            quality_problems.append("fewer than two concrete findings or outcomes")
+        if not sections["next"]:
+            quality_problems.append("no supported recommendation or next step")
+        if no_action and recommendation_or_risk:
+            quality_problems.append("No action needed conflicts with the reported recommendation or risk")
+    if quality_problems:
+        return truthful_incomplete_sections(
+            sections,
+            "Detailed findings were not captured well enough for a reliable completion: "
+            + "; ".join(quality_problems) + ".",
+        )
+
+    if not explicit_complete:
+        return truthful_incomplete_sections(
+            sections,
+            "The source response did not establish a complete, reliable outcome.",
+        )
+    sections["done"] = substantive[:5]
+    sections["issues"] = sections["issues"][:5]
+    sections["next"] = sections["next"][:5]
+    sections["approval"] = sections["approval"][:5]
+    return True, sections
 
 
-def structured_final_text(text: str, *, objective: str, model: str, route: str) -> str:
+def structured_final_text(
+    text: str,
+    *,
+    objective: str,
+    model: str,
+    route: str,
+    why: str = "",
+    work_id: str = "",
+    run_id: str = "",
+    task_started_at: str = "",
+    response_recorded_at: str = "",
+) -> str:
     """Normalize a native Hermes final to the canonical fixed-width contract."""
     complete, sections = parse_final_sections(text)
+    if complete and (
+        not clean_final_item(model)
+        or not clean_final_item(route)
+        or "unverified" in f"{model} {route}".lower()
+    ):
+        complete, sections = truthful_incomplete_sections(
+            sections,
+            "The runtime model or route was not verified, so completion cannot be claimed reliably.",
+        )
+    evidence_problems = final_evidence_problems(
+        text,
+        objective=objective,
+        work_id=work_id,
+        run_id=run_id,
+        task_started_at=task_started_at,
+        response_recorded_at=response_recorded_at,
+    )
+    if evidence_problems:
+        complete, sections = stale_evidence_sections(evidence_problems)
 
     def wrap(value: str, *, indent: str = "") -> list[str]:
         return textwrap.wrap(
@@ -1024,14 +1349,24 @@ def structured_final_text(text: str, *, objective: str, model: str, route: str) 
             rows.extend(wrap(f"- {item}", indent="  "))
         return rows
 
-    model_label = clean_final_item(model) or "Verified JAIMES runtime"
-    route_label = clean_final_item(route) or "JAIMES verified execution"
+    model_label = clean_final_item(model) or "unverified"
+    route_label = clean_final_item(route) or "unverified"
+    why_label = clean_final_item(why) or "verified JAIMES execution"
+    route_match = re.fullmatch(
+        r"(.+?)\s*\|\s*Why:\s*(.+)",
+        route_label,
+        flags=re.I,
+    )
+    if route_match:
+        route_label = clean_final_item(route_match.group(1)) or "unverified"
+        if not clean_final_item(why):
+            why_label = clean_final_item(route_match.group(2)) or why_label
     objective_label = clean_final_item(objective) or "Complete the current Telegram task"
-    next_items = sections["next"] or ([] if not complete else ["No action needed."])
+    next_items = sections["next"]
     approval_items = sections["approval"]
     lines = [
         *wrap(
-            f"Model: {model_label} | Route: {route_label} | Why: verified JAIMES execution",
+            f"Model: {model_label} | Route: {route_label} | Why: {why_label}",
             indent="   ",
         ),
         "",
@@ -1056,7 +1391,23 @@ def final_contract_is_canonical(value: str) -> bool:
     plain = html.unescape(re.sub(r"^<pre>|</pre>$", "", str(value or "").strip(), flags=re.I))
     labels = ["Complete:", "What was done:", "Issues:", "Appropriate next steps:", "Approval needed:"]
     positions = [plain.find(label) for label in labels]
-    return all(position >= 0 for position in positions) and positions == sorted(positions) and bool(re.search(r"(?m)^Complete: (?:Yes|No)\b", plain))
+    complete_at = plain.find("Complete:")
+    header = " ".join(
+        line.strip()
+        for line in plain[:complete_at].splitlines()
+        if line.strip()
+    )
+    header_ok = bool(re.fullmatch(
+        r"Model:\s*[^|]+?\s*\|\s*Route:\s*[^|]+?\s*\|\s*Why:\s*[^|]+",
+        header,
+        flags=re.I,
+    ))
+    return (
+        header_ok
+        and all(position >= 0 for position in positions)
+        and positions == sorted(positions)
+        and bool(re.search(r"(?m)^Complete: (?:Yes|No)\b", plain))
+    )
 
 
 def latest_direct_message_id(session_id: str) -> int:
@@ -1778,6 +2129,7 @@ def send_ack(
     surface_attempt_callback: Callable[[], bool] | None = None,
 ) -> dict[str, Any]:
     task_identity = event.get("platform_message_id") or event.get("db_message_id") or event["ts"].replace(":", "").replace(".", "-")
+    task_started_at = str(event.get("ts") or utc_now())
     key = f"jaimes-fast-ack-{(meta or {}).get('telegram_chat_id') or 'telegram'}-{task_identity}"
     work_id, work_run_id, origin_claim_hash = telegram_work_identity(
         key,
@@ -1907,6 +2259,12 @@ def send_ack(
             f"Received Telegram task|Objective determined: {objective}|Model selected: {display_model}|Skill selected: {skill.get('label') or 'none'}",
             "--next",
             "Work automatically; show buttons only for final approval steps if needed",
+            "--work-id",
+            work_id,
+            "--run-id",
+            work_run_id,
+            "--task-started-at",
+            task_started_at,
         ]
         if handoff_topic:
             # Topic 1's immutable header and live card are new surfaces for the
@@ -1990,6 +2348,7 @@ def send_ack(
         "reaction_ok": reaction_ok,
         "button_triggered": is_button_prompt(prompt),
         "run_id": event.get("run_id") or "",
+        "task_started_at": task_started_at,
         "last_card_update_at": utc_now(),
         "telegram_chat_id": (meta or {}).get("telegram_chat_id"),
         "telegram_thread_id": (meta or {}).get("telegram_thread_id"),
@@ -2026,7 +2385,26 @@ def complete_cards_from_final_responses(state: dict[str, Any], session_id: str, 
             objective=str(card.get("objective") or "JAIMES Telegram task"),
             model=str(card.get("model") or DEFAULT_MODEL),
             route=str(card.get("route") or DEFAULT_ROUTE),
+            work_id=str(card.get("work_id") or ""),
+            run_id=str(card.get("ledger_run_id") or ""),
+            task_started_at=str(card.get("task_started_at") or card.get("started_at") or ""),
+            response_recorded_at=str(final_record.get("recorded_at") or ""),
         )
+        evidence_problems = final_evidence_problems(
+            str(final_record.get("content") or ""),
+            objective=str(card.get("objective") or "JAIMES Telegram task"),
+            work_id=str(card.get("work_id") or ""),
+            run_id=str(card.get("ledger_run_id") or ""),
+            task_started_at=str(card.get("task_started_at") or card.get("started_at") or ""),
+            response_recorded_at=str(final_record.get("recorded_at") or ""),
+        )
+        card["final_evidence_status"] = "stale" if evidence_problems else "current"
+        card["final_evidence_work_id"] = str(card.get("work_id") or "")
+        card["final_evidence_run_id"] = str(card.get("ledger_run_id") or "")
+        card["final_evidence_task_started_at"] = str(
+            card.get("task_started_at") or card.get("started_at") or ""
+        )
+        card["final_response_recorded_at"] = str(final_record.get("recorded_at") or "")
         if not final_contract_is_canonical(formatted_final):
             card["final_contract_status"] = "formatter_error"
             continue
@@ -2083,6 +2461,65 @@ def complete_cards_from_final_responses(state: dict[str, Any], session_id: str, 
     return completed
 
 
+def reconcile_adapter_confirmed_deliveries(
+    state: dict[str, Any],
+    *,
+    dry_run: bool = False,
+) -> int:
+    """Close watcher state only after the adapter's successful-send receipt."""
+    snapshot = load_json(JAIMES_WORK_CARD_STATE_PATH, {})
+    work_cards = snapshot.get("cards") if isinstance(snapshot, dict) else {}
+    if not isinstance(work_cards, dict):
+        return 0
+    confirmed = 0
+    for card in (state.get("active_cards") or {}).values():
+        if not isinstance(card, dict) or card.get("status") == "done":
+            continue
+        record = work_cards.get(str(card.get("key") or ""))
+        if not isinstance(record, dict) or record.get("status") != "done":
+            continue
+        final_message_id = str(record.get("final_message_id") or "")
+        if not final_message_id:
+            continue
+        identity_pairs = (
+            ("work_id", "work_id"),
+            ("ledger_run_id", "run_id"),
+            ("task_started_at", "task_started_at"),
+        )
+        if any(
+            str(card.get(card_field) or "")
+            and str(record.get(record_field) or "") != str(card.get(card_field) or "")
+            for card_field, record_field in identity_pairs
+        ):
+            continue
+        work_log = " ".join(str(item) for item in (record.get("work_log") or record.get("done") or []))
+        if "Final summary delivered" not in work_log:
+            continue
+        ended_at = str(record.get("updated_at") or utc_now())
+        card["status"] = "done"
+        card["ended_at"] = ended_at
+        card["last_card_update_at"] = ended_at
+        card["final_contract_status"] = "canonical"
+        card["native_final_message_id"] = final_message_id
+        card["final_message_id"] = final_message_id
+        card["final_delivery_verified_by"] = "hermes-adapter-success"
+        card["final_delivery_confirmed_at"] = ended_at
+        if not dry_run:
+            publish_jaimes(
+                str(card.get("objective") or "JAIMES Telegram task"),
+                "done",
+                "Canonical final response confirmed delivered in JAIMES Telegram.",
+                work_id=str(card.get("work_id") or ""),
+                run_id=str(card.get("ledger_run_id") or ""),
+                phase="done",
+                model_id=str(card.get("model") or DEFAULT_MODEL),
+                route_verified=True,
+                origin_claim_hash=str(card.get("origin_claim_hash") or ""),
+            )
+        confirmed += 1
+    return confirmed
+
+
 def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = False) -> list[dict[str, Any]]:
     # Groups retain opt-in live cards. Direct-chat cards are always maintained:
     # the direct acknowledgement promise includes a single editable work card.
@@ -2126,7 +2563,7 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
             cmd = [
                 "python3",
                 "mission-control/scripts/jaimes_work_card.py",
-                "done",
+                "update",
                 "--key",
                 key,
                 "--title",
@@ -2135,34 +2572,25 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
                 str(card.get("model") or DEFAULT_MODEL),
                 "--route",
                 str(card.get("route") or DEFAULT_ROUTE),
-                "--done",
-                "Final response sent",
-                "--blocker",
-                "None",
+                "--now",
+                "Final response prepared; awaiting Telegram delivery",
             ] + work_card_target_args(card)
             result = {"ok": True, "dry_run": True} if dry_run else run_cmd(cmd)
             if not dry_run:
                 publish_jaimes(
                     objective,
-                    "done",
-                    "Final response sent in JAIMES Telegram.",
+                    "active",
+                    "Final response prepared; awaiting confirmed Telegram delivery.",
                     work_id=str(card.get("work_id") or ""),
                     run_id=str(card.get("ledger_run_id") or ""),
-                    phase="done",
+                    phase="delivery",
                     model_id=str(card.get("model") or DEFAULT_MODEL),
                     route_verified=True,
                     origin_claim_hash=str(card.get("origin_claim_hash") or ""),
                 )
-                if (
-                    event.get("final_text")
-                    and event_id not in approval_sent
-                    and os.environ.get("JAIMES_TELEGRAM_SEPARATE_APPROVAL_BUTTONS", "0") == "1"
-                ):
-                    approval_message_id = send_approval_options(objective, event["final_text"], dry_run=dry_run, meta=card)
-                    if approval_message_id:
-                        approval_sent.add(event_id)
-                        card["approval_message_id"] = approval_message_id
-            card["status"] = "done"
+            card["status"] = "active"
+            card["current_summary"] = "Final response prepared; awaiting Telegram delivery"
+            card["model_completed_at"] = utc_now()
             card["last_card_update_at"] = utc_now()
             card["last_progress_at"] = card["last_card_update_at"]
         else:
@@ -2316,6 +2744,49 @@ def internal_replay_prompt(prompt: str) -> bool:
 
 def direct_jaimes_mention(prompt: str) -> bool:
     return bool(JAIMES_MENTION_RE.search(clean_prompt(prompt)))
+
+
+def contextual_followup_prompt(prompt: str) -> bool:
+    """Recognize short turns that clearly ask about the current result."""
+    text = " ".join(clean_prompt(prompt).lower().split()).strip()
+    if not text or len(text.split()) > 12 or "http://" in text or "https://" in text:
+        return False
+    return bool(re.fullmatch(
+        r"(?:\?{1,4}|and\??|results?\??|findings?\??|status\??|any update\??|"
+        r"(?:so\s+)?what did (?:you|it) find(?: out)?\??|what happened\??|"
+        r"what (?:are|were) the (?:findings|results|next steps)\??|"
+        r"(?:can you\s+)?summari[sz]e (?:that|it)\??|tell me more\??)",
+        text,
+        flags=re.I,
+    ))
+
+
+def attach_contextual_followup(
+    state: dict[str, Any],
+    event: dict[str, Any],
+    meta: dict[str, Any],
+) -> bool:
+    """Keep an explicit result follow-up on the current card and run."""
+    if not contextual_followup_prompt(str(event.get("prompt") or "")):
+        return False
+    card = recent_active_card_for_meta(state, meta, max_age_seconds=float(MAX_ACTIVE_CARD_SECONDS))
+    if not card:
+        return False
+    active = state.setdefault("active_cards", {})
+    previous_run_id = next((run_id for run_id, value in active.items() if value is card), "")
+    current_run_id = str(event.get("run_id") or "")
+    if not current_run_id:
+        return False
+    if previous_run_id and previous_run_id != current_run_id:
+        active.pop(previous_run_id, None)
+        active[current_run_id] = card
+        card.setdefault("continued_from_run_ids", []).append(previous_run_id)
+        card["continued_from_run_ids"] = list(dict.fromkeys(card["continued_from_run_ids"]))[-20:]
+    card.setdefault("followup_message_ids", []).append(str(event.get("db_message_id") or ""))
+    card["followup_message_ids"] = [value for value in card["followup_message_ids"] if value][-20:]
+    card["run_id"] = current_run_id
+    card["last_followup_at"] = utc_now()
+    return True
 
 
 def session_has_compaction_marker(session_id: str) -> bool:
@@ -2716,8 +3187,18 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
     candidates.sort(key=lambda item: item[0])
     if candidates:
         _, newest_event, newest_meta = candidates[-1]
-        attached_card = recent_active_card_for_meta(state, newest_meta) if media_only_prompt(newest_event.get("prompt") or "") else None
-        if attached_card:
+        attached_followup = attach_contextual_followup(state, newest_event, newest_meta)
+        attached_card = (
+            recent_active_card_for_meta(state, newest_meta)
+            if not attached_followup and media_only_prompt(newest_event.get("prompt") or "")
+            else None
+        )
+        if attached_followup:
+            attached_id = f"{newest_event['session_id']}:{newest_event['ts']}"
+            acked.add(attached_id)
+            state["contextual_followups_attached"] = int(state.get("contextual_followups_attached") or 0) + 1
+            candidates.pop()
+        elif attached_card:
             attached_id = f"{newest_event['session_id']}:{newest_event['ts']}"
             acked.add(attached_id)
             attached_card.setdefault("attachment_message_ids", []).append(str(newest_event.get("db_message_id") or ""))
@@ -2748,9 +3229,10 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
             result["x_intelligence_queued"] = queued_x
         if result.get("ok"):
             acked.add(event_id)
-            state.setdefault("processed_task_keys", []).append(str(result.get("key") or ""))
-            state["processed_task_keys"] = sorted({k for k in state["processed_task_keys"] if k})[-300:]
-            if result.get("run_id"):
+            if registerable_ack_result(result):
+                state.setdefault("processed_task_keys", []).append(str(result.get("key") or ""))
+                state["processed_task_keys"] = sorted({k for k in state["processed_task_keys"] if k})[-300:]
+            if result.get("run_id") and registerable_ack_result(result):
                 state["active_cards"][result["run_id"]] = {
                     "key": result.get("key"),
                     "work_id": result.get("work_id"),
@@ -2764,6 +3246,7 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
                     "telegram_chat_id": selected_meta.get("telegram_chat_id"),
                     "telegram_thread_id": selected_meta.get("telegram_thread_id"),
                     "session_id": selected_session_id,
+                    "task_started_at": result.get("task_started_at") or result.get("last_card_update_at"),
                     "started_at": result.get("last_card_update_at"),
                     "last_progress_at": result.get("last_card_update_at"),
                     "last_card_update_at": result.get("last_card_update_at"),
@@ -2788,17 +3271,25 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
     if sent:
         state["last_sent_at"] = utc_now()
         state["last_result"] = sent[-1]["result"]
-        state["latest_pending_ack"] = {
-            "message_id": sent[-1]["result"].get("ack_message_id"),
-            "key": sent[-1]["result"].get("key"),
-            "event": sent[-1]["event"],
-            "created_at": utc_now(),
-            "model": selected_model,
-            "telegram_chat_id": sent[-1]["result"].get("telegram_chat_id"),
-            "telegram_thread_id": sent[-1]["result"].get("telegram_thread_id"),
-        }
+        latest_result = sent[-1]["result"]
+        latest_message_id = positive_message_id(latest_result.get("ack_message_id"))
+        if registerable_ack_result(latest_result) and latest_message_id:
+            state["latest_pending_ack"] = {
+                "message_id": latest_message_id,
+                "key": latest_result.get("key"),
+                "event": sent[-1]["event"],
+                "created_at": utc_now(),
+                "model": selected_model,
+                "telegram_chat_id": latest_result.get("telegram_chat_id"),
+                "telegram_thread_id": latest_result.get("telegram_thread_id"),
+            }
+        else:
+            state.pop("latest_pending_ack", None)
     else:
         state["last_result"] = {"ok": True, "status": "watching", "session_ids": session_ids}
+    pending = state.get("latest_pending_ack")
+    if isinstance(pending, dict) and not positive_message_id(pending.get("message_id")):
+        state.pop("latest_pending_ack", None)
 
     updates: list[dict[str, Any]] = []
     for sid in session_ids:
@@ -2806,13 +3297,31 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
             state, sid, dry_run=dry_run
         )
         updates.extend(update_active_cards(state, sid, dry_run=dry_run))
+    state["cards_confirmed_by_adapter"] = int(state.get("cards_confirmed_by_adapter") or 0) + reconcile_adapter_confirmed_deliveries(
+        state, dry_run=dry_run
+    )
     if not dry_run:
+        now_stamp = dt.datetime.now(dt.timezone.utc)
+        last_evidence = parse_final_timestamp(state.get("completion_evidence_written_at", ""))
+        if last_evidence is None or now_stamp - last_evidence >= dt.timedelta(minutes=5):
+            try:
+                write_completion_evidence(now=now_stamp)
+                state["completion_evidence_written_at"] = now_stamp.replace(microsecond=0).isoformat().replace("+00:00", "Z")
+                state.pop("completion_evidence_error_at", None)
+            except Exception:
+                # Observability must never prevent Telegram state from saving.
+                state["completion_evidence_error_at"] = utc_now()
         save_json(STATE_PATH, state)
     return {"ok": True, "session_id": selected_session_id, "session_ids": session_ids, "sent": sent, "updates": updates, "dry_run": dry_run}
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--format-final-json-stdin",
+        action="store_true",
+        help="Read a private JSON payload from stdin and emit one canonical Topic 17 final.",
+    )
     parser.add_argument("--once", action="store_true", help="Run one poll and exit.")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--interval", type=float, default=1.5)
@@ -2822,6 +3331,21 @@ def main() -> int:
     parser.add_argument("--message-id", default="")
     parser.add_argument("--timeout", type=float, default=10.0)
     args = parser.parse_args()
+
+    if args.format_final_json_stdin:
+        payload = json.load(sys.stdin)
+        print(structured_final_text(
+            str(payload.get("text") or ""),
+            objective=str(payload.get("objective") or "Complete the current Telegram task"),
+            model=str(payload.get("model") or DEFAULT_MODEL),
+            route=str(payload.get("route") or DEFAULT_ROUTE),
+            why=str(payload.get("why") or ""),
+            work_id=str(payload.get("work_id") or ""),
+            run_id=str(payload.get("run_id") or ""),
+            task_started_at=str(payload.get("task_started_at") or ""),
+            response_recorded_at=str(payload.get("response_recorded_at") or ""),
+        ))
+        return 0
 
     if args.await_handoff:
         code, receipt = await_handoff(args.chat_id, args.thread_id, args.message_id, args.timeout)

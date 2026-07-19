@@ -8,9 +8,9 @@ from pathlib import Path
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "inbox_coordinator.py"
 COMPLETE_OUTPUT = """Complete: Yes, the objective was completed.
 What was done:
-- Preserved the verified worker result.
-- Reused the existing Inbox work card.
-- Delivered the structured final response.
+- Confirmed the saved worker result remained unchanged at its original result path.
+- Used the existing Inbox card key for delivery without creating a replacement card.
+- Prevented duplicate delivery and model execution during the second recovery scan.
 Issues:
 - n/a
 Appropriate next steps:

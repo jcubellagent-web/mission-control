@@ -6,6 +6,7 @@ from pathlib import Path
 import stat
 import tempfile
 import unittest
+from unittest.mock import patch
 
 
 MODULE_PATH = Path(__file__).parents[1] / "scripts" / "inbox_coordinator.py"
@@ -358,21 +359,21 @@ class InboxCoordinatorTests(unittest.TestCase):
                 rendered.append(final_path.read_text(encoding="utf-8"))
                 return type("Result", (), {"returncode": 0})()
 
-            coordinator.subprocess.run = fake_run
-            delivered = coordinator.deliver_result(
-                "job-weak",
-                {"origin": {"cardKey": "card-weak", "chatId": "chat", "threadId": "1"}},
-                {"routeId": "luna", "routingReason": "test"},
-                {
-                    "actualProvider": "codex",
-                    "actualModel": "gpt-test",
-                    "actualWorker": "worker",
-                    "actualHost": "josh2",
-                    "modelVerified": True,
-                    "executionVerified": True,
-                },
-                "Complete: Yes\nWhat was done:\n- Assessment complete.\nIssues:\n- n/a\nAppropriate next steps:\n- No action needed.\nApproval needed:\n- n/a",
-            )
+            with patch.object(coordinator.subprocess, "run", side_effect=fake_run):
+                delivered = coordinator.deliver_result(
+                    "job-weak",
+                    {"origin": {"cardKey": "card-weak", "chatId": "chat", "threadId": "1"}},
+                    {"routeId": "luna", "routingReason": "test"},
+                    {
+                        "actualProvider": "codex",
+                        "actualModel": "gpt-test",
+                        "actualWorker": "worker",
+                        "actualHost": "josh2",
+                        "modelVerified": True,
+                        "executionVerified": True,
+                    },
+                    "Complete: Yes\nWhat was done:\n- Assessment complete.\nIssues:\n- n/a\nAppropriate next steps:\n- No action needed.\nApproval needed:\n- n/a",
+                )
             self.assertIs(delivered, True)
             self.assertEqual(commands[0][2], "fail")
             self.assertIn("Complete: No", html.unescape(rendered[0]))

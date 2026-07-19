@@ -65,13 +65,13 @@ class FakeLiveModule:
     def build_card(self, *, status: str, **_kwargs) -> str:
         self.card_statuses.append(status)
         if status == "done":
-            return "<pre>██████████ 100% · stage 6/6</pre>"
-        return "<pre>████████░░ 83% · stage 5/6</pre>"
+            return "<pre>JOSH 2.0 · Complete\nProgress [██████████] 6/6\n\nNow\nResult verified and ready.</pre>"
+        return "<pre>JOSH 2.0 · Verifying\nProgress [████████░░] 5/6\n\nNow\nVerifying the result.</pre>"
 
     def build_rich_card(self, *, status: str, **_kwargs) -> str:
         if status == "done":
-            return "<h3>Done</h3><pre>██████████ 100% · stage 6/6</pre><details>done</details><footer>now</footer>"
-        return "<h3>Live</h3><pre>████████░░ 83% · stage 5/6</pre><details>live</details><footer>now</footer>"
+            return "<pre>JOSH 2.0 · Complete\nProgress [██████████] 6/6\n\nNow\nResult verified and ready.</pre>"
+        return "<pre>JOSH 2.0 · Verifying\nProgress [████████░░] 5/6\n\nNow\nVerifying the result.</pre>"
 
     def build_completion_summary(self, **_kwargs) -> str:
         return """<pre>Model: x | Route: qa | Why: test
@@ -386,7 +386,7 @@ def test_live_target_requires_numeric_ids_and_explicit_production_confirmation()
     ) == []
 
 
-def test_live_canary_closes_card_at_100_percent_then_sends_exactly_one_final(monkeypatch) -> None:
+def test_live_canary_closes_card_at_6_of_6_then_sends_exactly_one_final(monkeypatch) -> None:
     monkeypatch.setattr(stress.time, "sleep", lambda _seconds: None)
     module = FakeLiveModule()
 
@@ -395,8 +395,8 @@ def test_live_canary_closes_card_at_100_percent_then_sends_exactly_one_final(mon
     assert result["ok"] is True
     assert module.card_statuses[-1] == "done"
     terminal_edit = [call for call in module.calls if call[0] == "edit_rich"][-1]
-    assert "100%" in terminal_edit[2] and "stage 6/6" in terminal_edit[2]
-    assert "100%" in terminal_edit[3] and "stage 6/6" in terminal_edit[3]
+    assert "Progress [██████████] 6/6" in terminal_edit[2]
+    assert "Progress [██████████] 6/6" in terminal_edit[3]
     assert result["timing"]["checks"]["terminalLiveCard100Percent"] is True
     assert result["final"] == {
         "attempts": 1,
