@@ -76,6 +76,7 @@ type BrainAtlas = NonNullable<MissionControlState["brainAtlas"]>;
 type BrainAtlasNode = BrainAtlas["nodes"][number];
 type BrainAtlasEdge = BrainAtlas["edges"][number];
 type MemoryActivity = NonNullable<NonNullable<MissionControlState["memoryOperations"]>["activity"]>;
+type BrainAtlasMode = "activity" | "evidence";
 type BrainAtlasView = {
   nodes: BrainAtlasNode[];
   edges: BrainAtlasEdge[];
@@ -2997,6 +2998,7 @@ function ReliabilityUpgradesPanel({ upgrades }: { upgrades?: MissionControlState
 }
 
 const BRAIN_ATLAS_LAYER_ORDER: BrainAtlasNode["kind"][] = ["agent", "work", "receipt", "model"];
+const BRAIN_ATLAS_VIEW_ORDER: BrainAtlasMode[] = ["activity", "evidence"];
 const BRAIN_ATLAS_LAYER_X: Record<BrainAtlasNode["kind"], number> = {
   agent: 98,
   work: 362,
@@ -3128,6 +3130,7 @@ function BrainAtlasPanel({
   atlas?: BrainAtlas;
   memoryOperations?: MissionControlState["memoryOperations"];
 }) {
+  const [atlasView, setAtlasView] = useState<BrainAtlasMode>("activity");
   const [focusId, setFocusId] = useState("all");
   useEffect(() => {
     if (focusId !== "all" && !atlas?.nodes.some((node) => node.id === focusId)) setFocusId("all");
@@ -3159,7 +3162,7 @@ function BrainAtlasPanel({
     misses: 0,
     lastRetrievalAt: null,
   });
-  const graphHeight = 168;
+  const graphHeight = 260;
   const positions = useMemo(() => {
     const next = new Map<string, { x: number; y: number; node: BrainAtlasNode }>();
     BRAIN_ATLAS_LAYER_ORDER.forEach((kind) => {
@@ -3181,7 +3184,9 @@ function BrainAtlasPanel({
   const age = ageMinutes(atlas?.generatedAt);
   const stale = Number.isFinite(age) && age > 60;
   const unavailable = !atlas || atlas.status === "unavailable";
-  const tone = unavailable && !activity ? "risk" : stale || !activity || atlas?.status === "empty" ? "watch" : "clear";
+  const activityTone = activity ? "clear" : "risk";
+  const evidenceTone = unavailable ? "risk" : stale || atlas?.status === "empty" ? "watch" : "clear";
+  const selectedTone = atlasView === "activity" ? activityTone : evidenceTone;
   const sourceExcluded = atlas
     ? atlas.counts.excluded.capacityReceipts + atlas.counts.excluded.capacityRoutes
     : 0;
@@ -3202,34 +3207,88 @@ function BrainAtlasPanel({
       ? `View limited to ${view.shownReceipts}/${view.candidateReceipts} newest exact receipts.`
       : "All qualifying exact receipts are shown.",
   ].join(" ");
+  const evidenceStateLabel = atlas?.status === "ready"
+    ? `${atlas.counts.receipts} exact receipt${atlas.counts.receipts === 1 ? "" : "s"}`
+    : atlas?.status === "empty"
+      ? "No exact receipts in window"
+      : "Source unavailable";
+  const handleAtlasViewKeyDown = useCallback((event: React.KeyboardEvent<HTMLButtonElement>) => {
+    const currentIndex = BRAIN_ATLAS_VIEW_ORDER.indexOf(atlasView);
+    let nextIndex = currentIndex;
+    if (event.key === "ArrowRight") nextIndex = (currentIndex + 1) % BRAIN_ATLAS_VIEW_ORDER.length;
+    else if (event.key === "ArrowLeft") nextIndex = (currentIndex - 1 + BRAIN_ATLAS_VIEW_ORDER.length) % BRAIN_ATLAS_VIEW_ORDER.length;
+    else if (event.key === "Home") nextIndex = 0;
+    else if (event.key === "End") nextIndex = BRAIN_ATLAS_VIEW_ORDER.length - 1;
+    else return;
+    event.preventDefault();
+    const nextView = BRAIN_ATLAS_VIEW_ORDER[nextIndex];
+    setAtlasView(nextView);
+    document.getElementById(`brain-atlas-tab-${nextView}`)?.focus();
+  }, [atlasView]);
 
   return (
     <section
       id="brain-atlas"
-      className={`brain-atlas-panel is-${tone}${latestSignalRecent ? " has-live-memory-flow" : ""}`}
+      className={`brain-atlas-panel is-${selectedTone}${latestSignalRecent ? " has-live-memory-flow" : ""}`}
+      data-atlas-view={atlasView}
+      data-atlas-view-tone={selectedTone}
       data-memory-flow-state={latestSignalRecent ? "live" : activity ? "idle" : "unavailable"}
-      aria-label="Brain Atlas governed memory activity and receipt evidence"
+      aria-label="Brain Atlas observable memory activity with optional execution evidence"
     >
       <header className="brain-atlas-header">
         <div>
-          <p><GitBranch size={13} />Agent memory &amp; execution evidence</p>
+          <p><GitBranch size={13} />Observable agent activity</p>
           <h2>Brain Atlas</h2>
         </div>
-        <span className={`brain-atlas-state is-${tone}${latestSignalRecent ? " is-live" : ""}`} aria-live="polite">
-          Memory · {activityStateLabel}
+        <div className="brain-atlas-view-switch" role="tablist" aria-label="Brain Atlas views">
+          <button
+            id="brain-atlas-tab-activity"
+            type="button"
+            role="tab"
+            data-atlas-view-option="activity"
+            aria-controls="brain-atlas-memory-panel"
+            aria-selected={atlasView === "activity"}
+            tabIndex={atlasView === "activity" ? 0 : -1}
+            className={atlasView === "activity" ? "is-active" : ""}
+            onClick={() => setAtlasView("activity")}
+            onKeyDown={handleAtlasViewKeyDown}
+          >
+            Activity
+          </button>
+          <button
+            id="brain-atlas-tab-evidence"
+            type="button"
+            role="tab"
+            data-atlas-view-option="evidence"
+            aria-controls="brain-atlas-evidence-panel"
+            aria-selected={atlasView === "evidence"}
+            tabIndex={atlasView === "evidence" ? 0 : -1}
+            className={atlasView === "evidence" ? "is-active" : ""}
+            onClick={() => setAtlasView("evidence")}
+            onKeyDown={handleAtlasViewKeyDown}
+          >
+            Proof &amp; evidence
+          </button>
+        </div>
+        <span className={`brain-atlas-state is-${selectedTone}${atlasView === "activity" && latestSignalRecent ? " is-live" : ""}`} aria-live="polite">
+          {atlasView === "activity" ? `Activity · ${activityStateLabel}` : `Evidence · ${evidenceStateLabel}`}
         </span>
       </header>
 
       <section
+        id="brain-atlas-memory-panel"
         className="brain-atlas-section is-memory"
         data-atlas-region="memory"
-        aria-labelledby="brain-atlas-memory-heading"
+        data-atlas-view-panel="activity"
+        role="tabpanel"
+        aria-labelledby="brain-atlas-tab-activity"
         aria-describedby="brain-atlas-memory-description"
+        hidden={atlasView !== "activity"}
       >
         <header className="brain-atlas-section-header">
           <div>
             <h3 id="brain-atlas-memory-heading">Memory activity</h3>
-            <p id="brain-atlas-memory-description">Verified retrieval, application, feedback, and governed promotion. Recent exact receipts animate.</p>
+            <p id="brain-atlas-memory-description">How agents retrieve, apply, evaluate, and promote governed memory. Observable activity—not private reasoning.</p>
           </div>
           <div className="brain-atlas-scope" aria-label="Memory activity scope and evidence policy">
             <span>{activity?.windowMinutes || 30}-minute live view</span>
@@ -3245,7 +3304,7 @@ function BrainAtlasPanel({
           <article><span>Durable memory</span><strong>{Number(memoryRegistry.active || 0)}</strong><em>{Number(memoryReview.pending || 0)} candidate{Number(memoryReview.pending || 0) === 1 ? "" : "s"}</em></article>
         </div>
 
-        <div className="memory-flow-map">
+        <div className="memory-flow-map" tabIndex={0} aria-label="Observable governed memory activity graph. Scroll horizontally on narrow screens.">
           <svg
             viewBox="0 0 1000 224"
             role="img"
@@ -3326,15 +3385,19 @@ function BrainAtlasPanel({
       </section>
 
       <section
+        id="brain-atlas-evidence-panel"
         className={`brain-atlas-section is-evidence${focusNeeded ? " has-focus" : ""}`}
         data-atlas-region="receipts"
-        aria-labelledby="brain-atlas-evidence-heading"
+        data-atlas-view-panel="evidence"
+        role="tabpanel"
+        aria-labelledby="brain-atlas-tab-evidence"
         aria-describedby="brain-atlas-evidence-description"
+        hidden={atlasView !== "evidence"}
       >
         <header className="brain-atlas-section-header">
           <div>
             <h3 id="brain-atlas-evidence-heading">Work execution proof</h3>
-            <p id="brain-atlas-evidence-description">Proof of what ran: agent → work → timestamped receipt → verified model. Exact seven-day links only.</p>
+            <p id="brain-atlas-evidence-description">Exact audit paths showing what ran: agent → work → timestamped receipt → verified model. Seven-day links only.</p>
           </div>
           <output className="brain-atlas-evidence-summary" title={evidencePolicyDetail} aria-live="polite">
             {evidenceSummary}
