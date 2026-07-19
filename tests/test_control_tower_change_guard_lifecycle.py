@@ -35,6 +35,9 @@ def lease(tmp_path: Path, *, agent: str = "josh2", expired: bool = False, pid: i
 
 @pytest.fixture(autouse=True)
 def isolated_guard(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    root = tmp_path / "repo"
+    root.mkdir()
+    monkeypatch.setattr(GUARD, "ROOT", root)
     monkeypatch.setattr(GUARD, "LOCK_PATH", tmp_path / "lease.json")
     monkeypatch.setattr(GUARD, "source_changes", lambda: [])
 
@@ -46,8 +49,9 @@ def fake_git(*, ahead: int = 0, behind: int = 0, source_changed: bool = False):
     return run
 
 
-def test_kiosk_watchdog_is_guarded_source() -> None:
+def test_host_runtime_helpers_are_guarded_source() -> None:
     assert "scripts/mission_control_kiosk_watchdog.py" in GUARD.SOURCE_PATHS
+    assert "scripts/codex_remote_manual_lane.py" in GUARD.SOURCE_PATHS
 
 
 def test_successful_completion_verifies_and_releases_own_lease(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -82,6 +86,31 @@ def test_cancellation_aborts_own_lease_and_preserves_evidence(tmp_path: Path) ->
 
     assert not GUARD.LOCK_PATH.exists()
     assert json.loads((backup / "lifecycle-outcome.json").read_text())["outcome"] == "aborted"
+
+
+def test_cancellation_restores_existing_source_and_removes_new_source(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    payload = lease(tmp_path)
+    backup = Path(payload["backup"])
+    root = tmp_path / "repo"
+    existing = root / "scripts" / "existing.py"
+    created = root / "scripts" / "created.py"
+    backup_existing = backup / "scripts" / "existing.py"
+    existing.parent.mkdir(parents=True)
+    backup_existing.parent.mkdir(parents=True)
+    existing.write_text("edited\n")
+    created.write_text("new during lease\n")
+    backup_existing.write_text("original\n")
+    monkeypatch.setattr(GUARD, "ROOT", root)
+    monkeypatch.setattr(GUARD, "SOURCE_PATHS", ("scripts/existing.py", "scripts/created.py"))
+
+    GUARD.abort("own-token")
+
+    assert existing.read_text() == "original\n"
+    assert not created.exists()
+    assert not GUARD.LOCK_PATH.exists()
 
 
 def test_process_interruption_uses_finally_style_abort(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

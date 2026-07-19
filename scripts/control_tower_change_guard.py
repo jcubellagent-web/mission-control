@@ -66,6 +66,7 @@ SOURCE_PATHS = (
     "scripts/control_tower_path_guard.py",
     "scripts/control_tower_change_guard.py",
     "scripts/control_tower_foreground.py",
+    "scripts/codex_remote_manual_lane.py",
     "scripts/memory_registry.py",
     "scripts/memory_sleep_review.py",
     "scripts/memory_registry_smoke_test.py",
@@ -229,6 +230,7 @@ def verify(token: str) -> None:
         ([sys.executable, "scripts/memory_registry_smoke_test.py"], None),
         ([sys.executable, "-m", "py_compile",
           "scripts/control_tower_change_guard.py",
+          "scripts/codex_remote_manual_lane.py",
           "scripts/ecosystem_health_sweep.py",
           "scripts/ecosystem_qa_benchmark.py",
           "scripts/mission_control_runtime_layout_check.py",
@@ -353,11 +355,18 @@ def abort(token: str) -> None:
         source = backup / relative
         target = ROOT / relative
         if not source.exists():
+            # A guarded source path that had no pre-edit backup did not exist
+            # when the lease began. Remove anything created there so abort is
+            # a true rollback rather than a partial restore.
+            if target.is_symlink() or target.is_file():
+                target.unlink()
+            elif target.is_dir():
+                shutil.rmtree(target)
             continue
-        if target.is_dir():
-            shutil.rmtree(target)
-        elif target.exists():
+        if target.is_symlink() or target.is_file():
             target.unlink()
+        elif target.is_dir():
+            shutil.rmtree(target)
         target.parent.mkdir(parents=True, exist_ok=True)
         if source.is_dir():
             shutil.copytree(source, target)
