@@ -200,7 +200,9 @@ class BrainAtlasTests(unittest.TestCase):
         atlas = subject.generate_atlas(self.database, as_of=AS_OF)
         work = next(node for node in atlas["nodes"] if node["kind"] == "work")
 
-        self.assertEqual(work["id"], subject.stable_id("work", "shared-work"))
+        self.assertEqual(
+            work["id"], subject.stable_id("work", "josh2", "shared-work", 1)
+        )
         self.assertEqual(work["label"], "Polish Telegram response flow")
         self.assertNotIn("objective", work)
         self.assertNotIn("phase", work)
@@ -394,6 +396,57 @@ class BrainAtlasTests(unittest.TestCase):
         )
         self.assertEqual(rejected["status"], "unavailable")
         self.assertEqual(rejected["emptyReason"], "generated-payload-invalid")
+
+    def test_cross_owner_and_generation_work_ids_remain_distinct_exact_paths(self) -> None:
+        self.insert_event(
+            1,
+            work_id="shared-handoff-work",
+            run_id="shared-handoff-run",
+            owner_agent="josh2",
+            objective="Begin Brain Atlas visual repair",
+            sequence=1,
+        )
+        self.insert_event(
+            2,
+            work_id="shared-handoff-work",
+            run_id="shared-handoff-run",
+            owner_agent="joshex",
+            objective="Finish Brain Atlas visual repair",
+            sequence=2,
+        )
+        self.insert_event(
+            3,
+            work_id="shared-handoff-work",
+            run_id="shared-handoff-run-2",
+            owner_agent="joshex",
+            objective="Verify Brain Atlas after reopening",
+            generation=2,
+            sequence=1,
+        )
+
+        atlas = subject.generate_atlas(self.database, as_of=AS_OF)
+        work_nodes = [node for node in atlas["nodes"] if node["kind"] == "work"]
+        clean = dashboard.sanitize_brain_atlas(
+            atlas, subject.iso(AS_OF + dt.timedelta(minutes=1))
+        )
+
+        self.assertEqual(len(work_nodes), 3)
+        self.assertEqual(len({node["id"] for node in work_nodes}), 3)
+        self.assertEqual(subject.validate_atlas(atlas), [])
+        self.assertEqual(clean["status"], "ready")
+        receipt_ids = {
+            node["id"] for node in atlas["nodes"] if node["kind"] == "receipt"
+        }
+        self.assertEqual(len(receipt_ids), 3)
+        for receipt_id in receipt_ids:
+            self.assertEqual(
+                sum(
+                    edge["kind"] == "emitted"
+                    and edge["evidenceReceipt"] == receipt_id
+                    for edge in atlas["edges"]
+                ),
+                1,
+            )
 
     def test_ids_and_full_payload_are_deterministic_for_fixed_receipts(self) -> None:
         self.insert_event(1, owner_agent="jaimes")
@@ -622,6 +675,17 @@ class BrainAtlasTests(unittest.TestCase):
             owns_edges[0]["evidenceReceipt"],
         )
         self.assertIn("ambiguous-path", subject.validate_atlas(wrong_receipt_owner))
+
+        conflicting_owner = json.loads(json.dumps(atlas))
+        owns_edges = [
+            edge for edge in conflicting_owner["edges"] if edge["kind"] == "owns"
+        ]
+        owns_edges[1]["target"] = owns_edges[0]["target"]
+        owns_edges[1]["id"] = subject.edge_id(
+            owns_edges[1]["kind"], owns_edges[1]["source"], owns_edges[1]["target"],
+            owns_edges[1]["evidenceReceipt"],
+        )
+        self.assertIn("ambiguous-owner", subject.validate_atlas(conflicting_owner))
 
 
 if __name__ == "__main__":

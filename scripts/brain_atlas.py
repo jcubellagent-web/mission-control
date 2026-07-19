@@ -255,7 +255,11 @@ def build_graph(
         owner = str(row["owner_agent"])
         observed_at = iso(parse_time(row["occurred_at"]))
         agent_node = f"agent:{owner}"
-        work_node = stable_id("work", row["work_id"])
+        #JAIMES: A displayed work node is one owned execution generation; handoffs
+        # must remain separate exact paths instead of merging into one owner conflict.
+        work_node = stable_id(
+            "work", owner, row["work_id"], int(row["generation"])
+        )
         receipt_node = stable_id("receipt", row["event_id"])
         required = {agent_node, work_node, receipt_node} - nodes.keys()
         if len(nodes) + len(required) > max_nodes:
@@ -476,6 +480,7 @@ def validate_atlas(payload: dict[str, Any]) -> list[str]:
     emitted_by_receipt: dict[str, list[tuple[str, str]]] = {}
     emitted_by_path: dict[tuple[str, str], int] = {}
     owns_by_path: dict[tuple[str, str], int] = {}
+    owner_by_work: dict[str, str] = {}
     routes_by_receipt: dict[str, int] = {}
     for edge in edges:
         if not isinstance(edge, dict):
@@ -513,6 +518,9 @@ def validate_atlas(payload: dict[str, Any]) -> list[str]:
             problems.append("edge-type")
             continue
         if kind == "owns":
+            prior_owner = owner_by_work.setdefault(target_id, source_id)
+            if prior_owner != source_id:
+                problems.append("ambiguous-owner")
             owns_by_path[(target_id, receipt_id)] = (
                 owns_by_path.get((target_id, receipt_id), 0) + 1
             )

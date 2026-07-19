@@ -3656,7 +3656,6 @@ function BrainAtlasPanel({
               <span className={workingAgentCount ? "is-working" : ""}>Live Work linked · {workingAgentCount} working</span>
               <span>{activity ? `${activity.windowMinutes}m memory window` : "Memory window unavailable"}</span>
               <span>Counts only · no contents</span>
-              <span>{activity ? "Sanitized counts contract" : "Memory contract unavailable"}</span>
             </div>
             <output className="brain-atlas-evidence-summary" title={evidencePolicyDetail} aria-live="polite">
               {evidenceSummary}
@@ -3704,6 +3703,47 @@ function BrainAtlasPanel({
             <desc id="brain-atlas-description">
               Shared agent nodes show {workingAgentCount} agents working from the same current state as the Live Work Board. Only governed memory receipt paths move when a recent exact registry timestamp exists. The lower lane shows {proofRows.length} static, exact agent to named work to timestamped receipt to verified model paths. This visualization shows observable operations and evidence, not private model reasoning or memory contents.
             </desc>
+            <defs>
+              {flowAgents.map((row, index) => {
+                const y = 22 + index * 52;
+                return (
+                  <clipPath key={`agent-copy-clip-${row.agent}`} id={`brain-atlas-agent-copy-${row.agent}`} clipPathUnits="userSpaceOnUse">
+                    <rect x={brainAtlasWideX(27)} y={y} width={brainAtlasWideWidth(27, 137)} height="38" rx="3" />
+                  </clipPath>
+                );
+              })}
+              <clipPath id="brain-atlas-recall-copy" clipPathUnits="userSpaceOnUse">
+                <rect x={brainAtlasWideX(236)} y="95" width={brainAtlasWideWidth(236, 132)} height="47" rx="4" />
+              </clipPath>
+              <clipPath id="brain-atlas-registry-copy" clipPathUnits="userSpaceOnUse">
+                <rect x={brainAtlasWideX(434)} y="95" width={brainAtlasWideWidth(434, 138)} height="47" rx="4" />
+              </clipPath>
+              <clipPath id="brain-atlas-applied-copy" clipPathUnits="userSpaceOnUse">
+                <rect x={brainAtlasWideX(644)} y="34" width={brainAtlasWideWidth(644, 136)} height="47" rx="4" />
+              </clipPath>
+              <clipPath id="brain-atlas-outcome-copy" clipPathUnits="userSpaceOnUse">
+                <rect x={brainAtlasWideX(644)} y="157" width={brainAtlasWideWidth(644, 136)} height="47" rx="4" />
+              </clipPath>
+              <clipPath id="brain-atlas-candidate-copy" clipPathUnits="userSpaceOnUse">
+                <rect x={brainAtlasWideX(834)} y="157" width={brainAtlasWideWidth(834, 136)} height="47" rx="4" />
+              </clipPath>
+              <clipPath id="brain-atlas-durable-copy" clipPathUnits="userSpaceOnUse">
+                <rect x={brainAtlasWideX(834)} y="34" width={brainAtlasWideWidth(834, 136)} height="47" rx="4" />
+              </clipPath>
+              {proofRows.map((row, index) => {
+                const rowY = 264 + index * 45;
+                return (
+                  <React.Fragment key={`proof-copy-clip-${row.id}`}>
+                    <clipPath id={`brain-atlas-proof-work-copy-${index}`} clipPathUnits="userSpaceOnUse">
+                      <rect x={brainAtlasWideX(228)} y={rowY - 13} width={brainAtlasWideWidth(228, 294)} height="26" rx="3" />
+                    </clipPath>
+                    <clipPath id={`brain-atlas-proof-model-copy-${index}`} clipPathUnits="userSpaceOnUse">
+                      <rect x={brainAtlasWideX(766)} y={rowY - 13} width={brainAtlasWideWidth(766, 202)} height="26" rx="3" />
+                    </clipPath>
+                  </React.Fragment>
+                );
+              })}
+            </defs>
             <g className="brain-atlas-memory-layer" data-atlas-layer="memory">
             <text className="brain-atlas-lane-label is-memory" x={brainAtlasWideX(18)} y="14">LIVE AGENTS + GOVERNED MEMORY</text>
             <g className="memory-flow-edges" aria-hidden="true">
@@ -3733,7 +3773,6 @@ function BrainAtlasPanel({
               const y = 22 + index * 52;
               const live = memorySignalIsRecent(row.lastRetrievalAt, motionWindowSeconds);
               const working = workingAgentIds.has(row.agent);
-              const activeWorkTitle = liveWorkByAgent.get(row.agent)?.activeWork?.title;
               return (
                 <g
                   key={row.agent}
@@ -3747,45 +3786,59 @@ function BrainAtlasPanel({
                   <title>{`${AGENTS[row.agent].label}: ${working ? "working now" : "not working"}; ${!activity ? "memory telemetry unavailable" : live ? "verified memory retrieval live" : "memory quiet"}`}</title>
                   <rect className="memory-flow-node-aura" x={brainAtlasWideX(13)} y={y - 5} width={brainAtlasWideWidth(13, 160)} height="48" rx="12" />
                   <rect x={brainAtlasWideX(18)} y={y} width={brainAtlasWideWidth(18, 150)} height="38" rx="7" />
-                  <text className="memory-flow-node-title" x={brainAtlasWideX(30)} y={y + 16}>{AGENTS[row.agent].label}</text>
+                  <g className="memory-flow-node-copy" clipPath={`url(#brain-atlas-agent-copy-${row.agent})`}>
+                  <text className="memory-flow-node-title" x={brainAtlasWideX(30)} y={y + 18}>{AGENTS[row.agent].label}</text>
                   <circle className="memory-flow-presence-dot" cx={brainAtlasWideX(155)} cy={y + 12} r="5.5" />
-                  <text className="memory-flow-node-detail" x={brainAtlasWideX(30)} y={y + 30}>
+                  <text className="memory-flow-node-detail" x={brainAtlasWideX(30)} y={y + 35}>
                     {working
-                      ? `ACTIVE · ${compactText(activeWorkTitle || "Work in progress", 26)}`
+                      ? "ACTIVE · WORKING"
                       : !activity ? "Quiet · memory unavailable" : `Quiet · ${row.retrievals} retrieval${row.retrievals === 1 ? "" : "s"}`}
                   </text>
+                  </g>
                 </g>
               );
             })}
             <g className={`memory-flow-node is-recall${recent("retrieval") ? " is-live" : ""}`}>
               <rect x={brainAtlasWideX(232)} y="92" width={brainAtlasWideWidth(232, 140)} height="54" rx="9" />
+              <g className="memory-flow-node-copy" clipPath="url(#brain-atlas-recall-copy)">
               <text className="memory-flow-node-title" x={brainAtlasWideX(302)} y="115" textAnchor="middle">Recall</text>
               <text className="memory-flow-node-detail" x={brainAtlasWideX(302)} y="132" textAnchor="middle">{activity ? `${retrievals} queried · ${count("misses")} miss` : "telemetry unavailable"}</text>
+              </g>
             </g>
             <g className={`memory-flow-node is-registry${recent("hit") || recent("promoted") ? " is-live" : ""}`}>
               <rect x={brainAtlasWideX(430)} y="92" width={brainAtlasWideWidth(430, 146)} height="54" rx="9" />
+              <g className="memory-flow-node-copy" clipPath="url(#brain-atlas-registry-copy)">
               <text className="memory-flow-node-title" x={brainAtlasWideX(503)} y="115" textAnchor="middle">Memory registry</text>
               <text className="memory-flow-node-detail" x={brainAtlasWideX(503)} y="132" textAnchor="middle">{durableMemoryCount} governed records</text>
+              </g>
             </g>
             <g className={`memory-flow-node is-applied${recent("used") ? " is-live" : ""}`}>
               <rect x={brainAtlasWideX(640)} y="31" width={brainAtlasWideWidth(640, 144)} height="54" rx="9" />
+              <g className="memory-flow-node-copy" clipPath="url(#brain-atlas-applied-copy)">
               <text className="memory-flow-node-title" x={brainAtlasWideX(712)} y="54" textAnchor="middle">Applied</text>
               <text className="memory-flow-node-detail" x={brainAtlasWideX(712)} y="71" textAnchor="middle">{activity ? `${uses} explicit use receipt${uses === 1 ? "" : "s"}` : "telemetry unavailable"}</text>
+              </g>
             </g>
             <g className={`memory-flow-node is-feedback${recent("feedback") ? " is-live" : ""}`}>
               <rect x={brainAtlasWideX(640)} y="154" width={brainAtlasWideWidth(640, 144)} height="54" rx="9" />
+              <g className="memory-flow-node-copy" clipPath="url(#brain-atlas-outcome-copy)">
               <text className="memory-flow-node-title" x={brainAtlasWideX(712)} y="177" textAnchor="middle">Outcome</text>
               <text className="memory-flow-node-detail" x={brainAtlasWideX(712)} y="194" textAnchor="middle">{activity ? `${count("feedback")} feedback receipt${count("feedback") === 1 ? "" : "s"}` : "telemetry unavailable"}</text>
+              </g>
             </g>
             <g className={`memory-flow-node is-candidate${candidateIsRecent ? " is-live" : ""}`} data-observed-at={candidateObservedAt || undefined}>
               <rect x={brainAtlasWideX(830)} y="154" width={brainAtlasWideWidth(830, 144)} height="54" rx="9" />
+              <g className="memory-flow-node-copy" clipPath="url(#brain-atlas-candidate-copy)">
               <text className="memory-flow-node-title" x={brainAtlasWideX(902)} y="177" textAnchor="middle">Candidate</text>
               <text className="memory-flow-node-detail" x={brainAtlasWideX(902)} y="194" textAnchor="middle">{activity ? `${count("proposed")} proposed · not learned` : "telemetry unavailable"}</text>
+              </g>
             </g>
             <g className={`memory-flow-node is-durable${recent("promoted") ? " is-live" : ""}`}>
               <rect x={brainAtlasWideX(830)} y="31" width={brainAtlasWideWidth(830, 144)} height="54" rx="9" />
+              <g className="memory-flow-node-copy" clipPath="url(#brain-atlas-durable-copy)">
               <text className="memory-flow-node-title" x={brainAtlasWideX(902)} y="54" textAnchor="middle">Durable</text>
               <text className="memory-flow-node-detail" x={brainAtlasWideX(902)} y="71" textAnchor="middle">{activity ? `${count("promoted")} governed promotion${count("promoted") === 1 ? "" : "s"}` : "telemetry unavailable"}</text>
+              </g>
             </g>
             </g>
             </g>
@@ -3823,8 +3876,10 @@ function BrainAtlasPanel({
                     <path className="brain-atlas-proof-edge is-verified" d={`M ${brainAtlasWideX(649)} ${rowY} C ${brainAtlasWideX(690)} ${rowY}, ${brainAtlasWideX(716)} ${rowY}, ${brainAtlasWideX(760)} ${rowY}`} />
                     <g className="brain-atlas-proof-work">
                       <rect x={brainAtlasWideX(220)} y={rowY - 15} width={brainAtlasWideWidth(220, 310)} height="30" rx="6" />
+                      <g className="brain-atlas-proof-copy" clipPath={`url(#brain-atlas-proof-work-copy-${index})`}>
                       <text className="brain-atlas-proof-title" x={brainAtlasWideX(235)} y={rowY - 2}>{compactText(row.workLabel, 54)}</text>
                       <text className="brain-atlas-proof-detail" x={brainAtlasWideX(235)} y={rowY + 10}>{agentLabel} · Receipt: {compactText(receiptLabel, 18)} · {receiptStatus}</text>
+                      </g>
                     </g>
                     <g className="brain-atlas-proof-receipt">
                       <text className="brain-atlas-proof-kicker" x={brainAtlasWideX(640)} y={rowY - 12} textAnchor="middle">RECEIPT</text>
@@ -3834,8 +3889,10 @@ function BrainAtlasPanel({
                     </g>
                     <g className="brain-atlas-proof-model">
                       <rect x={brainAtlasWideX(760)} y={rowY - 15} width={brainAtlasWideWidth(760, 214)} height="30" rx="6" />
+                      <g className="brain-atlas-proof-copy" clipPath={`url(#brain-atlas-proof-model-copy-${index})`}>
                       <text className="brain-atlas-proof-title" x={brainAtlasWideX(867)} y={rowY - 2} textAnchor="middle">{compactText(row.model.label, 34)}</text>
                       <text className="brain-atlas-proof-detail" x={brainAtlasWideX(867)} y={rowY + 10} textAnchor="middle">route verified</text>
+                      </g>
                     </g>
                   </g>
                 );

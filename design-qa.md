@@ -45,6 +45,57 @@
 
 final result: passed
 
+---
+
+# Control Tower Brain Atlas proof-recovery and text-fit QA
+
+## Scope and evidence
+
+- User-reported source capture: `/var/folders/1w/ndj9slyx5rj80g5pn88wkp9c0000gn/T/codex-clipboard-d6caf64a-988f-4b49-8490-84adfe5240a3.png`
+- Final physical-kiosk Atlas crop: `/private/tmp/brain-atlas-polish-active-atlas-1920.png`
+- Final full physical-kiosk capture: `/private/tmp/brain-atlas-polish-active-kiosk-1920.png`
+- Same-input before/after comparison: `/private/tmp/brain-atlas-polish-comparison.png`
+- Measured physical-kiosk report: `/private/tmp/brain-atlas-polish-active-report.json`
+- Browser and viewport: the existing Josh 2.0 Google Chrome kiosk at 1920 x 1080, DPR 1. The user-selected kiosk was inspected through its existing CDP 9224 endpoint; agent-auth Chrome was not touched.
+
+## Proof recovery
+
+1. Confirmed the lower lane was not empty and the receipt source was not offline. The canonical graph was ready, but the dashboard presentation boundary rejected one work node that combined receipts from two owners.
+2. Scoped work-node identity to owner, stable work ID, and execution generation. Historical handoffs now remain separate exact audit paths without deleting or rewriting receipts.
+3. Added the same single-owner invariant to the producer validator and added a cross-owner, cross-generation generator-to-sanitizer regression.
+4. Added a release check that fails when a ready canonical Brain Atlas graph is downgraded to an unavailable dashboard projection.
+
+## Text and spacing polish
+
+1. Added hard SVG clip regions to agent, memory-stage, named-work, and verified-model copy so future values cannot cross a node border.
+2. Replaced variable-length active subtitles with the distance-readable `ACTIVE · WORKING` state; the Live Work Board remains the task-detail source.
+3. Separated agent title and status baselines, removed one redundant context pill, raised the header line box, and corrected the metric-number line height.
+4. Added permanent HTML and SVG text-fit measurements, including node-border containment and title/detail overlap checks.
+
+## Final physical measurements
+
+- Page: 1920 x 1080 with zero horizontal or vertical overflow.
+- Brain Atlas: 1208.45 x 510.73 px, fully in the initial viewport with a visible 2 px bottom inset.
+- Unified map: 1166.45 x 295.73 px with 95% substantive horizontal fill.
+- Text containment: 0 HTML overflows, 0 SVG node-text overflows, 0 title/detail overlaps, and unclipped purpose copy.
+- Exact proof: ready; 100 bounded nodes, 141 exact edges, 59 displayed receipts, and 3 recent verified paths. All nine visible proof edges remain static.
+- Active-state parity: JOSHeX appeared as working in both Live Work and Brain Atlas. Aura, presence dot, and header beacon changed across the motion sample; quiet agents remained still.
+
+## Runtime and regression checks
+
+- Production React build passed.
+- Focused Brain Atlas, dashboard projection, and runtime-layout suite passed: 104 tests. The full repository release suite passed: 693 tests.
+- Physical kiosk probe recorded zero exceptions, failed requests, page overflow, text overflow, or Live Work parity mismatches.
+- The in-app Browser plugin path was unavailable because its required Node REPL bridge was not exposed; QA used the user's already-open physical Josh 2.0 kiosk.
+
+## Severity review
+
+- P0: none.
+- P1: none.
+- P2: none.
+
+final result: passed
+
 # Control Tower alert truth and matte-blue FinOps QA
 
 ## Scope and evidence

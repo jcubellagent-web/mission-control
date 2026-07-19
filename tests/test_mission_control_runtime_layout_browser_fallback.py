@@ -149,6 +149,9 @@ def valid_kiosk_legibility_measurements() -> dict[str, object]:
                 "secondaryGlyphHeights": [7.2],
                 "layerGlyphHeights": [9.5],
                 "nodeOverlapCount": 0,
+                "htmlTextOverflowCount": 0,
+                "svgTextOverflowCount": 0,
+                "svgTextOverlapCount": 0,
             },
         },
         "liveWork": {
@@ -264,6 +267,22 @@ def test_compact_live_json_requires_a_canonical_schedule_source(tmp_path: Path) 
 
     assert result["state"] == "fail"
     assert "crons or todayJobs" in result["detail"]
+
+
+def test_live_projection_rejects_ready_raw_atlas_downgrade(tmp_path: Path) -> None:
+    payload = json.loads(FIXTURE_PATH.read_text())
+    payload["brainAtlas"] = {
+        "status": "unavailable",
+        "emptyReason": "generated-payload-invalid",
+    }
+    (tmp_path / "brain-atlas.json").write_text(json.dumps({"status": "ready"}))
+    candidate = tmp_path / "control-tower-live.json"
+    candidate.write_text(json.dumps(payload))
+
+    result = runtime_layout.check_control_tower_json(candidate)
+
+    assert result["state"] == "fail"
+    assert "projection rejected a ready canonical graph" in result["detail"]
 
 
 def test_full_dashboard_json_still_requires_crons(tmp_path: Path) -> None:
@@ -451,6 +470,27 @@ def test_layout_rejects_cramped_or_undocumented_brain_atlas_sections() -> None:
     assert any("unified primary labels render below 8px" in failure for failure in failures)
     assert any("unified layer labels render below 9px" in failure for failure in failures)
     assert any("3 overlapping same-layer node pair" in failure for failure in failures)
+
+
+def test_layout_rejects_brain_atlas_html_and_svg_text_overflow() -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    sections = measurements["brainAtlasSections"]
+    assert isinstance(sections, dict)
+    unified = sections["unified"]
+    assert isinstance(unified, dict)
+    unified.update({
+        "htmlTextOverflowCount": 1,
+        "svgTextOverflowCount": 2,
+        "svgTextOverlapCount": 1,
+    })
+
+    failures = runtime_layout.validate_control_tower_layout(
+        measurements, label="kiosk-1920"
+    )
+
+    assert any("1 overflowing HTML text container" in failure for failure in failures)
+    assert any("2 overflowing SVG node text" in failure for failure in failures)
+    assert any("1 overflowing SVG title/detail pair" in failure for failure in failures)
 
 
 def test_layout_rejects_reversed_or_overflowing_brain_atlas_sections() -> None:

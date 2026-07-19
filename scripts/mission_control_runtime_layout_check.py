@@ -308,6 +308,56 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
     };
     const headingState = textState(heading);
     const descriptionState = textState(description);
+    const htmlTextTargets = atlasRoot ? [...atlasRoot.querySelectorAll(
+      '.brain-atlas-header h2, .brain-atlas-legend span, .brain-atlas-state strong, '
+      + '.brain-atlas-state em, .brain-atlas-section-header h3, .brain-atlas-section-header p, '
+      + '.brain-atlas-scope span, .brain-atlas-evidence-summary, .memory-flow-metrics span, '
+      + '.memory-flow-metrics strong, .memory-flow-metrics em, .brain-atlas-focus span, '
+      + '.brain-atlas-focus select, .brain-atlas-proof-state'
+    )].filter(visible) : [];
+    const htmlTextOverflowRoles = htmlTextTargets.flatMap((node, index) => {
+      const overflowX = Math.max(0, node.scrollWidth - node.clientWidth);
+      const overflowY = Math.max(0, node.scrollHeight - node.clientHeight);
+      const role = String(node.className || node.tagName || `text-${index}`)
+        .trim().replace(/\s+/g, '.').slice(0, 80);
+      return overflowX > 1 || overflowY > 1 ? [role || `text-${index}`] : [];
+    });
+    const svgTextFit = [];
+    const svgTextOverlap = [];
+    if (svg) {
+      const textOwners = [...svg.querySelectorAll(
+        '.memory-flow-node, .brain-atlas-proof-work, .brain-atlas-proof-model'
+      )];
+      textOwners.forEach((owner, ownerIndex) => {
+        const shell = [...owner.children].find((child) => (
+          child.tagName.toLowerCase() === 'rect'
+          && !child.classList.contains('memory-flow-node-aura')
+        ));
+        if (!shell) return;
+        const shellBox = shell.getBBox();
+        const texts = [...owner.querySelectorAll('text')].filter(visible);
+        texts.forEach((textNode, textIndex) => {
+          const box = textNode.getBBox();
+          const fits = box.x >= shellBox.x - 1
+            && box.y >= shellBox.y - 1
+            && box.x + box.width <= shellBox.x + shellBox.width + 1
+            && box.y + box.height <= shellBox.y + shellBox.height + 1;
+          svgTextFit.push({
+            role: `${String(owner.getAttribute('class') || 'svg-owner').replace(/\s+/g, '.')}:${textIndex}`,
+            fits,
+          });
+        });
+        const title = owner.querySelector('.memory-flow-node-title, .brain-atlas-proof-title');
+        const detail = owner.querySelector('.memory-flow-node-detail, .brain-atlas-proof-detail');
+        if (title && detail && visible(title) && visible(detail)) {
+          const titleBox = title.getBBox();
+          const detailBox = detail.getBBox();
+          const verticalOverlap = Math.min(titleBox.y + titleBox.height, detailBox.y + detailBox.height)
+            - Math.max(titleBox.y, detailBox.y);
+          if (verticalOverlap > 0.5) svgTextOverlap.push(ownerIndex);
+        }
+      });
+    }
     const nodeBoxes = [...element.querySelectorAll('.brain-atlas-node, .brain-atlas-proof-work, .brain-atlas-proof-receipt, .brain-atlas-proof-model')].filter(visible).map((node) => {
       const box = node.getBoundingClientRect();
       const layer = ['agent', 'work', 'receipt', 'model'].find((kind) => (
@@ -354,6 +404,11 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
       secondaryGlyphHeights: glyphHeights(secondarySelector),
       layerGlyphHeights: glyphHeights(layerSelector),
       nodeOverlapCount,
+      htmlTextOverflowCount: htmlTextOverflowRoles.length,
+      htmlTextOverflowRoles,
+      svgTextOverflowCount: svgTextFit.filter((item) => !item.fits).length,
+      svgTextOverflowRoles: svgTextFit.filter((item) => !item.fits).map((item) => item.role),
+      svgTextOverlapCount: svgTextOverlap.length,
     };
   };
   const atlasUnifiedRegion = atlasRegion(
@@ -614,6 +669,27 @@ def check_control_tower_json(path: Path) -> dict[str, Any]:
             missing.append(stamp)
     if missing:
         return row("live-data-json", "fail", f"Control Tower JSON is missing canonical fields: {', '.join(missing)}")
+    raw_atlas_path = path.with_name("brain-atlas.json")
+    if raw_atlas_path.exists():
+        try:
+            raw_atlas = json.loads(raw_atlas_path.read_text())
+        except Exception as exc:  # noqa: BLE001
+            return row(
+                "live-data-json",
+                "fail",
+                f"brain-atlas.json failed: {dashboard_safe_error(exc)}",
+            )
+        raw_status = str(raw_atlas.get("status") or "") if isinstance(raw_atlas, dict) else ""
+        projected_atlas = data.get("brainAtlas") if isinstance(data.get("brainAtlas"), dict) else {}
+        projected_status = str(projected_atlas.get("status") or "")
+        if raw_status == "ready" and projected_status != "ready":
+            projected_reason = str(projected_atlas.get("emptyReason") or "missing")
+            return row(
+                "live-data-json",
+                "fail",
+                "Brain Atlas projection rejected a ready canonical graph "
+                f"(raw=ready, projected={projected_status or 'missing'}, reason={projected_reason})",
+            )
     assert schedule_source is not None
     return row(
         "live-data-json",
@@ -986,6 +1062,20 @@ def validate_control_tower_layout(
                 failures.append(f"{label}: Brain Atlas unified node-overlap measurement is missing")
             elif overlap_count:
                 failures.append(f"{label}: Brain Atlas unified graph has {overlap_count} overlapping same-layer node pair(s)")
+            for key, fit_label in (
+                ("htmlTextOverflowCount", "HTML text container"),
+                ("svgTextOverflowCount", "SVG node text"),
+                ("svgTextOverlapCount", "SVG title/detail pair"),
+            ):
+                count = int(_number(region.get(key), missing=-1.0))
+                if count < 0:
+                    failures.append(
+                        f"{label}: Brain Atlas unified {fit_label} measurement is missing"
+                    )
+                elif count:
+                    failures.append(
+                        f"{label}: Brain Atlas unified has {count} overflowing {fit_label}(s)"
+                    )
             layer_heights = region.get("layerGlyphHeights") if isinstance(region.get("layerGlyphHeights"), list) else []
             if not layer_heights or min(_number(value) for value in layer_heights) < 9:
                 failures.append(f"{label}: Brain Atlas unified layer labels render below 9px")
