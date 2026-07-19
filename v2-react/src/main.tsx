@@ -59,6 +59,13 @@ type WorkItem = {
   target: AttentionTarget;
   priority: number;
 };
+type AgentLiveWorkPresentation = {
+  status: AgentStatus;
+  activeWork?: WorkItem;
+  activeFocus: boolean;
+  visualState: AgentVisualState;
+  working: boolean;
+};
 type HandoffBeam = {
   id: string;
   from: AgentId;
@@ -76,12 +83,20 @@ type BrainAtlas = NonNullable<MissionControlState["brainAtlas"]>;
 type BrainAtlasNode = BrainAtlas["nodes"][number];
 type BrainAtlasEdge = BrainAtlas["edges"][number];
 type MemoryActivity = NonNullable<NonNullable<MissionControlState["memoryOperations"]>["activity"]>;
-type BrainAtlasMode = "activity" | "evidence";
 type BrainAtlasView = {
   nodes: BrainAtlasNode[];
   edges: BrainAtlasEdge[];
   candidateReceipts: number;
   shownReceipts: number;
+};
+type BrainAtlasProofRow = {
+  id: string;
+  agent: BrainAtlasNode;
+  agentId: AgentId | null;
+  work: BrainAtlasNode;
+  receipt: BrainAtlasNode;
+  model: BrainAtlasNode;
+  workLabel: string;
 };
 
 type KioskPulse = {
@@ -665,12 +680,51 @@ function agentClass(agent: AgentId) {
 
 function agentVisualState(status: AgentStatus, activeFocus: boolean, activeWork?: WorkItem): AgentVisualState {
   const value = String(status.status || "").toLowerCase();
-  if (isOptionalJoshexOffline(status)) return "offline";
   if (value === "blocked" || value === "error" || activeWork?.state === "blocked") return "blocked";
   if (activeWork?.state === "waiting") return "waiting";
+  // A fresh claimed work item is the Live Work Board's strongest current-work
+  // signal, including when an optional host has not published a status row yet.
+  // Resolve it before the offline fallback so the board and Atlas cannot
+  // disagree about a visibly working agent.
   if (activeFocus || value === "queued" || (value === "active" && isFreshActiveTimestamp(status.updated_at)) || (status.active && isFreshActiveTimestamp(status.updated_at))) return "working";
+  if (isOptionalJoshexOffline(status)) return "offline";
   if (freshnessClass(status.updated_at) === "is-stale") return "stale";
   return "ready";
+}
+
+function activeWorkForAgent(agent: AgentId, workItems: WorkItem[]) {
+  return workItems.find((item) => item.agent_id === agent && item.source !== "job" && ["waiting", "blocked", "working"].includes(item.state))
+    || workItems.find((item) => item.agent_id === agent && ["waiting", "blocked", "working"].includes(item.state));
+}
+
+function agentHasFreshWorkFocus(status: AgentStatus, activeWork?: WorkItem) {
+  const activeWorkFresh = activeWork?.state === "working" && isFreshActiveTimestamp(activeWork.updated_at);
+  const statusWorkingFresh = ["active", "working"].includes(String(status.status || "").toLowerCase())
+    && isFreshActiveTimestamp(status.updated_at);
+  return activeWorkFresh || statusWorkingFresh;
+}
+
+function agentIsShownWorking(status: AgentStatus, activeWork?: WorkItem) {
+  const activeFocus = agentHasFreshWorkFocus(status, activeWork);
+  return agentVisualState(status, activeFocus, activeWork) === "working";
+}
+
+function liveWorkPresentationForAgent(
+  agent: AgentId,
+  status: AgentStatus | undefined,
+  workItems: WorkItem[],
+): AgentLiveWorkPresentation {
+  const resolvedStatus = status || offlineStatus(agent);
+  const activeWork = activeWorkForAgent(agent, workItems);
+  const activeFocus = agentHasFreshWorkFocus(resolvedStatus, activeWork);
+  const visualState = agentVisualState(resolvedStatus, activeFocus, activeWork);
+  return {
+    status: resolvedStatus,
+    activeWork,
+    activeFocus,
+    visualState,
+    working: visualState === "working",
+  };
 }
 
 function stepTrailForAgent(status: AgentStatus, activeFocus: boolean, activeWork?: WorkItem): Array<{ label: string; state: StepTrailState }> {
@@ -1108,6 +1162,7 @@ function App() {
   const statusByAgent = useMemo(() => {
     return new Map(state.statuses.map((row) => [row.agent_id, row]));
   }, [state.statuses]);
+  const liveWorkItems = useMemo(() => buildWorkItems(state), [state]);
 
   const decisionCount = useMemo(() => state.approvals.filter((row) => row.status === "pending").length, [state.approvals]);
   const trackedJobs = useMemo(() => operatorTrackedJobs(state.jobs), [state.jobs]);
@@ -1198,7 +1253,14 @@ function App() {
       <section className="kiosk-grid">
         <section id="brain-feed" className={`brain-hero-panel brain-hero-panel--single${sectionCueClass("brain", liveCues)}`}>
           <SectionCue label={liveCues.focus === "brain" ? "focus" : "updated"} />
-          <BrainHero state={state} statuses={statusByAgent} quietMode={quietMode} onNavigate={navigateToPanel} liveCues={liveCues} />
+          <BrainHero
+            state={state}
+            statuses={statusByAgent}
+            workItems={liveWorkItems}
+            quietMode={quietMode}
+            onNavigate={navigateToPanel}
+            liveCues={liveCues}
+          />
         </section>
         <div className="right-rail">
           <JobsRail
@@ -1210,7 +1272,12 @@ function App() {
             liveCues={liveCues}
           />
         </div>
-        <BrainAtlasPanel atlas={state.brainAtlas} memoryOperations={state.memoryOperations} />
+        <BrainAtlasPanel
+          atlas={state.brainAtlas}
+          memoryOperations={state.memoryOperations}
+          statuses={state.statuses}
+          workItems={liveWorkItems}
+        />
         <MemoizedFinOpsDashboard
           wallet={state.agenticCrypto}
           modelUsage={state.modelUsage}
@@ -1228,12 +1295,14 @@ function App() {
 function BrainHero({
   state,
   statuses,
+  workItems,
   quietMode,
   onNavigate,
   liveCues,
 }: {
   state: MissionControlState;
   statuses: Map<AgentId, AgentStatus>;
+  workItems: WorkItem[];
   quietMode: boolean;
   onNavigate: (target: AttentionTarget) => void;
   liveCues: LiveCueState;
@@ -1245,7 +1314,6 @@ function BrainHero({
   const recentActivity = events.filter((event) => timeValue(event.created_at) > recentCutoff).length;
   const activeAgents = Array.from(statuses.values()).filter((row) => row.active || row.status === "active").length;
   const activeJobs = state.jobs.filter((job) => jobIsFreshActive(job)).length;
-  const workItems = buildWorkItems(state);
   const [showDetails, setShowDetails] = useState(false);
   const [nowMs, setNowMs] = useState(() => Date.now());
   useEffect(() => {
@@ -1287,16 +1355,13 @@ function BrainHero({
         <AgentHandoffBeams state={state} />
         <div className="brain-agent-grid">
           {heroAgents.map((agent) => {
-            const status = statuses.get(agent) || offlineStatus(agent);
-            const activeWork = workItems.find((item) => item.agent_id === agent && item.source !== "job" && ["waiting", "blocked", "working"].includes(item.state))
-              || workItems.find((item) => item.agent_id === agent && ["waiting", "blocked", "working"].includes(item.state));
+            const liveWork = liveWorkPresentationForAgent(agent, statuses.get(agent), workItems);
             const idleContext = buildAgentIdleContext(agent, state, nowMs);
             return (
               <AgentHeroCard
                 key={agent}
                 agent={agent}
-                status={status}
-                activeWork={activeWork}
+                liveWork={liveWork}
                 idleContext={idleContext}
                 changed={Boolean(liveCues.rows[cueRowKey("agent", agent)])}
               />
@@ -1432,49 +1497,62 @@ function EcosystemOperationsPanel({ state, workItems }: { state: MissionControlS
 }
 
 function MemoryOperationsPanel({ state }: { state: MissionControlState }) {
-  const memory = recordRow(state.memoryOperations);
-  const registry = recordRow(memory.registry);
-  const review = recordRow(memory.review);
-  const retrieval = recordRow(memory.retrieval);
-  const governance = recordRow(memory.governance);
-  const access = recordRow(memory.agentAccess);
-  const tone = supportTone(memory.status);
-  const hitRate = retrieval.hitRate == null ? "Learning" : `${retrieval.hitRate}%`;
-  const qualityRate = retrieval.qualityRate == null ? "Learning" : `${retrieval.qualityRate}%`;
-  const agents = Object.entries(access).slice(0, 4);
+  const memory = state.memoryOperations;
+  const activity = useMemo(() => sanitizedMemoryActivity(memory?.activity), [memory?.activity]);
+  const durable = sanitizedNestedMemoryCount(memory, "registry", "active");
+  const sources = sanitizedNestedMemoryCount(memory, "registry", "sources");
+  const pending = sanitizedNestedMemoryCount(memory, "review", "pending");
+  const disputed = sanitizedNestedMemoryCount(memory, "review", "disputed");
+  const queries7d = sanitizedNestedMemoryCount(memory, "retrieval", "queries7d");
+  const feedback30d = sanitizedNestedMemoryCount(memory, "retrieval", "feedback30d");
+  const corrected30d = sanitizedNestedMemoryCount(memory, "retrieval", "corrected30d");
+  const hitRateMetric = sanitizedNestedMemoryMetric(memory, "retrieval", "hitRate", 100);
+  const qualityRateMetric = sanitizedNestedMemoryMetric(memory, "retrieval", "qualityRate", 100);
+  const latencyMetric = sanitizedNestedMemoryMetric(memory, "retrieval", "avgLatencyMs", 60_000);
+  const lastReview = sanitizedNestedMemoryTimestamp(memory, "review", "lastRun");
+  const tone = disputed ? "risk" : pending || !activity ? "watch" : "clear";
+  const hitRate = hitRateMetric == null ? "Learning" : `${hitRateMetric}%`;
+  const qualityRate = qualityRateMetric == null ? "Learning" : `${qualityRateMetric}%`;
+  const summary = disputed
+    ? `${disputed} memory conflict${disputed === 1 ? "" : "s"} need review`
+    : pending
+      ? `${pending} memory candidate${pending === 1 ? "" : "s"} await review`
+      : activity
+        ? "Shared memory is healthy"
+        : "Counts-only memory telemetry is unavailable";
   return (
     <section className={`memory-ops-panel is-${tone}`} aria-label="Memory operations">
       <header>
         <div><span>Shared context and recall</span><strong>Memory Operations</strong></div>
-        <em>{missionText(memory.summary || "Memory registry initializing")}</em>
+        <em>{summary}</em>
       </header>
       <div className="memory-ops-metrics">
-        <article><span>Durable records</span><strong>{registry.active ?? 0}</strong><p>{registry.sources ?? 0} governed sources</p></article>
-        <article><span>Review queue</span><strong>{review.pending ?? 0}</strong><p>{review.disputed ?? 0} conflict{Number(review.disputed || 0) === 1 ? "" : "s"}</p></article>
-        <article><span>Recall hit rate</span><strong>{hitRate}</strong><p>{retrieval.queries7d ?? 0} queries in 7 days</p></article>
-        <article><span>Recall quality</span><strong>{qualityRate}</strong><p>{retrieval.feedback30d ?? 0} outcomes · {retrieval.corrected30d ?? 0} corrected</p></article>
-        <article><span>Recall latency</span><strong>{retrieval.avgLatencyMs ?? 0} ms</strong><p>Local hybrid retrieval</p></article>
+        <article><span>Durable records</span><strong>{durable}</strong><p>{sources} governed sources</p></article>
+        <article><span>Review queue</span><strong>{pending}</strong><p>{disputed} conflict{disputed === 1 ? "" : "s"}</p></article>
+        <article><span>Recall hit rate</span><strong>{hitRate}</strong><p>{queries7d} queries in 7 days</p></article>
+        <article><span>Recall quality</span><strong>{qualityRate}</strong><p>{feedback30d} outcomes · {corrected30d} corrected</p></article>
+        <article><span>Recall latency</span><strong>{latencyMetric == null ? "--" : latencyMetric} ms</strong><p>Local hybrid retrieval</p></article>
       </div>
       <div className="memory-ops-detail">
         <article>
           <strong>Governance</strong>
-          <p>{missionText(governance.sourceOfTruth || "Files and skills remain authoritative")}</p>
-          <small>{missionText(governance.autoPromote || "Low-risk verified memories only")}</small>
+          <p>Files and skills remain authoritative</p>
+          <small>Low-risk verified memories only</small>
         </article>
         <article>
           <strong>Nightly review</strong>
-          <p>{review.lastRun ? `${ageLabel(review.lastRun)} · ${missionText(review.lastStatus)}` : "First review pending"}</p>
+          <p>{lastReview ? `${ageLabel(lastReview)} · review recorded` : "First review pending"}</p>
           <small>Dedupes, expires, detects conflicts, and proposes durable learning.</small>
         </article>
         <article>
           <strong>Agent access</strong>
-          <p>{agents.length ? agents.map(([agent]) => agent.toUpperCase()).join(" · ") : "JOSH2 · JAIMES · JAIN · JOSHEX"}</p>
+          <p>{HERO_AGENT_ORDER.map((agent) => AGENTS[agent].label).join(" · ")}</p>
           <small>One registry, scoped retrieval, provenance returned with every result.</small>
         </article>
         <article>
           <strong>Privacy boundary</strong>
           <p>Counts and health only</p>
-          <small>{missionText(governance.privacy || "No private memory contents on Control Tower")}</small>
+          <small>No private memory contents on Control Tower</small>
         </article>
       </div>
     </section>
@@ -2998,13 +3076,6 @@ function ReliabilityUpgradesPanel({ upgrades }: { upgrades?: MissionControlState
 }
 
 const BRAIN_ATLAS_LAYER_ORDER: BrainAtlasNode["kind"][] = ["agent", "work", "receipt", "model"];
-const BRAIN_ATLAS_VIEW_ORDER: BrainAtlasMode[] = ["activity", "evidence"];
-const BRAIN_ATLAS_LAYER_X: Record<BrainAtlasNode["kind"], number> = {
-  agent: 98,
-  work: 362,
-  receipt: 638,
-  model: 902,
-};
 const BRAIN_ATLAS_LAYER_LABEL: Record<BrainAtlasNode["kind"], string> = {
   agent: "Agent",
   work: "Work",
@@ -3031,8 +3102,13 @@ function brainAtlasView(atlas: BrainAtlas | undefined, focusId: string): BrainAt
     return { nodes: [], edges: [], candidateReceipts: 0, shownReceipts: 0 };
   }
   const byId = new Map(atlas.nodes.map((node) => [node.id, node]));
+  const verifiedReceiptIds = new Set(
+    atlas.edges
+      .filter((edge) => edge.kind === "verified-route")
+      .map((edge) => edge.evidenceReceipt),
+  );
   const receipts = atlas.nodes
-    .filter((node) => node.kind === "receipt")
+    .filter((node) => node.kind === "receipt" && node.routeVerified === true && verifiedReceiptIds.has(node.id))
     .sort((a, b) => timeValue(b.observedAt) - timeValue(a.observedAt));
   const selected = focusId === "all" ? undefined : byId.get(focusId);
   let candidates = receipts;
@@ -3073,17 +3149,109 @@ function brainAtlasView(atlas: BrainAtlas | undefined, focusId: string): BrainAt
 function brainAtlasNodeOption(node: BrainAtlasNode) {
   const observed = fmtTime(node.observedAt);
   if (node.kind === "receipt") return `Receipt - ${node.label} - ${observed}`;
+  if (node.kind === "work") return `Verified work - ${brainAtlasSafeWorkLabel(node.label)}`;
   return `${BRAIN_ATLAS_LAYER_LABEL[node.kind]} - ${node.label}`;
 }
 
-function brainAtlasNodeSubline(node: BrainAtlasNode) {
-  if (node.kind === "agent") return `${node.receiptCount} receipt${node.receiptCount === 1 ? "" : "s"}`;
-  if (node.kind === "work") return `generation ${node.generation || 1} - ${displayStatus(node.status)}`;
-  if (node.kind === "receipt") return `sequence ${node.sequence || 1} - ${displayStatus(node.status)}`;
-  return "route verified";
+function brainAtlasSafeWorkLabel(value: string | null | undefined) {
+  const rawLabel = String(value || "");
+  const normalizedLabel = rawLabel.normalize("NFKC");
+  const label = normalizedLabel.replace(/[\u0000-\u001f\u007f]+/g, " ").replace(/\s+/g, " ").trim();
+  const hasControlOrFormat = /\p{C}/u.test(normalizedLabel);
+  const opaqueWorkId = /^Work [a-f0-9]{8}$/i.test(label);
+  const exactSafeCommand = label === "Handle /new";
+  const phoneLike = Array.from(label.matchAll(/(?<!\w)(?:\+?\d|\(\d{2,4}\))[\d(). -]{5,}\d(?!\w)/g))
+    .some((match) => (match[0].match(/\d/g) || []).length >= 10);
+  const unsafe = (
+    !label
+    || normalizedLabel !== rawLabel
+    || label !== normalizedLabel
+    || hasControlOrFormat
+    || label.length > 56
+    || opaqueWorkId
+    || /^work[:_-][a-z0-9-]+$/i.test(label)
+    || /\bsk-(?:proj-|live-|test-)?[A-Za-z0-9_-]{12,}\b/i.test(label)
+    || /\b(?:sk|pk)_(?:live|test)_[A-Za-z0-9]{12,}\b/i.test(label)
+    || /\bbearer\s+[A-Za-z0-9._~+/=-]{12,}\b/i.test(label)
+    || /\b(?:api[ _-]?key|access[ _-]?token|refresh[ _-]?token|auth(?:orization)?|bearer|cookie|password|passwd|secret|session[ _-]?id)\s*(?:=|:)\s*\S{4,}/i.test(label)
+    || /\b[A-Fa-f0-9]{24,}\b/.test(label)
+    || /\bhttps?:\/\//i.test(label)
+    || (!exactSafeCommand && /(?:^|[\s(\[{'"])~?\/(?:\S+)/.test(label))
+    || /(?:^|[\s(\[{'"])[A-Za-z]:[\\/](?:\S+)/.test(label)
+    || /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i.test(label)
+    || /(?<!\d)\d{3}[ -]?\d{2}[ -]?\d{4}(?!\d)/.test(label)
+    || /(?<!\d)(?:\d[ -]?){12,18}\d(?!\d)/.test(label)
+    || /(?<!\d)\d{9,19}(?!\d)/.test(label)
+    || phoneLike
+    || /\b(?:phone|mobile|cell|call|text|sms|tel)\b[^\d+]{0,16}(?:\+?\d|\(\d{2,4}\))[\d(). -]{5,}\d/i.test(label)
+  );
+  return unsafe ? "Verified work" : label;
 }
 
+function brainAtlasAgentId(node: BrainAtlasNode): AgentId | null {
+  const fromId = String(node.id || "").replace(/^agent:/, "") as AgentId;
+  if (HERO_AGENT_ORDER.includes(fromId)) return fromId;
+  return HERO_AGENT_ORDER.find((agent) => AGENTS[agent].label.toLowerCase() === String(node.label || "").toLowerCase()) || null;
+}
+
+function brainAtlasProofRows(view: BrainAtlasView): BrainAtlasProofRow[] {
+  const byId = new Map(view.nodes.map((node) => [node.id, node]));
+  return view.nodes
+    .filter((node) => node.kind === "receipt")
+    .sort((a, b) => timeValue(b.observedAt) - timeValue(a.observedAt))
+    .flatMap((receipt) => {
+      if (receipt.routeVerified !== true || !receipt.status) return [];
+      const receiptEdges = view.edges.filter((edge) => edge.evidenceReceipt === receipt.id);
+      const emittedEdges = receiptEdges.filter((edge) => edge.kind === "emitted");
+      const ownsEdges = receiptEdges.filter((edge) => edge.kind === "owns");
+      const verifiedEdges = receiptEdges.filter((edge) => edge.kind === "verified-route");
+      if (emittedEdges.length !== 1 || ownsEdges.length !== 1 || verifiedEdges.length !== 1) return [];
+      const [emitted] = emittedEdges;
+      if (emitted.target !== receipt.id) return [];
+      const work = byId.get(emitted.source);
+      if (!work || work.kind !== "work") return [];
+      const [owns] = ownsEdges;
+      const [verified] = verifiedEdges;
+      if (owns.target !== work.id || verified.source !== receipt.id) return [];
+      const agent = byId.get(owns.source);
+      const model = byId.get(verified.target);
+      if (!agent || agent.kind !== "agent" || !model || model.kind !== "model") return [];
+      return [{
+        id: receipt.id,
+        agent,
+        agentId: brainAtlasAgentId(agent),
+        work,
+        receipt,
+        model,
+        workLabel: brainAtlasSafeWorkLabel(work.label),
+      }];
+    })
+    .slice(0, BRAIN_ATLAS_VISIBLE_RECEIPTS);
+}
+
+type MemoryCountKey = keyof MemoryActivity["counts"];
 type MemorySignalKey = keyof MemoryActivity["lastObservedAt"];
+
+const MEMORY_COUNT_KEYS: MemoryCountKey[] = [
+  "retrievals", "hits", "misses", "selected", "used", "reuseIgnored",
+  "feedback", "helpful", "feedbackIgnored", "corrected", "harmful",
+  "proposed", "promoted",
+];
+const MEMORY_SIGNAL_KEYS: MemorySignalKey[] = [
+  "retrieval", "hit", "miss", "selected", "used", "reuseIgnored",
+  "feedback", "corrected", "proposed", "promoted",
+];
+const MEMORY_ACTIVITY_KEYS = [
+  "schemaVersion", "generatedAt", "windowMinutes", "motionWindowSeconds",
+  "source", "privacy", "counts", "lastObservedAt", "agents",
+];
+const MEMORY_SOURCE_KEYS = ["name", "verified"];
+const MEMORY_PRIVACY_KEYS = [
+  "queryIncluded", "contentIncluded", "rawIdentifiersIncluded",
+  "reasonsIncluded", "countsOnly",
+];
+const MEMORY_AGENT_KEYS = ["agent", "retrievals", "hits", "misses", "lastRetrievalAt"];
+const MAX_MEMORY_ACTIVITY_COUNT = 100_000;
 
 const MEMORY_SIGNAL_LABELS: Record<MemorySignalKey, string> = {
   retrieval: "Retrieval observed",
@@ -3098,22 +3266,176 @@ const MEMORY_SIGNAL_LABELS: Record<MemorySignalKey, string> = {
   promoted: "Governed memory updated",
 };
 
-function verifiedMemoryActivity(activity?: MemoryActivity): activity is MemoryActivity {
-  return Boolean(
-    activity
-    && activity.schemaVersion === 1
-    && activity.source?.name === "governed-memory-registry"
-    && activity.source.verified === true
-    && activity.privacy?.countsOnly === true
-    && activity.privacy.queryIncluded === false
-    && activity.privacy.contentIncluded === false
-    && activity.privacy.rawIdentifiersIncluded === false,
-  );
+function exactMemoryRecord(value: unknown, expectedKeys: string[]): Record<string, unknown> | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const record = value as Record<string, unknown>;
+  const actualKeys = Object.keys(record).sort();
+  const requiredKeys = [...expectedKeys].sort();
+  if (actualKeys.length !== requiredKeys.length || actualKeys.some((key, index) => key !== requiredKeys[index])) return null;
+  return record;
+}
+
+function boundedMemoryCount(value: unknown): number | null {
+  return typeof value === "number"
+    && Number.isSafeInteger(value)
+    && value >= 0
+    && value <= MAX_MEMORY_ACTIVITY_COUNT
+    ? value
+    : null;
+}
+
+function isStrictMemoryTimestamp(value: unknown): value is string {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(value)) return false;
+  const parsed = Date.parse(value);
+  return Number.isFinite(parsed) && new Date(parsed).toISOString().replace(".000Z", "Z") === value;
+}
+
+function memoryTimestampFitsWindow(value: string | null, generatedAtMs: number, windowMinutes: number) {
+  if (value === null) return true;
+  const observedAtMs = Date.parse(value);
+  const lowerBound = generatedAtMs - windowMinutes * 60_000 - 5_000;
+  return observedAtMs >= lowerBound && observedAtMs <= generatedAtMs + 5_000;
+}
+
+function sanitizedMemoryActivity(value: unknown): MemoryActivity | undefined {
+  const activity = exactMemoryRecord(value, MEMORY_ACTIVITY_KEYS);
+  if (!activity || activity.schemaVersion !== 1 || !isStrictMemoryTimestamp(activity.generatedAt)) return undefined;
+  const generatedAtMs = Date.parse(activity.generatedAt);
+  if (generatedAtMs < Date.UTC(2024, 0, 1) || generatedAtMs > Date.now() + 5 * 60_000) return undefined;
+
+  const windowMinutes = boundedMemoryCount(activity.windowMinutes);
+  const motionWindowSeconds = boundedMemoryCount(activity.motionWindowSeconds);
+  if (windowMinutes === null || windowMinutes < 1 || windowMinutes > 120) return undefined;
+  if (motionWindowSeconds === null || motionWindowSeconds < 15 || motionWindowSeconds > 100) return undefined;
+
+  // Source/privacy fields are schema assertions, not a trust boundary. The
+  // frontend validates the complete counts-only shape and rebuilds a new,
+  // narrow object instead of retaining any self-declared or unexpected data.
+  const source = exactMemoryRecord(activity.source, MEMORY_SOURCE_KEYS);
+  const privacy = exactMemoryRecord(activity.privacy, MEMORY_PRIVACY_KEYS);
+  if (
+    !source
+    || source.name !== "governed-memory-registry"
+    || source.verified !== true
+    || !privacy
+    || privacy.countsOnly !== true
+    || privacy.queryIncluded !== false
+    || privacy.contentIncluded !== false
+    || privacy.rawIdentifiersIncluded !== false
+    || privacy.reasonsIncluded !== false
+  ) return undefined;
+
+  const rawCounts = exactMemoryRecord(activity.counts, MEMORY_COUNT_KEYS);
+  if (!rawCounts) return undefined;
+  const counts = {} as MemoryActivity["counts"];
+  for (const key of MEMORY_COUNT_KEYS) {
+    const count = boundedMemoryCount(rawCounts[key]);
+    if (count === null) return undefined;
+    counts[key] = count;
+  }
+  if (counts.hits + counts.misses !== counts.retrievals) return undefined;
+  if (counts.helpful + counts.feedbackIgnored + counts.corrected + counts.harmful !== counts.feedback) return undefined;
+
+  const rawObserved = exactMemoryRecord(activity.lastObservedAt, MEMORY_SIGNAL_KEYS);
+  if (!rawObserved) return undefined;
+  const lastObservedAt = {} as MemoryActivity["lastObservedAt"];
+  for (const key of MEMORY_SIGNAL_KEYS) {
+    const timestamp = rawObserved[key];
+    if (timestamp !== null && !isStrictMemoryTimestamp(timestamp)) return undefined;
+    const safeTimestamp = timestamp as string | null;
+    if (!memoryTimestampFitsWindow(safeTimestamp, generatedAtMs, windowMinutes)) return undefined;
+    lastObservedAt[key] = safeTimestamp;
+  }
+  const timestampCounts: Partial<Record<MemorySignalKey, MemoryCountKey>> = {
+    retrieval: "retrievals",
+    hit: "hits",
+    miss: "misses",
+    selected: "selected",
+    used: "used",
+    reuseIgnored: "reuseIgnored",
+    feedback: "feedback",
+    corrected: "corrected",
+    proposed: "proposed",
+    promoted: "promoted",
+  };
+  for (const [signal, countKey] of Object.entries(timestampCounts) as Array<[MemorySignalKey, MemoryCountKey]>) {
+    if ((counts[countKey] === 0) !== (lastObservedAt[signal] === null)) return undefined;
+  }
+
+  if (!Array.isArray(activity.agents) || activity.agents.length !== HERO_AGENT_ORDER.length) return undefined;
+  const agents: MemoryActivity["agents"] = [];
+  const seenAgents = new Set<AgentId>();
+  for (const value of activity.agents) {
+    const agentRow = exactMemoryRecord(value, MEMORY_AGENT_KEYS);
+    if (!agentRow || !HERO_AGENT_ORDER.includes(agentRow.agent as AgentId) || seenAgents.has(agentRow.agent as AgentId)) return undefined;
+    const agent = agentRow.agent as AgentId;
+    const retrievals = boundedMemoryCount(agentRow.retrievals);
+    const hits = boundedMemoryCount(agentRow.hits);
+    const misses = boundedMemoryCount(agentRow.misses);
+    const lastRetrievalAt = agentRow.lastRetrievalAt;
+    if (retrievals === null || hits === null || misses === null || hits + misses !== retrievals) return undefined;
+    if (lastRetrievalAt !== null && !isStrictMemoryTimestamp(lastRetrievalAt)) return undefined;
+    const safeLastRetrievalAt = lastRetrievalAt as string | null;
+    if (!memoryTimestampFitsWindow(safeLastRetrievalAt, generatedAtMs, windowMinutes)) return undefined;
+    if ((retrievals === 0) !== (safeLastRetrievalAt === null)) return undefined;
+    seenAgents.add(agent);
+    agents.push({ agent, retrievals, hits, misses, lastRetrievalAt: safeLastRetrievalAt });
+  }
+  if (HERO_AGENT_ORDER.some((agent) => !seenAgents.has(agent))) return undefined;
+  if (agents.reduce((total, row) => total + row.retrievals, 0) !== counts.retrievals) return undefined;
+  if (agents.reduce((total, row) => total + row.hits, 0) !== counts.hits) return undefined;
+  if (agents.reduce((total, row) => total + row.misses, 0) !== counts.misses) return undefined;
+
+  return {
+    schemaVersion: 1,
+    generatedAt: activity.generatedAt,
+    windowMinutes,
+    motionWindowSeconds,
+    source: { name: "governed-memory-registry", verified: true },
+    privacy: {
+      queryIncluded: false,
+      contentIncluded: false,
+      rawIdentifiersIncluded: false,
+      reasonsIncluded: false,
+      countsOnly: true,
+    },
+    counts,
+    lastObservedAt,
+    agents: agents.sort((a, b) => HERO_AGENT_ORDER.indexOf(a.agent) - HERO_AGENT_ORDER.indexOf(b.agent)),
+  };
+}
+
+function nestedMemoryValue(value: unknown, section: string, key: string) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const sectionValue = (value as Record<string, unknown>)[section];
+  if (!sectionValue || typeof sectionValue !== "object" || Array.isArray(sectionValue)) return undefined;
+  return (sectionValue as Record<string, unknown>)[key];
+}
+
+function sanitizedNestedMemoryCount(value: unknown, section: string, key: string) {
+  return boundedMemoryCount(nestedMemoryValue(value, section, key)) ?? 0;
+}
+
+function sanitizedNestedMemoryMetric(value: unknown, section: string, key: string, maximum: number) {
+  const metric = nestedMemoryValue(value, section, key);
+  return typeof metric === "number" && Number.isFinite(metric) && metric >= 0 && metric <= maximum ? metric : null;
+}
+
+function sanitizedNestedMemoryTimestamp(value: unknown, section: string, key: string) {
+  const timestamp = nestedMemoryValue(value, section, key);
+  return isStrictMemoryTimestamp(timestamp) && Date.parse(timestamp) <= Date.now() + 5 * 60_000 ? timestamp : null;
+}
+
+function newestMemoryTimestamp(first: string | null | undefined, second: string | null | undefined) {
+  if (!first) return second || null;
+  if (!second) return first;
+  return timeValue(first) >= timeValue(second) ? first : second;
 }
 
 function memorySignalIsRecent(value: string | null | undefined, windowSeconds: number) {
   const observed = timeValue(value);
-  return observed > 0 && Date.now() - observed <= windowSeconds * 1_000;
+  const ageMs = Date.now() - observed;
+  return observed > 0 && ageMs >= -5_000 && ageMs <= windowSeconds * 1_000;
 }
 
 function latestMemorySignal(activity?: MemoryActivity) {
@@ -3126,21 +3448,29 @@ function latestMemorySignal(activity?: MemoryActivity) {
 function BrainAtlasPanel({
   atlas,
   memoryOperations,
+  statuses,
+  workItems,
 }: {
   atlas?: BrainAtlas;
   memoryOperations?: MissionControlState["memoryOperations"];
+  statuses: AgentStatus[];
+  workItems: WorkItem[];
 }) {
-  const [atlasView, setAtlasView] = useState<BrainAtlasMode>("activity");
   const [focusId, setFocusId] = useState("all");
   useEffect(() => {
     if (focusId !== "all" && !atlas?.nodes.some((node) => node.id === focusId)) setFocusId("all");
   }, [atlas?.generatedAt, atlas?.nodes, focusId]);
   const view = useMemo(() => brainAtlasView(atlas, focusId), [atlas, focusId]);
-  const rawActivity = memoryOperations?.activity;
-  const activity = verifiedMemoryActivity(rawActivity) ? rawActivity : undefined;
-  const memoryRegistry = recordRow(memoryOperations?.registry);
-  const memoryReview = recordRow(memoryOperations?.review);
-  const motionWindowSeconds = Math.min(300, Math.max(15, Number(activity?.motionWindowSeconds || 90)));
+  const proofRows = useMemo(() => brainAtlasProofRows(view), [view]);
+  const recentProofView = useMemo(() => brainAtlasView(atlas, "all"), [atlas]);
+  const recentProofRows = useMemo(() => brainAtlasProofRows(recentProofView), [recentProofView]);
+  const proofWorkOptions = useMemo(() => (
+    Array.from(new Map(recentProofRows.map((row) => [row.work.id, row.work])).values())
+  ), [recentProofRows]);
+  const activity = useMemo(() => sanitizedMemoryActivity(memoryOperations?.activity), [memoryOperations?.activity]);
+  const durableMemoryCount = sanitizedNestedMemoryCount(memoryOperations, "registry", "active");
+  const pendingMemoryCount = sanitizedNestedMemoryCount(memoryOperations, "review", "pending");
+  const motionWindowSeconds = Math.min(100, Math.max(15, Number(activity?.motionWindowSeconds || 90)));
   const count = (key: keyof MemoryActivity["counts"]) => Number(activity?.counts[key] || 0);
   const recent = (key: MemorySignalKey) => memorySignalIsRecent(activity?.lastObservedAt[key], motionWindowSeconds);
   const latestSignal = latestMemorySignal(activity);
@@ -3155,6 +3485,13 @@ function BrainAtlasPanel({
   const uses = count("used");
   const hitRate = retrievals ? `${Math.round((hits / retrievals) * 100)}%` : "--";
   const byAgent = new Map((activity?.agents || []).map((row) => [row.agent, row]));
+  const statusByAgent = new Map(statuses.map((row) => [row.agent_id, row]));
+  const liveWorkByAgent = new Map(HERO_AGENT_ORDER.map((agent) => [
+    agent,
+    liveWorkPresentationForAgent(agent, statusByAgent.get(agent), workItems),
+  ]));
+  const workingAgentIds = new Set(HERO_AGENT_ORDER.filter((agent) => liveWorkByAgent.get(agent)?.working));
+  const workingAgentCount = workingAgentIds.size;
   const flowAgents = HERO_AGENT_ORDER.map((agent) => byAgent.get(agent) || {
     agent,
     retrievals: 0,
@@ -3162,42 +3499,21 @@ function BrainAtlasPanel({
     misses: 0,
     lastRetrievalAt: null,
   });
-  const graphHeight = 260;
-  const positions = useMemo(() => {
-    const next = new Map<string, { x: number; y: number; node: BrainAtlasNode }>();
-    BRAIN_ATLAS_LAYER_ORDER.forEach((kind) => {
-      const layerNodes = view.nodes.filter((node) => node.kind === kind);
-      const layerTop = 54;
-      const layerBottom = graphHeight - 23;
-      layerNodes.forEach((node, index) => {
-        next.set(node.id, {
-          x: BRAIN_ATLAS_LAYER_X[kind],
-          y: layerNodes.length === 1
-            ? (layerTop + layerBottom) / 2
-            : layerTop + ((layerBottom - layerTop) * index) / (layerNodes.length - 1),
-          node,
-        });
-      });
-    });
-    return next;
-  }, [view.nodes]);
   const age = ageMinutes(atlas?.generatedAt);
   const stale = Number.isFinite(age) && age > 60;
   const unavailable = !atlas || atlas.status === "unavailable";
-  const activityTone = activity ? "clear" : "risk";
-  const evidenceTone = unavailable ? "risk" : stale || atlas?.status === "empty" ? "watch" : "clear";
-  const selectedTone = atlasView === "activity" ? activityTone : evidenceTone;
+  const selectedTone = !activity && unavailable
+    ? "risk"
+    : !activity || unavailable || stale || atlas?.status === "empty"
+      ? "watch"
+      : "clear";
   const sourceExcluded = atlas
     ? atlas.counts.excluded.capacityReceipts + atlas.counts.excluded.capacityRoutes
     : 0;
   const viewLimited = view.candidateReceipts > view.shownReceipts;
-  const focusNeeded = Boolean(
-    atlas?.status === "ready"
-    && (atlas.nodes.length > view.nodes.length || atlas.counts.receipts > BRAIN_ATLAS_VISIBLE_RECEIPTS),
-  );
   const selectedNode = focusId === "all" ? undefined : atlas?.nodes.find((node) => node.id === focusId);
   const evidenceSummary = atlas?.status === "ready"
-    ? `Showing ${view.nodes.length}/${atlas.counts.nodes} nodes · ${view.edges.length}/${atlas.counts.edges} edges${selectedNode ? ` · ${selectedNode.label}` : ""}`
+    ? `${proofRows.length}/${Math.min(view.candidateReceipts, BRAIN_ATLAS_VISIBLE_RECEIPTS)} recent exact path${proofRows.length === 1 ? "" : "s"}${selectedNode?.kind === "work" ? ` · ${brainAtlasSafeWorkLabel(selectedNode.label)}` : ""}`
     : "Source unavailable";
   const evidencePolicyDetail = [
     sourceExcluded
@@ -3208,114 +3524,113 @@ function BrainAtlasPanel({
       : "All qualifying exact receipts are shown.",
   ].join(" ");
   const evidenceStateLabel = atlas?.status === "ready"
-    ? `${atlas.counts.receipts} exact receipt${atlas.counts.receipts === 1 ? "" : "s"}`
+    ? `${atlas.counts.receipts} receipt${atlas.counts.receipts === 1 ? "" : "s"} · ${recentProofRows.length} verified path${recentProofRows.length === 1 ? "" : "s"}`
     : atlas?.status === "empty"
       ? "No exact receipts in window"
       : "Source unavailable";
-  const handleAtlasViewKeyDown = useCallback((event: React.KeyboardEvent<HTMLButtonElement>) => {
-    const currentIndex = BRAIN_ATLAS_VIEW_ORDER.indexOf(atlasView);
-    let nextIndex = currentIndex;
-    if (event.key === "ArrowRight") nextIndex = (currentIndex + 1) % BRAIN_ATLAS_VIEW_ORDER.length;
-    else if (event.key === "ArrowLeft") nextIndex = (currentIndex - 1 + BRAIN_ATLAS_VIEW_ORDER.length) % BRAIN_ATLAS_VIEW_ORDER.length;
-    else if (event.key === "Home") nextIndex = 0;
-    else if (event.key === "End") nextIndex = BRAIN_ATLAS_VIEW_ORDER.length - 1;
-    else return;
-    event.preventDefault();
-    const nextView = BRAIN_ATLAS_VIEW_ORDER[nextIndex];
-    setAtlasView(nextView);
-    document.getElementById(`brain-atlas-tab-${nextView}`)?.focus();
-  }, [atlasView]);
+  const proofState = atlas?.status === "ready"
+    ? recentProofRows.length ? "ready" : "empty"
+    : atlas?.status || "unavailable";
+  const candidateObservedAt = newestMemoryTimestamp(
+    activity?.lastObservedAt.proposed,
+    activity?.lastObservedAt.corrected,
+  );
+  const candidateIsRecent = memorySignalIsRecent(candidateObservedAt, motionWindowSeconds);
 
   return (
     <section
       id="brain-atlas"
       className={`brain-atlas-panel is-${selectedTone}${latestSignalRecent ? " has-live-memory-flow" : ""}`}
-      data-atlas-view={atlasView}
+      data-atlas-view="unified"
       data-atlas-view-tone={selectedTone}
       data-memory-flow-state={latestSignalRecent ? "live" : activity ? "idle" : "unavailable"}
-      aria-label="Brain Atlas observable memory activity with optional execution evidence"
+      data-exact-proof-state={proofState}
+      data-working-agent-count={workingAgentCount}
+      aria-label="Brain Atlas unified observable agent activity and exact execution evidence"
     >
       <header className="brain-atlas-header">
         <div>
           <p><GitBranch size={13} />Observable agent activity</p>
           <h2>Brain Atlas</h2>
         </div>
-        <div className="brain-atlas-view-switch" role="tablist" aria-label="Brain Atlas views">
-          <button
-            id="brain-atlas-tab-activity"
-            type="button"
-            role="tab"
-            data-atlas-view-option="activity"
-            aria-controls="brain-atlas-memory-panel"
-            aria-selected={atlasView === "activity"}
-            tabIndex={atlasView === "activity" ? 0 : -1}
-            className={atlasView === "activity" ? "is-active" : ""}
-            onClick={() => setAtlasView("activity")}
-            onKeyDown={handleAtlasViewKeyDown}
-          >
-            Activity
-          </button>
-          <button
-            id="brain-atlas-tab-evidence"
-            type="button"
-            role="tab"
-            data-atlas-view-option="evidence"
-            aria-controls="brain-atlas-evidence-panel"
-            aria-selected={atlasView === "evidence"}
-            tabIndex={atlasView === "evidence" ? 0 : -1}
-            className={atlasView === "evidence" ? "is-active" : ""}
-            onClick={() => setAtlasView("evidence")}
-            onKeyDown={handleAtlasViewKeyDown}
-          >
-            Proof &amp; evidence
-          </button>
+        <div className="brain-atlas-legend" aria-label="Brain Atlas visual legend">
+          <span className="is-work"><i aria-hidden="true" />Live work halo</span>
+          <span className="is-memory"><i aria-hidden="true" />Moving memory receipt</span>
+          <span className="is-proof"><i aria-hidden="true" />Static exact proof</span>
         </div>
-        <span className={`brain-atlas-state is-${selectedTone}${atlasView === "activity" && latestSignalRecent ? " is-live" : ""}`} aria-live="polite">
-          {atlasView === "activity" ? `Activity · ${activityStateLabel}` : `Evidence · ${evidenceStateLabel}`}
+        <span className={`brain-atlas-state is-${selectedTone}${latestSignalRecent ? " is-live" : ""}`} aria-live="polite">
+          {workingAgentCount} working · {activityStateLabel} · {evidenceStateLabel}
         </span>
       </header>
 
       <section
-        id="brain-atlas-memory-panel"
-        className="brain-atlas-section is-memory"
-        data-atlas-region="memory"
-        data-atlas-view-panel="activity"
-        role="tabpanel"
-        aria-labelledby="brain-atlas-tab-activity"
-        aria-describedby="brain-atlas-memory-description"
-        hidden={atlasView !== "activity"}
+        id="brain-atlas-unified-panel"
+        className="brain-atlas-section is-unified"
+        data-atlas-region="unified"
+        data-atlas-view-panel="unified"
+        aria-labelledby="brain-atlas-unified-heading"
+        aria-describedby="brain-atlas-unified-description"
       >
         <header className="brain-atlas-section-header">
           <div>
-            <h3 id="brain-atlas-memory-heading">Memory activity</h3>
-            <p id="brain-atlas-memory-description">How agents retrieve, apply, evaluate, and promote governed memory. Observable activity—not private reasoning.</p>
+            <h3 id="brain-atlas-unified-heading">Live activity + exact proof</h3>
+            <p id="brain-atlas-unified-description">One view: shared agents, governed memory receipts, and static proof of execution. This is observable activity—not private reasoning.</p>
           </div>
-          <div className="brain-atlas-scope" aria-label="Memory activity scope and evidence policy">
-            <span>{activity?.windowMinutes || 30}-minute live view</span>
-            <span>Counts only · no contents</span>
-            <span>{activity?.source.verified ? "Registry verified" : "Registry not verified"}</span>
+          <div className="brain-atlas-context">
+            <div className="brain-atlas-scope" aria-label="Brain Atlas scope and evidence policy">
+              <span className={workingAgentCount ? "is-working" : ""}>Live Work linked · {workingAgentCount} working</span>
+              <span>{activity ? `${activity.windowMinutes}m memory window` : "Memory window unavailable"}</span>
+              <span>Counts only · no contents</span>
+              <span>{activity ? "Sanitized counts contract" : "Memory contract unavailable"}</span>
+            </div>
+            <output className="brain-atlas-evidence-summary" title={evidencePolicyDetail} aria-live="polite">
+              {evidenceSummary}
+            </output>
           </div>
         </header>
 
         <div className="memory-flow-metrics" aria-label="Memory activity summary">
-          <article><span>Retrievals</span><strong>{retrievals}</strong><em>last {activity?.windowMinutes || 30}m</em></article>
-          <article><span>Recall hit rate</span><strong>{hitRate}</strong><em>{hits} exact hit{hits === 1 ? "" : "s"}</em></article>
-          <article className={uses ? "is-verified" : "is-idle"}><span>Explicit uses</span><strong>{uses}</strong><em>{uses ? "selected + used" : "no use receipt"}</em></article>
-          <article><span>Durable memory</span><strong>{Number(memoryRegistry.active || 0)}</strong><em>{Number(memoryReview.pending || 0)} candidate{Number(memoryReview.pending || 0) === 1 ? "" : "s"}</em></article>
+          <article><span>Retrievals</span><strong>{activity ? retrievals : "--"}</strong><em>{activity ? `last ${activity.windowMinutes}m` : "telemetry unavailable"}</em></article>
+          <article><span>Recall hit rate</span><strong>{hitRate}</strong><em>{activity ? `${hits} exact hit${hits === 1 ? "" : "s"}` : "telemetry unavailable"}</em></article>
+          <article className={activity && uses ? "is-verified" : "is-idle"}><span>Explicit uses</span><strong>{activity ? uses : "--"}</strong><em>{activity ? (uses ? "selected + used" : "no use receipt") : "telemetry unavailable"}</em></article>
+          <article><span>Durable memory</span><strong>{durableMemoryCount}</strong><em>{pendingMemoryCount} candidate{pendingMemoryCount === 1 ? "" : "s"}</em></article>
         </div>
 
-        <div className="memory-flow-map" tabIndex={0} aria-label="Observable governed memory activity graph. Scroll horizontally on narrow screens.">
+        <div className="brain-atlas-unified-controls">
+          <label className="brain-atlas-focus" htmlFor="brain-atlas-focus-node">
+            <span>Inspect verified work</span>
+            <select
+              id="brain-atlas-focus-node"
+              value={focusId}
+              disabled={atlas?.status !== "ready" || !proofWorkOptions.length}
+              onChange={(event) => setFocusId(event.target.value)}
+            >
+              <option value="all">Most recent exact proof</option>
+              {proofWorkOptions.map((node) => (
+                <option key={node.id} value={node.id}>{brainAtlasNodeOption(node)}</option>
+              ))}
+            </select>
+          </label>
+          <span className={`brain-atlas-proof-state is-${proofState === "ready" ? "ready" : "watch"}`}>
+            {evidenceStateLabel}
+          </span>
+        </div>
+
+        <div className="memory-flow-map is-unified" tabIndex={0} aria-label="Unified observable agent, governed memory, and exact execution proof graph. Scroll horizontally on narrow screens.">
           <svg
-            viewBox="0 0 1000 224"
+            viewBox="0 0 1000 376"
             role="img"
-            aria-labelledby="memory-flow-title memory-flow-description"
+            aria-labelledby="brain-atlas-title brain-atlas-description"
             preserveAspectRatio="xMidYMid meet"
-            data-evidence-source="governed-memory-registry"
+            data-memory-source="governed-memory-registry"
+            data-proof-source="exact-receipt-ledger"
           >
-            <title id="memory-flow-title">Verified governed memory activity</title>
-            <desc id="memory-flow-description">
-              Counts-only flow from agent retrieval through recall, explicit use, feedback, candidate review, and durable memory. Moving paths require a recent exact registry timestamp. This does not expose memory content or internal model reasoning.
+            <title id="brain-atlas-title">Unified observable agent activity, governed memory, and exact execution proof</title>
+            <desc id="brain-atlas-description">
+              Shared agent nodes show {workingAgentCount} agents working from the same current state as the Live Work Board. Only governed memory receipt paths move when a recent exact registry timestamp exists. The lower lane shows {proofRows.length} static, exact agent to named work to timestamped receipt to verified model paths. This visualization shows observable operations and evidence, not private model reasoning or memory contents.
             </desc>
+            <g className="brain-atlas-memory-layer" data-atlas-layer="memory">
+            <text className="brain-atlas-lane-label is-memory" x="18" y="14">LIVE AGENTS + GOVERNED MEMORY</text>
             <g className="memory-flow-edges" aria-hidden="true">
             {flowAgents.map((row, index) => {
               const y = 22 + index * 52;
@@ -3324,6 +3639,7 @@ function BrainAtlasPanel({
                 <path
                   key={`agent-flow-${row.agent}`}
                   className={`memory-flow-edge is-retrieval${live ? " is-live" : ""}`}
+                  data-agent={row.agent}
                   data-operation="retrieval"
                   data-observed-at={row.lastRetrievalAt || undefined}
                   d={`M 168 ${y + 19} C 198 ${y + 19}, 202 119, 232 119`}
@@ -3333,7 +3649,7 @@ function BrainAtlasPanel({
             <path className={`memory-flow-edge is-hit${recent("hit") ? " is-live" : ""}`} data-operation="hit" data-observed-at={activity?.lastObservedAt.hit || undefined} d="M 372 119 C 392 119, 408 119, 430 119" />
             <path className={`memory-flow-edge is-used${recent("used") ? " is-live" : ""}`} data-operation="used" data-observed-at={activity?.lastObservedAt.used || undefined} d="M 576 119 C 610 119, 606 58, 640 58" />
             <path className={`memory-flow-edge is-feedback${recent("feedback") ? " is-live" : ""}`} data-operation="feedback" data-observed-at={activity?.lastObservedAt.feedback || undefined} d="M 576 119 C 610 119, 606 181, 640 181" />
-            <path className={`memory-flow-edge is-proposed${recent("proposed") || recent("corrected") ? " is-live" : ""}`} data-operation="proposed" data-observed-at={activity?.lastObservedAt.proposed || activity?.lastObservedAt.corrected || undefined} d="M 784 181 C 802 181, 812 181, 830 181" />
+            <path className={`memory-flow-edge is-proposed${candidateIsRecent ? " is-live" : ""}`} data-operation="proposed" data-observed-at={candidateObservedAt || undefined} d="M 784 181 C 802 181, 812 181, 830 181" />
             <path className={`memory-flow-edge is-promoted${recent("promoted") ? " is-live" : ""}`} data-operation="promoted" data-observed-at={activity?.lastObservedAt.promoted || undefined} d="M 902 154 C 902 134, 902 103, 902 84" />
             <path className={`memory-flow-edge is-promoted is-return${recent("promoted") ? " is-live" : ""}`} data-operation="promoted" data-observed-at={activity?.lastObservedAt.promoted || undefined} d="M 830 57 C 756 10, 514 10, 504 92" />
             </g>
@@ -3341,159 +3657,120 @@ function BrainAtlasPanel({
             {flowAgents.map((row, index) => {
               const y = 22 + index * 52;
               const live = memorySignalIsRecent(row.lastRetrievalAt, motionWindowSeconds);
+              const working = workingAgentIds.has(row.agent);
               return (
-                <g key={row.agent} className={`memory-flow-node is-agent${live ? " is-live" : ""}`} data-agent={row.agent}>
+                <g
+                  key={row.agent}
+                  className={`memory-flow-node is-agent${working ? " is-work-active" : ""}${live ? " is-memory-live is-live" : ""}`}
+                  data-agent={row.agent}
+                  data-agent-working={working ? "true" : "false"}
+                  data-work-state={working ? "working" : "quiet"}
+                  data-memory-state={!activity ? "unavailable" : live ? "live" : "idle"}
+                >
+                  <title>{`${AGENTS[row.agent].label}: ${working ? "working now" : "not working"}; ${!activity ? "memory telemetry unavailable" : live ? "verified memory retrieval live" : "memory quiet"}`}</title>
+                  <rect className="memory-flow-node-aura" x="13" y={y - 5} width="160" height="48" rx="12" />
                   <rect x="18" y={y} width="150" height="38" rx="7" />
                   <text className="memory-flow-node-title" x="30" y={y + 16}>{AGENTS[row.agent].label}</text>
-                  <text className="memory-flow-node-detail" x="30" y={y + 30}>{row.retrievals} retrieval{row.retrievals === 1 ? "" : "s"}</text>
+                  <circle className="memory-flow-presence-dot" cx="155" cy={y + 12} r="4" />
+                  <text className="memory-flow-node-detail" x="30" y={y + 30}>
+                    {working
+                      ? `Working · ${!activity ? "memory unavailable" : row.retrievals ? `${row.retrievals} retrieval${row.retrievals === 1 ? "" : "s"}` : "memory quiet"}`
+                      : !activity ? "Quiet · memory unavailable" : `Quiet · ${row.retrievals} retrieval${row.retrievals === 1 ? "" : "s"}`}
+                  </text>
                 </g>
               );
             })}
             <g className={`memory-flow-node is-recall${recent("retrieval") ? " is-live" : ""}`}>
               <rect x="232" y="92" width="140" height="54" rx="9" />
               <text className="memory-flow-node-title" x="302" y="115" textAnchor="middle">Recall</text>
-              <text className="memory-flow-node-detail" x="302" y="132" textAnchor="middle">{retrievals} queried · {count("misses")} miss</text>
+              <text className="memory-flow-node-detail" x="302" y="132" textAnchor="middle">{activity ? `${retrievals} queried · ${count("misses")} miss` : "telemetry unavailable"}</text>
             </g>
             <g className={`memory-flow-node is-registry${recent("hit") || recent("promoted") ? " is-live" : ""}`}>
               <rect x="430" y="92" width="146" height="54" rx="9" />
               <text className="memory-flow-node-title" x="503" y="115" textAnchor="middle">Memory registry</text>
-              <text className="memory-flow-node-detail" x="503" y="132" textAnchor="middle">{Number(memoryRegistry.active || 0)} governed records</text>
+              <text className="memory-flow-node-detail" x="503" y="132" textAnchor="middle">{durableMemoryCount} governed records</text>
             </g>
             <g className={`memory-flow-node is-applied${recent("used") ? " is-live" : ""}`}>
               <rect x="640" y="31" width="144" height="54" rx="9" />
               <text className="memory-flow-node-title" x="712" y="54" textAnchor="middle">Applied</text>
-              <text className="memory-flow-node-detail" x="712" y="71" textAnchor="middle">{uses} explicit use receipt{uses === 1 ? "" : "s"}</text>
+              <text className="memory-flow-node-detail" x="712" y="71" textAnchor="middle">{activity ? `${uses} explicit use receipt${uses === 1 ? "" : "s"}` : "telemetry unavailable"}</text>
             </g>
             <g className={`memory-flow-node is-feedback${recent("feedback") ? " is-live" : ""}`}>
               <rect x="640" y="154" width="144" height="54" rx="9" />
               <text className="memory-flow-node-title" x="712" y="177" textAnchor="middle">Outcome</text>
-              <text className="memory-flow-node-detail" x="712" y="194" textAnchor="middle">{count("feedback")} feedback receipt{count("feedback") === 1 ? "" : "s"}</text>
+              <text className="memory-flow-node-detail" x="712" y="194" textAnchor="middle">{activity ? `${count("feedback")} feedback receipt${count("feedback") === 1 ? "" : "s"}` : "telemetry unavailable"}</text>
             </g>
-            <g className={`memory-flow-node is-candidate${recent("proposed") || recent("corrected") ? " is-live" : ""}`}>
+            <g className={`memory-flow-node is-candidate${candidateIsRecent ? " is-live" : ""}`} data-observed-at={candidateObservedAt || undefined}>
               <rect x="830" y="154" width="144" height="54" rx="9" />
               <text className="memory-flow-node-title" x="902" y="177" textAnchor="middle">Candidate</text>
-              <text className="memory-flow-node-detail" x="902" y="194" textAnchor="middle">{count("proposed")} proposed · not learned</text>
+              <text className="memory-flow-node-detail" x="902" y="194" textAnchor="middle">{activity ? `${count("proposed")} proposed · not learned` : "telemetry unavailable"}</text>
             </g>
             <g className={`memory-flow-node is-durable${recent("promoted") ? " is-live" : ""}`}>
               <rect x="830" y="31" width="144" height="54" rx="9" />
               <text className="memory-flow-node-title" x="902" y="54" textAnchor="middle">Durable</text>
-              <text className="memory-flow-node-detail" x="902" y="71" textAnchor="middle">{count("promoted")} governed promotion{count("promoted") === 1 ? "" : "s"}</text>
+              <text className="memory-flow-node-detail" x="902" y="71" textAnchor="middle">{activity ? `${count("promoted")} governed promotion${count("promoted") === 1 ? "" : "s"}` : "telemetry unavailable"}</text>
             </g>
+            </g>
+            </g>
+
+            <g className="brain-atlas-proof-layer" data-atlas-layer="proof" data-proof-animated="false">
+              <line className="brain-atlas-lane-divider" x1="18" y1="224" x2="982" y2="224" />
+              <text className="brain-atlas-lane-label is-proof" x="18" y="241">EXACT EXECUTION PROOF · STATIC AUDIT PATHS</text>
+              <text className="brain-atlas-proof-column" x="375" y="241" textAnchor="middle">NAMED WORK</text>
+              <text className="brain-atlas-proof-column" x="640" y="241" textAnchor="middle">RECEIPT</text>
+              <text className="brain-atlas-proof-column" x="867" y="241" textAnchor="middle">VERIFIED MODEL</text>
+              {proofRows.length ? proofRows.map((row, index) => {
+                const rowY = 264 + index * 45;
+                const agentIndex = row.agentId ? HERO_AGENT_ORDER.indexOf(row.agentId) : -1;
+                const agentY = agentIndex >= 0 ? 41 + agentIndex * 52 : 119;
+                const selected = focusId !== "all" && focusId === row.work.id;
+                const agentLabel = row.agentId ? AGENTS[row.agentId].label : row.agent.label;
+                const receiptLabel = missionText(row.receipt.label || "Receipt").replace(/\s+receipt$/i, "");
+                const receiptStatus = row.receipt.status ? displayStatus(row.receipt.status) : "Status unavailable";
+                return (
+                  <g
+                    key={row.id}
+                    className={`brain-atlas-proof-row${selected ? " is-selected" : ""}`}
+                    data-proof-row={row.id}
+                    data-work-label={row.workLabel}
+                    data-agent={row.agentId || row.agent.id}
+                    data-receipt={row.receipt.id}
+                    data-receipt-status={row.receipt.status}
+                    data-model={row.model.id}
+                    data-route-verified="true"
+                    data-proof-animated="false"
+                  >
+                    <title>{`${agentLabel} ran ${row.workLabel}; ${receiptLabel} receipt status ${receiptStatus}, observed ${fmtTime(row.receipt.observedAt)}; ${row.model.label} route verified. Static audit evidence, not reasoning.`}</title>
+                    <path className="brain-atlas-proof-edge is-owns" d={`M 168 ${agentY} C 190 ${agentY}, 196 ${rowY}, 220 ${rowY}`} />
+                    <path className="brain-atlas-proof-edge is-emitted" d={`M 530 ${rowY} C 566 ${rowY}, 592 ${rowY}, 631 ${rowY}`} />
+                    <path className="brain-atlas-proof-edge is-verified" d={`M 649 ${rowY} C 690 ${rowY}, 716 ${rowY}, 760 ${rowY}`} />
+                    <g className="brain-atlas-proof-work">
+                      <rect x="220" y={rowY - 15} width="310" height="30" rx="6" />
+                      <text className="brain-atlas-proof-title" x="235" y={rowY - 2}>{compactText(row.workLabel, 42)}</text>
+                      <text className="brain-atlas-proof-detail" x="235" y={rowY + 10}>{agentLabel} · Receipt: {compactText(receiptLabel, 14)} · {receiptStatus}</text>
+                    </g>
+                    <g className="brain-atlas-proof-receipt">
+                      <text className="brain-atlas-proof-kicker" x="640" y={rowY - 12} textAnchor="middle">RECEIPT</text>
+                      <circle cx="640" cy={rowY} r="8" />
+                      <text className="brain-atlas-proof-check" x="640" y={rowY + 3} textAnchor="middle">✓</text>
+                      <text className="brain-atlas-proof-time" x="640" y={rowY + 19} textAnchor="middle">{fmtTime(row.receipt.observedAt)}</text>
+                    </g>
+                    <g className="brain-atlas-proof-model">
+                      <rect x="760" y={rowY - 15} width="214" height="30" rx="6" />
+                      <text className="brain-atlas-proof-title" x="867" y={rowY - 2} textAnchor="middle">{compactText(row.model.label, 28)}</text>
+                      <text className="brain-atlas-proof-detail" x="867" y={rowY + 10} textAnchor="middle">route verified</text>
+                    </g>
+                  </g>
+                );
+              }) : (
+                <g className="brain-atlas-proof-empty" role="status">
+                  <text x="500" y="292" textAnchor="middle">{proofState === "empty" ? "No verified proof paths in this window" : "Exact proof unavailable"}</text>
+                  <text className="brain-atlas-proof-empty-detail" x="500" y="312" textAnchor="middle">{brainAtlasEmptyMessage(atlas?.emptyReason)}</text>
+                </g>
+              )}
             </g>
           </svg>
         </div>
-      </section>
-
-      <section
-        id="brain-atlas-evidence-panel"
-        className={`brain-atlas-section is-evidence${focusNeeded ? " has-focus" : ""}`}
-        data-atlas-region="receipts"
-        data-atlas-view-panel="evidence"
-        role="tabpanel"
-        aria-labelledby="brain-atlas-tab-evidence"
-        aria-describedby="brain-atlas-evidence-description"
-        hidden={atlasView !== "evidence"}
-      >
-        <header className="brain-atlas-section-header">
-          <div>
-            <h3 id="brain-atlas-evidence-heading">Work execution proof</h3>
-            <p id="brain-atlas-evidence-description">Exact audit paths showing what ran: agent → work → timestamped receipt → verified model. Seven-day links only.</p>
-          </div>
-          <output className="brain-atlas-evidence-summary" title={evidencePolicyDetail} aria-live="polite">
-            {evidenceSummary}
-          </output>
-        </header>
-
-        {focusNeeded ? (
-          <label className="brain-atlas-focus" htmlFor="brain-atlas-focus-node">
-            <span>Show receipt path</span>
-            <select id="brain-atlas-focus-node" value={focusId} onChange={(event) => setFocusId(event.target.value)}>
-              <option value="all">Recent exact receipt paths</option>
-              {atlas?.nodes.map((node) => <option key={node.id} value={node.id}>{brainAtlasNodeOption(node)}</option>)}
-            </select>
-          </label>
-        ) : null}
-
-        {atlas?.status === "ready" && view.nodes.length ? (
-          <div
-            className="brain-atlas-plot"
-            tabIndex={0}
-            aria-label="Work execution proof graph. Scroll horizontally on narrow screens to inspect exact receipt paths."
-          >
-          <svg
-            viewBox={`0 0 1000 ${graphHeight}`}
-            role="img"
-            aria-labelledby="brain-atlas-title brain-atlas-description"
-            preserveAspectRatio="xMidYMid meet"
-          >
-            <title id="brain-atlas-title">Exact agent to work to receipt to verified model paths</title>
-            <desc id="brain-atlas-description">
-              Showing {view.nodes.length} of {atlas.counts.nodes} bounded nodes and {view.edges.length} of {atlas.counts.edges} exact receipt-backed edges from the last seven days. No inferred relationships are shown.
-            </desc>
-            {BRAIN_ATLAS_LAYER_ORDER.map((kind) => (
-              <text key={kind} className="brain-atlas-layer-label" x={BRAIN_ATLAS_LAYER_X[kind]} y="22" textAnchor="middle">
-                {BRAIN_ATLAS_LAYER_LABEL[kind]}
-              </text>
-            ))}
-            <g className="brain-atlas-edges">
-              {view.edges.map((edge) => {
-                const source = positions.get(edge.source);
-                const target = positions.get(edge.target);
-                if (!source || !target) return null;
-                const sourceHalf = source.node.kind === "receipt" ? 9 : 78;
-                const targetHalf = target.node.kind === "receipt" ? 9 : 78;
-                const startX = source.x + sourceHalf;
-                const endX = target.x - targetHalf;
-                const bend = Math.max(28, (endX - startX) * 0.42);
-                return (
-                  <path
-                    key={edge.id}
-                    className={edge.kind === "verified-route" ? "is-verified" : ""}
-                    d={`M ${startX} ${source.y} C ${startX + bend} ${source.y}, ${endX - bend} ${target.y}, ${endX} ${target.y}`}
-                    vectorEffect="non-scaling-stroke"
-                  >
-                    <title>{BRAIN_ATLAS_LAYER_LABEL[source.node.kind]} to {BRAIN_ATLAS_LAYER_LABEL[target.node.kind]} - exact {edge.kind} receipt edge</title>
-                  </path>
-                );
-              })}
-            </g>
-            <g className="brain-atlas-nodes">
-              {view.nodes.map((node) => {
-                const position = positions.get(node.id);
-                if (!position) return null;
-                const primary = compactText(node.label, node.kind === "model" ? 24 : 20);
-                const subline = brainAtlasNodeSubline(node);
-                return (
-                  <g key={node.id} className={`brain-atlas-node is-${node.kind}`} transform={`translate(${position.x} ${position.y})`}>
-                    <title>{node.label} - {subline} - observed {fmtTime(node.observedAt)}</title>
-                    {node.kind === "receipt"
-                      ? <circle r="9" />
-                      : <rect x="-78" y="-19" width="156" height="38" rx="6" />}
-                    {node.kind === "receipt" ? (
-                      <>
-                        <text className="brain-atlas-receipt-label" x="0" y="-12" textAnchor="middle">{primary}</text>
-                        <text className="brain-atlas-receipt-subline" x="0" y="19" textAnchor="middle">#{node.sequence || 1}</text>
-                      </>
-                    ) : (
-                      <>
-                        <text className="brain-atlas-node-label" x="0" y="-2" textAnchor="middle">{primary}</text>
-                        <text className="brain-atlas-node-subline" x="0" y="11" textAnchor="middle">{compactText(subline, 25)}</text>
-                      </>
-                    )}
-                  </g>
-                );
-              })}
-            </g>
-          </svg>
-          </div>
-        ) : (
-          <div className="brain-atlas-empty" role="status">
-            <GitBranch size={22} aria-hidden="true" />
-            <strong>{atlas?.status === "empty" ? "No exact paths in this window" : "Atlas evidence unavailable"}</strong>
-            <p>{brainAtlasEmptyMessage(atlas?.emptyReason)}</p>
-          </div>
-        )}
-
       </section>
     </section>
   );
@@ -4068,17 +4345,16 @@ function agentHeadline(activeFocus: boolean, objectiveText: string, idleContext:
 
 function AgentHeroCard({
   agent,
-  status,
-  activeWork,
+  liveWork,
   idleContext,
   changed,
 }: {
   agent: AgentId;
-  status: AgentStatus;
-  activeWork?: WorkItem;
+  liveWork: AgentLiveWorkPresentation;
   idleContext: AgentIdleContext;
   changed?: boolean;
 }) {
+  const { status, activeWork, activeFocus, visualState } = liveWork;
   const objectiveRef = useRef<HTMLHeadingElement | null>(null);
   const [objectiveScroll, setObjectiveScroll] = useState({ active: false, distance: 0, duration: 18 });
   const freshness = freshnessClass(status.updated_at);
@@ -4086,8 +4362,6 @@ function AgentHeroCard({
   const verifiedRoute = verifiedRouteForAgentStatus(status);
   const route = verifiedRoute || routeForAgentStatus(status);
   const activeWorkFresh = activeWork?.state === "working" && isFreshActiveTimestamp(activeWork.updated_at);
-  const statusWorkingFresh = ["active", "working"].includes(String(status.status || "").toLowerCase()) && isFreshActiveTimestamp(status.updated_at);
-  const activeFocus = activeWorkFresh || statusWorkingFresh;
   const activeWorkDetail = activeWorkFresh ? activeWork : undefined;
   const currentStep = status.steps?.find((step) => step.label || step.title)?.label
     || status.steps?.find((step) => step.label || step.title)?.title
@@ -4103,7 +4377,6 @@ function AgentHeroCard({
   const supportNote = activeFocus
     ? `Current: ${readoutSummary(activeWorkDetail?.detail || activeWorkDetail?.title || currentStep, "Working through the current step.", 78)}`
     : `Complete: ${readoutSummary(idleContext.complete, "No recent completion reported.", 78)}`;
-  const visualState = agentVisualState(status, activeFocus, activeWork);
   const stepTrail = stepTrailForAgent(status, activeFocus, activeWork);
   const showStepTrail = activeFocus || visualState === "waiting" || visualState === "blocked";
   const updateAgeMs = Math.max(0, Date.now() - timeValue(status.updated_at));
@@ -4136,6 +4409,8 @@ function AgentHeroCard({
   return (
     <article
       className={`agent-hero-card ${agentClass(agent)} ${freshness} ${statusClass(status.status)} is-state-${visualState} ${activeFocus ? "is-working-focus" : "is-up-next-focus"} ${verifiedRoute ? "has-verified-route" : "is-route-pending"}${changedRowClass(changed)}`}
+      data-agent={agent}
+      data-agent-working={visualState === "working" ? "true" : "false"}
       style={{
         "--agent-pulse-speed": `${pulseSpeed}s`,
         "--agent-rail-speed": `${railSpeed}s`,

@@ -71,8 +71,7 @@ KIOSK_LEGIBILITY_THRESHOLDS = {
     "ledgerRowHeight": 22.0,
     "healthHeightMin": 54.0,
     "healthHeightMax": 58.0,
-    "atlasMemoryMapHeight": 260.0,
-    "atlasReceiptPlotHeight": 240.0,
+    "atlasUnifiedMapHeight": 300.0,
     "atlasPrimaryGlyphHeight": 8.0,
     "atlasSecondaryGlyphHeight": 7.0,
     "atlasSectionHeadingFont": 11.0,
@@ -84,6 +83,19 @@ INTERNAL_TEXT_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("source stack", re.compile(r"(?:node_modules/|(?:src|scripts)/[^\s:]+:\d+)", re.I)),
     ("legacy product label", re.compile(r"(?:React v2 Mission Control|Mission Control v2|Local legacy fallback)", re.I)),
     ("secret-shaped text", re.compile(r"(?:Bearer\s+[A-Za-z0-9._~-]{12,}|\bsk-[A-Za-z0-9_-]{12,}|(?:api[_ -]?key|client_secret|refresh_token)\s*[:=]\s*\S+)", re.I)),
+)
+PROOF_WORK_LABEL_UNSAFE_PATTERNS: tuple[re.Pattern[str], ...] = (
+    re.compile(r"[\x00-\x1f\x7f]"),
+    re.compile(r"\bhttps?://", re.I),
+    re.compile(r"\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", re.I),
+    re.compile(r"(?:^|\s)(?:/(?:Users|home|var|private|tmp|etc|opt)/|~/|[A-Z]:\\)", re.I),
+    re.compile(r"/(?:[A-Za-z0-9._-]+/)+[A-Za-z0-9._-]+"),
+    re.compile(r"\b\d{3}[- .]\d{2}[- .]\d{4}\b"),
+    re.compile(r"(?:\+?\d[\d(). -]{7,}\d)"),
+    re.compile(r"(?:Bearer\s+[A-Za-z0-9._~-]{12,}|\bsk-[A-Za-z0-9_-]{12,}|(?:api[_ -]?key|client_secret|refresh_token)\s*[:=]\s*\S+)", re.I),
+    re.compile(r"\b(?:work|run|event|receipt)-[a-z0-9_-]{6,}\b", re.I),
+    re.compile(r"\b[a-f0-9]{16,}\b", re.I),
+    re.compile(r"\b[A-Za-z0-9_-]{32,}\b"),
 )
 
 
@@ -198,8 +210,10 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
   const memoryEdges = [...document.querySelectorAll('#brain-atlas .memory-flow-edge')].map((element) => {
     const observedAt = String(element.getAttribute('data-observed-at') || '');
     const observedMs = Date.parse(observedAt);
-    const animationName = getComputedStyle(element).animationName;
+    const style = getComputedStyle(element);
+    const animationName = style.animationName;
     return {
+      agent: String(element.getAttribute('data-agent') || ''),
       operation: String(element.getAttribute('data-operation') || ''),
       observedAt,
       evidenceValid: Boolean(observedAt) && Number.isFinite(observedMs),
@@ -207,25 +221,41 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
       live: element.classList.contains('is-live'),
       animationName,
       animated: animationName !== 'none',
+      strokeWidth: round(Number.parseFloat(style.strokeWidth)),
+      strokeDasharray: style.strokeDasharray,
+      strokeLinecap: style.strokeLinecap,
+      filter: style.filter,
     };
   });
+  const atlasAgentNodes = [...document.querySelectorAll('#brain-atlas .memory-flow-node.is-agent')].map((element) => {
+    const aura = element.querySelector('.memory-flow-node-aura');
+    const presenceDot = element.querySelector('.memory-flow-presence-dot');
+    const shell = [...element.children].find((child) => child.tagName.toLowerCase() === 'rect' && !child.classList.contains('memory-flow-node-aura'));
+    const auraAnimationName = aura ? getComputedStyle(aura).animationName : 'none';
+    const presenceAnimationName = presenceDot ? getComputedStyle(presenceDot).animationName : 'none';
+    const memoryAnimationName = shell ? getComputedStyle(shell).animationName : 'none';
+    return {
+      agent: String(element.getAttribute('data-agent') || ''),
+      layer: String(element.closest('[data-atlas-layer]')?.getAttribute('data-atlas-layer') || ''),
+      working: element.getAttribute('data-agent-working') === 'true',
+      workState: String(element.getAttribute('data-work-state') || ''),
+      memoryState: String(element.getAttribute('data-memory-state') || ''),
+      workClass: element.classList.contains('is-work-active'),
+      memoryClass: element.classList.contains('is-memory-live'),
+      auraAnimationName,
+      presenceAnimationName,
+      memoryAnimationName,
+      workAnimated: auraAnimationName !== 'none' || presenceAnimationName !== 'none',
+      memoryAnimated: memoryAnimationName !== 'none',
+      animated: auraAnimationName !== 'none' || presenceAnimationName !== 'none' || memoryAnimationName !== 'none',
+    };
+  });
+  const liveWorkAgents = [...document.querySelectorAll('.brain-hero.is-flight-deck .agent-hero-card')].map((element) => ({
+    agent: String(element.getAttribute('data-agent') || ''),
+    working: element.getAttribute('data-agent-working') === 'true',
+  }));
   const atlasRoot = document.querySelector('#brain-atlas');
   const atlasRootRect = atlasRoot ? atlasRoot.getBoundingClientRect() : null;
-  const atlasViewButtons = [...document.querySelectorAll('#brain-atlas [data-atlas-view-option]')].map((element) => {
-    const rect = element.getBoundingClientRect();
-    const style = getComputedStyle(element);
-    return {
-      view: String(element.getAttribute('data-atlas-view-option') || ''),
-      text: String(element.textContent || '').trim(),
-      selected: element.getAttribute('aria-selected') === 'true',
-      controls: String(element.getAttribute('aria-controls') || ''),
-      tabIndex: element.tabIndex,
-      visible: visible(element),
-      fontSize: round(Number.parseFloat(style.fontSize)),
-      height: round(rect.height),
-      clipped: element.scrollWidth > element.clientWidth + 1 || element.scrollHeight > element.clientHeight + 1,
-    };
-  });
   const atlasRegion = (name, graphSelector, primarySelector, secondarySelector, layerSelector = '') => {
     const element = document.querySelector(`#brain-atlas [data-atlas-region="${name}"]`);
     if (!visible(element)) return null;
@@ -260,9 +290,11 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
     };
     const headingState = textState(heading);
     const descriptionState = textState(description);
-    const nodeBoxes = [...element.querySelectorAll('.brain-atlas-node')].filter(visible).map((node) => {
+    const nodeBoxes = [...element.querySelectorAll('.brain-atlas-node, .brain-atlas-proof-work, .brain-atlas-proof-receipt, .brain-atlas-proof-model')].filter(visible).map((node) => {
       const box = node.getBoundingClientRect();
-      const layer = ['agent', 'work', 'receipt', 'model'].find((kind) => node.classList.contains(`is-${kind}`)) || '';
+      const layer = ['agent', 'work', 'receipt', 'model'].find((kind) => (
+        node.classList.contains(`is-${kind}`) || node.classList.contains(`brain-atlas-proof-${kind}`)
+      )) || '';
       return {layer, top: box.top, bottom: box.bottom, left: box.left, right: box.right};
     });
     let nodeOverlapCount = 0;
@@ -305,19 +337,54 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
       nodeOverlapCount,
     };
   };
-  const atlasMemoryRegion = atlasRegion(
-    'memory',
+  const atlasUnifiedRegion = atlasRegion(
+    'unified',
     '.memory-flow-map',
-    '.memory-flow-node-title',
-    '.memory-flow-node-detail'
+    '.memory-flow-node-title, .brain-atlas-proof-title',
+    '.memory-flow-node-detail, .brain-atlas-proof-detail, .brain-atlas-proof-time',
+    '.brain-atlas-lane-label, .brain-atlas-proof-column'
   );
-  const atlasReceiptRegion = atlasRegion(
-    'receipts',
-    '.brain-atlas-plot, .brain-atlas-empty',
-    '.brain-atlas-node-label, .brain-atlas-receipt-label',
-    '.brain-atlas-node-subline, .brain-atlas-receipt-subline',
-    '.brain-atlas-layer-label'
+  const visibleAtlasRegions = [...document.querySelectorAll('#brain-atlas [data-atlas-region]')].filter(visible);
+  const visibleAtlasLayers = [...document.querySelectorAll('#brain-atlas [data-atlas-layer]')].filter(visible);
+  const atlasLayerCounts = Object.fromEntries(
+    ['memory', 'proof'].map((name) => [
+      name,
+      visibleAtlasLayers.filter((element) => element.getAttribute('data-atlas-layer') === name).length,
+    ])
   );
+  const proofRows = [...document.querySelectorAll('#brain-atlas [data-proof-row]')].filter(visible).map((element) => {
+    const rect = element.getBoundingClientRect();
+    const svg = element.closest('svg');
+    const svgRect = svg ? svg.getBoundingClientRect() : null;
+    const workLabel = String(element.getAttribute('data-work-label') || '').trim();
+    const visibleWorkLabel = String(element.querySelector('.brain-atlas-proof-work .brain-atlas-proof-title')?.textContent || '').trim();
+    return {
+      agent: String(element.getAttribute('data-agent') || '').trim(),
+      workLabel,
+      visibleWorkLabel,
+      receipt: String(element.getAttribute('data-receipt') || '').trim(),
+      receiptStatus: String(element.getAttribute('data-receipt-status') || '').trim(),
+      model: String(element.getAttribute('data-model') || '').trim(),
+      routeVerified: element.getAttribute('data-route-verified') === 'true',
+      declaredAnimated: element.getAttribute('data-proof-animated') !== 'false',
+      opaqueLabel: /^Work\s+[a-f0-9]{8}$/i.test(workLabel),
+      clipped: !svgRect
+        || rect.left < svgRect.left - 1
+        || rect.right > svgRect.right + 1
+        || rect.top < svgRect.top - 1
+        || rect.bottom > svgRect.bottom + 1,
+    };
+  });
+  const proofEmpty = [...document.querySelectorAll('#brain-atlas .brain-atlas-proof-empty')].find(visible);
+  const proofEdges = [...document.querySelectorAll('#brain-atlas .brain-atlas-proof-edge')].map((element) => {
+    const style = getComputedStyle(element);
+    return {
+      animationName: style.animationName,
+      animated: style.animationName !== 'none',
+      memoryFlowClass: element.classList.contains('memory-flow-edge'),
+      liveClass: element.classList.contains('is-live'),
+    };
+  });
   return {
     viewport: {width: root.clientWidth, height: root.clientHeight},
     pageOverflowX: round(Math.max(0, root.scrollWidth - root.clientWidth)),
@@ -335,23 +402,31 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
     memory: {
       flowState: document.querySelector('#brain-atlas')?.getAttribute('data-memory-flow-state') || '',
       reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-      evidenceSource: document.querySelector('#brain-atlas .memory-flow-map svg')?.getAttribute('data-evidence-source') || '',
+      evidenceSource: document.querySelector('#brain-atlas .memory-flow-map svg')?.getAttribute('data-memory-source')
+        || document.querySelector('#brain-atlas .memory-flow-map svg')?.getAttribute('data-evidence-source')
+        || '',
       edges: memoryEdges,
       liveEdgeCount: memoryEdges.filter((edge) => edge.live).length,
       animatedEdgeCount: memoryEdges.filter((edge) => edge.animated).length,
       animatedInactiveCount: memoryEdges.filter((edge) => edge.animated && !edge.live).length,
+      atlasAgentNodes,
+      liveWorkAgents,
+      workingAgentCount: Number(document.querySelector('#brain-atlas')?.getAttribute('data-working-agent-count') || 0),
     },
     brainAtlasSections: {
-      memory: atlasMemoryRegion,
-      receipts: atlasReceiptRegion,
+      unified: atlasUnifiedRegion,
     },
     brainAtlasView: {
       active: String(atlasRoot?.getAttribute('data-atlas-view') || ''),
       tone: String(atlasRoot?.getAttribute('data-atlas-view-tone') || ''),
       statusText: String(document.querySelector('#brain-atlas .brain-atlas-state')?.textContent || '').trim(),
-      selectedCount: atlasViewButtons.filter((button) => button.selected).length,
-      visiblePanelCount: [atlasMemoryRegion, atlasReceiptRegion].filter(Boolean).length,
-      buttons: atlasViewButtons,
+      visiblePanelCount: visibleAtlasRegions.length,
+      legacyViewControlCount: document.querySelectorAll('#brain-atlas [data-atlas-view-option]').length,
+      layerCounts: atlasLayerCounts,
+      proofState: String(atlasRoot?.getAttribute('data-exact-proof-state') || ''),
+      proofEmptyText: String(proofEmpty?.textContent || '').trim(),
+      proofRows,
+      proofEdges,
     },
     liveWork: {
       objectives: measurements('.brain-hero.is-flight-deck .agent-objective-main', '.agent-hero-card'),
@@ -741,7 +816,7 @@ def validate_control_tower_layout(
     *,
     label: str,
     expect_reduced_motion: bool = False,
-    expect_atlas_view: str = "activity",
+    expect_atlas_view: str = "unified",
 ) -> list[str]:
     """Validate the initial four-panel composition and evidence-bound motion."""
     if not isinstance(measurements, dict):
@@ -786,7 +861,7 @@ def validate_control_tower_layout(
         if gap < 0:
             failures.append(f"{label}: {order_label} (overlap {_px(abs(gap))})")
 
-    if expect_atlas_view not in {"activity", "evidence"}:
+    if expect_atlas_view != "unified":
         failures.append(f"{label}: unsupported expected Brain Atlas view {expect_atlas_view!r}")
     atlas_view = measurements.get("brainAtlasView") if isinstance(measurements.get("brainAtlasView"), dict) else {}
     active_view = str(atlas_view.get("active") or "")
@@ -796,62 +871,27 @@ def validate_control_tower_layout(
             f"(requires {expect_atlas_view})"
         )
     if str(atlas_view.get("tone") or "") not in {"clear", "watch", "risk"}:
-        failures.append(f"{label}: Brain Atlas selected-view tone is missing or invalid")
-    expected_status_prefix = "Activity ·" if expect_atlas_view == "activity" else "Evidence ·"
-    if not str(atlas_view.get("statusText") or "").startswith(expected_status_prefix):
-        failures.append(f"{label}: Brain Atlas selected-view status does not match {expect_atlas_view}")
-    if int(_number(atlas_view.get("selectedCount"), missing=-1.0)) != 1:
-        failures.append(f"{label}: Brain Atlas must expose exactly one selected view control")
+        failures.append(f"{label}: Brain Atlas unified tone is missing or invalid")
+    status_text = str(atlas_view.get("statusText") or "").lower()
+    if "working" not in status_text or not any(
+        token in status_text for token in ("receipt", "source unavailable", "no exact receipts")
+    ):
+        failures.append(f"{label}: Brain Atlas unified status does not summarize work and receipt state")
     if int(_number(atlas_view.get("visiblePanelCount"), missing=-1.0)) != 1:
-        failures.append(f"{label}: Brain Atlas must expose exactly one visible view panel")
-    buttons = atlas_view.get("buttons") if isinstance(atlas_view.get("buttons"), list) else []
-    by_view = {
-        str(button.get("view") or ""): button
-        for button in buttons
-        if isinstance(button, dict)
-    }
-    expected_controls = {
-        "activity": "brain-atlas-memory-panel",
-        "evidence": "brain-atlas-evidence-panel",
-    }
-    for view_name, expected_control in expected_controls.items():
-        button = by_view.get(view_name)
-        if not isinstance(button, dict):
-            failures.append(f"{label}: Brain Atlas {view_name} view control is missing")
-            continue
-        if button.get("visible") is not True or button.get("clipped") is not False:
-            failures.append(f"{label}: Brain Atlas {view_name} view control is hidden or clipped")
-        if str(button.get("controls") or "") != expected_control:
-            failures.append(f"{label}: Brain Atlas {view_name} view control is not linked to its panel")
-        if button.get("selected") is not (view_name == expect_atlas_view):
-            failures.append(f"{label}: Brain Atlas {view_name} selected state is incorrect")
-        expected_tab_index = 0 if view_name == expect_atlas_view else -1
-        if int(_number(button.get("tabIndex"), missing=-2.0)) != expected_tab_index:
-            failures.append(f"{label}: Brain Atlas {view_name} keyboard focus state is incorrect")
-        if _number(button.get("fontSize")) < 10 or _number(button.get("height")) < 28:
-            failures.append(f"{label}: Brain Atlas {view_name} view control is too small")
+        failures.append(f"{label}: Brain Atlas must expose exactly one visible unified region")
+    if int(_number(atlas_view.get("legacyViewControlCount"), missing=-1.0)) != 0:
+        failures.append(f"{label}: Brain Atlas still exposes legacy Activity / Evidence view controls")
+
+    layer_counts = atlas_view.get("layerCounts") if isinstance(atlas_view.get("layerCounts"), dict) else {}
+    for layer_name in ("memory", "proof"):
+        if int(_number(layer_counts.get(layer_name), missing=-1.0)) != 1:
+            failures.append(f"{label}: Brain Atlas must expose exactly one visible {layer_name} layer")
 
     atlas_sections = measurements.get("brainAtlasSections") if isinstance(measurements.get("brainAtlasSections"), dict) else {}
-    memory_region = atlas_sections.get("memory")
-    receipt_region = atlas_sections.get("receipts")
-    if expect_atlas_view == "activity":
-        region = memory_region
-        inactive_region = receipt_region
-        expected_heading = "Memory activity"
-        description_token = "Observable activity"
-        region_label = "memory"
-        minimum_graph_height = KIOSK_LEGIBILITY_THRESHOLDS["atlasMemoryMapHeight"]
-        expected_labelled_by = "brain-atlas-tab-activity"
-    else:
-        region = receipt_region
-        inactive_region = memory_region
-        expected_heading = "Work execution proof"
-        description_token = "timestamped receipt"
-        region_label = "receipt"
-        minimum_graph_height = KIOSK_LEGIBILITY_THRESHOLDS["atlasReceiptPlotHeight"]
-        expected_labelled_by = "brain-atlas-tab-evidence"
-    if isinstance(inactive_region, dict):
-        failures.append(f"{label}: Brain Atlas inactive view remains visible")
+    region = atlas_sections.get("unified")
+    expected_heading = "Live activity + exact proof"
+    region_label = "unified"
+    minimum_graph_height = KIOSK_LEGIBILITY_THRESHOLDS["atlasUnifiedMapHeight"]
     if not isinstance(region, dict):
         failures.append(f"{label}: Brain Atlas {expected_heading} region is missing")
     else:
@@ -859,10 +899,12 @@ def validate_control_tower_layout(
             failures.append(f"{label}: Brain Atlas {expected_heading} region escapes its panel")
         if str(region.get("heading") or "") != expected_heading:
             failures.append(f"{label}: Brain Atlas {expected_heading} visible heading is missing")
-        if description_token not in str(region.get("description") or ""):
+        description = str(region.get("description") or "").lower()
+        description_tokens = ("governed memory", "receipt", "static proof", "not private reasoning")
+        if not all(token in description for token in description_tokens):
             failures.append(f"{label}: Brain Atlas {expected_heading} purpose text is missing")
-        if str(region.get("labelledBy") or "") != expected_labelled_by or region.get("labelledByTargetPresent") is not True:
-            failures.append(f"{label}: Brain Atlas {expected_heading} view-control label is missing")
+        if not str(region.get("labelledBy") or "") or region.get("labelledByTargetPresent") is not True:
+            failures.append(f"{label}: Brain Atlas {expected_heading} accessible label is missing")
         if not region.get("describedBy"):
             failures.append(f"{label}: Brain Atlas {expected_heading} accessible description is missing")
         if _number(region.get("headingFontSize")) < KIOSK_LEGIBILITY_THRESHOLDS["atlasSectionHeadingFont"]:
@@ -882,10 +924,10 @@ def validate_control_tower_layout(
                 f"{label}: Brain Atlas {region_label} graph height is {_px(graph_height)} "
                 f"(requires >= {_px(minimum_graph_height)})"
             )
-        graph_kind = str(region.get("graphKind") or "svg")
-        if graph_kind == "missing":
-            failures.append(f"{label}: Brain Atlas {region_label} graph is missing")
-        elif graph_kind != "empty":
+        graph_kind = str(region.get("graphKind") or "missing")
+        if graph_kind != "svg":
+            failures.append(f"{label}: Brain Atlas {region_label} graph must be one visible SVG")
+        else:
             if region.get("svgTitlePresent") is not True or region.get("svgDescriptionPresent") is not True:
                 failures.append(f"{label}: Brain Atlas {region_label} graph lacks an SVG title or description")
             for key, glyph_label, minimum in (
@@ -897,15 +939,77 @@ def validate_control_tower_layout(
                     failures.append(f"{label}: Brain Atlas {region_label} {glyph_label} are missing")
                 elif min(_number(value) for value in heights) < minimum:
                     failures.append(f"{label}: Brain Atlas {region_label} {glyph_label} render below {_px(minimum)}")
-        if expect_atlas_view == "evidence" and graph_kind == "svg":
+        if graph_kind == "svg":
             overlap_count = int(_number(region.get("nodeOverlapCount"), missing=-1.0))
             if overlap_count < 0:
-                failures.append(f"{label}: Brain Atlas receipt node-overlap measurement is missing")
+                failures.append(f"{label}: Brain Atlas unified node-overlap measurement is missing")
             elif overlap_count:
-                failures.append(f"{label}: Brain Atlas receipt graph has {overlap_count} overlapping same-layer node pair(s)")
+                failures.append(f"{label}: Brain Atlas unified graph has {overlap_count} overlapping same-layer node pair(s)")
             layer_heights = region.get("layerGlyphHeights") if isinstance(region.get("layerGlyphHeights"), list) else []
             if not layer_heights or min(_number(value) for value in layer_heights) < 9:
-                failures.append(f"{label}: Brain Atlas receipt layer labels render below 9px")
+                failures.append(f"{label}: Brain Atlas unified layer labels render below 9px")
+
+    proof_rows = atlas_view.get("proofRows") if isinstance(atlas_view.get("proofRows"), list) else []
+    proof_state = str(atlas_view.get("proofState") or "")
+    proof_empty_text = str(atlas_view.get("proofEmptyText") or "").strip()
+    if proof_state == "ready":
+        if not 1 <= len(proof_rows) <= 3:
+            failures.append(f"{label}: Brain Atlas renders {len(proof_rows)} exact proof rows (ready requires 1 to 3)")
+        if proof_empty_text:
+            failures.append(f"{label}: Brain Atlas ready proof state also exposes an empty-state message")
+    elif proof_state in {"empty", "unavailable"}:
+        if proof_rows:
+            failures.append(f"{label}: Brain Atlas {proof_state} proof state still renders exact proof rows")
+        if not proof_empty_text:
+            failures.append(f"{label}: Brain Atlas {proof_state} proof state lacks an explanatory message")
+    else:
+        failures.append(f"{label}: Brain Atlas exact proof state is missing or invalid")
+    known_agents = {"joshex", "josh2", "jaimes", "jain"}
+    known_receipt_statuses = {
+        "accepted", "planned", "routed", "active", "verifying", "done",
+        "blocked", "error", "cancelled",
+    }
+    for index, proof_row in enumerate(proof_rows, start=1):
+        if not isinstance(proof_row, dict):
+            failures.append(f"{label}: Brain Atlas proof row {index} is malformed")
+            continue
+        agent = str(proof_row.get("agent") or "")
+        work_label = str(proof_row.get("workLabel") or "").strip()
+        visible_work_label = str(proof_row.get("visibleWorkLabel") or "").strip()
+        if agent not in known_agents:
+            failures.append(f"{label}: Brain Atlas proof row {index} has an unknown agent")
+        if not work_label or len(work_label) > 56:
+            failures.append(f"{label}: Brain Atlas proof row {index} lacks a concise work name")
+        if proof_row.get("opaqueLabel") is True or re.fullmatch(r"Work\s+[a-f0-9]{8}", work_label, re.I):
+            failures.append(f"{label}: Brain Atlas proof row {index} exposes an opaque work identifier")
+        if not visible_work_label or re.fullmatch(r"Work\s+[a-f0-9]{8}", visible_work_label, re.I):
+            failures.append(f"{label}: Brain Atlas proof row {index} lacks a readable visible work name")
+        if internal_text_leaks(work_label) or any(pattern.search(work_label) for pattern in PROOF_WORK_LABEL_UNSAFE_PATTERNS):
+            failures.append(f"{label}: Brain Atlas proof row {index} exposes an unsafe work name")
+        if not str(proof_row.get("receipt") or "").strip():
+            failures.append(f"{label}: Brain Atlas proof row {index} lacks an exact receipt")
+        if str(proof_row.get("receiptStatus") or "") not in known_receipt_statuses:
+            failures.append(f"{label}: Brain Atlas proof row {index} lacks an exact receipt status")
+        if not str(proof_row.get("model") or "").strip():
+            failures.append(f"{label}: Brain Atlas proof row {index} lacks a verified model")
+        if proof_row.get("routeVerified") is not True:
+            failures.append(f"{label}: Brain Atlas proof row {index} lacks a verified route")
+        if proof_row.get("declaredAnimated") is not False:
+            failures.append(f"{label}: Brain Atlas proof row {index} is not declared static")
+        if proof_row.get("clipped") is not False:
+            failures.append(f"{label}: Brain Atlas proof row {index} is clipped")
+
+    proof_edges = atlas_view.get("proofEdges") if isinstance(atlas_view.get("proofEdges"), list) else []
+    if len(proof_edges) < len(proof_rows):
+        failures.append(f"{label}: Brain Atlas proof edge evidence is incomplete")
+    for index, proof_edge in enumerate(proof_edges, start=1):
+        if not isinstance(proof_edge, dict):
+            failures.append(f"{label}: Brain Atlas proof edge {index} is malformed")
+            continue
+        if proof_edge.get("animated") is True or str(proof_edge.get("animationName") or "none") != "none":
+            failures.append(f"{label}: Brain Atlas proof edge {index} is animated")
+        if proof_edge.get("memoryFlowClass") is True or proof_edge.get("liveClass") is True:
+            failures.append(f"{label}: Brain Atlas proof edge {index} impersonates live memory activity")
 
     today_jobs = measurements.get("todayJobs") if isinstance(measurements.get("todayJobs"), dict) else {}
     row_count = int(_number(today_jobs.get("rowCount"), missing=-1.0))
@@ -954,12 +1058,86 @@ def validate_control_tower_layout(
                 f"{label}: live {operation} path evidence is {age_seconds:g}s old "
                 f"(requires -5s to {MEMORY_ACTIVITY_MAX_AGE_SECONDS:g}s)"
             )
+        if _number(edge.get("strokeWidth")) < 3:
+            failures.append(f"{label}: live {operation} path is not visually pronounced enough")
+        if str(edge.get("strokeLinecap") or "") != "round":
+            failures.append(f"{label}: live {operation} path lacks a rounded travel beacon")
+        if not expect_reduced_motion:
+            if str(edge.get("strokeDasharray") or "none") == "none":
+                failures.append(f"{label}: live {operation} path lacks a visible moving dash")
+            if str(edge.get("filter") or "none") == "none":
+                failures.append(f"{label}: live {operation} path lacks a visible evidence glow")
     if int(_number(memory.get("animatedInactiveCount"), missing=-1.0)) != 0:
         failures.append(f"{label}: an unevidenced Brain Atlas path is animated")
     if flow_state == "live" and not live_edges:
         failures.append(f"{label}: Brain Atlas reports live activity without an exact live path")
     if flow_state != "live" and live_edges:
         failures.append(f"{label}: Brain Atlas exposes live paths while its state is {flow_state}")
+
+    atlas_agent_nodes = memory.get("atlasAgentNodes") if isinstance(memory.get("atlasAgentNodes"), list) else []
+    live_work_agents = memory.get("liveWorkAgents") if isinstance(memory.get("liveWorkAgents"), list) else []
+    if len(atlas_agent_nodes) != 4:
+        failures.append(f"{label}: Brain Atlas exposes {len(atlas_agent_nodes)} agent presence nodes (requires 4)")
+    if len(live_work_agents) != 4:
+        failures.append(f"{label}: Live Work exposes {len(live_work_agents)} agent presence cards (requires 4)")
+    atlas_working = sorted(
+        str(node.get("agent") or "")
+        for node in atlas_agent_nodes
+        if isinstance(node, dict) and node.get("working") is True
+    )
+    board_working = sorted(
+        str(node.get("agent") or "")
+        for node in live_work_agents
+        if isinstance(node, dict) and node.get("working") is True
+    )
+    if atlas_working != board_working:
+        failures.append(
+            f"{label}: Brain Atlas working agents {atlas_working} do not match "
+            f"Live Work working agents {board_working}"
+        )
+    working_agent_count = int(_number(memory.get("workingAgentCount"), missing=-1.0))
+    if working_agent_count != len(atlas_working):
+        failures.append(
+            f"{label}: Brain Atlas working-agent count is {working_agent_count} "
+            f"but {len(atlas_working)} working nodes are rendered"
+        )
+    retrieval_edges_by_agent = {
+        str(edge.get("agent") or ""): edge
+        for edge in edges
+        if isinstance(edge, dict) and edge.get("operation") == "retrieval" and edge.get("agent")
+    }
+    for node in atlas_agent_nodes:
+        if not isinstance(node, dict):
+            failures.append(f"{label}: Brain Atlas agent presence node is malformed")
+            continue
+        agent = str(node.get("agent") or "unknown")
+        if str(node.get("layer") or "") != "memory":
+            failures.append(f"{label}: Brain Atlas {agent} shared agent node is outside the memory layer")
+        working = node.get("working") is True
+        memory_live = str(node.get("memoryState") or "") == "live"
+        if str(node.get("workState") or "") != ("working" if working else "quiet"):
+            failures.append(f"{label}: Brain Atlas {agent} work-state label disagrees with its working flag")
+        if node.get("workClass") is not working:
+            failures.append(f"{label}: Brain Atlas {agent} work-presence class disagrees with Live Work state")
+        if node.get("memoryClass") is not memory_live:
+            failures.append(f"{label}: Brain Atlas {agent} memory class disagrees with its memory state")
+        retrieval_edge = retrieval_edges_by_agent.get(agent)
+        if not isinstance(retrieval_edge, dict):
+            failures.append(f"{label}: Brain Atlas {agent} retrieval path is missing")
+        elif (retrieval_edge.get("live") is True) is not memory_live:
+            failures.append(f"{label}: Brain Atlas {agent} memory path motion disagrees with exact retrieval state")
+        if expect_reduced_motion:
+            if node.get("animated") is True:
+                failures.append(f"{label}: reduced-motion mode still animates Brain Atlas {agent} presence")
+        else:
+            if working and node.get("workAnimated") is not True:
+                failures.append(f"{label}: working Brain Atlas agent {agent} lacks an active presence animation")
+            if not working and node.get("workAnimated") is True:
+                failures.append(f"{label}: quiet Brain Atlas agent {agent} has an active presence animation")
+            if memory_live and node.get("memoryAnimated") is not True:
+                failures.append(f"{label}: memory-live Brain Atlas agent {agent} lacks exact-memory animation")
+            if not memory_live and node.get("memoryAnimated") is True:
+                failures.append(f"{label}: memory-idle Brain Atlas agent {agent} has memory animation")
     if expect_reduced_motion:
         if animated_edges:
             failures.append(f"{label}: reduced-motion mode still animates {len(animated_edges)} Brain Atlas path(s)")
@@ -1239,29 +1417,6 @@ def playwright_render(url: str, timeout: float, screenshot_path: Path | None) ->
                             label=label,
                             expect_reduced_motion=label == REDUCED_MOTION_PROBE_LABEL,
                         ))
-                    evidence_button = page.locator('#brain-atlas [data-atlas-view-option="evidence"]')
-                    activity_button = page.locator('#brain-atlas [data-atlas-view-option="activity"]')
-                    if evidence_button.count() != 1 or activity_button.count() != 1:
-                        failures.append(f"{label}: Brain Atlas view controls cannot be exercised")
-                    else:
-                        evidence_button.click()
-                        page.wait_for_timeout(120)
-                        evidence_measurements = page.evaluate(KIOSK_LEGIBILITY_EVALUATION)
-                        failures.extend(validate_control_tower_layout(
-                            evidence_measurements,
-                            label=f"{label}-evidence",
-                            expect_reduced_motion=label == REDUCED_MOTION_PROBE_LABEL,
-                            expect_atlas_view="evidence",
-                        ))
-                        runtime_measurements["brainAtlasEvidenceView"] = {
-                            "brainAtlasView": evidence_measurements.get("brainAtlasView"),
-                            "brainAtlasSections": evidence_measurements.get("brainAtlasSections"),
-                        }
-                        activity_button.click()
-                        page.wait_for_timeout(120)
-                        restored_view = page.locator('#brain-atlas').get_attribute('data-atlas-view')
-                        if restored_view != "activity":
-                            failures.append(f"{label}: Brain Atlas did not restore its primary Activity view")
                 probe_evidence = {
                     "name": label,
                     "width": viewport["width"],
@@ -1483,6 +1638,7 @@ def self_test() -> int:
             "evidenceSource": "governed-memory-registry",
             "edges": [
                 {
+                    "agent": "josh2",
                     "operation": "retrieval",
                     "observedAt": "2026-01-01T00:00:00Z",
                     "evidenceValid": True,
@@ -1490,47 +1646,73 @@ def self_test() -> int:
                     "live": True,
                     "animationName": "memory-flow-travel",
                     "animated": True,
+                    "strokeWidth": 3.2,
+                    "strokeDasharray": "14px, 9px",
+                    "strokeLinecap": "round",
+                    "filter": "drop-shadow(rgb(88, 238, 154) 0px 0px 4px)",
                 },
+                {"agent": "joshex", "operation": "retrieval", "observedAt": "", "evidenceValid": False, "ageSeconds": None, "live": False, "animationName": "none", "animated": False},
+                {"agent": "jaimes", "operation": "retrieval", "observedAt": "", "evidenceValid": False, "ageSeconds": None, "live": False, "animationName": "none", "animated": False},
+                {"agent": "jain", "operation": "retrieval", "observedAt": "", "evidenceValid": False, "ageSeconds": None, "live": False, "animationName": "none", "animated": False},
             ],
             "liveEdgeCount": 1,
             "animatedEdgeCount": 1,
             "animatedInactiveCount": 0,
+            "atlasAgentNodes": [
+                {"agent": "joshex", "layer": "memory", "working": False, "workState": "quiet", "memoryState": "idle", "workClass": False, "memoryClass": False, "auraAnimationName": "none", "presenceAnimationName": "none", "memoryAnimationName": "none", "workAnimated": False, "memoryAnimated": False, "animated": False},
+                {"agent": "josh2", "layer": "memory", "working": True, "workState": "working", "memoryState": "live", "workClass": True, "memoryClass": True, "auraAnimationName": "memory-agent-presence-halo", "presenceAnimationName": "memory-agent-presence-dot", "memoryAnimationName": "memory-node-live-pulse", "workAnimated": True, "memoryAnimated": True, "animated": True},
+                {"agent": "jaimes", "layer": "memory", "working": False, "workState": "quiet", "memoryState": "idle", "workClass": False, "memoryClass": False, "auraAnimationName": "none", "presenceAnimationName": "none", "memoryAnimationName": "none", "workAnimated": False, "memoryAnimated": False, "animated": False},
+                {"agent": "jain", "layer": "memory", "working": False, "workState": "quiet", "memoryState": "idle", "workClass": False, "memoryClass": False, "auraAnimationName": "none", "presenceAnimationName": "none", "memoryAnimationName": "none", "workAnimated": False, "memoryAnimated": False, "animated": False},
+            ],
+            "liveWorkAgents": [
+                {"agent": "joshex", "working": False},
+                {"agent": "josh2", "working": True},
+                {"agent": "jaimes", "working": False},
+                {"agent": "jain", "working": False},
+            ],
+            "workingAgentCount": 1,
         },
         "brainAtlasView": {
-            "active": "activity",
+            "active": "unified",
             "tone": "clear",
-            "statusText": "Activity · Idle - no activity in 30m",
-            "selectedCount": 1,
+            "statusText": "1 working · Memory live · 2 exact receipts",
             "visiblePanelCount": 1,
-            "buttons": [
-                {"view": "activity", "text": "Activity", "selected": True, "controls": "brain-atlas-memory-panel", "tabIndex": 0, "visible": True, "fontSize": 10, "height": 28, "clipped": False},
-                {"view": "evidence", "text": "Proof & evidence", "selected": False, "controls": "brain-atlas-evidence-panel", "tabIndex": -1, "visible": True, "fontSize": 10, "height": 28, "clipped": False},
+            "legacyViewControlCount": 0,
+            "layerCounts": {"memory": 1, "proof": 1},
+            "proofState": "ready",
+            "proofEmptyText": "",
+            "proofRows": [
+                {"agent": "josh2", "workLabel": "Refresh Control Tower health", "visibleWorkLabel": "Refresh Control Tower health", "receipt": "receipt-1", "receiptStatus": "done", "model": "codex/gpt-5.6-terra", "routeVerified": True, "declaredAnimated": False, "opaqueLabel": False, "clipped": False},
+                {"agent": "jaimes", "workLabel": "Verify scheduled agent jobs", "visibleWorkLabel": "Verify scheduled agent jobs", "receipt": "receipt-2", "receiptStatus": "active", "model": "codex/gpt-5.6-sol", "routeVerified": True, "declaredAnimated": False, "opaqueLabel": False, "clipped": False},
+            ],
+            "proofEdges": [
+                {"animationName": "none", "animated": False, "memoryFlowClass": False, "liveClass": False},
+                {"animationName": "none", "animated": False, "memoryFlowClass": False, "liveClass": False},
             ],
         },
         "brainAtlasSections": {
-            "memory": {
+            "unified": {
                 "contained": True,
-                "heading": "Memory activity",
-                "description": "Observable activity, not private reasoning.",
+                "heading": "Live activity + exact proof",
+                "description": "Governed memory moves on exact receipts; static proof is audit evidence, not private reasoning.",
                 "headingFontSize": 12,
                 "descriptionFontSize": 9.5,
                 "headingClipped": False,
                 "descriptionClipped": False,
-                "labelledBy": "brain-atlas-tab-activity",
-                "describedBy": "brain-atlas-memory-description",
+                "labelledBy": "brain-atlas-unified-heading",
+                "describedBy": "brain-atlas-unified-description",
                 "labelledByTargetPresent": True,
                 "height": 410,
-                "graphHeight": 300,
+                "graphHeight": 320,
                 "graphKind": "svg",
                 "overflowY": 0,
                 "svgTitlePresent": True,
                 "svgDescriptionPresent": True,
                 "primaryGlyphHeights": [8.2],
                 "secondaryGlyphHeights": [7.2],
-                "layerGlyphHeights": [],
+                "layerGlyphHeights": [9.5],
                 "nodeOverlapCount": 0,
             },
-            "receipts": None,
         },
         "liveWork": {
             "objectives": [{"fontSize": 24, "clipped": False}],
@@ -1587,40 +1769,6 @@ def self_test() -> int:
             "directChildrenValid": True,
         },
     }
-    good_evidence = json.loads(json.dumps(good_kiosk))
-    good_evidence["brainAtlasView"].update({"active": "evidence", "tone": "clear", "statusText": "Evidence · 3 exact receipts"})
-    good_evidence["brainAtlasView"]["buttons"][0].update({"selected": False, "tabIndex": -1})
-    good_evidence["brainAtlasView"]["buttons"][1].update({"selected": True, "tabIndex": 0})
-    good_evidence["brainAtlasSections"] = {
-        "memory": None,
-        "receipts": {
-            "contained": True,
-            "heading": "Work execution proof",
-            "description": "Agent to work to timestamped receipt to verified model.",
-            "headingFontSize": 12,
-            "descriptionFontSize": 9.5,
-            "headingClipped": False,
-            "descriptionClipped": False,
-            "labelledBy": "brain-atlas-tab-evidence",
-            "describedBy": "brain-atlas-evidence-description",
-            "labelledByTargetPresent": True,
-            "height": 410,
-            "graphHeight": 280,
-            "graphKind": "svg",
-            "overflowY": 0,
-            "svgTitlePresent": True,
-            "svgDescriptionPresent": True,
-            "primaryGlyphHeights": [8.2],
-            "secondaryGlyphHeights": [7.2],
-            "layerGlyphHeights": [9.5],
-            "nodeOverlapCount": 0,
-        },
-    }
-    good_evidence_failures = validate_control_tower_layout(
-        good_evidence,
-        label="kiosk-1920-evidence",
-        expect_atlas_view="evidence",
-    )
     bad_kiosk = json.loads(json.dumps(good_kiosk))
     bad_kiosk["pageOverflowY"] = 8
     bad_kiosk["liveWork"]["objectives"][0]["clipped"] = True
@@ -1637,7 +1785,6 @@ def self_test() -> int:
         and missing_browser_detected
         and unrelated_failure_rejected
         and not good_kiosk_failures
-        and not good_evidence_failures
         and len(bad_kiosk_failures) >= 5
     )
     print(json.dumps({
@@ -1648,7 +1795,6 @@ def self_test() -> int:
         "missingBrowserDetected": missing_browser_detected,
         "unrelatedFailureRejected": unrelated_failure_rejected,
         "goodKioskFailures": good_kiosk_failures,
-        "goodEvidenceFailures": good_evidence_failures,
         "badKioskFailures": bad_kiosk_failures,
     }, indent=2))
     return 0 if ok else 1

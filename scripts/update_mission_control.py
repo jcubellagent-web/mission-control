@@ -31,6 +31,11 @@ from todays_jobs_projection import (  # noqa: E402
     parse_crontab_definitions,
 )
 from handoff_receipt_bridge import receipt_state, terminal_result_receipt  # noqa: E402
+from brain_atlas_contract import work_label_is_safe  # noqa: E402
+try:  # Keep the dashboard boundary aligned when the shared contract provides it.
+    from brain_atlas_contract import model_id_is_safe as _shared_model_id_is_safe  # type: ignore[attr-defined] # noqa: E402
+except ImportError:  # Backward-compatible with an older generator contract.
+    _shared_model_id_is_safe = None
 try:
     import tomllib
 except ModuleNotFoundError:  # pragma: no cover - Python <3.11 fallback
@@ -181,6 +186,58 @@ RUNTIME_LAYOUT_LIVE_FIELDS = frozenset({
 CAPABILITY_NODE_IDENTITY_FIELDS = frozenset({"id", "name", "host", "agent"})
 CAPABILITY_NODE_RUNTIME_FIELDS = ("openclawCli", "hermesCli", "geminiCli", "codexCli")
 
+MEMORY_OPERATIONS_RAW_FIELDS = frozenset({
+    "updatedAt", "status", "summary", "registry", "review", "retrieval",
+    "governance", "agentAccess", "activity", "privacy",
+})
+MEMORY_OPERATIONS_PROJECTED_FIELDS = frozenset({
+    "schemaVersion", "updatedAt", "status", "source", "privacy",
+    "registry", "review", "retrieval", "activity",
+})
+MEMORY_CANONICAL_AGENTS = ("joshex", "josh2", "jaimes", "jain")
+MEMORY_REGISTRY_FIELDS = ("active", "superseded", "expired", "sources")
+MEMORY_REVIEW_RAW_FIELDS = frozenset({"pending", "disputed", "lastRun", "lastStatus"})
+MEMORY_REVIEW_PROJECTED_FIELDS = frozenset({"pending", "disputed", "lastRun"})
+MEMORY_RETRIEVAL_RAW_FIELDS = frozenset({
+    "queries7d", "hits7d", "hitRate", "avgLatencyMs", "feedback30d",
+    "helpful30d", "ignored30d", "corrected30d", "harmful30d",
+    "qualityRate", "qualityDefinition", "preflights7d", "selected30d",
+    "used30d", "reuseIgnored30d", "selectedUseRate",
+})
+MEMORY_RETRIEVAL_PROJECTED_FIELDS = (
+    "queries7d", "hits7d", "hitRate", "avgLatencyMs", "feedback30d",
+    "helpful30d", "ignored30d", "corrected30d", "harmful30d",
+    "qualityRate", "preflights7d", "selected30d", "used30d",
+    "reuseIgnored30d", "selectedUseRate",
+)
+MEMORY_ACTIVITY_COUNT_FIELDS = (
+    "retrievals", "hits", "misses", "selected", "used", "reuseIgnored",
+    "feedback", "helpful", "feedbackIgnored", "corrected", "harmful",
+    "proposed", "promoted",
+)
+MEMORY_ACTIVITY_TIME_FIELDS = (
+    "retrieval", "hit", "miss", "selected", "used", "reuseIgnored",
+    "feedback", "corrected", "proposed", "promoted",
+)
+MEMORY_PRIVACY_CONTRACT = {
+    "queryIncluded": False,
+    "contentIncluded": False,
+    "rawIdentifiersIncluded": False,
+    "reasonsIncluded": False,
+    "countsOnly": True,
+}
+MEMORY_ACTIVITY_AGENT_FIELDS = frozenset({
+    "agent", "retrievals", "hits", "misses", "lastRetrievalAt",
+})
+MEMORY_RAW_PRIVACY_FIELDS = frozenset({
+    "checkedAt", "ok", "policy", "publicLabels", "activePublic",
+    "activeOwnerPrivate", "unknownLabelsOwnerScoped", "crossOwnerPrivateLeaks",
+})
+MEMORY_GOVERNANCE_FIELDS = frozenset({
+    "sourceOfTruth", "autoPromote", "manualReview", "privacy",
+})
+MEMORY_STRICT_TIMESTAMP = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
+
 
 def _project_mapping(value: Any, fields: frozenset[str]) -> Dict[str, Any]:
     if not isinstance(value, dict):
@@ -212,6 +269,367 @@ def _project_capability_inventory(value: Any) -> Dict[str, Any]:
         nodes.append(node)
     projected["nodes"] = nodes
     return projected
+
+
+def _memory_time(value: Any) -> dt.datetime | None:
+    if not isinstance(value, str) or not MEMORY_STRICT_TIMESTAMP.fullmatch(value):
+        return None
+    try:
+        parsed = dt.datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except (TypeError, ValueError):
+        return None
+    normalized = parsed.astimezone(dt.timezone.utc)
+    if normalized.replace(microsecond=0).isoformat().replace("+00:00", "Z") != value:
+        return None
+    return normalized
+
+
+def _memory_count(value: Any, maximum: int = 10_000_000) -> int | None:
+    if type(value) is not int or value < 0 or value > maximum:
+        return None
+    return value
+
+
+def _memory_metric(value: Any, maximum: float) -> int | float | None:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    number = float(value)
+    if not math.isfinite(number) or number < 0 or number > maximum:
+        return None
+    return value
+
+
+def _memory_operations_unavailable(now_iso: str) -> Dict[str, Any]:
+    """Return a content-free, non-animated memory telemetry contract."""
+
+    safe_now = now_iso if _memory_time(now_iso) is not None else utc_iso()
+    zero_counts = {name: 0 for name in MEMORY_ACTIVITY_COUNT_FIELDS}
+    no_times = {name: None for name in MEMORY_ACTIVITY_TIME_FIELDS}
+    return {
+        "schemaVersion": 1,
+        "updatedAt": safe_now,
+        "status": "unavailable",
+        "source": {"name": "governed-memory-registry", "verified": False},
+        "privacy": dict(MEMORY_PRIVACY_CONTRACT),
+        "registry": {name: 0 for name in MEMORY_REGISTRY_FIELDS},
+        "review": {"pending": 0, "disputed": 0, "lastRun": None},
+        "retrieval": {
+            name: None if name in {"hitRate", "qualityRate", "selectedUseRate"} else 0
+            for name in MEMORY_RETRIEVAL_PROJECTED_FIELDS
+        },
+        "activity": {
+            "schemaVersion": 1,
+            "generatedAt": safe_now,
+            "windowMinutes": 30,
+            "motionWindowSeconds": 90,
+            "source": {"name": "governed-memory-registry", "verified": False},
+            "privacy": dict(MEMORY_PRIVACY_CONTRACT),
+            "counts": zero_counts,
+            "lastObservedAt": no_times,
+            "agents": [
+                {
+                    "agent": agent,
+                    "retrievals": 0,
+                    "hits": 0,
+                    "misses": 0,
+                    "lastRetrievalAt": None,
+                }
+                for agent in MEMORY_CANONICAL_AGENTS
+            ],
+        },
+    }
+
+
+def _valid_memory_raw_envelope(value: Dict[str, Any], updated_at: dt.datetime) -> bool:
+    """Validate legacy producer-only fields before discarding them."""
+
+    if value.get("status") not in {"ok", "healthy", "ready", "watch"}:
+        return False
+    summary = value.get("summary")
+    if not isinstance(summary, str) or len(summary) > 500 or any(ord(char) < 32 for char in summary):
+        return False
+    governance = value.get("governance")
+    if not isinstance(governance, dict) or set(governance) != MEMORY_GOVERNANCE_FIELDS:
+        return False
+    if any(
+        not isinstance(item, str)
+        or len(item) > 1_000
+        or any(ord(char) < 32 for char in item)
+        for item in governance.values()
+    ):
+        return False
+    expected_access = {
+        "josh2": "local CLI",
+        "jaimes": "shared SSH client",
+        "jain": "shared SSH client",
+        "joshex": "oversight SSH client",
+    }
+    if value.get("agentAccess") != expected_access:
+        return False
+    privacy = value.get("privacy")
+    if not isinstance(privacy, dict) or set(privacy) != MEMORY_RAW_PRIVACY_FIELDS:
+        return False
+    checked_at = _memory_time(privacy.get("checkedAt"))
+    if (
+        checked_at is None
+        or abs(checked_at - updated_at) > dt.timedelta(seconds=2)
+        or privacy.get("ok") is not True
+        or privacy.get("policy") != "deny-by-default"
+        or privacy.get("publicLabels") != ["dashboard-safe", "public"]
+        or privacy.get("crossOwnerPrivateLeaks") != 0
+    ):
+        return False
+    privacy_counts: Dict[str, int] = {}
+    for name in ("activePublic", "activeOwnerPrivate", "unknownLabelsOwnerScoped", "crossOwnerPrivateLeaks"):
+        count = _memory_count(privacy.get(name))
+        if count is None:
+            return False
+        privacy_counts[name] = count
+    registry = value.get("registry")
+    return bool(
+        isinstance(registry, dict)
+        and _memory_count(registry.get("active"))
+        == privacy_counts["activePublic"] + privacy_counts["activeOwnerPrivate"]
+    )
+
+
+def sanitize_memory_operations(value: Any, now_iso: str) -> Dict[str, Any]:
+    """Publish only bounded memory counts and exact activity timestamps.
+
+    The registry producer contains policy descriptions and access metadata that
+    are useful in its private audit file but do not belong in dashboard-data or
+    the kiosk. Unknown fields, content-bearing activity, forged times, missing
+    agents, or unverifiable provenance collapse to a quiet unavailable state.
+    """
+
+    fallback = _memory_operations_unavailable(now_iso)
+    if not isinstance(value, dict):
+        return fallback
+    raw_input = set(value) == MEMORY_OPERATIONS_RAW_FIELDS
+    projected_input = set(value) == MEMORY_OPERATIONS_PROJECTED_FIELDS
+    if not raw_input and not projected_input:
+        return fallback
+    current = _memory_time(now_iso)
+    updated_at = _memory_time(value.get("updatedAt"))
+    if current is None or updated_at is None or updated_at > current + dt.timedelta(minutes=2):
+        return fallback
+    if projected_input and value.get("status") == "unavailable":
+        # Only the exact content-free fallback is safe to project repeatedly.
+        expected = _memory_operations_unavailable(str(value.get("updatedAt") or now_iso))
+        return expected if value == expected else fallback
+    if raw_input:
+        if not _valid_memory_raw_envelope(value, updated_at):
+            return fallback
+    else:
+        if (
+            value.get("schemaVersion") != 1
+            or value.get("status") != "ready"
+            or value.get("source") != {"name": "governed-memory-registry", "verified": True}
+            or value.get("privacy") != MEMORY_PRIVACY_CONTRACT
+        ):
+            return fallback
+
+    registry = value.get("registry")
+    if not isinstance(registry, dict) or set(registry) != set(MEMORY_REGISTRY_FIELDS):
+        return fallback
+    clean_registry: Dict[str, int] = {}
+    for name in MEMORY_REGISTRY_FIELDS:
+        count = _memory_count(registry.get(name))
+        if count is None:
+            return fallback
+        clean_registry[name] = count
+
+    review = value.get("review")
+    expected_review_fields = MEMORY_REVIEW_RAW_FIELDS if raw_input else MEMORY_REVIEW_PROJECTED_FIELDS
+    if not isinstance(review, dict) or set(review) != expected_review_fields:
+        return fallback
+    pending = _memory_count(review.get("pending"))
+    disputed = _memory_count(review.get("disputed"))
+    last_run_raw = review.get("lastRun")
+    last_run = _memory_time(last_run_raw) if last_run_raw is not None else None
+    if (
+        pending is None
+        or disputed is None
+        or (last_run_raw is not None and last_run is None)
+        or (last_run is not None and last_run > updated_at + dt.timedelta(minutes=2))
+        or (raw_input and review.get("lastStatus") not in {"ok", "not-run"})
+    ):
+        return fallback
+
+    retrieval = value.get("retrieval")
+    expected_retrieval_fields = (
+        MEMORY_RETRIEVAL_RAW_FIELDS if raw_input else set(MEMORY_RETRIEVAL_PROJECTED_FIELDS)
+    )
+    if not isinstance(retrieval, dict) or set(retrieval) != expected_retrieval_fields:
+        return fallback
+    if raw_input and retrieval.get("qualityDefinition") != (
+        "helpful feedback divided by all feedback, including ignored, corrected, and harmful"
+    ):
+        return fallback
+    clean_retrieval: Dict[str, Any] = {}
+    rate_fields = {"hitRate", "qualityRate", "selectedUseRate"}
+    metric_fields = {"avgLatencyMs"}
+    for name in MEMORY_RETRIEVAL_PROJECTED_FIELDS:
+        item = retrieval.get(name)
+        if name in rate_fields:
+            if item is not None and _memory_metric(item, 100.0) is None:
+                return fallback
+            clean_retrieval[name] = item
+        elif name in metric_fields:
+            metric = _memory_metric(item, 1_000_000.0)
+            if metric is None:
+                return fallback
+            clean_retrieval[name] = metric
+        else:
+            count = _memory_count(item)
+            if count is None:
+                return fallback
+            clean_retrieval[name] = count
+    if (
+        clean_retrieval["hits7d"] > clean_retrieval["queries7d"]
+        or clean_retrieval["helpful30d"]
+        + clean_retrieval["ignored30d"]
+        + clean_retrieval["corrected30d"]
+        + clean_retrieval["harmful30d"]
+        != clean_retrieval["feedback30d"]
+        or clean_retrieval["used30d"] + clean_retrieval["reuseIgnored30d"]
+        > clean_retrieval["selected30d"]
+    ):
+        return fallback
+
+    activity = value.get("activity")
+    activity_fields = {
+        "schemaVersion", "generatedAt", "windowMinutes", "motionWindowSeconds",
+        "source", "privacy", "counts", "lastObservedAt", "agents",
+    }
+    if not isinstance(activity, dict) or set(activity) != activity_fields:
+        return fallback
+    generated_at = _memory_time(activity.get("generatedAt"))
+    window_minutes = _memory_count(activity.get("windowMinutes"), 120)
+    motion_seconds = _memory_count(activity.get("motionWindowSeconds"), 100)
+    if (
+        activity.get("schemaVersion") != 1
+        or generated_at is None
+        or abs(generated_at - updated_at) > dt.timedelta(seconds=2)
+        or generated_at > current + dt.timedelta(minutes=2)
+        or window_minutes is None
+        or window_minutes < 1
+        or motion_seconds is None
+        or motion_seconds < 15
+        or motion_seconds > window_minutes * 60
+        or activity.get("source") != {"name": "governed-memory-registry", "verified": True}
+        or activity.get("privacy") != MEMORY_PRIVACY_CONTRACT
+    ):
+        return fallback
+
+    raw_counts = activity.get("counts")
+    if not isinstance(raw_counts, dict) or set(raw_counts) != set(MEMORY_ACTIVITY_COUNT_FIELDS):
+        return fallback
+    clean_counts: Dict[str, int] = {}
+    for name in MEMORY_ACTIVITY_COUNT_FIELDS:
+        count = _memory_count(raw_counts.get(name), 100_000)
+        if count is None:
+            return fallback
+        clean_counts[name] = count
+    if (
+        clean_counts["retrievals"] != clean_counts["hits"] + clean_counts["misses"]
+        or clean_counts["helpful"]
+        + clean_counts["feedbackIgnored"]
+        + clean_counts["corrected"]
+        + clean_counts["harmful"]
+        != clean_counts["feedback"]
+        or clean_counts["used"] + clean_counts["reuseIgnored"] > clean_counts["selected"]
+    ):
+        return fallback
+
+    raw_times = activity.get("lastObservedAt")
+    if not isinstance(raw_times, dict) or set(raw_times) != set(MEMORY_ACTIVITY_TIME_FIELDS):
+        return fallback
+    signal_counts = {
+        "retrieval": "retrievals", "hit": "hits", "miss": "misses",
+        "selected": "selected", "used": "used", "reuseIgnored": "reuseIgnored",
+        "feedback": "feedback", "corrected": "corrected", "proposed": "proposed",
+        "promoted": "promoted",
+    }
+    window_start = generated_at - dt.timedelta(minutes=window_minutes)
+    clean_times: Dict[str, str | None] = {}
+    for signal in MEMORY_ACTIVITY_TIME_FIELDS:
+        raw_time = raw_times.get(signal)
+        observed_at = _memory_time(raw_time) if raw_time is not None else None
+        if (
+            (raw_time is not None and observed_at is None)
+            or (observed_at is not None and not window_start <= observed_at <= generated_at)
+            or ((clean_counts[signal_counts[signal]] > 0) != (observed_at is not None))
+        ):
+            return fallback
+        clean_times[signal] = raw_time
+
+    raw_agents = activity.get("agents")
+    if not isinstance(raw_agents, list) or len(raw_agents) != len(MEMORY_CANONICAL_AGENTS):
+        return fallback
+    clean_agents_by_id: Dict[str, Dict[str, Any]] = {}
+    for row in raw_agents:
+        if not isinstance(row, dict) or set(row) != MEMORY_ACTIVITY_AGENT_FIELDS:
+            return fallback
+        agent = row.get("agent")
+        retrievals = _memory_count(row.get("retrievals"), 100_000)
+        hits = _memory_count(row.get("hits"), 100_000)
+        misses = _memory_count(row.get("misses"), 100_000)
+        raw_last = row.get("lastRetrievalAt")
+        last_retrieval = _memory_time(raw_last) if raw_last is not None else None
+        if (
+            agent not in MEMORY_CANONICAL_AGENTS
+            or agent in clean_agents_by_id
+            or retrievals is None
+            or hits is None
+            or misses is None
+            or retrievals != hits + misses
+            or (raw_last is not None and last_retrieval is None)
+            or (last_retrieval is not None and not window_start <= last_retrieval <= generated_at)
+            or ((retrievals > 0) != (last_retrieval is not None))
+        ):
+            return fallback
+        clean_agents_by_id[agent] = {
+            "agent": agent,
+            "retrievals": retrievals,
+            "hits": hits,
+            "misses": misses,
+            "lastRetrievalAt": raw_last,
+        }
+    if set(clean_agents_by_id) != set(MEMORY_CANONICAL_AGENTS):
+        return fallback
+    for metric in ("retrievals", "hits", "misses"):
+        if sum(row[metric] for row in clean_agents_by_id.values()) != clean_counts[metric]:
+            return fallback
+    latest_agent_retrieval = max(
+        (row["lastRetrievalAt"] for row in clean_agents_by_id.values() if row["lastRetrievalAt"]),
+        key=lambda item: _memory_time(item) or dt.datetime.min.replace(tzinfo=dt.timezone.utc),
+        default=None,
+    )
+    if latest_agent_retrieval != clean_times["retrieval"]:
+        return fallback
+
+    return {
+        "schemaVersion": 1,
+        "updatedAt": value["updatedAt"],
+        "status": "ready",
+        "source": {"name": "governed-memory-registry", "verified": True},
+        "privacy": dict(MEMORY_PRIVACY_CONTRACT),
+        "registry": clean_registry,
+        "review": {"pending": pending, "disputed": disputed, "lastRun": last_run_raw},
+        "retrieval": clean_retrieval,
+        "activity": {
+            "schemaVersion": 1,
+            "generatedAt": activity["generatedAt"],
+            "windowMinutes": window_minutes,
+            "motionWindowSeconds": motion_seconds,
+            "source": {"name": "governed-memory-registry", "verified": True},
+            "privacy": dict(MEMORY_PRIVACY_CONTRACT),
+            "counts": clean_counts,
+            "lastObservedAt": clean_times,
+            "agents": [clean_agents_by_id[agent] for agent in MEMORY_CANONICAL_AGENTS],
+        },
+    }
 
 
 BRAIN_ATLAS_NODE_FIELD_ORDER = (
@@ -246,6 +664,29 @@ BRAIN_ATLAS_AGENT_LABELS = {
 BRAIN_ATLAS_HASHED_ID = re.compile(r"^(work|receipt|model):[a-f0-9]{24}$")
 BRAIN_ATLAS_EDGE_ID = re.compile(r"^edge:[a-f0-9]{24}$")
 BRAIN_ATLAS_MODEL_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/+\-]{0,119}$")
+BRAIN_ATLAS_SECRET_MODEL_ID = re.compile(
+    r"(?i)(?:^|[._:/+\-])(?:"
+    r"sk-(?:proj-|live-|test-)?[A-Z0-9_-]{12,}|"
+    r"(?:sk|pk)_(?:live|test)_[A-Z0-9]{12,}|"
+    r"gh[opusr]_[A-Z0-9]{20,}|"
+    r"xox[baprs]-[A-Z0-9-]{12,}|"
+    r"AKIA[A-Z0-9]{16}|"
+    r"eyJ[A-Z0-9_-]{8,}\.[A-Z0-9_-]{8,}\.[A-Z0-9_-]{8,}"
+    r")(?:$|[._:/+\-])"
+)
+
+
+def _brain_atlas_model_id_safe(value: Any) -> bool:
+    if callable(_shared_model_id_is_safe):
+        try:
+            return bool(_shared_model_id_is_safe(value))
+        except (TypeError, ValueError):
+            return False
+    return bool(
+        isinstance(value, str)
+        and BRAIN_ATLAS_MODEL_ID.fullmatch(value)
+        and not BRAIN_ATLAS_SECRET_MODEL_ID.search(value)
+    )
 
 
 def _brain_atlas_unavailable(now_iso: str, reason: str) -> Dict[str, Any]:
@@ -375,6 +816,8 @@ def sanitize_brain_atlas(value: Any, now_iso: str) -> Dict[str, Any]:
 
     nodes: List[Dict[str, Any]] = []
     node_kinds: Dict[str, str] = {}
+    node_observed_at: Dict[str, dt.datetime] = {}
+    receipt_route_verified: Dict[str, bool] = {}
     kind_counts = {"agent": 0, "work": 0, "receipt": 0, "model": 0}
     for raw in raw_nodes:
         if not isinstance(raw, dict) or set(raw) - BRAIN_ATLAS_NODE_FIELDS:
@@ -403,7 +846,7 @@ def sanitize_brain_atlas(value: Any, now_iso: str) -> Dict[str, Any]:
             if (
                 set(raw) != required
                 or not BRAIN_ATLAS_HASHED_ID.fullmatch(node_id)
-                or not re.fullmatch(r"Work [a-f0-9]{8}", label)
+                or not work_label_is_safe(label)
                 or raw.get("status") not in BRAIN_ATLAS_STATUSES
                 or (_brain_atlas_count(raw.get("generation"), 1_000_000) or 0) < 1
             ):
@@ -429,18 +872,24 @@ def sanitize_brain_atlas(value: Any, now_iso: str) -> Dict[str, Any]:
                 or not BRAIN_ATLAS_HASHED_ID.fullmatch(node_id)
                 or family not in {"codex", "antigravity", "ollama", "grok"}
                 or not isinstance(model_id, str)
-                or not BRAIN_ATLAS_MODEL_ID.fullmatch(model_id)
+                or not _brain_atlas_model_id_safe(model_id)
                 or label != f"{family}/{model_id}"
             ):
                 return fallback
         node_kinds[node_id] = kind
+        node_observed_at[node_id] = observed_at
+        if kind == "receipt":
+            receipt_route_verified[node_id] = raw["routeVerified"]
         kind_counts[kind] += 1
         nodes.append({key: raw[key] for key in BRAIN_ATLAS_NODE_FIELD_ORDER if key in raw})
 
     edges: List[Dict[str, Any]] = []
     edge_ids: set[str] = set()
     emitted_pairs: set[tuple[str, str]] = set()
-    owns_pairs: List[tuple[str, str]] = []
+    emitted_by_receipt: Dict[str, str] = {}
+    owner_by_work_receipt: Dict[tuple[str, str], str] = {}
+    owner_by_work: Dict[str, str] = {}
+    verified_by_receipt: Dict[str, str] = {}
     for raw in raw_edges:
         if not isinstance(raw, dict) or set(raw) != BRAIN_ATLAS_EDGE_FIELDS:
             return fallback
@@ -460,6 +909,7 @@ def sanitize_brain_atlas(value: Any, now_iso: str) -> Dict[str, Any]:
             or node_kinds.get(receipt_id) != "receipt"
             or observed_at is None
             or not window_start <= observed_at <= window_end
+            or observed_at != node_observed_at.get(receipt_id)
         ):
             return fallback
         expected = {
@@ -470,16 +920,38 @@ def sanitize_brain_atlas(value: Any, now_iso: str) -> Dict[str, Any]:
         if (node_kinds[source_id], node_kinds[target_id]) != expected:
             return fallback
         if kind == "emitted":
-            if receipt_id != target_id:
+            pair = (source_id, receipt_id)
+            if (
+                receipt_id != target_id
+                or pair in emitted_pairs
+                or receipt_id in emitted_by_receipt
+            ):
                 return fallback
-            emitted_pairs.add((source_id, receipt_id))
-        elif kind == "verified-route" and receipt_id != source_id:
-            return fallback
+            emitted_pairs.add(pair)
+            emitted_by_receipt[receipt_id] = source_id
+        elif kind == "verified-route":
+            if (
+                receipt_id != source_id
+                or receipt_route_verified.get(receipt_id) is not True
+                or receipt_id in verified_by_receipt
+            ):
+                return fallback
+            verified_by_receipt[receipt_id] = target_id
         elif kind == "owns":
-            owns_pairs.append((target_id, receipt_id))
+            pair = (target_id, receipt_id)
+            if (
+                source_id not in BRAIN_ATLAS_AGENT_LABELS
+                or pair in owner_by_work_receipt
+                or (target_id in owner_by_work and owner_by_work[target_id] != source_id)
+            ):
+                return fallback
+            owner_by_work_receipt[pair] = source_id
+            owner_by_work[target_id] = source_id
         edge_ids.add(edge_id)
         edges.append({key: raw[key] for key in BRAIN_ATLAS_EDGE_FIELD_ORDER})
-    if any(pair not in emitted_pairs for pair in owns_pairs):
+    if set(owner_by_work_receipt) != emitted_pairs:
+        return fallback
+    if any(receipt not in emitted_by_receipt for receipt in verified_by_receipt):
         return fallback
 
     expected_count_fields = {
@@ -556,6 +1028,10 @@ def build_live_dashboard(dashboard: Dict[str, Any]) -> Dict[str, Any]:
     live["capabilityInventory"] = _project_capability_inventory(dashboard.get("capabilityInventory"))
     live["brainAtlas"] = sanitize_brain_atlas(
         dashboard.get("brainAtlas"),
+        str(dashboard.get("lastUpdated") or utc_iso()),
+    )
+    live["memoryOperations"] = sanitize_memory_operations(
+        dashboard.get("memoryOperations"),
         str(dashboard.get("lastUpdated") or utc_iso()),
     )
     return live
@@ -5299,15 +5775,13 @@ def main() -> None:
         "summary": {"status": "unknown", "agents": 0, "staleAgents": [], "openTasks": 0, "openHandoffs": 0},
         "agents": {},
     })
-    dashboard["memoryOperations"] = load_json_file(MEMORY_OPERATIONS_PATH, {
-        "updatedAt": now_iso,
-        "status": "not-configured",
-        "summary": "Shared memory registry has not published health yet.",
-        "registry": {"active": 0, "superseded": 0, "expired": 0, "sources": 0},
-        "review": {"pending": 0, "disputed": 0, "lastRun": None, "lastStatus": "not-run"},
-        "retrieval": {"queries7d": 0, "hits7d": 0, "hitRate": None, "avgLatencyMs": 0},
-        "agentAccess": {},
-    })
+    # Project the private registry sidecar at first load so neither the full
+    # dashboard nor the kiosk can ever receive memory contents, queries, raw
+    # identifiers, policy prose, or unverified motion timestamps.
+    dashboard["memoryOperations"] = sanitize_memory_operations(
+        load_json_file(MEMORY_OPERATIONS_PATH, {}),
+        now_iso,
+    )
     dashboard["reliabilityUpgrades"] = load_json_file(RELIABILITY_UPGRADES_PATH, {
         "updatedAt": now_iso,
         "summary": "Reliability upgrade probes have not run yet.",

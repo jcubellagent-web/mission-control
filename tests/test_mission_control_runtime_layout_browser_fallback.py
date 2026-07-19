@@ -61,6 +61,7 @@ def valid_kiosk_legibility_measurements() -> dict[str, object]:
             "evidenceSource": "governed-memory-registry",
             "edges": [
                 {
+                    "agent": "josh2",
                     "operation": "retrieval",
                     "observedAt": "2026-01-01T00:00:00Z",
                     "evidenceValid": True,
@@ -68,6 +69,10 @@ def valid_kiosk_legibility_measurements() -> dict[str, object]:
                     "live": True,
                     "animationName": "memory-flow-travel",
                     "animated": True,
+                    "strokeWidth": 3.2,
+                    "strokeDasharray": "14px, 9px",
+                    "strokeLinecap": "round",
+                    "filter": "drop-shadow(rgb(88, 238, 154) 0px 0px 4px)",
                 },
                 {
                     "operation": "used",
@@ -78,46 +83,68 @@ def valid_kiosk_legibility_measurements() -> dict[str, object]:
                     "animationName": "none",
                     "animated": False,
                 },
+                {"agent": "joshex", "operation": "retrieval", "observedAt": "", "evidenceValid": False, "ageSeconds": None, "live": False, "animationName": "none", "animated": False},
+                {"agent": "jaimes", "operation": "retrieval", "observedAt": "", "evidenceValid": False, "ageSeconds": None, "live": False, "animationName": "none", "animated": False},
+                {"agent": "jain", "operation": "retrieval", "observedAt": "", "evidenceValid": False, "ageSeconds": None, "live": False, "animationName": "none", "animated": False},
             ],
             "liveEdgeCount": 1,
             "animatedEdgeCount": 1,
             "animatedInactiveCount": 0,
+            "atlasAgentNodes": [
+                {"agent": "joshex", "layer": "memory", "working": False, "workState": "quiet", "memoryState": "idle", "workClass": False, "memoryClass": False, "auraAnimationName": "none", "presenceAnimationName": "none", "memoryAnimationName": "none", "workAnimated": False, "memoryAnimated": False, "animated": False},
+                {"agent": "josh2", "layer": "memory", "working": True, "workState": "working", "memoryState": "live", "workClass": True, "memoryClass": True, "auraAnimationName": "memory-agent-presence-halo", "presenceAnimationName": "memory-agent-presence-dot", "memoryAnimationName": "memory-node-live-pulse", "workAnimated": True, "memoryAnimated": True, "animated": True},
+                {"agent": "jaimes", "layer": "memory", "working": False, "workState": "quiet", "memoryState": "idle", "workClass": False, "memoryClass": False, "auraAnimationName": "none", "presenceAnimationName": "none", "memoryAnimationName": "none", "workAnimated": False, "memoryAnimated": False, "animated": False},
+                {"agent": "jain", "layer": "memory", "working": False, "workState": "quiet", "memoryState": "idle", "workClass": False, "memoryClass": False, "auraAnimationName": "none", "presenceAnimationName": "none", "memoryAnimationName": "none", "workAnimated": False, "memoryAnimated": False, "animated": False},
+            ],
+            "liveWorkAgents": [
+                {"agent": "joshex", "working": False},
+                {"agent": "josh2", "working": True},
+                {"agent": "jaimes", "working": False},
+                {"agent": "jain", "working": False},
+            ],
+            "workingAgentCount": 1,
         },
         "brainAtlasView": {
-            "active": "activity",
+            "active": "unified",
             "tone": "clear",
-            "statusText": "Activity · Idle - no activity in 30m",
-            "selectedCount": 1,
+            "statusText": "1 working · Memory live · 2 exact receipts",
             "visiblePanelCount": 1,
-            "buttons": [
-                {"view": "activity", "text": "Activity", "selected": True, "controls": "brain-atlas-memory-panel", "tabIndex": 0, "visible": True, "fontSize": 10, "height": 28, "clipped": False},
-                {"view": "evidence", "text": "Proof & evidence", "selected": False, "controls": "brain-atlas-evidence-panel", "tabIndex": -1, "visible": True, "fontSize": 10, "height": 28, "clipped": False},
+            "legacyViewControlCount": 0,
+            "layerCounts": {"memory": 1, "proof": 1},
+            "proofState": "ready",
+            "proofEmptyText": "",
+            "proofRows": [
+                {"agent": "josh2", "workLabel": "Refresh Control Tower health", "visibleWorkLabel": "Refresh Control Tower health", "receipt": "receipt-1", "receiptStatus": "done", "model": "codex/gpt-5.6-terra", "routeVerified": True, "declaredAnimated": False, "opaqueLabel": False, "clipped": False},
+                {"agent": "jaimes", "workLabel": "Verify scheduled agent jobs", "visibleWorkLabel": "Verify scheduled agent jobs", "receipt": "receipt-2", "receiptStatus": "active", "model": "codex/gpt-5.6-sol", "routeVerified": True, "declaredAnimated": False, "opaqueLabel": False, "clipped": False},
+            ],
+            "proofEdges": [
+                {"animationName": "none", "animated": False, "memoryFlowClass": False, "liveClass": False},
+                {"animationName": "none", "animated": False, "memoryFlowClass": False, "liveClass": False},
             ],
         },
         "brainAtlasSections": {
-            "memory": {
+            "unified": {
                 "contained": True,
-                "heading": "Memory activity",
-                "description": "Observable activity, not private reasoning.",
+                "heading": "Live activity + exact proof",
+                "description": "Governed memory moves on exact receipts; static proof is audit evidence, not private reasoning.",
                 "headingFontSize": 12,
                 "descriptionFontSize": 9.5,
                 "headingClipped": False,
                 "descriptionClipped": False,
-                "labelledBy": "brain-atlas-tab-activity",
-                "describedBy": "brain-atlas-memory-description",
+                "labelledBy": "brain-atlas-unified-heading",
+                "describedBy": "brain-atlas-unified-description",
                 "labelledByTargetPresent": True,
                 "height": 410,
-                "graphHeight": 300,
+                "graphHeight": 320,
                 "graphKind": "svg",
                 "overflowY": 0,
                 "svgTitlePresent": True,
                 "svgDescriptionPresent": True,
                 "primaryGlyphHeights": [8.2],
                 "secondaryGlyphHeights": [7.2],
-                "layerGlyphHeights": [],
+                "layerGlyphHeights": [9.5],
                 "nodeOverlapCount": 0,
             },
-            "receipts": None,
         },
         "liveWork": {
             "objectives": [{"fontSize": 24, "clipped": False}],
@@ -174,43 +201,6 @@ def valid_kiosk_legibility_measurements() -> dict[str, object]:
             "directChildrenValid": True,
         },
     }
-
-
-def valid_evidence_view_measurements() -> dict[str, object]:
-    measurements = json.loads(json.dumps(valid_kiosk_legibility_measurements()))
-    view = measurements["brainAtlasView"]
-    assert isinstance(view, dict)
-    view.update({"active": "evidence", "tone": "clear", "statusText": "Evidence · 3 exact receipts"})
-    buttons = view["buttons"]
-    assert isinstance(buttons, list)
-    buttons[0].update({"selected": False, "tabIndex": -1})
-    buttons[1].update({"selected": True, "tabIndex": 0})
-    measurements["brainAtlasSections"] = {
-        "memory": None,
-        "receipts": {
-            "contained": True,
-            "heading": "Work execution proof",
-            "description": "Agent to work to timestamped receipt to verified model.",
-            "headingFontSize": 12,
-            "descriptionFontSize": 9.5,
-            "headingClipped": False,
-            "descriptionClipped": False,
-            "labelledBy": "brain-atlas-tab-evidence",
-            "describedBy": "brain-atlas-evidence-description",
-            "labelledByTargetPresent": True,
-            "height": 410,
-            "graphHeight": 280,
-            "graphKind": "svg",
-            "overflowY": 0,
-            "svgTitlePresent": True,
-            "svgDescriptionPresent": True,
-            "primaryGlyphHeights": [8.2],
-            "secondaryGlyphHeights": [7.2],
-            "layerGlyphHeights": [9.5],
-            "nodeOverlapCount": 0,
-        },
-    }
-    return measurements
 
 
 def test_ci_live_data_fixture_satisfies_canonical_contract() -> None:
@@ -351,76 +341,62 @@ def test_playwright_probes_cover_responsive_reference_and_reduced_motion_contrac
 def test_kiosk_legibility_accepts_exact_contract_boundaries() -> None:
     assert runtime_layout.validate_kiosk_legibility(valid_kiosk_legibility_measurements()) == []
     assert runtime_layout.validate_control_tower_layout(
-        valid_evidence_view_measurements(),
-        label="kiosk-1920-evidence",
-        expect_atlas_view="evidence",
+        valid_kiosk_legibility_measurements(),
+        label="reference-2048",
     ) == []
 
 
-def test_layout_rejects_wrong_default_or_multiple_visible_atlas_views() -> None:
+def test_layout_rejects_legacy_tabs_or_missing_simultaneous_layers() -> None:
     measurements = valid_kiosk_legibility_measurements()
     view = measurements["brainAtlasView"]
-    sections = measurements["brainAtlasSections"]
     assert isinstance(view, dict)
-    assert isinstance(sections, dict)
     view["active"] = "evidence"
-    view["selectedCount"] = 2
     view["visiblePanelCount"] = 2
-    sections["receipts"] = valid_evidence_view_measurements()["brainAtlasSections"]["receipts"]
+    view["legacyViewControlCount"] = 2
+    view["layerCounts"] = {"memory": 1, "proof": 0}
 
     failures = runtime_layout.validate_control_tower_layout(measurements, label="kiosk-1920")
 
-    assert any("active view is evidence (requires activity)" in failure for failure in failures)
-    assert any("exactly one selected view control" in failure for failure in failures)
-    assert any("exactly one visible view panel" in failure for failure in failures)
-    assert any("inactive view remains visible" in failure for failure in failures)
+    assert any("active view is evidence (requires unified)" in failure for failure in failures)
+    assert any("exactly one visible unified region" in failure for failure in failures)
+    assert any("legacy Activity / Evidence view controls" in failure for failure in failures)
+    assert any("exactly one visible proof layer" in failure for failure in failures)
 
 
-def test_layout_rejects_broken_atlas_view_control_contract() -> None:
+def test_layout_rejects_broken_unified_atlas_status_contract() -> None:
     measurements = valid_kiosk_legibility_measurements()
     view = measurements["brainAtlasView"]
     assert isinstance(view, dict)
-    view.update({"tone": "", "statusText": "Evidence · Source unavailable"})
-    buttons = view["buttons"]
-    assert isinstance(buttons, list)
-    buttons[0].update({"controls": "wrong-panel", "tabIndex": -1, "clipped": True, "height": 20})
+    view.update({"tone": "", "statusText": "Memory live"})
 
     failures = runtime_layout.validate_control_tower_layout(measurements, label="kiosk-1920")
 
-    assert any("activity view control is hidden or clipped" in failure for failure in failures)
-    assert any("activity view control is not linked to its panel" in failure for failure in failures)
-    assert any("activity keyboard focus state is incorrect" in failure for failure in failures)
-    assert any("activity view control is too small" in failure for failure in failures)
-    assert any("selected-view tone is missing or invalid" in failure for failure in failures)
-    assert any("selected-view status does not match activity" in failure for failure in failures)
+    assert any("unified tone is missing or invalid" in failure for failure in failures)
+    assert any("unified status does not summarize work and receipt state" in failure for failure in failures)
 
 
 def test_layout_rejects_cramped_or_undocumented_brain_atlas_sections() -> None:
-    measurements = valid_evidence_view_measurements()
+    measurements = valid_kiosk_legibility_measurements()
     sections = measurements["brainAtlasSections"]
     assert isinstance(sections, dict)
-    receipts = sections["receipts"]
-    assert isinstance(receipts, dict)
-    receipts["description"] = ""
-    receipts["descriptionFontSize"] = 8
-    receipts["descriptionClipped"] = True
-    receipts["graphHeight"] = 104
-    receipts["primaryGlyphHeights"] = [6]
-    receipts["secondaryGlyphHeights"] = [5]
-    receipts["layerGlyphHeights"] = [7]
-    receipts["nodeOverlapCount"] = 3
-    failures = runtime_layout.validate_control_tower_layout(
-        measurements,
-        label="kiosk-1920-evidence",
-        expect_atlas_view="evidence",
-    )
+    unified = sections["unified"]
+    assert isinstance(unified, dict)
+    unified["description"] = ""
+    unified["descriptionFontSize"] = 8
+    unified["descriptionClipped"] = True
+    unified["graphHeight"] = 104
+    unified["primaryGlyphHeights"] = [6]
+    unified["secondaryGlyphHeights"] = [5]
+    unified["layerGlyphHeights"] = [7]
+    unified["nodeOverlapCount"] = 3
+    failures = runtime_layout.validate_control_tower_layout(measurements, label="kiosk-1920")
 
     assert any("purpose text is missing" in failure for failure in failures)
     assert any("purpose text is too small or unmeasured" in failure for failure in failures)
     assert any("heading or purpose text is clipped" in failure for failure in failures)
-    assert any("receipt graph height is 104px" in failure for failure in failures)
-    assert any("receipt primary labels render below 8px" in failure for failure in failures)
-    assert any("receipt layer labels render below 9px" in failure for failure in failures)
+    assert any("unified graph height is 104px" in failure for failure in failures)
+    assert any("unified primary labels render below 8px" in failure for failure in failures)
+    assert any("unified layer labels render below 9px" in failure for failure in failures)
     assert any("3 overlapping same-layer node pair" in failure for failure in failures)
 
 
@@ -428,47 +404,197 @@ def test_layout_rejects_reversed_or_overflowing_brain_atlas_sections() -> None:
     measurements = valid_kiosk_legibility_measurements()
     sections = measurements["brainAtlasSections"]
     assert isinstance(sections, dict)
-    memory = sections["memory"]
-    assert isinstance(memory, dict)
-    memory["contained"] = False
-    memory["overflowY"] = 12
+    unified = sections["unified"]
+    assert isinstance(unified, dict)
+    unified["contained"] = False
+    unified["overflowY"] = 12
     failures = runtime_layout.validate_control_tower_layout(measurements, label="kiosk-1920")
 
-    assert any("Memory activity region escapes its panel" in failure for failure in failures)
-    assert any("Memory activity overflows vertically by 12px" in failure for failure in failures)
+    assert any("Live activity + exact proof region escapes its panel" in failure for failure in failures)
+    assert any("Live activity + exact proof overflows vertically by 12px" in failure for failure in failures)
 
 
-def test_layout_accepts_visible_receipt_empty_state_without_fake_svg_evidence() -> None:
-    measurements = valid_evidence_view_measurements()
+def test_layout_requires_one_visible_unified_svg() -> None:
+    measurements = valid_kiosk_legibility_measurements()
     sections = measurements["brainAtlasSections"]
     assert isinstance(sections, dict)
-    receipts = sections["receipts"]
-    assert isinstance(receipts, dict)
-    receipts["graphKind"] = "empty"
-    receipts["svgTitlePresent"] = False
-    receipts["svgDescriptionPresent"] = False
-    receipts["primaryGlyphHeights"] = []
-    receipts["secondaryGlyphHeights"] = []
-    receipts["layerGlyphHeights"] = []
+    unified = sections["unified"]
+    assert isinstance(unified, dict)
+    unified["graphKind"] = "empty"
 
-    assert runtime_layout.validate_control_tower_layout(
-        measurements,
-        label="kiosk-1920-evidence",
-        expect_atlas_view="evidence",
-    ) == []
+    failures = runtime_layout.validate_control_tower_layout(measurements, label="kiosk-1920")
+
+    assert any("unified graph must be one visible SVG" in failure for failure in failures)
 
 
 def test_layout_rejects_missing_section_overflow_measurement() -> None:
     measurements = valid_kiosk_legibility_measurements()
     sections = measurements["brainAtlasSections"]
     assert isinstance(sections, dict)
-    memory = sections["memory"]
-    assert isinstance(memory, dict)
-    memory.pop("overflowY")
+    unified = sections["unified"]
+    assert isinstance(unified, dict)
+    unified.pop("overflowY")
 
     failures = runtime_layout.validate_control_tower_layout(measurements, label="kiosk-1920")
 
-    assert any("Memory activity overflow measurement is missing" in failure for failure in failures)
+    assert any("Live activity + exact proof overflow measurement is missing" in failure for failure in failures)
+
+
+def test_layout_rejects_unreadable_or_unverified_proof_rows() -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    view = measurements["brainAtlasView"]
+    assert isinstance(view, dict)
+    rows = view["proofRows"]
+    assert isinstance(rows, list)
+    rows[0].update({
+        "agent": "unknown",
+        "workLabel": "Work deadbeef",
+        "visibleWorkLabel": "Work deadbeef",
+        "receipt": "",
+        "receiptStatus": "",
+        "model": "",
+        "routeVerified": False,
+        "declaredAnimated": True,
+        "opaqueLabel": True,
+        "clipped": True,
+    })
+
+    failures = runtime_layout.validate_control_tower_layout(measurements, label="kiosk-1920")
+
+    expected = (
+        "unknown agent",
+        "opaque work identifier",
+        "lacks an exact receipt",
+        "lacks an exact receipt status",
+        "lacks a verified model",
+        "lacks a verified route",
+        "not declared static",
+        "is clipped",
+    )
+    assert all(any(fragment in failure for failure in failures) for fragment in expected)
+
+
+def test_layout_rejects_private_or_identifier_shaped_work_names() -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    view = measurements["brainAtlasView"]
+    assert isinstance(view, dict)
+    rows = view["proofRows"]
+    assert isinstance(rows, list)
+    rows[0]["workLabel"] = "Review /Users/private/work-12345678"
+
+    failures = runtime_layout.validate_control_tower_layout(measurements, label="kiosk-1920")
+
+    assert any("exposes an unsafe work name" in failure for failure in failures)
+
+
+@pytest.mark.parametrize(
+    "unsafe_label",
+    [
+        "Open /help/etc/passwd",
+        "Call 212-555-0199",
+        "Review 123-45-6789",
+        "Use sk-proj-abcdefghijklmnopqrstuvwxyz",
+    ],
+)
+def test_layout_rejects_pii_path_and_secret_shaped_work_names(unsafe_label: str) -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    view = measurements["brainAtlasView"]
+    assert isinstance(view, dict)
+    rows = view["proofRows"]
+    assert isinstance(rows, list)
+    rows[0]["workLabel"] = unsafe_label
+
+    failures = runtime_layout.validate_control_tower_layout(measurements, label="kiosk-1920")
+
+    assert any("exposes an unsafe work name" in failure for failure in failures)
+
+
+def test_layout_allows_safe_slash_command_work_name() -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    view = measurements["brainAtlasView"]
+    assert isinstance(view, dict)
+    rows = view["proofRows"]
+    assert isinstance(rows, list)
+    rows[0]["workLabel"] = "/new Telegram task"
+
+    assert runtime_layout.validate_control_tower_layout(measurements, label="kiosk-1920") == []
+
+
+def test_layout_rejects_work_name_over_shared_56_character_limit() -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    view = measurements["brainAtlasView"]
+    assert isinstance(view, dict)
+    rows = view["proofRows"]
+    assert isinstance(rows, list)
+    rows[0]["workLabel"] = "x" * 57
+
+    failures = runtime_layout.validate_control_tower_layout(measurements, label="kiosk-1920")
+
+    assert any("lacks a concise work name" in failure for failure in failures)
+
+
+@pytest.mark.parametrize("row_count", [0, 4])
+def test_layout_limits_exact_proof_rows_to_a_readable_window(row_count: int) -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    view = measurements["brainAtlasView"]
+    assert isinstance(view, dict)
+    rows = view["proofRows"]
+    assert isinstance(rows, list)
+    view["proofRows"] = [json.loads(json.dumps(rows[0])) for _ in range(row_count)]
+
+    failures = runtime_layout.validate_control_tower_layout(measurements, label="kiosk-1920")
+
+    assert any(f"renders {row_count} exact proof rows" in failure for failure in failures)
+
+
+@pytest.mark.parametrize("proof_state", ["empty", "unavailable"])
+def test_layout_accepts_truthful_empty_or_unavailable_proof_state(proof_state: str) -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    view = measurements["brainAtlasView"]
+    assert isinstance(view, dict)
+    view["proofState"] = proof_state
+    view["proofRows"] = []
+    view["proofEdges"] = []
+    view["proofEmptyText"] = "No exact proof paths in this window" if proof_state == "empty" else "Exact proof unavailable"
+    view["statusText"] = (
+        "0 working · Memory idle · No exact receipts in window"
+        if proof_state == "empty"
+        else "0 working · Memory telemetry unavailable · Source unavailable"
+    )
+
+    assert runtime_layout.validate_control_tower_layout(measurements, label="kiosk-1920") == []
+
+
+def test_layout_rejects_animated_proof_edges_that_impersonate_memory() -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    view = measurements["brainAtlasView"]
+    assert isinstance(view, dict)
+    edges = view["proofEdges"]
+    assert isinstance(edges, list)
+    edges[0].update({
+        "animationName": "memory-flow-travel",
+        "animated": True,
+        "memoryFlowClass": True,
+        "liveClass": True,
+    })
+
+    failures = runtime_layout.validate_control_tower_layout(measurements, label="kiosk-1920")
+
+    assert any("proof edge 1 is animated" in failure for failure in failures)
+    assert any("proof edge 1 impersonates live memory activity" in failure for failure in failures)
+
+
+def test_layout_rejects_shared_agent_node_outside_memory_layer() -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    memory = measurements["memory"]
+    assert isinstance(memory, dict)
+    nodes = memory["atlasAgentNodes"]
+    assert isinstance(nodes, list)
+    nodes[0]["layer"] = "proof"
+
+    failures = runtime_layout.validate_control_tower_layout(measurements, label="kiosk-1920")
+
+    assert any("shared agent node is outside the memory layer" in failure for failure in failures)
 
 
 def test_layout_accepts_idle_atlas_only_when_no_path_is_live_or_animated() -> None:
@@ -483,10 +609,76 @@ def test_layout_accepts_idle_atlas_only_when_no_path_is_live_or_animated() -> No
         edge["live"] = False
         edge["animationName"] = "none"
         edge["animated"] = False
+    atlas_nodes = memory["atlasAgentNodes"]
+    assert isinstance(atlas_nodes, list)
+    for node in atlas_nodes:
+        assert isinstance(node, dict)
+        node["memoryState"] = "idle"
+        node["memoryClass"] = False
+        node["memoryAnimationName"] = "none"
+        node["memoryAnimated"] = False
+        node["animated"] = bool(node["workAnimated"])
     memory["liveEdgeCount"] = 0
     memory["animatedEdgeCount"] = 0
 
     assert runtime_layout.validate_control_tower_layout(measurements, label="reference-2048") == []
+
+
+def test_layout_accepts_working_agent_with_memory_quiet_and_no_live_edge() -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    memory = measurements["memory"]
+    assert isinstance(memory, dict)
+    memory["flowState"] = "idle"
+    edges = memory["edges"]
+    assert isinstance(edges, list)
+    edge = next(row for row in edges if row.get("agent") == "josh2")
+    edge.update({"observedAt": "", "evidenceValid": False, "ageSeconds": None, "live": False, "animationName": "none", "animated": False})
+    memory["liveEdgeCount"] = 0
+    memory["animatedEdgeCount"] = 0
+    nodes = memory["atlasAgentNodes"]
+    assert isinstance(nodes, list)
+    node = next(row for row in nodes if row.get("agent") == "josh2")
+    node.update({"memoryState": "idle", "memoryClass": False, "memoryAnimationName": "none", "memoryAnimated": False, "animated": True})
+
+    assert runtime_layout.validate_control_tower_layout(measurements, label="reference-2048") == []
+
+
+def test_layout_accepts_idle_agent_with_exact_live_memory_path() -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    memory = measurements["memory"]
+    assert isinstance(memory, dict)
+    board = memory["liveWorkAgents"]
+    nodes = memory["atlasAgentNodes"]
+    assert isinstance(board, list)
+    assert isinstance(nodes, list)
+    board_node = next(row for row in board if row.get("agent") == "josh2")
+    board_node["working"] = False
+    atlas_node = next(row for row in nodes if row.get("agent") == "josh2")
+    atlas_node.update({
+        "working": False,
+        "workState": "quiet",
+        "workClass": False,
+        "auraAnimationName": "none",
+        "presenceAnimationName": "none",
+        "workAnimated": False,
+        "animated": True,
+    })
+    memory["workingAgentCount"] = 0
+
+    assert runtime_layout.validate_control_tower_layout(measurements, label="reference-2048") == []
+
+
+def test_layout_rejects_live_work_and_atlas_presence_mismatch() -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    memory = measurements["memory"]
+    assert isinstance(memory, dict)
+    board = memory["liveWorkAgents"]
+    assert isinstance(board, list)
+    next(row for row in board if row.get("agent") == "jaimes")["working"] = True
+
+    failures = runtime_layout.validate_control_tower_layout(measurements, label="reference-2048")
+
+    assert any("do not match Live Work working agents" in failure for failure in failures)
 
 
 def test_layout_accepts_exact_live_path_without_animation_in_reduced_motion() -> None:
@@ -501,6 +693,16 @@ def test_layout_accepts_exact_live_path_without_animation_in_reduced_motion() ->
     live_edge["animationName"] = "none"
     live_edge["animated"] = False
     memory["animatedEdgeCount"] = 0
+    atlas_nodes = memory["atlasAgentNodes"]
+    assert isinstance(atlas_nodes, list)
+    for node in atlas_nodes:
+        assert isinstance(node, dict)
+        node["auraAnimationName"] = "none"
+        node["presenceAnimationName"] = "none"
+        node["memoryAnimationName"] = "none"
+        node["workAnimated"] = False
+        node["memoryAnimated"] = False
+        node["animated"] = False
 
     assert runtime_layout.validate_control_tower_layout(
         measurements,
@@ -537,6 +739,24 @@ def test_layout_rejects_live_path_without_numeric_evidence_age() -> None:
     failures = runtime_layout.validate_control_tower_layout(measurements, label="reference-2048")
 
     assert any("live retrieval path lacks a numeric evidence age" in failure for failure in failures)
+
+
+def test_layout_rejects_live_path_that_is_too_subtle_to_read() -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    memory = measurements["memory"]
+    assert isinstance(memory, dict)
+    edges = memory["edges"]
+    assert isinstance(edges, list)
+    live_edge = edges[0]
+    assert isinstance(live_edge, dict)
+    live_edge.update({"strokeWidth": 2.2, "strokeDasharray": "none", "strokeLinecap": "butt", "filter": "none"})
+
+    failures = runtime_layout.validate_control_tower_layout(measurements, label="reference-2048")
+
+    assert any("not visually pronounced enough" in failure for failure in failures)
+    assert any("lacks a rounded travel beacon" in failure for failure in failures)
+    assert any("lacks a visible moving dash" in failure for failure in failures)
+    assert any("lacks a visible evidence glow" in failure for failure in failures)
 
 
 def test_kiosk_legibility_reports_every_regression() -> None:

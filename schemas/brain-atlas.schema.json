@@ -126,6 +126,19 @@
     "node": {
       "type": "object",
       "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {"kind": {"const": "work"}},
+            "required": ["kind"]
+          },
+          "then": {
+            "properties": {
+              "label": {"maxLength": 56}
+            }
+          }
+        }
+      ],
       "required": ["id", "kind", "label", "observedAt", "receiptCount"],
       "properties": {
         "id": {"type": "string", "pattern": "^(agent|work|receipt|model):[A-Za-z0-9._:-]{1,80}$"},

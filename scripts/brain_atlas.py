@@ -3,8 +3,9 @@
 
 The generator is read-only by default: it opens the Control Tower work ledger
 with SQLite ``mode=ro`` and prints JSON. An output file is written only when
-``--output`` is explicitly supplied. It never reads objectives, details,
-prompts, memory content, account data, or raw origin claims.
+``--output`` is explicitly supplied. It reads only the objective and phase
+needed to derive a privacy-filtered title; it never emits those raw fields or
+reads details, prompts, memory content, account data, or raw origin claims.
 """
 from __future__ import annotations
 
@@ -19,6 +20,13 @@ import sqlite3
 from pathlib import Path
 from typing import Any, Iterable
 from urllib.parse import quote
+
+from brain_atlas_contract import (
+    model_route_node_is_safe,
+    safe_model_route_candidate,
+    safe_work_label,
+    work_label_is_safe,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -40,14 +48,13 @@ STATUSES = {
     "accepted", "planned", "routed", "active", "verifying",
     "done", "blocked", "error", "cancelled",
 }
-MODEL_FAMILIES = {"codex", "antigravity", "ollama", "grok"}
 IDENTIFIER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$")
 SHA256 = re.compile(r"^[a-f0-9]{64}$")
-MODEL_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/+\-]{0,119}$")
 REQUIRED_EVENT_COLUMNS = {
     "event_id", "work_id", "run_id", "generation", "sequence", "kind",
-    "status", "owner_agent", "origin_claim_hash", "model_family", "model_id",
-    "route_verified", "occurred_at", "accepted_revision",
+    "status", "owner_agent", "objective", "phase", "origin_claim_hash",
+    "model_family", "model_id", "route_verified", "occurred_at",
+    "accepted_revision",
 }
 NODE_ORDER = {"agent": 0, "work": 1, "receipt": 2, "model": 3}
 EDGE_ORDER = {"owns": 0, "emitted": 1, "verified-route": 2}
@@ -128,11 +135,7 @@ def verify_source(connection: sqlite3.Connection) -> tuple[int, int]:
 def safe_model_route(row: sqlite3.Row) -> tuple[str, str] | None:
     if int(row["route_verified"] or 0) != 1:
         return None
-    family = str(row["model_family"] or "").strip().lower()
-    model_id = str(row["model_id"] or "").strip()
-    if family not in MODEL_FAMILIES or not MODEL_ID.fullmatch(model_id):
-        return None
-    return family, model_id
+    return safe_model_route_candidate(row["model_family"], row["model_id"])
 
 
 def verified_event(row: sqlite3.Row, *, window_start: dt.datetime, window_end: dt.datetime, source_revision: int) -> bool:
@@ -169,7 +172,7 @@ def read_receipts(
     ).fetchone()[0])
     rows = connection.execute(
         """SELECT event_id,work_id,run_id,generation,sequence,kind,status,
-                  owner_agent,origin_claim_hash,model_family,model_id,
+                  owner_agent,objective,phase,origin_claim_hash,model_family,model_id,
                   route_verified,occurred_at,accepted_revision
            FROM work_events
            WHERE occurred_at >= ? AND occurred_at <= ?
@@ -249,7 +252,9 @@ def build_graph(
             nodes[work_node] = {
                 "id": work_node,
                 "kind": "work",
-                "label": f"Work {work_node.rsplit(':', 1)[-1][:8]}",
+                "label": safe_work_label(
+                    row["objective"], row["phase"], AGENT_LABELS[owner]
+                ),
                 "status": str(row["status"]),
                 "observedAt": observed_at,
                 "receiptCount": 0,
@@ -383,7 +388,7 @@ def atlas_payload(
         "policy": {
             "identifiers": "deterministic-sha256-prefix; canonical agent ids only",
             "edges": "exact accepted work/event keys only; no inferred or fuzzy relationships",
-            "content": "operational receipt metadata only",
+            "content": "privacy-filtered work title and operational receipt metadata only",
             "excludedFields": [
                 "objective", "detail", "origin", "originClaimHash", "workId", "runId", "eventId",
                 "prompts", "memoryContent", "privateAccountData",
@@ -425,6 +430,7 @@ def validate_atlas(payload: dict[str, Any]) -> list[str]:
         problems.append("status")
 
     node_ids: dict[str, str] = {}
+    node_rows: dict[str, dict[str, Any]] = {}
     for node in nodes:
         if not isinstance(node, dict):
             problems.append("node-shape")
@@ -433,10 +439,22 @@ def validate_atlas(payload: dict[str, Any]) -> list[str]:
             problems.append("node-fields")
         identifier = str(node.get("id") or "")
         kind = str(node.get("kind") or "")
+        if kind == "work" and not work_label_is_safe(node.get("label")):
+            problems.append("work-label")
+        if kind == "model" and not model_route_node_is_safe(
+            node.get("family"), node.get("modelId"), node.get("label")
+        ):
+            problems.append("model-route")
         if identifier in node_ids or kind not in NODE_ORDER:
             problems.append("node-identity")
         node_ids[identifier] = kind
+        node_rows[identifier] = node
     edge_ids: set[str] = set()
+    semantic_edges: set[tuple[str, str, str, str]] = set()
+    emitted_by_receipt: dict[str, list[tuple[str, str]]] = {}
+    emitted_by_path: dict[tuple[str, str], int] = {}
+    owns_by_path: dict[tuple[str, str], int] = {}
+    routes_by_receipt: dict[str, int] = {}
     for edge in edges:
         if not isinstance(edge, dict):
             problems.append("edge-shape")
@@ -451,8 +469,18 @@ def validate_atlas(payload: dict[str, Any]) -> list[str]:
         if identifier in edge_ids or kind not in EDGE_ORDER:
             problems.append("edge-identity")
         edge_ids.add(identifier)
+        semantic_key = (kind, source_id, target_id, receipt_id)
+        if semantic_key in semantic_edges:
+            problems.append("duplicate-edge")
+        semantic_edges.add(semantic_key)
+        if kind in EDGE_ORDER and identifier != edge_id(
+            kind, source_id, target_id, receipt_id
+        ):
+            problems.append("edge-id")
         if source_id not in node_ids or target_id not in node_ids or node_ids.get(receipt_id) != "receipt":
             problems.append("dangling-edge")
+            continue
+        if kind not in EDGE_ORDER:
             continue
         expected = {
             "owns": ("agent", "work"),
@@ -461,6 +489,38 @@ def validate_atlas(payload: dict[str, Any]) -> list[str]:
         }[kind]
         if (node_ids[source_id], node_ids[target_id]) != expected:
             problems.append("edge-type")
+            continue
+        if kind == "owns":
+            owns_by_path[(target_id, receipt_id)] = (
+                owns_by_path.get((target_id, receipt_id), 0) + 1
+            )
+        elif kind == "emitted":
+            if target_id != receipt_id:
+                problems.append("ambiguous-path")
+            emitted_by_receipt.setdefault(receipt_id, []).append((source_id, receipt_id))
+            emitted_by_path[(source_id, receipt_id)] = (
+                emitted_by_path.get((source_id, receipt_id), 0) + 1
+            )
+        else:
+            if source_id != receipt_id:
+                problems.append("route-proof")
+            if node_rows.get(source_id, {}).get("routeVerified") is not True:
+                problems.append("route-proof")
+            routes_by_receipt[source_id] = routes_by_receipt.get(source_id, 0) + 1
+
+    receipt_ids = {
+        identifier for identifier, kind in node_ids.items() if kind == "receipt"
+    }
+    for receipt_id in receipt_ids:
+        paths = emitted_by_receipt.get(receipt_id, [])
+        if len(paths) != 1 or routes_by_receipt.get(receipt_id, 0) > 1:
+            problems.append("ambiguous-path")
+    for path, emitted_count in emitted_by_path.items():
+        if emitted_count != 1 or owns_by_path.get(path, 0) != 1:
+            problems.append("ambiguous-path")
+    for path, owns_count in owns_by_path.items():
+        if owns_count != 1 or emitted_by_path.get(path, 0) != 1:
+            problems.append("ambiguous-path")
     return sorted(set(problems))
 
 

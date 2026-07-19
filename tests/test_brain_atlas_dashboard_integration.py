@@ -75,7 +75,7 @@ def valid_atlas() -> dict:
             {
                 "id": work,
                 "kind": "work",
-                "label": "Work 11111111",
+                "label": "Refresh Control Tower health",
                 "status": "done",
                 "observedAt": generated,
                 "receiptCount": 1,
@@ -131,6 +131,116 @@ def valid_atlas() -> dict:
     }
 
 
+def valid_memory_operations() -> dict:
+    generated = "2026-07-18T16:00:00Z"
+    retrieval_at = "2026-07-18T15:59:00Z"
+    return {
+        "updatedAt": generated,
+        "status": "watch",
+        "summary": "Two governed candidates are awaiting review.",
+        "registry": {"active": 10, "superseded": 1, "expired": 2, "sources": 4},
+        "review": {
+            "pending": 2,
+            "disputed": 0,
+            "lastRun": "2026-07-18T15:00:00Z",
+            "lastStatus": "ok",
+        },
+        "retrieval": {
+            "queries7d": 100,
+            "hits7d": 90,
+            "hitRate": 90.0,
+            "avgLatencyMs": 1.2,
+            "feedback30d": 10,
+            "helpful30d": 6,
+            "ignored30d": 3,
+            "corrected30d": 1,
+            "harmful30d": 0,
+            "qualityRate": 60.0,
+            "qualityDefinition": "helpful feedback divided by all feedback, including ignored, corrected, and harmful",
+            "preflights7d": 2,
+            "selected30d": 5,
+            "used30d": 4,
+            "reuseIgnored30d": 1,
+            "selectedUseRate": 80.0,
+        },
+        "governance": {
+            "sourceOfTruth": "Checked-in operating rules",
+            "autoPromote": "Verified low-risk facts only",
+            "manualReview": "Sensitive changes require review",
+            "privacy": "Owner-scoped by default",
+        },
+        "agentAccess": {
+            "josh2": "local CLI",
+            "jaimes": "shared SSH client",
+            "jain": "shared SSH client",
+            "joshex": "oversight SSH client",
+        },
+        "activity": {
+            "schemaVersion": 1,
+            "generatedAt": generated,
+            "windowMinutes": 30,
+            "motionWindowSeconds": 90,
+            "source": {"name": "governed-memory-registry", "verified": True},
+            "privacy": {
+                "queryIncluded": False,
+                "contentIncluded": False,
+                "rawIdentifiersIncluded": False,
+                "reasonsIncluded": False,
+                "countsOnly": True,
+            },
+            "counts": {
+                "retrievals": 1,
+                "hits": 1,
+                "misses": 0,
+                "selected": 1,
+                "used": 1,
+                "reuseIgnored": 0,
+                "feedback": 1,
+                "helpful": 1,
+                "feedbackIgnored": 0,
+                "corrected": 0,
+                "harmful": 0,
+                "proposed": 0,
+                "promoted": 0,
+            },
+            "lastObservedAt": {
+                "retrieval": retrieval_at,
+                "hit": retrieval_at,
+                "miss": None,
+                "selected": "2026-07-18T15:59:05Z",
+                "used": "2026-07-18T15:59:10Z",
+                "reuseIgnored": None,
+                "feedback": "2026-07-18T15:59:10Z",
+                "corrected": None,
+                "proposed": None,
+                "promoted": None,
+            },
+            "agents": [
+                {
+                    "agent": "joshex",
+                    "retrievals": 1,
+                    "hits": 1,
+                    "misses": 0,
+                    "lastRetrievalAt": retrieval_at,
+                },
+                {"agent": "josh2", "retrievals": 0, "hits": 0, "misses": 0, "lastRetrievalAt": None},
+                {"agent": "jaimes", "retrievals": 0, "hits": 0, "misses": 0, "lastRetrievalAt": None},
+                {"agent": "jain", "retrievals": 0, "hits": 0, "misses": 0, "lastRetrievalAt": None},
+            ],
+        },
+        "privacy": {
+            "checkedAt": generated,
+            "ok": True,
+            "policy": "deny-by-default",
+            "publicLabels": ["dashboard-safe", "public"],
+            "activePublic": 8,
+            "activeOwnerPrivate": 2,
+            "unknownLabelsOwnerScoped": 0,
+            "crossOwnerPrivateLeaks": 0,
+        },
+    }
+
+
 class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -145,6 +255,7 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertEqual(4, clean["counts"]["nodes"])
         self.assertNotIn("policy", clean)
         self.assertNotIn("never-forward-this", json.dumps(clean))
+        self.assertEqual("Refresh Control Tower health", clean["nodes"][1]["label"])
         self.assertEqual(
             ["owns", "emitted", "verified-route"],
             [edge["kind"] for edge in clean["edges"]],
@@ -171,6 +282,35 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertEqual([], clean["nodes"])
         self.assertNotIn(secret, json.dumps(clean))
 
+    def test_work_label_boundary_accepts_plain_titles_and_rejects_opaque_or_private_content(self) -> None:
+        safe = valid_atlas()
+        safe["nodes"][1]["label"] = "Verify Telegram handoff receipts"
+
+        clean = self.update.sanitize_brain_atlas(safe, "2026-07-18T16:01:00Z")
+
+        self.assertEqual("ready", clean["status"])
+        self.assertEqual("Verify Telegram handoff receipts", clean["nodes"][1]["label"])
+
+        unsafe_labels = (
+            "Work 11111111",
+            "operator@example.com",
+            "/Users/operator/private/account.json",
+            "api_key:supersecretvalue123",
+        )
+        for unsafe_label in unsafe_labels:
+            with self.subTest(unsafe_label=unsafe_label):
+                source = valid_atlas()
+                source["nodes"][1]["label"] = unsafe_label
+                rejected = self.update.sanitize_brain_atlas(
+                    source,
+                    "2026-07-18T16:01:00Z",
+                )
+
+                self.assertEqual("unavailable", rejected["status"])
+                self.assertEqual("generated-payload-invalid", rejected["emptyReason"])
+                self.assertEqual([], rejected["nodes"])
+                self.assertNotIn(unsafe_label, json.dumps(rejected))
+
     def test_inferred_or_dangling_edges_fail_closed(self) -> None:
         source = valid_atlas()
         source["edges"][0]["evidenceReceipt"] = "receipt:" + "9" * 24
@@ -179,6 +319,69 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
 
         self.assertEqual("unavailable", clean["status"])
         self.assertEqual([], clean["edges"])
+
+    def test_verified_route_requires_the_receipt_verified_bit(self) -> None:
+        source = valid_atlas()
+        source["nodes"][2]["routeVerified"] = False
+
+        clean = self.update.sanitize_brain_atlas(source, "2026-07-18T16:01:00Z")
+
+        self.assertEqual("unavailable", clean["status"])
+        self.assertEqual([], clean["edges"])
+
+    def test_each_work_receipt_has_exactly_one_canonical_owner(self) -> None:
+        source = valid_atlas()
+        source["nodes"].append({
+            "id": "agent:jaimes",
+            "kind": "agent",
+            "label": "JAIMES",
+            "observedAt": source["generatedAt"],
+            "receiptCount": 1,
+        })
+        source["edges"].append({
+            "id": "edge:" + "7" * 24,
+            "kind": "owns",
+            "source": "agent:jaimes",
+            "target": source["nodes"][1]["id"],
+            "evidenceReceipt": source["nodes"][2]["id"],
+            "observedAt": source["generatedAt"],
+        })
+        source["counts"]["nodes"] += 1
+        source["counts"]["agents"] += 1
+        source["counts"]["edges"] += 1
+
+        clean = self.update.sanitize_brain_atlas(source, "2026-07-18T16:01:00Z")
+
+        self.assertEqual("unavailable", clean["status"])
+        self.assertEqual([], clean["edges"])
+
+    def test_duplicate_emitted_or_verified_paths_fail_closed(self) -> None:
+        for edge_index in (1, 2):
+            with self.subTest(kind=valid_atlas()["edges"][edge_index]["kind"]):
+                source = valid_atlas()
+                duplicate = copy.deepcopy(source["edges"][edge_index])
+                duplicate["id"] = "edge:" + ("7" if edge_index == 1 else "8") * 24
+                source["edges"].append(duplicate)
+                source["counts"]["edges"] += 1
+
+                clean = self.update.sanitize_brain_atlas(
+                    source,
+                    "2026-07-18T16:01:00Z",
+                )
+
+                self.assertEqual("unavailable", clean["status"])
+                self.assertEqual([], clean["edges"])
+
+    def test_secret_shaped_model_id_fails_closed(self) -> None:
+        source = valid_atlas()
+        secret_model = "sk-proj-ABCDEFGHIJKLMN123456"
+        source["nodes"][3]["modelId"] = secret_model
+        source["nodes"][3]["label"] = f"codex/{secret_model}"
+
+        clean = self.update.sanitize_brain_atlas(source, "2026-07-18T16:01:00Z")
+
+        self.assertEqual("unavailable", clean["status"])
+        self.assertNotIn(secret_model, json.dumps(clean))
 
     def test_scope_and_cap_are_hard_validation_boundaries(self) -> None:
         source = valid_atlas()
@@ -234,6 +437,128 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertEqual("ready", live["brainAtlas"]["status"])
         self.assertNotIn("policy", live["brainAtlas"])
 
+    def test_memory_operations_projects_only_bounded_counts_and_timestamps(self) -> None:
+        source = valid_memory_operations()
+        clean = self.update.sanitize_memory_operations(
+            source,
+            "2026-07-18T16:01:00Z",
+        )
+        second_pass = self.update.sanitize_memory_operations(
+            clean,
+            "2026-07-18T16:01:00Z",
+        )
+
+        self.assertEqual("ready", clean["status"])
+        self.assertEqual(
+            {
+                "schemaVersion", "updatedAt", "status", "source", "privacy",
+                "registry", "review", "retrieval", "activity",
+            },
+            set(clean),
+        )
+        self.assertEqual(
+            {"name": "governed-memory-registry", "verified": True},
+            clean["source"],
+        )
+        self.assertEqual(
+            ["joshex", "josh2", "jaimes", "jain"],
+            [row["agent"] for row in clean["activity"]["agents"]],
+        )
+        self.assertEqual(clean, second_pass)
+        serialized = json.dumps(clean)
+        for private_field in ("summary", "governance", "agentAccess", "qualityDefinition", "publicLabels"):
+            self.assertNotIn(private_field, serialized)
+
+    def test_memory_operations_rejects_content_and_unknown_fields_without_echo(self) -> None:
+        secret = "private-memory-content-never-publish"
+        mutations = []
+
+        top_level = valid_memory_operations()
+        top_level["memoryContent"] = secret
+        mutations.append(top_level)
+
+        activity_content = valid_memory_operations()
+        activity_content["activity"]["query"] = secret
+        mutations.append(activity_content)
+
+        agent_identifier = valid_memory_operations()
+        agent_identifier["activity"]["agents"][0]["memoryId"] = secret
+        mutations.append(agent_identifier)
+
+        for source in mutations:
+            with self.subTest(keys=sorted(source)):
+                clean = self.update.sanitize_memory_operations(
+                    source,
+                    "2026-07-18T16:01:00Z",
+                )
+                self.assertEqual("unavailable", clean["status"])
+                self.assertFalse(clean["source"]["verified"])
+                self.assertNotIn(secret, json.dumps(clean))
+
+    def test_memory_operations_rejects_forged_times_or_unverified_source(self) -> None:
+        forged = valid_memory_operations()
+        forged["activity"]["lastObservedAt"]["retrieval"] = "2026-07-18T18:00:00Z"
+        forged["activity"]["agents"][0]["lastRetrievalAt"] = "2026-07-18T18:00:00Z"
+
+        unverified = valid_memory_operations()
+        unverified["activity"]["source"]["verified"] = False
+
+        for source in (forged, unverified):
+            clean = self.update.sanitize_memory_operations(
+                source,
+                "2026-07-18T16:01:00Z",
+            )
+            self.assertEqual("unavailable", clean["status"])
+            self.assertEqual(0, clean["activity"]["counts"]["retrievals"])
+            self.assertIsNone(clean["activity"]["lastObservedAt"]["retrieval"])
+
+    def test_memory_operations_requires_each_canonical_agent_and_privacy_flag(self) -> None:
+        duplicate_agent = valid_memory_operations()
+        duplicate_agent["activity"]["agents"][3]["agent"] = "joshex"
+
+        unsafe_privacy = valid_memory_operations()
+        unsafe_privacy["activity"]["privacy"]["contentIncluded"] = True
+
+        for source in (duplicate_agent, unsafe_privacy):
+            clean = self.update.sanitize_memory_operations(
+                source,
+                "2026-07-18T16:01:00Z",
+            )
+            self.assertEqual("unavailable", clean["status"])
+
+    def test_memory_operations_enforces_count_and_motion_window_caps(self) -> None:
+        excessive_count = valid_memory_operations()
+        excessive_count["activity"]["counts"]["retrievals"] = 100_001
+        excessive_count["activity"]["counts"]["hits"] = 100_001
+        excessive_count["activity"]["agents"][0]["retrievals"] = 100_001
+        excessive_count["activity"]["agents"][0]["hits"] = 100_001
+
+        excessive_window = valid_memory_operations()
+        excessive_window["activity"]["windowMinutes"] = 121
+
+        for source in (excessive_count, excessive_window):
+            clean = self.update.sanitize_memory_operations(
+                source,
+                "2026-07-18T16:01:00Z",
+            )
+            self.assertEqual("unavailable", clean["status"])
+
+    def test_live_dashboard_resanitizes_memory_operations(self) -> None:
+        source = valid_memory_operations()
+        clean = self.update.sanitize_memory_operations(
+            source,
+            "2026-07-18T16:01:00Z",
+        )
+        clean["activity"]["query"] = "injected-after-initial-load"
+
+        live = self.update.build_live_dashboard({
+            "lastUpdated": "2026-07-18T16:01:00Z",
+            "memoryOperations": clean,
+        })
+
+        self.assertEqual("unavailable", live["memoryOperations"]["status"])
+        self.assertNotIn("injected-after-initial-load", json.dumps(live))
+
     def test_generated_stage_atlas_round_trips_when_present(self) -> None:
         generated_path = MISSION_CONTROL / "data" / "brain-atlas.json"
         if not generated_path.is_file():
@@ -256,69 +581,107 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertTrue(all(edge["kind"] in {"owns", "emitted", "verified-route"} for edge in clean["edges"]))
         self.assertEqual(clean, written["brainAtlas"])
 
-    def test_ui_contract_is_activity_first_with_secondary_exact_evidence(self) -> None:
+    def test_ui_contract_is_one_unified_observable_graph_with_exact_static_proof(self) -> None:
         main = (MISSION_CONTROL / "v2-react" / "src" / "main.tsx").read_text(encoding="utf-8")
         styles = (MISSION_CONTROL / "v2-react" / "src" / "styles.css").read_text(encoding="utf-8")
         component = main[main.index("const BRAIN_ATLAS_LAYER_ORDER"):main.index("function AgentWorkBoard")]
+        unified_svg = component[component.index("<svg"):component.index("</svg>")]
 
         self.assertIn('["agent", "work", "receipt", "model"]', component)
-        self.assertIn('data-atlas-region="memory"', component)
-        self.assertIn('data-atlas-region="receipts"', component)
-        self.assertIn('const [atlasView, setAtlasView] = useState<BrainAtlasMode>("activity")', component)
-        self.assertIn('role="tablist" aria-label="Brain Atlas views"', component)
-        self.assertIn('data-atlas-view-option="activity"', component)
-        self.assertIn('data-atlas-view-option="evidence"', component)
-        self.assertIn('aria-controls="brain-atlas-memory-panel"', component)
-        self.assertIn('aria-controls="brain-atlas-evidence-panel"', component)
-        self.assertIn('aria-selected={atlasView === "activity"}', component)
-        self.assertIn('aria-selected={atlasView === "evidence"}', component)
-        self.assertIn('hidden={atlasView !== "activity"}', component)
-        self.assertIn('hidden={atlasView !== "evidence"}', component)
-        self.assertIn('const activityTone = activity ? "clear" : "risk"', component)
-        self.assertIn('const evidenceTone = unavailable ? "risk"', component)
-        self.assertIn('const selectedTone = atlasView === "activity" ? activityTone : evidenceTone', component)
+        self.assertEqual(1, component.count('data-atlas-region="unified"'))
+        self.assertEqual(1, component.count('data-atlas-view-panel="unified"'))
+        self.assertIn('data-atlas-view="unified"', component)
+        self.assertNotIn('data-atlas-region="memory"', component)
+        self.assertNotIn('data-atlas-region="receipts"', component)
+        self.assertNotIn('role="tablist"', component)
+        self.assertNotIn('data-atlas-view-option=', component)
+        self.assertNotIn("setAtlasView", component)
+        self.assertIn('id="brain-atlas-unified-panel"', component)
+        self.assertIn('aria-labelledby="brain-atlas-unified-heading"', component)
+        self.assertIn('aria-describedby="brain-atlas-unified-description"', component)
+        self.assertIn('data-atlas-layer="memory"', unified_svg)
+        self.assertIn('data-atlas-layer="proof"', unified_svg)
+        self.assertIn('data-memory-source="governed-memory-registry"', unified_svg)
+        self.assertIn('data-proof-source="exact-receipt-ledger"', unified_svg)
+        self.assertIn('data-proof-animated="false"', unified_svg)
+        self.assertGreaterEqual(unified_svg.count('data-proof-animated="false"'), 2)
         self.assertIn('data-atlas-view-tone={selectedTone}', component)
-        self.assertIn('aria-labelledby="brain-atlas-tab-activity"', component)
-        self.assertIn('aria-labelledby="brain-atlas-tab-evidence"', component)
-        self.assertIn('aria-describedby="brain-atlas-memory-description"', component)
-        self.assertIn('aria-describedby="brain-atlas-evidence-description"', component)
-        self.assertIn('event.key === "ArrowRight"', component)
-        self.assertIn('event.key === "ArrowLeft"', component)
-        self.assertIn('event.key === "Home"', component)
-        self.assertIn('event.key === "End"', component)
-        self.assertIn("Memory activity", component)
-        self.assertIn("Work execution proof", component)
-        self.assertIn("Proof &amp; evidence", component)
-        self.assertIn("30}-minute live view", component)
-        self.assertIn("Observable activity—not private reasoning", component)
-        self.assertIn("Exact audit paths showing what ran: agent → work → timestamped receipt → verified model", component)
-        self.assertIn("exact receipt-backed edges", component)
-        self.assertIn("No inferred relationships are shown", component)
-        self.assertIn("verifiedMemoryActivity(rawActivity)", component)
+        self.assertIn("Live activity + exact proof", component)
+        self.assertIn("One view: shared agents, governed memory receipts, and static proof of execution", component)
+        self.assertIn("This is observable activity—not private reasoning", component)
+        self.assertIn("This visualization shows observable operations and evidence, not private model reasoning or memory contents", component)
+        self.assertIn('aria-label="Brain Atlas unified observable agent activity and exact execution evidence"', component)
+        self.assertIn("Only governed memory receipt paths move when a recent exact registry timestamp exists", component)
+        self.assertIn("static, exact agent to named work to timestamped receipt to verified model paths", component)
+        self.assertIn("LIVE AGENTS + GOVERNED MEMORY", component)
+        self.assertIn("EXACT EXECUTION PROOF · STATIC AUDIT PATHS", component)
+        self.assertIn("sanitizedMemoryActivity(memoryOperations?.activity)", component)
         self.assertIn("memorySignalIsRecent", component)
-        self.assertIn('data-evidence-source="governed-memory-registry"', component)
+        self.assertIn("ageMs >= -5_000", component)
+        self.assertIn("Math.min(100", component)
         self.assertIn("data-observed-at", component)
+        self.assertIn("data-agent-working", component)
+        self.assertIn("data-work-state", component)
+        self.assertIn("data-memory-state", component)
+        self.assertIn("is-work-active", component)
+        self.assertIn("is-memory-live", component)
+        self.assertIn("verified memory retrieval live", component)
+        self.assertIn('`Quiet · ${row.retrievals} retrieval', component)
+        self.assertIn('const emittedEdges = receiptEdges.filter((edge) => edge.kind === "emitted")', component)
+        self.assertIn('const ownsEdges = receiptEdges.filter((edge) => edge.kind === "owns")', component)
+        self.assertIn('const verifiedEdges = receiptEdges.filter((edge) => edge.kind === "verified-route")', component)
+        self.assertIn("emittedEdges.length !== 1 || ownsEdges.length !== 1 || verifiedEdges.length !== 1", component)
+        self.assertIn("owns.target !== work.id || verified.source !== receipt.id", component)
+        self.assertIn("edge.evidenceReceipt === receipt.id", component)
+        self.assertIn("data-proof-row={row.id}", component)
+        self.assertIn("data-work-label={row.workLabel}", component)
+        self.assertIn("data-receipt={row.receipt.id}", component)
+        self.assertIn("data-model={row.model.id}", component)
+        self.assertIn('data-route-verified="true"', component)
+        self.assertIn('return unsafe ? "Verified work" : label', component)
+        self.assertIn("const opaqueWorkId = /^Work [a-f0-9]{8}$/i.test(label)", component)
+        self.assertIn("compactText(row.workLabel, 42)", component)
+        self.assertIn("Static audit evidence, not reasoning", component)
+        self.assertIn("const agentY = agentIndex >= 0 ? 41 + agentIndex * 52 : 119", component)
+        self.assertIn('d={`M 168 ${agentY}', component)
+        self.assertIn('d={`M 168 ${y + 19}', component)
+        self.assertIn("Shared agent nodes show", component)
+        self.assertEqual(1, component.count("memory-flow-node is-agent"))
+        self.assertIn("liveWorkPresentationForAgent(agent, statusByAgent.get(agent), workItems)", component)
+        self.assertIn("statuses={state.statuses}", main)
+        self.assertIn("const liveWorkItems = useMemo(() => buildWorkItems(state), [state])", main)
+        self.assertGreaterEqual(main.count("workItems={liveWorkItems}"), 2)
         self.assertIn('recent("used") ? " is-live" : ""', component)
         self.assertIn("const BRAIN_ATLAS_VISIBLE_RECEIPTS = 3", main)
-        self.assertIn("const graphHeight = 260", component)
-        self.assertIn("layerTop + ((layerBottom - layerTop) * index) / (layerNodes.length - 1)", component)
-        self.assertIn("Moving paths require a recent exact registry timestamp", component)
-        self.assertIn("This does not expose memory content or internal model reasoning", component)
+        self.assertIn('viewBox="0 0 1000 376"', component)
         self.assertIn("not learned", component)
         self.assertNotIn("forceSimulation", component)
         self.assertNotIn("d3-force", component)
         self.assertNotIn("Math.random", component)
 
         self.assertIn(".memory-flow-edge.is-live {", styles)
-        self.assertIn("animation: memory-flow-travel 1.05s linear infinite;", styles)
+        self.assertIn("stroke-width: 3.2;", styles)
+        self.assertIn(".memory-flow-edge.is-retrieval.is-live", styles)
+        self.assertIn("stroke: rgba(101, 217, 255, 0.96);", styles)
+        self.assertIn("animation: memory-flow-travel 0.72s linear infinite;", styles)
         self.assertIn("@keyframes memory-flow-travel", styles)
-        self.assertIn("#brain-atlas .brain-atlas-section[hidden]", styles)
-        self.assertIn("display: none !important;", styles)
-        self.assertIn("#brain-atlas .brain-atlas-view-switch", styles)
-        self.assertIn("flex: 0 0 50px;", styles)
-        self.assertIn("min-height: 44px;", styles)
+        self.assertIn("@keyframes memory-agent-presence-halo", styles)
+        self.assertIn("@keyframes memory-agent-presence-dot", styles)
+        self.assertIn("transform-box: fill-box;", styles)
+        self.assertIn("@keyframes memory-node-live-pulse", styles)
+        self.assertIn(".memory-flow-node.is-work-active .memory-flow-node-aura", styles)
+        proof_edge_css = styles[
+            styles.index(".brain-atlas-proof-edge {"):
+            styles.index(".brain-atlas-proof-work rect")
+        ]
+        self.assertIn("stroke-width: 1.25;", proof_edge_css)
+        self.assertNotIn("animation:", proof_edge_css)
+        self.assertNotIn("brain-atlas-proof-edge is-live", component)
+        self.assertIn("#brain-atlas .brain-atlas-section.is-unified", styles)
         reduced_motion = styles[styles.index("@media (prefers-reduced-motion: reduce)", styles.index("@keyframes memory-flow-travel")) :]
         self.assertIn(".memory-flow-edge.is-live", reduced_motion)
+        self.assertIn(".memory-flow-node.is-work-active .memory-flow-node-aura", reduced_motion)
+        self.assertIn(".memory-flow-node.is-work-active .memory-flow-presence-dot", reduced_motion)
         self.assertIn("animation: none !important;", reduced_motion)
 
     def test_atlas_and_finops_are_always_visible_in_matched_grid_cells(self) -> None:
@@ -340,10 +703,9 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertIn(".kiosk-grid > #brain-atlas { grid-area: atlas; }", desktop_layout)
         self.assertIn(".kiosk-grid > #finops-dashboard { grid-area: finops; }", desktop_layout)
         self.assertIn("height: 100% !important;", desktop_layout)
-        self.assertIn(".brain-atlas-section.is-memory", styles)
-        self.assertIn(".brain-atlas-section.is-evidence", styles)
-        self.assertGreaterEqual(styles.count("flex: 1 1 auto;"), 2)
-        self.assertIn("#brain-atlas .brain-atlas-section[hidden]", styles)
+        self.assertIn(".brain-atlas-section.is-unified", styles)
+        self.assertIn("flex: 1 1 auto;", styles)
+        self.assertIn(".memory-flow-map {", styles)
 
     def test_kiosk_respects_user_motion_preference_and_guard_protects_launcher(self) -> None:
         launcher = (MISSION_CONTROL / "scripts" / "open_mission_control_kiosk.sh").read_text(encoding="utf-8")
