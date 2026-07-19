@@ -124,6 +124,19 @@ Checked-in `AGENTS.md`, `MEMORY.md`, and `agent-skills` remain authoritative. Th
 
 Use `agent-skills` as the durable source for shared agent skills/runbooks. When these skills change, sync them into each active host's `~/.codex/skills` directory and update `data/agent-skill-inventory.json`.
 
+## Linear Durable Work Ledger
+
+Control Tower remains the source of truth for live execution, heartbeats, queues, current jobs, and agent availability. Linear is the durable planning layer for work that must survive the current execution: approved enhancements, confirmed bugs or regressions, approved proposals, cross-session initiatives, and unresolved follow-ups that need an owner.
+
+- Apply `agent-skills/linear-work-tracking/SKILL.md` and `config/linear-integration.json` before creating or updating ecosystem issues.
+- Search by Control Tower `workId` or proposal ID before creating an issue. Reuse one issue across handoffs and lifecycle changes.
+- Update Linear only at meaningful boundaries: accepted, started, blocked, verifying, completed, or cancelled. Never mirror heartbeats, routine jobs, Telegram replies, live-card edits, transient telemetry, or self-healed alerts.
+- Linear ownership does not grant or bypass a shared-source edit lease. Agents may prepare, research, test unrelated surfaces, and coordinate in parallel while the canonical lease continues to protect source edits.
+- JOSHeX, Josh 2.0, and JAIMES use their connected Linear Codex tools. J.A.I.N delegates durable issue writes to the JAIMES Codex lane until a verified headless connector is intentionally added.
+- Store only dashboard-safe objectives, acceptance criteria, owner lane, priority, approval state, stable work references, and safe artifact links. Never store raw prompts, raw emails, private account content, OAuth payloads, tokens, cookies, or credentials.
+
+#JAIMES: Linear tracks durable work boundaries; Control Tower remains authoritative for live state and shared edit leases remain mandatory.
+
 ## JOSHeX Device Resource Guardrail
 
 JOSHeX runs on Josh's personal MacBook. Treat this device as the trusted coordinator and personal-device specialist, not the default execution host for the agent ecosystem.

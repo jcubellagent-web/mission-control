@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "enabled": true,
+  "role": "durable_planning",
+  "sourceOfTruth": {
+    "liveOperations": "control_tower",
+    "durablePlanning": "linear",
+    "decisionsAndMemory": "governed_sidecars"
+  },
+  "workspace": {
+    "name": "Jcubellagent",
+    "teamName": "Jcubellagent",
+    "teamKey": "JCU",
+    "teamId": "7767e152-10d8-4cb7-a353-76837480aafe",
+    "projectName": "Agent Ecosystem",
+    "projectId": "7f7e8df4-50b6-4585-8aad-ff2e0ddc6d62"
+  },
+  "connector": {
+    "mode": "codex_app",
+    "directAgents": ["joshex", "josh2", "jaimes"],
+    "delegatedAgents": {"jain": "jaimes"},
+    "verifiedAt": "2026-07-19T19:19:00Z",
+    "headlessCredentialRequired": false
+  },
+  "tracking": {
+    "createFor": [
+      "approved_enhancement",
+      "confirmed_bug_or_regression",
+      "approved_proposal",
+      "multi_session_work",
+      "unresolved_follow_up",
+      "human_blocker"
+    ],
+    "exclude": [
+      "instant_answer",
+      "short_check",
+      "routine_health_check",
+      "heartbeat",
+      "routine_job_success",
+      "telegram_reply",
+      "live_card_update",
+      "transient_telemetry",
+      "self_healed_alert",
+      "same_session_microtask"
+    ],
+    "updateAt": ["accepted", "started", "blocked", "verifying", "completed", "cancelled"],
+    "searchKeyOrder": ["workId", "proposalId", "durableObjective"],
+    "oneIssueAcrossHandoffs": true
+  },
+  "statusMapping": {
+    "accepted": "Todo",
+    "planned": "Todo",
+    "routed": "Todo",
+    "active": "In Progress",
+    "blocked": "In Progress",
+    "verifying": "In Review",
+    "done": "Done",
+    "cancelled": "Canceled"
+  },
+  "labels": {
+    "agent": {
+      "joshex": "JOSHeX",
+      "josh2": "Josh 2.0",
+      "jaimes": "JAIMES",
+      "jain": "J.A.I.N"
+    },
+    "area": ["Control Tower", "Telegram", "Memory", "Automation", "Integrations", "Reliability"],
+    "onePerGroup": true
+  },
+  "privacy": {
+    "allowed": ["dashboard_safe_objective", "acceptance_criteria", "owner_lane", "priority", "approval_state", "stable_work_reference", "safe_artifact_link"],
+    "forbidden": ["raw_prompt", "raw_message", "raw_email", "private_account_content", "oauth_payload", "token", "cookie", "password", "credential", "wallet_secret", "private_customer_data"]
+  }
+}

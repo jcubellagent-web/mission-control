@@ -1,5 +1,30 @@
 # Agent Runbooks
 
+## Linear Durable Work Tracking
+
+Use Linear for durable agent-ecosystem work, not as a copy of Control Tower. The shared project is `Agent Ecosystem` in team `Jcubellagent` (`JCU`).
+
+Create or reuse an issue when work is an approved enhancement, a confirmed bug or regression, an approved proposal, a multi-session initiative, or an unresolved follow-up with an owner. Skip instant answers, routine health checks, successful scheduled jobs, heartbeats, Telegram delivery events, live-card edits, transient telemetry, and self-healed noise.
+
+Before creating:
+
+1. Read `config/linear-integration.json`.
+2. Search Linear for the Control Tower `workId` or proposal ID.
+3. Reuse the existing issue when found.
+4. Select exactly one `Agent` label and one `Area` label; Linear label groups are mutually exclusive.
+5. Include dashboard-safe acceptance criteria and the stable Control Tower reference.
+
+Lifecycle mapping:
+
+- Accepted, planned, or routed: `Todo`
+- Active: `In Progress`
+- Verifying: `In Review`
+- Done: `Done`
+- Cancelled: `Canceled`
+- Blocked: remain `In Progress` and record the durable blocker; waiting for a source lease is coordination state, not a Josh-facing blocker
+
+JOSHeX, Josh 2.0, and JAIMES have verified connector access. J.A.I.N asks the JAIMES Codex lane to perform a Linear write when needed. If a connector is temporarily unavailable, continue safe execution and preserve the stable work reference in Control Tower rather than creating a duplicate issue later.
+
 ## JOSHeX / Personal Codex
 
 Owns sensitive account connectors, approval decisions, Control Tower code, dashboard validation, task routing, and cross-agent handoffs.
