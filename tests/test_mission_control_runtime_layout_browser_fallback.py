@@ -83,6 +83,52 @@ def valid_kiosk_legibility_measurements() -> dict[str, object]:
             "animatedEdgeCount": 1,
             "animatedInactiveCount": 0,
         },
+        "brainAtlasSections": {
+            "memory": {
+                "contained": True,
+                "heading": "Memory activity",
+                "description": "Verified retrieval, use, feedback, and governed learning.",
+                "headingFontSize": 12,
+                "descriptionFontSize": 9.5,
+                "headingClipped": False,
+                "descriptionClipped": False,
+                "labelledBy": "brain-atlas-memory-heading",
+                "describedBy": "brain-atlas-memory-description",
+                "height": 232,
+                "graphHeight": 148,
+                "graphKind": "svg",
+                "overflowY": 0,
+                "svgTitlePresent": True,
+                "svgDescriptionPresent": True,
+                "primaryGlyphHeights": [8.2],
+                "secondaryGlyphHeights": [7.2],
+                "layerGlyphHeights": [],
+                "nodeOverlapCount": 0,
+            },
+            "receipts": {
+                "contained": True,
+                "heading": "Work execution proof",
+                "description": "Agent to work to timestamped receipt to verified model.",
+                "headingFontSize": 12,
+                "descriptionFontSize": 9.5,
+                "headingClipped": False,
+                "descriptionClipped": False,
+                "labelledBy": "brain-atlas-evidence-heading",
+                "describedBy": "brain-atlas-evidence-description",
+                "height": 214,
+                "graphHeight": 150,
+                "graphKind": "svg",
+                "overflowY": 0,
+                "svgTitlePresent": True,
+                "svgDescriptionPresent": True,
+                "primaryGlyphHeights": [8.2],
+                "secondaryGlyphHeights": [7.2],
+                "layerGlyphHeights": [9.5],
+                "nodeOverlapCount": 0,
+            },
+            "gap": 5,
+            "receiptShare": 0.48,
+        },
         "liveWork": {
             "objectives": [{"fontSize": 24, "clipped": False}],
             "names": [{"fontSize": 17, "clipped": False}],
@@ -279,6 +325,80 @@ def test_kiosk_legibility_accepts_exact_contract_boundaries() -> None:
     assert runtime_layout.validate_kiosk_legibility(valid_kiosk_legibility_measurements()) == []
 
 
+def test_layout_rejects_cramped_or_undocumented_brain_atlas_sections() -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    sections = measurements["brainAtlasSections"]
+    assert isinstance(sections, dict)
+    receipts = sections["receipts"]
+    assert isinstance(receipts, dict)
+    receipts["description"] = ""
+    receipts["descriptionFontSize"] = 8
+    receipts["descriptionClipped"] = True
+    receipts["graphHeight"] = 104
+    receipts["primaryGlyphHeights"] = [6]
+    receipts["secondaryGlyphHeights"] = [5]
+    receipts["layerGlyphHeights"] = [7]
+    receipts["nodeOverlapCount"] = 3
+    sections["receiptShare"] = 0.3
+
+    failures = runtime_layout.validate_control_tower_layout(measurements, label="kiosk-1920")
+
+    assert any("purpose text is missing" in failure for failure in failures)
+    assert any("purpose text is too small or unmeasured" in failure for failure in failures)
+    assert any("heading or purpose text is clipped" in failure for failure in failures)
+    assert any("receipt region receives 30%" in failure for failure in failures)
+    assert any("receipt plot height is 104px" in failure for failure in failures)
+    assert any("receipt primary labels render below 8px" in failure for failure in failures)
+    assert any("receipt layer labels render below 9px" in failure for failure in failures)
+    assert any("3 overlapping same-layer node pair" in failure for failure in failures)
+
+
+def test_layout_rejects_reversed_or_overflowing_brain_atlas_sections() -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    sections = measurements["brainAtlasSections"]
+    assert isinstance(sections, dict)
+    memory = sections["memory"]
+    assert isinstance(memory, dict)
+    memory["contained"] = False
+    memory["overflowY"] = 12
+    sections["gap"] = -8
+
+    failures = runtime_layout.validate_control_tower_layout(measurements, label="kiosk-1920")
+
+    assert any("Memory activity region escapes its panel" in failure for failure in failures)
+    assert any("Memory activity overflows vertically by 12px" in failure for failure in failures)
+    assert any("section gap is -8px" in failure for failure in failures)
+
+
+def test_layout_accepts_visible_receipt_empty_state_without_fake_svg_evidence() -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    sections = measurements["brainAtlasSections"]
+    assert isinstance(sections, dict)
+    receipts = sections["receipts"]
+    assert isinstance(receipts, dict)
+    receipts["graphKind"] = "empty"
+    receipts["svgTitlePresent"] = False
+    receipts["svgDescriptionPresent"] = False
+    receipts["primaryGlyphHeights"] = []
+    receipts["secondaryGlyphHeights"] = []
+    receipts["layerGlyphHeights"] = []
+
+    assert runtime_layout.validate_control_tower_layout(measurements, label="kiosk-1920") == []
+
+
+def test_layout_rejects_missing_section_overflow_measurement() -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    sections = measurements["brainAtlasSections"]
+    assert isinstance(sections, dict)
+    memory = sections["memory"]
+    assert isinstance(memory, dict)
+    memory.pop("overflowY")
+
+    failures = runtime_layout.validate_control_tower_layout(measurements, label="kiosk-1920")
+
+    assert any("Memory activity overflow measurement is missing" in failure for failure in failures)
+
+
 def test_layout_accepts_idle_atlas_only_when_no_path_is_live_or_animated() -> None:
     measurements = valid_kiosk_legibility_measurements()
     memory = measurements["memory"]
@@ -330,6 +450,21 @@ def test_layout_rejects_live_animation_after_exact_evidence_expires() -> None:
     failures = runtime_layout.validate_control_tower_layout(measurements, label="reference-2048")
 
     assert any("live retrieval path evidence is 101s old" in failure for failure in failures)
+
+
+def test_layout_rejects_live_path_without_numeric_evidence_age() -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    memory = measurements["memory"]
+    assert isinstance(memory, dict)
+    edges = memory["edges"]
+    assert isinstance(edges, list)
+    live_edge = edges[0]
+    assert isinstance(live_edge, dict)
+    live_edge["ageSeconds"] = None
+
+    failures = runtime_layout.validate_control_tower_layout(measurements, label="reference-2048")
+
+    assert any("live retrieval path lacks a numeric evidence age" in failure for failure in failures)
 
 
 def test_kiosk_legibility_reports_every_regression() -> None:

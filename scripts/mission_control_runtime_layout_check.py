@@ -16,6 +16,7 @@ import argparse
 import datetime as dt
 import html
 import json
+import math
 import os
 import re
 import signal
@@ -70,6 +71,13 @@ KIOSK_LEGIBILITY_THRESHOLDS = {
     "ledgerRowHeight": 22.0,
     "healthHeightMin": 54.0,
     "healthHeightMax": 58.0,
+    "atlasMemoryMapHeight": 130.0,
+    "atlasReceiptPlotHeight": 130.0,
+    "atlasReceiptShare": 0.35,
+    "atlasPrimaryGlyphHeight": 8.0,
+    "atlasSecondaryGlyphHeight": 7.0,
+    "atlasSectionHeadingFont": 11.0,
+    "atlasSectionDescriptionFont": 9.0,
 }
 INTERNAL_TEXT_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("private filesystem path", re.compile(r"(?:/Users/|/home/)[^\s<]{2,}", re.I)),
@@ -202,6 +210,90 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
       animated: animationName !== 'none',
     };
   });
+  const atlasRoot = document.querySelector('#brain-atlas');
+  const atlasRootRect = atlasRoot ? atlasRoot.getBoundingClientRect() : null;
+  const atlasRegion = (name, graphSelector, primarySelector, secondarySelector, layerSelector = '') => {
+    const element = document.querySelector(`#brain-atlas [data-atlas-region="${name}"]`);
+    if (!visible(element)) return null;
+    const rect = element.getBoundingClientRect();
+    const labelledBy = String(element.getAttribute('aria-labelledby') || '');
+    const describedBy = String(element.getAttribute('aria-describedby') || '');
+    const heading = labelledBy ? document.getElementById(labelledBy) : null;
+    const description = describedBy ? document.getElementById(describedBy) : null;
+    const graph = element.querySelector(graphSelector);
+    const graphRect = visible(graph) ? graph.getBoundingClientRect() : null;
+    const svg = graph?.querySelector('svg');
+    const glyphHeights = (selector) => selector
+      ? [...element.querySelectorAll(selector)].filter(visible).map((node) => round(node.getBoundingClientRect().height))
+      : [];
+    const textState = (node) => {
+      if (!visible(node)) return {fontSize: null, clipped: true};
+      const style = getComputedStyle(node);
+      return {
+        fontSize: round(Number.parseFloat(style.fontSize)),
+        clipped: node.scrollWidth > node.clientWidth + 1 || node.scrollHeight > node.clientHeight + 1,
+      };
+    };
+    const headingState = textState(heading);
+    const descriptionState = textState(description);
+    const nodeBoxes = [...element.querySelectorAll('.brain-atlas-node')].filter(visible).map((node) => {
+      const box = node.getBoundingClientRect();
+      const layer = ['agent', 'work', 'receipt', 'model'].find((kind) => node.classList.contains(`is-${kind}`)) || '';
+      return {layer, top: box.top, bottom: box.bottom, left: box.left, right: box.right};
+    });
+    let nodeOverlapCount = 0;
+    for (let leftIndex = 0; leftIndex < nodeBoxes.length; leftIndex += 1) {
+      for (let rightIndex = leftIndex + 1; rightIndex < nodeBoxes.length; rightIndex += 1) {
+        const left = nodeBoxes[leftIndex];
+        const right = nodeBoxes[rightIndex];
+        if (left.layer !== right.layer) continue;
+        const overlapX = Math.min(left.right, right.right) - Math.max(left.left, right.left);
+        const overlapY = Math.min(left.bottom, right.bottom) - Math.max(left.top, right.top);
+        if (overlapX > 1 && overlapY > 1) nodeOverlapCount += 1;
+      }
+    }
+    return {
+      top: round(rect.top),
+      bottom: round(rect.bottom),
+      height: round(rect.height),
+      contained: Boolean(atlasRootRect)
+        && rect.top >= atlasRootRect.top - 1
+        && rect.bottom <= atlasRootRect.bottom + 1
+        && rect.left >= atlasRootRect.left - 1
+        && rect.right <= atlasRootRect.right + 1,
+      heading: String(heading?.textContent || '').trim(),
+      description: String(description?.textContent || '').trim(),
+      headingFontSize: headingState.fontSize,
+      descriptionFontSize: descriptionState.fontSize,
+      headingClipped: headingState.clipped,
+      descriptionClipped: descriptionState.clipped,
+      labelledBy,
+      describedBy,
+      graphHeight: graphRect ? round(graphRect.height) : null,
+      graphKind: svg ? 'svg' : graph ? 'empty' : 'missing',
+      overflowY: round(Math.max(0, element.scrollHeight - element.clientHeight)),
+      svgTitlePresent: Boolean(svg?.querySelector('title')?.textContent?.trim()),
+      svgDescriptionPresent: Boolean(svg?.querySelector('desc')?.textContent?.trim()),
+      primaryGlyphHeights: glyphHeights(primarySelector),
+      secondaryGlyphHeights: glyphHeights(secondarySelector),
+      layerGlyphHeights: glyphHeights(layerSelector),
+      nodeOverlapCount,
+    };
+  };
+  const atlasMemoryRegion = atlasRegion(
+    'memory',
+    '.memory-flow-map',
+    '.memory-flow-node-title',
+    '.memory-flow-node-detail'
+  );
+  const atlasReceiptRegion = atlasRegion(
+    'receipts',
+    '.brain-atlas-plot, .brain-atlas-empty',
+    '.brain-atlas-node-label, .brain-atlas-receipt-label',
+    '.brain-atlas-node-subline, .brain-atlas-receipt-subline',
+    '.brain-atlas-layer-label'
+  );
+  const atlasRegionHeight = (atlasMemoryRegion?.height || 0) + (atlasReceiptRegion?.height || 0);
   return {
     viewport: {width: root.clientWidth, height: root.clientHeight},
     pageOverflowX: round(Math.max(0, root.scrollWidth - root.clientWidth)),
@@ -224,6 +316,12 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
       liveEdgeCount: memoryEdges.filter((edge) => edge.live).length,
       animatedEdgeCount: memoryEdges.filter((edge) => edge.animated).length,
       animatedInactiveCount: memoryEdges.filter((edge) => edge.animated && !edge.live).length,
+    },
+    brainAtlasSections: {
+      memory: atlasMemoryRegion,
+      receipts: atlasReceiptRegion,
+      gap: atlasMemoryRegion && atlasReceiptRegion ? round(atlasReceiptRegion.top - atlasMemoryRegion.bottom) : null,
+      receiptShare: atlasRegionHeight ? round((atlasReceiptRegion?.height || 0) / atlasRegionHeight) : null,
     },
     liveWork: {
       objectives: measurements('.brain-hero.is-flight-deck .agent-objective-main', '.agent-hero-card'),
@@ -657,6 +755,99 @@ def validate_control_tower_layout(
         if gap < 0:
             failures.append(f"{label}: {order_label} (overlap {_px(abs(gap))})")
 
+    atlas_sections = (
+        measurements.get("brainAtlasSections")
+        if isinstance(measurements.get("brainAtlasSections"), dict)
+        else {}
+    )
+    memory_region = atlas_sections.get("memory")
+    receipt_region = atlas_sections.get("receipts")
+    expected_regions = (
+        (memory_region, "Memory activity", "Verified retrieval"),
+        (receipt_region, "Work execution proof", "timestamped receipt"),
+    )
+    for region, expected_heading, description_token in expected_regions:
+        if not isinstance(region, dict):
+            failures.append(f"{label}: Brain Atlas {expected_heading} region is missing")
+            continue
+        if region.get("contained") is not True:
+            failures.append(f"{label}: Brain Atlas {expected_heading} region escapes its panel")
+        if str(region.get("heading") or "") != expected_heading:
+            failures.append(f"{label}: Brain Atlas {expected_heading} visible heading is missing")
+        description = str(region.get("description") or "")
+        if description_token not in description:
+            failures.append(f"{label}: Brain Atlas {expected_heading} purpose text is missing")
+        if not region.get("labelledBy") or not region.get("describedBy"):
+            failures.append(f"{label}: Brain Atlas {expected_heading} accessible description is missing")
+        heading_font = _number(region.get("headingFontSize"))
+        description_font = _number(region.get("descriptionFontSize"))
+        if heading_font < KIOSK_LEGIBILITY_THRESHOLDS["atlasSectionHeadingFont"]:
+            failures.append(f"{label}: Brain Atlas {expected_heading} heading is too small or unmeasured")
+        if description_font < KIOSK_LEGIBILITY_THRESHOLDS["atlasSectionDescriptionFont"]:
+            failures.append(f"{label}: Brain Atlas {expected_heading} purpose text is too small or unmeasured")
+        if region.get("headingClipped") is not False or region.get("descriptionClipped") is not False:
+            failures.append(f"{label}: Brain Atlas {expected_heading} heading or purpose text is clipped")
+        overflow_y = _number(region.get("overflowY"))
+        if overflow_y < 0:
+            failures.append(f"{label}: Brain Atlas {expected_heading} overflow measurement is missing")
+        elif overflow_y > 1:
+            failures.append(f"{label}: Brain Atlas {expected_heading} overflows vertically by {_px(overflow_y)}")
+
+    if isinstance(memory_region, dict) and isinstance(receipt_region, dict):
+        region_gap = _number(atlas_sections.get("gap"))
+        if region_gap < 4:
+            failures.append(f"{label}: Brain Atlas section gap is {_px(region_gap)} (requires >= 4px)")
+        receipt_share = _number(atlas_sections.get("receiptShare"))
+        minimum_share = KIOSK_LEGIBILITY_THRESHOLDS["atlasReceiptShare"]
+        if receipt_share < minimum_share:
+            failures.append(
+                f"{label}: Brain Atlas receipt region receives {receipt_share:.0%} "
+                f"(requires >= {minimum_share:.0%})"
+            )
+        memory_graph_height = _number(memory_region.get("graphHeight"))
+        minimum_memory_height = KIOSK_LEGIBILITY_THRESHOLDS["atlasMemoryMapHeight"]
+        if memory_graph_height < minimum_memory_height:
+            failures.append(
+                f"{label}: Brain Atlas memory map height is {_px(memory_graph_height)} "
+                f"(requires >= {_px(minimum_memory_height)})"
+            )
+        receipt_graph_height = _number(receipt_region.get("graphHeight"))
+        minimum_receipt_height = KIOSK_LEGIBILITY_THRESHOLDS["atlasReceiptPlotHeight"]
+        if receipt_graph_height < minimum_receipt_height:
+            failures.append(
+                f"{label}: Brain Atlas receipt plot height is {_px(receipt_graph_height)} "
+                f"(requires >= {_px(minimum_receipt_height)})"
+            )
+        for region, region_label in ((memory_region, "memory"), (receipt_region, "receipt")):
+            graph_kind = str(region.get("graphKind") or "svg")
+            if graph_kind == "missing":
+                failures.append(f"{label}: Brain Atlas {region_label} graph is missing")
+                continue
+            if graph_kind == "empty":
+                continue
+            if region.get("svgTitlePresent") is not True or region.get("svgDescriptionPresent") is not True:
+                failures.append(f"{label}: Brain Atlas {region_label} graph lacks an SVG title or description")
+            for key, glyph_label, minimum in (
+                ("primaryGlyphHeights", "primary labels", KIOSK_LEGIBILITY_THRESHOLDS["atlasPrimaryGlyphHeight"]),
+                ("secondaryGlyphHeights", "secondary labels", KIOSK_LEGIBILITY_THRESHOLDS["atlasSecondaryGlyphHeight"]),
+            ):
+                heights = region.get(key) if isinstance(region.get(key), list) else []
+                if not heights:
+                    failures.append(f"{label}: Brain Atlas {region_label} {glyph_label} are missing")
+                elif min(_number(value) for value in heights) < minimum:
+                    failures.append(
+                        f"{label}: Brain Atlas {region_label} {glyph_label} render below {_px(minimum)}"
+                    )
+        if str(receipt_region.get("graphKind") or "svg") == "svg":
+            overlap_count = int(_number(receipt_region.get("nodeOverlapCount"), missing=-1.0))
+            if overlap_count < 0:
+                failures.append(f"{label}: Brain Atlas receipt node-overlap measurement is missing")
+            elif overlap_count:
+                failures.append(f"{label}: Brain Atlas receipt graph has {overlap_count} overlapping same-layer node pair(s)")
+            layer_heights = receipt_region.get("layerGlyphHeights") if isinstance(receipt_region.get("layerGlyphHeights"), list) else []
+            if not layer_heights or min(_number(value) for value in layer_heights) < 9:
+                failures.append(f"{label}: Brain Atlas receipt layer labels render below 9px")
+
     today_jobs = measurements.get("todayJobs") if isinstance(measurements.get("todayJobs"), dict) else {}
     row_count = int(_number(today_jobs.get("rowCount"), missing=-1.0))
     declared_count = int(_number(today_jobs.get("declaredRowCount"), missing=-1.0))
@@ -693,9 +884,12 @@ def validate_control_tower_layout(
     animated_edges = [edge for edge in edges if isinstance(edge, dict) and edge.get("animated") is True]
     for edge in live_edges:
         operation = str(edge.get("operation") or "unknown")
-        age_seconds = _number(edge.get("ageSeconds"))
+        raw_age_seconds = edge.get("ageSeconds")
+        age_seconds = _number(raw_age_seconds)
         if edge.get("evidenceValid") is not True:
             failures.append(f"{label}: live {operation} path lacks an exact observed-at timestamp")
+        elif isinstance(raw_age_seconds, bool) or not isinstance(raw_age_seconds, (int, float)) or not math.isfinite(age_seconds):
+            failures.append(f"{label}: live {operation} path lacks a numeric evidence age")
         elif age_seconds < -5 or age_seconds > MEMORY_ACTIVITY_MAX_AGE_SECONDS:
             failures.append(
                 f"{label}: live {operation} path evidence is {age_seconds:g}s old "
@@ -1219,6 +1413,52 @@ def self_test() -> int:
             "liveEdgeCount": 1,
             "animatedEdgeCount": 1,
             "animatedInactiveCount": 0,
+        },
+        "brainAtlasSections": {
+            "memory": {
+                "contained": True,
+                "heading": "Memory activity",
+                "description": "Verified retrieval, use, feedback, and governed learning.",
+                "headingFontSize": 12,
+                "descriptionFontSize": 9.5,
+                "headingClipped": False,
+                "descriptionClipped": False,
+                "labelledBy": "brain-atlas-memory-heading",
+                "describedBy": "brain-atlas-memory-description",
+                "height": 232,
+                "graphHeight": 148,
+                "graphKind": "svg",
+                "overflowY": 0,
+                "svgTitlePresent": True,
+                "svgDescriptionPresent": True,
+                "primaryGlyphHeights": [8.2],
+                "secondaryGlyphHeights": [7.2],
+                "layerGlyphHeights": [],
+                "nodeOverlapCount": 0,
+            },
+            "receipts": {
+                "contained": True,
+                "heading": "Work execution proof",
+                "description": "Agent to work to timestamped receipt to verified model.",
+                "headingFontSize": 12,
+                "descriptionFontSize": 9.5,
+                "headingClipped": False,
+                "descriptionClipped": False,
+                "labelledBy": "brain-atlas-evidence-heading",
+                "describedBy": "brain-atlas-evidence-description",
+                "height": 214,
+                "graphHeight": 150,
+                "graphKind": "svg",
+                "overflowY": 0,
+                "svgTitlePresent": True,
+                "svgDescriptionPresent": True,
+                "primaryGlyphHeights": [8.2],
+                "secondaryGlyphHeights": [7.2],
+                "layerGlyphHeights": [9.5],
+                "nodeOverlapCount": 0,
+            },
+            "gap": 5,
+            "receiptShare": 0.48,
         },
         "liveWork": {
             "objectives": [{"fontSize": 24, "clipped": False}],

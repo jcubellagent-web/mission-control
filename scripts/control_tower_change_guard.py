@@ -65,6 +65,7 @@ SOURCE_PATHS = (
     "scripts/update_mission_control.py",
     "scripts/control_tower_path_guard.py",
     "scripts/control_tower_change_guard.py",
+    "scripts/control_tower_foreground.py",
     "scripts/memory_registry.py",
     "scripts/memory_sleep_review.py",
     "scripts/memory_registry_smoke_test.py",

@@ -96,7 +96,7 @@ type KioskPulse = {
 const CHANGE_CUE_MS = 3200;
 const LIVE_REFRESH_MS = 10_000;
 const MIN_EXPECTED_OPERATOR_JOBS = 12;
-const BRAIN_ATLAS_VISIBLE_RECEIPTS = 6;
+const BRAIN_ATLAS_VISIBLE_RECEIPTS = 3;
 
 const JOSH_HEADSHOT_URL = new URL("../../assets/josh-headshot.jpg", import.meta.url).href;
 
@@ -3159,16 +3159,19 @@ function BrainAtlasPanel({
     misses: 0,
     lastRetrievalAt: null,
   });
-  const graphHeight = 188;
+  const graphHeight = 168;
   const positions = useMemo(() => {
     const next = new Map<string, { x: number; y: number; node: BrainAtlasNode }>();
     BRAIN_ATLAS_LAYER_ORDER.forEach((kind) => {
       const layerNodes = view.nodes.filter((node) => node.kind === kind);
-      const available = graphHeight - 78;
+      const layerTop = 54;
+      const layerBottom = graphHeight - 23;
       layerNodes.forEach((node, index) => {
         next.set(node.id, {
           x: BRAIN_ATLAS_LAYER_X[kind],
-          y: 48 + (available * (index + 1)) / (layerNodes.length + 1),
+          y: layerNodes.length === 1
+            ? (layerTop + layerBottom) / 2
+            : layerTop + ((layerBottom - layerTop) * index) / (layerNodes.length - 1),
           node,
         });
       });
@@ -3188,6 +3191,17 @@ function BrainAtlasPanel({
     && (atlas.nodes.length > view.nodes.length || atlas.counts.receipts > BRAIN_ATLAS_VISIBLE_RECEIPTS),
   );
   const selectedNode = focusId === "all" ? undefined : atlas?.nodes.find((node) => node.id === focusId);
+  const evidenceSummary = atlas?.status === "ready"
+    ? `Showing ${view.nodes.length}/${atlas.counts.nodes} nodes · ${view.edges.length}/${atlas.counts.edges} edges${selectedNode ? ` · ${selectedNode.label}` : ""}`
+    : "Source unavailable";
+  const evidencePolicyDetail = [
+    sourceExcluded
+      ? `Source cap excluded ${sourceExcluded} path element${sourceExcluded === 1 ? "" : "s"}.`
+      : "No source-cap exclusions.",
+    viewLimited
+      ? `View limited to ${view.shownReceipts}/${view.candidateReceipts} newest exact receipts.`
+      : "All qualifying exact receipts are shown.",
+  ].join(" ");
 
   return (
     <section
@@ -3198,41 +3212,52 @@ function BrainAtlasPanel({
     >
       <header className="brain-atlas-header">
         <div>
-          <p><GitBranch size={13} />Governed external memory</p>
+          <p><GitBranch size={13} />Agent memory &amp; execution evidence</p>
           <h2>Brain Atlas</h2>
         </div>
         <span className={`brain-atlas-state is-${tone}${latestSignalRecent ? " is-live" : ""}`} aria-live="polite">
-          {activityStateLabel}
+          Memory · {activityStateLabel}
         </span>
       </header>
 
-      <div className="brain-atlas-scope" aria-label="Brain Atlas scope and evidence policy">
-        <span>{activity?.windowMinutes || 30}-minute live window</span>
-        <span>Counts and timing only</span>
-        <span>No memory contents</span>
-        <span>{activity?.source.verified ? "Registry verified" : "Registry not verified"}</span>
-      </div>
+      <section
+        className="brain-atlas-section is-memory"
+        data-atlas-region="memory"
+        aria-labelledby="brain-atlas-memory-heading"
+        aria-describedby="brain-atlas-memory-description"
+      >
+        <header className="brain-atlas-section-header">
+          <div>
+            <h3 id="brain-atlas-memory-heading">Memory activity</h3>
+            <p id="brain-atlas-memory-description">Verified retrieval, application, feedback, and governed promotion. Recent exact receipts animate.</p>
+          </div>
+          <div className="brain-atlas-scope" aria-label="Memory activity scope and evidence policy">
+            <span>{activity?.windowMinutes || 30}-minute live view</span>
+            <span>Counts only · no contents</span>
+            <span>{activity?.source.verified ? "Registry verified" : "Registry not verified"}</span>
+          </div>
+        </header>
 
-      <div className="memory-flow-metrics" aria-label="Memory activity summary">
-        <article><span>Retrievals</span><strong>{retrievals}</strong><em>last {activity?.windowMinutes || 30}m</em></article>
-        <article><span>Recall hit rate</span><strong>{hitRate}</strong><em>{hits} exact hit{hits === 1 ? "" : "s"}</em></article>
-        <article className={uses ? "is-verified" : "is-idle"}><span>Explicit uses</span><strong>{uses}</strong><em>{uses ? "selected + used" : "no use receipt"}</em></article>
-        <article><span>Durable memory</span><strong>{Number(memoryRegistry.active || 0)}</strong><em>{Number(memoryReview.pending || 0)} candidate{Number(memoryReview.pending || 0) === 1 ? "" : "s"}</em></article>
-      </div>
+        <div className="memory-flow-metrics" aria-label="Memory activity summary">
+          <article><span>Retrievals</span><strong>{retrievals}</strong><em>last {activity?.windowMinutes || 30}m</em></article>
+          <article><span>Recall hit rate</span><strong>{hitRate}</strong><em>{hits} exact hit{hits === 1 ? "" : "s"}</em></article>
+          <article className={uses ? "is-verified" : "is-idle"}><span>Explicit uses</span><strong>{uses}</strong><em>{uses ? "selected + used" : "no use receipt"}</em></article>
+          <article><span>Durable memory</span><strong>{Number(memoryRegistry.active || 0)}</strong><em>{Number(memoryReview.pending || 0)} candidate{Number(memoryReview.pending || 0) === 1 ? "" : "s"}</em></article>
+        </div>
 
-      <div className="memory-flow-map">
-        <svg
-          viewBox="0 0 1000 238"
-          role="img"
-          aria-labelledby="memory-flow-title memory-flow-description"
-          preserveAspectRatio="xMidYMid meet"
-          data-evidence-source="governed-memory-registry"
-        >
-          <title id="memory-flow-title">Verified governed memory activity</title>
-          <desc id="memory-flow-description">
-            Counts-only flow from agent retrieval through recall, explicit use, feedback, candidate review, and durable memory. Moving paths require a recent exact registry timestamp. This does not expose memory content or internal model reasoning.
-          </desc>
-          <g className="memory-flow-edges" aria-hidden="true">
+        <div className="memory-flow-map">
+          <svg
+            viewBox="0 0 1000 224"
+            role="img"
+            aria-labelledby="memory-flow-title memory-flow-description"
+            preserveAspectRatio="xMidYMid meet"
+            data-evidence-source="governed-memory-registry"
+          >
+            <title id="memory-flow-title">Verified governed memory activity</title>
+            <desc id="memory-flow-description">
+              Counts-only flow from agent retrieval through recall, explicit use, feedback, candidate review, and durable memory. Moving paths require a recent exact registry timestamp. This does not expose memory content or internal model reasoning.
+            </desc>
+            <g className="memory-flow-edges" aria-hidden="true">
             {flowAgents.map((row, index) => {
               const y = 22 + index * 52;
               const live = memorySignalIsRecent(row.lastRetrievalAt, motionWindowSeconds);
@@ -3252,8 +3277,8 @@ function BrainAtlasPanel({
             <path className={`memory-flow-edge is-proposed${recent("proposed") || recent("corrected") ? " is-live" : ""}`} data-operation="proposed" data-observed-at={activity?.lastObservedAt.proposed || activity?.lastObservedAt.corrected || undefined} d="M 784 181 C 802 181, 812 181, 830 181" />
             <path className={`memory-flow-edge is-promoted${recent("promoted") ? " is-live" : ""}`} data-operation="promoted" data-observed-at={activity?.lastObservedAt.promoted || undefined} d="M 902 154 C 902 134, 902 103, 902 84" />
             <path className={`memory-flow-edge is-promoted is-return${recent("promoted") ? " is-live" : ""}`} data-operation="promoted" data-observed-at={activity?.lastObservedAt.promoted || undefined} d="M 830 57 C 756 10, 514 10, 504 92" />
-          </g>
-          <g className="memory-flow-nodes">
+            </g>
+            <g className="memory-flow-nodes">
             {flowAgents.map((row, index) => {
               const y = 22 + index * 52;
               const live = memorySignalIsRecent(row.lastRetrievalAt, motionWindowSeconds);
@@ -3295,27 +3320,43 @@ function BrainAtlasPanel({
               <text className="memory-flow-node-title" x="902" y="54" textAnchor="middle">Durable</text>
               <text className="memory-flow-node-detail" x="902" y="71" textAnchor="middle">{count("promoted")} governed promotion{count("promoted") === 1 ? "" : "s"}</text>
             </g>
-          </g>
-        </svg>
-      </div>
+            </g>
+          </svg>
+        </div>
+      </section>
 
-      <div className="brain-atlas-evidence-label">
-        <span>Operational receipt evidence</span>
-        <em>{atlas?.source.verified ? `${atlas.counts.nodes} nodes · ${atlas.counts.edges} exact edges` : "source unavailable"}</em>
-      </div>
+      <section
+        className={`brain-atlas-section is-evidence${focusNeeded ? " has-focus" : ""}`}
+        data-atlas-region="receipts"
+        aria-labelledby="brain-atlas-evidence-heading"
+        aria-describedby="brain-atlas-evidence-description"
+      >
+        <header className="brain-atlas-section-header">
+          <div>
+            <h3 id="brain-atlas-evidence-heading">Work execution proof</h3>
+            <p id="brain-atlas-evidence-description">Proof of what ran: agent → work → timestamped receipt → verified model. Exact seven-day links only.</p>
+          </div>
+          <output className="brain-atlas-evidence-summary" title={evidencePolicyDetail} aria-live="polite">
+            {evidenceSummary}
+          </output>
+        </header>
 
-      {focusNeeded ? (
-        <label className="brain-atlas-focus" htmlFor="brain-atlas-focus-node">
-          <span>Exact-node focus</span>
-          <select id="brain-atlas-focus-node" value={focusId} onChange={(event) => setFocusId(event.target.value)}>
-            <option value="all">Recent exact receipt paths</option>
-            {atlas?.nodes.map((node) => <option key={node.id} value={node.id}>{brainAtlasNodeOption(node)}</option>)}
-          </select>
-        </label>
-      ) : null}
+        {focusNeeded ? (
+          <label className="brain-atlas-focus" htmlFor="brain-atlas-focus-node">
+            <span>Show receipt path</span>
+            <select id="brain-atlas-focus-node" value={focusId} onChange={(event) => setFocusId(event.target.value)}>
+              <option value="all">Recent exact receipt paths</option>
+              {atlas?.nodes.map((node) => <option key={node.id} value={node.id}>{brainAtlasNodeOption(node)}</option>)}
+            </select>
+          </label>
+        ) : null}
 
-      {atlas?.status === "ready" && view.nodes.length ? (
-        <div className="brain-atlas-plot">
+        {atlas?.status === "ready" && view.nodes.length ? (
+          <div
+            className="brain-atlas-plot"
+            tabIndex={0}
+            aria-label="Work execution proof graph. Scroll horizontally on narrow screens to inspect exact receipt paths."
+          >
           <svg
             viewBox={`0 0 1000 ${graphHeight}`}
             role="img"
@@ -3367,8 +3408,8 @@ function BrainAtlasPanel({
                       : <rect x="-78" y="-19" width="156" height="38" rx="6" />}
                     {node.kind === "receipt" ? (
                       <>
-                        <text className="brain-atlas-receipt-label" x="0" y="-15" textAnchor="middle">{primary}</text>
-                        <text className="brain-atlas-receipt-subline" x="0" y="25" textAnchor="middle">#{node.sequence || 1}</text>
+                        <text className="brain-atlas-receipt-label" x="0" y="-12" textAnchor="middle">{primary}</text>
+                        <text className="brain-atlas-receipt-subline" x="0" y="19" textAnchor="middle">#{node.sequence || 1}</text>
                       </>
                     ) : (
                       <>
@@ -3381,32 +3422,16 @@ function BrainAtlasPanel({
               })}
             </g>
           </svg>
-        </div>
-      ) : (
-        <div className="brain-atlas-empty" role="status">
-          <GitBranch size={22} aria-hidden="true" />
-          <strong>{atlas?.status === "empty" ? "No exact paths in this window" : "Atlas evidence unavailable"}</strong>
-          <p>{brainAtlasEmptyMessage(atlas?.emptyReason)}</p>
-        </div>
-      )}
+          </div>
+        ) : (
+          <div className="brain-atlas-empty" role="status">
+            <GitBranch size={22} aria-hidden="true" />
+            <strong>{atlas?.status === "empty" ? "No exact paths in this window" : "Atlas evidence unavailable"}</strong>
+            <p>{brainAtlasEmptyMessage(atlas?.emptyReason)}</p>
+          </div>
+        )}
 
-      <footer className="brain-atlas-footer" aria-live="polite">
-        <span>
-          {atlas?.status === "ready"
-            ? `View ${view.nodes.length}/${atlas.counts.nodes} nodes - ${view.edges.length}/${atlas.counts.edges} edges${selectedNode ? ` - focused on ${selectedNode.label}` : ""}`
-            : `Updated ${fmtTime(atlas?.generatedAt)}`}
-        </span>
-        <em>
-          {[
-            sourceExcluded
-              ? `Source cap excluded ${sourceExcluded} path element${sourceExcluded === 1 ? "" : "s"}`
-              : "No source-cap exclusions",
-            viewLimited
-              ? `view limited to ${view.shownReceipts}/${view.candidateReceipts} newest exact receipts`
-              : "",
-          ].filter(Boolean).join(" - ")}
-        </em>
-      </footer>
+      </section>
     </section>
   );
 }

@@ -269,21 +269,13 @@ def test_cdp_activation_command_success_without_pid_change_fails(monkeypatch: py
     monkeypatch.setattr(MODULE.urllib.request, "urlopen", lambda *_args, **_kwargs: Response())
     monkeypatch.setattr(MODULE, "frontmost_application", lambda: {"pid": 202, "name": "Google Chrome"})
     monkeypatch.setattr(MODULE.time, "sleep", lambda _seconds: None)
-    hidden_calls = []
-    monkeypatch.setattr(
-        MODULE,
-        "set_application_hidden",
-        lambda pid, hidden: (hidden_calls.append((pid, hidden)) or True),
-    )
-
     ok, detail = MODULE.activate_kiosk_process(101, 202)
 
     assert ok is False
     assert "failed verification" in detail
-    assert hidden_calls == [(202, True), (202, False)]
 
 
-def test_same_bundle_retry_hides_only_previous_process_then_focuses_kiosk(
+def test_same_bundle_retry_never_hides_previous_process_and_can_focus_kiosk(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     class Response:
@@ -302,21 +294,15 @@ def test_same_bundle_retry_hides_only_previous_process_then_focuses_kiosk(
             {"pid": 101, "name": "Google Chrome"},
         ]
     )
-    hidden_calls = []
     monkeypatch.setattr(MODULE, "control_tower_target_id", lambda: "target")
     monkeypatch.setattr(MODULE.urllib.request, "urlopen", lambda *_args, **_kwargs: Response())
     monkeypatch.setattr(MODULE, "frontmost_application", lambda: next(frontmost))
     monkeypatch.setattr(MODULE.time, "sleep", lambda _seconds: None)
-    monkeypatch.setattr(
-        MODULE,
-        "set_application_hidden",
-        lambda pid, hidden: (hidden_calls.append((pid, hidden)) or True),
-    )
 
     ok, _detail = MODULE.activate_kiosk_process(101, 202)
 
     assert ok is True
-    assert hidden_calls == [(202, True)]
+    assert not hasattr(MODULE, "set_application_hidden")
 
 
 def test_missing_kiosk_is_an_error_without_repair(tmp_path: Path) -> None:
@@ -343,5 +329,56 @@ def test_process_match_rejects_chrome_renderer_and_similar_profile(monkeypatch: 
         stderr = ""
 
     monkeypatch.setattr(MODULE, "run", lambda *_args, **_kwargs: Result())
+    monkeypatch.setattr(MODULE, "cdp_listener_pid", lambda: 12)
+    monkeypatch.setattr(MODULE, "singleton_lock_pid", lambda: 12)
 
     assert MODULE.find_kiosk_pid() == 12
+
+
+def test_duplicate_profile_roots_select_actual_cdp_owner(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(MODULE, "kiosk_process_pids", lambda: [75124, 75160])
+    monkeypatch.setattr(MODULE, "cdp_listener_pid", lambda: 75160)
+    monkeypatch.setattr(MODULE, "singleton_lock_pid", lambda: 75160)
+
+    assert MODULE.find_kiosk_pid() == 75160
+
+
+def test_duplicate_profile_roots_fail_closed_when_owner_is_ambiguous(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(MODULE, "kiosk_process_pids", lambda: [75124, 75160])
+    monkeypatch.setattr(MODULE, "cdp_listener_pid", lambda: None)
+    monkeypatch.setattr(MODULE, "singleton_lock_pid", lambda: None)
+
+    assert MODULE.find_kiosk_pid() is None
+
+
+def test_single_profile_root_fails_closed_when_ownership_points_elsewhere(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(MODULE, "kiosk_process_pids", lambda: [75124])
+    monkeypatch.setattr(MODULE, "cdp_listener_pid", lambda: 75160)
+    monkeypatch.setattr(MODULE, "singleton_lock_pid", lambda: 75160)
+
+    assert MODULE.find_kiosk_pid() is None
+
+
+def test_single_starting_profile_root_is_allowed_to_enter_startup_grace(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(MODULE, "kiosk_process_pids", lambda: [75160])
+    monkeypatch.setattr(MODULE, "cdp_listener_pid", lambda: None)
+    monkeypatch.setattr(MODULE, "singleton_lock_pid", lambda: None)
+
+    assert MODULE.find_kiosk_pid() == 75160
+
+
+def test_starting_kiosk_gets_cdp_grace_before_repair(tmp_path: Path) -> None:
+    waits = []
+
+    result = ensure(
+        tmp_path,
+        repair=True,
+        cdp_ready_fn=lambda: False,
+        frontmost_fn=lambda: {"pid": 101, "name": "Google Chrome"},
+        startup_wait_fn=lambda lookup: (waits.append(lookup) or True),
+        activate_fn=lambda *_: pytest.fail("already-frontmost kiosk should not need activation"),
+    )
+
+    assert result["status"] == "foreground"
+    assert result["kioskPid"] == 101
+    assert len(waits) == 1

@@ -41,6 +41,7 @@ LEASE_PATH = Path(
 DEFAULT_LEASE_SECONDS = 180
 MAX_LEASE_SECONDS = 600
 RECENT_INPUT_SECONDS = 90.0
+KIOSK_STARTUP_GRACE_SECONDS = 12.0
 PURPOSES = {"browser", "computer-use", "local-ui"}
 PROTECTED_FRONTMOST_APPS = {"loginwindow", "SecurityAgent", "ScreenSaverEngine"}
 
@@ -285,7 +286,7 @@ def hid_idle_seconds() -> Optional[float]:
     return int(match.group(1)) / 1_000_000_000
 
 
-def find_kiosk_pid() -> Optional[int]:
+def kiosk_process_pids() -> list[int]:
     proc = run(["/bin/ps", "-axo", "pid=,command="], timeout=10)
     needle = f"--user-data-dir={KIOSK_PROFILE}"
     candidates: list[int] = []
@@ -300,7 +301,61 @@ def find_kiosk_pid() -> Optional[int]:
             candidates.append(int(pid_text))
         except ValueError:
             continue
-    return min(candidates) if candidates else None
+    return sorted(set(candidates))
+
+
+def singleton_lock_pid() -> Optional[int]:
+    try:
+        target = os.readlink(KIOSK_PROFILE / "SingletonLock")
+    except OSError:
+        return None
+    match = re.search(r"-(\d+)$", target)
+    return int(match.group(1)) if match else None
+
+
+def cdp_listener_pid() -> Optional[int]:
+    proc = run(["/usr/sbin/lsof", "-nP", "-iTCP:9224", "-sTCP:LISTEN", "-t"], timeout=5)
+    if proc.returncode != 0:
+        return None
+    for line in proc.stdout.splitlines():
+        try:
+            return int(line.strip())
+        except ValueError:
+            continue
+    return None
+
+
+def find_kiosk_pid() -> Optional[int]:
+    candidates = kiosk_process_pids()
+    if not candidates:
+        return None
+    # A duplicate profile launch can leave an orphan root process. Require all
+    # available ownership signals to agree, then select that exact root. When a
+    # single process is still starting and neither signal exists yet, return it
+    # only so the startup-grace path can wait for CDP instead of relaunching.
+    owners = [pid for pid in (cdp_listener_pid(), singleton_lock_pid()) if pid is not None]
+    if owners:
+        if len(set(owners)) != 1:
+            return None
+        owner_pid = owners[0]
+        return owner_pid if owner_pid in candidates else None
+    return candidates[0] if len(candidates) == 1 else None
+
+
+def wait_for_cdp(
+    cdp_ready_fn: Callable[[], bool],
+    *,
+    timeout_seconds: float = KIOSK_STARTUP_GRACE_SECONDS,
+    interval_seconds: float = 0.5,
+) -> bool:
+    deadline = time.monotonic() + max(0.0, timeout_seconds)
+    while True:
+        if cdp_ready_fn():
+            return True
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            return False
+        time.sleep(min(interval_seconds, remaining))
 
 
 def cdp_has_control_tower() -> bool:
@@ -339,30 +394,13 @@ def frontmost_application() -> Optional[dict[str, Any]]:
     return value if isinstance(value, dict) else None
 
 
-def set_application_hidden(pid: int, hidden: bool) -> bool:
-    selector = "hide" if hidden else "unhide"
-    script = (
-        'ObjC.import("AppKit"); '
-        f"const app=$.NSRunningApplication.runningApplicationWithProcessIdentifier({int(pid)}); "
-        'if (!app) { throw new Error("application missing"); } '
-        f'app.performSelector("{selector}"); "ok"'
-    )
-    proc = run(["/usr/bin/osascript", "-l", "JavaScript", "-e", script], timeout=8)
-    return proc.returncode == 0 and proc.stdout.strip() == "ok"
-
-
-def activate_kiosk_process(kiosk_pid: int, previous_pid: Optional[int]) -> tuple[bool, str]:
+def activate_kiosk_process(kiosk_pid: int, _previous_pid: Optional[int]) -> tuple[bool, str]:
     target_id = control_tower_target_id()
     if not target_id:
         return False, "Control Tower CDP target is unavailable for exact activation."
     activate_url = f"http://127.0.0.1:9224/json/activate/{urllib.parse.quote(target_id, safe='')}"
     last_error = ""
-    previous_hidden = False
-    for attempt in range(2):
-        if attempt == 1 and previous_pid and previous_pid != kiosk_pid:
-            previous_hidden = set_application_hidden(previous_pid, True)
-            if previous_hidden:
-                time.sleep(0.3)
+    for _attempt in range(2):
         try:
             request = urllib.request.Request(activate_url, method="PUT")
             with urllib.request.urlopen(request, timeout=3) as response:
@@ -376,8 +414,6 @@ def activate_kiosk_process(kiosk_pid: int, previous_pid: Optional[int]) -> tuple
         if frontmost and int(frontmost.get("pid") or 0) == kiosk_pid:
             return True, "Control Tower CDP target owns the physical foreground."
         last_error = "frontmost PID did not match the kiosk"
-    if previous_hidden and previous_pid:
-        set_application_hidden(previous_pid, False)
     return False, f"Exact Control Tower target activation failed verification ({last_error or 'unknown'})."
 
 
@@ -393,6 +429,7 @@ def ensure_foreground(
     cdp_ready_fn: Optional[Callable[[], bool]] = None,
     frontmost_fn: Optional[Callable[[], Optional[dict[str, Any]]]] = None,
     activate_fn: Optional[Callable[[int, Optional[int]], tuple[bool, str]]] = None,
+    startup_wait_fn: Optional[Callable[[Callable[[], bool]], bool]] = None,
 ) -> dict[str, Any]:
     locked = (locked_fn or session_is_locked)()
     if locked:
@@ -438,13 +475,16 @@ def ensure_foreground(
             "idleSeconds": round(idle_seconds, 1),
         }
 
+    if kiosk_pid and not cdp_ready and repair:
+        cdp_ready = (startup_wait_fn or wait_for_cdp)(cdp_lookup)
+        frontmost = frontmost_lookup() if cdp_ready else None
+
     if (not kiosk_pid or not cdp_ready) and repair:
         child_env = os.environ.copy()
         child_env["CONTROL_TOWER_FOREGROUND_CHILD"] = "1"
         opener = ROOT / "scripts" / "open_mission_control_kiosk.sh"
         opened = run([str(opener), "--force"], timeout=75, env=child_env)
         if opened.returncode == 0:
-            time.sleep(2)
             kiosk_pid = pid_lookup()
             cdp_ready = cdp_lookup()
             frontmost = frontmost_lookup() if kiosk_pid and cdp_ready else None
