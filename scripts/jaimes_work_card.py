@@ -34,6 +34,7 @@ LOCK_PATH = Path(os.environ.get("JAIMES_WORK_CARD_LOCK", str(STATE_PATH.with_suf
 ACK_STATE_PATH = Path(os.environ.get("JAIMES_FAST_ACK_STATE", str(Path.home() / ".openclaw" / "telegram" / "jaimes_fast_ack_state.json")))
 CONTROL_CENTER_CHAT_ID = "-1003589561528"
 INBOX_THREAD_ID = "1"
+JAIMES_OPS_THREAD_ID = "17"
 TASK_HEADER_ENV = "JAIMES_TELEGRAM_TASK_HEADERS"
 HEADER_LABEL_WIDTH = 9
 HEADER_VALUE_WIDTH = 25
@@ -1389,6 +1390,7 @@ def _upsert_card(args: argparse.Namespace, status: str) -> int:
         and previous_current
         and incoming_current != previous_current
         and not new_done
+        and not incoming_current.lower().startswith(("still working", "waiting"))
         and not previous_current.lower().startswith(("task received", "still working", "waiting"))
     ):
         new_done = [previous_current]
@@ -1489,9 +1491,9 @@ def _upsert_card(args: argparse.Namespace, status: str) -> int:
 
     card_buttons = buttons if status == "running" else None
     final_buttons = buttons if status in {"done", "failed"} else None
-    strict_inbox_delivery = (
+    strict_group_delivery = (
         str(chat_id or "") == CONTROL_CENTER_CHAT_ID
-        and str(thread_id or "") == INBOX_THREAD_ID
+        and str(thread_id or "") in {INBOX_THREAD_ID, JAIMES_OPS_THREAD_ID}
     )
 
     def persist_checkpoint(
@@ -1544,7 +1546,7 @@ def _upsert_card(args: argparse.Namespace, status: str) -> int:
     header_message_id = existing.get("header_message_id")
     header_action = None
     if status == "running" and not header_message_id and not existing.get("message_id") and header_enabled:
-        if strict_inbox_delivery and existing.get("header_delivery_status") == "indeterminate":
+        if strict_group_delivery and existing.get("header_delivery_status") == "indeterminate":
             print(json.dumps({
                 "ok": False,
                 "action": "header_send_quarantined",
@@ -1573,14 +1575,14 @@ def _upsert_card(args: argparse.Namespace, status: str) -> int:
             header_action = "sent"
             header_message_id = (header_result.get("result") or {}).get("message_id")
         if (
-            strict_inbox_delivery
+            strict_group_delivery
             and header_action == "adopted"
             and not header_result.get("ok")
             and telegram_message_not_modified(header_result)
         ):
             header_result = {"ok": True, "result": {"message_id": header_message_id}}
         if not header_result.get("ok") or not header_message_id:
-            if strict_inbox_delivery and header_action == "sent" and (
+            if strict_group_delivery and header_action == "sent" and (
                 delivery_indeterminate(header_result) or (header_result.get("ok") and not header_message_id)
             ):
                 existing = persist_checkpoint(
@@ -1611,7 +1613,7 @@ def _upsert_card(args: argparse.Namespace, status: str) -> int:
         # the editable live work card.
         ack_message_id = ""
 
-    if strict_inbox_delivery and existing.get("live_delivery_status") == "indeterminate" and not existing.get("message_id"):
+    if strict_group_delivery and existing.get("live_delivery_status") == "indeterminate" and not existing.get("message_id"):
         print(json.dumps({
             "ok": False,
             "action": "live_send_quarantined",
@@ -1632,14 +1634,14 @@ def _upsert_card(args: argparse.Namespace, status: str) -> int:
         action = "sent"
 
     if (
-        strict_inbox_delivery
+        strict_group_delivery
         and action in {"edited", "adopted"}
         and not result.get("ok")
         and telegram_message_not_modified(result)
     ):
         result = {"ok": True, "result": {"message_id": existing.get("message_id") or ack_message_id}}
     if not result.get("ok"):
-        if strict_inbox_delivery and action == "sent" and delivery_indeterminate(result):
+        if strict_group_delivery and action == "sent" and delivery_indeterminate(result):
             existing = persist_checkpoint(
                 header_id=header_message_id,
                 live_id=None,
@@ -1658,7 +1660,7 @@ def _upsert_card(args: argparse.Namespace, status: str) -> int:
     elif action == "adopted":
         message_id = ack_message_id
     if not message_id:
-        if strict_inbox_delivery and action == "sent":
+        if strict_group_delivery and action == "sent":
             existing = persist_checkpoint(
                 header_id=header_message_id,
                 live_id=None,
@@ -1683,7 +1685,7 @@ def _upsert_card(args: argparse.Namespace, status: str) -> int:
     )
     final_action = None
     if final_text:
-        if strict_inbox_delivery and not final_message_id and existing.get("final_delivery_status") == "indeterminate":
+        if strict_group_delivery and not final_message_id and existing.get("final_delivery_status") == "indeterminate":
             print(json.dumps({
                 "ok": False,
                 "action": "final_send_quarantined",
@@ -1694,19 +1696,19 @@ def _upsert_card(args: argparse.Namespace, status: str) -> int:
             final_result = edit_final_summary(final_message_id, final_text, args.timeout, chat_id=chat_id, thread_id=thread_id)
             final_action = "edited"
             if (
-                strict_inbox_delivery
+                strict_group_delivery
                 and not final_result.get("ok")
                 and telegram_message_not_modified(final_result)
             ):
                 final_result = {"ok": True, "result": {"message_id": final_message_id}}
-            if not final_result.get("ok") and not strict_inbox_delivery:
+            if not final_result.get("ok") and not strict_group_delivery:
                 final_result = send_final_summary(final_text, args.timeout, chat_id=chat_id, thread_id=thread_id)
                 final_action = "sent"
         else:
             final_result = send_final_summary(final_text, args.timeout, chat_id=chat_id, thread_id=thread_id)
             final_action = "sent"
         if not final_result.get("ok"):
-            if strict_inbox_delivery and final_action == "sent" and delivery_indeterminate(final_result):
+            if strict_group_delivery and final_action == "sent" and delivery_indeterminate(final_result):
                 existing = persist_checkpoint(
                     header_id=header_message_id,
                     live_id=message_id,
@@ -1721,7 +1723,7 @@ def _upsert_card(args: argparse.Namespace, status: str) -> int:
         if final_action == "sent":
             final_message_id = final_result.get("result", {}).get("message_id")
             if not final_message_id:
-                if strict_inbox_delivery:
+                if strict_group_delivery:
                     existing = persist_checkpoint(
                         header_id=header_message_id,
                         live_id=message_id,

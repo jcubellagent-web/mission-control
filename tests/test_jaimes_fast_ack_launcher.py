@@ -28,3 +28,45 @@ def test_missing_gateway_token_fails_closed() -> None:
             assert "credential is unavailable" in str(exc)
         else:
             raise AssertionError("missing token must fail closed")
+
+
+def test_secure_fallback_resolves_only_telegram_reference_and_removes_temp_file(tmp_path) -> None:
+    source = tmp_path / "hermes.op.env"
+    source.write_text(
+        "OPENAI_API_KEY=op://Agent Ecosystem/OpenAI/credential\n"
+        "TELEGRAM_BOT_TOKEN=op://Agent Ecosystem/JAIMES Telegram/credential\n",
+        encoding="utf-8",
+    )
+    runner = tmp_path / "op_agent_env.sh"
+    runner.write_text("#!/bin/sh\n", encoding="utf-8")
+    private_dir = tmp_path / "private"
+    observed = {}
+
+    def fake_run(args, *, timeout=8):
+        template = Path(args[1])
+        observed["path"] = template
+        observed["contents"] = template.read_text(encoding="utf-8")
+        observed["timeout"] = timeout
+        return "telegram-value\n"
+
+    with (
+        patch.object(launcher, "OP_ENV_TEMPLATE", source),
+        patch.object(launcher, "OP_ENV_RUNNER", runner),
+        patch.object(launcher, "PRIVATE_DIR", private_dir),
+        patch.object(launcher, "run", side_effect=fake_run),
+    ):
+        assert launcher.secure_telegram_token() == "telegram-value"
+
+    assert observed["contents"] == "TELEGRAM_BOT_TOKEN=op://Agent Ecosystem/JAIMES Telegram/credential\n"
+    assert observed["timeout"] == 40
+    assert not observed["path"].exists()
+
+
+def test_resolver_falls_back_after_gateway_scrubs_its_environment() -> None:
+    with (
+        patch.object(launcher, "gateway_pid", return_value="42764"),
+        patch.object(launcher, "gateway_telegram_token", side_effect=RuntimeError("credential is unavailable")),
+        patch.object(launcher, "secure_telegram_token", return_value="telegram-value") as fallback,
+    ):
+        assert launcher.resolve_telegram_token() == "telegram-value"
+    fallback.assert_called_once_with()

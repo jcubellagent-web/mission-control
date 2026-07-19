@@ -123,7 +123,7 @@ def _stable_surface_stubs(watcher, monkeypatch):
     monkeypatch.setattr(watcher, "publish_jaimes", lambda *args, **kwargs: None)
 
 
-def test_visible_card_is_sent_once_without_placeholder_edits(monkeypatch):
+def test_topic17_visible_card_is_sent_once_as_a_fresh_managed_message(monkeypatch):
     watcher = load_module()
     _stable_surface_stubs(watcher, monkeypatch)
     calls = []
@@ -140,7 +140,7 @@ def test_visible_card_is_sent_once_without_placeholder_edits(monkeypatch):
     assert result["ack_message_id"] == "444"
     assert len(calls) == 1
     assert "--ack-message-id" not in calls[0]
-    assert "--separate-message" not in calls[0]
+    assert "--separate-message" in calls[0]
 
 
 def test_topic_one_requires_a_direct_jaimes_mention():

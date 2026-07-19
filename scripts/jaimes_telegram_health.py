@@ -41,6 +41,7 @@ SSH_BASE = [
 ]
 RECOVERY_COOLDOWN_SECONDS = 15 * 60
 LOCK_STALE_SECONDS = 10 * 60
+FAST_ACK_STALE_SECONDS = 5 * 60
 
 
 def utc_now() -> dt.datetime:
@@ -167,6 +168,17 @@ payload = {
         "status": fast_ack_state.get("status"),
         "lastCheckedAt": fast_ack_state.get("last_checked_at"),
         "identity": fast_ack_state.get("telegram_identity"),
+        "lastSurfaceAt": fast_ack_state.get("last_attempt_at") or fast_ack_state.get("last_sent_at"),
+        "lastSurfaceOk": (fast_ack_state.get("last_result") or {}).get("ok") if isinstance(fast_ack_state.get("last_result"), dict) else None,
+        "surfaceIndeterminate": bool((fast_ack_state.get("last_result") or {}).get("surface_indeterminate")) if isinstance(fast_ack_state.get("last_result"), dict) else False,
+        "activeCardCount": sum(
+            1 for card in (fast_ack_state.get("active_cards") or {}).values()
+            if isinstance(card, dict) and card.get("status") != "done"
+        ) if isinstance(fast_ack_state.get("active_cards"), dict) else 0,
+        "deliveryError": {
+            "at": (fast_ack_state.get("last_telegram_delivery_error") or {}).get("at"),
+            "method": (fast_ack_state.get("last_telegram_delivery_error") or {}).get("method"),
+        } if isinstance(fast_ack_state.get("last_telegram_delivery_error"), dict) else None,
     },
     "cuaLaunchd": cua_launch.stdout[-2000:],
     "processes": ps.stdout[-2000:],
@@ -245,6 +257,23 @@ def evaluate(probe: dict[str, Any]) -> tuple[str, list[str], set[str]]:
     if fast_ack_identity.get("ok") is not True:
         issues.append("JAIMES Telegram fast-ack bot identity is not verified.")
         recovery_targets.add("fast_ack")
+    fast_ack_checked_at = parse_ts(fast_ack_state.get("lastCheckedAt"))
+    if (
+        fast_ack_checked_at is None
+        or (utc_now() - fast_ack_checked_at).total_seconds()
+        > FAST_ACK_STALE_SECONDS
+    ):
+        issues.append("JAIMES Telegram fast-ack has not completed a recent poll.")
+        recovery_targets.add("fast_ack")
+    delivery_error = fast_ack_state.get("deliveryError") if isinstance(fast_ack_state.get("deliveryError"), dict) else {}
+    unresolved_delivery_error = bool(delivery_error)
+    last_surface_at = parse_ts(fast_ack_state.get("lastSurfaceAt"))
+    recent_failed_surface = bool(
+        fast_ack_state.get("lastSurfaceOk") is False
+        and (last_surface_at is None or (utc_now() - last_surface_at) <= dt.timedelta(minutes=30))
+    )
+    if unresolved_delivery_error or recent_failed_surface:
+        issues.append("A JAIMES Telegram card send or edit still lacks a confirmed receipt.")
     if not telegram_sessions:
         issues.append("No Telegram session binding is present.")
         recovery_targets.add("gateway")
@@ -392,7 +421,8 @@ def main() -> int:
     parser.add_argument("--force-publish", action="store_true")
     args = parser.parse_args()
 
-    with lock_or_exit():
+    lock_context = contextlib.nullcontext() if args.dry_run else lock_or_exit()
+    with lock_context:
         previous = read_json(STATE_PATH, {})
         probe = probe_jaimes()
         visibility_reconcile: dict[str, Any] | None = None
@@ -445,6 +475,13 @@ def main() -> int:
                 "telegramState": (((probe.get("gateway") or {}).get("platforms") or {}).get("telegram") or {}).get("state") if isinstance(probe.get("gateway"), dict) else None,
                 "fastAckState": "running" if "state = running" in str(probe.get("fastAckLaunchd") or "") else "not-running",
                 "fastAckIdentity": (probe.get("fastAckState") or {}).get("identity") if isinstance(probe.get("fastAckState"), dict) else None,
+                "fastAckDelivery": {
+                    "lastSurfaceAt": (probe.get("fastAckState") or {}).get("lastSurfaceAt"),
+                    "lastSurfaceOk": (probe.get("fastAckState") or {}).get("lastSurfaceOk"),
+                    "surfaceIndeterminate": (probe.get("fastAckState") or {}).get("surfaceIndeterminate"),
+                    "activeCardCount": (probe.get("fastAckState") or {}).get("activeCardCount"),
+                    "deliveryError": (probe.get("fastAckState") or {}).get("deliveryError"),
+                } if isinstance(probe.get("fastAckState"), dict) else None,
                 "brainFeed": probe.get("brainFeed"),
                 "computerUse": {
                     "status": (probe.get("cua") or {}).get("status") if isinstance(probe.get("cua"), dict) else None,
@@ -464,7 +501,6 @@ def main() -> int:
         state["lastHealthyAt"] = iso() if status == "ok" else previous.get("lastHealthyAt")
 
         summary = "JAIMES Telegram, Hermes, and Computer Use are healthy." if status == "ok" else "JAIMES needs attention: " + "; ".join(issues[:3])
-        heartbeat(status, summary)
         state_changed = previous.get("status") != status
         last_published = parse_ts(previous.get("lastPublishedAt"))
         unresolved_reminder = bool(
@@ -472,14 +508,17 @@ def main() -> int:
             and last_published
             and (utc_now() - last_published) >= dt.timedelta(hours=2)
         )
-        if args.force_publish or state_changed or recovery or unresolved_reminder:
-            publish("ok" if status == "ok" else "error", "JAIMES health loop", summary)
-            state["lastPublishedAt"] = iso()
-        else:
+        if args.dry_run:
             state["lastPublishedAt"] = previous.get("lastPublishedAt")
-        write_json(STATE_PATH, state)
-
-        log(f"{status}: {summary}")
+        else:
+            heartbeat(status, summary)
+            if args.force_publish or state_changed or recovery or unresolved_reminder:
+                publish("ok" if status == "ok" else "error", "JAIMES health loop", summary)
+                state["lastPublishedAt"] = iso()
+            else:
+                state["lastPublishedAt"] = previous.get("lastPublishedAt")
+            write_json(STATE_PATH, state)
+            log(f"{status}: {summary}")
         print(json.dumps({"ok": status == "ok", **state}, indent=2))
         return 0 if status == "ok" else 2
 

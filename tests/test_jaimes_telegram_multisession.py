@@ -10,12 +10,24 @@ import sys
 import tempfile
 import threading
 import time
+import types
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
 # The watcher is a tracked runtime script rather than an installed package.
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
+# Prefer the sibling staged copy when this regression file is exercised before
+# deployment, while retaining the canonical repository layout after it lands.
+test_dir = Path(__file__).resolve().parent
+staged_script = test_dir / "jaimes_telegram_fast_ack.py"
+script_dir = test_dir if staged_script.exists() else Path(__file__).resolve().parents[1] / "scripts"
+sys.path.insert(0, str(script_dir))
+try:
+    import jaimes_completion_evidence  # noqa: F401
+except ModuleNotFoundError:
+    completion_evidence = types.ModuleType("jaimes_completion_evidence")
+    completion_evidence.write_completion_evidence = lambda **_kwargs: None
+    sys.modules["jaimes_completion_evidence"] = completion_evidence
 import jaimes_telegram_fast_ack as watcher
 
 
@@ -98,7 +110,7 @@ class MultiSessionWatcherTests(unittest.TestCase):
         self.assertIn("--route-verified", remote)
 
     @staticmethod
-    def fake_ack(event, model, state, dry_run, meta):
+    def fake_ack(event, model, state, dry_run, meta, **_kwargs):
         return {
             "ok": True,
             "ack_message_id": "999",
@@ -139,7 +151,7 @@ class MultiSessionWatcherTests(unittest.TestCase):
     def test_awaiting_objective_result_never_registers_active_or_pending_state(self) -> None:
         self.add_user("older", "transport metadata before an unresolved request")
 
-        def awaiting(event, model, state, dry_run, meta):
+        def awaiting(event, model, state, dry_run, meta, **_kwargs):
             return {
                 "ok": True,
                 "status": "awaiting-objective-interpretation",
@@ -163,7 +175,7 @@ class MultiSessionWatcherTests(unittest.TestCase):
     def test_result_without_positive_message_receipt_is_never_pending(self) -> None:
         self.add_user("older", "verify no-receipt handling")
 
-        def no_receipt(event, model, state, dry_run, meta):
+        def no_receipt(event, model, state, dry_run, meta, **_kwargs):
             return {
                 "ok": True,
                 "ack_message_id": "0",
@@ -193,7 +205,9 @@ class MultiSessionWatcherTests(unittest.TestCase):
         event = {"ts": watcher.utc_now(), "prompt": "fix Telegram cards", "db_message_id": "9", "run_id": "telegram-message-9"}
         meta = {"telegram_chat_id": "-1003589561528", "telegram_thread_id": "1", "origin": {"message_id": "77"}}
         state = {}
-        with patch.object(watcher, "set_eyes_reaction", return_value=True), \
+        with patch.object(watcher, "objective_from_prompt", return_value="Fix Telegram cards"), \
+             patch.object(watcher, "objective_is_near_copy", return_value=False), \
+             patch.object(watcher, "set_eyes_reaction", return_value=True), \
              patch.object(watcher, "send_initial_ack", return_value={"ok": True, "result": {"message_id": 100}}) as initial, \
              patch.object(watcher, "edit_message", return_value={"ok": True}), \
              patch.object(watcher, "record_api_result"), \
@@ -246,7 +260,9 @@ class MultiSessionWatcherTests(unittest.TestCase):
             "run_id": "telegram-message-10",
         }
         meta = {"telegram_chat_id": "-1003589561528", "telegram_thread_id": "1"}
-        with patch.object(watcher, "set_eyes_reaction", return_value=True), \
+        with patch.object(watcher, "objective_from_prompt", return_value="Verify receipt validation"), \
+             patch.object(watcher, "objective_is_near_copy", return_value=False), \
+             patch.object(watcher, "set_eyes_reaction", return_value=True), \
              patch.object(watcher, "auto_route_for_prompt", return_value={}), \
              patch.object(watcher, "skill_for_prompt", return_value={"id": "", "label": "", "reason": ""}), \
              patch.object(watcher, "run_cmd", return_value={
@@ -280,7 +296,9 @@ class MultiSessionWatcherTests(unittest.TestCase):
                 }
             }
         }
-        with patch.object(watcher, "set_eyes_reaction", return_value=True), \
+        with patch.object(watcher, "objective_from_prompt", return_value="Verify ambiguous delivery fencing"), \
+             patch.object(watcher, "objective_is_near_copy", return_value=False), \
+             patch.object(watcher, "set_eyes_reaction", return_value=True), \
              patch.object(watcher, "auto_route_for_prompt", return_value={}), \
              patch.object(watcher, "skill_for_prompt", return_value={"id": "", "label": "", "reason": ""}), \
              patch.object(watcher, "run_cmd", return_value={
@@ -297,6 +315,510 @@ class MultiSessionWatcherTests(unittest.TestCase):
         self.assertTrue(result["surface_indeterminate"])
         self.assertEqual(result["header_message_id"], "301")
         self.assertEqual(result["ack_message_id"], "")
+
+    def test_topic17_card_child_timeout_is_bounded_inside_parent_timeout(self) -> None:
+        event = {
+            "ts": watcher.utc_now(),
+            "prompt": "restore the JAIMES live updates",
+            "platform_message_id": "803",
+            "db_message_id": "51",
+            "run_id": "telegram-message-51",
+        }
+        meta = {
+            "telegram_chat_id": "-1003589561528",
+            "telegram_thread_id": "17",
+        }
+        receipt = {"ok": True, "message_id": 803}
+        with patch.object(watcher, "objective_from_prompt", return_value="Restore JAIMES live updates"), \
+             patch.object(watcher, "objective_is_near_copy", return_value=False), \
+             patch.object(watcher, "skill_for_prompt", return_value={"id": "", "label": "", "reason": ""}), \
+             patch.object(watcher, "should_start_visible_card", return_value=True), \
+             patch.object(watcher, "work_card_surface_receipt", return_value={}), \
+             patch.object(watcher, "run_cmd", return_value={
+                 "ok": True,
+                 "stdout": json.dumps(receipt),
+                 "stderr": "",
+             }) as run, \
+             patch.object(watcher, "record_api_result"), \
+             patch.object(watcher, "send_chat_action"), \
+             patch.object(watcher, "publish_jaimes"):
+            result = watcher.send_ack(event, "openai-codex/gpt-5.6-sol", {}, meta=meta)
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["ack_message_id"], "803")
+        self.assertEqual(result["header_message_id"], "")
+        command = run.call_args.args[0]
+        self.assertEqual(command[2], "start")
+        self.assertEqual(command[command.index("--timeout") + 1], str(watcher.WORK_CARD_API_TIMEOUT_SECONDS))
+        self.assertIn("--no-brain-feed", command)
+        self.assertIn("--separate-message", command)
+        self.assertLess(watcher.WORK_CARD_API_TIMEOUT_SECONDS, watcher.WORK_CARD_PARENT_TIMEOUT_SECONDS)
+        self.assertEqual(run.call_args.kwargs["timeout"], watcher.WORK_CARD_PARENT_TIMEOUT_SECONDS)
+        self.assertEqual(run.call_args.kwargs["extra_env"], {"ALLOW_NO_BRAIN_FEED": "1"})
+
+    def test_topic17_ambiguous_card_delivery_propagates_durable_quarantine(self) -> None:
+        event = {
+            "ts": watcher.utc_now(),
+            "prompt": "restore the JAIMES live updates",
+            "platform_message_id": "804",
+            "db_message_id": "52",
+            "run_id": "telegram-message-52",
+        }
+        meta = {
+            "telegram_chat_id": "-1003589561528",
+            "telegram_thread_id": "17",
+        }
+        with patch.object(watcher, "objective_from_prompt", return_value="Restore JAIMES live updates"), \
+             patch.object(watcher, "objective_is_near_copy", return_value=False), \
+             patch.object(watcher, "skill_for_prompt", return_value={"id": "", "label": "", "reason": ""}), \
+             patch.object(watcher, "should_start_visible_card", return_value=True), \
+             patch.object(watcher, "run_cmd", return_value={
+                 "ok": False,
+                 "stdout": "",
+                 "stderr": "command timed out after 12s",
+             }), \
+             patch.object(watcher, "work_card_surface_receipt", return_value={
+                 "message_id": "",
+                 "surface_indeterminate": True,
+             }), \
+             patch.object(watcher, "record_api_result"), \
+             patch.object(watcher, "send_chat_action"), \
+             patch.object(watcher, "publish_jaimes"):
+            result = watcher.send_ack(event, "openai-codex/gpt-5.6-sol", {}, meta=meta)
+
+        self.assertFalse(result["ok"])
+        self.assertTrue(result["surface_indeterminate"])
+        self.assertEqual(result["ack_message_id"], "")
+
+    def test_definitive_surface_failure_keeps_cursor_for_one_safe_retry(self) -> None:
+        real_datetime = watcher.dt.datetime
+
+        class FrozenDateTime(real_datetime):
+            current = real_datetime.now(watcher.dt.timezone.utc).replace(microsecond=0)
+
+            @classmethod
+            def now(cls, tz=None):
+                value = cls.current
+                return value.astimezone(tz) if tz is not None else value.replace(tzinfo=None)
+
+        event = {
+            "session_id": "older",
+            "ts": FrozenDateTime.current.isoformat().replace("+00:00", "Z"),
+            "prompt": "restore JAIMES live updates",
+            "platform_message_id": "805",
+            "db_message_id": "55",
+            "run_id": "telegram-message-55",
+        }
+        meta = {
+            "sessionId": "older",
+            "model": "openai-codex/gpt-5.6-sol",
+            "telegram_chat_id": "-1003589561528",
+            "telegram_thread_id": "17",
+        }
+        failed = {
+            "ok": False,
+            "key": "topic17-retry",
+            "objective": "Restore JAIMES live updates",
+            "route": "JAIMES verified execution",
+            "ack_message_id": "",
+            "run_id": "telegram-message-55",
+        }
+        succeeded = {
+            **failed,
+            "ok": True,
+            "ack_message_id": "905",
+            "last_card_update_at": watcher.utc_now(),
+            "telegram_chat_id": "-1003589561528",
+            "telegram_thread_id": "17",
+        }
+        self.state.write_text(json.dumps({"direct_db_cursor:older": 0}), encoding="utf-8")
+
+        def events_after_cursor(_session_id: str, cursor: int):
+            return [event] if cursor < 55 else []
+
+        with patch.object(watcher, "active_hermes_sessions_metadata", return_value=[meta]), \
+             patch.object(watcher, "recent_prompt_events_from_state_db", side_effect=events_after_cursor), \
+             patch.object(watcher, "send_ack", side_effect=[failed, succeeded]) as send, \
+             patch.object(watcher.dt, "datetime", FrozenDateTime):
+            first = watcher.poll_once()
+            first_saved = json.loads(self.state.read_text(encoding="utf-8"))
+            FrozenDateTime.current += watcher.dt.timedelta(
+                seconds=watcher.SURFACE_RETRY_BASE_SECONDS + 1
+            )
+            second = watcher.poll_once()
+            second_saved = json.loads(self.state.read_text(encoding="utf-8"))
+            third = watcher.poll_once()
+
+        self.assertFalse(first["sent"][0]["result"]["ok"])
+        self.assertEqual(first_saved["direct_db_cursor:older"], 0)
+        self.assertTrue(second["sent"][0]["result"]["ok"])
+        self.assertEqual(second_saved["direct_db_cursor:older"], 55)
+        self.assertEqual(third["sent"], [])
+        self.assertEqual(send.call_count, 2)
+
+    def test_failed_surface_retry_is_persistently_backed_off_between_fast_polls(self) -> None:
+        event = {
+            "session_id": "older",
+            "ts": watcher.utc_now(),
+            "prompt": "restore JAIMES live updates",
+            "platform_message_id": "806",
+            "db_message_id": "56",
+            "run_id": "telegram-message-56",
+        }
+        meta = {
+            "sessionId": "older",
+            "model": "openai-codex/gpt-5.6-sol",
+            "telegram_chat_id": "-1003589561528",
+            "telegram_thread_id": "17",
+        }
+        failed = {
+            "ok": False,
+            "key": "topic17-backed-off-retry",
+            "objective": "Restore JAIMES live updates",
+            "route": "JAIMES verified execution",
+            "ack_message_id": "",
+            "run_id": "telegram-message-56",
+        }
+        self.state.write_text(json.dumps({"direct_db_cursor:older": 0}), encoding="utf-8")
+
+        def events_after_cursor(_session_id: str, cursor: int):
+            return [event] if cursor < 56 else []
+
+        with patch.object(watcher, "active_hermes_sessions_metadata", return_value=[meta]), \
+             patch.object(watcher, "recent_prompt_events_from_state_db", side_effect=events_after_cursor), \
+             patch.object(watcher, "send_ack", return_value=failed) as send:
+            first = watcher.poll_once()
+            watcher.poll_once()
+
+        saved = json.loads(self.state.read_text(encoding="utf-8"))
+        self.assertFalse(first["sent"][0]["result"]["ok"])
+        self.assertEqual(send.call_count, 1)
+        self.assertEqual(saved["direct_db_cursor:older"], 0)
+
+    def test_pending_surface_retry_is_not_discarded_by_two_minute_stale_cutoff(self) -> None:
+        event = {
+            "session_id": "older",
+            "ts": watcher.utc_now(),
+            "prompt": "restore JAIMES live updates",
+            "platform_message_id": "807",
+            "db_message_id": "57",
+            "run_id": "telegram-message-57",
+        }
+        meta = {
+            "sessionId": "older",
+            "model": "openai-codex/gpt-5.6-sol",
+            "telegram_chat_id": "-1003589561528",
+            "telegram_thread_id": "17",
+        }
+        failed = {
+            "ok": False,
+            "key": "topic17-aged-retry",
+            "objective": "Restore JAIMES live updates",
+            "route": "JAIMES verified execution",
+            "ack_message_id": "",
+            "run_id": "telegram-message-57",
+        }
+        ages = iter([0.0, float(watcher.STALE_BOOTSTRAP_SECONDS + 30)])
+        self.state.write_text(json.dumps({"direct_db_cursor:older": 0}), encoding="utf-8")
+
+        def events_after_cursor(_session_id: str, cursor: int):
+            return [event] if cursor < 57 else []
+
+        with patch.object(watcher, "active_hermes_sessions_metadata", return_value=[meta]), \
+             patch.object(watcher, "recent_prompt_events_from_state_db", side_effect=events_after_cursor), \
+             patch.object(watcher, "event_age_seconds", side_effect=lambda _ts: next(ages)), \
+             patch.object(watcher, "send_ack", return_value=failed) as send:
+            watcher.poll_once()
+            watcher.poll_once()
+
+        saved = json.loads(self.state.read_text(encoding="utf-8"))
+        self.assertEqual(send.call_count, 1)
+        self.assertEqual(saved["direct_db_cursor:older"], 0)
+        self.assertNotIn(f"older:{event['ts']}", saved["acked_prompt_events"])
+
+    def test_newer_same_session_event_supersedes_backoff_and_clears_exact_delivery_incident(self) -> None:
+        now = watcher.dt.datetime.now(watcher.dt.timezone.utc).replace(microsecond=0)
+        older = {
+            "session_id": "older",
+            "ts": now.isoformat().replace("+00:00", "Z"),
+            "prompt": "restore the older JAIMES live update",
+            "platform_message_id": "809",
+            "db_message_id": "59",
+            "run_id": "telegram-message-59",
+        }
+        newer = {
+            "session_id": "older",
+            "ts": (now + watcher.dt.timedelta(seconds=1)).isoformat().replace("+00:00", "Z"),
+            "prompt": "handle the newer JAIMES request",
+            "platform_message_id": "810",
+            "db_message_id": "60",
+            "run_id": "telegram-message-60",
+        }
+        meta = {
+            "sessionId": "older",
+            "model": "openai-codex/gpt-5.6-sol",
+            "telegram_chat_id": "-1003589561528",
+            "telegram_thread_id": "17",
+        }
+        older_key = "topic17-superseded-retry"
+        failed = {
+            "ok": False,
+            "key": older_key,
+            "objective": "Restore the older JAIMES live update",
+            "route": "JAIMES verified execution",
+            "reaction_ok": True,
+            "ack_message_id": "",
+            "run_id": "telegram-message-59",
+        }
+        succeeded = {
+            "ok": True,
+            "key": "topic17-newer-surface",
+            "objective": "Handle the newer JAIMES request",
+            "route": "JAIMES verified execution",
+            "reaction_ok": True,
+            "ack_message_id": "910",
+            "run_id": "telegram-message-60",
+            "last_card_update_at": watcher.utc_now(),
+            "telegram_chat_id": "-1003589561528",
+            "telegram_thread_id": "17",
+        }
+        batches = iter([[older], [older, newer]])
+        self.state.write_text(json.dumps({"direct_db_cursor:older": 0}), encoding="utf-8")
+
+        def ack_with_exact_incident(event, model, state, dry_run, meta, **_kwargs):
+            if event["db_message_id"] == "59":
+                watcher.record_api_result(state, "sendMessage", {
+                    "ok": False,
+                    "error": "definitive no-effect send failure",
+                    "delivery_key": older_key,
+                })
+                return failed
+            return succeeded
+
+        with patch.object(watcher, "active_hermes_sessions_metadata", return_value=[meta]), \
+             patch.object(watcher, "recent_prompt_events_from_state_db", side_effect=lambda *_args: next(batches)), \
+             patch.object(watcher, "send_ack", side_effect=ack_with_exact_incident) as send:
+            first = watcher.poll_once()
+            first_saved = json.loads(self.state.read_text(encoding="utf-8"))
+            second = watcher.poll_once()
+
+        saved = json.loads(self.state.read_text(encoding="utf-8"))
+        older_event_id = f"older:{older['ts']}"
+        operation_id = watcher.delivery_operation_id("sendMessage", older_key)
+        self.assertFalse(first["sent"][0]["result"]["ok"])
+        self.assertIn(older_event_id, first_saved["surface_retry_events"])
+        self.assertIn(operation_id, first_saved["unresolved_telegram_deliveries"])
+        self.assertEqual(first_saved["status"], "telegram-delivery-error")
+        self.assertTrue(second["sent"][0]["result"]["ok"])
+        self.assertEqual(send.call_count, 2)
+        self.assertEqual(saved["direct_db_cursor:older"], 60)
+        self.assertNotIn(older_event_id, saved["surface_retry_events"])
+        self.assertNotIn(operation_id, saved.get("unresolved_telegram_deliveries", {}))
+        self.assertNotIn("last_telegram_delivery_error", saved)
+        self.assertNotIn("last_error", saved)
+        self.assertEqual(saved["status"], "ok")
+
+    def test_followup_or_attachment_cursor_advance_sweeps_superseded_retry_incident(self) -> None:
+        now = watcher.dt.datetime.now(watcher.dt.timezone.utc).replace(microsecond=0)
+        older = {
+            "session_id": "older",
+            "ts": now.isoformat().replace("+00:00", "Z"),
+            "prompt": "restore the older JAIMES live update",
+            "platform_message_id": "812",
+            "db_message_id": "62",
+            "run_id": "telegram-message-62",
+        }
+        newer = {
+            "session_id": "older",
+            "ts": (now + watcher.dt.timedelta(seconds=1)).isoformat().replace("+00:00", "Z"),
+            "prompt": "additional context for the current task",
+            "platform_message_id": "813",
+            "db_message_id": "63",
+            "run_id": "telegram-message-63",
+        }
+        meta = {
+            "sessionId": "older",
+            "model": "openai-codex/gpt-5.6-sol",
+            "telegram_chat_id": "-1003589561528",
+            "telegram_thread_id": "17",
+        }
+        older_event_id = f"older:{older['ts']}"
+        older_key = "topic17-context-superseded-retry"
+        operation_id = watcher.delivery_operation_id("sendMessage", older_key)
+        incident = {
+            "at": older["ts"],
+            "method": "sendMessage",
+            "ok": False,
+            "operation": operation_id,
+            "error": "definitive no-effect send failure",
+        }
+
+        for continuation_kind in ("contextual-followup", "attachment"):
+            with self.subTest(continuation_kind=continuation_kind):
+                state = {
+                    "direct_db_cursor:older": 0,
+                    "active_cards": {},
+                    "acked_prompt_events": [],
+                    "surface_retry_events": {
+                        older_event_id: {
+                            "attempts": 1,
+                            "first_failed_at": older["ts"],
+                            "last_failed_at": older["ts"],
+                            "next_retry_at": (
+                                now + watcher.dt.timedelta(seconds=60)
+                            ).isoformat().replace("+00:00", "Z"),
+                            "reaction_ok": True,
+                            "session_id": "older",
+                            "db_message_id": 62,
+                            "delivery_key": older_key,
+                        }
+                    },
+                    "unresolved_telegram_deliveries": {operation_id: incident},
+                    "last_telegram_delivery_error": incident,
+                    "status": "telegram-delivery-error",
+                    "last_error": "A managed Telegram card send lacks a confirmed receipt.",
+                }
+                self.state.write_text(json.dumps(state), encoding="utf-8")
+                attachment_card = {"key": "current-card"}
+                with patch.object(watcher, "active_hermes_sessions_metadata", return_value=[meta]), \
+                     patch.object(watcher, "recent_prompt_events_from_state_db", return_value=[older, newer]), \
+                     patch.object(
+                         watcher,
+                         "attach_contextual_followup",
+                         return_value=continuation_kind == "contextual-followup",
+                     ), \
+                     patch.object(
+                         watcher,
+                         "media_only_prompt",
+                         return_value=continuation_kind == "attachment",
+                     ), \
+                     patch.object(
+                         watcher,
+                         "recent_active_card_for_meta",
+                         return_value=attachment_card if continuation_kind == "attachment" else None,
+                     ), \
+                     patch.object(watcher, "send_ack") as send:
+                    result = watcher.poll_once()
+
+                saved = json.loads(self.state.read_text(encoding="utf-8"))
+                self.assertEqual(result["sent"], [])
+                send.assert_not_called()
+                self.assertEqual(saved["direct_db_cursor:older"], 63)
+                self.assertNotIn(older_event_id, saved["surface_retry_events"])
+                self.assertNotIn(operation_id, saved.get("unresolved_telegram_deliveries", {}))
+                self.assertNotIn("last_telegram_delivery_error", saved)
+                self.assertNotIn("last_error", saved)
+                self.assertEqual(saved["status"], "ok")
+
+    def test_due_surface_retry_does_not_queue_x_intelligence_twice(self) -> None:
+        real_datetime = watcher.dt.datetime
+
+        class FrozenDateTime(real_datetime):
+            current = real_datetime.now(watcher.dt.timezone.utc).replace(microsecond=0)
+
+            @classmethod
+            def now(cls, tz=None):
+                value = cls.current
+                return value.astimezone(tz) if tz is not None else value.replace(tzinfo=None)
+
+        event = {
+            "session_id": "older",
+            "ts": FrozenDateTime.current.isoformat().replace("+00:00", "Z"),
+            "prompt": "assess https://x.com/example/status/123456789 without making changes",
+            "platform_message_id": "811",
+            "db_message_id": "61",
+            "run_id": "telegram-message-61",
+        }
+        meta = {
+            "sessionId": "older",
+            "model": "openai-codex/gpt-5.6-sol",
+            "telegram_chat_id": "-1003589561528",
+            "telegram_thread_id": "17",
+        }
+        failed = {
+            "ok": False,
+            "key": "topic17-x-retry",
+            "objective": "Assess the public X post",
+            "route": "JAIMES verified execution",
+            "reaction_ok": True,
+            "ack_message_id": "",
+            "run_id": "telegram-message-61",
+        }
+        succeeded = {
+            **failed,
+            "ok": True,
+            "ack_message_id": "911",
+            "last_card_update_at": event["ts"],
+            "telegram_chat_id": "-1003589561528",
+            "telegram_thread_id": "17",
+        }
+        self.state.write_text(json.dumps({"direct_db_cursor:older": 0}), encoding="utf-8")
+
+        def events_after_cursor(_session_id: str, cursor: int):
+            return [event] if cursor < 61 else []
+
+        with patch.object(watcher, "active_hermes_sessions_metadata", return_value=[meta]), \
+             patch.object(watcher, "recent_prompt_events_from_state_db", side_effect=events_after_cursor), \
+             patch.object(watcher, "queue_forwarded_x_intelligence", return_value=1) as queue_x, \
+             patch.object(watcher, "send_ack", side_effect=[failed, succeeded]) as send, \
+             patch.object(watcher.dt, "datetime", FrozenDateTime):
+            first = watcher.poll_once()
+            FrozenDateTime.current += watcher.dt.timedelta(
+                seconds=watcher.SURFACE_RETRY_BASE_SECONDS + 1
+            )
+            second = watcher.poll_once()
+
+        self.assertEqual(first["sent"][0]["result"]["x_intelligence_queued"], 1)
+        self.assertNotIn("x_intelligence_queued", second["sent"][0]["result"])
+        self.assertEqual(queue_x.call_count, 1)
+        self.assertEqual(send.call_count, 2)
+        self.assertFalse(send.call_args_list[0].kwargs["reaction_already_done"])
+        self.assertTrue(send.call_args_list[1].kwargs["reaction_already_done"])
+
+    def test_durable_message_receipt_clears_delivery_error_after_parent_timeout(self) -> None:
+        event = {
+            "ts": watcher.utc_now(),
+            "prompt": "restore the JAIMES live updates",
+            "platform_message_id": "808",
+            "db_message_id": "58",
+            "run_id": "telegram-message-58",
+        }
+        meta = {
+            "telegram_chat_id": "-1003589561528",
+            "telegram_thread_id": "17",
+        }
+        state = {
+            "last_telegram_delivery_error": {
+                "at": "2026-07-19T13:00:00Z",
+                "method": "sendMessage",
+                "ok": False,
+            }
+        }
+        with patch.object(watcher, "objective_from_prompt", return_value="Restore JAIMES live updates"), \
+             patch.object(watcher, "objective_is_near_copy", return_value=False), \
+             patch.object(watcher, "skill_for_prompt", return_value={"id": "", "label": "", "reason": ""}), \
+             patch.object(watcher, "should_start_visible_card", return_value=True), \
+             patch.object(watcher, "run_cmd", return_value={
+                 "ok": False,
+                 "stdout": "",
+                 "stderr": "command timed out after 12s",
+             }), \
+             patch.object(watcher, "work_card_surface_receipt", return_value={
+                 "message_id": "908",
+                 "surface_indeterminate": False,
+             }), \
+             patch.object(watcher, "send_chat_action"), \
+             patch.object(watcher, "publish_jaimes"):
+            result = watcher.send_ack(
+                event,
+                "openai-codex/gpt-5.6-sol",
+                state,
+                meta=meta,
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["ack_message_id"], "908")
+        self.assertNotIn("last_telegram_delivery_error", state)
 
     def test_ambiguous_handoff_surface_stays_owned_and_never_fails_open(self) -> None:
         event = {
@@ -352,6 +874,97 @@ class MultiSessionWatcherTests(unittest.TestCase):
             identity_patch.start()
         self.assertNotIn("last_telegram_api_error", state)
         self.assertTrue(state["telegram_identity"]["ok"])
+
+    def test_keyed_delivery_success_is_operation_scoped_and_migrates_legacy_error(self) -> None:
+        state: dict = {}
+        watcher.record_api_result(state, "editMessageText", {
+            "ok": False,
+            "error": "card A edit failed",
+            "delivery_key": "card-a",
+        })
+        card_a_operation = watcher.delivery_operation_id("editMessageText", "card-a")
+        watcher.record_api_result(state, "editMessageText", {
+            "ok": True,
+            "delivery_key": "card-b",
+        })
+
+        self.assertIn(card_a_operation, state["unresolved_telegram_deliveries"])
+        self.assertEqual(
+            state["last_telegram_delivery_error"]["operation"],
+            card_a_operation,
+        )
+
+        legacy = {
+            "at": "2026-07-19T12:00:00Z",
+            "method": "editMessageText",
+            "ok": False,
+            "error": "legacy pre-operation-key error",
+        }
+        legacy_state = {"last_telegram_delivery_error": legacy}
+        watcher.record_api_result(legacy_state, "editMessageText", {
+            "ok": True,
+            "delivery_key": "first-confirmed-keyed-edit",
+        })
+
+        self.assertEqual(legacy_state["unresolved_telegram_deliveries"], {})
+        self.assertNotIn("last_telegram_delivery_error", legacy_state)
+
+    def test_error_sanitizer_redacts_bearer_and_quoted_json_token_values(self) -> None:
+        secret_values = [
+            "telegram-env-secret",
+            "openai-env-secret",
+            "github-env-secret",
+            "access-env-secret",
+            "api-env-secret",
+            "telegram-json-secret",
+            "openai-json-secret",
+            "github-json-secret",
+            "access-json-secret",
+            "api-json-secret",
+            "bearer-secret-abc",
+        ]
+        sanitized = watcher.sanitize_error_text(
+            "TELEGRAM_BOT_TOKEN=telegram-env-secret; "
+            "OPENAI_API_KEY: openai-env-secret; "
+            "GITHUB_TOKEN=github-env-secret; "
+            "access_token=access-env-secret; "
+            "api_key=api-env-secret; "
+            "Authorization: Bearer bearer-secret-abc; "
+            'payload={"telegram_bot_token": "telegram-json-secret", '
+            '"openai_api_key": "openai-json-secret", '
+            '"github_token": "github-json-secret", '
+            '"access_token": "access-json-secret", '
+            '"api_key": "api-json-secret"}'
+        )
+
+        for secret in secret_values:
+            with self.subTest(secret=secret):
+                self.assertNotIn(secret, sanitized)
+        self.assertNotIn("Bearer", sanitized)
+        self.assertGreaterEqual(sanitized.count("<redacted>"), len(secret_values))
+
+    def test_daemon_exception_persistence_uses_secret_safe_sanitizer(self) -> None:
+        self.state.write_text("{}", encoding="utf-8")
+        failure = RuntimeError(
+            'Authorization: Bearer daemon-bearer-secret; '
+            'OPENAI_API_KEY=daemon-openai-secret; '
+            'payload={"access_token": "daemon-json-secret"}'
+        )
+
+        with patch.object(watcher.sys, "argv", ["jaimes_telegram_fast_ack.py"]), \
+             patch.object(watcher, "poll_once", side_effect=failure), \
+             patch.object(watcher.time, "sleep", side_effect=KeyboardInterrupt), \
+             self.assertRaises(KeyboardInterrupt):
+            watcher.main()
+
+        saved = json.loads(self.state.read_text(encoding="utf-8"))
+        persisted = saved["last_error"]
+        self.assertNotIn("daemon-bearer-secret", persisted)
+        self.assertNotIn("daemon-openai-secret", persisted)
+        self.assertNotIn("daemon-json-secret", persisted)
+        self.assertNotIn("Bearer", persisted)
+        self.assertGreaterEqual(persisted.count("<redacted>"), 3)
+        self.assertTrue(saved["last_error_at"])
 
     def test_bot_identity_mismatch_fails_closed(self) -> None:
         state = {}
@@ -883,6 +1496,208 @@ class MultiSessionWatcherTests(unittest.TestCase):
         self.assertEqual(run.call_count, 1)
         self.assertIn("e2", state["processed_progress_events"])
 
+    def test_failed_progress_edit_is_not_consumed_and_retries_successfully(self) -> None:
+        unchanged = watcher.utc_now()
+        state = {
+            "active_cards": {
+                "telegram-message-61": {
+                    "key": "retry-progress-card",
+                    "objective": "Restore JAIMES live updates",
+                    "model": "model",
+                    "route": "route",
+                    "status": "active",
+                    "session_id": "older",
+                    "telegram_chat_id": "-1003589561528",
+                    "telegram_thread_id": "17",
+                    "current_summary": "Reading current state",
+                    "started_at": unchanged,
+                    "last_progress_at": unchanged,
+                    "last_card_update_at": unchanged,
+                }
+            },
+            "processed_progress_events": [],
+        }
+        event = {
+            "event_id": "progress-retry-61",
+            "run_id": "telegram-message-61",
+            "type": "tool.result",
+            "summary": "Verified the active card receipt",
+        }
+        update_patch = self.patches[3]
+        update_patch.stop()
+        try:
+            with patch.dict("os.environ", {"JAIMES_TELEGRAM_LIVE_CARDS": "1"}), \
+                 patch.object(watcher, "recent_progress_events", return_value=[event]), \
+                 patch.object(watcher, "run_work_card_cmd", side_effect=[
+                     {"ok": False, "stderr": "temporary Telegram timeout"},
+                     {"ok": True, "stdout": "{}", "stderr": ""},
+                 ]) as run, \
+                 patch.object(watcher, "publish_jaimes"), \
+                 patch.object(watcher, "send_chat_action"):
+                first = watcher.update_active_cards(state, "older")
+                first_card = dict(state["active_cards"]["telegram-message-61"])
+                first_processed = list(state["processed_progress_events"])
+                second = watcher.update_active_cards(state, "older")
+        finally:
+            update_patch.start()
+
+        self.assertFalse(first[0]["result"]["ok"])
+        self.assertEqual(first_processed, [])
+        self.assertEqual(first_card["current_summary"], "Reading current state")
+        self.assertEqual(first_card["last_progress_at"], unchanged)
+        self.assertTrue(second[0]["result"]["ok"])
+        self.assertIn("progress-retry-61", state["processed_progress_events"])
+        self.assertEqual(
+            state["active_cards"]["telegram-message-61"]["current_summary"],
+            "Verified the active card receipt",
+        )
+        self.assertEqual(run.call_count, 2)
+
+    def test_idle_active_card_receives_same_card_heartbeat_without_progress_mutation(self) -> None:
+        now = watcher.dt.datetime.now(watcher.dt.timezone.utc)
+        old = (now - watcher.dt.timedelta(seconds=watcher.HEARTBEAT_SECONDS + 5)).replace(
+            microsecond=0
+        ).isoformat().replace("+00:00", "Z")
+        started = (now - watcher.dt.timedelta(minutes=3)).replace(
+            microsecond=0
+        ).isoformat().replace("+00:00", "Z")
+        state = {
+            "active_cards": {
+                "telegram-message-62": {
+                    "key": "heartbeat-card",
+                    "objective": "Restore JAIMES live updates",
+                    "model": "model",
+                    "route": "route",
+                    "status": "active",
+                    "session_id": "older",
+                    "telegram_chat_id": "-1003589561528",
+                    "telegram_thread_id": "17",
+                    "current_summary": "Checking the Telegram receipt lifecycle",
+                    "started_at": started,
+                    "last_progress_at": old,
+                    "last_card_update_at": old,
+                }
+            },
+            "processed_progress_events": [],
+        }
+        update_patch = self.patches[3]
+        update_patch.stop()
+        try:
+            with patch.dict("os.environ", {"JAIMES_TELEGRAM_LIVE_CARDS": "1"}), \
+                 patch.object(watcher, "recent_progress_events", return_value=[]), \
+                 patch.object(watcher, "run_work_card_cmd", return_value={"ok": True}) as run, \
+                 patch.object(watcher, "publish_jaimes") as publish:
+                updates = watcher.update_active_cards(state, "older")
+        finally:
+            update_patch.start()
+
+        self.assertEqual(len(updates), 1)
+        command = run.call_args.args[0]
+        self.assertEqual(command[2], "update")
+        self.assertEqual(command[command.index("--key") + 1], "heartbeat-card")
+        rendered_phase = command[command.index("--now") + 1]
+        self.assertEqual(rendered_phase, "Checking the Telegram receipt lifecycle")
+        self.assertNotIn("Still working", rendered_phase)
+        self.assertNotIn("--done", command)
+        active = state["active_cards"]["telegram-message-62"]
+        self.assertEqual(active["last_progress_at"], old)
+        self.assertEqual(active["current_summary"], "Checking the Telegram receipt lifecycle")
+        self.assertNotEqual(active["last_card_update_at"], old)
+        self.assertEqual(active["heartbeat_checked_at"], active["last_card_update_at"])
+        self.assertEqual(publish.call_args.kwargs["phase"], "heartbeat")
+        self.assertFalse(publish.call_args.kwargs["brain_feed"])
+
+    def test_old_card_with_recent_progress_does_not_expire(self) -> None:
+        now = watcher.dt.datetime.now(watcher.dt.timezone.utc)
+        started = (now - watcher.dt.timedelta(seconds=watcher.MAX_ACTIVE_CARD_SECONDS + 5)).replace(
+            microsecond=0
+        ).isoformat().replace("+00:00", "Z")
+        recent_progress = now.replace(microsecond=0).isoformat().replace("+00:00", "Z")
+        state = {
+            "active_cards": {
+                "telegram-message-64": {
+                    "key": "expired-card",
+                    "objective": "Restore JAIMES live updates",
+                    "model": "model",
+                    "route": "route",
+                    "status": "active",
+                    "session_id": "older",
+                    "telegram_chat_id": "-1003589561528",
+                    "telegram_thread_id": "17",
+                    "current_summary": "Checking the Telegram receipt lifecycle",
+                    "started_at": started,
+                    "last_progress_at": recent_progress,
+                    "last_card_update_at": recent_progress,
+                }
+            },
+            "processed_progress_events": [],
+        }
+        update_patch = self.patches[3]
+        update_patch.stop()
+        try:
+            with patch.dict("os.environ", {"JAIMES_TELEGRAM_LIVE_CARDS": "1"}), \
+                 patch.object(watcher, "recent_progress_events", return_value=[]), \
+                 patch.object(watcher, "run_work_card_cmd") as run, \
+                 patch.object(watcher, "publish_jaimes") as publish:
+                updates = watcher.update_active_cards(state, "older")
+        finally:
+            update_patch.start()
+
+        self.assertEqual(state["active_cards"]["telegram-message-64"]["status"], "active")
+        self.assertEqual(updates, [])
+        run.assert_not_called()
+        publish.assert_not_called()
+
+    def test_compaction_child_progress_rebinds_to_parent_card(self) -> None:
+        timestamp = watcher.utc_now()
+        state = {
+            "active_cards": {
+                "telegram-message-63": {
+                    "key": "lineage-card",
+                    "objective": "Restore JAIMES live updates",
+                    "model": "model",
+                    "route": "route",
+                    "status": "active",
+                    "session_id": "parent-session",
+                    "telegram_chat_id": "-1003589561528",
+                    "telegram_thread_id": "17",
+                    "current_summary": "Reading current state",
+                    "started_at": timestamp,
+                    "last_progress_at": timestamp,
+                    "last_card_update_at": timestamp,
+                }
+            },
+            "processed_progress_events": [],
+        }
+        child_event = {
+            "event_id": "child-progress-63",
+            "run_id": "telegram-message-999",
+            "type": "tool.result",
+            "summary": "Continued after context compression",
+        }
+        update_patch = self.patches[3]
+        update_patch.stop()
+        try:
+            with patch.dict("os.environ", {"JAIMES_TELEGRAM_LIVE_CARDS": "1"}), \
+                 patch.object(watcher, "hermes_session_lineage", return_value={
+                     "child-session", "parent-session"
+                 }), \
+                 patch.object(watcher, "recent_progress_events", return_value=[child_event]), \
+                 patch.object(watcher, "run_work_card_cmd", return_value={"ok": True}) as run, \
+                 patch.object(watcher, "publish_jaimes"), \
+                 patch.object(watcher, "send_chat_action"):
+                updates = watcher.update_active_cards(state, "child-session")
+        finally:
+            update_patch.start()
+
+        self.assertEqual(len(updates), 1)
+        self.assertEqual(run.call_args.args[0][run.call_args.args[0].index("--key") + 1], "lineage-card")
+        rebound = state["active_cards"]["telegram-message-63"]
+        self.assertEqual(rebound["session_id"], "child-session")
+        self.assertEqual(rebound["continued_from_session_ids"], ["parent-session"])
+        self.assertEqual(rebound["current_summary"], "Continued after context compression")
+        self.assertIn("child-progress-63", state["processed_progress_events"])
+
     def test_model_completed_waits_for_confirmed_telegram_delivery(self) -> None:
         state = {
             "active_cards": {
@@ -952,6 +1767,112 @@ class MultiSessionWatcherTests(unittest.TestCase):
         self.assertEqual(card["native_final_message_id"], "3914")
         self.assertEqual(card["final_message_id"], "3914")
         publish.assert_called_once()
+
+    def test_adapter_confirmed_terminal_delivery_retires_live_and_final_edit_incidents(self) -> None:
+        work_state = Path(self.tmp.name) / "jaimes_work_cards.json"
+        work_state.write_text(json.dumps({"cards": {
+            "receipt-card": {
+                "status": "done",
+                "updated_at": "2026-07-19T18:00:00Z",
+                "work_log": ["Final summary delivered"],
+                "final_message_id": "4914",
+                "work_id": "work-receipt",
+                "run_id": "run-receipt",
+                "task_started_at": "2026-07-19T17:59:00Z",
+            }
+        }}))
+        live_operation = watcher.delivery_operation_id(
+            "editMessageText", "receipt-card"
+        )
+        final_operation = watcher.delivery_operation_id(
+            "editMessageText", "receipt-card:final"
+        )
+        live_incident = {
+            "at": "2026-07-19T17:59:30Z",
+            "method": "editMessageText",
+            "ok": False,
+            "operation": live_operation,
+            "error": "live edit receipt unresolved",
+        }
+        final_incident = {
+            "at": "2026-07-19T17:59:40Z",
+            "method": "editMessageText",
+            "ok": False,
+            "operation": final_operation,
+            "error": "final edit receipt unresolved",
+        }
+        state = {
+            "active_cards": {
+                "run-receipt": {
+                    "key": "receipt-card",
+                    "objective": "Verify adapter terminal delivery",
+                    "model": "openai-codex/gpt-5.6-sol",
+                    "work_id": "work-receipt",
+                    "ledger_run_id": "run-receipt",
+                    "task_started_at": "2026-07-19T17:59:00Z",
+                    "status": "active",
+                }
+            },
+            "unresolved_telegram_deliveries": {
+                live_operation: live_incident,
+                final_operation: final_incident,
+            },
+            "last_telegram_delivery_error": final_incident,
+        }
+
+        with patch.object(watcher, "JAIMES_WORK_CARD_STATE_PATH", work_state), \
+             patch.object(watcher, "publish_jaimes"):
+            confirmed = watcher.reconcile_adapter_confirmed_deliveries(state)
+
+        self.assertEqual(confirmed, 1)
+        self.assertEqual(state["active_cards"]["run-receipt"]["status"], "done")
+        self.assertEqual(state["unresolved_telegram_deliveries"], {})
+        self.assertNotIn("last_telegram_delivery_error", state)
+
+    def test_superseding_old_card_retires_only_its_unretryable_edit_incidents(self) -> None:
+        old_live = watcher.delivery_operation_id("editMessageText", "old-card")
+        old_final = watcher.delivery_operation_id("editMessageText", "old-card:final")
+        current_live = watcher.delivery_operation_id("editMessageText", "current-card")
+
+        def incident(operation: str, at: str) -> dict:
+            return {
+                "at": at,
+                "method": "editMessageText",
+                "ok": False,
+                "operation": operation,
+                "error": "edit receipt unresolved",
+            }
+
+        state = {
+            "active_cards": {
+                "run-old": {"key": "old-card", "status": "active"},
+                "run-current": {"key": "current-card", "status": "active"},
+            },
+            "unresolved_telegram_deliveries": {
+                old_live: incident(old_live, "2026-07-19T17:59:10Z"),
+                old_final: incident(old_final, "2026-07-19T17:59:20Z"),
+                current_live: incident(current_live, "2026-07-19T17:59:30Z"),
+            },
+        }
+        watcher.refresh_delivery_error_state(
+            state, state["unresolved_telegram_deliveries"]
+        )
+
+        retired = watcher.retire_noncurrent_active_cards(state, "run-current")
+
+        self.assertEqual(retired, 1)
+        self.assertEqual(state["active_cards"]["run-old"]["status"], "done")
+        self.assertEqual(
+            state["active_cards"]["run-old"]["retired_reason"],
+            "superseded-by-newer-user-turn",
+        )
+        self.assertEqual(state["active_cards"]["run-current"]["status"], "active")
+        self.assertNotIn(old_live, state["unresolved_telegram_deliveries"])
+        self.assertNotIn(old_final, state["unresolved_telegram_deliveries"])
+        self.assertIn(current_live, state["unresolved_telegram_deliveries"])
+        self.assertEqual(
+            state["last_telegram_delivery_error"]["operation"], current_live
+        )
 
     def test_adapter_receipt_without_final_message_id_does_not_close_watcher_card(self) -> None:
         work_state = Path(self.tmp.name) / "jaimes_work_cards.json"
@@ -1053,6 +1974,61 @@ class MultiSessionWatcherTests(unittest.TestCase):
         self.assertIn("Route: JAIMES verified execution", rendered)
         self.assertIn("Why: verified JAIMES execution", rendered)
         self.assertIn("Appropriate next steps:", rendered)
+
+    def test_native_final_not_modified_is_success_and_clears_exact_final_incident(self) -> None:
+        user_id = self.add_user("older", "run the health check")
+        with sqlite3.connect(self.db) as con:
+            con.execute(
+                "INSERT INTO messages(session_id,role,content,platform_message_id,timestamp) VALUES (?,?,?,?,?)",
+                ("older", "assistant", "TLDR\nHealth check passed.\nChallenges\nNone", "556", time.time()),
+            )
+        key = "idempotent-final-card"
+        delivery_key = f"{key}:final"
+        operation_id = watcher.delivery_operation_id("editMessageText", delivery_key)
+        incident = {
+            "at": watcher.utc_now(),
+            "method": "editMessageText",
+            "ok": False,
+            "operation": operation_id,
+            "error": "prior final edit receipt was unresolved",
+        }
+        state = {
+            "active_cards": {
+                f"telegram-message-{user_id}": {
+                    "key": key,
+                    "objective": "Verify JAIMES health",
+                    "model": "openai-codex/gpt-5.6-sol",
+                    "route": "JAIMES verified execution",
+                    "status": "active",
+                    "telegram_chat_id": "-1003589561528",
+                    "telegram_thread_id": "17",
+                }
+            },
+            "unresolved_telegram_deliveries": {operation_id: incident},
+            "last_telegram_delivery_error": incident,
+        }
+        completion_patch = self.patches[2]
+        completion_patch.stop()
+        try:
+            with patch.object(watcher, "edit_message", return_value={
+                     "ok": False,
+                     "description": "Bad Request: message is not modified",
+                 }) as edit, \
+                 patch.object(watcher, "run_work_card_cmd", return_value={"ok": True}) as run, \
+                 patch.object(watcher, "publish_jaimes"):
+                completed = watcher.complete_cards_from_final_responses(state, "older")
+        finally:
+            completion_patch.start()
+
+        self.assertEqual(completed, 1)
+        edit.assert_called_once()
+        run.assert_called_once()
+        completed_card = state["active_cards"][f"telegram-message-{user_id}"]
+        self.assertEqual(completed_card["status"], "done")
+        self.assertEqual(completed_card["final_contract_status"], "canonical")
+        self.assertEqual(completed_card["native_final_message_id"], "556")
+        self.assertNotIn(operation_id, state.get("unresolved_telegram_deliveries", {}))
+        self.assertNotIn("last_telegram_delivery_error", state)
 
     def test_final_without_telegram_delivery_id_does_not_close_card(self) -> None:
         user_id = self.add_user("older", "verify delivery")

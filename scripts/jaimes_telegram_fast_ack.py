@@ -53,6 +53,11 @@ BOT_IDENTITY_CHECK_SECONDS = 5 * 60
 EXPECTED_BOT_USERNAME = os.environ.get("JAIMES_TELEGRAM_BOT_USERNAME", "Jaimes_claw_bot")
 HEARTBEAT_SECONDS = 20
 MAX_ACTIVE_CARD_SECONDS = 45 * 60
+WORK_CARD_API_TIMEOUT_SECONDS = 8
+WORK_CARD_PARENT_TIMEOUT_SECONDS = 12
+SURFACE_RETRY_BASE_SECONDS = 5
+SURFACE_RETRY_MAX_SECONDS = 60
+SURFACE_RETRY_MAX_RECORDS = 100
 CONTROL_TOWER_SSH_HOST = os.environ.get("CONTROL_TOWER_SSH_HOST", "josh2.0@josh2")
 CONTROL_TOWER_REMOTE_ROOT = os.environ.get(
     "CONTROL_TOWER_REMOTE_ROOT",
@@ -176,10 +181,10 @@ def work_card_target_args(meta: dict[str, Any] | None) -> list[str]:
 def work_card_surface_receipt(key: str) -> dict[str, Any]:
     """Recover the durable card checkpoint after a child delivery failure.
 
-    Topic 1 work-card sends checkpoint ambiguous Telegram responses before the
-    child exits nonzero.  The handoff owner must carry that state upward;
-    treating it as a clean failure would let Josh create a second surface even
-    though Telegram may already have accepted JAIMES's first request.
+    Managed group work-card sends checkpoint ambiguous Telegram responses
+    before the child exits nonzero. The watcher must carry that state upward;
+    treating it as a clean failure could create a duplicate surface even though
+    Telegram may already have accepted JAIMES's first request.
     """
     if work_card is None:
         return {}
@@ -222,11 +227,84 @@ def send_chat_action(action: str = "typing", meta: dict[str, Any] | None = None)
     work_card.api_call("sendChatAction", payload, timeout=6)
 
 
+def sanitize_error_text(value: Any, limit: int = 320) -> str:
+    """Return bounded diagnostics with Telegram URLs and credentials removed."""
+    error = str(value or "Telegram API call failed")
+    error = re.sub(
+        r"https://api\.telegram\.org/bot[^/\s]+",
+        "https://api.telegram.org/bot<redacted>",
+        error,
+    )
+    error = re.sub(
+        r'(?i)("(?:[a-z0-9_]*(?:token|secret|password|api_key|access_token|cookie)|authorization)"\s*:\s*)"[^"]*"',
+        r'\1"<redacted>"',
+        error,
+    )
+    error = re.sub(
+        r"(?i)('(?:[a-z0-9_]*(?:token|secret|password|api_key|access_token|cookie)|authorization)'\s*:\s*)'[^']*'",
+        r"\1'<redacted>'",
+        error,
+    )
+    error = re.sub(
+        r"(?i)\b([a-z0-9_]*(?:token|secret|password|api_key|access_token|cookie)|authorization)\b\s*[=:]\s*(?:bearer\s+)?[^\s,;}\]]+",
+        r"\1=<redacted>",
+        error,
+    )
+    error = re.sub(
+        r"(?i)\bbearer\s+[A-Za-z0-9._~+/=-]{4,}\b",
+        "Bearer <redacted>",
+        error,
+    )
+    error = re.sub(
+        r"(?i)\b(?:sk|xai|gh[pousr])[-_][A-Za-z0-9_-]{4,}\b",
+        "<redacted>",
+        error,
+    )
+    return error[: max(0, int(limit))]
+
+
+def delivery_operation_id(method: str, delivery_key: str) -> str:
+    return hashlib.sha256(
+        f"{method}|{delivery_key or 'unscoped'}".encode("utf-8")
+    ).hexdigest()[:24]
+
+
+def refresh_delivery_error_state(
+    state: dict[str, Any], unresolved: dict[str, Any]
+) -> None:
+    ordered = sorted(
+        (item for item in unresolved.items() if isinstance(item[1], dict)),
+        key=lambda item: str(item[1].get("at") or ""),
+    )[-50:]
+    state["unresolved_telegram_deliveries"] = dict(ordered)
+    if ordered:
+        state["last_telegram_delivery_error"] = ordered[-1][1]
+    else:
+        state.pop("last_telegram_delivery_error", None)
+
+
+def resolve_delivery_incident(
+    state: dict[str, Any], method: str, delivery_key: str
+) -> None:
+    """Retire a proven no-effect incident without inventing an API success."""
+    unresolved = state.get("unresolved_telegram_deliveries")
+    if not isinstance(unresolved, dict):
+        return
+    unresolved.pop(delivery_operation_id(method, delivery_key), None)
+    refresh_delivery_error_state(state, unresolved)
+
+
 def record_api_result(state: dict[str, Any], method: str, result: dict[str, Any]) -> None:
     """Keep short, secret-free Telegram API evidence in watcher state."""
     row = {"at": utc_now(), "method": method, "ok": bool(result.get("ok"))}
+    delivery_key = str(result.get("delivery_key") or "").strip()
+    operation_id = delivery_operation_id(method, delivery_key)
+    if method in {"sendMessage", "editMessageText"}:
+        row["operation"] = operation_id
     if not row["ok"]:
-        row["error"] = str(result.get("description") or result.get("error") or "Telegram API call failed")[:320]
+        row["error"] = sanitize_error_text(
+            result.get("description") or result.get("error")
+        )
     history = list(state.get("telegram_api_results") or [])
     history.append(row)
     state["telegram_api_results"] = history[-40:]
@@ -235,6 +313,35 @@ def record_api_result(state: dict[str, Any], method: str, result: dict[str, Any]
         state.pop("last_telegram_api_error", None)
     else:
         state["last_telegram_api_error"] = row
+    if method in {"sendMessage", "editMessageText"}:
+        unresolved = state.get("unresolved_telegram_deliveries")
+        if not isinstance(unresolved, dict):
+            unresolved = {}
+            previous = state.get("last_telegram_delivery_error")
+            if isinstance(previous, dict):
+                previous_method = str(previous.get("method") or "")
+                previous_id = str(
+                    previous.get("operation")
+                    or delivery_operation_id(previous_method, "")
+                )
+                unresolved[previous_id] = previous
+        if row["ok"]:
+            unresolved.pop(operation_id, None)
+            legacy_id = delivery_operation_id(method, "")
+            for candidate_id, candidate in list(unresolved.items()):
+                if not isinstance(candidate, dict):
+                    continue
+                if (
+                    str(candidate.get("method") or "") == method
+                    and (
+                        not candidate.get("operation")
+                        or str(candidate_id) == legacy_id
+                    )
+                ):
+                    unresolved.pop(candidate_id, None)
+        else:
+            unresolved[operation_id] = row
+        refresh_delivery_error_state(state, unresolved)
 
 
 def verify_bot_identity(state: dict[str, Any]) -> bool:
@@ -1618,6 +1725,35 @@ def recent_progress_events(session_id: str) -> list[dict[str, str]]:
     return events
 
 
+def hermes_session_lineage(session_id: str) -> set[str]:
+    """Return the current Hermes session plus its compression ancestors."""
+    lineage = {str(session_id)} if session_id else set()
+    if not session_id or not HERMES_STATE_DB.exists():
+        return lineage
+    try:
+        con = sqlite3.connect(f"file:{HERMES_STATE_DB}?mode=ro", uri=True, timeout=2)
+        try:
+            columns = {str(row[1]) for row in con.execute("PRAGMA table_info(sessions)")}
+            if "parent_session_id" not in columns:
+                return lineage
+            current = str(session_id)
+            for _ in range(8):
+                row = con.execute(
+                    "SELECT parent_session_id FROM sessions WHERE id = ?",
+                    (current,),
+                ).fetchone()
+                parent = str(row[0] or "") if row else ""
+                if not parent or parent in lineage:
+                    break
+                lineage.add(parent)
+                current = parent
+        finally:
+            con.close()
+    except Exception:
+        return lineage
+    return lineage
+
+
 def mitigation_steps_from_text(text: str) -> list[str]:
     if ux_final_action_steps is not None:
         return ux_final_action_steps(text)[1]
@@ -1999,12 +2135,54 @@ def skill_for_prompt(prompt: str) -> dict[str, str]:
         return {"id": "", "label": "", "reason": ""}
 
 
-def run_cmd(cmd: list[str], timeout: int = 20) -> dict[str, str | int | bool]:
+def run_cmd(
+    cmd: list[str],
+    timeout: int = 20,
+    *,
+    extra_env: dict[str, str] | None = None,
+) -> dict[str, str | int | bool]:
+    env = None
+    if extra_env:
+        env = os.environ.copy()
+        env.update(extra_env)
     try:
-        proc = subprocess.run(cmd, cwd=WORKSPACE, text=True, capture_output=True, timeout=timeout)
+        proc = subprocess.run(
+            cmd,
+            cwd=WORKSPACE,
+            text=True,
+            capture_output=True,
+            timeout=timeout,
+            env=env,
+        )
     except subprocess.TimeoutExpired:
         return {"ok": False, "returncode": 124, "stdout": "", "stderr": f"command timed out after {timeout}s"}
-    return {"ok": proc.returncode == 0, "returncode": proc.returncode, "stdout": proc.stdout.strip(), "stderr": proc.stderr.strip()}
+    return {
+        "ok": proc.returncode == 0,
+        "returncode": proc.returncode,
+        "stdout": proc.stdout.strip(),
+        "stderr": sanitize_error_text(proc.stderr.strip(), limit=1200)
+        if proc.stderr.strip()
+        else "",
+    }
+
+
+def run_work_card_cmd(cmd: list[str]) -> dict[str, str | int | bool]:
+    """Run one bounded Telegram card edit without duplicate Brain Feed I/O.
+
+    The watcher publishes the same lifecycle phase itself after the Telegram
+    receipt is known. Keeping the helper surface-only prevents its remote Brain
+    Feed SSH call from exceeding the fast-ack parent deadline.
+    """
+    bounded = list(cmd)
+    if "--timeout" not in bounded:
+        bounded.extend(["--timeout", str(WORK_CARD_API_TIMEOUT_SECONDS)])
+    if "--no-brain-feed" not in bounded:
+        bounded.append("--no-brain-feed")
+    return run_cmd(
+        bounded,
+        timeout=WORK_CARD_PARENT_TIMEOUT_SECONDS,
+        extra_env={"ALLOW_NO_BRAIN_FEED": "1"},
+    )
 
 
 def telegram_work_identity(key: str, run_id: str) -> tuple[str, str, str]:
@@ -2240,6 +2418,7 @@ def send_ack(
     # bubble several times in two seconds, which looked like cards disappearing.
     header_message_id = "dry-run-header" if dry_run else ""
     ack_message_id = "dry-run-message" if dry_run else ""
+    surface_indeterminate = False
     if not dry_run and start_visible_card:
         card_command = [
             "python3",
@@ -2266,17 +2445,23 @@ def send_ack(
             "--task-started-at",
             task_started_at,
         ]
+        managed_group_topic = bool(
+            str((meta or {}).get("telegram_chat_id") or "") == CONTROL_CENTER_CHAT_ID
+            and str((meta or {}).get("telegram_thread_id") or "")
+        )
         if handoff_topic:
             # Topic 1's immutable header and live card are new surfaces for the
             # current inbound message. Never adopt the prior poll receipt.
-            # Bound each child API call below the parent lifetime so the child
-            # can checkpoint an indeterminate send instead of being killed
-            # after Telegram may already have accepted it.
             card_command.extend(["--separate-message", "--timeout", "4"])
-        card_result = run_cmd(
-            card_command + work_card_target_args(meta),
-            timeout=12 if handoff_topic else 6,
-        )
+        elif managed_group_topic:
+            # Every group task owns a fresh origin-scoped card. Reusing the
+            # prior task's pending acknowledgement would overwrite its visible
+            # history and bind the new task to the wrong Telegram message.
+            card_command.append("--separate-message")
+        # Every managed surface uses the same bounded helper. Topic 17 used to
+        # run a 15-second Bot API child under a 6-second parent; Telegram could
+        # accept the card just before the parent killed receipt persistence.
+        card_result = run_work_card_cmd(card_command + work_card_target_args(meta))
         card_receipt: dict[str, Any] = {}
         if card_result.get("stdout"):
             try:
@@ -2285,7 +2470,7 @@ def send_ack(
                     card_receipt = parsed_receipt
             except (TypeError, ValueError):
                 card_receipt = {}
-        durable_receipt = work_card_surface_receipt(key) if handoff_topic else {}
+        durable_receipt = work_card_surface_receipt(key)
         ack_message_id = str(
             card_receipt.get("message_id")
             or (card_receipt.get("result") or {}).get("message_id")
@@ -2301,38 +2486,55 @@ def send_ack(
         if handoff_topic:
             ack_message_id = _handoff_id(ack_message_id)
             header_message_id = _handoff_id(header_message_id)
+        surface_indeterminate = bool(durable_receipt.get("surface_indeterminate"))
+        confirmed_card_receipt = bool(
+            ack_message_id
+            and not surface_indeterminate
+            and (not handoff_topic or header_message_id)
+        )
         record_api_result(state, "sendMessage", {
-            "ok": bool(card_result.get("ok") and card_receipt.get("ok") and ack_message_id),
+            "ok": confirmed_card_receipt,
             "error": card_result.get("stderr") or card_result.get("error") or "",
+            "delivery_key": key,
         })
     elif not dry_run:
         ack_result = send_initial_ack(
             f"🤖 {display_model}\n\n👀 Objective\n{objective}",
             meta=meta,
         )
+        ack_result["delivery_key"] = key
         record_api_result(state, "sendMessage", ack_result)
         ack_message_id = str(ack_result.get("result", {}).get("message_id") or "") if ack_result.get("ok") else ""
 
     if not dry_run and not ack_message_id:
         # Do not silently mark this event deduplicated when Telegram did not
         # confirm the durable acknowledgement or live card.
-        record_api_result(state, "sendMessage", {"ok": False, "error": "No message_id returned by initial Telegram surface"})
+        record_api_result(state, "sendMessage", {
+            "ok": False,
+            "error": "No message_id returned by initial Telegram surface",
+            "delivery_key": key,
+        })
+    surface_ok = bool(
+        ack_message_id
+        and not surface_indeterminate
+        and (not handoff_topic or header_message_id)
+    )
     if not dry_run:
         send_chat_action(meta=meta)
-        publish_jaimes(
-            objective,
-            "active",
-            f"Objective confirmed; {display_model}; skill={skill.get('label') or 'none'}",
-            work_id=work_id,
-            run_id=work_run_id,
-            phase="active",
-            model_id=display_model,
-            route_verified=True,
-            origin_claim_hash=origin_claim_hash,
-            work_event="start",
-        )
+        if surface_ok:
+            publish_jaimes(
+                objective,
+                "active",
+                f"Objective confirmed; {display_model}; skill={skill.get('label') or 'none'}",
+                work_id=work_id,
+                run_id=work_run_id,
+                phase="active",
+                model_id=display_model,
+                route_verified=True,
+                origin_claim_hash=origin_claim_hash,
+                work_event="start",
+            )
 
-    surface_ok = bool(ack_message_id and (not handoff_topic or header_message_id))
     return {
         "ok": bool(dry_run or (surface_ok and (reaction_ok or not handoff_topic))),
         "header_message_id": header_message_id,
@@ -2354,10 +2556,13 @@ def send_ack(
         "telegram_thread_id": (meta or {}).get("telegram_thread_id"),
         "retention": "persistent-edit-only",
         "surface_indeterminate": bool(
-            handoff_topic and not dry_run and durable_receipt.get("surface_indeterminate")
+            not dry_run and surface_indeterminate
         ) if start_visible_card else False,
-        "error": str(card_result.get("stderr") or card_result.get("error") or "")[:240]
-        if start_visible_card and not dry_run and not card_result.get("ok") else "",
+        "error": sanitize_error_text(
+            card_result.get("stderr") or card_result.get("error") or "",
+            limit=240,
+        )
+        if start_visible_card and not dry_run and not surface_ok else "",
     }
 
 
@@ -2417,10 +2622,15 @@ def complete_cards_from_final_responses(state: dict[str, Any], session_id: str, 
                 meta=card,
                 parse_mode="HTML",
             )
-            record_api_result(state, "editMessageText", edit_result)
         not_modified = "message is not modified" in str(
             edit_result.get("description") or edit_result.get("error") or ""
         ).lower()
+        if not dry_run:
+            record_api_result(state, "editMessageText", {
+                **edit_result,
+                "ok": bool(edit_result.get("ok") or not_modified),
+                "delivery_key": f"{key}:final",
+            })
         if not edit_result.get("ok") and not not_modified:
             card["final_contract_status"] = "retry_same_message"
             card["final_contract_attempts"] = int(card.get("final_contract_attempts") or 0) + 1
@@ -2436,7 +2646,13 @@ def complete_cards_from_final_responses(state: dict[str, Any], session_id: str, 
             "--blocker", "None",
             "--no-final-summary",
         ] + work_card_target_args(card)
-        result = {"ok": True, "dry_run": True} if dry_run else run_cmd(cmd)
+        result = {"ok": True, "dry_run": True} if dry_run else run_work_card_cmd(cmd)
+        if not dry_run:
+            record_api_result(state, "editMessageText", {
+                "ok": bool(result.get("ok")),
+                "error": result.get("stderr") or result.get("error") or "",
+                "delivery_key": key,
+            })
         if result.get("ok"):
             card["status"] = "done"
             card["ended_at"] = utc_now()
@@ -2448,7 +2664,7 @@ def complete_cards_from_final_responses(state: dict[str, Any], session_id: str, 
             if not dry_run:
                 publish_jaimes(
                     str(card.get("objective") or "JAIMES Telegram task"),
-                    "cancelled",
+                    "done",
                     "Verified final response delivered in JAIMES Telegram.",
                     work_id=str(card.get("work_id") or ""),
                     run_id=str(card.get("ledger_run_id") or ""),
@@ -2504,6 +2720,10 @@ def reconcile_adapter_confirmed_deliveries(
         card["final_message_id"] = final_message_id
         card["final_delivery_verified_by"] = "hermes-adapter-success"
         card["final_delivery_confirmed_at"] = ended_at
+        card_key = str(card.get("key") or "")
+        if card_key:
+            resolve_delivery_incident(state, "editMessageText", card_key)
+            resolve_delivery_incident(state, "editMessageText", f"{card_key}:final")
         if not dry_run:
             publish_jaimes(
                 str(card.get("objective") or "JAIMES Telegram task"),
@@ -2536,19 +2756,45 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
     approval_sent = set(state.get("approval_buttons_sent") or [])
     updates: list[dict[str, Any]] = []
     pending_by_run: dict[str, dict[str, Any]] = {}
-    for event in recent_progress_events(session_id):
+    lineage = hermes_session_lineage(session_id)
+    lineage_cards = [
+        (run_id, card)
+        for run_id, card in active.items()
+        if isinstance(card, dict)
+        and card.get("status") != "done"
+        and str(card.get("session_id") or "") in lineage
+    ]
+    lineage_cards.sort(
+        key=lambda item: parse_utc(
+            item[1].get("last_progress_at") or item[1].get("started_at")
+        ) or dt.datetime.min.replace(tzinfo=dt.timezone.utc)
+    )
+    for source_event in recent_progress_events(session_id):
+        event = dict(source_event)
         event_id = event["event_id"]
         if event_id in processed:
             continue
-        processed.add(event_id)
         card = active.get(event["run_id"])
+        if not card and lineage_cards:
+            # Hermes compression creates a child session and new internal user
+            # row for the same turn. Keep those child tool events bound to the
+            # one origin-scoped Telegram card until a genuine new prompt owns a
+            # new run/card.
+            continued_run_id, card = lineage_cards[-1]
+            event["run_id"] = continued_run_id
+            event["continued_session_id"] = session_id
         if not card or card.get("status") == "done":
+            processed.add(event_id)
             continue
-        if card.get("session_id") and str(card.get("session_id")) != session_id:
+        if card.get("session_id") and str(card.get("session_id")) not in lineage:
+            processed.add(event_id)
             continue
         # Coalesce a burst of tool/model events into one visible edit. Replaying
         # every micro-event after rollover can time out the work-card helper and
         # makes Telegram look noisy rather than live.
+        previous = pending_by_run.get(event["run_id"])
+        if previous:
+            processed.add(previous["event_id"])
         pending_by_run[event["run_id"]] = event
     for event in pending_by_run.values():
         event_id = event["event_id"]
@@ -2558,6 +2804,7 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
         objective = str(card.get("objective") or "JAIMES Telegram task")
         key = str(card.get("key") or "")
         if not key:
+            processed.add(event_id)
             continue
         if event["type"] == "model.completed":
             cmd = [
@@ -2575,8 +2822,14 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
                 "--now",
                 "Final response prepared; awaiting Telegram delivery",
             ] + work_card_target_args(card)
-            result = {"ok": True, "dry_run": True} if dry_run else run_cmd(cmd)
+            result = {"ok": True, "dry_run": True} if dry_run else run_work_card_cmd(cmd)
             if not dry_run:
+                record_api_result(state, "editMessageText", {
+                    "ok": bool(result.get("ok")),
+                    "error": result.get("stderr") or result.get("error") or "",
+                    "delivery_key": key,
+                })
+            if not dry_run and result.get("ok"):
                 publish_jaimes(
                     objective,
                     "active",
@@ -2588,11 +2841,19 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
                     route_verified=True,
                     origin_claim_hash=str(card.get("origin_claim_hash") or ""),
                 )
-            card["status"] = "active"
-            card["current_summary"] = "Final response prepared; awaiting Telegram delivery"
-            card["model_completed_at"] = utc_now()
-            card["last_card_update_at"] = utc_now()
-            card["last_progress_at"] = card["last_card_update_at"]
+            if result.get("ok"):
+                processed.add(event_id)
+                card["status"] = "active"
+                if event.get("continued_session_id") and str(card.get("session_id") or "") != session_id:
+                    card.setdefault("continued_from_session_ids", []).append(str(card.get("session_id") or ""))
+                    card["continued_from_session_ids"] = [
+                        value for value in dict.fromkeys(card["continued_from_session_ids"]) if value
+                    ][-8:]
+                    card["session_id"] = session_id
+                card["current_summary"] = "Final response prepared; awaiting Telegram delivery"
+                card["model_completed_at"] = utc_now()
+                card["last_card_update_at"] = utc_now()
+                card["last_progress_at"] = card["last_card_update_at"]
         else:
             if not dry_run:
                 send_chat_action(meta=card)
@@ -2614,8 +2875,14 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
             if event["type"] == "tool.result":
                 cmd += ["--done", event["summary"]]
             cmd += work_card_target_args(card)
-            result = {"ok": True, "dry_run": True} if dry_run else run_cmd(cmd)
+            result = {"ok": True, "dry_run": True} if dry_run else run_work_card_cmd(cmd)
             if not dry_run:
+                record_api_result(state, "editMessageText", {
+                    "ok": bool(result.get("ok")),
+                    "error": result.get("stderr") or result.get("error") or "",
+                    "delivery_key": key,
+                })
+            if not dry_run and result.get("ok"):
                 publish_jaimes(
                     objective,
                     "active",
@@ -2627,10 +2894,18 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
                     route_verified=True,
                     origin_claim_hash=str(card.get("origin_claim_hash") or ""),
                 )
-            card["status"] = "active"
-            card["current_summary"] = event["summary"]
-            card["last_card_update_at"] = utc_now()
-            card["last_progress_at"] = card["last_card_update_at"]
+            if result.get("ok"):
+                processed.add(event_id)
+                card["status"] = "active"
+                if event.get("continued_session_id") and str(card.get("session_id") or "") != session_id:
+                    card.setdefault("continued_from_session_ids", []).append(str(card.get("session_id") or ""))
+                    card["continued_from_session_ids"] = [
+                        value for value in dict.fromkeys(card["continued_from_session_ids"]) if value
+                    ][-8:]
+                    card["session_id"] = session_id
+                card["current_summary"] = event["summary"]
+                card["last_card_update_at"] = utc_now()
+                card["last_progress_at"] = card["last_card_update_at"]
         updates.append({"event": event_id, "result": result})
     now = dt.datetime.now(dt.timezone.utc)
     for run_id, card in active.items():
@@ -2645,12 +2920,12 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
         key = str(card.get("key") or "")
         if not key:
             continue
-        started_raw = str(card.get("started_at") or card.get("last_progress_at") or last_raw or "")
+        progress_raw = str(card.get("last_progress_at") or card.get("started_at") or last_raw or "")
         try:
-            started = dt.datetime.fromisoformat(started_raw.replace("Z", "+00:00"))
+            last_progress = dt.datetime.fromisoformat(progress_raw.replace("Z", "+00:00"))
         except Exception:
-            started = last
-        if (now - started).total_seconds() > MAX_ACTIVE_CARD_SECONDS:
+            last_progress = last
+        if (now - last_progress).total_seconds() > MAX_ACTIVE_CARD_SECONDS:
             summary = "No recent model or tool progress; JAIMES is back on standby."
             cmd = [
                 "python3",
@@ -2670,8 +2945,14 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
                 "None",
                 "--no-final-summary",
             ] + work_card_target_args(card)
-            result = {"ok": True, "dry_run": True} if dry_run else run_cmd(cmd)
+            result = {"ok": True, "dry_run": True} if dry_run else run_work_card_cmd(cmd)
             if not dry_run:
+                record_api_result(state, "editMessageText", {
+                    "ok": bool(result.get("ok")),
+                    "error": result.get("stderr") or result.get("error") or "",
+                    "delivery_key": key,
+                })
+            if not dry_run and result.get("ok"):
                 publish_jaimes(
                     objective,
                     "cancelled",
@@ -2682,22 +2963,61 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
                     model_id=str(card.get("model") or DEFAULT_MODEL),
                     origin_claim_hash=str(card.get("origin_claim_hash") or ""),
                 )
-            card["status"] = "done"
-            card["ended_at"] = utc_now()
-            card["last_card_update_at"] = card["ended_at"]
-            updates.append({"event": f"expired:{run_id}:{card['ended_at']}", "result": result})
+            if result.get("ok"):
+                card["status"] = "done"
+                card["ended_at"] = utc_now()
+                card["last_card_update_at"] = card["ended_at"]
+                updates.append({"event": f"expired:{run_id}:{card['ended_at']}", "result": result})
+            else:
+                card["heartbeat_checked_at"] = utc_now()
+                updates.append({"event": f"expiry-edit-failed:{run_id}:{card['heartbeat_checked_at']}", "result": result})
             continue
-        if (now - last).total_seconds() < HEARTBEAT_SECONDS:
+        heartbeat_raw = str(card.get("heartbeat_checked_at") or "")
+        try:
+            heartbeat_checked = dt.datetime.fromisoformat(heartbeat_raw.replace("Z", "+00:00"))
+        except Exception:
+            heartbeat_checked = last
+        if (now - max(last, heartbeat_checked)).total_seconds() < HEARTBEAT_SECONDS:
             continue
-        # Keep the last concrete phase visible. A synthetic "waiting" heartbeat
-        # made active work look stalled and polluted Completed/progress. Tool and
-        # model events are the only sources allowed to move the visible card.
-        card["heartbeat_checked_at"] = utc_now()
+        # Refresh the same card without changing its concrete phase or adding a
+        # Completed row. This makes long tool/model calls visibly alive while
+        # keeping the card's substantive progress ledger clean.
+        current_summary = str(
+            card.get("current_summary") or "Work remains active on the verified JAIMES route."
+        )
+        heartbeat_summary = current_summary
+        cmd = [
+            "python3",
+            "mission-control/scripts/jaimes_work_card.py",
+            "update",
+            "--key",
+            key,
+            "--title",
+            objective,
+            "--model",
+            str(card.get("model") or DEFAULT_MODEL),
+            "--route",
+            str(card.get("route") or DEFAULT_ROUTE),
+            "--now",
+            heartbeat_summary,
+        ] + work_card_target_args(card)
+        result = {"ok": True, "dry_run": True} if dry_run else run_work_card_cmd(cmd)
+        heartbeat_at = utc_now()
+        card["heartbeat_checked_at"] = heartbeat_at
         if not dry_run:
+            record_api_result(state, "editMessageText", {
+                "ok": bool(result.get("ok")),
+                "error": result.get("stderr") or result.get("error") or "",
+                "delivery_key": key,
+            })
+        if result.get("ok"):
+            card["last_card_update_at"] = heartbeat_at
+        updates.append({"event": f"heartbeat:{run_id}:{heartbeat_at}", "result": result})
+        if not dry_run and result.get("ok"):
             publish_jaimes(
                 objective,
                 "active",
-                str(card.get("current_summary") or "Work remains active on the verified JAIMES route."),
+                current_summary,
                 work_id=str(card.get("work_id") or ""),
                 run_id=str(card.get("ledger_run_id") or ""),
                 phase="heartbeat",
@@ -2722,6 +3042,10 @@ def retire_noncurrent_active_cards(state: dict[str, Any], current_run_id: str) -
         card["status"] = "done"
         card["ended_at"] = ended_at
         card["retired_reason"] = "superseded-by-newer-user-turn"
+        card_key = str(card.get("key") or "")
+        if card_key:
+            resolve_delivery_incident(state, "editMessageText", card_key)
+            resolve_delivery_incident(state, "editMessageText", f"{card_key}:final")
         retired += 1
     return retired
 
@@ -2915,6 +3239,7 @@ def process_ack_event(
     state: dict[str, Any],
     dry_run: bool,
     meta: dict[str, Any],
+    reaction_already_done: bool = False,
 ) -> dict[str, Any]:
     """Fence Topic 1 ownership behind an exact, privacy-safe acceptance lease.
 
@@ -2925,7 +3250,14 @@ def process_ack_event(
     that cancellation with an accepted receipt.
     """
     if dry_run or not inbox_handoff_topic(meta):
-        return send_ack(event, model=model, state=state, dry_run=dry_run, meta=meta)
+        return send_ack(
+            event,
+            model=model,
+            state=state,
+            dry_run=dry_run,
+            meta=meta,
+            reaction_already_done=reaction_already_done,
+        )
 
     chat_id = meta.get("telegram_chat_id")
     thread_id = meta.get("telegram_thread_id")
@@ -3117,6 +3449,30 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
         return {"ok": False, "status": "no-direct-session"}
 
     state.setdefault("active_cards", {})
+    surface_retries = state.get("surface_retry_events")
+    if not isinstance(surface_retries, dict):
+        surface_retries = {}
+    state["surface_retry_events"] = surface_retries
+    poll_now = dt.datetime.now(dt.timezone.utc)
+
+    def advance_event_cursor(event: dict[str, Any]) -> None:
+        """Consume one DB row only after it is handled or safely quarantined."""
+        event_session_id = str(event.get("session_id") or "")
+        event_db_id = int(event.get("db_message_id") or 0)
+        if not event_session_id or event_db_id <= 0:
+            return
+        event_cursor_key = f"direct_db_cursor:{event_session_id}"
+        state[event_cursor_key] = max(int(state.get(event_cursor_key) or 0), event_db_id)
+
+    def retire_surface_retry(event_id: str) -> None:
+        """Drop a known no-effect retry and its exact delivery incident."""
+        record = surface_retries.pop(event_id, None)
+        if not isinstance(record, dict):
+            return
+        delivery_key = str(record.get("delivery_key") or "")
+        if delivery_key:
+            resolve_delivery_incident(state, "sendMessage", delivery_key)
+
     candidates: list[tuple[float, dict[str, Any], dict[str, Any]]] = []
     session_ids: list[str] = []
     # Scan every owned live Telegram session. A rollover can leave the gateway
@@ -3139,6 +3495,15 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
         for event in batch:
             event_id = f"{event['session_id']}:{event['ts']}"
             event_db_id = int(event.get("db_message_id") or 0)
+            retry_record = surface_retries.get(event_id)
+            retry_pending = isinstance(retry_record, dict)
+            if retry_pending:
+                retry_after = parse_utc(retry_record.get("next_retry_at"))
+                if retry_after and poll_now < retry_after:
+                    # Keep the database cursor behind this row while the
+                    # persisted bounded backoff is active. The daemon polls at
+                    # 1.5 seconds, so retrying every tick would hammer Telegram.
+                    continue
             if (
                 str(session_meta.get("telegram_chat_id") or "") == CONTROL_CENTER_CHAT_ID
                 and not owner_accepts(
@@ -3174,13 +3539,22 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
             event_ts = dt.datetime.fromisoformat(event["ts"].replace("Z", "+00:00")).timestamp()
             replay_adjacent = any(abs(event_ts - marker_ts) <= 2.0 for marker_ts in replay_times)
             replay_duplicate = compaction_session and replayed_prompt_from_other_session(event)
-            if internal_replay_prompt(event.get("prompt") or "") or replay_adjacent or replay_duplicate or (age is not None and age > STALE_BOOTSTRAP_SECONDS):
+            if (
+                internal_replay_prompt(event.get("prompt") or "")
+                or replay_adjacent
+                or replay_duplicate
+                or (
+                    age is not None
+                    and age > STALE_BOOTSTRAP_SECONDS
+                    and not retry_pending
+                )
+            ):
                 acked.add(event_id)
                 state[cursor_key] = max(int(state.get(cursor_key) or 0), event_db_id)
+                retire_surface_retry(event_id)
                 continue
             if event_id not in acked:
                 candidates.append((event_ts, event, session_meta))
-            state[cursor_key] = max(int(state.get(cursor_key) or 0), event_db_id)
 
     # Preserve the existing anti-replay rule: if multiple genuine turns arrive
     # during one catch-up pass, only the newest creates visible Telegram UX.
@@ -3196,17 +3570,41 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
         if attached_followup:
             attached_id = f"{newest_event['session_id']}:{newest_event['ts']}"
             acked.add(attached_id)
+            advance_event_cursor(newest_event)
+            retire_surface_retry(attached_id)
             state["contextual_followups_attached"] = int(state.get("contextual_followups_attached") or 0) + 1
             candidates.pop()
         elif attached_card:
             attached_id = f"{newest_event['session_id']}:{newest_event['ts']}"
             acked.add(attached_id)
+            advance_event_cursor(newest_event)
+            retire_surface_retry(attached_id)
             attached_card.setdefault("attachment_message_ids", []).append(str(newest_event.get("db_message_id") or ""))
             state["multipart_rows_attached"] = int(state.get("multipart_rows_attached") or 0) + 1
             candidates.pop()
     selected = candidates[-1:] if candidates else []
+    if selected:
+        selected_event = selected[0][1]
+        selected_session = str(selected_event.get("session_id") or "")
+        selected_db_id = int(selected_event.get("db_message_id") or 0)
+        for retry_event_id, retry_record in list(surface_retries.items()):
+            if not isinstance(retry_record, dict):
+                continue
+            if (
+                str(retry_record.get("session_id") or "") == selected_session
+                and 0 < int(retry_record.get("db_message_id") or 0) < selected_db_id
+            ):
+                # The existing anti-replay policy chooses the newest user turn.
+                # A prior definitive no-effect failure is now superseded, so
+                # retire its retry and exact health incident rather than leave
+                # an unreachable permanent error behind the advanced cursor.
+                acked.add(retry_event_id)
+                retire_surface_retry(retry_event_id)
     for _, stale_event, _ in candidates[:-1]:
-        acked.add(f"{stale_event['session_id']}:{stale_event['ts']}")
+        stale_event_id = f"{stale_event['session_id']}:{stale_event['ts']}"
+        acked.add(stale_event_id)
+        advance_event_cursor(stale_event)
+        retire_surface_retry(stale_event_id)
 
     sent: list[dict[str, Any]] = []
     selected_meta = selected[0][2] if selected else metas[0]
@@ -3217,18 +3615,29 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
         state["silently_retired_cards"] = int(state.get("silently_retired_cards") or 0) + retire_for_genuine_events(state, events)
     for event in events:
         event_id = f"{event['session_id']}:{event['ts']}"
-        queued_x = 0 if dry_run else queue_forwarded_x_intelligence(event, selected_meta)
+        retry_record = surface_retries.get(event_id)
+        reaction_already_done = bool(
+            isinstance(retry_record, dict) and retry_record.get("reaction_ok")
+        )
+        queued_x = (
+            0
+            if dry_run or isinstance(retry_record, dict)
+            else queue_forwarded_x_intelligence(event, selected_meta)
+        )
         result = process_ack_event(
             event,
             model=selected_model,
             state=state,
             dry_run=dry_run,
             meta=selected_meta,
+            reaction_already_done=reaction_already_done,
         )
         if queued_x:
             result["x_intelligence_queued"] = queued_x
         if result.get("ok"):
             acked.add(event_id)
+            advance_event_cursor(event)
+            retire_surface_retry(event_id)
             if registerable_ack_result(result):
                 state.setdefault("processed_task_keys", []).append(str(result.get("key") or ""))
                 state["processed_task_keys"] = sorted({k for k in state["processed_task_keys"] if k})[-300:]
@@ -3255,25 +3664,94 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
                 }
             sent.append({"event": event_id, "result": result})
         else:
-            if result.get("handoff_terminal_failure") or result.get("handoff_indeterminate"):
+            if (
+                result.get("handoff_terminal_failure")
+                or result.get("handoff_indeterminate")
+                or result.get("surface_indeterminate")
+            ):
                 acked.add(event_id)
+                advance_event_cursor(event)
+                retire_surface_retry(event_id)
+            else:
+                previous_retry = retry_record if isinstance(retry_record, dict) else {}
+                attempts = int(previous_retry.get("attempts") or 0) + 1
+                delay_seconds = min(
+                    SURFACE_RETRY_BASE_SECONDS * (2 ** min(attempts - 1, 6)),
+                    SURFACE_RETRY_MAX_SECONDS,
+                )
+                failed_at = dt.datetime.now(dt.timezone.utc)
+                surface_retries[event_id] = {
+                    "attempts": attempts,
+                    "first_failed_at": str(
+                        previous_retry.get("first_failed_at")
+                        or failed_at.replace(microsecond=0).isoformat().replace("+00:00", "Z")
+                    ),
+                    "last_failed_at": failed_at.replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+                    "next_retry_at": (
+                        failed_at + dt.timedelta(seconds=delay_seconds)
+                    ).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+                    "reaction_ok": bool(
+                        result.get("reaction_ok") or reaction_already_done
+                    ),
+                    "session_id": str(event.get("session_id") or ""),
+                    "db_message_id": int(event.get("db_message_id") or 0),
+                    "delivery_key": str(result.get("key") or ""),
+                    "error": sanitize_error_text(
+                        result.get("error") or "Managed Telegram surface was not confirmed",
+                        limit=180,
+                    ),
+                }
             sent.append({"event": event_id, "result": result})
             break
+
+    for retry_event_id, retry_record in list(surface_retries.items()):
+        if not isinstance(retry_record, dict):
+            continue
+        retry_session = str(retry_record.get("session_id") or "")
+        retry_db_id = int(retry_record.get("db_message_id") or 0)
+        if (
+            retry_session
+            and retry_db_id > 0
+            and int(state.get(f"direct_db_cursor:{retry_session}") or 0)
+            >= retry_db_id
+        ):
+            # Any path that advances past a definitive no-effect failure—new
+            # task, contextual follow-up, or multipart attachment—makes that
+            # retry unreachable. Retire its exact incident in the same poll.
+            acked.add(retry_event_id)
+            retire_surface_retry(retry_event_id)
+
+    ordered_retries = sorted(
+        (
+            (event_id, record)
+            for event_id, record in surface_retries.items()
+            if isinstance(record, dict)
+        ),
+        key=lambda item: str(item[1].get("last_failed_at") or ""),
+    )[-SURFACE_RETRY_MAX_RECORDS:]
+    state["surface_retry_events"] = dict(ordered_retries)
 
     state["acked_prompt_events"] = sorted(acked)[-300:]
     state["last_checked_at"] = utc_now()
     state["direct_session_id"] = selected_session_id
     state["owned_session_ids"] = session_ids
     state["model"] = selected_model
-    state["status"] = "ok"
-    state.pop("last_error", None)
-    state.pop("last_error_at", None)
+    delivery_error = state.get("last_telegram_delivery_error")
+    if isinstance(delivery_error, dict):
+        state["status"] = "telegram-delivery-error"
+        state["last_error"] = "A managed Telegram card send or edit lacks a confirmed receipt."
+        state["last_error_at"] = str(delivery_error.get("at") or utc_now())
+    else:
+        state["status"] = "ok"
+        state.pop("last_error", None)
+        state.pop("last_error_at", None)
     if sent:
-        state["last_sent_at"] = utc_now()
+        state["last_attempt_at"] = utc_now()
         state["last_result"] = sent[-1]["result"]
         latest_result = sent[-1]["result"]
         latest_message_id = positive_message_id(latest_result.get("ack_message_id"))
         if registerable_ack_result(latest_result) and latest_message_id:
+            state["last_sent_at"] = state["last_attempt_at"]
             state["latest_pending_ack"] = {
                 "message_id": latest_message_id,
                 "key": latest_result.get("key"),
@@ -3364,7 +3842,7 @@ def main() -> int:
             if not isinstance(state, dict):
                 state = {}
             state["last_error_at"] = utc_now()
-            state["last_error"] = str(exc)
+            state["last_error"] = sanitize_error_text(exc, limit=320)
             save_json(STATE_PATH, state)
         time.sleep(max(0.5, args.interval))
 

@@ -14,7 +14,13 @@ from unittest.mock import patch
 import pytest
 
 
-MODULE_PATH = Path(__file__).resolve().parents[1] / "scripts" / "jaimes_work_card.py"
+TEST_DIR = Path(__file__).resolve().parent
+STAGED_MODULE_PATH = TEST_DIR / "jaimes_work_card.py"
+MODULE_PATH = (
+    STAGED_MODULE_PATH
+    if STAGED_MODULE_PATH.exists()
+    else Path(__file__).resolve().parents[1] / "scripts" / "jaimes_work_card.py"
+)
 
 
 def load_module():
@@ -376,6 +382,175 @@ def test_inbox_indeterminate_live_send_is_quarantined_after_header_checkpoint(tm
         assert card.upsert_card(args, "running") == 1
 
     assert sends == ["header", "live"]
+
+
+def test_topic17_indeterminate_live_send_is_durably_quarantined(tmp_path):
+    state_path = tmp_path / "cards.json"
+    args = SimpleNamespace(
+        key="topic17-ambiguous-live", title="Restore JAIMES live updates",
+        model="model", route="route", now="Checking Telegram delivery",
+        done="Received task", next="Verify", blocker="None", eta="",
+        ack_message_id="", separate_message=False,
+        chat_id="-1003589561528", thread_id="17",
+        buttons=None, buttons_file=None, routing_buttons=False,
+        approval_buttons=False, no_buttons=True, final_summary=False,
+        no_final_summary=True, timeout=8, dry_run=False, no_brain_feed=True,
+    )
+    sends = []
+
+    def ambiguous_live(*_args, **_kwargs):
+        sends.append("live")
+        return {"ok": False, "error": "timed out after request write"}
+
+    with patch.object(card, "STATE_PATH", state_path), \
+         patch.object(card, "LOCK_PATH", tmp_path / "cards.lock"), \
+         patch.object(card, "claim_pending_ack", return_value=""), \
+         patch.object(card, "send_card", side_effect=ambiguous_live), \
+         patch.object(card, "publish_brain_feed"):
+        assert card.upsert_card(args, "running") == 1
+        partial = card.load_state()["cards"]["topic17-ambiguous-live"]
+        assert partial["live_delivery_status"] == "indeterminate"
+        assert partial["message_id"] is None
+        assert partial["chat_id"] == "-1003589561528"
+        assert partial["thread_id"] == "17"
+        assert card.upsert_card(args, "running") == 1
+
+    assert sends == ["live"]
+
+
+def test_topic17_heartbeat_edits_same_card_without_polluting_work_log(tmp_path):
+    state_path = tmp_path / "cards.json"
+    common = {
+        "key": "topic17-heartbeat",
+        "title": "Restore JAIMES live updates",
+        "model": "model",
+        "route": "route",
+        "next": "Verify",
+        "blocker": "None",
+        "eta": "",
+        "ack_message_id": "",
+        "separate_message": False,
+        "chat_id": "-1003589561528",
+        "thread_id": "17",
+        "buttons": None,
+        "buttons_file": None,
+        "routing_buttons": False,
+        "approval_buttons": False,
+        "no_buttons": True,
+        "final_summary": False,
+        "no_final_summary": True,
+        "timeout": 8,
+        "dry_run": False,
+        "no_brain_feed": True,
+    }
+    start_args = SimpleNamespace(
+        **common,
+        now="Checking Telegram delivery",
+        done="Received task",
+    )
+    heartbeat_args = SimpleNamespace(
+        **common,
+        now="Checking Telegram delivery",
+        done="",
+    )
+
+    with patch.object(card, "STATE_PATH", state_path), \
+         patch.object(card, "LOCK_PATH", tmp_path / "cards.lock"), \
+         patch.object(card, "claim_pending_ack", return_value=""), \
+         patch.object(card, "send_card", return_value={
+             "ok": True, "result": {"message_id": 777}
+         }) as send, \
+         patch.object(card, "edit_card", return_value={"ok": True}) as edit, \
+         patch.object(card, "publish_brain_feed"):
+        assert card.upsert_card(start_args, "running") == 0
+        before = card.load_state()["cards"]["topic17-heartbeat"]
+        assert before["work_log"] == ["Received task"]
+        assert card.upsert_card(heartbeat_args, "running") == 0
+
+    saved = card.load_json_file(state_path, {})["cards"]["topic17-heartbeat"]
+    assert send.call_count == 1
+    assert edit.call_count == 1
+    assert edit.call_args.args[0] == 777
+    rendered = card.html.unescape(edit.call_args.args[1])
+    assert "Telegram delivery" in rendered
+    assert "Still working" not in rendered
+    assert saved["message_id"] == 777
+    assert saved["work_log"] == ["Received task"]
+    assert saved["current_step"] == "Checking Telegram delivery"
+
+
+def test_sequential_topic17_tasks_send_fresh_cards_and_preserve_prior_task(tmp_path):
+    state_path = tmp_path / "cards.json"
+    ack_path = tmp_path / "jaimes_fast_ack_state.json"
+    common = {
+        "model": "model",
+        "route": "route",
+        "now": "Checking Telegram delivery",
+        "done": "Received task",
+        "next": "Verify",
+        "blocker": "None",
+        "eta": "",
+        "ack_message_id": "",
+        "separate_message": True,
+        "chat_id": "-1003589561528",
+        "thread_id": "17",
+        "buttons": None,
+        "buttons_file": None,
+        "routing_buttons": False,
+        "approval_buttons": False,
+        "no_buttons": True,
+        "final_summary": False,
+        "no_final_summary": True,
+        "timeout": 8,
+        "dry_run": False,
+        "no_brain_feed": True,
+    }
+    task_a = SimpleNamespace(
+        **common,
+        key="topic17-task-a",
+        title="Verify the first JAIMES task",
+    )
+    task_b = SimpleNamespace(
+        **common,
+        key="topic17-task-b",
+        title="Verify the second JAIMES task",
+    )
+    sends = iter([
+        {"ok": True, "result": {"message_id": 801}},
+        {"ok": True, "result": {"message_id": 802}},
+    ])
+
+    with patch.object(card, "STATE_PATH", state_path), \
+         patch.object(card, "LOCK_PATH", tmp_path / "cards.lock"), \
+         patch.object(card, "ACK_STATE_PATH", ack_path), \
+         patch.object(card, "claim_pending_ack", side_effect=AssertionError(
+             "separate Topic 17 tasks must not claim the prior pending acknowledgement"
+         )), \
+         patch.object(card, "send_card", side_effect=lambda *_args, **_kwargs: next(sends)) as send, \
+         patch.object(card, "edit_card", side_effect=AssertionError(
+             "task B must not edit task A's card"
+         )), \
+         patch.object(card, "publish_brain_feed"):
+        assert card.upsert_card(task_a, "running") == 0
+        card.save_json_file(ack_path, {
+            "latest_pending_ack": {
+                "message_id": "801",
+                "key": "topic17-task-a",
+                "telegram_chat_id": "-1003589561528",
+                "telegram_thread_id": "17",
+            }
+        })
+        assert card.upsert_card(task_b, "running") == 0
+
+    saved_cards = card.load_json_file(state_path, {})["cards"]
+    assert set(saved_cards) == {"topic17-task-a", "topic17-task-b"}
+    assert saved_cards["topic17-task-a"]["message_id"] == 801
+    assert saved_cards["topic17-task-b"]["message_id"] == 802
+    assert send.call_count == 2
+    pending = card.load_json_file(ack_path, {})["latest_pending_ack"]
+    assert pending["message_id"] == "801"
+    assert pending["key"] == "topic17-task-a"
+    assert "claimed_by" not in pending
 
 
 def test_inbox_live_receipt_survives_indeterminate_final_send_and_retry(tmp_path):
