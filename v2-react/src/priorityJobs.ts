@@ -1,4 +1,4 @@
-export type PriorityJobKey = "gmail" | "sorare" | "fantasy";
+export type PriorityJobKey = "gmail" | "sorare";
 
 export type PriorityJobRule = {
   key: PriorityJobKey;
@@ -27,12 +27,6 @@ export const PRIORITY_JOB_RULES: PriorityJobRule[] = [
     label: "Sorare",
     agent: "JAIMES",
     pattern: /sorare/,
-  },
-  {
-    key: "fantasy",
-    label: "Fantasy Baseball",
-    agent: "JAIMES",
-    pattern: /fantasy|waiver|roster|lineup|pitcher|baseball/,
   },
 ];
 

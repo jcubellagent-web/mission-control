@@ -3,7 +3,6 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 FILES=[
 ROOT/'scripts/rh_nft_secondary_exit_strategy.py',
-ROOT/'scripts/rh_kaleido_accumulator_monitor.py',
 ROOT/'scripts/rh_rootwood_monitor.py',
 ROOT/'scripts/robinhood_nft_opportunity_watch_eth_sol.sh',
 ]

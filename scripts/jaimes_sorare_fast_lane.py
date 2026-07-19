@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""JAIMES Sorare/Fantasy fast lane refresh.
+"""JAIMES Sorare fast lane refresh.
 
 Read-only cache refresh for launchd. Keeps Sorare artifacts warm so Telegram and
 Control Tower answers can start from fresh fixture/context/model state.

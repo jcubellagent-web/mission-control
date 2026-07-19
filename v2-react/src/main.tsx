@@ -5089,7 +5089,6 @@ function priorityScore(job: JobRow) {
   const key = priorityJobKey(job);
   if (key === "gmail") return 3;
   if (key === "sorare") return 2;
-  if (key === "fantasy") return 1;
   return 0;
 }
 
@@ -5886,7 +5885,7 @@ function JobFocusView({ jobs, allJobs, quietMode, liveCues }: { jobs: JobRow[]; 
       <div className="priority-jobs">
         <header>
           <strong>Today matters</strong>
-          <span>{quietMode ? "quiet focus" : "Gmail · Sorare · Fantasy"}</span>
+          <span>{quietMode ? "quiet focus" : "Gmail · Sorare"}</span>
         </header>
         <div className="operator-queue-list priority-job-list">
           {PRIORITY_JOB_RULES.map((rule) => {
