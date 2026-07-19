@@ -16972,7 +16972,6 @@ body,
 #brain-atlas.has-live-memory-flow .memory-flow-map {
   border-color: rgba(88, 238, 154, 0.4);
   box-shadow: inset 0 0 28px rgba(88, 238, 154, 0.06), 0 0 18px rgba(88, 238, 154, 0.08);
-  animation: memory-map-live-breathe 1.8s ease-in-out infinite;
 }
 
 .memory-flow-map:focus-visible {
@@ -17110,7 +17109,6 @@ body,
   stroke-width: 3.2;
   stroke-dasharray: 14 9;
   animation: memory-flow-travel 0.72s linear infinite;
-  filter: drop-shadow(0 0 4px currentColor) drop-shadow(0 0 8px currentColor);
 }
 
 .memory-flow-node rect {
@@ -17131,7 +17129,6 @@ body,
   fill: rgba(12, 42, 58, 0.98);
   stroke-width: 2.3;
   filter: drop-shadow(0 0 4px rgba(88, 238, 154, 0.52)) drop-shadow(0 0 10px rgba(88, 238, 154, 0.34));
-  animation: memory-node-live-pulse 1.15s ease-in-out infinite;
 }
 
 .memory-flow-node .memory-flow-node-aura {
@@ -17199,16 +17196,6 @@ body,
 @keyframes memory-agent-presence-dot {
   0%, 100% { opacity: 0.5; transform: scale(0.78); }
   50% { opacity: 1; transform: scale(1.22); }
-}
-
-@keyframes memory-node-live-pulse {
-  0%, 100% { filter: drop-shadow(0 0 4px rgba(88, 238, 154, 0.46)) drop-shadow(0 0 8px rgba(88, 238, 154, 0.28)); }
-  50% { filter: drop-shadow(0 0 7px rgba(88, 238, 154, 0.72)) drop-shadow(0 0 14px rgba(88, 238, 154, 0.44)); }
-}
-
-@keyframes memory-map-live-breathe {
-  0%, 100% { box-shadow: inset 0 0 28px rgba(88, 238, 154, 0.05), 0 0 16px rgba(88, 238, 154, 0.06); }
-  50% { box-shadow: inset 0 0 34px rgba(88, 238, 154, 0.1), 0 0 22px rgba(88, 238, 154, 0.12); }
 }
 
 #brain-atlas .brain-atlas-focus {

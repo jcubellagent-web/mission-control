@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { createHash } from "node:crypto";
 import { readFileSync, statSync, watch } from "node:fs";
 import { spawn } from "node:child_process";
 import { join, resolve } from "node:path";
@@ -36,6 +37,64 @@ let walletRefreshInFlight: Promise<WalletRefreshResult> | null = null;
 function boundedAppend(current: string, chunk: unknown) {
   if (current.length >= walletRefreshOutputLimit) return current;
   return (current + String(chunk ?? "")).slice(0, walletRefreshOutputLimit);
+}
+
+function contentEtag(body: Buffer | string) {
+  return `"${createHash("sha256").update(body).digest("base64url")}"`;
+}
+
+function requestAcceptsEtag(req: any, etag: string) {
+  const header = req.headers?.["if-none-match"];
+  const raw = Array.isArray(header) ? header.join(",") : String(header || "");
+  const normalizedEtag = etag.replace(/^W\//, "");
+  return raw.split(",").some((candidate) => {
+    const normalizedCandidate = candidate.trim().replace(/^W\//, "");
+    return normalizedCandidate === "*" || normalizedCandidate === normalizedEtag;
+  });
+}
+
+function writePrivateJson(req: any, res: any, body: Buffer | string) {
+  const etag = contentEtag(body);
+  res.setHeader("Content-Type", "application/json; charset=utf-8");
+  res.setHeader("Cache-Control", "private, no-cache, max-age=0, must-revalidate");
+  res.setHeader("ETag", etag);
+  if (requestAcceptsEtag(req, etag)) {
+    res.statusCode = 304;
+    res.end();
+    return;
+  }
+  res.setHeader("Content-Length", Buffer.isBuffer(body) ? body.byteLength : Buffer.byteLength(body));
+  if (String(req.method || "GET").toUpperCase() === "HEAD") {
+    res.end();
+    return;
+  }
+  res.end(body);
+}
+
+function activeHotProjection() {
+  const hot = JSON.parse(readFileSync(join(dataRoot, "control-tower-hot.json"), "utf8"));
+  const activeWorks = Array.isArray(hot?.activeWorks) ? hot.activeWorks : [];
+  const activeModelRoutes = Array.isArray(hot?.activeModelRoutes) ? hot.activeModelRoutes : [];
+  const activeByAgent = activeWorks.reduce((counts: Record<string, number>, work: any) => {
+    const agent = typeof work?.ownerAgent === "string" ? work.ownerAgent : "unknown";
+    counts[agent] = (counts[agent] || 0) + 1;
+    return counts;
+  }, {});
+  return JSON.stringify({
+    schemaVersion: hot?.schemaVersion,
+    revision: hot?.revision,
+    generatedAt: hot?.generatedAt,
+    storeUpdatedAt: hot?.storeUpdatedAt,
+    source: hot?.source,
+    freshness: hot?.freshness,
+    counts: {
+      activeWorks: activeWorks.length,
+      activeModelRoutes: activeModelRoutes.length,
+      activeByAgent,
+    },
+    activeWorks,
+    activeModelRoutes,
+  });
 }
 
 function runWalletRefresh(): Promise<WalletRefreshResult> {
@@ -136,6 +195,18 @@ function writeLocalLiveEvent(res: any) {
 
 function serveMissionControlFiles(req: any, res: any, next: any) {
   const pathname = String(req.url || "").split("?")[0];
+  if (pathname === "/api/control-tower-hot") {
+    try {
+      writePrivateJson(req, res, activeHotProjection());
+    } catch {
+      res.statusCode = 503;
+      res.setHeader("Content-Type", "application/json; charset=utf-8");
+      res.setHeader("Cache-Control", "no-store");
+      res.end(JSON.stringify({ ok: false, error: "active work projection unavailable" }));
+    }
+    return;
+  }
+
   if (pathname === "/api/live-source") {
     const body = JSON.stringify(liveSourcePayload());
     res.setHeader("Content-Type", "application/json; charset=utf-8");
@@ -238,9 +309,7 @@ function serveMissionControlFiles(req: any, res: any, next: any) {
 
   try {
     const body = readFileSync(join(dataRoot, rawPath));
-    res.setHeader("Content-Type", "application/json; charset=utf-8");
-    res.setHeader("Cache-Control", "no-store");
-    res.end(body);
+    writePrivateJson(req, res, body);
   } catch {
     next();
   }

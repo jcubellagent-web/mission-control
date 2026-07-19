@@ -1,4 +1,7 @@
+import json
 from pathlib import Path
+import subprocess
+import textwrap
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -32,6 +35,65 @@ def test_server_stream_watches_rendered_snapshot_and_support_sidecars() -> None:
         assert f'"{filename}"' in source
     assert '"X-Accel-Buffering": "no"' in source
     assert 'res.write("retry: 2000\\n\\n")' in source
+
+
+def test_today_jobs_fallback_preserves_scheduled_rows_without_duplicates() -> None:
+    script = textwrap.dedent(
+        """
+        const esbuild = require("esbuild");
+        const built = esbuild.buildSync({
+          entryPoints: ["v2-react/src/data.ts"],
+          bundle: true,
+          platform: "node",
+          format: "cjs",
+          write: false,
+        }).outputFiles[0].text;
+        const loaded = { exports: {} };
+        new Function("require", "module", "exports", built)(require, loaded, loaded.exports);
+        const rows = loaded.exports.buildFallbackJobs({
+          generatedAt: "2026-07-19T12:00:00Z",
+          codexJobs: [],
+          todayJobs: [
+            {
+              occurrenceId: "daily-qa@09:00",
+              name: "Daily QA",
+              agent: "JOSH 2.0",
+              runStatus: "complete",
+              scheduledAt: "2026-07-19T09:00:00Z",
+            },
+            {
+              occurrenceId: "daily-qa@12:00",
+              name: "Daily QA",
+              agent: "JOSH 2.0",
+              runStatus: "scheduled",
+              scheduledAt: "2026-07-19T12:00:00Z",
+            },
+            {
+              occurrenceId: "sorare-sweep@11:00",
+              name: "Sorare sweep",
+              agent: "JAIMES",
+              runStatus: "complete",
+              scheduledAt: "2026-07-19T11:00:00Z",
+            },
+          ],
+        });
+        console.log(JSON.stringify(rows.map(({ title, status }) => ({ title, status }))));
+        """
+    )
+
+    completed = subprocess.run(
+        ["node", "-e", script],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    rows = json.loads(completed.stdout)
+
+    assert sorted(rows, key=lambda row: row["title"]) == [
+        {"title": "Daily QA", "status": "scheduled"},
+        {"title": "Sorare sweep", "status": "complete"},
+    ]
 
 
 def test_system_alerts_are_visible_without_becoming_decisions() -> None:

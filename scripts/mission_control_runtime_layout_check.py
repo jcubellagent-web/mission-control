@@ -205,6 +205,8 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
   const jobsPanelRect = panelRect('#today-jobs');
   const atlasPanelRect = panelRect('#brain-atlas');
   const finopsPanelRect = panelRect('#finops-dashboard');
+  const memoryMap = document.querySelector('#brain-atlas .memory-flow-map');
+  const memoryMapStyle = memoryMap ? getComputedStyle(memoryMap) : null;
   const declaredJobsLabel = document.querySelector('#today-jobs .today-jobs-summary')?.getAttribute('aria-label') || '';
   const declaredJobsMatch = declaredJobsLabel.match(/^(\d+)\s+job occurrences today$/i);
   const memoryEdges = [...document.querySelectorAll('#brain-atlas .memory-flow-edge')].map((element) => {
@@ -224,6 +226,7 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
       strokeWidth: round(Number.parseFloat(style.strokeWidth)),
       strokeDasharray: style.strokeDasharray,
       strokeLinecap: style.strokeLinecap,
+      stroke: style.stroke,
       filter: style.filter,
     };
   });
@@ -233,7 +236,8 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
     const shell = [...element.children].find((child) => child.tagName.toLowerCase() === 'rect' && !child.classList.contains('memory-flow-node-aura'));
     const auraAnimationName = aura ? getComputedStyle(aura).animationName : 'none';
     const presenceAnimationName = presenceDot ? getComputedStyle(presenceDot).animationName : 'none';
-    const memoryAnimationName = shell ? getComputedStyle(shell).animationName : 'none';
+    const shellStyle = shell ? getComputedStyle(shell) : null;
+    const memoryAnimationName = shellStyle?.animationName || 'none';
     return {
       agent: String(element.getAttribute('data-agent') || ''),
       layer: String(element.closest('[data-atlas-layer]')?.getAttribute('data-atlas-layer') || ''),
@@ -245,6 +249,8 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
       auraAnimationName,
       presenceAnimationName,
       memoryAnimationName,
+      memoryFilter: shellStyle?.filter || 'none',
+      memoryStrokeWidth: shellStyle ? round(Number.parseFloat(shellStyle.strokeWidth)) : 0,
       workAnimated: auraAnimationName !== 'none' || presenceAnimationName !== 'none',
       memoryAnimated: memoryAnimationName !== 'none',
       animated: auraAnimationName !== 'none' || presenceAnimationName !== 'none' || memoryAnimationName !== 'none',
@@ -402,6 +408,9 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
     memory: {
       flowState: document.querySelector('#brain-atlas')?.getAttribute('data-memory-flow-state') || '',
       reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+      mapAnimationName: memoryMapStyle?.animationName || 'none',
+      mapAnimated: Boolean(memoryMapStyle && memoryMapStyle.animationName !== 'none'),
+      mapBoxShadow: memoryMapStyle?.boxShadow || 'none',
       evidenceSource: document.querySelector('#brain-atlas .memory-flow-map svg')?.getAttribute('data-memory-source')
         || document.querySelector('#brain-atlas .memory-flow-map svg')?.getAttribute('data-evidence-source')
         || '',
@@ -576,14 +585,22 @@ def check_control_tower_json(path: Path) -> dict[str, Any]:
     if not isinstance(data, dict):
         return row("live-data-json", "fail", "Control Tower JSON is not an object")
     object_fields = ("brainFeed", "agentBrainFeeds", "runtimeLayout")
-    list_fields = ("crons", "codexJobs", "actionRequired")
+    list_fields = ("codexJobs", "actionRequired")
     missing = [key for key in object_fields if not isinstance(data.get(key), dict)]
     missing.extend(key for key in list_fields if not isinstance(data.get(key), list))
+    is_live_projection = path.name.startswith("control-tower-live")
+    schedule_source = "crons" if isinstance(data.get("crons"), list) else None
+    #JAIMES: Compact live data uses canonical todayJobs instead of repeating full cron rows.
+    if is_live_projection and schedule_source is None and isinstance(data.get("todayJobs"), list):
+        schedule_source = "todayJobs"
+    if schedule_source is None:
+        missing.append("crons or todayJobs" if is_live_projection else "crons")
     for stamp in ("lastUpdated", "sourceUpdatedAt"):
         if not isinstance(data.get(stamp), str) or not data.get(stamp):
             missing.append(stamp)
     if missing:
         return row("live-data-json", "fail", f"Control Tower JSON is missing canonical fields: {', '.join(missing)}")
+    assert schedule_source is not None
     return row(
         "live-data-json",
         "pass",
@@ -592,7 +609,10 @@ def check_control_tower_json(path: Path) -> dict[str, Any]:
             "path": display_path(path),
             "brainFeed": len(data["brainFeed"]),
             "agentBrainFeeds": len(data["agentBrainFeeds"]),
-            "crons": len(data["crons"]),
+            "scheduleSource": schedule_source,
+            "scheduleRows": len(data[schedule_source]),
+            "crons": len(data["crons"]) if isinstance(data.get("crons"), list) else 0,
+            "todayJobs": len(data["todayJobs"]) if isinstance(data.get("todayJobs"), list) else 0,
             "codexJobs": len(data["codexJobs"]),
             "actionRequired": len(data["actionRequired"]),
             "lastUpdated": data.get("lastUpdated"),
@@ -1040,6 +1060,11 @@ def validate_control_tower_layout(
     flow_state = str(memory.get("flowState") or "")
     if flow_state not in {"live", "idle", "unavailable"}:
         failures.append(f"{label}: Brain Atlas memory flow state is missing or invalid")
+    if memory.get("mapAnimated") is True or str(memory.get("mapAnimationName") or "none") != "none":
+        failures.append(f"{label}: Brain Atlas map shell uses an expensive paint animation")
+    #JAIMES: Idle maps intentionally omit the activity glow; require it only for exact live flow.
+    if flow_state == "live" and str(memory.get("mapBoxShadow") or "none") == "none":
+        failures.append(f"{label}: Brain Atlas map shell lacks its static activity glow")
     edges = memory.get("edges") if isinstance(memory.get("edges"), list) else []
     if not edges:
         failures.append(f"{label}: Brain Atlas memory flow edges are missing")
@@ -1062,11 +1087,13 @@ def validate_control_tower_layout(
             failures.append(f"{label}: live {operation} path is not visually pronounced enough")
         if str(edge.get("strokeLinecap") or "") != "round":
             failures.append(f"{label}: live {operation} path lacks a rounded travel beacon")
+        if str(edge.get("filter") or "none") != "none":
+            failures.append(f"{label}: live {operation} path uses an expensive SVG filter")
+        if str(edge.get("stroke") or "none") in {"none", "transparent", "rgba(0, 0, 0, 0)"}:
+            failures.append(f"{label}: live {operation} path lacks a visible evidence stroke")
         if not expect_reduced_motion:
             if str(edge.get("strokeDasharray") or "none") == "none":
                 failures.append(f"{label}: live {operation} path lacks a visible moving dash")
-            if str(edge.get("filter") or "none") == "none":
-                failures.append(f"{label}: live {operation} path lacks a visible evidence glow")
     if int(_number(memory.get("animatedInactiveCount"), missing=-1.0)) != 0:
         failures.append(f"{label}: an unevidenced Brain Atlas path is animated")
     if flow_state == "live" and not live_edges:
@@ -1126,6 +1153,12 @@ def validate_control_tower_layout(
             failures.append(f"{label}: Brain Atlas {agent} retrieval path is missing")
         elif (retrieval_edge.get("live") is True) is not memory_live:
             failures.append(f"{label}: Brain Atlas {agent} memory path motion disagrees with exact retrieval state")
+        if node.get("memoryAnimated") is True or str(node.get("memoryAnimationName") or "none") != "none":
+            failures.append(f"{label}: Brain Atlas {agent} node shell uses an expensive paint animation")
+        if memory_live and str(node.get("memoryFilter") or "none") == "none":
+            failures.append(f"{label}: memory-live Brain Atlas agent {agent} lacks its static node glow")
+        if memory_live and _number(node.get("memoryStrokeWidth")) < 2:
+            failures.append(f"{label}: memory-live Brain Atlas agent {agent} lacks a pronounced static stroke")
         if expect_reduced_motion:
             if node.get("animated") is True:
                 failures.append(f"{label}: reduced-motion mode still animates Brain Atlas {agent} presence")
@@ -1134,10 +1167,6 @@ def validate_control_tower_layout(
                 failures.append(f"{label}: working Brain Atlas agent {agent} lacks an active presence animation")
             if not working and node.get("workAnimated") is True:
                 failures.append(f"{label}: quiet Brain Atlas agent {agent} has an active presence animation")
-            if memory_live and node.get("memoryAnimated") is not True:
-                failures.append(f"{label}: memory-live Brain Atlas agent {agent} lacks exact-memory animation")
-            if not memory_live and node.get("memoryAnimated") is True:
-                failures.append(f"{label}: memory-idle Brain Atlas agent {agent} has memory animation")
     if expect_reduced_motion:
         if animated_edges:
             failures.append(f"{label}: reduced-motion mode still animates {len(animated_edges)} Brain Atlas path(s)")
@@ -1635,6 +1664,9 @@ def self_test() -> int:
         "memory": {
             "flowState": "live",
             "reducedMotion": False,
+            "mapAnimationName": "none",
+            "mapAnimated": False,
+            "mapBoxShadow": "rgba(88, 238, 154, 0.06) 0px 0px 18px",
             "evidenceSource": "governed-memory-registry",
             "edges": [
                 {
@@ -1649,7 +1681,8 @@ def self_test() -> int:
                     "strokeWidth": 3.2,
                     "strokeDasharray": "14px, 9px",
                     "strokeLinecap": "round",
-                    "filter": "drop-shadow(rgb(88, 238, 154) 0px 0px 4px)",
+                    "stroke": "rgba(101, 217, 255, 0.96)",
+                    "filter": "none",
                 },
                 {"agent": "joshex", "operation": "retrieval", "observedAt": "", "evidenceValid": False, "ageSeconds": None, "live": False, "animationName": "none", "animated": False},
                 {"agent": "jaimes", "operation": "retrieval", "observedAt": "", "evidenceValid": False, "ageSeconds": None, "live": False, "animationName": "none", "animated": False},
@@ -1660,7 +1693,7 @@ def self_test() -> int:
             "animatedInactiveCount": 0,
             "atlasAgentNodes": [
                 {"agent": "joshex", "layer": "memory", "working": False, "workState": "quiet", "memoryState": "idle", "workClass": False, "memoryClass": False, "auraAnimationName": "none", "presenceAnimationName": "none", "memoryAnimationName": "none", "workAnimated": False, "memoryAnimated": False, "animated": False},
-                {"agent": "josh2", "layer": "memory", "working": True, "workState": "working", "memoryState": "live", "workClass": True, "memoryClass": True, "auraAnimationName": "memory-agent-presence-halo", "presenceAnimationName": "memory-agent-presence-dot", "memoryAnimationName": "memory-node-live-pulse", "workAnimated": True, "memoryAnimated": True, "animated": True},
+                {"agent": "josh2", "layer": "memory", "working": True, "workState": "working", "memoryState": "live", "workClass": True, "memoryClass": True, "auraAnimationName": "memory-agent-presence-halo", "presenceAnimationName": "memory-agent-presence-dot", "memoryAnimationName": "none", "memoryFilter": "drop-shadow(rgba(88, 238, 154, 0.52) 0px 0px 4px)", "memoryStrokeWidth": 2.3, "workAnimated": True, "memoryAnimated": False, "animated": True},
                 {"agent": "jaimes", "layer": "memory", "working": False, "workState": "quiet", "memoryState": "idle", "workClass": False, "memoryClass": False, "auraAnimationName": "none", "presenceAnimationName": "none", "memoryAnimationName": "none", "workAnimated": False, "memoryAnimated": False, "animated": False},
                 {"agent": "jain", "layer": "memory", "working": False, "workState": "quiet", "memoryState": "idle", "workClass": False, "memoryClass": False, "auraAnimationName": "none", "presenceAnimationName": "none", "memoryAnimationName": "none", "workAnimated": False, "memoryAnimated": False, "animated": False},
             ],

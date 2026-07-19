@@ -1072,19 +1072,74 @@ function App() {
   const [nightModeOverride, setNightModeOverride] = useState<boolean | null>(null);
   const [clockNow, setClockNow] = useState(() => new Date());
   const liveCues = useLiveCues(state);
+  const refreshInFlightRef = useRef<Promise<void> | null>(null);
+  const refreshRequestedVersionRef = useRef(0);
+  const refreshCompletedVersionRef = useRef(0);
+  const refreshLoadingThroughVersionRef = useRef(0);
+  const latestAppliedRefreshRef = useRef(0);
 
-  const refresh = useCallback(async (showLoading = true) => {
-    if (showLoading) setLoading(true);
-    try {
-      const next = await loadMissionControl();
-      setState(next);
-      setDataError(null);
-    } catch (error) {
-      console.warn("Control Tower data fetch error:", error);
-      setDataError(error instanceof Error ? error.message : "Data fetch failed");
-    } finally {
-      if (showLoading) setLoading(false);
+  const refresh = useCallback((showLoading = true): Promise<void> => {
+    const targetVersion = ++refreshRequestedVersionRef.current;
+    if (showLoading) {
+      refreshLoadingThroughVersionRef.current = Math.max(
+        refreshLoadingThroughVersionRef.current,
+        targetVersion,
+      );
+      setLoading(true);
     }
+
+    const waitForTargetVersion = async () => {
+      while (refreshCompletedVersionRef.current < targetVersion) {
+        if (!refreshInFlightRef.current) {
+          const coveredVersion = refreshRequestedVersionRef.current;
+          let refreshPromise: Promise<void>;
+          refreshPromise = (async () => {
+            try {
+              const next = await loadMissionControl();
+              if (coveredVersion < latestAppliedRefreshRef.current) return;
+              latestAppliedRefreshRef.current = coveredVersion;
+              setState(next);
+              setDataError(null);
+            } catch (error) {
+              if (coveredVersion < latestAppliedRefreshRef.current) return;
+              latestAppliedRefreshRef.current = coveredVersion;
+              console.warn("Control Tower data fetch error:", error);
+              setDataError(error instanceof Error ? error.message : "Data fetch failed");
+            } finally {
+              refreshCompletedVersionRef.current = Math.max(
+                refreshCompletedVersionRef.current,
+                coveredVersion,
+              );
+              if (
+                refreshLoadingThroughVersionRef.current > 0
+                && coveredVersion >= refreshLoadingThroughVersionRef.current
+              ) {
+                refreshLoadingThroughVersionRef.current = 0;
+                setLoading(false);
+              }
+            }
+          })().finally(() => {
+            if (refreshInFlightRef.current === refreshPromise) {
+              refreshInFlightRef.current = null;
+            }
+          });
+          refreshInFlightRef.current = refreshPromise;
+        }
+
+        const activeRefresh = refreshInFlightRef.current;
+        if (activeRefresh) {
+          try {
+            await activeRefresh;
+          } catch (error) {
+            // The refresh task reports its own user-facing error; keep the
+            // single-flight coordinator available for the next queued version.
+            console.warn(error);
+          }
+        }
+      }
+    };
+
+    return waitForTargetVersion();
   }, []);
 
   const refreshAgenticCrypto = useCallback(async (showLoading = true) => {

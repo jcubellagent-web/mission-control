@@ -92,13 +92,16 @@ ECOSYSTEM_QA_STATE_PATH = DATA_DIR / "ecosystem-qa-scheduler.json"
 TELEGRAM_INBOX_QA_PATH = DATA_DIR / "telegram-inbox-qa.json"
 
 
-def atomic_write_json(path: Path, payload: Any) -> None:
+def atomic_write_json(path: Path, payload: Any, *, compact: bool = False) -> None:
     """Promote a complete JSON document without exposing partial output."""
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
     try:
         with temporary.open("w", encoding="utf-8") as handle:
-            json.dump(payload, handle, indent=2, ensure_ascii=True, default=str)
+            if compact:
+                json.dump(payload, handle, separators=(",", ":"), ensure_ascii=True, default=str)
+            else:
+                json.dump(payload, handle, indent=2, ensure_ascii=True, default=str)
             handle.write("\n")
             handle.flush()
             os.fsync(handle.fileno())
@@ -160,18 +163,13 @@ def source_freshness() -> Dict[str, Any]:
 LIVE_DASHBOARD_KEYS = {
     "actionRequired", "agentBrainFeeds", "agentBus", "agentContextRegistry", "agentControl",
     "brainAtlas", "brainFeed", "capabilityInventory", "capabilityStack", "capabilityWatch", "codingVisibility",
-    "codexJobs", "crons", "generatedAt", "jaimesBrainFeed", "jainBrainFeed", "joshBrainFeed",
+    "codexJobs", "generatedAt", "jaimesBrainFeed", "jainBrainFeed", "joshBrainFeed",
     "lastUpdated", "liveObjectives", "machineHealth", "memoryOperations", "modelRouter", "modelUsage",
     "recentActivity", "reliabilityUpgrades", "runtimeLayout", "sharedOperatingLayer", "sourceFreshness",
     "sourceUpdatedAt", "telegramInboxQa", "trackedTasks",
     "todayJobs", "todayJobsMeta",
 }
 
-CRON_LIVE_FIELDS = frozenset({
-    "name", "agent", "status", "runStatus", "description", "schedule",
-    "sourceLabel", "source", "lastRun", "nextRun", "verifiedToday", "todayRelevant",
-    "qaJobId", "qaMeta",
-})
 TODAY_JOB_LIVE_FIELDS = frozenset({
     "occurrenceId", "name", "owner", "agent", "sourceLabel", "scheduledAt",
     "scheduledTime", "outcome", "runStatus", "lastRun", "durationMs", "duration",
@@ -795,14 +793,15 @@ def sanitize_brain_atlas(value: Any, now_iso: str) -> Dict[str, Any]:
     if source_revision is not None and _brain_atlas_count(source_revision) is None:
         return fallback
 
-    if set(window) != {"days", "start", "end"} or window.get("days") != 7:
+    window_days = _brain_atlas_count(window.get("days"), 7)
+    if set(window) != {"days", "start", "end"} or window_days is None or window_days < 1:
         return fallback
     window_start = _brain_atlas_time(window.get("start"))
     window_end = _brain_atlas_time(window.get("end"))
     if (
         window_start is None
         or window_end is None
-        or abs((window_end - window_start) - dt.timedelta(days=7)) > dt.timedelta(seconds=1)
+        or abs((window_end - window_start) - dt.timedelta(days=window_days)) > dt.timedelta(seconds=1)
         or abs(window_end - generated_at) > dt.timedelta(seconds=1)
     ):
         return fallback
@@ -999,7 +998,7 @@ def sanitize_brain_atlas(value: Any, now_iso: str) -> Dict[str, Any]:
             "schemaVersion": source_schema,
             "revision": source_revision,
         },
-        "window": {"days": 7, "start": window["start"], "end": window["end"]},
+        "window": {"days": window_days, "start": window["start"], "end": window["end"]},
         "limits": {"maxNodes": max_nodes, "hardMaxNodes": 100},
         "counts": {
             "nodes": len(nodes),
@@ -1019,7 +1018,6 @@ def sanitize_brain_atlas(value: Any, now_iso: str) -> Dict[str, Any]:
 def build_live_dashboard(dashboard: Dict[str, Any]) -> Dict[str, Any]:
     """Project rendered kiosk fields while retaining the full audit payload separately."""
     live = {key: value for key, value in dashboard.items() if key in LIVE_DASHBOARD_KEYS}
-    live["crons"] = _project_rows(dashboard.get("crons"), CRON_LIVE_FIELDS)
     live["todayJobs"] = _project_rows(dashboard.get("todayJobs"), TODAY_JOB_LIVE_FIELDS)
     live["sharedOperatingLayer"] = _project_mapping(
         dashboard.get("sharedOperatingLayer"), SHARED_OPERATING_LAYER_LIVE_FIELDS
@@ -5975,7 +5973,7 @@ def main() -> None:
     validate_dashboard(dashboard, now_iso)
 
     atomic_write_json(DASHBOARD_PATH, dashboard)
-    atomic_write_json(LIVE_DASHBOARD_PATH, build_live_dashboard(dashboard))
+    atomic_write_json(LIVE_DASHBOARD_PATH, build_live_dashboard(dashboard), compact=True)
     atomic_write_json(MODEL_USAGE_PATH, model_usage)
     atomic_write_json(AGENT_COMMS_PATH, agent_comms)
     MOLTWORLD_STATE_PATH.parent.mkdir(parents=True, exist_ok=True) # Ensure data dir exists

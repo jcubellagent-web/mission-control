@@ -13,15 +13,14 @@ SPEC.loader.exec_module(subject)
 
 
 def test_live_projection_keeps_only_rendered_hot_path_fields() -> None:
-    cron_row = {field: f"cron-{field}" for field in subject.CRON_LIVE_FIELDS}
-    cron_row.update({
+    cron_row = {
         "name": "Deep release QA",
         "status": "error",
         "runStatus": "missed",
         "qaJobId": "nightly-control-tower-suite",
         "qaMeta": True,
         "auditBlob": "full history remains in dashboard-data.json",
-    })
+    }
     today_row = {field: f"today-{field}" for field in subject.TODAY_JOB_LIVE_FIELDS}
     today_row.update({
         "occurrenceId": "qa@2026-07-18T0247",
@@ -67,7 +66,7 @@ def test_live_projection_keeps_only_rendered_hot_path_fields() -> None:
 
     live = subject.build_live_dashboard(dashboard)
 
-    assert set(live["crons"][0]) == set(subject.CRON_LIVE_FIELDS)
+    assert "crons" not in live
     assert set(live["todayJobs"][0]) == set(subject.TODAY_JOB_LIVE_FIELDS)
     assert set(live["sharedOperatingLayer"]) == set(subject.SHARED_OPERATING_LAYER_LIVE_FIELDS)
     assert set(live["runtimeLayout"]) == set(subject.RUNTIME_LAYOUT_LIVE_FIELDS)
@@ -77,6 +76,7 @@ def test_live_projection_keeps_only_rendered_hot_path_fields() -> None:
     assert live["capabilityInventory"]["nodes"][0]["geminiCli"] == {"available": True}
     assert live["capabilityInventory"]["nodes"][0]["codexCli"] == {"available": True}
     assert dashboard["crons"][0]["auditBlob"].startswith("full history")
+    assert dashboard["todayJobs"][0]["auditBlob"].startswith("full history")
 
 
 def test_live_projection_stays_below_hot_path_budget_without_mutating_full_data() -> None:

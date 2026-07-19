@@ -58,6 +58,9 @@ def valid_kiosk_legibility_measurements() -> dict[str, object]:
         "memory": {
             "flowState": "live",
             "reducedMotion": False,
+            "mapAnimationName": "none",
+            "mapAnimated": False,
+            "mapBoxShadow": "rgba(88, 238, 154, 0.06) 0px 0px 18px",
             "evidenceSource": "governed-memory-registry",
             "edges": [
                 {
@@ -72,7 +75,8 @@ def valid_kiosk_legibility_measurements() -> dict[str, object]:
                     "strokeWidth": 3.2,
                     "strokeDasharray": "14px, 9px",
                     "strokeLinecap": "round",
-                    "filter": "drop-shadow(rgb(88, 238, 154) 0px 0px 4px)",
+                    "stroke": "rgba(101, 217, 255, 0.96)",
+                    "filter": "none",
                 },
                 {
                     "operation": "used",
@@ -92,7 +96,7 @@ def valid_kiosk_legibility_measurements() -> dict[str, object]:
             "animatedInactiveCount": 0,
             "atlasAgentNodes": [
                 {"agent": "joshex", "layer": "memory", "working": False, "workState": "quiet", "memoryState": "idle", "workClass": False, "memoryClass": False, "auraAnimationName": "none", "presenceAnimationName": "none", "memoryAnimationName": "none", "workAnimated": False, "memoryAnimated": False, "animated": False},
-                {"agent": "josh2", "layer": "memory", "working": True, "workState": "working", "memoryState": "live", "workClass": True, "memoryClass": True, "auraAnimationName": "memory-agent-presence-halo", "presenceAnimationName": "memory-agent-presence-dot", "memoryAnimationName": "memory-node-live-pulse", "workAnimated": True, "memoryAnimated": True, "animated": True},
+                {"agent": "josh2", "layer": "memory", "working": True, "workState": "working", "memoryState": "live", "workClass": True, "memoryClass": True, "auraAnimationName": "memory-agent-presence-halo", "presenceAnimationName": "memory-agent-presence-dot", "memoryAnimationName": "none", "memoryFilter": "drop-shadow(rgba(88, 238, 154, 0.52) 0px 0px 4px)", "memoryStrokeWidth": 2.3, "workAnimated": True, "memoryAnimated": False, "animated": True},
                 {"agent": "jaimes", "layer": "memory", "working": False, "workState": "quiet", "memoryState": "idle", "workClass": False, "memoryClass": False, "auraAnimationName": "none", "presenceAnimationName": "none", "memoryAnimationName": "none", "workAnimated": False, "memoryAnimated": False, "animated": False},
                 {"agent": "jain", "layer": "memory", "working": False, "workState": "quiet", "memoryState": "idle", "workClass": False, "memoryClass": False, "auraAnimationName": "none", "presenceAnimationName": "none", "memoryAnimationName": "none", "workAnimated": False, "memoryAnimated": False, "animated": False},
             ],
@@ -232,6 +236,46 @@ def test_ci_live_data_fixture_keeps_required_fields_strict(
 
     assert result["state"] == "fail"
     assert missing_field in result["detail"]
+
+
+def test_compact_live_json_accepts_today_jobs_without_crons(tmp_path: Path) -> None:
+    payload = json.loads(FIXTURE_PATH.read_text())
+    payload.pop("crons")
+    payload["todayJobs"] = [{"occurrenceId": "daily-qa@09:00", "name": "Daily QA"}]
+    candidate = tmp_path / "control-tower-live.json"
+    candidate.write_text(json.dumps(payload))
+
+    result = runtime_layout.check_control_tower_json(candidate)
+
+    assert result["state"] == "pass"
+    assert result["evidence"]["scheduleSource"] == "todayJobs"
+    assert result["evidence"]["scheduleRows"] == 1
+
+
+def test_compact_live_json_requires_a_canonical_schedule_source(tmp_path: Path) -> None:
+    payload = json.loads(FIXTURE_PATH.read_text())
+    payload.pop("crons")
+    payload.pop("todayJobs", None)
+    candidate = tmp_path / "control-tower-live.json"
+    candidate.write_text(json.dumps(payload))
+
+    result = runtime_layout.check_control_tower_json(candidate)
+
+    assert result["state"] == "fail"
+    assert "crons or todayJobs" in result["detail"]
+
+
+def test_full_dashboard_json_still_requires_crons(tmp_path: Path) -> None:
+    payload = json.loads(FIXTURE_PATH.read_text())
+    payload.pop("crons")
+    payload["todayJobs"] = []
+    candidate = tmp_path / "dashboard-data.json"
+    candidate.write_text(json.dumps(payload))
+
+    result = runtime_layout.check_control_tower_json(candidate)
+
+    assert result["state"] == "fail"
+    assert "crons" in result["detail"]
 
 
 def test_uses_bundled_playwright_browser_without_fallback() -> None:
@@ -629,6 +673,7 @@ def test_layout_accepts_working_agent_with_memory_quiet_and_no_live_edge() -> No
     memory = measurements["memory"]
     assert isinstance(memory, dict)
     memory["flowState"] = "idle"
+    memory["mapBoxShadow"] = "none"
     edges = memory["edges"]
     assert isinstance(edges, list)
     edge = next(row for row in edges if row.get("agent") == "josh2")
@@ -641,6 +686,17 @@ def test_layout_accepts_working_agent_with_memory_quiet_and_no_live_edge() -> No
     node.update({"memoryState": "idle", "memoryClass": False, "memoryAnimationName": "none", "memoryAnimated": False, "animated": True})
 
     assert runtime_layout.validate_control_tower_layout(measurements, label="reference-2048") == []
+
+
+def test_layout_rejects_live_atlas_without_static_activity_glow() -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    memory = measurements["memory"]
+    assert isinstance(memory, dict)
+    memory["mapBoxShadow"] = "none"
+
+    failures = runtime_layout.validate_control_tower_layout(measurements, label="reference-2048")
+
+    assert any("map shell lacks its static activity glow" in failure for failure in failures)
 
 
 def test_layout_accepts_idle_agent_with_exact_live_memory_path() -> None:
@@ -661,11 +717,39 @@ def test_layout_accepts_idle_agent_with_exact_live_memory_path() -> None:
         "auraAnimationName": "none",
         "presenceAnimationName": "none",
         "workAnimated": False,
-        "animated": True,
+        "animated": False,
     })
     memory["workingAgentCount"] = 0
 
     assert runtime_layout.validate_control_tower_layout(measurements, label="reference-2048") == []
+
+
+def test_layout_rejects_paint_heavy_atlas_shell_and_edge_animations() -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    memory = measurements["memory"]
+    assert isinstance(memory, dict)
+    memory.update({
+        "mapAnimationName": "memory-map-live-breathe",
+        "mapAnimated": True,
+    })
+    edges = memory["edges"]
+    assert isinstance(edges, list)
+    live_edge = edges[0]
+    assert isinstance(live_edge, dict)
+    live_edge["filter"] = "drop-shadow(rgb(101, 217, 255) 0px 0px 8px)"
+    nodes = memory["atlasAgentNodes"]
+    assert isinstance(nodes, list)
+    live_node = next(row for row in nodes if row.get("agent") == "josh2")
+    live_node.update({
+        "memoryAnimationName": "memory-node-live-pulse",
+        "memoryAnimated": True,
+    })
+
+    failures = runtime_layout.validate_control_tower_layout(measurements, label="reference-2048")
+
+    assert any("map shell uses an expensive paint animation" in failure for failure in failures)
+    assert any("live retrieval path uses an expensive SVG filter" in failure for failure in failures)
+    assert any("josh2 node shell uses an expensive paint animation" in failure for failure in failures)
 
 
 def test_layout_rejects_live_work_and_atlas_presence_mismatch() -> None:
@@ -749,14 +833,14 @@ def test_layout_rejects_live_path_that_is_too_subtle_to_read() -> None:
     assert isinstance(edges, list)
     live_edge = edges[0]
     assert isinstance(live_edge, dict)
-    live_edge.update({"strokeWidth": 2.2, "strokeDasharray": "none", "strokeLinecap": "butt", "filter": "none"})
+    live_edge.update({"strokeWidth": 2.2, "strokeDasharray": "none", "strokeLinecap": "butt", "stroke": "none"})
 
     failures = runtime_layout.validate_control_tower_layout(measurements, label="reference-2048")
 
     assert any("not visually pronounced enough" in failure for failure in failures)
     assert any("lacks a rounded travel beacon" in failure for failure in failures)
     assert any("lacks a visible moving dash" in failure for failure in failures)
-    assert any("lacks a visible evidence glow" in failure for failure in failures)
+    assert any("lacks a visible evidence stroke" in failure for failure in failures)
 
 
 def test_kiosk_legibility_reports_every_regression() -> None:

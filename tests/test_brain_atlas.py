@@ -124,6 +124,30 @@ class BrainAtlasTests(unittest.TestCase):
         connection.commit()
         connection.close()
 
+    def insert_many_events(self, count: int) -> None:
+        occurred_at = subject.iso(AS_OF - dt.timedelta(minutes=1))
+        claim = hashlib.sha256(b"bulk-claim").hexdigest()
+        rows = [
+            (
+                f"bulk-event-{index}", f"bulk-work-{index}", f"bulk-run-{index}",
+                1, 1, "start", "active", "josh2", "Stress Brain Atlas source count",
+                "working", "test", "", "test", claim, "codex", "gpt-5.6-terra",
+                1, None, occurred_at, 1,
+            )
+            for index in range(count)
+        ]
+        connection = sqlite3.connect(self.database)
+        connection.executemany(
+            """INSERT INTO work_events(
+                 event_id,work_id,run_id,generation,sequence,kind,status,owner_agent,
+                 objective,phase,tool,detail,origin,origin_claim_hash,model_family,
+                 model_id,route_verified,lease_until,occurred_at,accepted_revision
+               ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+            rows,
+        )
+        connection.commit()
+        connection.close()
+
     def test_output_excludes_private_content_and_raw_operational_ids(self) -> None:
         self.insert_event(
             1,
@@ -399,6 +423,39 @@ class BrainAtlasTests(unittest.TestCase):
             self.assertIn(edge["evidenceReceipt"], node_ids)
         with self.assertRaises(ValueError):
             subject.generate_atlas(self.database, as_of=AS_OF, max_nodes=101)
+
+    def test_node_cap_reserves_three_exact_verified_proof_paths(self) -> None:
+        for index in range(60):
+            self.insert_event(
+                index,
+                route_verified=0,
+                model_family="",
+                model_id="",
+                occurred_at=subject.iso(AS_OF - dt.timedelta(minutes=index)),
+            )
+        for offset in range(3):
+            self.insert_event(
+                100 + offset,
+                model_family="codex",
+                model_id="gpt-5.6-terra",
+                occurred_at=subject.iso(AS_OF - dt.timedelta(days=2, minutes=offset)),
+            )
+
+        atlas = subject.generate_atlas(self.database, as_of=AS_OF)
+        verified = [edge for edge in atlas["edges"] if edge["kind"] == "verified-route"]
+
+        self.assertEqual(len(verified), 3)
+        self.assertEqual(len({edge["evidenceReceipt"] for edge in verified}), 3)
+        self.assertEqual(subject.validate_atlas(atlas), [])
+
+    def test_source_row_count_is_exact_above_query_scan_limit(self) -> None:
+        self.insert_many_events(10_001)
+
+        atlas = subject.generate_atlas(self.database, as_of=AS_OF)
+
+        self.assertEqual(atlas["counts"]["sourceRowsInWindow"], 10_001)
+        self.assertLessEqual(atlas["counts"]["receipts"], 100)
+        self.assertEqual(subject.validate_atlas(atlas), [])
 
     def test_stale_legacy_and_unverified_relationships_are_excluded(self) -> None:
         self.insert_event(1)

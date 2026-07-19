@@ -242,6 +242,18 @@ async function loadDashboardSnapshot(): Promise<any> {
   }
 }
 
+async function loadActiveWorkProjection(): Promise<unknown> {
+  try {
+    const snapshot = await fetchJson<unknown>("/api/control-tower-hot");
+    if (!isRecord(snapshot)) throw new Error("active work projection is not an object");
+    return snapshot;
+  } catch {
+    // Compatibility for older Control Tower servers that only expose the
+    // full work-store projection. normalizeHotProjection still strips history.
+    return fetchJson<unknown>("/data/control-tower-hot.json").catch(() => null);
+  }
+}
+
 function dedupeStatus(rows: Array<AgentStatus | null>): AgentStatus[] {
   const byAgent = new Map<AgentId, AgentStatus>();
   for (const row of rows) {
@@ -498,7 +510,7 @@ function normalizeTodayJobsProjection(dashboard: any): { todayJobs: TodayJobOccu
 }
 
 async function loadFallback(): Promise<MissionControlState> {
-  const [brain, personal, dashboard, sidecars, joshexFeed, jaimesFeed, jainFeed, codexJobs, rawWorkHot] = await Promise.all([
+  const [brain, personal, dashboard, sidecars, joshexFeed, jaimesFeed, jainFeed, rawWorkHot] = await Promise.all([
     fetchJson<any>("/data/brain-feed.json").catch(() => null),
     fetchJson<any>("/data/personal-codex.json").catch(() => null),
     loadDashboardSnapshot(),
@@ -506,9 +518,11 @@ async function loadFallback(): Promise<MissionControlState> {
     fetchJson<any>("/data/joshex-brain-feed.json").catch(() => null),
     fetchJson<any>("/data/jaimes-brain-feed.json").catch(() => null),
     fetchJson<any>("/data/jain-brain-feed.json").catch(() => null),
-    fetchJson<any>("/data/codex-jobs.json").catch(() => null),
-    fetchJson<unknown>("/data/control-tower-hot.json").catch(() => null),
+    loadActiveWorkProjection(),
   ]);
+  const codexJobs = Array.isArray(dashboard?.codexJobs)
+    ? null
+    : await fetchJson<any>("/data/codex-jobs.json").catch(() => null);
   const workHot = normalizeHotProjection(rawWorkHot);
   const brainAgent = String(brain?.agentId || brain?.agent_id || brain?.agent || "").toLowerCase();
   const brainAgentId: AgentId = brainAgent.includes("josh") && !brainAgent.includes("joshex")
@@ -630,14 +644,20 @@ function ownerToAgentId(owner?: string): AgentId {
   return "josh2";
 }
 
-function buildFallbackJobs(dashboard: any, directCodexJobs?: any): AgentJob[] {
+export function buildFallbackJobs(dashboard: any, directCodexJobs?: any): AgentJob[] {
   const now = Date.now();
   const codexJobs = Array.isArray(directCodexJobs?.jobs)
     ? directCodexJobs.jobs
     : Array.isArray(dashboard?.codexJobs)
       ? dashboard.codexJobs
       : [];
-  const crons = Array.isArray(dashboard?.crons) ? dashboard.crons : [];
+  const usesProjectedTodayJobs = !Array.isArray(dashboard?.crons)
+    && Array.isArray(dashboard?.todayJobs);
+  const crons = Array.isArray(dashboard?.crons)
+    ? dashboard.crons
+    : usesProjectedTodayJobs
+      ? dashboard.todayJobs
+      : [];
   const rows: AgentJob[] = [];
 
   for (const job of codexJobs) {
@@ -663,7 +683,11 @@ function buildFallbackJobs(dashboard: any, directCodexJobs?: any): AgentJob[] {
     tool: item?.sourceLabel || item?.source || "",
     updated_at: item?.lastRun || dashboard?.generatedAt || "",
   }));
-  const dailyCrons = crons.filter((item: any) => item?.todayRelevant);
+  // #JAIMES: `todayJobs` is already today's bounded projection; do not require
+  // the cron-only `todayRelevant` flag or normal scheduled rows disappear.
+  const dailyCrons = usesProjectedTodayJobs
+    ? crons
+    : crons.filter((item: any) => item?.todayRelevant);
   const selectedCrons = new Map<string, any>();
   for (const cron of [...priorityCrons, ...dailyCrons]) {
     selectedCrons.set(String(cron?.name || selectedCrons.size), cron);
@@ -722,13 +746,30 @@ export function subscribeMissionControlRealtime(_onChange: () => void, onState?:
   // #JAIMES: the Josh 2.0 local SSE lane is the fast path; the existing 10s
   // refresh in main.tsx remains the reconciliation/fallback path.
   const events = new EventSource("/events/mission-control");
+  const refreshIntervalMs = 500;
   let refreshTimer: number | null = null;
+  let lastRefreshAt = Number.NEGATIVE_INFINITY;
+  let refreshQueued = false;
+
+  const deliverRefresh = () => {
+    refreshTimer = null;
+    if (!refreshQueued) return;
+    refreshQueued = false;
+    lastRefreshAt = Date.now();
+    _onChange();
+  };
+
   const scheduleRefresh = () => {
-    if (refreshTimer !== null) window.clearTimeout(refreshTimer);
-    refreshTimer = window.setTimeout(() => {
-      refreshTimer = null;
-      _onChange();
-    }, 120);
+    refreshQueued = true;
+    if (refreshTimer !== null) return;
+
+    const elapsed = Date.now() - lastRefreshAt;
+    const delay = Math.max(0, refreshIntervalMs - elapsed);
+    if (delay === 0) {
+      deliverRefresh();
+      return;
+    }
+    refreshTimer = window.setTimeout(deliverRefresh, delay);
   };
   const handleLiveUpdate = () => scheduleRefresh();
 
@@ -738,6 +779,7 @@ export function subscribeMissionControlRealtime(_onChange: () => void, onState?:
 
   return () => {
     if (refreshTimer !== null) window.clearTimeout(refreshTimer);
+    refreshQueued = false;
     events.removeEventListener("mission-control", handleLiveUpdate);
     events.close();
   };

@@ -394,6 +394,30 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertEqual(7, clean["window"]["days"])
         self.assertEqual(100, clean["limits"]["hardMaxNodes"])
 
+    def test_declared_one_to_seven_day_windows_round_trip_exactly(self) -> None:
+        for days in range(1, 8):
+            source = valid_atlas()
+            source["window"]["days"] = days
+            source["window"]["start"] = f"2026-07-{18 - days:02d}T16:00:00Z"
+
+            with self.subTest(days=days):
+                clean = self.update.sanitize_brain_atlas(source, "2026-07-18T16:01:00Z")
+                self.assertEqual("ready", clean["status"])
+                self.assertEqual(days, clean["window"]["days"])
+                self.assertEqual(source["window"], clean["window"])
+
+    def test_declared_window_days_must_match_exact_duration(self) -> None:
+        for days in (0, 8):
+            source = valid_atlas()
+            source["window"]["days"] = days
+            clean = self.update.sanitize_brain_atlas(source, "2026-07-18T16:01:00Z")
+            self.assertEqual("unavailable", clean["status"])
+
+        mismatched = valid_atlas()
+        mismatched["window"]["days"] = 1
+        clean = self.update.sanitize_brain_atlas(mismatched, "2026-07-18T16:01:00Z")
+        self.assertEqual("unavailable", clean["status"])
+
     def test_missing_source_has_visible_unavailable_state(self) -> None:
         clean = self.update.sanitize_brain_atlas(None, "2026-07-18T16:01:00Z")
 
@@ -411,12 +435,58 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
 
         with tempfile.TemporaryDirectory(prefix="brain-atlas-dashboard-test-") as directory:
             target = Path(directory) / "control-tower-live.json"
-            self.update.atomic_write_json(target, live)
+            self.update.atomic_write_json(target, live, compact=True)
             written = json.loads(target.read_text(encoding="utf-8"))
 
         self.assertEqual("ready", written["brainAtlas"]["status"])
         self.assertNotIn("policy", written["brainAtlas"])
         self.assertNotIn("privateAuditPayload", written)
+
+    def test_live_dashboard_is_compact_while_audit_json_stays_readable(self) -> None:
+        payload = {
+            "lastUpdated": "2026-07-18T16:01:00Z",
+            "brainAtlas": valid_atlas(),
+            "metrics": {"latencyMs": 12.0, "label": "retrieval → applied"},
+        }
+
+        with tempfile.TemporaryDirectory(prefix="brain-atlas-json-format-") as directory:
+            live_target = Path(directory) / "control-tower-live.json"
+            audit_target = Path(directory) / "dashboard-data.json"
+            self.update.atomic_write_json(live_target, payload, compact=True)
+            self.update.atomic_write_json(audit_target, payload)
+            live_text = live_target.read_text(encoding="utf-8")
+            audit_text = audit_target.read_text(encoding="utf-8")
+
+        self.assertEqual(payload, json.loads(live_text))
+        self.assertEqual(payload, json.loads(audit_text))
+        self.assertTrue(live_text.endswith("\n"))
+        self.assertNotIn("\n  ", live_text)
+        self.assertIn('"latencyMs":12.0', live_text)
+        self.assertIn("\\u2192", live_text)
+        self.assertIn("\n  ", audit_text)
+        self.assertIn('"latencyMs": 12.0', audit_text)
+        self.assertIn("\\u2192", audit_text)
+        self.assertLess(len(live_text.encode("utf-8")), len(audit_text.encode("utf-8")))
+
+    def test_compact_live_serialization_keeps_large_payload_under_hard_max(self) -> None:
+        payload = {
+            "rows": [
+                {"label": "x" * 20, "value": 1.0}
+                for _ in range(4_000)
+            ],
+        }
+
+        with tempfile.TemporaryDirectory(prefix="brain-atlas-json-size-") as directory:
+            live_target = Path(directory) / "control-tower-live.json"
+            audit_target = Path(directory) / "dashboard-data.json"
+            self.update.atomic_write_json(live_target, payload, compact=True)
+            self.update.atomic_write_json(audit_target, payload)
+            live_text = live_target.read_text(encoding="utf-8")
+            audit_text = audit_target.read_text(encoding="utf-8")
+
+        self.assertEqual(payload, json.loads(live_text))
+        self.assertGreater(len(audit_text.encode("utf-8")), 250_000)
+        self.assertLess(len(live_text.encode("utf-8")), 250_000)
 
     def test_sanitized_atlas_is_idempotent_for_the_live_projection(self) -> None:
         clean = self.update.sanitize_brain_atlas(
@@ -571,7 +641,7 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         })
         with tempfile.TemporaryDirectory(prefix="brain-atlas-real-stage-") as directory:
             target = Path(directory) / "control-tower-live.json"
-            self.update.atomic_write_json(target, live)
+            self.update.atomic_write_json(target, live, compact=True)
             written = json.loads(target.read_text(encoding="utf-8"))
 
         self.assertEqual(source["status"], clean["status"])
@@ -668,8 +738,28 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertIn("@keyframes memory-agent-presence-halo", styles)
         self.assertIn("@keyframes memory-agent-presence-dot", styles)
         self.assertIn("transform-box: fill-box;", styles)
-        self.assertIn("@keyframes memory-node-live-pulse", styles)
         self.assertIn(".memory-flow-node.is-work-active .memory-flow-node-aura", styles)
+        live_map_css = styles[
+            styles.index("#brain-atlas.has-live-memory-flow .memory-flow-map {"):
+            styles.index(".memory-flow-map:focus-visible")
+        ]
+        self.assertIn("box-shadow:", live_map_css)
+        self.assertNotIn("animation:", live_map_css)
+        live_edge_css = styles[
+            styles.index(".memory-flow-edge.is-live {"):
+            styles.index(".memory-flow-node rect")
+        ]
+        self.assertIn("animation: memory-flow-travel 0.72s linear infinite;", live_edge_css)
+        self.assertNotIn("filter:", live_edge_css)
+        live_node_css = styles[
+            styles.index(".memory-flow-node.is-live > rect:not(.memory-flow-node-aura) {"):
+            styles.index(".memory-flow-node .memory-flow-node-aura")
+        ]
+        self.assertIn("stroke-width: 2.3;", live_node_css)
+        self.assertIn("filter: drop-shadow", live_node_css)
+        self.assertNotIn("animation:", live_node_css)
+        self.assertNotIn("@keyframes memory-node-live-pulse", styles)
+        self.assertNotIn("@keyframes memory-map-live-breathe", styles)
         proof_edge_css = styles[
             styles.index(".brain-atlas-proof-edge {"):
             styles.index(".brain-atlas-proof-work rect")

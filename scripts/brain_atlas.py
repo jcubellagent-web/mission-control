@@ -35,6 +35,7 @@ SCHEMA_VERSION = 1
 SUPPORTED_STORE_SCHEMA = 1
 MAX_WINDOW_DAYS = 7
 HARD_NODE_CAP = 100
+MIN_VERIFIED_PROOF_PATHS = 3
 SOURCE_NAME = "control-tower-work-ledger"
 
 AGENT_LABELS = {
@@ -164,10 +165,14 @@ def read_receipts(
     *,
     window_start: dt.datetime,
     window_end: dt.datetime,
-) -> tuple[list[sqlite3.Row], int]:
+) -> tuple[list[sqlite3.Row], int, int]:
     start_text, end_text = iso(window_start), iso(window_end)
     stale_count = int(connection.execute(
         "SELECT COUNT(*) FROM work_events WHERE occurred_at < ? OR occurred_at > ?",
+        (start_text, end_text),
+    ).fetchone()[0])
+    source_count = int(connection.execute(
+        "SELECT COUNT(*) FROM work_events WHERE occurred_at >= ? AND occurred_at <= ?",
         (start_text, end_text),
     ).fetchone()[0])
     rows = connection.execute(
@@ -180,7 +185,7 @@ def read_receipts(
            LIMIT 10000""",
         (start_text, end_text),
     ).fetchall()
-    return list(rows), stale_count
+    return list(rows), stale_count, source_count
 
 
 def add_edge(
@@ -220,7 +225,24 @@ def build_graph(
         "unverifiedRoutes": 0,
         "unsafeVerifiedRoutes": 0,
     }
-    for row in rows:
+    ordered_rows = list(rows)
+    reserved = []
+    for row in ordered_rows:
+        if verified_event(
+            row,
+            window_start=window_start,
+            window_end=window_end,
+            source_revision=source_revision,
+        ) and safe_model_route(row) is not None:
+            reserved.append(row)
+            if len(reserved) >= MIN_VERIFIED_PROOF_PATHS:
+                break
+    reserved_ids = {str(row["event_id"]) for row in reserved}
+    ordered_rows = [
+        *reserved,
+        *(row for row in ordered_rows if str(row["event_id"]) not in reserved_ids),
+    ]
+    for row in ordered_rows:
         if not verified_event(
             row,
             window_start=window_start,
@@ -539,7 +561,7 @@ def generate_atlas(
     window_start = generated_at - dt.timedelta(days=int(days))
     with closing(read_only_connection(Path(db_path))) as connection:
         source_schema, source_revision = verify_source(connection)
-        rows, stale_count = read_receipts(
+        rows, stale_count, source_count = read_receipts(
             connection,
             window_start=window_start,
             window_end=generated_at,
@@ -551,7 +573,7 @@ def generate_atlas(
             source_revision=source_revision,
             max_nodes=int(max_nodes),
         )
-    reason = None if nodes else empty_reason(len(rows), excluded, int(max_nodes))
+    reason = None if nodes else empty_reason(source_count, excluded, int(max_nodes))
     payload = atlas_payload(
         generated_at=generated_at,
         window_start=window_start,
@@ -563,7 +585,7 @@ def generate_atlas(
         source_revision=source_revision,
         nodes=nodes,
         edges=edges,
-        source_rows=len(rows),
+        source_rows=source_count,
         stale_count=stale_count,
         excluded=excluded,
         reason=reason,
