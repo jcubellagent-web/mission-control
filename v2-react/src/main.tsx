@@ -1649,8 +1649,12 @@ function signalRows(signals: SignalItem[], newsletter: boolean) {
 function cryptoFreshness(wallet?: AgenticCryptoWallet) {
   if (!wallet?.updatedAt) return { label: "not loaded", status: "stale", tone: "watch" };
   const age = Date.now() - timeValue(wallet.updatedAt);
-  if (String(wallet.status).toLowerCase() === "error") return { label: "error", status: "error", tone: "risk" };
-  if (age > 60 * 60 * 1000) return { label: "stale", status: "stale", tone: "watch" };
+  const reportedStatus = String(wallet.status || wallet.summary?.freshnessStatus || "").toLowerCase();
+  if (reportedStatus === "error") return { label: "error", status: "error", tone: "risk" };
+  if (["attention", "provisional", "stale"].includes(reportedStatus)) {
+    return { label: reportedStatus, status: reportedStatus, tone: "watch" };
+  }
+  if (age > 15 * 60 * 1000) return { label: "stale", status: "stale", tone: "watch" };
   return { label: "fresh", status: "fresh", tone: "clear" };
 }
 

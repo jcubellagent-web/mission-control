@@ -10,6 +10,7 @@ from __future__ import annotations
 import datetime as dt
 import fcntl
 import json
+import math
 import os
 import tempfile
 import time
@@ -23,8 +24,14 @@ WALLET = "0xa8Fed22B1DF934370B7E9E0F611a3A894Fc257d8"
 WALLET_L = WALLET.lower()
 WETH = "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73"
 WETH_L = WETH.lower()
+USDG = "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168"
+USDG_L = USDG.lower()
 BLOCKSCOUT = "https://robinhoodchain.blockscout.com/api/v2"
 EXPLORER = "https://robinhoodchain.blockscout.com"
+DEX_CHAIN = "robinhood"
+DEX_ANCHOR_RATIO_LIMIT = 3.0
+DEX_CONSENSUS_RATIO_LIMIT = 3.0
+DEX_MIN_UNANCHORED_LIQUIDITY_USD = 100.0
 ROOT = Path.home() / ".openclaw/workspace/mission-control"
 RAW = Path.home() / ".openclaw/private/mission-control/agentic-crypto-wallet-raw.json"
 OUT = ROOT / "data/agentic-crypto-wallet.json"
@@ -98,60 +105,210 @@ def address_of(value: Any) -> str:
     return str(value or "").lower()
 
 
+def finite_positive(value: Any) -> float:
+    try:
+        parsed = float(value)
+    except (TypeError, ValueError, OverflowError):
+        return 0.0
+    return parsed if math.isfinite(parsed) and parsed > 0 else 0.0
+
+
+def finite_nonnegative(value: Any, field: str) -> float:
+    try:
+        parsed = float(value)
+    except (TypeError, ValueError, OverflowError) as exc:
+        raise RuntimeError(f"Invalid wallet value for {field}") from exc
+    if not math.isfinite(parsed) or parsed < 0:
+        raise RuntimeError(f"Invalid wallet value for {field}")
+    return parsed
+
+
+def valid_decimals(value: Any) -> int | None:
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError, OverflowError):
+        return None
+    return parsed if 0 <= parsed <= 36 else None
+
+
 def token_meta(row: dict[str, Any]) -> dict[str, Any]:
     token = row.get("token") if isinstance(row.get("token"), dict) else {}
+    token_type = str(token.get("type") or row.get("token_type") or "")
+    decimals = valid_decimals(token.get("decimals"))
+    if decimals is None and token_type in {"ERC-721", "ERC-1155"}:
+        decimals = 0
     return {
         "address": str(token.get("address_hash") or ""),
         "name": str(token.get("name") or "Unknown token"),
         "symbol": str(token.get("symbol") or "?")[:28],
-        "decimals": int(token.get("decimals") or 0),
-        "type": str(token.get("type") or row.get("token_type") or ""),
-        "exchange_rate": float(token.get("exchange_rate") or 0),
+        "decimals": decimals,
+        "type": token_type,
+        "exchange_rate": finite_positive(token.get("exchange_rate")),
     }
 
 
 def token_amount(row: dict[str, Any]) -> float:
     meta = token_meta(row)
+    total = row.get("total") if isinstance(row.get("total"), dict) else {}
     raw = row.get("value")
-    if raw is None and isinstance(row.get("total"), dict):
-        raw = row["total"].get("value")
-        try:
-            meta["decimals"] = int(row["total"].get("decimals") or meta["decimals"])
-        except Exception:
-            pass
+    if raw is None:
+        raw = total.get("value")
+    override = valid_decimals(total.get("decimals"))
+    if meta["type"] == "ERC-20" and override is not None:
+        meta["decimals"] = override
+    if meta["decimals"] is None:
+        return 0.0
     try:
-        return int(raw or 0) / (10 ** int(meta["decimals"] or 0))
-    except Exception:
+        amount = int(raw or 0) / (10 ** meta["decimals"])
+        return amount if math.isfinite(amount) and amount >= 0 else 0.0
+    except (TypeError, ValueError, OverflowError):
         return 0.0
 
 
-def dex_prices(addresses: list[str]) -> dict[str, float]:
-    prices: dict[str, float] = {}
-    for start in range(0, len(addresses), 30):
-        batch = addresses[start:start + 30]
-        if not batch:
+def pair_volume_usd(pair: dict[str, Any]) -> float:
+    volume = pair.get("volume") if isinstance(pair.get("volume"), dict) else {}
+    return finite_positive(volume.get("h24"))
+
+
+def pair_liquidity_usd(pair: dict[str, Any]) -> float:
+    liquidity = pair.get("liquidity") if isinstance(pair.get("liquidity"), dict) else {}
+    return finite_positive(liquidity.get("usd"))
+
+
+def select_dex_price(pairs: list[dict[str, Any]], address: str, anchor: float = 0.0) -> float:
+    """Select a corroborated price instead of trusting one reported-liquidity maximum."""
+    target = address.lower()
+    candidates: list[dict[str, float | bool]] = []
+    for pair in pairs:
+        if str(pair.get("chainId") or "").lower() != DEX_CHAIN:
             continue
+        base = pair.get("baseToken") if isinstance(pair.get("baseToken"), dict) else {}
+        quote = pair.get("quoteToken") if isinstance(pair.get("quoteToken"), dict) else {}
+        if address_of(base.get("address")) != target:
+            continue
+        price = finite_positive(pair.get("priceUsd"))
+        liquidity = pair_liquidity_usd(pair)
+        if not price or not liquidity:
+            continue
+        candidates.append({
+            "price": price,
+            "liquidity": liquidity,
+            "volume": pair_volume_usd(pair),
+            "trustedQuote": address_of(quote.get("address")) in {WETH_L, USDG_L},
+        })
+    if not candidates:
+        return 0.0
+
+    anchored = finite_positive(anchor)
+    if anchored:
+        lower = anchored / DEX_ANCHOR_RATIO_LIMIT
+        upper = anchored * DEX_ANCHOR_RATIO_LIMIT
+        candidates = [row for row in candidates if lower <= float(row["price"]) <= upper]
+        if not candidates:
+            return 0.0
+
+    trusted = [row for row in candidates if bool(row["trustedQuote"])]
+    if trusted:
+        candidates = trusted
+    elif not anchored:
+        return 0.0
+
+    ordered = sorted(candidates, key=lambda row: float(row["price"]))
+    clusters: list[list[dict[str, float | bool]]] = []
+    for row in ordered:
+        if not clusters or float(row["price"]) > float(clusters[-1][0]["price"]) * DEX_CONSENSUS_RATIO_LIMIT:
+            clusters.append([row])
+        else:
+            clusters[-1].append(row)
+    candidates = max(
+        clusters,
+        key=lambda cluster: (
+            len(cluster),
+            sum(float(row["volume"]) for row in cluster),
+            sum(float(row["liquidity"]) for row in cluster),
+        ),
+    )
+    if not anchored and len(ordered) > 1 and len(candidates) == 1:
+        return 0.0
+    if not anchored and len(candidates) == 1 and float(candidates[0]["liquidity"]) < DEX_MIN_UNANCHORED_LIQUIDITY_USD:
+        return 0.0
+    best = max(candidates, key=lambda row: (float(row["volume"]), float(row["liquidity"])))
+    return float(best["price"])
+
+
+def dex_prices(addresses: list[str], anchors: dict[str, float] | None = None) -> tuple[dict[str, float], set[str]]:
+    """Fetch every token independently so a many-pool token cannot crowd out the rest."""
+    prices: dict[str, float] = {}
+    rejected: set[str] = set()
+    seen: set[str] = set()
+    anchors = anchors or {}
+    for address in addresses:
+        address_l = str(address or "").lower()
+        if not address_l or address_l in seen:
+            continue
+        seen.add(address_l)
         try:
-            payload = get_json("https://api.dexscreener.com/latest/dex/tokens/" + ",".join(batch))
+            payload = get_json(f"https://api.dexscreener.com/token-pairs/v1/{DEX_CHAIN}/{address}")
         except Exception:
             continue
-        best: dict[str, tuple[float, float]] = {}
-        for pair in (payload.get("pairs") or []) if isinstance(payload, dict) else []:
-            if str(pair.get("chainId") or "").lower() != "robinhood":
-                continue
-            base = address_of((pair.get("baseToken") or {}).get("address"))
-            if not base:
-                base = str((pair.get("baseToken") or {}).get("address") or "").lower()
-            try:
-                price = float(pair.get("priceUsd") or 0)
-                liquidity = float((pair.get("liquidity") or {}).get("usd") or 0)
-            except Exception:
-                continue
-            if price > 0 and (base not in best or liquidity > best[base][0]):
-                best[base] = (liquidity, price)
-        for address, (_, price) in best.items():
-            prices[address] = price
-    return prices
+        pairs = payload if isinstance(payload, list) else []
+        price = select_dex_price(pairs, address_l, anchors.get(address_l, 0.0))
+        if price:
+            prices[address_l] = price
+        elif any(
+            str(pair.get("chainId") or "").lower() == DEX_CHAIN
+            and address_of((pair.get("baseToken") or {}).get("address")) == address_l
+            and finite_positive(pair.get("priceUsd"))
+            and pair_liquidity_usd(pair)
+            for pair in pairs
+            if isinstance(pair, dict)
+        ):
+            rejected.add(address_l)
+    return prices, rejected
+
+
+def unique_token_balances(balances: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Collapse exact duplicate ERC-20 rows without conflating same-symbol contracts."""
+    output: list[dict[str, Any]] = []
+    seen: dict[str, float] = {}
+    for row in balances:
+        meta = token_meta(row)
+        address = meta["address"].lower()
+        if meta["type"] != "ERC-20" or not address:
+            output.append(row)
+            continue
+        amount = token_amount(row)
+        if address in seen:
+            if not math.isclose(amount, seen[address], rel_tol=1e-12, abs_tol=1e-12):
+                raise RuntimeError(f"Conflicting duplicate ERC-20 balance for {address[:8]}…")
+            continue
+        seen[address] = amount
+        output.append(row)
+    return output
+
+
+def validate_wallet_sidecar(sidecar: dict[str, Any]) -> None:
+    summary = sidecar.get("summary") if isinstance(sidecar.get("summary"), dict) else {}
+    native = finite_nonnegative(summary.get("nativeLiquidUsd"), "nativeLiquidUsd")
+    token_summary = finite_nonnegative(summary.get("tokenLiquidUsd"), "tokenLiquidUsd")
+    nft_summary = finite_nonnegative(summary.get("nftEstimatedUsd"), "nftEstimatedUsd")
+    tokens = sidecar.get("tokens") if isinstance(sidecar.get("tokens"), list) else []
+    token_total = 0.0
+    for index, row in enumerate(tokens):
+        if not isinstance(row, dict):
+            raise RuntimeError(f"Invalid wallet token row {index}")
+        finite_nonnegative(row.get("amount"), f"tokens[{index}].amount")
+        finite_nonnegative(row.get("priceUsd"), f"tokens[{index}].priceUsd")
+        token_total += finite_nonnegative(row.get("valueUsd"), f"tokens[{index}].valueUsd")
+    liquid = finite_nonnegative(summary.get("liquidEstimatedUsd"), "liquidEstimatedUsd")
+    total = finite_nonnegative(summary.get("totalEstimatedUsd"), "totalEstimatedUsd")
+    rounding_tolerance = 0.005 * (len(tokens) + 1) + 1e-9
+    if not math.isclose(token_summary, token_total, rel_tol=0, abs_tol=rounding_tolerance):
+        raise RuntimeError("Wallet token total failed published-row reconciliation")
+    if not math.isclose(liquid, native + token_summary, rel_tol=0, abs_tol=0.015000001):
+        raise RuntimeError("Wallet total failed native-plus-token reconciliation")
+    if not math.isclose(total, liquid + nft_summary, rel_tol=0, abs_tol=0.015000001):
+        raise RuntimeError("Wallet total failed liquid-plus-NFT reconciliation")
 
 
 def transfer_groups(transfers: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
@@ -320,6 +477,7 @@ def activity_rows(transactions: list[dict[str, Any]], trades: list[dict[str, Any
 
 def refresh_wallet() -> int:
     errors: list[str] = []
+    pricing_warnings: list[str] = []
     address = get_json(f"{BLOCKSCOUT}/addresses/{WALLET}")
     balances = get_json(f"{BLOCKSCOUT}/addresses/{WALLET}/token-balances")
     transactions = paged(f"/addresses/{WALLET}/transactions", max_pages=4)
@@ -327,10 +485,18 @@ def refresh_wallet() -> int:
     if not isinstance(balances, list):
         raise RuntimeError("Blockscout token balances returned an unexpected payload")
 
-    eth_usd = float(address.get("exchange_rate") or 0)
+    eth_usd = finite_positive(address.get("exchange_rate"))
     native_eth = int(address.get("coin_balance") or 0) / 1e18
+    balances = unique_token_balances(balances)
     erc20_addresses = [token_meta(row)["address"] for row in balances if token_meta(row)["type"] == "ERC-20"]
-    dex = dex_prices([address for address in erc20_addresses if address])
+    anchors = {
+        token_meta(row)["address"].lower(): token_meta(row)["exchange_rate"]
+        for row in balances
+        if token_meta(row)["type"] == "ERC-20" and token_meta(row)["address"]
+    }
+    dex, rejected_prices = dex_prices([address for address in erc20_addresses if address], anchors)
+    if rejected_prices:
+        pricing_warnings.append(f"{len(rejected_prices)} token price source disagreement(s); affected rows withheld")
 
     tokens: list[dict[str, Any]] = []
     nfts: list[dict[str, Any]] = []
@@ -341,16 +507,20 @@ def refresh_wallet() -> int:
         amount = token_amount(row)
         address_l = meta["address"].lower()
         if meta["type"] == "ERC-20":
-            price = dex.get(address_l) or meta["exchange_rate"]
+            price = finite_positive(dex.get(address_l))
+            if not price and address_l not in rejected_prices:
+                price = meta["exchange_rate"]
             prices[address_l] = price
             value = amount * price
+            if not math.isfinite(value) or value < 0:
+                continue
             if value < 0.01 and address_l != WETH_L:
                 continue
             token_liquid_usd += value
             tokens.append({
                 "amount": round(amount, 8), "chain": "robinhood", "classification": "core" if address_l == WETH_L else "active-trade",
                 "contractMasked": f"{meta['address'][:6]}…{meta['address'][-4:]}", "name": meta["name"], "symbol": meta["symbol"],
-                "priceUsd": round(price, 10), "priceSource": "DexScreener" if address_l in dex else "Blockscout",
+                "priceUsd": round(price, 10), "priceSource": "DexScreener screened" if address_l in dex else "Blockscout",
                 "source": "robinhood-blockscout-live", "valueUsd": round(value, 2),
             })
         elif meta["type"] in {"ERC-721", "ERC-1155"} and "important alert" not in meta["name"].lower():
@@ -368,13 +538,13 @@ def refresh_wallet() -> int:
     liquid_usd = token_liquid_usd + native_usd
     sidecar: dict[str, Any] = {
         "updatedAt": ts,
-        "status": "fresh",
+        "status": "attention" if errors else "fresh",
         "walletMode": "read-only",
         "refreshMode": "live-robinhood-chain",
         "lastFullRefreshAt": ts,
         "wallets": {"evmMasked": f"{WALLET[:6]}…{WALLET[-4:]}", "primaryChain": "Robinhood Chain"},
         "summary": {
-            "freshnessStatus": "fresh", "lastRefreshed": ts,
+            "freshnessStatus": "attention" if errors else "fresh", "lastRefreshed": ts,
             "nativeLiquidUsd": round(native_usd, 2), "tokenLiquidUsd": round(token_liquid_usd, 2),
             "liquidEstimatedUsd": round(liquid_usd, 2), "nftEstimatedUsd": 0,
             "totalEstimatedUsd": round(liquid_usd, 2),
@@ -405,7 +575,10 @@ def refresh_wallet() -> int:
             "requiredApproval": "none", "riskLevel": "low", "simulationStatus": "live",
         }],
         "errors": errors,
+        "pricingWarnings": pricing_warnings,
     }
+
+    validate_wallet_sidecar(sidecar)
 
     raw = json.loads(RAW.read_text()) if RAW.exists() else {"note": "Private local inventory cache. Do not publish."}
     raw["addresses"] = {"evm": WALLET}
