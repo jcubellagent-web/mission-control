@@ -3,17 +3,17 @@
   "agent": "JOSH 2.0",
   "active": true,
   "reportedActive": true,
-  "status": "done",
-  "objective": "Done: read-only Telegram canary completed; Fast Ack identity and terminal receipt need repair",
-  "detail": "Finished bash: completed running the handoff receipt bridge helper",
-  "updatedAt": "2026-07-19T00:46:54Z",
-  "checkedAt": "2026-07-19T00:46:54Z",
-  "currentTool": "exec",
+  "status": "active",
+  "objective": "Receiving: verify current ecosystem and Mission Control health",
+  "detail": "josh2-codex-luna on josh2; fast Inbox coordination",
+  "updatedAt": "2026-07-19T20:32:08Z",
+  "checkedAt": "2026-07-19T20:32:08Z",
+  "currentTool": "telegram",
   "steps": [
     {
-      "label": "Done - read-only Telegram canary completed; Fast Ack identity and terminal receipt need repair",
-      "status": "done",
-      "tool": "exec"
+      "label": "Receiving - verify current ecosystem and Mission Control health",
+      "status": "active",
+      "tool": "telegram"
     }
   ],
   "source": "josh2-local-live-feed",
@@ -21,14 +21,14 @@
   "model": "GPT-5.6-terra",
   "messageReceived": "2026-07-19T00:42:44Z",
   "localLiveFeed": true,
-  "workId": "work-adhoc-d32e1c9adf7a490c954742a07f3e0177",
-  "runId": "run-11e97b398464440d8009cae954482526",
+  "workId": "work-telegram-7d7c5b8378f1e2eeb97dc18b",
+  "runId": "run-telegram-db28dc74c46bd3663f43dcbd",
   "generation": 1,
-  "sequence": 1,
+  "sequence": 2,
   "phase": "active",
-  "originClaimHash": "643b48b88177e1e059645d715b0364609f7a21bb89ce929ffee472d0decfdb37",
+  "originClaimHash": "c9e7b7d752661adc3f3b0988f99d488b633ef7e6d046fb195c901f5c496b71a6",
   "modelFamily": "codex",
-  "modelId": "openai/gpt-5.6-terra",
-  "routeVerified": true,
-  "leaseUntil": "2026-07-19T00:49:51.000Z"
+  "modelId": "gpt-5.6-luna",
+  "routeVerified": false,
+  "leaseUntil": "2026-07-19T20:34:36.000Z"
 }
