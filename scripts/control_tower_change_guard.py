@@ -37,6 +37,9 @@ SOURCE_PATHS = (
     "plugins/inbox-coordinator",
     "launchd",
     "tests",
+    "scripts/agent_task.py",
+    "scripts/agent_delegate.py",
+    "scripts/linear_work_intent.py",
     "scripts/agent_route.py",
     "scripts/agent_publish.py",
     "scripts/ecosystem_health_sweep.py",
@@ -87,6 +90,29 @@ SOURCE_PATHS = (
     "scripts/test_ecosystem_state_reconciler.py",
     "scripts/test_telegram_approval_extraction.py",
     "scripts/todays_jobs_consistency_watchdog.py",
+)
+PYTHON_COMPILE_PATHS = (
+    "scripts/control_tower_change_guard.py",
+    "scripts/codex_remote_manual_lane.py",
+    "scripts/ecosystem_health_sweep.py",
+    "scripts/ecosystem_qa_benchmark.py",
+    "scripts/mission_control_runtime_layout_check.py",
+    "scripts/mission_control_visual_canaries.py",
+    "scripts/todays_jobs_consistency_watchdog.py",
+    "scripts/jaimes_openclaw_gateway_launcher.py",
+    "scripts/josh_telegram_fast_ack.py",
+    "scripts/jaimes_telegram_fast_ack.py",
+    "scripts/josh_work_card.py",
+    "scripts/jaimes_work_card.py",
+    "scripts/ecosystem_qa_scheduler.py",
+    "scripts/ecosystem_runtime_probe.py",
+    "scripts/refresh_agentic_robinhood_wallet_live.py",
+    "scripts/telegram_response_contract_stress.py",
+    "scripts/telegram_inbox_qa_monitor.py",
+    "scripts/update_mission_control.py",
+    "scripts/agent_task.py",
+    "scripts/agent_delegate.py",
+    "scripts/linear_work_intent.py",
 )
 LEASE_MINUTES = 45
 
@@ -164,6 +190,56 @@ def require_token(token: str) -> dict:
     return payload
 
 
+def source_snapshot() -> list[dict[str, object]]:
+    """Freeze guarded-path existence so rollback never consults a later path list."""
+    return [
+        {"path": relative, "existedAtBegin": (ROOT / relative).exists()}
+        for relative in SOURCE_PATHS
+    ]
+
+
+def rollback_snapshot(payload: dict) -> list[dict[str, object]]:
+    """Validate rollback inputs completely before mutating any source path."""
+    backup = Path(str(payload.get("backup") or ""))
+    raw = payload.get("sourceSnapshot")
+    legacy = not isinstance(raw, list)
+    entries = raw if isinstance(raw, list) else [
+        {
+            "path": relative,
+            "existedAtBegin": (backup / relative).exists(),
+        }
+        for relative in SOURCE_PATHS
+    ]
+    normalized: list[dict[str, object]] = []
+    seen: set[str] = set()
+    problems: list[str] = []
+    for entry in entries:
+        if not isinstance(entry, dict):
+            problems.append("invalid snapshot entry")
+            continue
+        relative = str(entry.get("path") or "")
+        path = Path(relative)
+        if not relative or path.is_absolute() or ".." in path.parts or relative in seen:
+            problems.append(f"unsafe or duplicate snapshot path: {relative or '<empty>'}")
+            continue
+        seen.add(relative)
+        existed = bool(entry.get("existedAtBegin"))
+        backup_source = backup / relative
+        target = ROOT / relative
+        if existed and not backup_source.exists():
+            problems.append(f"missing pre-edit backup: {relative}")
+        if legacy and not existed and target.exists():
+            problems.append(f"legacy lease cannot prove existing path was newly created: {relative}")
+        normalized.append({"path": relative, "existedAtBegin": existed})
+    if problems:
+        raise SystemExit(json.dumps({
+            "ok": False,
+            "reason": "rollback prevalidation failed; lease retained",
+            "problems": problems,
+        }, indent=2))
+    return normalized
+
+
 def begin(agent: str, objective: str) -> None:
     STATE_DIR.mkdir(parents=True, exist_ok=True)
     BACKUP_ROOT.mkdir(parents=True, exist_ok=True)
@@ -178,9 +254,11 @@ def begin(agent: str, objective: str) -> None:
     stamp = now().strftime("%Y%m%d-%H%M%S")
     backup = BACKUP_ROOT / f"{stamp}-{agent}"
     backup.mkdir(parents=True)
-    for relative in SOURCE_PATHS:
+    snapshot = source_snapshot()
+    for entry in snapshot:
+        relative = str(entry["path"])
         source = ROOT / relative
-        if not source.exists():
+        if not entry["existedAtBegin"]:
             continue
         target = backup / relative
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -198,6 +276,7 @@ def begin(agent: str, objective: str) -> None:
         "pushApproval": None,
         "baseCommit": run(["git", "rev-parse", "HEAD"]).stdout.strip(),
         "backup": str(backup),
+        "sourceSnapshot": snapshot,
         "source": "v2-react",
         "port": 5174,
     }
@@ -228,25 +307,7 @@ def verify(token: str) -> None:
     checks = [
         ([sys.executable, "scripts/control_tower_path_guard.py"], env),
         ([sys.executable, "scripts/memory_registry_smoke_test.py"], None),
-        ([sys.executable, "-m", "py_compile",
-          "scripts/control_tower_change_guard.py",
-          "scripts/codex_remote_manual_lane.py",
-          "scripts/ecosystem_health_sweep.py",
-          "scripts/ecosystem_qa_benchmark.py",
-          "scripts/mission_control_runtime_layout_check.py",
-          "scripts/mission_control_visual_canaries.py",
-          "scripts/todays_jobs_consistency_watchdog.py",
-          "scripts/jaimes_openclaw_gateway_launcher.py",
-          "scripts/josh_telegram_fast_ack.py",
-          "scripts/jaimes_telegram_fast_ack.py",
-          "scripts/josh_work_card.py",
-          "scripts/jaimes_work_card.py",
-          "scripts/ecosystem_qa_scheduler.py",
-          "scripts/ecosystem_runtime_probe.py",
-          "scripts/refresh_agentic_robinhood_wallet_live.py",
-          "scripts/telegram_response_contract_stress.py",
-          "scripts/telegram_inbox_qa_monitor.py",
-          "scripts/update_mission_control.py"], None),
+        ([sys.executable, "-m", "py_compile", *PYTHON_COMPILE_PATHS], None),
         ([qa_python, "-m", "pytest", "-q", "tests", "scripts/test_telegram_approval_extraction.py", "scripts/test_ecosystem_qa_scheduler.py"], None),
         (["npm", "test", "--prefix", "plugins/inbox-coordinator"], None),
         (["npm", "run", "build"], None),
@@ -349,15 +410,14 @@ def finish(token: str) -> None:
 
 def abort(token: str) -> None:
     payload = require_token(token)
-    evidence = release_evidence(payload, "aborted", "source restored from pre-edit backup")
     backup = Path(payload["backup"])
-    for relative in SOURCE_PATHS:
+    snapshot = rollback_snapshot(payload)
+    evidence = release_evidence(payload, "aborted", "source restored from immutable pre-edit snapshot")
+    for entry in snapshot:
+        relative = str(entry["path"])
         source = backup / relative
         target = ROOT / relative
-        if not source.exists():
-            # A guarded source path that had no pre-edit backup did not exist
-            # when the lease began. Remove anything created there so abort is
-            # a true rollback rather than a partial restore.
+        if not entry["existedAtBegin"]:
             if target.is_symlink() or target.is_file():
                 target.unlink()
             elif target.is_dir():

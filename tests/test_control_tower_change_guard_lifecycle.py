@@ -39,6 +39,7 @@ def isolated_guard(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     root.mkdir()
     monkeypatch.setattr(GUARD, "ROOT", root)
     monkeypatch.setattr(GUARD, "LOCK_PATH", tmp_path / "lease.json")
+    monkeypatch.setattr(GUARD, "BACKUP_ROOT", tmp_path / "backups")
     monkeypatch.setattr(GUARD, "source_changes", lambda: [])
 
 
@@ -52,6 +53,29 @@ def fake_git(*, ahead: int = 0, behind: int = 0, source_changed: bool = False):
 def test_host_runtime_helpers_are_guarded_source() -> None:
     assert "scripts/mission_control_kiosk_watchdog.py" in GUARD.SOURCE_PATHS
     assert "scripts/codex_remote_manual_lane.py" in GUARD.SOURCE_PATHS
+    bridge = {
+        "scripts/agent_task.py",
+        "scripts/agent_delegate.py",
+        "scripts/linear_work_intent.py",
+    }
+    assert bridge.issubset(set(GUARD.SOURCE_PATHS))
+    assert bridge.issubset(set(GUARD.PYTHON_COMPILE_PATHS))
+
+
+def test_begin_records_an_immutable_source_snapshot(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    existing = GUARD.ROOT / "existing.txt"
+    existing.write_text("before\n")
+    monkeypatch.setattr(GUARD, "SOURCE_PATHS", ("existing.txt", "missing.txt"))
+    monkeypatch.setattr(GUARD, "run", lambda *_args, **_kwargs: type("Process", (), {"stdout": "abc123\n"})())
+
+    GUARD.begin("joshex", "snapshot test")
+
+    payload = json.loads(GUARD.LOCK_PATH.read_text())
+    assert payload["sourceSnapshot"] == [
+        {"path": "existing.txt", "existedAtBegin": True},
+        {"path": "missing.txt", "existedAtBegin": False},
+    ]
+    assert (Path(payload["backup"]) / "existing.txt").read_text() == "before\n"
 
 
 def test_successful_completion_verifies_and_releases_own_lease(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -105,12 +129,77 @@ def test_cancellation_restores_existing_source_and_removes_new_source(
     backup_existing.write_text("original\n")
     monkeypatch.setattr(GUARD, "ROOT", root)
     monkeypatch.setattr(GUARD, "SOURCE_PATHS", ("scripts/existing.py", "scripts/created.py"))
+    payload["sourceSnapshot"] = [
+        {"path": "scripts/existing.py", "existedAtBegin": True},
+        {"path": "scripts/created.py", "existedAtBegin": False},
+    ]
+    GUARD.LOCK_PATH.write_text(json.dumps(payload))
 
     GUARD.abort("own-token")
 
     assert existing.read_text() == "original\n"
     assert not created.exists()
     assert not GUARD.LOCK_PATH.exists()
+
+
+def test_abort_uses_lease_snapshot_when_guard_paths_expand(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    payload = lease(tmp_path)
+    root = GUARD.ROOT
+    existing = root / "existing.py"
+    later_guarded = root / "later.py"
+    existing.write_text("edited\n")
+    later_guarded.write_text("must remain\n")
+    (Path(payload["backup"]) / "existing.py").write_text("original\n")
+    payload["sourceSnapshot"] = [{"path": "existing.py", "existedAtBegin": True}]
+    GUARD.LOCK_PATH.write_text(json.dumps(payload))
+    monkeypatch.setattr(GUARD, "SOURCE_PATHS", ("existing.py", "later.py"))
+
+    GUARD.abort("own-token")
+
+    assert existing.read_text() == "original\n"
+    assert later_guarded.read_text() == "must remain\n"
+
+
+def test_legacy_abort_preserves_unbacked_existing_path_and_retains_lease(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    lease(tmp_path)
+    unbacked = GUARD.ROOT / "newly-guarded.py"
+    unbacked.write_text("pre-existing but not backed up\n")
+    monkeypatch.setattr(GUARD, "SOURCE_PATHS", ("newly-guarded.py",))
+
+    with pytest.raises(SystemExit, match="rollback prevalidation failed"):
+        GUARD.abort("own-token")
+
+    assert unbacked.read_text() == "pre-existing but not backed up\n"
+    assert GUARD.LOCK_PATH.exists()
+
+
+def test_snapshot_abort_fails_closed_before_any_partial_restore(
+    tmp_path: Path,
+) -> None:
+    payload = lease(tmp_path)
+    first = GUARD.ROOT / "first.py"
+    second = GUARD.ROOT / "second.py"
+    first.write_text("edited first\n")
+    second.write_text("edited second\n")
+    (Path(payload["backup"]) / "first.py").write_text("original first\n")
+    payload["sourceSnapshot"] = [
+        {"path": "first.py", "existedAtBegin": True},
+        {"path": "second.py", "existedAtBegin": True},
+    ]
+    GUARD.LOCK_PATH.write_text(json.dumps(payload))
+
+    with pytest.raises(SystemExit, match="rollback prevalidation failed"):
+        GUARD.abort("own-token")
+
+    assert first.read_text() == "edited first\n"
+    assert second.read_text() == "edited second\n"
+    assert GUARD.LOCK_PATH.exists()
 
 
 def test_process_interruption_uses_finally_style_abort(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
