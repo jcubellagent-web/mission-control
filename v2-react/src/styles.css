@@ -16678,22 +16678,52 @@ body,
 
 #brain-atlas .brain-atlas-header {
   display: grid;
-  grid-template-columns: minmax(170px, 0.72fr) minmax(300px, 1.28fr) minmax(210px, 0.9fr);
+  grid-template-columns: minmax(190px, 0.62fr) minmax(300px, 0.95fr) minmax(300px, 1.18fr);
   align-items: center;
   gap: 10px;
   min-height: 38px;
 }
 
 #brain-atlas .brain-atlas-header h2 {
-  font-size: 21px;
+  font-size: 24px;
+}
+
+#brain-atlas .brain-atlas-header p {
+  font-size: 10.5px;
 }
 
 #brain-atlas .brain-atlas-state {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
   justify-self: end;
   max-width: 100%;
   overflow: hidden;
+  padding: 4px 9px;
+  transform-origin: right center;
+}
+
+#brain-atlas .brain-atlas-state strong,
+#brain-atlas .brain-atlas-state em {
+  min-width: 0;
+  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+#brain-atlas .brain-atlas-state strong {
+  color: currentColor;
+  font-size: 12.5px;
+  font-weight: 920;
+  letter-spacing: 0.045em;
+}
+
+#brain-atlas .brain-atlas-state em {
+  color: var(--soft);
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 760;
 }
 
 #brain-atlas .brain-atlas-legend {
@@ -16712,7 +16742,7 @@ body,
   min-width: 0;
   overflow: hidden;
   color: var(--muted);
-  font-size: 8.5px;
+  font-size: 10px;
   font-weight: 820;
   letter-spacing: 0.02em;
   text-overflow: ellipsis;
@@ -16743,6 +16773,14 @@ body,
   box-shadow: 0 0 18px rgba(88, 238, 154, 0.1);
 }
 
+#brain-atlas.has-active-work .brain-atlas-state {
+  border-color: rgba(101, 217, 255, 0.72);
+  color: #8ee8ff;
+  background: rgba(42, 164, 214, 0.16);
+  box-shadow: 0 0 16px rgba(85, 215, 255, 0.18);
+  animation: brain-atlas-work-beacon 1.8s ease-in-out infinite;
+}
+
 #brain-atlas .brain-atlas-section {
   display: flex;
   flex-direction: column;
@@ -16771,7 +16809,7 @@ body,
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  flex: 0 0 49px;
+  flex: 0 0 48px;
   min-width: 0;
   overflow: hidden;
 }
@@ -16786,6 +16824,7 @@ body,
 
 #brain-atlas .brain-atlas-section-header h3,
 #brain-atlas .brain-atlas-section-header p {
+  margin: 0;
   overflow: hidden;
 }
 
@@ -16796,14 +16835,14 @@ body,
 
 #brain-atlas .brain-atlas-section-header h3 {
   color: var(--text);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 880;
   line-height: 1;
 }
 
 #brain-atlas .brain-atlas-section-header p {
   color: var(--soft);
-  font-size: 10px;
+  font-size: 10.5px;
   font-weight: 650;
   line-height: 1.15;
   text-overflow: clip;
@@ -16882,7 +16921,7 @@ body,
   align-content: center;
   gap: 1px;
   min-width: 0;
-  padding: 5px 10px;
+  padding: 3px 10px;
 }
 
 .memory-flow-metrics article + article {
@@ -16893,7 +16932,7 @@ body,
 .memory-flow-metrics em {
   overflow: hidden;
   color: var(--muted);
-  font-size: 8px;
+  font-size: 8.5px;
   font-style: normal;
   font-weight: 800;
   line-height: 1;
@@ -16904,8 +16943,8 @@ body,
 
 .memory-flow-metrics strong {
   color: var(--text);
-  font-size: 16px;
-  line-height: 1;
+  font-size: 19px;
+  line-height: 0.92;
 }
 
 .memory-flow-metrics article.is-verified strong { color: var(--green); }
@@ -16974,6 +17013,11 @@ body,
   box-shadow: inset 0 0 28px rgba(88, 238, 154, 0.06), 0 0 18px rgba(88, 238, 154, 0.08);
 }
 
+#brain-atlas.has-active-work:not(.has-live-memory-flow) .memory-flow-map {
+  border-color: rgba(101, 217, 255, 0.46);
+  box-shadow: inset 0 0 30px rgba(85, 215, 255, 0.055), 0 0 16px rgba(85, 215, 255, 0.075);
+}
+
 .memory-flow-map:focus-visible {
   outline: 2px solid var(--cyan);
   outline-offset: -2px;
@@ -16987,7 +17031,7 @@ body,
 
 .brain-atlas-lane-label {
   fill: #8ea8b7;
-  font-size: 10px;
+  font-size: 12.5px;
   font-weight: 900;
   letter-spacing: 0.08em;
 }
@@ -17004,7 +17048,7 @@ body,
 
 .brain-atlas-proof-column {
   fill: #698695;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 850;
   letter-spacing: 0.08em;
 }
@@ -17041,7 +17085,7 @@ body,
 
 .brain-atlas-proof-title {
   fill: #e9f7fb;
-  font-size: 9px;
+  font-size: 11.5px;
   font-weight: 820;
   pointer-events: none;
 }
@@ -17050,20 +17094,20 @@ body,
 .brain-atlas-proof-time,
 .brain-atlas-proof-kicker {
   fill: #829dab;
-  font-size: 7.5px;
+  font-size: 9px;
   font-weight: 720;
   pointer-events: none;
 }
 
 .brain-atlas-proof-kicker {
   fill: #7adfae;
-  font-size: 6.5px;
+  font-size: 8px;
   letter-spacing: 0.06em;
 }
 
 .brain-atlas-proof-check {
   fill: #a8f3cc;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 900;
   pointer-events: none;
 }
@@ -17106,9 +17150,10 @@ body,
 }
 
 .memory-flow-edge.is-live {
-  stroke-width: 3.2;
-  stroke-dasharray: 14 9;
-  animation: memory-flow-travel 0.72s linear infinite;
+  stroke-width: 4.4;
+  stroke-dasharray: 20 12;
+  stroke-opacity: 1;
+  animation: memory-flow-travel 1.05s linear infinite;
 }
 
 .memory-flow-node rect {
@@ -17151,51 +17196,66 @@ body,
 .memory-flow-node.is-work-active > rect:not(.memory-flow-node-aura) {
   fill: rgba(8, 38, 57, 0.98);
   stroke: #65d9ff;
-  stroke-width: 2.15;
-  filter: drop-shadow(0 0 6px rgba(85, 215, 255, 0.38));
+  stroke-width: 3.1;
+  filter: drop-shadow(0 0 7px rgba(85, 215, 255, 0.5)) drop-shadow(0 0 14px rgba(85, 215, 255, 0.2));
 }
 
 .memory-flow-node.is-work-active .memory-flow-node-aura {
-  opacity: 0.78;
-  animation: memory-agent-presence-halo 1.35s ease-out infinite;
+  stroke-width: 2.8;
+  opacity: 0.94;
+  animation: memory-agent-presence-halo 1.65s ease-out infinite;
+  animation-delay: var(--atlas-agent-phase, 0s);
 }
 
 .memory-flow-node.is-work-active .memory-flow-presence-dot {
   opacity: 1;
-  animation: memory-agent-presence-dot 0.9s ease-in-out infinite;
+  animation: memory-agent-presence-dot 1.1s ease-in-out infinite;
+  animation-delay: var(--atlas-agent-phase, 0s);
 }
 
 .memory-flow-node.is-work-active .memory-flow-node-detail {
   fill: #8ee8ff;
-  font-weight: 760;
+  font-size: 13.5px;
+  font-weight: 850;
+  letter-spacing: 0.015em;
+}
+
+.memory-flow-node.is-work-active .memory-flow-node-title {
+  fill: #ffffff;
+  font-size: 18px;
 }
 
 .memory-flow-node-title {
   fill: #ecf8fc;
-  font-size: 13px;
+  font-size: 17px;
   font-weight: 850;
   pointer-events: none;
 }
 
 .memory-flow-node-detail {
   fill: #8da8b7;
-  font-size: 11.5px;
+  font-size: 13px;
   pointer-events: none;
 }
 
 @keyframes memory-flow-travel {
-  to { stroke-dashoffset: -46; }
+  to { stroke-dashoffset: -64; }
 }
 
 @keyframes memory-agent-presence-halo {
-  0% { opacity: 0.78; transform: scale(0.97); }
-  70% { opacity: 0.12; transform: scale(1.08); }
-  100% { opacity: 0; transform: scale(1.1); }
+  0% { opacity: 0.94; transform: scale(0.97); }
+  68% { opacity: 0.2; transform: scale(1.1); }
+  100% { opacity: 0; transform: scale(1.14); }
 }
 
 @keyframes memory-agent-presence-dot {
-  0%, 100% { opacity: 0.5; transform: scale(0.78); }
-  50% { opacity: 1; transform: scale(1.22); }
+  0%, 100% { opacity: 0.58; transform: scale(0.72); }
+  50% { opacity: 1; transform: scale(1.36); }
+}
+
+@keyframes brain-atlas-work-beacon {
+  0%, 100% { opacity: 0.86; transform: scale(0.99); }
+  50% { opacity: 1; transform: scale(1.02); }
 }
 
 #brain-atlas .brain-atlas-focus {
@@ -17310,8 +17370,8 @@ body,
   }
 
   #brain-atlas .memory-flow-map svg {
-    width: 920px;
-    min-width: 920px;
+    width: 1280px;
+    min-width: 1280px;
   }
 
   #brain-atlas .brain-atlas-plot {
@@ -17507,6 +17567,7 @@ body,
   }
 
   #brain-atlas.has-live-memory-flow .memory-flow-map,
+  #brain-atlas.has-active-work .brain-atlas-state,
   .memory-flow-node.is-live > rect:not(.memory-flow-node-aura),
   .memory-flow-node.is-work-active .memory-flow-node-aura,
   .memory-flow-node.is-work-active .memory-flow-presence-dot {
@@ -17519,6 +17580,11 @@ body,
   }
 
   .memory-flow-node.is-work-active .memory-flow-presence-dot {
+    opacity: 1;
+    transform: none;
+  }
+
+  #brain-atlas.has-active-work .brain-atlas-state {
     opacity: 1;
     transform: none;
   }

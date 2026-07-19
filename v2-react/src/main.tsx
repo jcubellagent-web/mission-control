@@ -3500,6 +3500,22 @@ function latestMemorySignal(activity?: MemoryActivity) {
     .sort((a, b) => timeValue(b[1]) - timeValue(a[1]))[0] || null;
 }
 
+const BRAIN_ATLAS_WIDE_VIEWBOX_WIDTH = 1464;
+const BRAIN_ATLAS_SOURCE_LEFT = 18;
+const BRAIN_ATLAS_SOURCE_RIGHT = 982;
+const BRAIN_ATLAS_WIDE_LEFT = 24;
+const BRAIN_ATLAS_WIDE_RIGHT = 1440;
+
+function brainAtlasWideX(value: number) {
+  const sourceWidth = BRAIN_ATLAS_SOURCE_RIGHT - BRAIN_ATLAS_SOURCE_LEFT;
+  const wideWidth = BRAIN_ATLAS_WIDE_RIGHT - BRAIN_ATLAS_WIDE_LEFT;
+  return Number((BRAIN_ATLAS_WIDE_LEFT + ((value - BRAIN_ATLAS_SOURCE_LEFT) / sourceWidth) * wideWidth).toFixed(2));
+}
+
+function brainAtlasWideWidth(start: number, width: number) {
+  return Number((brainAtlasWideX(start + width) - brainAtlasWideX(start)).toFixed(2));
+}
+
 function BrainAtlasPanel({
   atlas,
   memoryOperations,
@@ -3547,6 +3563,9 @@ function BrainAtlasPanel({
   ]));
   const workingAgentIds = new Set(HERO_AGENT_ORDER.filter((agent) => liveWorkByAgent.get(agent)?.working));
   const workingAgentCount = workingAgentIds.size;
+  const headerActivityStateLabel = workingAgentCount > 0 && activity && !latestSignalRecent
+    ? "Memory quiet"
+    : activityStateLabel;
   const flowAgents = HERO_AGENT_ORDER.map((agent) => byAgent.get(agent) || {
     agent,
     retrievals: 0,
@@ -3595,7 +3614,7 @@ function BrainAtlasPanel({
   return (
     <section
       id="brain-atlas"
-      className={`brain-atlas-panel is-${selectedTone}${latestSignalRecent ? " has-live-memory-flow" : ""}`}
+      className={`brain-atlas-panel is-${selectedTone}${workingAgentCount ? " has-active-work" : ""}${latestSignalRecent ? " has-live-memory-flow" : ""}`}
       data-atlas-view="unified"
       data-atlas-view-tone={selectedTone}
       data-memory-flow-state={latestSignalRecent ? "live" : activity ? "idle" : "unavailable"}
@@ -3614,7 +3633,8 @@ function BrainAtlasPanel({
           <span className="is-proof"><i aria-hidden="true" />Static exact proof</span>
         </div>
         <span className={`brain-atlas-state is-${selectedTone}${latestSignalRecent ? " is-live" : ""}`} aria-live="polite">
-          {workingAgentCount} working · {activityStateLabel} · {evidenceStateLabel}
+          <strong>{workingAgentCount ? `${workingAgentCount} WORKING` : "NONE WORKING"}</strong>
+          <em>· {headerActivityStateLabel} · {evidenceStateLabel}</em>
         </span>
       </header>
 
@@ -3629,7 +3649,7 @@ function BrainAtlasPanel({
         <header className="brain-atlas-section-header">
           <div>
             <h3 id="brain-atlas-unified-heading">Live activity + exact proof</h3>
-            <p id="brain-atlas-unified-description">One view: shared agents, governed memory receipts, and static proof of execution. This is observable activity—not private reasoning.</p>
+            <p id="brain-atlas-unified-description">Governed memory receipts and static proof show live work—not private reasoning.</p>
           </div>
           <div className="brain-atlas-context">
             <div className="brain-atlas-scope" aria-label="Brain Atlas scope and evidence policy">
@@ -3673,7 +3693,7 @@ function BrainAtlasPanel({
 
         <div className="memory-flow-map is-unified" tabIndex={0} aria-label="Unified observable agent, governed memory, and exact execution proof graph. Scroll horizontally on narrow screens.">
           <svg
-            viewBox="0 0 1000 376"
+            viewBox={`0 0 ${BRAIN_ATLAS_WIDE_VIEWBOX_WIDTH} 376`}
             role="img"
             aria-labelledby="brain-atlas-title brain-atlas-description"
             preserveAspectRatio="xMidYMid meet"
@@ -3685,7 +3705,7 @@ function BrainAtlasPanel({
               Shared agent nodes show {workingAgentCount} agents working from the same current state as the Live Work Board. Only governed memory receipt paths move when a recent exact registry timestamp exists. The lower lane shows {proofRows.length} static, exact agent to named work to timestamped receipt to verified model paths. This visualization shows observable operations and evidence, not private model reasoning or memory contents.
             </desc>
             <g className="brain-atlas-memory-layer" data-atlas-layer="memory">
-            <text className="brain-atlas-lane-label is-memory" x="18" y="14">LIVE AGENTS + GOVERNED MEMORY</text>
+            <text className="brain-atlas-lane-label is-memory" x={brainAtlasWideX(18)} y="14">LIVE AGENTS + GOVERNED MEMORY</text>
             <g className="memory-flow-edges" aria-hidden="true">
             {flowAgents.map((row, index) => {
               const y = 22 + index * 52;
@@ -3697,22 +3717,23 @@ function BrainAtlasPanel({
                   data-agent={row.agent}
                   data-operation="retrieval"
                   data-observed-at={row.lastRetrievalAt || undefined}
-                  d={`M 168 ${y + 19} C 198 ${y + 19}, 202 119, 232 119`}
+                  d={`M ${brainAtlasWideX(168)} ${y + 19} C ${brainAtlasWideX(198)} ${y + 19}, ${brainAtlasWideX(202)} 119, ${brainAtlasWideX(232)} 119`}
                 />
               );
             })}
-            <path className={`memory-flow-edge is-hit${recent("hit") ? " is-live" : ""}`} data-operation="hit" data-observed-at={activity?.lastObservedAt.hit || undefined} d="M 372 119 C 392 119, 408 119, 430 119" />
-            <path className={`memory-flow-edge is-used${recent("used") ? " is-live" : ""}`} data-operation="used" data-observed-at={activity?.lastObservedAt.used || undefined} d="M 576 119 C 610 119, 606 58, 640 58" />
-            <path className={`memory-flow-edge is-feedback${recent("feedback") ? " is-live" : ""}`} data-operation="feedback" data-observed-at={activity?.lastObservedAt.feedback || undefined} d="M 576 119 C 610 119, 606 181, 640 181" />
-            <path className={`memory-flow-edge is-proposed${candidateIsRecent ? " is-live" : ""}`} data-operation="proposed" data-observed-at={candidateObservedAt || undefined} d="M 784 181 C 802 181, 812 181, 830 181" />
-            <path className={`memory-flow-edge is-promoted${recent("promoted") ? " is-live" : ""}`} data-operation="promoted" data-observed-at={activity?.lastObservedAt.promoted || undefined} d="M 902 154 C 902 134, 902 103, 902 84" />
-            <path className={`memory-flow-edge is-promoted is-return${recent("promoted") ? " is-live" : ""}`} data-operation="promoted" data-observed-at={activity?.lastObservedAt.promoted || undefined} d="M 830 57 C 756 10, 514 10, 504 92" />
+            <path className={`memory-flow-edge is-hit${recent("hit") ? " is-live" : ""}`} data-operation="hit" data-observed-at={activity?.lastObservedAt.hit || undefined} d={`M ${brainAtlasWideX(372)} 119 C ${brainAtlasWideX(392)} 119, ${brainAtlasWideX(408)} 119, ${brainAtlasWideX(430)} 119`} />
+            <path className={`memory-flow-edge is-used${recent("used") ? " is-live" : ""}`} data-operation="used" data-observed-at={activity?.lastObservedAt.used || undefined} d={`M ${brainAtlasWideX(576)} 119 C ${brainAtlasWideX(610)} 119, ${brainAtlasWideX(606)} 58, ${brainAtlasWideX(640)} 58`} />
+            <path className={`memory-flow-edge is-feedback${recent("feedback") ? " is-live" : ""}`} data-operation="feedback" data-observed-at={activity?.lastObservedAt.feedback || undefined} d={`M ${brainAtlasWideX(576)} 119 C ${brainAtlasWideX(610)} 119, ${brainAtlasWideX(606)} 181, ${brainAtlasWideX(640)} 181`} />
+            <path className={`memory-flow-edge is-proposed${candidateIsRecent ? " is-live" : ""}`} data-operation="proposed" data-observed-at={candidateObservedAt || undefined} d={`M ${brainAtlasWideX(784)} 181 C ${brainAtlasWideX(802)} 181, ${brainAtlasWideX(812)} 181, ${brainAtlasWideX(830)} 181`} />
+            <path className={`memory-flow-edge is-promoted${recent("promoted") ? " is-live" : ""}`} data-operation="promoted" data-observed-at={activity?.lastObservedAt.promoted || undefined} d={`M ${brainAtlasWideX(902)} 154 C ${brainAtlasWideX(902)} 134, ${brainAtlasWideX(902)} 103, ${brainAtlasWideX(902)} 84`} />
+            <path className={`memory-flow-edge is-promoted is-return${recent("promoted") ? " is-live" : ""}`} data-operation="promoted" data-observed-at={activity?.lastObservedAt.promoted || undefined} d={`M ${brainAtlasWideX(830)} 57 C ${brainAtlasWideX(756)} 10, ${brainAtlasWideX(514)} 10, ${brainAtlasWideX(504)} 92`} />
             </g>
             <g className="memory-flow-nodes">
             {flowAgents.map((row, index) => {
               const y = 22 + index * 52;
               const live = memorySignalIsRecent(row.lastRetrievalAt, motionWindowSeconds);
               const working = workingAgentIds.has(row.agent);
+              const activeWorkTitle = liveWorkByAgent.get(row.agent)?.activeWork?.title;
               return (
                 <g
                   key={row.agent}
@@ -3721,59 +3742,60 @@ function BrainAtlasPanel({
                   data-agent-working={working ? "true" : "false"}
                   data-work-state={working ? "working" : "quiet"}
                   data-memory-state={!activity ? "unavailable" : live ? "live" : "idle"}
+                  style={{ "--atlas-agent-phase": `${index * -0.18}s` } as React.CSSProperties}
                 >
                   <title>{`${AGENTS[row.agent].label}: ${working ? "working now" : "not working"}; ${!activity ? "memory telemetry unavailable" : live ? "verified memory retrieval live" : "memory quiet"}`}</title>
-                  <rect className="memory-flow-node-aura" x="13" y={y - 5} width="160" height="48" rx="12" />
-                  <rect x="18" y={y} width="150" height="38" rx="7" />
-                  <text className="memory-flow-node-title" x="30" y={y + 16}>{AGENTS[row.agent].label}</text>
-                  <circle className="memory-flow-presence-dot" cx="155" cy={y + 12} r="4" />
-                  <text className="memory-flow-node-detail" x="30" y={y + 30}>
+                  <rect className="memory-flow-node-aura" x={brainAtlasWideX(13)} y={y - 5} width={brainAtlasWideWidth(13, 160)} height="48" rx="12" />
+                  <rect x={brainAtlasWideX(18)} y={y} width={brainAtlasWideWidth(18, 150)} height="38" rx="7" />
+                  <text className="memory-flow-node-title" x={brainAtlasWideX(30)} y={y + 16}>{AGENTS[row.agent].label}</text>
+                  <circle className="memory-flow-presence-dot" cx={brainAtlasWideX(155)} cy={y + 12} r="5.5" />
+                  <text className="memory-flow-node-detail" x={brainAtlasWideX(30)} y={y + 30}>
                     {working
-                      ? `Working · ${!activity ? "memory unavailable" : row.retrievals ? `${row.retrievals} retrieval${row.retrievals === 1 ? "" : "s"}` : "memory quiet"}`
+                      ? `ACTIVE · ${compactText(activeWorkTitle || "Work in progress", 26)}`
                       : !activity ? "Quiet · memory unavailable" : `Quiet · ${row.retrievals} retrieval${row.retrievals === 1 ? "" : "s"}`}
                   </text>
                 </g>
               );
             })}
             <g className={`memory-flow-node is-recall${recent("retrieval") ? " is-live" : ""}`}>
-              <rect x="232" y="92" width="140" height="54" rx="9" />
-              <text className="memory-flow-node-title" x="302" y="115" textAnchor="middle">Recall</text>
-              <text className="memory-flow-node-detail" x="302" y="132" textAnchor="middle">{activity ? `${retrievals} queried · ${count("misses")} miss` : "telemetry unavailable"}</text>
+              <rect x={brainAtlasWideX(232)} y="92" width={brainAtlasWideWidth(232, 140)} height="54" rx="9" />
+              <text className="memory-flow-node-title" x={brainAtlasWideX(302)} y="115" textAnchor="middle">Recall</text>
+              <text className="memory-flow-node-detail" x={brainAtlasWideX(302)} y="132" textAnchor="middle">{activity ? `${retrievals} queried · ${count("misses")} miss` : "telemetry unavailable"}</text>
             </g>
             <g className={`memory-flow-node is-registry${recent("hit") || recent("promoted") ? " is-live" : ""}`}>
-              <rect x="430" y="92" width="146" height="54" rx="9" />
-              <text className="memory-flow-node-title" x="503" y="115" textAnchor="middle">Memory registry</text>
-              <text className="memory-flow-node-detail" x="503" y="132" textAnchor="middle">{durableMemoryCount} governed records</text>
+              <rect x={brainAtlasWideX(430)} y="92" width={brainAtlasWideWidth(430, 146)} height="54" rx="9" />
+              <text className="memory-flow-node-title" x={brainAtlasWideX(503)} y="115" textAnchor="middle">Memory registry</text>
+              <text className="memory-flow-node-detail" x={brainAtlasWideX(503)} y="132" textAnchor="middle">{durableMemoryCount} governed records</text>
             </g>
             <g className={`memory-flow-node is-applied${recent("used") ? " is-live" : ""}`}>
-              <rect x="640" y="31" width="144" height="54" rx="9" />
-              <text className="memory-flow-node-title" x="712" y="54" textAnchor="middle">Applied</text>
-              <text className="memory-flow-node-detail" x="712" y="71" textAnchor="middle">{activity ? `${uses} explicit use receipt${uses === 1 ? "" : "s"}` : "telemetry unavailable"}</text>
+              <rect x={brainAtlasWideX(640)} y="31" width={brainAtlasWideWidth(640, 144)} height="54" rx="9" />
+              <text className="memory-flow-node-title" x={brainAtlasWideX(712)} y="54" textAnchor="middle">Applied</text>
+              <text className="memory-flow-node-detail" x={brainAtlasWideX(712)} y="71" textAnchor="middle">{activity ? `${uses} explicit use receipt${uses === 1 ? "" : "s"}` : "telemetry unavailable"}</text>
             </g>
             <g className={`memory-flow-node is-feedback${recent("feedback") ? " is-live" : ""}`}>
-              <rect x="640" y="154" width="144" height="54" rx="9" />
-              <text className="memory-flow-node-title" x="712" y="177" textAnchor="middle">Outcome</text>
-              <text className="memory-flow-node-detail" x="712" y="194" textAnchor="middle">{activity ? `${count("feedback")} feedback receipt${count("feedback") === 1 ? "" : "s"}` : "telemetry unavailable"}</text>
+              <rect x={brainAtlasWideX(640)} y="154" width={brainAtlasWideWidth(640, 144)} height="54" rx="9" />
+              <text className="memory-flow-node-title" x={brainAtlasWideX(712)} y="177" textAnchor="middle">Outcome</text>
+              <text className="memory-flow-node-detail" x={brainAtlasWideX(712)} y="194" textAnchor="middle">{activity ? `${count("feedback")} feedback receipt${count("feedback") === 1 ? "" : "s"}` : "telemetry unavailable"}</text>
             </g>
             <g className={`memory-flow-node is-candidate${candidateIsRecent ? " is-live" : ""}`} data-observed-at={candidateObservedAt || undefined}>
-              <rect x="830" y="154" width="144" height="54" rx="9" />
-              <text className="memory-flow-node-title" x="902" y="177" textAnchor="middle">Candidate</text>
-              <text className="memory-flow-node-detail" x="902" y="194" textAnchor="middle">{activity ? `${count("proposed")} proposed · not learned` : "telemetry unavailable"}</text>
+              <rect x={brainAtlasWideX(830)} y="154" width={brainAtlasWideWidth(830, 144)} height="54" rx="9" />
+              <text className="memory-flow-node-title" x={brainAtlasWideX(902)} y="177" textAnchor="middle">Candidate</text>
+              <text className="memory-flow-node-detail" x={brainAtlasWideX(902)} y="194" textAnchor="middle">{activity ? `${count("proposed")} proposed · not learned` : "telemetry unavailable"}</text>
             </g>
             <g className={`memory-flow-node is-durable${recent("promoted") ? " is-live" : ""}`}>
-              <rect x="830" y="31" width="144" height="54" rx="9" />
-              <text className="memory-flow-node-title" x="902" y="54" textAnchor="middle">Durable</text>
-              <text className="memory-flow-node-detail" x="902" y="71" textAnchor="middle">{activity ? `${count("promoted")} governed promotion${count("promoted") === 1 ? "" : "s"}` : "telemetry unavailable"}</text>
+              <rect x={brainAtlasWideX(830)} y="31" width={brainAtlasWideWidth(830, 144)} height="54" rx="9" />
+              <text className="memory-flow-node-title" x={brainAtlasWideX(902)} y="54" textAnchor="middle">Durable</text>
+              <text className="memory-flow-node-detail" x={brainAtlasWideX(902)} y="71" textAnchor="middle">{activity ? `${count("promoted")} governed promotion${count("promoted") === 1 ? "" : "s"}` : "telemetry unavailable"}</text>
             </g>
             </g>
             </g>
 
             <g className="brain-atlas-proof-layer" data-atlas-layer="proof" data-proof-animated="false">
-              <line className="brain-atlas-lane-divider" x1="18" y1="224" x2="982" y2="224" />
-              <text className="brain-atlas-lane-label is-proof" x="18" y="241">EXACT EXECUTION PROOF · STATIC AUDIT PATHS</text>
-              <text className="brain-atlas-proof-column" x="375" y="241" textAnchor="middle">NAMED WORK</text>
-              <text className="brain-atlas-proof-column" x="640" y="241" textAnchor="middle">RECEIPT</text>
-              <text className="brain-atlas-proof-column" x="867" y="241" textAnchor="middle">VERIFIED MODEL</text>
+              <line className="brain-atlas-lane-divider" x1={brainAtlasWideX(18)} y1="224" x2={brainAtlasWideX(982)} y2="224" />
+              <text className="brain-atlas-lane-label is-proof" x={brainAtlasWideX(18)} y="241">EXACT EXECUTION PROOF · STATIC AUDIT PATHS</text>
+              <text className="brain-atlas-proof-column" x={brainAtlasWideX(375)} y="241" textAnchor="middle">NAMED WORK</text>
+              <text className="brain-atlas-proof-column" x={brainAtlasWideX(640)} y="241" textAnchor="middle">RECEIPT</text>
+              <text className="brain-atlas-proof-column" x={brainAtlasWideX(867)} y="241" textAnchor="middle">VERIFIED MODEL</text>
               {proofRows.length ? proofRows.map((row, index) => {
                 const rowY = 264 + index * 45;
                 const agentIndex = row.agentId ? HERO_AGENT_ORDER.indexOf(row.agentId) : -1;
@@ -3796,31 +3818,31 @@ function BrainAtlasPanel({
                     data-proof-animated="false"
                   >
                     <title>{`${agentLabel} ran ${row.workLabel}; ${receiptLabel} receipt status ${receiptStatus}, observed ${fmtTime(row.receipt.observedAt)}; ${row.model.label} route verified. Static audit evidence, not reasoning.`}</title>
-                    <path className="brain-atlas-proof-edge is-owns" d={`M 168 ${agentY} C 190 ${agentY}, 196 ${rowY}, 220 ${rowY}`} />
-                    <path className="brain-atlas-proof-edge is-emitted" d={`M 530 ${rowY} C 566 ${rowY}, 592 ${rowY}, 631 ${rowY}`} />
-                    <path className="brain-atlas-proof-edge is-verified" d={`M 649 ${rowY} C 690 ${rowY}, 716 ${rowY}, 760 ${rowY}`} />
+                    <path className="brain-atlas-proof-edge is-owns" d={`M ${brainAtlasWideX(168)} ${agentY} C ${brainAtlasWideX(190)} ${agentY}, ${brainAtlasWideX(196)} ${rowY}, ${brainAtlasWideX(220)} ${rowY}`} />
+                    <path className="brain-atlas-proof-edge is-emitted" d={`M ${brainAtlasWideX(530)} ${rowY} C ${brainAtlasWideX(566)} ${rowY}, ${brainAtlasWideX(592)} ${rowY}, ${brainAtlasWideX(631)} ${rowY}`} />
+                    <path className="brain-atlas-proof-edge is-verified" d={`M ${brainAtlasWideX(649)} ${rowY} C ${brainAtlasWideX(690)} ${rowY}, ${brainAtlasWideX(716)} ${rowY}, ${brainAtlasWideX(760)} ${rowY}`} />
                     <g className="brain-atlas-proof-work">
-                      <rect x="220" y={rowY - 15} width="310" height="30" rx="6" />
-                      <text className="brain-atlas-proof-title" x="235" y={rowY - 2}>{compactText(row.workLabel, 42)}</text>
-                      <text className="brain-atlas-proof-detail" x="235" y={rowY + 10}>{agentLabel} · Receipt: {compactText(receiptLabel, 14)} · {receiptStatus}</text>
+                      <rect x={brainAtlasWideX(220)} y={rowY - 15} width={brainAtlasWideWidth(220, 310)} height="30" rx="6" />
+                      <text className="brain-atlas-proof-title" x={brainAtlasWideX(235)} y={rowY - 2}>{compactText(row.workLabel, 54)}</text>
+                      <text className="brain-atlas-proof-detail" x={brainAtlasWideX(235)} y={rowY + 10}>{agentLabel} · Receipt: {compactText(receiptLabel, 18)} · {receiptStatus}</text>
                     </g>
                     <g className="brain-atlas-proof-receipt">
-                      <text className="brain-atlas-proof-kicker" x="640" y={rowY - 12} textAnchor="middle">RECEIPT</text>
-                      <circle cx="640" cy={rowY} r="8" />
-                      <text className="brain-atlas-proof-check" x="640" y={rowY + 3} textAnchor="middle">✓</text>
-                      <text className="brain-atlas-proof-time" x="640" y={rowY + 19} textAnchor="middle">{fmtTime(row.receipt.observedAt)}</text>
+                      <text className="brain-atlas-proof-kicker" x={brainAtlasWideX(640)} y={rowY - 12} textAnchor="middle">RECEIPT</text>
+                      <circle cx={brainAtlasWideX(640)} cy={rowY} r="8" />
+                      <text className="brain-atlas-proof-check" x={brainAtlasWideX(640)} y={rowY + 3} textAnchor="middle">✓</text>
+                      <text className="brain-atlas-proof-time" x={brainAtlasWideX(640)} y={rowY + 19} textAnchor="middle">{fmtTime(row.receipt.observedAt)}</text>
                     </g>
                     <g className="brain-atlas-proof-model">
-                      <rect x="760" y={rowY - 15} width="214" height="30" rx="6" />
-                      <text className="brain-atlas-proof-title" x="867" y={rowY - 2} textAnchor="middle">{compactText(row.model.label, 28)}</text>
-                      <text className="brain-atlas-proof-detail" x="867" y={rowY + 10} textAnchor="middle">route verified</text>
+                      <rect x={brainAtlasWideX(760)} y={rowY - 15} width={brainAtlasWideWidth(760, 214)} height="30" rx="6" />
+                      <text className="brain-atlas-proof-title" x={brainAtlasWideX(867)} y={rowY - 2} textAnchor="middle">{compactText(row.model.label, 34)}</text>
+                      <text className="brain-atlas-proof-detail" x={brainAtlasWideX(867)} y={rowY + 10} textAnchor="middle">route verified</text>
                     </g>
                   </g>
                 );
               }) : (
                 <g className="brain-atlas-proof-empty" role="status">
-                  <text x="500" y="292" textAnchor="middle">{proofState === "empty" ? "No verified proof paths in this window" : "Exact proof unavailable"}</text>
-                  <text className="brain-atlas-proof-empty-detail" x="500" y="312" textAnchor="middle">{brainAtlasEmptyMessage(atlas?.emptyReason)}</text>
+                  <text x={brainAtlasWideX(500)} y="292" textAnchor="middle">{proofState === "empty" ? "No verified proof paths in this window" : "Exact proof unavailable"}</text>
+                  <text className="brain-atlas-proof-empty-detail" x={brainAtlasWideX(500)} y="312" textAnchor="middle">{brainAtlasEmptyMessage(atlas?.emptyReason)}</text>
                 </g>
               )}
             </g>

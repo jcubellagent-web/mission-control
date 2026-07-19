@@ -72,6 +72,7 @@ KIOSK_LEGIBILITY_THRESHOLDS = {
     "healthHeightMin": 54.0,
     "healthHeightMax": 58.0,
     "atlasUnifiedMapHeight": 300.0,
+    "atlasHorizontalFillRatio": 0.9,
     "atlasPrimaryGlyphHeight": 8.0,
     "atlasSecondaryGlyphHeight": 7.0,
     "atlasSectionHeadingFont": 11.0,
@@ -262,7 +263,7 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
   }));
   const atlasRoot = document.querySelector('#brain-atlas');
   const atlasRootRect = atlasRoot ? atlasRoot.getBoundingClientRect() : null;
-  const atlasRegion = (name, graphSelector, primarySelector, secondarySelector, layerSelector = '') => {
+  const atlasRegion = (name, graphSelector, primarySelector, secondarySelector, layerSelector = '', fillAnchorSelector = '') => {
     const element = document.querySelector(`#brain-atlas [data-atlas-region="${name}"]`);
     if (!visible(element)) return null;
     const rect = element.getBoundingClientRect();
@@ -274,6 +275,17 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
     const graph = element.querySelector(graphSelector);
     const graphRect = visible(graph) ? graph.getBoundingClientRect() : null;
     const svg = graph?.querySelector('svg');
+    const fillAnchorRects = svg && fillAnchorSelector
+      ? [...svg.querySelectorAll(fillAnchorSelector)]
+          .filter(visible)
+          .map((anchor) => anchor.getBoundingClientRect())
+          .filter((anchorRect) => anchorRect.width > 0 && anchorRect.height > 0)
+      : [];
+    const horizontalContentLeft = fillAnchorRects.length ? Math.min(...fillAnchorRects.map((anchorRect) => anchorRect.left)) : null;
+    const horizontalContentRight = fillAnchorRects.length ? Math.max(...fillAnchorRects.map((anchorRect) => anchorRect.right)) : null;
+    const horizontalFillRatio = graphRect && horizontalContentLeft !== null && horizontalContentRight !== null
+      ? round(Math.max(0, horizontalContentRight - horizontalContentLeft) / graphRect.width)
+      : null;
     const glyphHeights = (selector) => selector
       ? [...element.querySelectorAll(selector)].filter(visible).map((node) => round(node.getBoundingClientRect().height))
       : [];
@@ -333,6 +345,7 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
       describedBy,
       labelledByTargetPresent: Boolean(labelledByTarget),
       graphHeight: graphRect ? round(graphRect.height) : null,
+      horizontalFillRatio,
       graphKind: svg ? 'svg' : graph ? 'empty' : 'missing',
       overflowY: round(Math.max(0, element.scrollHeight - element.clientHeight)),
       svgTitlePresent: Boolean(svg?.querySelector('title')?.textContent?.trim()),
@@ -348,7 +361,8 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
     '.memory-flow-map',
     '.memory-flow-node-title, .brain-atlas-proof-title',
     '.memory-flow-node-detail, .brain-atlas-proof-detail, .brain-atlas-proof-time',
-    '.brain-atlas-lane-label, .brain-atlas-proof-column'
+    '.brain-atlas-lane-label, .brain-atlas-proof-column',
+    '.memory-flow-node, .brain-atlas-proof-work, .brain-atlas-proof-receipt, .brain-atlas-proof-model'
   );
   const visibleAtlasRegions = [...document.querySelectorAll('#brain-atlas [data-atlas-region]')].filter(visible);
   const visibleAtlasLayers = [...document.querySelectorAll('#brain-atlas [data-atlas-layer]')].filter(visible);
@@ -948,6 +962,13 @@ def validate_control_tower_layout(
         if graph_kind != "svg":
             failures.append(f"{label}: Brain Atlas {region_label} graph must be one visible SVG")
         else:
+            horizontal_fill = _number(region.get("horizontalFillRatio"))
+            minimum_fill = KIOSK_LEGIBILITY_THRESHOLDS["atlasHorizontalFillRatio"]
+            if horizontal_fill < minimum_fill:
+                failures.append(
+                    f"{label}: Brain Atlas {region_label} graph uses {horizontal_fill:.0%} of its horizontal map "
+                    f"(requires >= {minimum_fill:.0%})"
+                )
             if region.get("svgTitlePresent") is not True or region.get("svgDescriptionPresent") is not True:
                 failures.append(f"{label}: Brain Atlas {region_label} graph lacks an SVG title or description")
             for key, glyph_label, minimum in (
@@ -1083,7 +1104,7 @@ def validate_control_tower_layout(
                 f"{label}: live {operation} path evidence is {age_seconds:g}s old "
                 f"(requires -5s to {MEMORY_ACTIVITY_MAX_AGE_SECONDS:g}s)"
             )
-        if _number(edge.get("strokeWidth")) < 3:
+        if _number(edge.get("strokeWidth")) < 4:
             failures.append(f"{label}: live {operation} path is not visually pronounced enough")
         if str(edge.get("strokeLinecap") or "") != "round":
             failures.append(f"{label}: live {operation} path lacks a rounded travel beacon")
@@ -1519,6 +1540,7 @@ def chromium_render(url: str, timeout: float, screenshot_path: Path | None) -> t
             "--headless=new",
             "--disable-gpu",
             "--no-sandbox",
+            "--use-mock-keychain",
             f"--user-data-dir={profile}",
             "--window-size=1440,1000",
             "--virtual-time-budget=3000",
@@ -1678,7 +1700,7 @@ def self_test() -> int:
                     "live": True,
                     "animationName": "memory-flow-travel",
                     "animated": True,
-                    "strokeWidth": 3.2,
+                    "strokeWidth": 4.4,
                     "strokeDasharray": "14px, 9px",
                     "strokeLinecap": "round",
                     "stroke": "rgba(101, 217, 255, 0.96)",
@@ -1737,6 +1759,7 @@ def self_test() -> int:
                 "labelledByTargetPresent": True,
                 "height": 410,
                 "graphHeight": 320,
+                "horizontalFillRatio": 0.95,
                 "graphKind": "svg",
                 "overflowY": 0,
                 "svgTitlePresent": True,

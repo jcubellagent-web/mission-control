@@ -72,8 +72,8 @@ def valid_kiosk_legibility_measurements() -> dict[str, object]:
                     "live": True,
                     "animationName": "memory-flow-travel",
                     "animated": True,
-                    "strokeWidth": 3.2,
-                    "strokeDasharray": "14px, 9px",
+                    "strokeWidth": 4.4,
+                    "strokeDasharray": "20px, 12px",
                     "strokeLinecap": "round",
                     "stroke": "rgba(101, 217, 255, 0.96)",
                     "filter": "none",
@@ -140,6 +140,7 @@ def valid_kiosk_legibility_measurements() -> dict[str, object]:
                 "labelledByTargetPresent": True,
                 "height": 410,
                 "graphHeight": 320,
+                "horizontalFillRatio": 0.95,
                 "graphKind": "svg",
                 "overflowY": 0,
                 "svgTitlePresent": True,
@@ -382,6 +383,14 @@ def test_playwright_probes_cover_responsive_reference_and_reduced_motion_contrac
     ]
 
 
+def test_chromium_fallback_uses_isolated_mock_keychain() -> None:
+    source = MODULE_PATH.read_text()
+    command = source[source.index('"--headless=new"'):source.index('"--window-size=1440,1000"')]
+
+    assert '"--use-mock-keychain"' in command
+    assert 'f"--user-data-dir={profile}"' in command
+
+
 def test_kiosk_legibility_accepts_exact_contract_boundaries() -> None:
     assert runtime_layout.validate_kiosk_legibility(valid_kiosk_legibility_measurements()) == []
     assert runtime_layout.validate_control_tower_layout(
@@ -456,6 +465,28 @@ def test_layout_rejects_reversed_or_overflowing_brain_atlas_sections() -> None:
 
     assert any("Live activity + exact proof region escapes its panel" in failure for failure in failures)
     assert any("Live activity + exact proof overflows vertically by 12px" in failure for failure in failures)
+
+
+def test_layout_rejects_horizontally_letterboxed_brain_atlas_graph() -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    sections = measurements["brainAtlasSections"]
+    assert isinstance(sections, dict)
+    unified = sections["unified"]
+    assert isinstance(unified, dict)
+    unified["horizontalFillRatio"] = 0.66
+
+    failures = runtime_layout.validate_control_tower_layout(measurements, label="kiosk-1920")
+
+    assert any("unified graph uses 66% of its horizontal map" in failure for failure in failures)
+
+
+def test_horizontal_fill_probe_excludes_full_width_layer_artifacts() -> None:
+    source = MODULE_PATH.read_text()
+    atlas_probe = source[source.index("const atlasRegion"):source.index("const visibleAtlasRegions")]
+
+    assert "querySelectorAll(fillAnchorSelector)" in atlas_probe
+    assert ".memory-flow-node, .brain-atlas-proof-work, .brain-atlas-proof-receipt, .brain-atlas-proof-model" in atlas_probe
+    assert "querySelectorAll('[data-atlas-layer]')" not in atlas_probe
 
 
 def test_layout_requires_one_visible_unified_svg() -> None:

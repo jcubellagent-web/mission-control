@@ -45,8 +45,6 @@
 
 final result: passed
 
----
-
 # Control Tower alert truth and matte-blue FinOps QA
 
 ## Scope and evidence
@@ -79,6 +77,55 @@ final result: passed
 - FinOps measured four provider cards, two metric bands with `[5, 4]` cells, a nine-row model ledger, four health cells, and zero panel overflow.
 - Today’s Jobs retained a centered current-time marker and a reason target for every non-green summary and row.
 - React build passed, regression checker passed, runtime-layout self-test passed, full Deep release QA passed, and the repository suite passed 432 tests.
+
+## Severity review
+
+- P0: none.
+- P1: none.
+- P2: none.
+
+final result: passed
+
+---
+
+# Control Tower Brain Atlas distance-readability QA
+
+## Scope and evidence
+
+- User reference capture: `/var/folders/1w/ndj9slyx5rj80g5pn88wkp9c0000gn/T/codex-clipboard-3c2a46e6-6fee-4d64-8068-8ec2d2d940d3.png`
+- Final 1920 x 1080 implementation crop: `/private/tmp/brain-atlas-distance-final-atlas-1920.png`
+- Final same-input before/after comparison: `/private/tmp/brain-atlas-distance-final-comparison.png`
+- Full kiosk capture: `/private/tmp/brain-atlas-distance-final-kiosk-1920.png`
+- Browser and viewport: isolated Google Chrome verification at 1920 x 1080, DPR 1, plus strict checks at 1440 x 1000, 390 x 844, 2048 x 1228, and 1920 x 1080 reduced motion.
+- State reviewed: current live Control Tower sidecars, one or more truthfully active Live Work agents, governed-memory telemetry, three recent exact execution paths, and the complete first viewport.
+
+## Visual and interaction corrections
+
+1. Replaced the letterboxed 1000 x 376 graph coordinate space with a 1464 x 376 layout and proportionally remapped every node, edge, work card, receipt, and verified-model path. Text and circles retain their aspect ratio; no nonuniform SVG stretching is used.
+2. Increased substantive graph use from roughly 66% to 97% of the available map width at the physical 1920 x 1080 kiosk size.
+3. Strengthened the distance hierarchy with a larger Brain Atlas title, a dedicated working-count beacon, brighter persistent active-node shells, larger live-agent labels, a visible presence dot, and faster evidence-bound motion.
+4. Replaced contradictory `working · idle` language with `working · memory quiet` when an agent is active but no governed-memory receipt is currently moving.
+5. Active agent nodes now show the current dashboard-safe work title. Named exact-proof rows remain readable and static; opaque work IDs are not exposed.
+6. Shortened and normalized the section-purpose copy so it stays fully visible without competing with the right-side state chips.
+7. The verified-work selector still changes the selected exact-proof row and retains its accessible label/description relationship.
+
+## Final measurements
+
+- Brain Atlas panel: 1208.45 x 510.73 px; FinOps matched its top and height exactly.
+- Unified map: 1166.45 x 300.77 px with zero panel or page overflow.
+- Substantive horizontal fill: 97% at 1920 x 1080 and 96% or better at the 2048 reference and reduced-motion probes.
+- Active agent title: 18 px; active detail: 13.5 px; lane labels: 12.5 px; section heading: 14 px; purpose copy: 10.5 px.
+- Current Live Work agents and animated Brain Atlas agents matched exactly in every tested state.
+
+## Motion, truth, and runtime checks
+
+- Across a 650 ms live sample, the active-agent aura, presence dot, and header beacon changed opacity and scale while the persistent node shell remained visible.
+- All nine exact-proof edges reported `animation-name: none`; quiet agents had no aura or presence animation.
+- Reduced-motion mode disabled the aura, presence-dot, header-beacon, and memory-edge animations while preserving the active-state styling.
+- Governed-memory edge animation remains conditional on a recent exact registry timestamp. No current timestamp means no moving memory path.
+- The horizontal-fill guard measures substantive nodes rather than the decorative full-width layer divider, preventing a false pass if the graph becomes cramped again.
+- Strict browser and visual verification passed with zero console errors, page errors, failed requests, bad HTTP responses, internal-text leaks, or desktop/kiosk page overflow.
+- Focused Brain Atlas/runtime tests passed: 85. Runtime-layout self-test and the production React build also passed.
 
 ## Severity review
 
