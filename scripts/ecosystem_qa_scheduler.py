@@ -83,6 +83,37 @@ def change_lease_active(now: dt.datetime) -> bool:
         return False
 
 
+def is_debounced_failure(job: dict[str, Any], result: dict[str, Any]) -> bool:
+    if str(result.get("status") or "") not in {"failed", "timeout"}:
+        return False
+    return int(result.get("returncode") or 0) in {
+        int(value)
+        for value in job.get("debouncedReturnCodes", [])
+        if str(value).lstrip("-").isdigit()
+    }
+
+
+def alert_threshold(job: dict[str, Any], result: dict[str, Any]) -> int:
+    if job.get("severity") == "p0" and not is_debounced_failure(job, result):
+        return 1
+    return max(1, int(job.get("alertAfterFailures") or 2))
+
+
+def defer_debounced_failure_for_change_lease(
+    job: dict[str, Any],
+    result: dict[str, Any],
+    now: dt.datetime,
+    *,
+    allow_change_lease: bool,
+) -> bool:
+    return bool(
+        job.get("suppressDebouncedDuringChangeLease")
+        and not allow_change_lease
+        and is_debounced_failure(job, result)
+        and change_lease_active(now)
+    )
+
+
 def scheduler_environment() -> dict[str, str]:
     """Keep launchd jobs able to resolve host tools such as npm and node."""
     env = os.environ.copy()
@@ -151,13 +182,13 @@ def run_job(job: dict[str, Any], shadow: bool = False) -> dict[str, Any]:
 
 
 def publish_transition(job: dict[str, Any], current: dict[str, Any], previous: dict[str, Any]) -> None:
-    previous_status = str(previous.get("status") or "unknown")
     current_status = str(current.get("status") or "unknown")
     failed = current_status in {"failed", "timeout"}
-    recovered = current_status == "ok" and int(previous.get("failureStreak") or 0) > 0
-    streak = int(current.get("failureStreak") or 0)
-    immediate = job.get("severity") == "p0"
-    if not recovered and not (failed and (immediate or streak >= 2)):
+    prior_open = bool(previous.get("incidentOpen"))
+    current_open = bool(current.get("incidentOpen"))
+    recovered = current_status == "ok" and prior_open
+    opened = failed and current_open and not prior_open
+    if not recovered and not opened:
         return
     title = f"{job.get('team')}: {job.get('id')} {'recovered' if recovered else 'needs attention'}"
     detail = "Recovered after a prior QA failure." if recovered else compact(current.get("stderr") or current.get("stdout") or "Scheduled QA failed.", 500)
@@ -201,6 +232,7 @@ def tick(
             "status": "running",
             "startedAt": iso(now),
             "failureStreak": int(previous.get("failureStreak") or 0),
+            "incidentOpen": bool(previous.get("incidentOpen")),
             "lastSlot": current_slot,
         }
         atomic_write(STATE_PATH, {
@@ -232,12 +264,27 @@ def tick(
                 # checks do not mistake the previous terminal state for now.
                 publish_running(job, previous)
             result = run_job(job, shadow=shadow)
-        if result["status"] in {"failed", "timeout"}:
+        if defer_debounced_failure_for_change_lease(
+            job,
+            result,
+            now,
+            allow_change_lease=allow_change_lease,
+        ):
+            result["observedStatus"] = result["status"]
+            result["status"] = "skipped_change_lease"
+            result["failureStreak"] = int(previous.get("failureStreak") or 0)
+            result["incidentOpen"] = bool(previous.get("incidentOpen"))
+        elif result["status"] in {"failed", "timeout"}:
             result["failureStreak"] = int(previous.get("failureStreak") or 0) + 1
+            result["incidentOpen"] = bool(previous.get("incidentOpen")) or (
+                int(result["failureStreak"]) >= alert_threshold(job, result)
+            )
         elif result["status"] == "ok":
             result["failureStreak"] = 0
+            result["incidentOpen"] = False
         else:
             result["failureStreak"] = int(previous.get("failureStreak") or 0)
+            result["incidentOpen"] = bool(previous.get("incidentOpen"))
         result["lastSlot"] = current_slot
         new_jobs[job_id] = result
         results.append(result)

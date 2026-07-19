@@ -155,15 +155,56 @@ class SchedulerTests(unittest.TestCase):
         self.assertEqual(observed["status"], "running")
         self.assertEqual(observed["jobs"]["deep-qa"]["status"], "running")
 
-    def test_clean_run_after_any_safe_skip_publishes_recovery_for_open_streak(self) -> None:
+    def test_clean_run_after_safe_skip_publishes_recovery_only_for_open_incident(self) -> None:
         job = {"id": "live", "owner": "josh2", "team": "Telegram QA", "severity": "p0"}
-        current = {"status": "ok", "failureStreak": 0}
-        previous = {"status": "skipped_change_lease", "failureStreak": 2}
+        current = {"status": "ok", "failureStreak": 0, "incidentOpen": False}
+        previous = {"status": "skipped_change_lease", "failureStreak": 2, "incidentOpen": True}
         with mock.patch.object(subject.subprocess, "run") as publish:
             subject.publish_transition(job, current, previous)
 
         publish.assert_called_once()
         self.assertIn("complete", publish.call_args.args[0])
+
+    def test_unopened_debounced_failure_does_not_publish_false_recovery(self) -> None:
+        job = {"id": "live", "owner": "josh2", "team": "Runtime SRE", "severity": "p0"}
+        current = {"status": "ok", "failureStreak": 0, "incidentOpen": False}
+        previous = {"status": "failed", "failureStreak": 1, "incidentOpen": False}
+        with mock.patch.object(subject.subprocess, "run") as publish:
+            subject.publish_transition(job, current, previous)
+        publish.assert_not_called()
+
+    def test_p0_service_failure_opens_immediately_but_contract_drift_waits(self) -> None:
+        job = {
+            "id": "runtime-service-probe",
+            "severity": "p0",
+            "alertAfterFailures": 2,
+            "debouncedReturnCodes": [1],
+        }
+        service_down = {"status": "failed", "returncode": 2}
+        contract_drift = {"status": "failed", "returncode": 1}
+        self.assertEqual(subject.alert_threshold(job, service_down), 1)
+        self.assertEqual(subject.alert_threshold(job, contract_drift), 2)
+
+    def test_debounced_contract_drift_defers_during_change_lease(self) -> None:
+        job = {
+            "severity": "p0",
+            "debouncedReturnCodes": [1],
+            "suppressDebouncedDuringChangeLease": True,
+        }
+        result = {"status": "failed", "returncode": 1}
+        with mock.patch.object(subject, "change_lease_active", return_value=True):
+            self.assertTrue(subject.defer_debounced_failure_for_change_lease(
+                job,
+                result,
+                dt.datetime(2026, 7, 19, tzinfo=dt.timezone.utc),
+                allow_change_lease=False,
+            ))
+            self.assertFalse(subject.defer_debounced_failure_for_change_lease(
+                job,
+                result,
+                dt.datetime(2026, 7, 19, tzinfo=dt.timezone.utc),
+                allow_change_lease=True,
+            ))
 
 
 if __name__ == "__main__":

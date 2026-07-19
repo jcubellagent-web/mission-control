@@ -22,6 +22,7 @@ MIN_EXPECTED_AGENT_ROWS = 3
 RUNTIME_STALE_MINUTES = 45
 STATE_WINDOW_HOURS = 48
 STATE_HISTORY_LIMIT = 36
+STATE_SCHEMA = 2
 
 #JAIMES: keep a short local incident ledger so repeated Control Tower drift turns into concrete next fixes instead of one-off repairs.
 
@@ -109,7 +110,7 @@ def recommendation_for_title(title: str) -> str:
 def update_ops_state(before_alerts: list[dict[str, str]], after_alerts: list[dict[str, str]], fixed: bool, ok: bool) -> dict[str, Any]:
     now = utc_now()
     prior = load_ops_state()
-    history = prior.get("history") if isinstance(prior.get("history"), list) else []
+    history = prior.get("history") if prior.get("schema") == STATE_SCHEMA and isinstance(prior.get("history"), list) else []
     fresh_history: list[dict[str, Any]] = []
     cutoff = now - dt.timedelta(hours=STATE_WINDOW_HOURS)
     for row in history:
@@ -119,32 +120,39 @@ def update_ops_state(before_alerts: list[dict[str, str]], after_alerts: list[dic
         if seen_at and seen_at >= cutoff:
             fresh_history.append(row)
 
-    current_alerts = after_alerts or before_alerts
+    observed_alerts = list(before_alerts) + list(after_alerts)
+    observed_keys = list(dict.fromkeys(alert_key(alert) for alert in observed_alerts))
+    unresolved_keys = list(dict.fromkeys(alert_key(alert) for alert in after_alerts))
     fresh_history.append({
         "checkedAt": now.replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         "ok": ok,
         "fixed": fixed,
         "beforeAlerts": summarize_alerts(before_alerts),
         "afterAlerts": summarize_alerts(after_alerts),
-        "alertKeys": [alert_key(alert) for alert in current_alerts],
+        "observedAlertKeys": observed_keys,
+        "unresolvedAlertKeys": unresolved_keys,
     })
     fresh_history = fresh_history[-STATE_HISTORY_LIMIT:]
 
     counts: dict[str, dict[str, Any]] = {}
     for row in fresh_history:
-        row_ok = bool(row.get("ok"))
-        for key in row.get("alertKeys") or []:
+        unresolved = {
+            key for key in row.get("unresolvedAlertKeys") or []
+            if isinstance(key, str) and key
+        }
+        for key in row.get("observedAlertKeys") or []:
             if not isinstance(key, str) or not key:
                 continue
             item = counts.setdefault(key, {"key": key, "count": 0, "unresolvedCount": 0, "lastSeen": row.get("checkedAt", "")})
             item["count"] += 1
             item["lastSeen"] = row.get("checkedAt", "")
-            if not row_ok:
+            if key in unresolved:
                 item["unresolvedCount"] += 1
 
     recurring: list[dict[str, Any]] = []
     recommendations: list[str] = []
-    lookup = {alert_key(alert): alert for alert in current_alerts}
+    lookup = {alert_key(alert): alert for alert in after_alerts}
+    active_keys = set(lookup)
     for key, item in sorted(counts.items(), key=lambda pair: (-pair[1]["unresolvedCount"], -pair[1]["count"], pair[0])):
         if item["count"] < 2:
             continue
@@ -157,6 +165,7 @@ def update_ops_state(before_alerts: list[dict[str, str]], after_alerts: list[dic
             "count": item["count"],
             "unresolvedCount": item["unresolvedCount"],
             "lastSeen": item["lastSeen"],
+            "active": key in active_keys,
             "recommendation": recommendation_for_title(str(alert.get("title") or title)),
         }
         recurring.append(entry)
@@ -164,11 +173,13 @@ def update_ops_state(before_alerts: list[dict[str, str]], after_alerts: list[dic
             recommendations.append(f'{entry["title"]}: {entry["recommendation"]}')
 
     payload = {
+        "schema": STATE_SCHEMA,
         "checkedAt": now.replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         "status": "ok" if ok else "attention",
         "fixed": fixed,
         "beforeAlerts": summarize_alerts(before_alerts),
         "afterAlerts": summarize_alerts(after_alerts),
+        "activeAlertKeys": sorted(active_keys),
         "history": fresh_history,
         "recurringAlerts": recurring[:8],
         "recommendations": recommendations[:6],
@@ -309,6 +320,8 @@ def prune_stale_freshness_history() -> dict[str, Any]:
 
 def run_repairs(before: dict[str, Any], before_alerts: list[dict[str, str]]) -> list[dict[str, Any]]:
     steps: list[dict[str, Any]] = []
+    if not before_alerts:
+        return steps
     runtime = before.get("runtimeLayout") if isinstance(before.get("runtimeLayout"), dict) else {}
     runtime_age = age_minutes(runtime.get("checkedAt"))
     needs_runtime = any("layout" in a["title"].lower() or "screen check" in a["title"].lower() for a in before_alerts)
@@ -320,19 +333,6 @@ def run_repairs(before: dict[str, Any], before_alerts: list[dict[str, str]]) -> 
         jain = ROOT / "scripts" / "jain_visibility_heartbeat.py"
         if jain.exists():
             steps.append(run([sys.executable, str(jain), "--brain-feed"], timeout=90))
-
-    router = ROOT / "scripts" / "agent_auto_delegate.py"
-    if router.exists():
-        samples = [
-            ("Mission Control refresh", "Refresh Mission Control and repair stale Brain Feed visibility."),
-            ("Sorare pre-lock review", "Check Sorare lineups, daily missions, starters, DNP risk, and lock timing."),
-            ("Personal Gmail reply", "Use my personal Gmail browser session to draft a reply."),
-        ]
-        for title, objective in samples:
-            steps.append(run([
-                sys.executable, str(router), "--title", title, "--objective", objective,
-                "--requester", "joshex", "--privacy", "dashboard-safe", "--dry-run",
-            ], timeout=60))
 
     steps.append(run([sys.executable, "scripts/update_mission_control.py"], timeout=180))
     prune_stale_freshness_history()

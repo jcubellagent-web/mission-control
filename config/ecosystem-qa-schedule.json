@@ -18,7 +18,12 @@
       "schedule": {"intervalMinutes": 5, "offset": 1},
       "command": ["python3", "scripts/ecosystem_runtime_probe.py", "--recover"],
       "timeoutSeconds": 75,
-      "severity": "p0"
+      "severity": "p0",
+      "alertAfterFailures": 2,
+      "debouncedReturnCodes": [
+        1
+      ],
+      "suppressDebouncedDuringChangeLease": true
     },
     {
       "id": "memory-operations-snapshot",

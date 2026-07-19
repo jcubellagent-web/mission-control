@@ -33,6 +33,15 @@ SERVICE_LABELS = {
 }
 
 
+def probe_exit_code(checks: dict[str, Any]) -> int:
+    """Separate real service outages from contract/freshness drift."""
+    if any(not bool((checks.get(service) or {}).get("ok")) for service in SERVICE_LABELS):
+        return 2
+    if any(not bool(row.get("ok")) for row in checks.values() if isinstance(row, dict)):
+        return 1
+    return 0
+
+
 def utc_now() -> dt.datetime:
     return dt.datetime.now(dt.timezone.utc).replace(microsecond=0)
 
@@ -306,12 +315,22 @@ def main() -> int:
         "preRecoveryChecks": initial_checks if attempted else None,
         "recoveryAttempts": attempted,
         "recoveries": recoveries,
+        "failedServices": [
+            service
+            for service in SERVICE_LABELS
+            if not bool((result["checks"].get(service) or {}).get("ok"))
+        ],
+        "failedContracts": [
+            name
+            for name, row in result["checks"].items()
+            if name not in SERVICE_LABELS and isinstance(row, dict) and not bool(row.get("ok"))
+        ],
         "policy": "A service must fail two consecutive service-specific probes before one bounded restart; 15-minute cooldown; circuit opens after three attempts; two later scheduled clean probes clear recovery state; source staleness never triggers a restart.",
     }
     if not args.no_write:
         atomic_write(OUTPUT, payload)
     print(json.dumps(payload, indent=2))
-    return 0 if result["ok"] else 1
+    return probe_exit_code(result["checks"])
 
 
 if __name__ == "__main__":

@@ -224,3 +224,17 @@ def test_recovery_cooldown_state_requires_two_later_clean_probes_to_clear() -> N
     second = probe.next_service_healthy_streaks({"serviceHealthyStreaks": first}, checks)
     assert second["controlTower"] == 2
     assert probe.clear_stably_healthy_recoveries(recovery, checks, second) == {}
+
+
+def test_probe_exit_code_separates_service_outage_from_contract_drift() -> None:
+    healthy = {name: {"ok": True} for name in probe.SERVICE_LABELS}
+    healthy["sourceFreshness"] = {"ok": True}
+    assert probe.probe_exit_code(healthy) == 0
+
+    contract_drift = {name: dict(row) for name, row in healthy.items()}
+    contract_drift["sourceFreshness"] = {"ok": False}
+    assert probe.probe_exit_code(contract_drift) == 1
+
+    service_down = {name: dict(row) for name, row in healthy.items()}
+    service_down["gateway"] = {"ok": False}
+    assert probe.probe_exit_code(service_down) == 2

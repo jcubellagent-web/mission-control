@@ -384,8 +384,11 @@ def main() -> int:
             and "<integer>30</integer>" in foreground_guard_plist
             and "active-visible-work" in foreground_guard
             and "activate_kiosk_process" in foreground_guard
-            and "open_mission_control_kiosk.sh" in kiosk_watchdog
-            and "reopened Chrome kiosk" in kiosk_watchdog
+            and "CHANGE_LOCK" in kiosk_watchdog
+            and "WATCHDOG_STATE_PATH" in kiosk_watchdog
+            and "ensure_foreground(repair=False)" in kiosk_watchdog
+            and "ensure_foreground(repair=True)" in kiosk_watchdog
+            and "open_mission_control_kiosk.sh" not in kiosk_watchdog
             and "mission_control_runtime_layout_check.py" in kiosk_watchdog,
             "Kiosk self-healing watchdog",
             "Josh 2.0 has a fast exact-window foreground guard plus a slower rendered-layout watchdog",
@@ -1445,28 +1448,55 @@ def main() -> int:
         ),
     ]
 
-    retired_source_contracts = {
+    # Historical UI string assertions are useful while designing a surface,
+    # but become misleading scheduler noise after that surface is replaced.
+    # Emit only current operational/data contracts here. Rendered browser
+    # health remains explicit and critical below; the release guard continues
+    # to run strict browser and visual suites independently.
+    current_canary_names = {
+        "Live objectives",
+        "Calendar tile",
+        "Today Jobs",
+        "Action Required",
+        "X intelligence-only jobs",
         "Kiosk self-healing watchdog",
         "Local live sidecar watch",
-        "Josh heartbeat recovery publish",
-        "Runtime kiosk layout guard",
-        "Runtime visible text quality",
-        "Runtime layout dashboard surfacing",
-        "Signal Feed generic source filter",
-        "Signal Feed duplicate story guard",
-        "Signal Feed newsletter specificity",
-        "Signal Feed plain-English reasons",
-        "Agentic Crypto summary",
-        "Today Jobs live merge policy",
-        "React favicon",
-        "Agent Control lane",
-        "Live Work Board heartbeat freshness",
+        "Quiet maintenance jobs",
+        "Live Work Board stale-active guard",
+        "Today Jobs stale-active guard",
+        "Runtime layout alert propagation",
+        "Watchdog Live Work Board fallback",
+        "Signal Feed optional source",
+        "Priority Jobs config",
+        "Typed data adapters",
+        "Today Jobs inventory depth",
+        "Stale blocker suppression",
+        "Today Jobs view dedupe",
+        "Today Jobs live dedupe",
     }
-    for check in checks:
-        if not check.get("ok") and check.get("name") in retired_source_contracts:
-            check["ok"] = True
-            check["severity"] = "ok"
-            check["detail"] = "retired/non-blocking source-contract canary; production health is covered by runtime layout, regression, and dashboard Action Required checks"
+    checks = [check for check in checks if check.get("name") in current_canary_names]
+    runtime_issues = runtime_layout.get("issues") if isinstance(runtime_layout.get("issues"), list) else []
+    visible_leaks = (
+        runtime_layout.get("textQuality", {}).get("visibleInternalTextLeaks")
+        if isinstance(runtime_layout.get("textQuality"), dict)
+        else None
+    )
+    checks.extend([
+        status(
+            bool(runtime_layout.get("checkedAt")) and runtime_layout.get("ok") is True and not runtime_issues,
+            "Rendered browser layout",
+            str(runtime_layout.get("summary") or runtime_issues or "live rendered layout has not been verified"),
+            severity="critical",
+        ),
+        status(
+            isinstance(visible_leaks, list) and not visible_leaks,
+            "Rendered browser text quality",
+            "No visible internal IDs, paths, raw job labels, or unresolved placeholders"
+            if isinstance(visible_leaks, list) and not visible_leaks
+            else f"visible internal text leaks: {visible_leaks!r}",
+            severity="critical",
+        ),
+    ])
 
     result = summarize_canary_checks(checks)
     out = {

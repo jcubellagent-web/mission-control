@@ -151,7 +151,17 @@ def test_publication_for_result_keeps_routine_success_quiet():
     ) is None
 
 
-def test_main_refreshes_dashboard_after_recovery_publication(monkeypatch):
+def test_publication_for_result_keeps_unopened_self_repair_quiet():
+    assert watchdog.publication_for_result(
+        ok=True,
+        detail="Rendered checks passed.",
+        prior_status="done",
+        repaired=True,
+        foreground_action=True,
+    ) is None
+
+
+def test_main_refreshes_dashboard_after_recovery_publication(monkeypatch, tmp_path):
     actions = []
 
     monkeypatch.setattr(
@@ -165,6 +175,8 @@ def test_main_refreshes_dashboard_after_recovery_publication(monkeypatch):
         lambda repair=False: {"ok": True, "status": "foreground", "reason": "already-foreground"},
     )
     monkeypatch.setattr(watchdog, "latest_screen_check_status", lambda: "blocked")
+    monkeypatch.setattr(watchdog, "WATCHDOG_STATE_PATH", tmp_path / "watchdog-state.json")
+    monkeypatch.setattr(watchdog, "change_lease_active", lambda: False)
 
     def fake_run(cmd, timeout=90):
         actions.append(("refresh", cmd, timeout))
@@ -180,3 +192,41 @@ def test_main_refreshes_dashboard_after_recovery_publication(monkeypatch):
     assert watchdog.main() == 0
     assert [action[0] for action in actions] == ["refresh", "publish", "refresh"]
     assert actions[1][1:3] == ("done", "Josh 2.0 screen check recovered")
+
+
+def test_change_lease_defers_without_runtime_or_publication(monkeypatch):
+    monkeypatch.setattr(watchdog, "change_lease_active", lambda: True)
+    monkeypatch.setattr(watchdog, "runtime_check", lambda: (_ for _ in ()).throw(AssertionError("ran")))
+    monkeypatch.setattr(watchdog, "publish", lambda *args: (_ for _ in ()).throw(AssertionError("published")))
+    monkeypatch.setattr(sys, "argv", ["mission_control_kiosk_watchdog.py"])
+
+    assert watchdog.main() == 0
+
+
+def test_second_layout_only_failure_never_repairs_kiosk(monkeypatch, tmp_path):
+    state = tmp_path / "watchdog-state.json"
+    state.write_text(json.dumps({"failureStreak": 1, "incidentOpen": False}), encoding="utf-8")
+    repairs = []
+    monkeypatch.setattr(watchdog, "WATCHDOG_STATE_PATH", state)
+    monkeypatch.setattr(watchdog, "change_lease_active", lambda: False)
+    monkeypatch.setattr(
+        watchdog,
+        "runtime_check",
+        lambda: (False, {"ok": False}, "Rendered layout failed."),
+    )
+
+    def foreground(repair=False):
+        repairs.append(repair)
+        return {"ok": True, "status": "foreground", "reason": "already-foreground"}
+
+    monkeypatch.setattr(watchdog, "ensure_foreground", foreground)
+    monkeypatch.setattr(
+        watchdog,
+        "run",
+        lambda *args, **kwargs: type("Result", (), {"returncode": 0, "stdout": "", "stderr": ""})(),
+    )
+    monkeypatch.setattr(sys, "argv", ["mission_control_kiosk_watchdog.py", "--repair", "--no-publish"])
+
+    assert watchdog.main() == 1
+    assert repairs == [False]
+    assert json.loads(state.read_text())["failureStreak"] == 2
