@@ -122,6 +122,26 @@ SUMMARY_CONCRETE_RESULT = re.compile(
     r"credential|wallet|source)\b",
     re.I,
 )
+SUMMARY_OPERATIONAL_RESULT = re.compile(
+    r"(?:\b(?:gateway|service|daemon|watcher|process|socket|connection|endpoint|api|launchd|"
+    r"runtime|bot|helper|logs?|files?|source|entry|entries|inventory|messages?|delivery)\b.{0,100}"
+    r"\b(?:running|listening|connected|reachable|responding|registered|loaded|active|healthy|"
+    r"stopped|offline|unreachable|empty|stale|missing|absent|unavailable|unverified|"
+    r"last\s+modified|has\s+no|have\s+no|there\s+(?:is|are)\s+no|port\s+\d{2,5})\b|"
+    r"\b(?:running|listening|connected|reachable|responding|registered|loaded|active|healthy|"
+    r"stopped|offline|unreachable|empty|stale|missing|absent|unavailable|unverified|"
+    r"last\s+modified|has\s+no|have\s+no|there\s+(?:is|are)\s+no|port\s+\d{2,5})\b.{0,100}"
+    r"\b(?:gateway|service|daemon|watcher|process|socket|connection|endpoint|api|launchd|"
+    r"runtime|bot|helper|logs?|files?|source|entry|entries|inventory|messages?|delivery)\b)",
+    re.I,
+)
+SUMMARY_OPERATIONAL_STATUS_FILLER = re.compile(
+    r"\b(?:gateway|service|daemon|watcher|process|runtime|bot|helper|delivery)\s+"
+    r"(?:(?:health|status|operational|connectivity|delivery)\s+){0,2}"
+    r"(?:assessment|review|report|request|task|work)\s+(?:is\s+|was\s+|remains\s+)?"
+    r"(?:active|running|connected|complete|completed|done|last\s+modified)\b",
+    re.I,
+)
 SUMMARY_PROCESS_RESULT = re.compile(
     r"\b(?:confirmed|found|identified|determined|show(?:s|ed)?|reveal(?:s|ed)?|"
     r"cannot|can't|does\s+not|only|recommend(?:s|ed|ation)?|fixed|changed|added|"
@@ -131,10 +151,39 @@ SUMMARY_PROCESS_RESULT = re.compile(
     re.I,
 )
 SUMMARY_RISK_OR_LIMITATION = re.compile(
-    r"\b(?:risk|cannot|can't|does\s+not|unsupported|limitation|avoid|do\s+not|"
-    r"blocked|failed|failure|unsafe|credential|wallet)\b",
+    r"\b(?:risk|cannot|can't|could\s+not|does\s+not|unsupported|"
+    r"limitation|avoid|do\s+not|blocked|failed|failure|unsafe|credential|wallet)\b",
     re.I,
 )
+SUMMARY_OPERATIONAL_RISK = re.compile(
+    r"(?:\b(?:gateway|service|daemon|watcher|process|socket|connection|endpoint|api|launchd|"
+    r"runtime|bot|helper|logs?|files?|source|entry|entries|inventory|messages?|delivery)\b.{0,100}"
+    r"\b(?:not\s+(?:running|listening|connected|reachable|responding|registered|loaded|active|healthy)|"
+    r"stopped|offline|unreachable|empty|stale|missing|absent|unavailable|unverified|"
+    r"has\s+no|have\s+no|there\s+(?:is|are)\s+no)\b|"
+    r"\b(?:not\s+(?:running|listening|connected|reachable|responding|registered|loaded|active|healthy)|"
+    r"stopped|offline|unreachable|empty|stale|missing|absent|unavailable|unverified|"
+    r"has\s+no|have\s+no|there\s+(?:is|are)\s+no)\b.{0,100}"
+    r"\b(?:gateway|service|daemon|watcher|process|socket|connection|endpoint|api|launchd|"
+    r"runtime|bot|helper|logs?|files?|source|entry|entries|inventory|messages?|delivery)\b)",
+    re.I,
+)
+SUMMARY_NEGATED_OPERATIONAL_RISK = re.compile(
+    r"\b(?:no|not|without)\s+(?:\w+\s+){0,2}"
+    r"(?:stopped|offline|unreachable|empty|stale|missing|absent|unavailable|unverified)\b",
+    re.I,
+)
+SUMMARY_POSITIVE_OPERATIONAL_ABSENCE = re.compile(
+    r"\b(?:(?:has|have)\s+no|there\s+(?:is|are)\s+no)\s+"
+    r"(?:remaining\s+)?(?:service\s+)?(?:issues?|failures?|errors?|problems?|risks?|blockers?)\b",
+    re.I,
+)
+
+
+def summary_has_operational_risk(value: str) -> bool:
+    text = SUMMARY_NEGATED_OPERATIONAL_RISK.sub("", value)
+    text = SUMMARY_POSITIVE_OPERATIONAL_ABSENCE.sub("", text)
+    return bool(SUMMARY_OPERATIONAL_RISK.search(text))
 SUMMARY_RECOMMENDATION_OR_ACTION = re.compile(
     r"\b(?:recommend(?:s|ed|ation)?|should|next\s+step|follow[- ]?up|retry|"
     r"avoid|do\s+not|use\s+.+\s+only|connect|install|approve)\b",
@@ -142,7 +191,7 @@ SUMMARY_RECOMMENDATION_OR_ACTION = re.compile(
 )
 SUMMARY_NO_ACTION_SUPPORT = re.compile(
     r"\b(?:resolved|fixed|deployed|passed|healthy|fully\s+(?:complete|verified)|"
-    r"no\s+(?:remaining|further)\s+(?:issue|work|action)|already\s+(?:configured|complete))\b",
+    r"no\s+(?:remaining|further)\s+(?:issues?|work|actions?)|already\s+(?:configured|complete))\b",
     re.I,
 )
 
@@ -1194,7 +1243,7 @@ def compact_card_lines(
 
 
 COMPLETE_STATUSES = {"done", "complete", "completed", "final", "finished", "success"}
-#JAIMES: terminal delivery completion is distinct from whether the requested objective succeeded.
+#JAIMES: terminal delivery and negative assessment findings are distinct from whether the assessed system is healthy.
 TERMINAL_LIFECYCLE_STATUSES = {*COMPLETE_STATUSES, "failed", "failure", "error"}
 
 
@@ -1341,9 +1390,15 @@ def is_status_only_summary_item(item: str) -> bool:
         return True
     if any(pattern.fullmatch(value) for pattern in SUMMARY_STATUS_FILLER_PATTERNS):
         return True
+    if SUMMARY_OPERATIONAL_STATUS_FILLER.search(value):
+        return True
     # "Reviewed the docs" is activity, not a finding.  A process-prefixed
     # sentence becomes useful only when it also states a concrete outcome.
-    return bool(SUMMARY_PROCESS_PREFIX.search(value) and not SUMMARY_PROCESS_RESULT.search(value))
+    return bool(
+        SUMMARY_PROCESS_PREFIX.search(value)
+        and not SUMMARY_PROCESS_RESULT.search(value)
+        and not SUMMARY_OPERATIONAL_RESULT.search(value)
+    )
 
 
 def substantive_summary_items(items: list[str]) -> list[str]:
@@ -1380,11 +1435,17 @@ def summary_semantic_issues(
             problems.append("Complete: Yes requires 3-5 What was done bullets")
         if len(substantive) < 3:
             problems.append("What was done must contain at least three substantive findings, outcomes, or changes")
-        result_count = sum(bool(SUMMARY_CONCRETE_RESULT.search(item)) for item in substantive)
+        result_count = sum(
+            bool(SUMMARY_CONCRETE_RESULT.search(item) or SUMMARY_OPERATIONAL_RESULT.search(item))
+            for item in substantive
+        )
         if result_count < 2:
             problems.append("What was done must state at least two concrete results")
 
-    has_risk_or_limitation = bool(SUMMARY_RISK_OR_LIMITATION.search(combined_results))
+    has_risk_or_limitation = bool(
+        SUMMARY_RISK_OR_LIMITATION.search(combined_results)
+        or summary_has_operational_risk(combined_results)
+    )
     if has_risk_or_limitation and not issues:
         problems.append("Risks and limitations must be surfaced under Issues")
 
@@ -1456,7 +1517,10 @@ def build_completion_summary(
     assessment_result = (
         complete_requested
         and bool(ASSESSMENT_OBJECTIVE.search(complete_title))
-        and any(SUMMARY_CONCRETE_RESULT.search(item) for item in substantive_steps)
+        and any(
+            SUMMARY_CONCRETE_RESULT.search(item) or SUMMARY_OPERATIONAL_RESULT.search(item)
+            for item in substantive_steps
+        )
     )
     # Negative readiness/safety findings do not make a finished assessment an
     # unfinished task.  Only bypass narrative-count complaints; missing route
@@ -1472,11 +1536,20 @@ def build_completion_summary(
     complete = "Yes" if complete_requested and (not quality_issues or (assessment_result and not non_narrative_issues)) else "No"
     if complete == "No" and complete_requested:
         steps = truthful_incomplete_steps(steps)
+        if "Risks and limitations must be surfaced under Issues" in quality_issues:
+            limitation = "A reported risk or limitation was not included under Issues."
+            retry_step = "Review the reported limitation and provide a supported next step."
+        elif "No action needed is not supported by the reported result" in quality_issues:
+            limitation = "The reported findings do not support a no-action conclusion."
+            retry_step = "Replace the no-action conclusion with a supported recommendation."
+        else:
+            limitation = "The reported evidence was not sufficient to verify the result as complete."
+            retry_step = "Retry after collecting the missing evidence or findings."
         issues = unique_summary_items([
             *issues,
-            "The work card did not capture enough concrete findings for a reliable final summary.",
+            limitation,
         ])
-        next_steps = ["Retry the final response with concrete findings and a supported recommendation."]
+        next_steps = [retry_step]
     else:
         steps = substantive_summary_items(steps) if complete == "Yes" else truthful_incomplete_steps(steps)
         if not next_steps:

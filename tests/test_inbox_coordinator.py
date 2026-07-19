@@ -11,6 +11,22 @@ from unittest.mock import patch
 
 
 MODULE_PATH = Path(__file__).parents[1] / "scripts" / "inbox_coordinator.py"
+TELEGRAM_HEALTH_RESULT = """Complete: Yes — current Telegram health was assessed read-only.
+
+What was done:
+- The local OpenClaw gateway is running and listening on port 18790, but this environment could not complete its loopback connectivity probe.
+- The local launchd domain has no registered Josh 2.0 or JAIMES Telegram fast-ack service entries.
+- The available Josh Telegram logs are empty and last modified May 5, so they provide no current delivery evidence.
+
+Issues:
+- Live Telegram API and end-to-end message delivery could not be verified from this restricted environment.
+- Fast-ack service registration and fresh operational logging are unverified.
+
+Appropriate next steps:
+- Run the existing read-only Telegram health probe on the service-owning host to confirm gateway connectivity, watcher status, and a fresh Telegram identity check.
+
+Approval needed:
+- n/a"""
 
 
 def load_module():
@@ -69,6 +85,23 @@ class InboxCoordinatorTests(unittest.TestCase):
         route = coordinator.route_prompt(
             "Review and fix the broken integration.",
             injected_health={"gemini": True, "terra": True, "luna": True},
+        )
+        self.assertEqual(route["routeId"], "terra")
+
+    def test_read_only_health_request_does_not_route_as_a_change(self):
+        coordinator = load_module()
+        route = coordinator.route_prompt(
+            "Assess current Telegram health and give me three concrete findings. Make no changes.",
+            injected_health={"luna": True, "terra": True},
+        )
+        self.assertEqual(route["routeId"], "luna")
+        self.assertEqual(route["routingReason"], "read-only health/status check")
+
+    def test_positive_repair_intent_wins_over_an_unrelated_no_changes_clause(self):
+        coordinator = load_module()
+        route = coordinator.route_prompt(
+            "Check Telegram health, make no changes to the gateway, and fix the Fast Ack watcher.",
+            injected_health={"luna": True, "terra": True},
         )
         self.assertEqual(route["routeId"], "terra")
 
@@ -213,6 +246,35 @@ class InboxCoordinatorTests(unittest.TestCase):
             self.assertIn("Complete: Yes", taken["output"])
             self.assertFalse(coordinator.take_result(job["jobId"])["ok"])
 
+    def test_run_worker_marks_explicit_read_only_codex_execution(self):
+        coordinator = load_module()
+        with tempfile.TemporaryDirectory() as tmp:
+            self.configure_private_state(coordinator, Path(tmp))
+            coordinator.spawn_worker = lambda job_id: None
+            coordinator.deliver_result = lambda *args, **kwargs: True
+            coordinator.telegram_health_host_context = lambda prompt: None
+            prompt = "Assess current Telegram health and give me three findings. Make no changes."
+            route = coordinator.route_prompt(prompt, injected_health={"luna": True, "terra": True})
+            job, _ = coordinator.make_job(prompt, route, {"runId": "run-read-only"}, 30)
+            captured = {}
+
+            def execute(_prompt, execution_route, _timeout):
+                captured.update(execution_route)
+                return {
+                    "output": "Complete: Yes\nWhat was done:\n- Confirmed the gateway service passed its current health check.\n- Verified successfully that the Fast Ack service passed its host check.\n- Ran three service checks and all three checks passed.\nIssues:\n- n/a\nAppropriate next steps:\n- No action needed.\nApproval needed:\n- n/a",
+                    "actualHost": "josh2",
+                    "actualWorker": "test-worker",
+                    "actualProvider": "codex",
+                    "actualModel": "gpt-5.6-luna",
+                    "modelVerified": True,
+                    "executionVerified": True,
+                }
+
+            coordinator.execute_route = execute
+            result = coordinator.run_worker(job["jobId"])
+            self.assertEqual(result["outcome"], "done")
+            self.assertIs(captured["readOnly"], True)
+
     def test_sensitive_prompt_is_never_persisted_or_hashed(self):
         coordinator = load_module()
         with tempfile.TemporaryDirectory() as tmp:
@@ -289,10 +351,14 @@ class InboxCoordinatorTests(unittest.TestCase):
         self.assertIs(sections["summarySufficient"], False)
         self.assertIn(coordinator.MISSING_FINDINGS_ISSUE, sections["issues"])
         self.assertEqual(sections["next"], [coordinator.RETRY_FINDINGS_NEXT_STEP])
-        self.assertTrue(3 <= len(sections["done"]) <= 5)
-        self.assertIn("No missing findings were inferred or invented.", sections["done"])
+        self.assertEqual(len(sections["done"]), 3)
+        self.assertIn("No unreported findings were inferred or presented as facts.", sections["done"])
         self.assertNotIn("Assessment complete.", sections["done"])
         self.assertNotIn("Prepared the result for deterministic Telegram delivery.", sections["done"])
+        serialized = json.dumps({key: sections[key] for key in ("done", "issues", "next", "approval")})
+        self.assertNotIn("completion claim requires", serialized.lower())
+        self.assertNotIn("supplied summary contained", serialized.lower())
+        self.assertNotIn("did not include enough concrete", serialized.lower())
 
     def test_agent_rh_findings_pass_semantic_gate(self):
         coordinator = load_module()
@@ -313,6 +379,208 @@ class InboxCoordinatorTests(unittest.TestCase):
         self.assertEqual(len(sections["done"]), 3)
         self.assertIn("cannot control or trade", sections["done"][1])
         self.assertIn("risk", sections["issues"][0])
+
+    def test_negative_telegram_health_findings_are_concrete_and_complete(self):
+        coordinator = load_module()
+        sections = coordinator.parse_model_sections(TELEGRAM_HEALTH_RESULT)
+        self.assertIs(sections["complete"], True)
+        self.assertIs(sections["summarySufficient"], True)
+        self.assertEqual(len(sections["done"]), 3)
+        self.assertTrue(all(coordinator.is_concrete_result_item(item) for item in sections["done"]))
+        self.assertFalse(coordinator.is_concrete_result_item(
+            "The assigned worker is named Josh 2.0 for this request."
+        ))
+        for generic in (
+            "The review remains active while the requested work is being discussed.",
+            "The report has no evidence-backed conclusion for the user at this time.",
+            "There are no findings in the prepared assessment summary for the user.",
+            "The report mentions port 18790 without reporting an operational observation.",
+            "The gateway health assessment remains active while the team discusses the request.",
+            "The service status review is running while the requested work remains pending.",
+            "The runtime report was last modified May 5 while the request remained pending.",
+        ):
+            self.assertFalse(coordinator.is_concrete_result_item(generic), generic)
+
+    def test_negative_operational_findings_require_issues(self):
+        coordinator = load_module()
+        no_issues = TELEGRAM_HEALTH_RESULT.replace(
+            "- Live Telegram API and end-to-end message delivery could not be verified from this restricted environment.\n"
+            "- Fast-ack service registration and fresh operational logging are unverified.",
+            "- n/a",
+        ).replace(
+            "Run the existing read-only Telegram health probe on the service-owning host to confirm gateway connectivity, watcher status, and a fresh Telegram identity check.",
+            "No action needed.",
+        )
+        sections = coordinator.parse_model_sections(no_issues)
+        self.assertIs(sections["complete"], False)
+        self.assertIn("A reported risk or limitation was not reflected in Issues.", sections["summaryQualityIssues"])
+        self.assertFalse(coordinator.has_operational_risk(
+            "The runtime has no missing helpers in the canonical Telegram delivery path."
+        ))
+        self.assertFalse(coordinator.has_operational_risk(
+            "The gateway service has no remaining issues after the health check."
+        ))
+        self.assertFalse(coordinator.has_operational_risk(
+            "There are no service failures in the current host snapshot."
+        ))
+        self.assertTrue(coordinator.has_operational_risk(
+            "The Telegram Fast Ack service is not running on the owning host."
+        ))
+
+    def test_incomplete_summary_keeps_three_source_findings_without_grader_boilerplate(self):
+        coordinator = load_module()
+        source = [
+            "The available service inventory contains an entry for the gateway runtime.",
+            "The watcher inventory contains a separate entry for the acknowledgement runtime.",
+            "The log inventory contains a dated file for the Telegram delivery path.",
+        ]
+        self.assertEqual(coordinator.incomplete_summary_done_items(source, 0), source)
+
+    def test_telegram_health_host_context_is_read_only_and_allowlisted(self):
+        coordinator = load_module()
+        payload = {
+            "checkedAt": coordinator.utc_now(),
+            "ok": True,
+            "checks": {
+                "gateway": {"ok": True, "detail": "listening", "latencyMs": 0.1, "secret": "omit"},
+                "telegramFastAck": {"ok": True, "detail": "launchd running"},
+                "telegramWorkCardHelper": {"ok": True, "detail": "runtime helper matches canonical source"},
+                "telegramInboxClaimHelper": {"ok": True, "detail": "canonical helper selected"},
+                "sourceFreshness": {"ok": True, "detail": "canonical source is current"},
+                "secretCheck": {"ok": True, "detail": "must not cross the boundary"},
+            },
+            "privatePath": "/private/omit-me",
+        }
+        completed = type("Result", (), {"returncode": 0, "stdout": json.dumps(payload), "stderr": ""})()
+        with patch.object(coordinator.subprocess, "run", return_value=completed) as run:
+            context = coordinator.telegram_health_host_context(
+                "Assess current Telegram health and make no changes."
+            )
+        command = run.call_args.args[0]
+        self.assertEqual(command[-1], "--no-write")
+        self.assertNotIn("--recover", command)
+        self.assertIs(context["available"], True)
+        self.assertEqual(set(context["checks"]), {
+            "gateway", "telegramFastAck", "telegramWorkCardHelper", "telegramInboxClaimHelper",
+            "sourceFreshness",
+        })
+        serialized = json.dumps(context)
+        self.assertNotIn("secretCheck", serialized)
+        self.assertNotIn("privatePath", serialized)
+        self.assertNotIn("omit-me", serialized)
+
+    def test_telegram_health_host_context_fails_closed_on_partial_or_mistyped_snapshot(self):
+        coordinator = load_module()
+        base = {
+            "checkedAt": coordinator.utc_now(),
+            "ok": True,
+            "checks": {
+                "gateway": {"ok": True},
+                "telegramFastAck": {"ok": True},
+                "telegramWorkCardHelper": {"ok": True},
+                "telegramInboxClaimHelper": {"ok": True},
+                "sourceFreshness": {"ok": True},
+            },
+        }
+        for mutate in (
+            lambda payload: payload["checks"].pop("sourceFreshness"),
+            lambda payload: payload["checks"]["gateway"].update(ok="false"),
+            lambda payload: payload.update(ok="false"),
+            lambda payload: payload.update(checkedAt="not-a-time"),
+        ):
+            payload = json.loads(json.dumps(base))
+            mutate(payload)
+            completed = type("Result", (), {"returncode": 0, "stdout": json.dumps(payload), "stderr": ""})()
+            with patch.object(coordinator.subprocess, "run", return_value=completed):
+                context = coordinator.telegram_health_host_context("Check Telegram health read-only.")
+            self.assertEqual(context["available"], False)
+
+    def test_probe_wide_status_is_not_used_for_allowlisted_telegram_health(self):
+        coordinator = load_module()
+        payload = {
+            "checkedAt": coordinator.utc_now(),
+            "ok": False,
+            "checks": {
+                key: {"ok": True, "detail": "healthy"}
+                for key in (
+                    "gateway", "telegramFastAck", "telegramWorkCardHelper",
+                    "telegramInboxClaimHelper", "sourceFreshness",
+                )
+            },
+        }
+        completed = type("Result", (), {"returncode": 1, "stdout": json.dumps(payload), "stderr": ""})()
+        with patch.object(coordinator.subprocess, "run", return_value=completed):
+            context = coordinator.telegram_health_host_context("Check Telegram health read-only.")
+        self.assertIs(context["available"], True)
+        self.assertIs(context["ok"], True)
+
+    def test_mutating_telegram_health_request_does_not_receive_read_only_probe_context(self):
+        coordinator = load_module()
+        with patch.object(coordinator.subprocess, "run") as run:
+            context = coordinator.telegram_health_host_context(
+                "Check Telegram health, make no changes to the gateway, and restart the watcher."
+            )
+        self.assertIsNone(context)
+        run.assert_not_called()
+
+    def test_healthy_host_context_replaces_contradictory_sandbox_output(self):
+        coordinator = load_module()
+        context = {
+            "available": True,
+            "checkedAt": coordinator.utc_now(),
+            "ok": True,
+            "checks": {
+                "gateway": {"ok": True, "detail": "listening on port 18790"},
+                "telegramFastAck": {"ok": True, "detail": "launchd running"},
+                "telegramWorkCardHelper": {"ok": True, "detail": "runtime helper matches source"},
+                "telegramInboxClaimHelper": {"ok": True, "detail": "canonical helper selected"},
+                "sourceFreshness": {"ok": True, "detail": "source is current"},
+            },
+        }
+        gated = coordinator.enforce_host_evidence_gate(TELEGRAM_HEALTH_RESULT, context)
+        self.assertNotIn("could not complete its loopback", gated)
+        self.assertNotIn("has no registered", gated)
+        self.assertNotIn("logs are empty", gated)
+        self.assertIn("gateway check passed", gated)
+        self.assertIn("Fast Ack service check passed", gated)
+        sections = coordinator.parse_model_sections(gated)
+        self.assertIs(sections["complete"], True)
+        self.assertIs(sections["summarySufficient"], True)
+
+    def test_read_only_codex_executor_uses_os_enforced_read_only_sandbox(self):
+        coordinator = load_module()
+        self.assertIn('"--sandbox", "read-only"', coordinator.LLM_EXECUTOR_CODE)
+        self.assertIn('cfg.get("readOnly")', coordinator.LLM_EXECUTOR_CODE)
+        for prompt in (
+            "Check Telegram health. Make no changes.",
+            "Check Telegram health and do not make changes.",
+            "Check Telegram health; don't make any changes.",
+            "Check Telegram health without making changes.",
+        ):
+            self.assertTrue(coordinator.read_only_execution_requested(prompt), prompt)
+        self.assertFalse(coordinator.read_only_execution_requested(
+            "Check Telegram health, make no changes to the gateway, and restart the watcher."
+        ))
+
+    def test_telegram_health_host_context_fails_closed_when_probe_is_unavailable(self):
+        coordinator = load_module()
+        completed = type("Result", (), {"returncode": 1, "stdout": "not-json", "stderr": "private error"})()
+        with patch.object(coordinator.subprocess, "run", return_value=completed):
+            context = coordinator.telegram_health_host_context("Check Telegram health read-only.")
+        self.assertEqual(context["available"], False)
+        self.assertIn("do not infer", context["instruction"])
+
+        gated = coordinator.enforce_host_evidence_gate(
+            "Complete: Yes\nWhat was done:\n- A sandbox guessed that services were healthy.",
+            context,
+        )
+        self.assertIn("Complete: No", gated)
+        self.assertIn("No sandbox-local failure was treated as evidence", gated)
+
+    def test_non_health_output_is_not_changed_by_host_evidence_gate(self):
+        coordinator = load_module()
+        output = "Complete: Yes\nWhat was done:\n- The requested file was updated."
+        self.assertEqual(coordinator.enforce_host_evidence_gate(output, None), output)
 
     def test_risk_and_no_action_without_an_issue_are_rejected(self):
         coordinator = load_module()
@@ -381,6 +649,44 @@ class InboxCoordinatorTests(unittest.TestCase):
             plain = re.sub(r"<[^>]+>", "", html.unescape(rendered[0]))
             self.assertIn("Complete: No", plain)
             self.assertIn(coordinator.MISSING_FINDINGS_ISSUE, html.unescape(rendered[0]).replace("\n  ", " "))
+
+    def test_delivery_uses_done_card_for_negative_telegram_health_findings(self):
+        coordinator = load_module()
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            coordinator.PRIVATE_DIR = root
+            coordinator.WORK_CARD_SCRIPT = root / "josh_work_card.py"
+            coordinator.WORK_CARD_SCRIPT.write_text("", encoding="utf-8")
+            commands = []
+            rendered = []
+
+            def fake_run(cmd, **_kwargs):
+                commands.append(cmd)
+                final_path = Path(cmd[cmd.index("--final-text-file") + 1])
+                rendered.append(final_path.read_text(encoding="utf-8"))
+                return type("Result", (), {"returncode": 0})()
+
+            with patch.object(coordinator.subprocess, "run", side_effect=fake_run):
+                delivered = coordinator.deliver_result(
+                    "job-health",
+                    {"origin": {"cardKey": "card-health", "chatId": "chat", "threadId": "1"}},
+                    {"routeId": "luna", "routingReason": "read-only health/status check"},
+                    {
+                        "actualProvider": "codex",
+                        "actualModel": "gpt-5.6-luna",
+                        "actualWorker": "worker",
+                        "actualHost": "josh2",
+                        "modelVerified": True,
+                        "executionVerified": True,
+                    },
+                    TELEGRAM_HEALTH_RESULT,
+                )
+            self.assertIs(delivered, True)
+            self.assertEqual(commands[0][2], "done")
+            plain = re.sub(r"<[^>]+>", "", html.unescape(rendered[0]))
+            self.assertIn("Complete: Yes", plain)
+            self.assertNotIn("supplied summary contained", plain.lower())
+            self.assertNotIn("completion requires", plain.lower())
 
     def test_unstructured_or_unverified_output_never_claims_completion(self):
         coordinator = load_module()

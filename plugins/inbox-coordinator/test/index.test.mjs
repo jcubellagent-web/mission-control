@@ -1015,6 +1015,78 @@ test("accepts a substantive Agent RH assessment with findings and next steps", (
   assert.equal(parsed.terminalStatus, "done");
 });
 
+test("accepts negative Telegram health findings as concrete assessment results", () => {
+  const rich = [
+    "<b>JOSH 2.0 · COMPLETE</b>",
+    "<code>Model: openai/gpt-5.6-luna | Route: Josh 2.0 Inbox | Why: read-only host assessment</code>",
+    "",
+    "<blockquote><b>Complete:</b> Yes - Telegram health assessed.</blockquote>",
+    "",
+    "<b>What was done:</b>",
+    "• The local gateway is running and listening on port 18790, but the sandbox could not probe loopback.",
+    "• The inspected launchd domain has no registered Telegram fast-ack entry.",
+    "• The available Telegram logs are empty and last modified May 5.",
+    "",
+    "<b>Issues:</b>",
+    "• Sandbox-local service checks are unverified.",
+    "",
+    "<b>Appropriate next steps:</b>",
+    "• Use the host-native read-only probe for current service state.",
+    "",
+    "<b>Approval needed:</b>",
+    "• None",
+  ].join("\n");
+  const parsed = parseCanonicalFinalSummary(rich, { expectedModel: "openai/gpt-5.6-luna" });
+  assert.equal(parsed.ok, true);
+  assert.equal(parsed.terminalStatus, "done");
+});
+
+test("rejects negative operational findings when Issues says n/a", () => {
+  const parsed = parseCanonicalFinalSummary(canonicalFinal({
+    done: [
+      "- The gateway service is not running",
+      "  at its configured endpoint.",
+      "- The Fast Ack watcher service is",
+      "  stopped in the launchd runtime.",
+      "- Telegram delivery logs are empty",
+      "  and stale on the service host.",
+    ],
+    next: "No action needed.",
+  }));
+  assert.equal(parsed.ok, false);
+  assert.equal(parsed.reason, "issues-required-for-risk-or-limitation");
+});
+
+test("rejects generic state words as concrete findings", () => {
+  const parsed = parseCanonicalFinalSummary(canonicalFinal({
+    done: [
+      "- The gateway health assessment",
+      "  active while work is discussed.",
+      "- The service status review is",
+      "  running while work remains pending.",
+      "- The runtime report was last",
+      "  modified May 5 while pending.",
+    ],
+  }));
+  assert.equal(parsed.ok, false);
+  assert.equal(parsed.reason, "what-was-done-concrete-outcome-count");
+});
+
+test("does not misclassify no missing helpers as an operational risk", () => {
+  const parsed = parseCanonicalFinalSummary(canonicalFinal({
+    done: [
+      "- The gateway service has no",
+      "  remaining issues after its check.",
+      "- The runtime has no missing helpers",
+      "  in the Telegram delivery path.",
+      "- There are no service failures in",
+      "  the current host snapshot.",
+    ],
+  }));
+  assert.equal(parsed.ok, true);
+  assert.equal(parsed.terminalStatus, "done");
+});
+
 test("accepts concrete Topic 17 repair outcomes and rejects duplicate Why headers", () => {
   const parsed = parseCanonicalFinalSummary(canonicalFinal({
     done: [

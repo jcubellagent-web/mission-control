@@ -307,6 +307,82 @@ Approval needed:
     assert stress.validate(text, FakeLiveModule()) == []
 
 
+def test_validate_accepts_negative_telegram_health_findings() -> None:
+    text = """<b>JOSH 2.0 · COMPLETE</b>
+<code>Model: openai/gpt-5.6-luna | Route: Josh 2.0 Inbox | Why: read-only host assessment</code>
+
+<blockquote><b>Complete:</b> Yes - Telegram health assessed.</blockquote>
+
+<b>What was done:</b>
+• The local gateway is running and listening on port 18790, but the sandbox could not probe loopback.
+• The inspected launchd domain has no registered Telegram fast-ack entry.
+• The available Telegram logs are empty and last modified May 5.
+
+<b>Issues:</b>
+• Sandbox-local service checks are unverified.
+
+<b>Appropriate next steps:</b>
+• Use the host-native read-only probe for current service state.
+
+<b>Approval needed:</b>
+• None"""
+
+    assert stress.validate(text, FakeLiveModule()) == []
+
+
+def test_validate_rejects_negative_operational_findings_without_issues() -> None:
+    text = """<b>JOSH 2.0 · COMPLETE</b>
+<code>Model: openai/gpt-5.6-luna | Route: Josh 2.0 Inbox | Why: read-only host assessment</code>
+<blockquote><b>Complete:</b> Yes - Telegram health assessed.</blockquote>
+<b>What was done:</b>
+• The local gateway service is not running at its configured endpoint.
+• The Telegram Fast Ack watcher service is stopped in the launchd runtime.
+• The available Telegram delivery logs are empty and stale on the service host.
+<b>Issues:</b>
+• None
+<b>Appropriate next steps:</b>
+• No action needed.
+<b>Approval needed:</b>
+• None"""
+    problems = stress.validate(text, FakeLiveModule())
+    assert "risk or limitation requires a substantive Issues entry" in problems
+
+
+def test_validate_rejects_generic_state_words_as_concrete_findings() -> None:
+    text = """<b>JOSH 2.0 · COMPLETE</b>
+<code>Model: openai/gpt-5.6-luna | Route: Josh 2.0 Inbox | Why: read-only host assessment</code>
+<blockquote><b>Complete:</b> Yes - Telegram health assessed.</blockquote>
+<b>What was done:</b>
+• The gateway health assessment remains active while the requested work is being discussed.
+• The service status review is running while the requested work remains pending.
+• The runtime report was last modified May 5 while the request remained pending.
+<b>Issues:</b>
+• None
+<b>Appropriate next steps:</b>
+• No action needed.
+<b>Approval needed:</b>
+• None"""
+    problems = stress.validate(text, FakeLiveModule())
+    assert "Complete Yes requires at least 2 concrete findings or outcomes" in problems
+
+
+def test_validate_no_missing_helpers_as_a_positive_finding() -> None:
+    text = """<b>JOSH 2.0 · COMPLETE</b>
+<code>Model: openai/gpt-5.6-luna | Route: Josh 2.0 Inbox | Why: read-only host assessment</code>
+<blockquote><b>Complete:</b> Yes - Telegram health assessed.</blockquote>
+<b>What was done:</b>
+• The gateway service has no remaining issues after its current health check.
+• The runtime has no missing helpers in the canonical Telegram delivery path.
+• There are no service failures in the current host snapshot.
+<b>Issues:</b>
+• None
+<b>Appropriate next steps:</b>
+• No action needed.
+<b>Approval needed:</b>
+• None"""
+    assert stress.validate(text, FakeLiveModule()) == []
+
+
 def test_validate_accepts_concrete_topic17_repair_outcomes() -> None:
     text = """<pre>Model: openai-codex/gpt-5.6-sol
    | Route: JAIMES execution

@@ -224,6 +224,100 @@ def test_finished_assessment_stays_complete_when_the_finding_is_negative():
     assert "Issues:" in body
 
 
+def test_finished_telegram_health_assessment_accepts_negative_operational_findings():
+    rendered = card.build_completion_summary(
+        title="Assess Telegram health read-only",
+        status="done",
+        model="openai/gpt-5.6-luna",
+        route="route=luna; reason=read-only health/status check",
+        done=[
+            "The local gateway is running and listening on port 18790, but the sandbox could not probe loopback.",
+            "The inspected launchd domain has no registered Telegram fast-ack entry.",
+            "The available Telegram logs are empty and last modified May 5.",
+        ],
+        next_step="Use the host-native read-only probe for current service state.",
+        blocker="Sandbox-local service checks are unverified.",
+    )
+    body = plain_html(rendered)
+    assert "Complete: Yes" in body
+    assert "running and listening" in body
+    assert "has no registered" in body
+    assert "empty and last modified" in body
+
+
+def test_negative_operational_findings_cannot_claim_no_issues_or_no_action():
+    rendered = card.build_completion_summary(
+        title="Assess Telegram health read-only",
+        status="done",
+        model="openai/gpt-5.6-luna",
+        route="route=luna; reason=read-only health/status check",
+        done=[
+            "The local gateway service is not running at its configured endpoint.",
+            "The Telegram Fast Ack watcher service is stopped in the launchd runtime.",
+            "The available Telegram delivery logs are empty and stale on the service host.",
+        ],
+        next_step="No action needed.",
+        blocker="None",
+    )
+    body = plain_html(rendered)
+    assert "Complete: No" in body
+    assert "A reported risk or limitation was not included under Issues." in body
+    assert "did not capture enough concrete findings" not in body
+
+
+def test_generic_state_words_do_not_substitute_for_operational_findings():
+    rendered = card.build_completion_summary(
+        title="Assess Telegram health read-only",
+        status="done",
+        model="openai/gpt-5.6-luna",
+        route="route=luna; reason=read-only health/status check",
+        done=[
+            "The gateway health assessment remains active while the requested work is being discussed.",
+            "The service status review is running while the requested work remains pending.",
+            "The runtime report was last modified May 5 while the request remained pending.",
+        ],
+        next_step="No action needed.",
+        blocker="None",
+    )
+    assert "Complete: No" in plain_html(rendered)
+
+
+def test_process_prefixed_operational_findings_are_preserved():
+    rendered = card.build_completion_summary(
+        title="Assess Telegram health read-only",
+        status="done",
+        model="openai/gpt-5.6-luna",
+        route="route=luna; reason=read-only health/status check",
+        done=[
+            "Checked the gateway service is running and listening on its configured endpoint.",
+            "Checked the Fast Ack service is registered and active in the launchd runtime.",
+            "Confirmed the host health check passed with no remaining issues.",
+        ],
+        next_step="No action needed.",
+        blocker="None",
+    )
+    body = plain_html(rendered)
+    assert "Complete: Yes" in body
+    assert "Checked the gateway service is running" in body
+
+
+def test_no_missing_helpers_is_not_misclassified_as_an_operational_risk():
+    rendered = card.build_completion_summary(
+        title="Assess Telegram health read-only",
+        status="done",
+        model="openai/gpt-5.6-luna",
+        route="route=luna; reason=read-only health/status check",
+        done=[
+            "The gateway service has no remaining issues after its current health check.",
+            "The runtime has no missing helpers in the canonical Telegram delivery path.",
+            "There are no service failures in the current host snapshot.",
+        ],
+        next_step="No action needed.",
+        blocker="None",
+    )
+    assert "Complete: Yes" in plain_html(rendered)
+
+
 def test_live_progress_has_a_ten_cell_visual_bar():
     lines = card.progress_lines(
         ["Received Telegram task", "Objective determined: Inbox health check", "Asynchronous worker started"],
@@ -892,6 +986,43 @@ def test_final_text_file_rejects_noncanonical_conversational_text():
         path.write_text("Inbox routing is healthy &amp; ready.", encoding="utf-8")
         with pytest.raises(SystemExit, match="canonical ordered final contract"):
             card.load_final_text_file(str(path))
+
+
+def test_incomplete_coordinator_final_passes_real_terminal_file_contract_without_grader_prose():
+    coordinator_path = Path(__file__).resolve().parents[1] / "scripts" / "inbox_coordinator.py"
+    coordinator_spec = importlib.util.spec_from_file_location("inbox_coordinator_terminal_contract", coordinator_path)
+    coordinator = importlib.util.module_from_spec(coordinator_spec)
+    assert coordinator_spec and coordinator_spec.loader
+    coordinator_spec.loader.exec_module(coordinator)
+    weak_output = """Complete: Yes
+What was done:
+- Assessment complete.
+- Reviewed the requested assessment.
+- Prepared the result for delivery.
+Issues:
+- n/a
+Appropriate next steps:
+- No action needed.
+Approval needed:
+- n/a"""
+    rendered = coordinator.render_final_html(
+        {"routeId": "luna", "routingReason": "read-only health/status check"},
+        {
+            "executionVerified": True,
+            "modelVerified": True,
+            "actualProvider": "codex",
+            "actualModel": "gpt-5.6-luna",
+        },
+        weak_output,
+    )
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "final.html"
+        path.write_text(rendered, encoding="utf-8")
+        assert card.load_final_text_file(str(path)) == rendered
+    lowered = plain_html(rendered).lower()
+    assert "completion claim requires" not in lowered
+    assert "supplied summary contained" not in lowered
+    assert "did not include enough concrete" not in lowered
 
 
 def test_final_text_file_accepts_canonical_structured_text():

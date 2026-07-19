@@ -326,8 +326,14 @@ const STATUS_ONLY_PATTERNS = [
   /\bresponse formatting (?:was )?recovered\b/i,
 ];
 
-const CONCRETE_RESULT_PATTERN = /\b(?:added|changed|confirmed|created|determined|differ(?:s|ed|ent)?|caus(?:e|es|ed)|repair(?:s|ed)?|(?:en|dis)abl(?:e|es|ed|ing)|failed|fixed|found|healthy|identified|implemented|passed|rejected|removed|reproduced|resolved|restored|returned|supports?|unsupported|updated|verified\s+(?:that|correctly|successfully|\d+)|cannot|can['’]?t|does not|did not|risk|limitation|recommend(?:ed|ation)?|\d+\s+(?:tests?|checks?|cases?)\b)\b/i;
+//JAIMES: Negative operational findings are concrete outcomes; keep this in lockstep with the Python and stress validators.
+const CONCRETE_RESULT_PATTERN = /\b(?:added|changed|confirmed|created|determined|differ(?:s|ed|ent)?|caus(?:e|es|ed)|repair(?:s|ed)?|(?:en|dis)abl(?:e|es|ed|ing)|failed|fixed|found|healthy|identified|implemented|passed|rejected|removed|reproduced|resolved|restored|returned|supports?|unsupported|updated|verified\s+(?:that|correctly|successfully|\d+)|cannot|can['’]?t|could not|does not|did not|risk|limitation|recommend(?:ed|ation)?|\d+\s+(?:tests?|checks?|cases?)\b)\b/i;
+const OPERATIONAL_RESULT_PATTERN = /(?:\b(?:gateway|service|daemon|watcher|process|socket|connection|endpoint|api|launchd|runtime|bot|helper|logs?|files?|source|entry|entries|inventory|messages?|delivery)\b.{0,100}\b(?:running|listening|connected|reachable|responding|registered|loaded|active|healthy|stopped|offline|unreachable|empty|stale|missing|absent|unavailable|unverified|last\s+modified|has\s+no|have\s+no|there\s+(?:is|are)\s+no|port\s+\d{2,5})\b|\b(?:running|listening|connected|reachable|responding|registered|loaded|active|healthy|stopped|offline|unreachable|empty|stale|missing|absent|unavailable|unverified|last\s+modified|has\s+no|have\s+no|there\s+(?:is|are)\s+no|port\s+\d{2,5})\b.{0,100}\b(?:gateway|service|daemon|watcher|process|socket|connection|endpoint|api|launchd|runtime|bot|helper|logs?|files?|source|entry|entries|inventory|messages?|delivery)\b)/i;
+const OPERATIONAL_STATUS_FILLER_PATTERN = /\b(?:gateway|service|daemon|watcher|process|runtime|bot|helper|delivery)\s+(?:(?:health|status|operational|connectivity|delivery)\s+){0,2}(?:assessment|review|report|request|task|work)\s+(?:is\s+|was\s+|remains\s+)?(?:active|running|connected|complete|completed|done|last\s+modified)\b/i;
 const RISK_OR_LIMITATION_PATTERN = /\b(?:risk|limitation|cannot|can['’]?t|could not|does not|did not|unsupported|blocked|failed|failure|unable|do not|don['’]?t|avoid)\b/i;
+const OPERATIONAL_RISK_PATTERN = /(?:\b(?:gateway|service|daemon|watcher|process|socket|connection|endpoint|api|launchd|runtime|bot|helper|logs?|files?|source|entry|entries|inventory|messages?|delivery)\b.{0,100}\b(?:not\s+(?:running|listening|connected|reachable|responding|registered|loaded|active|healthy)|stopped|offline|unreachable|empty|stale|missing|absent|unavailable|unverified|has\s+no|have\s+no|there\s+(?:is|are)\s+no)\b|\b(?:not\s+(?:running|listening|connected|reachable|responding|registered|loaded|active|healthy)|stopped|offline|unreachable|empty|stale|missing|absent|unavailable|unverified|has\s+no|have\s+no|there\s+(?:is|are)\s+no)\b.{0,100}\b(?:gateway|service|daemon|watcher|process|socket|connection|endpoint|api|launchd|runtime|bot|helper|logs?|files?|source|entry|entries|inventory|messages?|delivery)\b)/i;
+const NEGATED_OPERATIONAL_RISK_PATTERN = /\b(?:no|not|without)\s+(?:\w+\s+){0,2}(?:stopped|offline|unreachable|empty|stale|missing|absent|unavailable|unverified)\b/gi;
+const POSITIVE_OPERATIONAL_ABSENCE_PATTERN = /\b(?:(?:has|have)\s+no|there\s+(?:is|are)\s+no)\s+(?:remaining\s+)?(?:service\s+)?(?:issues?|failures?|errors?|problems?|risks?|blockers?)\b/gi;
 const RECOMMENDATION_PATTERN = /\b(?:recommend(?:ed|ation)?|should|must|next step|follow[- ]?up|do not|don['’]?t|avoid|needs? to|requires?)\b/i;
 const UNVERIFIED_HEADER_PATTERN = /(?:\b(?:unverified|unknown|unset|not verified)\b|^(?:n\/?a|none)$)/i;
 
@@ -349,7 +355,16 @@ function isSubstantiveBullet(value) {
 }
 
 function hasConcreteResult(value) {
-  return CONCRETE_RESULT_PATTERN.test(String(value || ""));
+  const text = String(value || "");
+  if (OPERATIONAL_STATUS_FILLER_PATTERN.test(text)) return false;
+  return CONCRETE_RESULT_PATTERN.test(text) || OPERATIONAL_RESULT_PATTERN.test(text);
+}
+
+function hasOperationalRisk(value) {
+  const text = String(value || "")
+    .replace(NEGATED_OPERATIONAL_RISK_PATTERN, "")
+    .replace(POSITIVE_OPERATIONAL_ABSENCE_PATTERN, "");
+  return OPERATIONAL_RISK_PATTERN.test(text);
 }
 
 function summaryQualityFailure(items) {
@@ -450,7 +465,9 @@ export function parseCanonicalFinalSummary(content, options = {}) {
     if (qualityFailure) return finalFailure(qualityFailure, sections);
   }
   const resultText = doneItems.join(" ");
-  const hasRiskOrLimitation = RISK_OR_LIMITATION_PATTERN.test(`${resultText} ${nextSteps}`);
+  const combinedRiskText = `${resultText} ${nextSteps}`;
+  const hasRiskOrLimitation = RISK_OR_LIMITATION_PATTERN.test(combinedRiskText)
+    || hasOperationalRisk(combinedRiskText);
   const noActionNeeded = /^(?:no action needed)\.?$/i.test(nextSteps.trim());
   if (noIssue && hasRiskOrLimitation) return finalFailure("issues-required-for-risk-or-limitation", sections);
   if (noActionNeeded && (!noIssue || approvalNeeded || RECOMMENDATION_PATTERN.test(resultText))) {
@@ -560,7 +577,9 @@ export function buildRecoveryFinalSummary(content, expectedModel = "") {
       recoveryItems.push(disclosure);
     }
   }
-  const riskFragment = sourceFragments.find((item) => RISK_OR_LIMITATION_PATTERN.test(item));
+  const riskFragment = sourceFragments.find((item) => (
+    RISK_OR_LIMITATION_PATTERN.test(item) || hasOperationalRisk(item)
+  ));
   const recommendation = sourceFragments.find((item) => RECOMMENDATION_PATTERN.test(item));
   const model = stringValue(expectedModel, "unverified");
   const completeText = complete

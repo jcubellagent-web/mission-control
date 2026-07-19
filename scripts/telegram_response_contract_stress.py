@@ -56,8 +56,28 @@ CONCRETE_RESULT_PATTERN = re.compile(
     r"identified|implemented|passed|rejected|removed|reproduced|resolved|restored|returned|supports?|"
     r"unsupported|updated|reconcil(?:e|es|ed)|retir(?:e|es|ed)|replac(?:e|es|ed)|"
     r"rerout(?:e|es|ed)|mov(?:e|es|ed)|prevent(?:s|ed)?|preserv(?:e|es|ed)|"
-    r"verified\s+(?:that|correctly|successfully|\d+)|cannot|can['’]?t|does not|did not|risk|limitation|"
-    r"recommend(?:ed|ation)?|\d+\s+(?:tests?|checks?|cases?))\b",
+    r"verified\s+(?:that|correctly|successfully|\d+)|cannot|can['’]?t|could not|does not|did not|"
+    r"risk|limitation|recommend(?:ed|ation)?|\d+\s+(?:tests?|checks?|cases?))\b",
+    re.I,
+)
+OPERATIONAL_RESULT_PATTERN = re.compile(
+    r"(?:\b(?:gateway|service|daemon|watcher|process|socket|connection|endpoint|api|launchd|"
+    r"runtime|bot|helper|logs?|files?|source|entry|entries|inventory|messages?|delivery)\b.{0,100}"
+    r"\b(?:running|listening|connected|reachable|responding|registered|loaded|active|healthy|stopped|"
+    r"offline|unreachable|empty|stale|missing|absent|unavailable|unverified|last\s+modified|"
+    r"has\s+no|have\s+no|there\s+(?:is|are)\s+no|port\s+\d{2,5})\b|"
+    r"\b(?:running|listening|connected|reachable|responding|registered|loaded|active|healthy|stopped|"
+    r"offline|unreachable|empty|stale|missing|absent|unavailable|unverified|last\s+modified|"
+    r"has\s+no|have\s+no|there\s+(?:is|are)\s+no|port\s+\d{2,5})\b.{0,100}"
+    r"\b(?:gateway|service|daemon|watcher|process|socket|connection|endpoint|api|launchd|"
+    r"runtime|bot|helper|logs?|files?|source|entry|entries|inventory|messages?|delivery)\b)",
+    re.I,
+)
+OPERATIONAL_STATUS_FILLER_PATTERN = re.compile(
+    r"\b(?:gateway|service|daemon|watcher|process|runtime|bot|helper|delivery)\s+"
+    r"(?:(?:health|status|operational|connectivity|delivery)\s+){0,2}"
+    r"(?:assessment|review|report|request|task|work)\s+(?:is\s+|was\s+|remains\s+)?"
+    r"(?:active|running|connected|complete|completed|done|last\s+modified)\b",
     re.I,
 )
 RISK_OR_LIMITATION_PATTERN = re.compile(
@@ -65,6 +85,41 @@ RISK_OR_LIMITATION_PATTERN = re.compile(
     r"failure|unable|do not|don['’]?t|avoid)\b",
     re.I,
 )
+OPERATIONAL_RISK_PATTERN = re.compile(
+    r"(?:\b(?:gateway|service|daemon|watcher|process|socket|connection|endpoint|api|launchd|"
+    r"runtime|bot|helper|logs?|files?|source|entry|entries|inventory|messages?|delivery)\b.{0,100}"
+    r"\b(?:not\s+(?:running|listening|connected|reachable|responding|registered|loaded|active|healthy)|"
+    r"stopped|offline|unreachable|empty|stale|missing|absent|unavailable|unverified|"
+    r"has\s+no|have\s+no|there\s+(?:is|are)\s+no)\b|"
+    r"\b(?:not\s+(?:running|listening|connected|reachable|responding|registered|loaded|active|healthy)|"
+    r"stopped|offline|unreachable|empty|stale|missing|absent|unavailable|unverified|"
+    r"has\s+no|have\s+no|there\s+(?:is|are)\s+no)\b.{0,100}"
+    r"\b(?:gateway|service|daemon|watcher|process|socket|connection|endpoint|api|launchd|"
+    r"runtime|bot|helper|logs?|files?|source|entry|entries|inventory|messages?|delivery)\b)",
+    re.I,
+)
+NEGATED_OPERATIONAL_RISK_PATTERN = re.compile(
+    r"\b(?:no|not|without)\s+(?:\w+\s+){0,2}"
+    r"(?:stopped|offline|unreachable|empty|stale|missing|absent|unavailable|unverified)\b",
+    re.I,
+)
+POSITIVE_OPERATIONAL_ABSENCE_PATTERN = re.compile(
+    r"\b(?:(?:has|have)\s+no|there\s+(?:is|are)\s+no)\s+"
+    r"(?:remaining\s+)?(?:service\s+)?(?:issues?|failures?|errors?|problems?|risks?|blockers?)\b",
+    re.I,
+)
+
+
+def _has_operational_risk(value: str) -> bool:
+    text = NEGATED_OPERATIONAL_RISK_PATTERN.sub("", value)
+    text = POSITIVE_OPERATIONAL_ABSENCE_PATTERN.sub("", text)
+    return bool(OPERATIONAL_RISK_PATTERN.search(text))
+
+
+def _has_concrete_result(value: str) -> bool:
+    return not OPERATIONAL_STATUS_FILLER_PATTERN.search(value) and bool(
+        CONCRETE_RESULT_PATTERN.search(value) or OPERATIONAL_RESULT_PATTERN.search(value)
+    )
 RECOMMENDATION_PATTERN = re.compile(
     r"\b(?:recommend(?:ed|ation)?|should|must|next step|follow[- ]?up|do not|don['’]?t|avoid|"
     r"needs? to|requires?)\b",
@@ -266,10 +321,17 @@ def validate(text: str, module=None) -> list[str]:
             problems.append("Complete Yes requires at least 3 unique substantive findings")
         if any(_status_only(item) for item in done_items):
             problems.append("Complete Yes cannot use status or process filler as findings")
-        if sum(bool(CONCRETE_RESULT_PATTERN.search(item)) for item in done_items) < 2:
+        if sum(
+            _has_concrete_result(item)
+            for item in done_items
+        ) < 2:
             problems.append("Complete Yes requires at least 2 concrete findings or outcomes")
     result_text = " ".join(done_items)
-    if _no_issue(issues) and RISK_OR_LIMITATION_PATTERN.search(f"{result_text} {next_steps}"):
+    combined_risk_text = f"{result_text} {next_steps}"
+    if _no_issue(issues) and (
+        RISK_OR_LIMITATION_PATTERN.search(combined_risk_text)
+        or _has_operational_risk(combined_risk_text)
+    ):
         problems.append("risk or limitation requires a substantive Issues entry")
     if _no_action(next_steps) and (
         not _no_issue(issues)

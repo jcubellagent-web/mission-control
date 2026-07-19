@@ -34,6 +34,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 WORKSPACE = ROOT.parent
+RUNTIME_PROBE_SCRIPT = ROOT / "scripts" / "ecosystem_runtime_probe.py"
 #JAIMES: Inbox cards must use the host helper beside send_josh_reply.py so live Telegram sends keep their configured Bot API lane.
 WORK_CARD_SCRIPT = WORKSPACE / "scripts" / "josh_work_card.py"
 SEND_REPLY_SCRIPT = WORK_CARD_SCRIPT.with_name("send_josh_reply.py")
@@ -94,6 +95,17 @@ SECRET_VALUE_PATTERNS = (
     re.compile(r"(?im)\b(password|passwd|token|api[_ -]?key|secret)\s*[:=]\s*([^\s,;]{4,})"),
 )
 WORKER_OUTPUT_CONTRACT = """Return a concise structured result using exactly these plain-text sections in this order: Complete: Yes or No plus whether the objective was completed; What was done: 3-5 unique, source-supported bullets that state concrete findings, outcomes, or changes; Issues: bullets or n/a; Appropriate next steps: one evidence-based recommendation or next action; Approval needed: one approval bullet per issue when approval is genuinely required, otherwise n/a. For an assessment, review, or research request, surface the key findings and recommendation instead of merely saying the assessment or review finished. Generic process statements such as task complete, execution verified, result prepared, or summary delivered are not findings and must not be used to fill the bullets. Put every reported risk or limitation in Issues as well as the relevant finding. Use No action needed only when the findings explicitly support that conclusion and there are no issues, risks, limitations, approvals, or recommendations to act on. Do not include a Model line or claim a provider, model, host, worker, route, or latency; the verified delivery layer adds those facts. Never repeat or reveal passwords, tokens, API keys, cookies, OAuth payloads, or other secret values."""
+TELEGRAM_HEALTH_EVIDENCE_UNAVAILABLE_RESULT = """Complete: No — current Telegram health could not be verified.
+What was done:
+- The coordinator requested the host-native read-only runtime probe.
+- The probe did not return a parseable allowlisted service snapshot.
+- No sandbox-local failure was treated as evidence of a service outage.
+Issues:
+- Current gateway and fast-ack health remain unverified.
+Appropriate next steps:
+- Retry after the host-native read-only runtime probe is available.
+Approval needed:
+- n/a"""
 FINAL_SECTION_LABELS = {
     "complete": "Complete:",
     "done": "What was done:",
@@ -103,8 +115,8 @@ FINAL_SECTION_LABELS = {
 }
 
 EMPTY_FINAL_ITEMS = frozenset({"n/a", "na", "none"})
-MISSING_FINDINGS_ISSUE = "Detailed findings were not captured well enough to verify completion."
-RETRY_FINDINGS_NEXT_STEP = "Retry the task and require three to five concrete findings or outcomes plus an evidence-based recommendation."
+MISSING_FINDINGS_ISSUE = "The reported evidence was not sufficient to verify the result as complete."
+RETRY_FINDINGS_NEXT_STEP = "Retry after collecting the missing evidence or findings."
 STATUS_ONLY_FINAL_PATTERNS = tuple(
     re.compile(pattern, re.I)
     for pattern in (
@@ -132,12 +144,59 @@ CONCRETE_RESULT_SIGNAL = re.compile(
     re.I,
 )
 CONCRETE_EVIDENCE_SIGNAL = re.compile(
-    r"(?:https?://|(?:^|\s)/[A-Za-z0-9_.-]+/|\b[A-Za-z0-9_.-]+\.(?:py|js|ts|json|md|ya?ml)\b|\b\d+(?:\.\d+)+(?:\b|%))",
+    r"(?:https?://|(?:^|\s)/[A-Za-z0-9_.-]+/|\b[A-Za-z0-9_.-]+\.(?:py|js|ts|json|md|ya?ml)\b|"
+    r"\b\d+(?:\.\d+)?\s*(?:%|ms|seconds?|minutes?|hours?|bytes?|kb|mb|gb|tests?|checks?|cases?|errors?|messages?)\b|"
+    r"\b(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+\d{1,2}\b)",
+    re.I,
+)
+OPERATIONAL_RESULT_SIGNAL = re.compile(
+    r"(?:\b(?:gateway|service|daemon|watcher|process|socket|connection|endpoint|api|launchd|"
+    r"runtime|bot|helper|logs?|files?|source|entry|entries|inventory|messages?|delivery)\b.{0,100}"
+    r"\b(?:running|listening|connected|reachable|responding|registered|loaded|active|healthy|"
+    r"stopped|offline|unreachable|empty|stale|missing|absent|unavailable|unverified|"
+    r"last\s+modified|has\s+no|have\s+no|there\s+(?:is|are)\s+no|port\s+\d{2,5})\b|"
+    r"\b(?:running|listening|connected|reachable|responding|registered|loaded|active|healthy|"
+    r"stopped|offline|unreachable|empty|stale|missing|absent|unavailable|unverified|"
+    r"last\s+modified|has\s+no|have\s+no|there\s+(?:is|are)\s+no|port\s+\d{2,5})\b.{0,100}"
+    r"\b(?:gateway|service|daemon|watcher|process|socket|connection|endpoint|api|launchd|"
+    r"runtime|bot|helper|logs?|files?|source|entry|entries|inventory|messages?|delivery)\b)",
+    re.I,
+)
+OPERATIONAL_STATUS_FILLER_SIGNAL = re.compile(
+    r"\b(?:gateway|service|daemon|watcher|process|runtime|bot|helper|delivery)\s+"
+    r"(?:(?:health|status|operational|connectivity|delivery)\s+){0,2}"
+    r"(?:assessment|review|report|request|task|work)\s+(?:is\s+|was\s+|remains\s+)?"
+    r"(?:active|running|connected|complete|completed|done|last\s+modified)\b",
+    re.I,
+)
+OPERATIONAL_RISK_SIGNAL = re.compile(
+    r"(?:\b(?:gateway|service|daemon|watcher|process|socket|connection|endpoint|api|launchd|"
+    r"runtime|bot|helper|logs?|files?|source|entry|entries|inventory|messages?|delivery)\b.{0,100}"
+    r"\b(?:not\s+(?:running|listening|connected|reachable|responding|registered|loaded|active|healthy)|"
+    r"stopped|offline|unreachable|empty|stale|missing|absent|unavailable|unverified|"
+    r"has\s+no|have\s+no|there\s+(?:is|are)\s+no)\b|"
+    r"\b(?:not\s+(?:running|listening|connected|reachable|responding|registered|loaded|active|healthy)|"
+    r"stopped|offline|unreachable|empty|stale|missing|absent|unavailable|unverified|"
+    r"has\s+no|have\s+no|there\s+(?:is|are)\s+no)\b.{0,100}"
+    r"\b(?:gateway|service|daemon|watcher|process|socket|connection|endpoint|api|launchd|"
+    r"runtime|bot|helper|logs?|files?|source|entry|entries|inventory|messages?|delivery)\b)",
+    re.I,
+)
+NEGATED_OPERATIONAL_RISK_SIGNAL = re.compile(
+    r"\b(?:no|not|without)\s+(?:\w+\s+){0,2}"
+    r"(?:stopped|offline|unreachable|empty|stale|missing|absent|unavailable|unverified)\b",
+    re.I,
+)
+POSITIVE_OPERATIONAL_ABSENCE_SIGNAL = re.compile(
+    r"\b(?:(?:has|have)\s+no|there\s+(?:is|are)\s+no)\s+"
+    r"(?:remaining\s+)?(?:service\s+)?(?:issues?|failures?|errors?|problems?|risks?|blockers?)\b",
     re.I,
 )
 RISK_OR_LIMITATION_SIGNAL = re.compile(
     r"\b(?:risk|risks|risky|limitation|limitations|limited|cannot|can't|unable|unsupported|"
-    r"not supported|do not|don't|avoid|blocked|blocker|warning|caution)\b",
+    r"not supported|could\s+not|does\s+not|did\s+not|do not|don't|avoid|"
+    r"blocked|blocker|failed|failure|"
+    r"warning|caution)\b",
     re.I,
 )
 ACTION_OR_RECOMMENDATION_SIGNAL = re.compile(
@@ -145,6 +204,27 @@ ACTION_OR_RECOMMENDATION_SIGNAL = re.compile(
     re.I,
 )
 NO_ACTION_SIGNAL = re.compile(r"^no (?:further )?actions? (?:(?:is|are) )?(?:needed|required)\b", re.I)
+TELEGRAM_HEALTH_REQUEST = re.compile(
+    r"(?:\btelegram\b.{0,80}\b(?:health|healthy|status|running|connectivity|delivery)\b|"
+    r"\b(?:health|healthy|status|running|connectivity|delivery)\b.{0,80}\btelegram\b)",
+    re.I | re.S,
+)
+READ_ONLY_REQUEST = re.compile(
+    r"\b(?:read[- ]only|make\s+no\s+(?:changes?|edits?|modifications?)|"
+    r"no\s+(?:changes?|edits?|modifications?)|(?:do\s+not|don't)\s+"
+    r"(?:make\s+(?:any\s+)?)?(?:changes?|edits?|modifications?|repairs?|restarts?)|"
+    r"without\s+(?:making\s+(?:any\s+)?)?(?:changes?|edits?|modifications?))\b",
+    re.I,
+)
+MUTATION_SIGNAL = re.compile(
+    r"\b(?:fix|patch|changes?|edit|implement|deploy|repair|restart|recover|build|code)\b",
+    re.I,
+)
+NEGATED_MUTATION_SIGNAL = re.compile(
+    r"\b(?:make\s+no|no|do\s+not|don't|never|without)\s+(?:\w+\s+){0,2}"
+    r"(?:changes?|edits?|modifications?|fixes?|patches?|deployments?|repairs?|restarts?)\b",
+    re.I,
+)
 
 
 ROUTES: dict[str, dict[str, Any]] = {
@@ -395,11 +475,20 @@ def classify_route(prompt: str, privacy: str) -> tuple[str, str]:
         return "grok", "public current-events/social signal request"
     if any(token in lower for token in ("hard", "stabilize", "architecture", "migration", "integration", "debug", "root cause")):
         return "terra", "trusted execution/integration"
-    if any(token in lower for token in ("fix", "patch", "change", "edit", "implement", "deploy", "repair", "build", "code")):
+    mutation_text = NEGATED_MUTATION_SIGNAL.sub("", lower)
+    if MUTATION_SIGNAL.search(mutation_text):
         return "terra", "trusted execution/integration"
+    if READ_ONLY_REQUEST.search(lower) and re.search(r"\b(?:assess|check|health|inspect|status|verify)\b", lower):
+        return "luna", "read-only health/status check"
     if any(token in lower for token in ("review", "summarize", "summary", "digest", "large context", "read this")):
         return "gemini", "dashboard-safe review/summarization"
     return "luna", "fast Inbox coordination"
+
+
+def read_only_execution_requested(prompt: str) -> bool:
+    text = str(prompt or "")
+    mutation_text = NEGATED_MUTATION_SIGNAL.sub("", text.lower())
+    return bool(READ_ONLY_REQUEST.search(text) and not MUTATION_SIGNAL.search(mutation_text))
 
 
 def health(route_id: str, injected: dict[str, bool] | None = None) -> bool:
@@ -668,9 +757,19 @@ def is_substantive_final_item(value: str) -> bool:
 
 def is_concrete_result_item(value: str) -> bool:
     text = clean_final_item(value)
+    if OPERATIONAL_STATUS_FILLER_SIGNAL.search(text):
+        return False
     return is_substantive_final_item(text) and bool(
-        CONCRETE_RESULT_SIGNAL.search(text) or CONCRETE_EVIDENCE_SIGNAL.search(text)
+        CONCRETE_RESULT_SIGNAL.search(text)
+        or CONCRETE_EVIDENCE_SIGNAL.search(text)
+        or OPERATIONAL_RESULT_SIGNAL.search(text)
     )
+
+
+def has_operational_risk(value: str) -> bool:
+    text = NEGATED_OPERATIONAL_RISK_SIGNAL.sub("", clean_final_item(value))
+    text = POSITIVE_OPERATIONAL_ABSENCE_SIGNAL.sub("", text)
+    return bool(OPERATIONAL_RISK_SIGNAL.search(text))
 
 
 def no_action_item(value: str) -> bool:
@@ -678,21 +777,148 @@ def no_action_item(value: str) -> bool:
 
 
 def incomplete_summary_done_items(source_items: list[str], concrete_count: int) -> list[str]:
-    """Preserve real details and fill shape only with transparent deficiency facts."""
-    preserved = [item for item in source_items if is_substantive_final_item(item)][:4]
-    deficiency_facts = [
-        f"The supplied summary contained {len(source_items)} unique result bullet(s), including {concrete_count} concrete finding(s) or outcome(s).",
-        "Completion requires three to five substantive source-provided bullets with concrete findings or outcomes.",
-        "No missing findings were inferred or invented.",
+    """Preserve reported details without exposing validator bookkeeping."""
+    _ = concrete_count
+    preserved = [item for item in source_items if is_substantive_final_item(item)][:5]
+    if len(preserved) >= 3:
+        return preserved
+    user_facing_limitations = [
+        "The worker response did not provide enough source-supported findings to establish the requested result.",
+        "No unreported findings were inferred or presented as facts.",
+        "The result remains unverified until the missing evidence is collected.",
     ]
-    combined = unique_final_items([*preserved, *deficiency_facts], limit=5)
-    if not any(item in deficiency_facts for item in combined):
-        combined = unique_final_items([*preserved[:4], deficiency_facts[0]], limit=5)
-    for fact in deficiency_facts:
-        if len(combined) >= 3:
-            break
-        combined = unique_final_items([*combined, fact], limit=5)
-    return combined
+    combined = unique_final_items([*preserved, *user_facing_limitations], limit=5)
+    return combined if len(combined) >= 3 else user_facing_limitations
+
+
+#JAIMES: Keep Codex sandboxed; runtime-health answers use only allowlisted host-native --no-write evidence and fail closed when it is absent.
+def telegram_health_host_context(prompt: str) -> dict[str, Any] | None:
+    """Collect a bounded host-native snapshot for Telegram health requests.
+
+    The Codex worker stays sandboxed. Only an allowlist of dashboard-safe probe
+    fields crosses into its prompt, so sandbox EPERM results cannot masquerade
+    as the service-owning host's current state.
+    """
+    prompt_text = str(prompt or "")
+    mutation_text = NEGATED_MUTATION_SIGNAL.sub("", prompt_text.lower())
+    if not TELEGRAM_HEALTH_REQUEST.search(prompt_text) or MUTATION_SIGNAL.search(mutation_text):
+        return None
+    unavailable = {
+        "available": False,
+        "instruction": "Host-native Telegram health evidence was unavailable; do not infer service health or claim the assessment complete.",
+    }
+    if not RUNTIME_PROBE_SCRIPT.exists():
+        return unavailable
+    try:
+        proc = subprocess.run(
+            [sys.executable, str(RUNTIME_PROBE_SCRIPT), "--no-write"],
+            cwd=ROOT,
+            stdin=subprocess.DEVNULL,
+            capture_output=True,
+            text=True,
+            timeout=12,
+            check=False,
+        )
+        payload = json.loads(proc.stdout or "")
+    except (OSError, subprocess.SubprocessError, TypeError, ValueError, json.JSONDecodeError):
+        return unavailable
+    if not isinstance(payload, dict) or not isinstance(payload.get("ok"), bool):
+        return unavailable
+    checked_at = payload.get("checkedAt")
+    checked_time = parse_utc(checked_at) if isinstance(checked_at, str) else None
+    current_time = parse_utc(utc_now())
+    if checked_time is None or current_time is None:
+        return unavailable
+    age_seconds = (current_time - checked_time).total_seconds()
+    if age_seconds > 300 or age_seconds < -60:
+        return unavailable
+    checks = payload.get("checks")
+    if not isinstance(checks, dict):
+        return unavailable
+    allowed_checks: dict[str, dict[str, Any]] = {}
+    required_checks = (
+        "gateway",
+        "telegramFastAck",
+        "telegramWorkCardHelper",
+        "telegramInboxClaimHelper",
+        "sourceFreshness",
+    )
+    for key in required_checks:
+        row = checks.get(key)
+        if not isinstance(row, dict) or not isinstance(row.get("ok"), bool):
+            return unavailable
+        safe_row: dict[str, Any] = {"ok": row["ok"]}
+        detail_value = row.get("detail")
+        detail = clean_final_item(detail_value, limit=120) if isinstance(detail_value, str) else ""
+        if detail:
+            safe_row["detail"] = detail
+        latency = row.get("latencyMs")
+        if isinstance(latency, (int, float)) and not isinstance(latency, bool) and 0 <= latency <= 60_000:
+            safe_row["latencyMs"] = round(float(latency), 1)
+        allowed_checks[key] = safe_row
+    return {
+        "available": True,
+        "checkedAt": checked_at,
+        "ok": all(row["ok"] for row in allowed_checks.values()),
+        "checks": allowed_checks,
+        "scope": "Josh 2.0 host services only; this does not itself prove end-to-end Telegram delivery.",
+    }
+
+
+def render_telegram_health_result(host_context: dict[str, Any]) -> str:
+    """Render host-health findings deterministically from the allowlisted snapshot."""
+    checks = host_context["checks"]
+
+    def finding(label: str, key: str) -> str:
+        row = checks[key]
+        state = "passed" if row["ok"] else "failed"
+        detail = clean_final_item(row.get("detail", ""), limit=120)
+        suffix = f": {detail}" if detail else "."
+        return f"The {label} check {state}{suffix}"
+
+    support_keys = ("telegramWorkCardHelper", "telegramInboxClaimHelper", "sourceFreshness")
+    support_passed = sum(1 for key in support_keys if checks[key]["ok"])
+    done = [
+        finding("gateway", "gateway"),
+        finding("Telegram Fast Ack service", "telegramFastAck"),
+        f"The work-card helper, Inbox claim helper, and source-freshness checks passed {support_passed} of 3 checks.",
+    ]
+    failed = [
+        finding(label, key)
+        for label, key in (
+            ("gateway", "gateway"),
+            ("Telegram Fast Ack service", "telegramFastAck"),
+            ("work-card helper", "telegramWorkCardHelper"),
+            ("Inbox claim helper", "telegramInboxClaimHelper"),
+            ("source freshness", "sourceFreshness"),
+        )
+        if not checks[key]["ok"]
+    ]
+    issues = [*failed, "This host-service snapshot does not verify end-to-end Telegram message delivery."]
+    next_step = (
+        "Use one human-origin Telegram message only if end-to-end delivery confirmation is required."
+        if not failed
+        else "Review the failed host checks before relying on Telegram delivery."
+    )
+    return "\n".join([
+        "Complete: Yes — the current Josh 2.0 host-service assessment completed.",
+        "What was done:",
+        *(f"- {item}" for item in done),
+        "Issues:",
+        *(f"- {item}" for item in issues),
+        "Appropriate next steps:",
+        f"- {next_step}",
+        "Approval needed:",
+        "- n/a",
+    ])
+
+
+def enforce_host_evidence_gate(output: str, host_context: dict[str, Any] | None) -> str:
+    if host_context is not None and host_context.get("available") is False:
+        return TELEGRAM_HEALTH_EVIDENCE_UNAVAILABLE_RESULT
+    if host_context is not None and host_context.get("available") is True:
+        return render_telegram_health_result(host_context)
+    return str(output or "")
 
 
 def parse_model_sections(output: str) -> dict[str, Any]:
@@ -759,7 +985,10 @@ def parse_model_sections(output: str) -> dict[str, Any]:
             quality_issues.append("The completion claim did not include an evidence-based next step.")
 
         reported_text = " ".join([*source_done, *source_next, *source_approval])
-        reported_risk = bool(RISK_OR_LIMITATION_SIGNAL.search(reported_text))
+        reported_risk = bool(
+            RISK_OR_LIMITATION_SIGNAL.search(reported_text)
+            or has_operational_risk(reported_text)
+        )
         if reported_risk and not source_issues:
             quality_issues.append("A reported risk or limitation was not reflected in Issues.")
 
@@ -788,7 +1017,7 @@ def parse_model_sections(output: str) -> dict[str, Any]:
         }
 
     if complete or not complete_declared:
-        issues = unique_final_items([MISSING_FINDINGS_ISSUE, *source_issues, *quality_issues])
+        issues = unique_final_items([*source_issues, MISSING_FINDINGS_ISSUE])
         return {
             "complete": False,
             "completeDeclared": complete_declared,
@@ -953,7 +1182,7 @@ def spawn_worker(job_id: str, prompt: str | None = None) -> None:
         proc.stdin.close()
 
 
-LLM_EXECUTOR_CODE = r'''import json, sys
+LLM_EXECUTOR_CODE = r'''import json, os, subprocess, sys, tempfile, time
 from pathlib import Path
 sys.path.insert(0, str(Path.home() / ".openclaw" / "workspace" / "scripts"))
 import llm_router
@@ -961,8 +1190,49 @@ cfg = json.loads(sys.argv[1])
 timeout = int(sys.argv[2])
 prompt = sys.stdin.read()
 kind = cfg["executor"]
+
+def ask_codex_read_only():
+    if llm_router._codex_disabled():
+        raise RuntimeError("Codex routing disabled by LLM_ROUTER_DISABLE_CODEX")
+    if not llm_router._codex_host_allowed():
+        raise RuntimeError("Codex local routing is not allowed on this host")
+    if not llm_router._codex_available():
+        raise RuntimeError("Codex CLI/config not available")
+    started = time.monotonic()
+    workdir = llm_router._codex_workdir()
+    fd, output_path_str = tempfile.mkstemp(prefix="inbox_codex_read_only_", suffix=".txt")
+    os.close(fd)
+    output_path = Path(output_path_str)
+    cmd = [
+        "codex", "exec", "-m", cfg["model"], "-C", str(workdir),
+        "--skip-git-repo-check", "--sandbox", "read-only", "--ephemeral",
+        "--color", "never", "-o", str(output_path), prompt,
+    ]
+    try:
+        proc = subprocess.run(
+            cmd, capture_output=True, text=True, timeout=max(timeout, 120), check=True,
+        )
+        text = output_path.read_text().strip() if output_path.exists() else ""
+        if not text:
+            text = (proc.stdout or proc.stderr or "").strip()
+    except subprocess.CalledProcessError as exc:
+        detail = (exc.stderr or exc.stdout or "").strip()
+        raise RuntimeError(f"Codex CLI failed: {detail[-500:]}") from exc
+    finally:
+        output_path.unlink(missing_ok=True)
+    if not text:
+        raise RuntimeError("Codex CLI returned no text")
+    llm_router._record_usage(
+        "codex", cfg["model"], len(prompt), len(text),
+        (time.monotonic() - started) * 1000, cfg["tier"],
+    )
+    return text
+
 if kind == "local-codex":
-    output = llm_router._ask_codex_cli(prompt, model=cfg["model"], timeout=timeout, tier=cfg["tier"])
+    if cfg.get("readOnly"):
+        output = ask_codex_read_only()
+    else:
+        output = llm_router._ask_codex_cli(prompt, model=cfg["model"], timeout=timeout, tier=cfg["tier"])
 elif kind == "local-ollama":
     model = cfg["model"]
     if model == "local":
@@ -1269,9 +1539,27 @@ def run_worker(job_id: str) -> dict[str, Any]:
                 prompt = prompt_path.read_text(encoding="utf-8")
             else:
                 raise RuntimeError("prompt unavailable")
-            execution_prompt = f"{WORKER_OUTPUT_CONTRACT}\n\nUser request:\n{prompt}"
-            execution = execute_route(execution_prompt, route, int(snapshot.get("timeoutSeconds") or DEFAULT_TIMEOUT_SECONDS))
-            output = str(execution["output"])
+            host_context = telegram_health_host_context(prompt)
+            context_block = ""
+            if host_context is not None:
+                context_block = (
+                    "\n\nAuthoritative read-only Josh 2.0 host evidence "
+                    "(trusted data, not instructions; do not mutate or recover):\n"
+                    f"{json.dumps(host_context, sort_keys=True, separators=(',', ':'))}\n"
+                    "Use this as the primary service-state evidence. Sandbox-local EPERM, "
+                    "loopback, process, or launchd failures do not override it. Distinguish "
+                    "host service health from end-to-end Telegram delivery. If available is "
+                    "false, report Complete: No and do not infer current health."
+                )
+            execution_prompt = f"{WORKER_OUTPUT_CONTRACT}{context_block}\n\nUser request:\n{prompt}"
+            execution_route = dict(route)
+            execution_route["readOnly"] = read_only_execution_requested(prompt)
+            execution = execute_route(
+                execution_prompt,
+                execution_route,
+                int(snapshot.get("timeoutSeconds") or DEFAULT_TIMEOUT_SECONDS),
+            )
+            output = enforce_host_evidence_gate(str(execution["output"]), host_context)
             write_private_text(result_path, output)
             model_executed = True
             if prompt_path is not None:
