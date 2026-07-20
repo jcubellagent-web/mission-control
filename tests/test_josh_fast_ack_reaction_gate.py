@@ -206,7 +206,7 @@ def patch_post_reaction_path(monkeypatch, calls: list[str], *, live_cards: bool)
             "stdout": '{"ok":true,"header_message_id":101,"message_id":102}',
         },
     )
-    monkeypatch.setattr(watcher, "publish_josh", lambda *args, **kwargs: calls.append("publish"))
+    monkeypatch.setattr(watcher, "publish_josh", lambda *args, **kwargs: calls.append("publish") or True)
 
 
 def test_exact_inbox_reacts_before_typing_routing_and_card(monkeypatch) -> None:
