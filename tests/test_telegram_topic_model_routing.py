@@ -72,3 +72,17 @@ def test_openclaw_fresh_lane_uses_real_main_agent_and_provider_prefix() -> None:
     command = model_lane.command_for(Args(), route)
     assert command[command.index("--agent") + 1] == "main"
     assert command[command.index("--model") + 1] == "ollama/qwen2.5:7b"
+
+
+def test_remote_specialists_use_current_host_interfaces() -> None:
+    coordinator = load_module("inbox_coordinator_executor", ROOT / "scripts" / "inbox_coordinator.py")
+    assert "_ask_gemini(prompt, model=cfg[\"model\"], tier=cfg[\"tier\"])" in coordinator.LLM_EXECUTOR_CODE
+    assert "_ask_gemini(prompt, model=cfg[\"model\"], timeout=" not in coordinator.LLM_EXECUTOR_CODE
+    command, host = coordinator.executor_command(coordinator.ROUTES["grok"], 60)
+    joined = " ".join(command)
+    assert host == "jaimes"
+    assert "grok" in joined
+    assert "op_agent_env.sh" not in joined
+    assert coordinator.ROUTES["grok"]["executor"] == "remote-grok-cli"
+    assert coordinator.ROUTES["grok"]["model"] == "grok-4.5"
+    assert '"--model", str(cfg.get("model") or "grok-4.5")' in coordinator.GROK_EXECUTOR_CODE

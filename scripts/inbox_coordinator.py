@@ -320,12 +320,12 @@ ROUTES: dict[str, dict[str, Any]] = {
     },
     "grok": {
         "provider": "xai",
-        "model": "grok-4-fast-non-reasoning",
+        "model": "grok-4.5",
         "tier": "grok-fast",
         "worker": "jaimes-grok-public",
         "host": "jaimes",
         "role": "X/current-events specialist",
-        "executor": "remote-llm-router-op",
+        "executor": "remote-grok-cli",
     },
 }
 
@@ -548,12 +548,7 @@ def health(route_id: str, injected: dict[str, bool] | None = None) -> bool:
         except Exception:
             return False
     if route_id == "grok":
-        return remote_check(
-            "test -x /opt/homebrew/bin/op && "
-            "test -x ~/.openclaw/workspace/scripts/op_agent_env.sh && "
-            "/usr/bin/security find-generic-password -a \"$USER\" "
-            "-s com.josh.agent-ecosystem.op-service-account.JC-Agents-Mac-mini >/dev/null 2>&1"
-        )
+        return remote_check("test -x ~/.local/bin/grok && ~/.local/bin/grok models >/dev/null 2>&1")
     return False
 
 
@@ -1267,7 +1262,7 @@ elif kind == "local-ollama":
     output = llm_router._ask_ollama(prompt, model=model, timeout=timeout, tier=cfg["tier"])
     cfg["model"] = model
 elif kind == "remote-llm-router":
-    output = llm_router._ask_gemini(prompt, model=cfg["model"], timeout=timeout, tier=cfg["tier"])
+    output = llm_router._ask_gemini(prompt, model=cfg["model"], tier=cfg["tier"])
 elif kind == "remote-llm-router-op":
     output = llm_router._ask_xai(prompt, model=cfg["model"], timeout=timeout, tier=cfg["tier"])
 else:
@@ -1291,12 +1286,38 @@ try:
         usage = json.load(open(usage_path, encoding="utf-8"))
     except Exception:
         usage = {}
-    model = str(usage.get("model") or usage.get("model_id") or "")
-    provider = str(usage.get("provider") or "jaimes")
+    model = str(usage.get("model") or usage.get("model_id") or cfg.get("model") or "")
+    provider = str(usage.get("provider") or cfg.get("provider") or "jaimes")
     print(json.dumps({"output": proc.stdout.strip(), "provider": provider, "model": model, "modelVerified": bool(model)}))
 finally:
     try: os.unlink(usage_path)
     except OSError: pass
+'''
+
+
+GROK_EXECUTOR_CODE = r'''import json, subprocess, sys
+cfg = json.loads(sys.argv[1])
+timeout = int(sys.argv[2])
+prompt = sys.stdin.read()
+proc = subprocess.run(
+    [
+        "/Users/jc_agent/.local/bin/grok",
+        "-p", prompt,
+        "--output-format", "json",
+        "--no-subagents",
+        "--max-turns", "2",
+        "--verbatim",
+        "--no-plan",
+        "--tools", "",
+        "--model", str(cfg.get("model") or "grok-4.5"),
+    ],
+    capture_output=True, text=True, timeout=timeout, check=True,
+)
+payload = json.loads(proc.stdout)
+output = str(payload.get("text") or "").strip()
+if not output:
+    raise RuntimeError("Grok CLI returned empty output")
+print(json.dumps({"output": output, "provider": "xai", "model": cfg.get("model") or "grok-4.5", "modelVerified": True}))
 '''
 
 
@@ -1306,15 +1327,13 @@ def executor_command(route: dict[str, Any], timeout: int) -> tuple[list[str], st
     if executor in {"local-codex", "local-ollama"}:
         return [sys.executable, "-c", LLM_EXECUTOR_CODE, cfg, str(timeout)], "josh2"
 
-    runner = HERMES_EXECUTOR_CODE if executor == "remote-hermes" else LLM_EXECUTOR_CODE
+    if executor == "remote-grok-cli":
+        runner = GROK_EXECUTOR_CODE
+    elif executor == "remote-hermes":
+        runner = HERMES_EXECUTOR_CODE
+    else:
+        runner = LLM_EXECUTOR_CODE
     remote_python = ["/opt/homebrew/bin/python3", "-c", runner, cfg, str(timeout)]
-    if executor == "remote-llm-router-op":
-        remote_python = [
-            f"{JAIMES_WORKSPACE}/scripts/op_agent_env.sh",
-            f"{JAIMES_WORKSPACE}/config/agent-ecosystem.op.env",
-            "--",
-            *remote_python,
-        ]
     remote_command = " ".join(shlex.quote(part) for part in remote_python)
     return [
         "ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=5",
