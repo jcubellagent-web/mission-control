@@ -598,7 +598,12 @@ def remote_specialist_available(provider: str, model: str = "") -> bool:
     if Path.home().name == "jc_agent":
         return False
     if provider == "gemini":
-        command = "test -x ~/.local/bin/hermes && grep -q '^[[:space:]]*antigravity:' ~/.hermes/config.yaml"
+        requested = str(model or "agy-gemini-3.5-flash").lower()
+        command = (
+            "curl -fsS --max-time 10 http://127.0.0.1:11435/v1/models "
+            "-H 'Authorization: Bearer agy-local' "
+            f"| grep -Fq {shlex.quote(requested)}"
+        )
     elif provider == "ollama" and str(model or "").lower().endswith(":cloud"):
         payload = json.dumps({
             "model": str(model).lower().removeprefix("ollama/"),
@@ -630,12 +635,24 @@ def remote_specialist_available(provider: str, model: str = "") -> bool:
 
 def explicit_route_unavailable(provider: str, model: str = "") -> str:
     if provider == "gemini":
-        hermes = Path.home() / ".local" / "bin" / "hermes"
-        config = Path.home() / ".hermes" / "config.yaml"
-        configured = config.exists() and "antigravity:" in config.read_text(errors="ignore")
-        if hermes.exists() and configured:
-            return ""
-        return "" if remote_specialist_available(provider, model) else "Antigravity Hermes provider is not configured on this host or JAIMES"
+        if Path.home().name == "jc_agent":
+            request = urllib.request.Request(
+                "http://127.0.0.1:11435/v1/models",
+                headers={"Authorization": "Bearer agy-local"},
+            )
+            try:
+                with urllib.request.urlopen(request, timeout=3) as response:
+                    payload = json.loads(response.read())
+                names = {
+                    str(row.get("id") or "").lower()
+                    for row in payload.get("data", []) if isinstance(row, dict)
+                }
+                requested = str(model or "agy-gemini-3.5-flash").lower()
+                if requested in names:
+                    return ""
+            except Exception:
+                pass
+        return "" if remote_specialist_available(provider, model) else "Antigravity subscription proxy is unavailable on JAIMES"
     if provider == "xai":
         row = provider_budget("xai")
         auth = str(row.get("authStatus") or "").lower()

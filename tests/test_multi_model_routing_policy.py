@@ -115,7 +115,8 @@ def test_direct_specialist_commands_cannot_silently_use_gpt(monkeypatch) -> None
     gemini = lane.command_for(model_args(transport="hermes"), {
         "agent": "jaimes", "modelRoute": {"provider": "gemini", "model": "agy-gemini-3.5-flash"},
     })
-    assert gemini[:5] == ["hermes", "chat", "--provider", "antigravity", "-m"]
+    assert gemini[1].endswith("scripts/antigravity_pass.py")
+    assert "SENSITIVE_SENTINEL" not in lane.command_preview(gemini)
 
     grok = lane.command_for(model_args(transport="hermes"), {
         "agent": "jaimes", "modelRoute": {"provider": "xai", "model": "grok-4.5"},
@@ -129,6 +130,36 @@ def test_direct_specialist_commands_cannot_silently_use_gpt(monkeypatch) -> None
     })
     assert glm[1].endswith("scripts/ollama_cloud_pass.py")
     assert "SENSITIVE_SENTINEL" not in lane.command_preview(glm)
+
+
+def test_antigravity_pass_uses_local_proxy_and_verifies_model(monkeypatch) -> None:
+    helper = load_module("antigravity_pass", ROOT / "scripts" / "antigravity_pass.py")
+    seen = {}
+
+    class Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return False
+
+        def read(self):
+            return json.dumps({
+                "model": "agy-gemini-3.5-flash",
+                "choices": [{"message": {"content": "GEMINI_OK"}}],
+            }).encode()
+
+    def fake_urlopen(request, timeout):
+        seen["url"] = request.full_url
+        seen["payload"] = json.loads(request.data)
+        seen["timeout"] = timeout
+        return Response()
+
+    monkeypatch.setattr(helper.urllib.request, "urlopen", fake_urlopen)
+    output = helper.run("agy-gemini-3.5-flash", "safe prompt", 30)
+    assert output == "GEMINI_OK"
+    assert seen["url"] == "http://127.0.0.1:11435/v1/chat/completions"
+    assert seen["payload"]["model"] == "agy-gemini-3.5-flash"
 
 
 def test_shared_skill_requires_real_verified_dispatch() -> None:

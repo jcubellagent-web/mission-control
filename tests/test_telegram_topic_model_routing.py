@@ -81,8 +81,9 @@ def test_remote_specialists_use_current_host_interfaces() -> None:
     assert coordinator.ROUTES["gemini"]["executor"] == "remote-antigravity"
     assert coordinator.ROUTES["gemini"]["model"] == "agy-gemini-3.5-flash"
     assert coordinator.ROUTES["gemini-pro"]["model"] == "agy-gemini-3.1-pro"
-    assert '"--provider", "antigravity"' in coordinator.ANTIGRAVITY_EXECUTOR_CODE
-    assert "refusing silent GPT fallback" in coordinator.ANTIGRAVITY_EXECUTOR_CODE
+    assert "127.0.0.1:11435/v1" in coordinator.ANTIGRAVITY_EXECUTOR_CODE
+    assert "unexpected model" in coordinator.ANTIGRAVITY_EXECUTOR_CODE
+    assert "hermes" not in coordinator.ANTIGRAVITY_EXECUTOR_CODE.lower()
     command, host = coordinator.executor_command(coordinator.ROUTES["grok"], 60)
     joined = " ".join(command)
     assert host == "jaimes"

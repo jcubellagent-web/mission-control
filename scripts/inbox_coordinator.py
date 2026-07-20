@@ -547,7 +547,12 @@ def health(route_id: str, injected: dict[str, bool] | None = None) -> bool:
             and run_check(["codex", "--version"], timeout=3)
         )
     if route_id in {"gemini", "gemini-pro"}:
-        return remote_check("test -x ~/.local/bin/hermes && grep -q '^[[:space:]]*antigravity:' ~/.hermes/config.yaml")
+        model = ROUTES[route_id]["model"]
+        return remote_check(
+            "curl -fsS --max-time 10 http://127.0.0.1:11435/v1/models "
+            "-H 'Authorization: Bearer agy-local' "
+            f"| grep -Fq {shlex.quote(model)}"
+        )
     if route_id == "jaimes":
         return remote_check("test -x ~/.local/bin/hermes")
     if route_id in {"ollama", "glm"}:
@@ -1316,34 +1321,44 @@ finally:
 '''
 
 
-ANTIGRAVITY_EXECUTOR_CODE = r'''import json, subprocess, sys
+ANTIGRAVITY_EXECUTOR_CODE = r'''import json, os, sys, urllib.error, urllib.request
 cfg = json.loads(sys.argv[1])
 timeout = int(sys.argv[2])
 prompt = sys.stdin.read()
-proc = subprocess.run(
-    [
-        "/Users/jc_agent/.local/bin/hermes", "chat",
-        "--provider", "antigravity",
-        "-m", str(cfg["model"]),
-        "-Q", "--source", "telegram-antigravity",
-        "-q", prompt,
-    ],
-    capture_output=True, text=True, timeout=timeout, check=False,
+model = str(cfg["model"])
+base_url = os.environ.get("ANTIGRAVITY_BASE_URL", "http://127.0.0.1:11435/v1").rstrip("/")
+token = os.environ.get("ANTIGRAVITY_LOCAL_TOKEN", "agy-local")
+payload = json.dumps({
+    "model": model,
+    "messages": [{"role": "user", "content": prompt}],
+    "stream": False,
+}).encode("utf-8")
+request = urllib.request.Request(
+    f"{base_url}/chat/completions", data=payload,
+    headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
+    method="POST",
 )
-combined = f"{proc.stdout}\n{proc.stderr}".lower()
-if proc.returncode != 0:
-    raise RuntimeError((proc.stderr or proc.stdout or "Antigravity failed")[-500:])
-if "switching to fallback" in combined or "primary auth failed" in combined:
-    raise RuntimeError("Antigravity authentication failed; refusing silent GPT fallback")
-lines = [
-    line for line in proc.stdout.splitlines()
-    if not line.strip().startswith("session_id:")
-    and not line.strip().startswith("Warning: Unknown toolsets:")
-]
-output = "\n".join(lines).strip()
+try:
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+        result = json.loads(response.read())
+except urllib.error.HTTPError as exc:
+    raise RuntimeError(f"Antigravity Gemini request failed with HTTP {exc.code}") from exc
+actual_model = str(result.get("model") or "").strip()
+if actual_model and actual_model != model:
+    raise RuntimeError(f"Antigravity returned unexpected model {actual_model}")
+choices = result.get("choices") or []
+message = (choices[0].get("message") or {}) if choices and isinstance(choices[0], dict) else {}
+content = message.get("content")
+if isinstance(content, list):
+    output = "\n".join(
+        str(item.get("text") or "") for item in content
+        if isinstance(item, dict) and item.get("type") == "text"
+    ).strip()
+else:
+    output = str(content or "").strip()
 if not output:
     raise RuntimeError("Antigravity returned empty output")
-print(json.dumps({"output": output, "provider": "gemini", "model": cfg["model"], "modelVerified": True}))
+print(json.dumps({"output": output, "provider": "gemini", "model": model, "modelVerified": True}))
 '''
 
 

@@ -165,8 +165,8 @@ def command_for(args: argparse.Namespace, route: dict[str, Any]) -> list[str]:
 
     if provider == "gemini":
         return [
-            "hermes", "chat", "--provider", "antigravity", "-m", model,
-            "-Q", "--source", source, "-q", prompt,
+            sys.executable, str(ROOT / "scripts" / "antigravity_pass.py"),
+            "--model", model, "--prompt", prompt,
         ]
 
     if provider == "xai":
