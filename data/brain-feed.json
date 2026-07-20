@@ -3,17 +3,17 @@
   "agent": "JOSH 2.0",
   "active": true,
   "reportedActive": false,
-  "status": "active",
-  "objective": "Receiving: diagnose why the fresh-session request was rejected",
+  "status": "done",
+  "objective": "Done: verified fresh Topic 1 session; prior card was a false worker-evidence failure",
   "detail": "The helper did not prove the required Topic 1 live-card receipt; no worker was queued and native fallback remains available.",
-  "updatedAt": "2026-07-20T03:06:59Z",
-  "checkedAt": "2026-07-20T03:06:59Z",
-  "currentTool": "telegram",
+  "updatedAt": "2026-07-20T03:07:30Z",
+  "checkedAt": "2026-07-20T03:07:30Z",
+  "currentTool": "exec",
   "steps": [
     {
-      "label": "Receiving - diagnose why the fresh-session request was rejected",
-      "status": "active",
-      "tool": "telegram"
+      "label": "Done - verified fresh Topic 1 session; prior card was a false worker-evidence failure",
+      "status": "done",
+      "tool": "exec"
     }
   ],
   "source": "josh2-local-live-feed",
