@@ -36,7 +36,7 @@ def valid_atlas() -> dict:
         "source": {
             "name": "control-tower-work-ledger",
             "verified": True,
-            "schemaVersion": 1,
+            "schemaVersion": 2,
             "revision": 14,
         },
         "window": {
@@ -176,7 +176,7 @@ def valid_memory_operations() -> dict:
             "joshex": "oversight SSH client",
         },
         "activity": {
-            "schemaVersion": 1,
+            "schemaVersion": 2,
             "generatedAt": generated,
             "windowMinutes": 30,
             "motionWindowSeconds": 90,
@@ -194,6 +194,7 @@ def valid_memory_operations() -> dict:
                 "misses": 0,
                 "selected": 1,
                 "used": 1,
+                "crossAgentUsed": 1,
                 "reuseIgnored": 0,
                 "feedback": 1,
                 "helpful": 1,
@@ -209,6 +210,7 @@ def valid_memory_operations() -> dict:
                 "miss": None,
                 "selected": "2026-07-18T15:59:05Z",
                 "used": "2026-07-18T15:59:10Z",
+                "crossAgentUsed": "2026-07-18T15:59:10Z",
                 "reuseIgnored": None,
                 "feedback": "2026-07-18T15:59:10Z",
                 "corrected": None,
@@ -221,11 +223,20 @@ def valid_memory_operations() -> dict:
                     "retrievals": 1,
                     "hits": 1,
                     "misses": 0,
+                    "selected": 1,
+                    "used": 1,
+                    "crossAgentUsed": 1,
                     "lastRetrievalAt": retrieval_at,
+                    "lastSelectedAt": "2026-07-18T15:59:05Z",
+                    "lastUsedAt": "2026-07-18T15:59:10Z",
+                    "lastCrossAgentUsedAt": "2026-07-18T15:59:10Z",
                 },
-                {"agent": "josh2", "retrievals": 0, "hits": 0, "misses": 0, "lastRetrievalAt": None},
-                {"agent": "jaimes", "retrievals": 0, "hits": 0, "misses": 0, "lastRetrievalAt": None},
-                {"agent": "jain", "retrievals": 0, "hits": 0, "misses": 0, "lastRetrievalAt": None},
+                {"agent": "josh2", "retrievals": 0, "hits": 0, "misses": 0, "selected": 0, "used": 0, "crossAgentUsed": 0, "lastRetrievalAt": None, "lastSelectedAt": None, "lastUsedAt": None, "lastCrossAgentUsedAt": None},
+                {"agent": "jaimes", "retrievals": 0, "hits": 0, "misses": 0, "selected": 0, "used": 0, "crossAgentUsed": 0, "lastRetrievalAt": None, "lastSelectedAt": None, "lastUsedAt": None, "lastCrossAgentUsedAt": None},
+                {"agent": "jain", "retrievals": 0, "hits": 0, "misses": 0, "selected": 0, "used": 0, "crossAgentUsed": 0, "lastRetrievalAt": None, "lastSelectedAt": None, "lastUsedAt": None, "lastCrossAgentUsedAt": None},
+            ],
+            "reuseLinks": [
+                {"sourceAgent": "jaimes", "consumerAgent": "joshex", "uses": 1, "lastUsedAt": "2026-07-18T15:59:10Z"},
             ],
         },
         "privacy": {
@@ -694,7 +705,10 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertIn("data-memory-state", component)
         self.assertIn("is-work-active", component)
         self.assertIn("is-memory-live", component)
-        self.assertIn("verified memory retrieval live", component)
+        self.assertIn("latestAgentMemorySignal", component)
+        self.assertIn('data-operation="cross-agent-used"', component)
+        self.assertIn("data-source-agent", component)
+        self.assertIn("data-consumer-agent", component)
         self.assertIn('`Quiet · ${row.retrievals} retrieval', component)
         self.assertIn('const emittedEdges = receiptEdges.filter((edge) => edge.kind === "emitted")', component)
         self.assertIn('const ownsEdges = receiptEdges.filter((edge) => edge.kind === "owns")', component)
@@ -738,6 +752,7 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertIn(".memory-flow-edge.is-live {", styles)
         self.assertIn("stroke-width: 4.4;", styles)
         self.assertIn(".memory-flow-edge.is-retrieval.is-live", styles)
+        self.assertIn(".memory-flow-edge.is-cross-agent", styles)
         self.assertIn("stroke: rgba(101, 217, 255, 0.96);", styles)
         self.assertIn("animation: memory-flow-travel 1.05s linear infinite;", styles)
         self.assertIn("@keyframes memory-flow-travel", styles)

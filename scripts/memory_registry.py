@@ -824,18 +824,68 @@ def memory_activity_payload(db: sqlite3.Connection) -> dict[str, Any]:
             (window_start,),
         ).fetchall()
     }
+    reuse_agent_rows: dict[str, dict[str, Any]] = {
+        agent: {
+            "selected": 0,
+            "used": 0,
+            "crossAgentUsed": 0,
+            "lastSelectedAt": None,
+            "lastUsedAt": None,
+            "lastCrossAgentUsedAt": None,
+        }
+        for agent in MEMORY_ACTIVITY_AGENTS
+    }
+    reuse_links: dict[tuple[str, str], dict[str, Any]] = {}
+    for row in db.execute(
+        """SELECT event.agent,event.outcome,event.time,record.owner
+           FROM memory_reuse_events event
+           JOIN memory_records record ON record.id=event.memory_id
+           WHERE event.time >= ?
+           ORDER BY event.time,event.id""",
+        (window_start,),
+    ).fetchall():
+        consumer = canonical_agent(row["agent"])
+        if consumer not in reuse_agent_rows:
+            continue
+        metrics = reuse_agent_rows[consumer]
+        outcome = str(row["outcome"] or "")
+        if outcome == "selected":
+            metrics["selected"] += 1
+            metrics["lastSelectedAt"] = row["time"]
+        elif outcome == "used":
+            metrics["used"] += 1
+            metrics["lastUsedAt"] = row["time"]
+            source = canonical_agent(row["owner"])
+            if source in MEMORY_ACTIVITY_AGENTS and source != consumer:
+                metrics["crossAgentUsed"] += 1
+                metrics["lastCrossAgentUsedAt"] = row["time"]
+                link = reuse_links.setdefault((source, consumer), {
+                    "sourceAgent": source,
+                    "consumerAgent": consumer,
+                    "uses": 0,
+                    "lastUsedAt": None,
+                })
+                link["uses"] += 1
+                link["lastUsedAt"] = row["time"]
+    cross_agent_used = sum(row["crossAgentUsed"] for row in reuse_agent_rows.values())
+    last_cross_agent_used = max(
+        (row["lastCrossAgentUsedAt"] for row in reuse_agent_rows.values() if row["lastCrossAgentUsedAt"]),
+        default=None,
+    )
     agents = []
     for agent in MEMORY_ACTIVITY_AGENTS:
         row = agent_rows.get(agent)
+        reuse_row = reuse_agent_rows[agent]
         agents.append({
             "agent": agent,
             "retrievals": int(row["total"] or 0) if row else 0,
             "hits": int(row["hits"] or 0) if row else 0,
             "misses": int(row["misses"] or 0) if row else 0,
             "lastRetrievalAt": row["last_at"] if row else None,
+            **reuse_row,
         })
     return {
-        "schemaVersion": 1,
+        "schemaVersion": 2,
         "generatedAt": iso(now),
         "windowMinutes": MEMORY_ACTIVITY_WINDOW_MINUTES,
         "motionWindowSeconds": MEMORY_ACTIVITY_MOTION_SECONDS,
@@ -853,6 +903,7 @@ def memory_activity_payload(db: sqlite3.Connection) -> dict[str, Any]:
             "misses": int(retrieval["misses"] or 0),
             "selected": int(reuse["selected"] or 0),
             "used": int(reuse["used"] or 0),
+            "crossAgentUsed": cross_agent_used,
             "reuseIgnored": int(reuse["ignored"] or 0),
             "feedback": int(feedback["total"] or 0),
             "helpful": int(feedback["helpful"] or 0),
@@ -868,6 +919,7 @@ def memory_activity_payload(db: sqlite3.Connection) -> dict[str, Any]:
             "miss": retrieval["last_miss_at"],
             "selected": reuse["last_selected_at"],
             "used": reuse["last_used_at"],
+            "crossAgentUsed": last_cross_agent_used,
             "reuseIgnored": reuse["last_ignored_at"],
             "feedback": feedback["last_at"],
             "corrected": feedback["last_corrected_at"],
@@ -875,6 +927,7 @@ def memory_activity_payload(db: sqlite3.Connection) -> dict[str, Any]:
             "promoted": candidates["last_promoted_at"],
         },
         "agents": agents,
+        "reuseLinks": sorted(reuse_links.values(), key=lambda row: (row["sourceAgent"], row["consumerAgent"])),
     }
 
 

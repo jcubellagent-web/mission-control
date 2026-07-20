@@ -209,12 +209,12 @@ MEMORY_RETRIEVAL_PROJECTED_FIELDS = (
     "reuseIgnored30d", "selectedUseRate",
 )
 MEMORY_ACTIVITY_COUNT_FIELDS = (
-    "retrievals", "hits", "misses", "selected", "used", "reuseIgnored",
+    "retrievals", "hits", "misses", "selected", "used", "crossAgentUsed", "reuseIgnored",
     "feedback", "helpful", "feedbackIgnored", "corrected", "harmful",
     "proposed", "promoted",
 )
 MEMORY_ACTIVITY_TIME_FIELDS = (
-    "retrieval", "hit", "miss", "selected", "used", "reuseIgnored",
+    "retrieval", "hit", "miss", "selected", "used", "crossAgentUsed", "reuseIgnored",
     "feedback", "corrected", "proposed", "promoted",
 )
 MEMORY_PRIVACY_CONTRACT = {
@@ -225,8 +225,10 @@ MEMORY_PRIVACY_CONTRACT = {
     "countsOnly": True,
 }
 MEMORY_ACTIVITY_AGENT_FIELDS = frozenset({
-    "agent", "retrievals", "hits", "misses", "lastRetrievalAt",
+    "agent", "retrievals", "hits", "misses", "selected", "used", "crossAgentUsed",
+    "lastRetrievalAt", "lastSelectedAt", "lastUsedAt", "lastCrossAgentUsedAt",
 })
+MEMORY_REUSE_LINK_FIELDS = frozenset({"sourceAgent", "consumerAgent", "uses", "lastUsedAt"})
 MEMORY_RAW_PRIVACY_FIELDS = frozenset({
     "checkedAt", "ok", "policy", "publicLabels", "activePublic",
     "activeOwnerPrivate", "unknownLabelsOwnerScoped", "crossOwnerPrivateLeaks",
@@ -304,7 +306,7 @@ def _memory_operations_unavailable(now_iso: str) -> Dict[str, Any]:
     zero_counts = {name: 0 for name in MEMORY_ACTIVITY_COUNT_FIELDS}
     no_times = {name: None for name in MEMORY_ACTIVITY_TIME_FIELDS}
     return {
-        "schemaVersion": 1,
+        "schemaVersion": 2,
         "updatedAt": safe_now,
         "status": "unavailable",
         "source": {"name": "governed-memory-registry", "verified": False},
@@ -316,7 +318,7 @@ def _memory_operations_unavailable(now_iso: str) -> Dict[str, Any]:
             for name in MEMORY_RETRIEVAL_PROJECTED_FIELDS
         },
         "activity": {
-            "schemaVersion": 1,
+            "schemaVersion": 2,
             "generatedAt": safe_now,
             "windowMinutes": 30,
             "motionWindowSeconds": 90,
@@ -330,10 +332,17 @@ def _memory_operations_unavailable(now_iso: str) -> Dict[str, Any]:
                     "retrievals": 0,
                     "hits": 0,
                     "misses": 0,
+                    "selected": 0,
+                    "used": 0,
+                    "crossAgentUsed": 0,
                     "lastRetrievalAt": None,
+                    "lastSelectedAt": None,
+                    "lastUsedAt": None,
+                    "lastCrossAgentUsedAt": None,
                 }
                 for agent in MEMORY_CANONICAL_AGENTS
             ],
+            "reuseLinks": [],
         },
     }
 
@@ -420,7 +429,7 @@ def sanitize_memory_operations(value: Any, now_iso: str) -> Dict[str, Any]:
             return fallback
     else:
         if (
-            value.get("schemaVersion") != 1
+            value.get("schemaVersion") != 2
             or value.get("status") != "ready"
             or value.get("source") != {"name": "governed-memory-registry", "verified": True}
             or value.get("privacy") != MEMORY_PRIVACY_CONTRACT
@@ -498,7 +507,7 @@ def sanitize_memory_operations(value: Any, now_iso: str) -> Dict[str, Any]:
     activity = value.get("activity")
     activity_fields = {
         "schemaVersion", "generatedAt", "windowMinutes", "motionWindowSeconds",
-        "source", "privacy", "counts", "lastObservedAt", "agents",
+        "source", "privacy", "counts", "lastObservedAt", "agents", "reuseLinks",
     }
     if not isinstance(activity, dict) or set(activity) != activity_fields:
         return fallback
@@ -506,7 +515,7 @@ def sanitize_memory_operations(value: Any, now_iso: str) -> Dict[str, Any]:
     window_minutes = _memory_count(activity.get("windowMinutes"), 120)
     motion_seconds = _memory_count(activity.get("motionWindowSeconds"), 100)
     if (
-        activity.get("schemaVersion") != 1
+        activity.get("schemaVersion") != 2
         or generated_at is None
         or abs(generated_at - updated_at) > dt.timedelta(seconds=2)
         or generated_at > current + dt.timedelta(minutes=2)
@@ -537,6 +546,7 @@ def sanitize_memory_operations(value: Any, now_iso: str) -> Dict[str, Any]:
         + clean_counts["harmful"]
         != clean_counts["feedback"]
         or clean_counts["used"] + clean_counts["reuseIgnored"] > clean_counts["selected"]
+        or clean_counts["crossAgentUsed"] > clean_counts["used"]
     ):
         return fallback
 
@@ -545,7 +555,7 @@ def sanitize_memory_operations(value: Any, now_iso: str) -> Dict[str, Any]:
         return fallback
     signal_counts = {
         "retrieval": "retrievals", "hit": "hits", "miss": "misses",
-        "selected": "selected", "used": "used", "reuseIgnored": "reuseIgnored",
+        "selected": "selected", "used": "used", "crossAgentUsed": "crossAgentUsed", "reuseIgnored": "reuseIgnored",
         "feedback": "feedback", "corrected": "corrected", "proposed": "proposed",
         "promoted": "promoted",
     }
@@ -573,18 +583,41 @@ def sanitize_memory_operations(value: Any, now_iso: str) -> Dict[str, Any]:
         retrievals = _memory_count(row.get("retrievals"), 100_000)
         hits = _memory_count(row.get("hits"), 100_000)
         misses = _memory_count(row.get("misses"), 100_000)
+        selected = _memory_count(row.get("selected"), 100_000)
+        used = _memory_count(row.get("used"), 100_000)
+        cross_agent_used = _memory_count(row.get("crossAgentUsed"), 100_000)
         raw_last = row.get("lastRetrievalAt")
         last_retrieval = _memory_time(raw_last) if raw_last is not None else None
+        raw_last_selected = row.get("lastSelectedAt")
+        raw_last_used = row.get("lastUsedAt")
+        raw_last_cross = row.get("lastCrossAgentUsedAt")
+        last_selected = _memory_time(raw_last_selected) if raw_last_selected is not None else None
+        last_used = _memory_time(raw_last_used) if raw_last_used is not None else None
+        last_cross = _memory_time(raw_last_cross) if raw_last_cross is not None else None
         if (
             agent not in MEMORY_CANONICAL_AGENTS
             or agent in clean_agents_by_id
             or retrievals is None
             or hits is None
             or misses is None
+            or selected is None
+            or used is None
+            or cross_agent_used is None
             or retrievals != hits + misses
+            or used > selected
+            or cross_agent_used > used
             or (raw_last is not None and last_retrieval is None)
             or (last_retrieval is not None and not window_start <= last_retrieval <= generated_at)
             or ((retrievals > 0) != (last_retrieval is not None))
+            or (raw_last_selected is not None and last_selected is None)
+            or (raw_last_used is not None and last_used is None)
+            or (raw_last_cross is not None and last_cross is None)
+            or (last_selected is not None and not window_start <= last_selected <= generated_at)
+            or (last_used is not None and not window_start <= last_used <= generated_at)
+            or (last_cross is not None and not window_start <= last_cross <= generated_at)
+            or ((selected > 0) != (last_selected is not None))
+            or ((used > 0) != (last_used is not None))
+            or ((cross_agent_used > 0) != (last_cross is not None))
         ):
             return fallback
         clean_agents_by_id[agent] = {
@@ -592,23 +625,80 @@ def sanitize_memory_operations(value: Any, now_iso: str) -> Dict[str, Any]:
             "retrievals": retrievals,
             "hits": hits,
             "misses": misses,
+            "selected": selected,
+            "used": used,
+            "crossAgentUsed": cross_agent_used,
             "lastRetrievalAt": raw_last,
+            "lastSelectedAt": raw_last_selected,
+            "lastUsedAt": raw_last_used,
+            "lastCrossAgentUsedAt": raw_last_cross,
         }
     if set(clean_agents_by_id) != set(MEMORY_CANONICAL_AGENTS):
         return fallback
-    for metric in ("retrievals", "hits", "misses"):
+    for metric in ("retrievals", "hits", "misses", "selected", "used", "crossAgentUsed"):
         if sum(row[metric] for row in clean_agents_by_id.values()) != clean_counts[metric]:
             return fallback
-    latest_agent_retrieval = max(
-        (row["lastRetrievalAt"] for row in clean_agents_by_id.values() if row["lastRetrievalAt"]),
+    for signal, field in (
+        ("retrieval", "lastRetrievalAt"),
+        ("selected", "lastSelectedAt"),
+        ("used", "lastUsedAt"),
+        ("crossAgentUsed", "lastCrossAgentUsedAt"),
+    ):
+        latest_agent_time = max(
+            (row[field] for row in clean_agents_by_id.values() if row[field]),
+            key=lambda item: _memory_time(item) or dt.datetime.min.replace(tzinfo=dt.timezone.utc),
+            default=None,
+        )
+        if latest_agent_time != clean_times[signal]:
+            return fallback
+
+    raw_links = activity.get("reuseLinks")
+    if not isinstance(raw_links, list) or len(raw_links) > len(MEMORY_CANONICAL_AGENTS) * (len(MEMORY_CANONICAL_AGENTS) - 1):
+        return fallback
+    clean_links: list[Dict[str, Any]] = []
+    seen_links: set[tuple[str, str]] = set()
+    for row in raw_links:
+        if not isinstance(row, dict) or set(row) != MEMORY_REUSE_LINK_FIELDS:
+            return fallback
+        source_agent = row.get("sourceAgent")
+        consumer_agent = row.get("consumerAgent")
+        uses = _memory_count(row.get("uses"), 100_000)
+        raw_last_used = row.get("lastUsedAt")
+        last_used = _memory_time(raw_last_used)
+        pair = (source_agent, consumer_agent)
+        if (
+            source_agent not in MEMORY_CANONICAL_AGENTS
+            or consumer_agent not in MEMORY_CANONICAL_AGENTS
+            or source_agent == consumer_agent
+            or pair in seen_links
+            or uses is None
+            or uses < 1
+            or last_used is None
+            or not window_start <= last_used <= generated_at
+        ):
+            return fallback
+        seen_links.add(pair)
+        clean_links.append({
+            "sourceAgent": source_agent,
+            "consumerAgent": consumer_agent,
+            "uses": uses,
+            "lastUsedAt": raw_last_used,
+        })
+    if sum(row["uses"] for row in clean_links) != clean_counts["crossAgentUsed"]:
+        return fallback
+    for agent in MEMORY_CANONICAL_AGENTS:
+        if sum(row["uses"] for row in clean_links if row["consumerAgent"] == agent) != clean_agents_by_id[agent]["crossAgentUsed"]:
+            return fallback
+    latest_link_time = max(
+        (row["lastUsedAt"] for row in clean_links),
         key=lambda item: _memory_time(item) or dt.datetime.min.replace(tzinfo=dt.timezone.utc),
         default=None,
     )
-    if latest_agent_retrieval != clean_times["retrieval"]:
+    if latest_link_time != clean_times["crossAgentUsed"]:
         return fallback
 
     return {
-        "schemaVersion": 1,
+        "schemaVersion": 2,
         "updatedAt": value["updatedAt"],
         "status": "ready",
         "source": {"name": "governed-memory-registry", "verified": True},
@@ -617,7 +707,7 @@ def sanitize_memory_operations(value: Any, now_iso: str) -> Dict[str, Any]:
         "review": {"pending": pending, "disputed": disputed, "lastRun": last_run_raw},
         "retrieval": clean_retrieval,
         "activity": {
-            "schemaVersion": 1,
+            "schemaVersion": 2,
             "generatedAt": activity["generatedAt"],
             "windowMinutes": window_minutes,
             "motionWindowSeconds": motion_seconds,
@@ -626,6 +716,7 @@ def sanitize_memory_operations(value: Any, now_iso: str) -> Dict[str, Any]:
             "counts": clean_counts,
             "lastObservedAt": clean_times,
             "agents": [clean_agents_by_id[agent] for agent in MEMORY_CANONICAL_AGENTS],
+            "reuseLinks": clean_links,
         },
     }
 

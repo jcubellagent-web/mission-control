@@ -1955,11 +1955,30 @@ def publish_josh(
         cmd.append("--route-unverified")
     if origin_claim_hash:
         cmd += ["--origin-claim-hash", origin_claim_hash]
-    try:
-        result = subprocess.run(cmd, cwd=WORKSPACE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=12, check=False)
-        return result.returncode == 0
-    except Exception:
-        return False
+    # Visibility is part of the Telegram task contract, not best-effort
+    # decoration. Retry bounded transient failures and require the canonical
+    # publisher's accepted work-ledger receipt before reporting success.
+    for attempt, delay in enumerate((0.0, 0.15, 0.4), start=1):
+        if delay:
+            time.sleep(delay)
+        try:
+            result = subprocess.run(
+                cmd,
+                cwd=WORKSPACE,
+                capture_output=True,
+                text=True,
+                timeout=12,
+                check=False,
+            )
+            if result.returncode != 0:
+                continue
+            payload = json.loads(result.stdout or "{}")
+            work_ledger = payload.get("workLedger") if isinstance(payload, dict) else None
+            if isinstance(payload, dict) and payload.get("ok") is True and isinstance(work_ledger, dict) and work_ledger.get("accepted") is True:
+                return True
+        except Exception:
+            continue
+    return False
 
 
 def event_age_seconds(ts: str) -> float | None:
@@ -2223,8 +2242,9 @@ def send_ack(
             "surface_indeterminate": bool(card_receipt.get("surface_indeterminate")),
             "card_start_receipt": str(card_start.get("stdout") or ""),
         }
+    visibility_publish_ok = True
     if not dry_run:
-        publish_josh(
+        visibility_publish_ok = publish_josh(
             objective,
             "active",
             f"Objective confirmed; {display_model}; skill={skill.get('label') or 'none'}",
@@ -2236,6 +2256,23 @@ def send_ack(
             origin_claim_hash=origin_claim_hash,
             work_event="start",
         )
+        if not visibility_publish_ok:
+            return {
+                "ok": False,
+                "status": "visibility-failed",
+                "error": "canonical_josh2_work_publish_failed",
+                "reaction_ok": bool(ack_sent),
+                "ack_message_id": ack_message_id,
+                "key": key,
+                "objective": objective,
+                "work_id": work_id,
+                "ledger_run_id": work_run_id,
+                "run_id": event.get("run_id") or "",
+                "card_start_ok": card_start_ok,
+                "header_message_id": header_message_id,
+                "live_message_id": live_message_id,
+                "visibility_publish_ok": False,
+            }
     return {
         "ok": True,
         "reaction_ok": bool(dry_run or ack_sent),
@@ -2259,6 +2296,7 @@ def send_ack(
         "header_required": header_required,
         "surface_contract": surface_contract,
         "card_start_receipt": str(card_start.get("stdout") or ""),
+        "visibility_publish_ok": visibility_publish_ok,
     }
 
 
@@ -2560,7 +2598,7 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
                 model_id=str(card.get("runtime_model") or card.get("model") or DEFAULT_MODEL),
                 route_verified=not coordinator_owned,
                 origin_claim_hash=str(card.get("origin_claim_hash") or ""),
-                brain_feed=False,
+                brain_feed=True,
                 work_event="heartbeat",
             )
         card["last_card_update_at"] = utc_now()

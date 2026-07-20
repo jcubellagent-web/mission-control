@@ -242,11 +242,24 @@ export type MemoryActivityAgent = {
   retrievals: number;
   hits: number;
   misses: number;
+  selected: number;
+  used: number;
+  crossAgentUsed: number;
   lastRetrievalAt: string | null;
+  lastSelectedAt: string | null;
+  lastUsedAt: string | null;
+  lastCrossAgentUsedAt: string | null;
+};
+
+export type MemoryReuseLink = {
+  sourceAgent: AgentId;
+  consumerAgent: AgentId;
+  uses: number;
+  lastUsedAt: string;
 };
 
 export type MemoryActivity = {
-  schemaVersion: 1;
+  schemaVersion: 2;
   generatedAt: string;
   windowMinutes: number;
   motionWindowSeconds: number;
@@ -264,6 +277,7 @@ export type MemoryActivity = {
     misses: number;
     selected: number;
     used: number;
+    crossAgentUsed: number;
     reuseIgnored: number;
     feedback: number;
     helpful: number;
@@ -279,6 +293,7 @@ export type MemoryActivity = {
     miss: string | null;
     selected: string | null;
     used: string | null;
+    crossAgentUsed: string | null;
     reuseIgnored: string | null;
     feedback: string | null;
     corrected: string | null;
@@ -286,6 +301,7 @@ export type MemoryActivity = {
     promoted: string | null;
   };
   agents: MemoryActivityAgent[];
+  reuseLinks: MemoryReuseLink[];
 };
 
 export type MemoryOperations = Record<string, unknown> & {

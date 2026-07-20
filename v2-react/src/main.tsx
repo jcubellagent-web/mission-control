@@ -3292,24 +3292,28 @@ type MemoryCountKey = keyof MemoryActivity["counts"];
 type MemorySignalKey = keyof MemoryActivity["lastObservedAt"];
 
 const MEMORY_COUNT_KEYS: MemoryCountKey[] = [
-  "retrievals", "hits", "misses", "selected", "used", "reuseIgnored",
+  "retrievals", "hits", "misses", "selected", "used", "crossAgentUsed", "reuseIgnored",
   "feedback", "helpful", "feedbackIgnored", "corrected", "harmful",
   "proposed", "promoted",
 ];
 const MEMORY_SIGNAL_KEYS: MemorySignalKey[] = [
-  "retrieval", "hit", "miss", "selected", "used", "reuseIgnored",
+  "retrieval", "hit", "miss", "selected", "used", "crossAgentUsed", "reuseIgnored",
   "feedback", "corrected", "proposed", "promoted",
 ];
 const MEMORY_ACTIVITY_KEYS = [
   "schemaVersion", "generatedAt", "windowMinutes", "motionWindowSeconds",
-  "source", "privacy", "counts", "lastObservedAt", "agents",
+  "source", "privacy", "counts", "lastObservedAt", "agents", "reuseLinks",
 ];
 const MEMORY_SOURCE_KEYS = ["name", "verified"];
 const MEMORY_PRIVACY_KEYS = [
   "queryIncluded", "contentIncluded", "rawIdentifiersIncluded",
   "reasonsIncluded", "countsOnly",
 ];
-const MEMORY_AGENT_KEYS = ["agent", "retrievals", "hits", "misses", "lastRetrievalAt"];
+const MEMORY_AGENT_KEYS = [
+  "agent", "retrievals", "hits", "misses", "selected", "used", "crossAgentUsed",
+  "lastRetrievalAt", "lastSelectedAt", "lastUsedAt", "lastCrossAgentUsedAt",
+];
+const MEMORY_REUSE_LINK_KEYS = ["sourceAgent", "consumerAgent", "uses", "lastUsedAt"];
 const MAX_MEMORY_ACTIVITY_COUNT = 100_000;
 
 const MEMORY_SIGNAL_LABELS: Record<MemorySignalKey, string> = {
@@ -3318,6 +3322,7 @@ const MEMORY_SIGNAL_LABELS: Record<MemorySignalKey, string> = {
   miss: "Recall miss",
   selected: "Memory selected",
   used: "Memory use verified",
+  crossAgentUsed: "Cross-agent reuse verified",
   reuseIgnored: "Memory result ignored",
   feedback: "Outcome recorded",
   corrected: "Correction proposed",
@@ -3358,7 +3363,7 @@ function memoryTimestampFitsWindow(value: string | null, generatedAtMs: number, 
 
 function sanitizedMemoryActivity(value: unknown): MemoryActivity | undefined {
   const activity = exactMemoryRecord(value, MEMORY_ACTIVITY_KEYS);
-  if (!activity || activity.schemaVersion !== 1 || !isStrictMemoryTimestamp(activity.generatedAt)) return undefined;
+  if (!activity || activity.schemaVersion !== 2 || !isStrictMemoryTimestamp(activity.generatedAt)) return undefined;
   const generatedAtMs = Date.parse(activity.generatedAt);
   if (generatedAtMs < Date.UTC(2024, 0, 1) || generatedAtMs > Date.now() + 5 * 60_000) return undefined;
 
@@ -3411,6 +3416,7 @@ function sanitizedMemoryActivity(value: unknown): MemoryActivity | undefined {
     miss: "misses",
     selected: "selected",
     used: "used",
+    crossAgentUsed: "crossAgentUsed",
     reuseIgnored: "reuseIgnored",
     feedback: "feedback",
     corrected: "corrected",
@@ -3431,22 +3437,95 @@ function sanitizedMemoryActivity(value: unknown): MemoryActivity | undefined {
     const retrievals = boundedMemoryCount(agentRow.retrievals);
     const hits = boundedMemoryCount(agentRow.hits);
     const misses = boundedMemoryCount(agentRow.misses);
+    const selected = boundedMemoryCount(agentRow.selected);
+    const used = boundedMemoryCount(agentRow.used);
+    const crossAgentUsed = boundedMemoryCount(agentRow.crossAgentUsed);
     const lastRetrievalAt = agentRow.lastRetrievalAt;
-    if (retrievals === null || hits === null || misses === null || hits + misses !== retrievals) return undefined;
+    const lastSelectedAt = agentRow.lastSelectedAt;
+    const lastUsedAt = agentRow.lastUsedAt;
+    const lastCrossAgentUsedAt = agentRow.lastCrossAgentUsedAt;
+    if (
+      retrievals === null || hits === null || misses === null || selected === null || used === null
+      || crossAgentUsed === null || hits + misses !== retrievals || used > selected || crossAgentUsed > used
+    ) return undefined;
     if (lastRetrievalAt !== null && !isStrictMemoryTimestamp(lastRetrievalAt)) return undefined;
+    if (lastSelectedAt !== null && !isStrictMemoryTimestamp(lastSelectedAt)) return undefined;
+    if (lastUsedAt !== null && !isStrictMemoryTimestamp(lastUsedAt)) return undefined;
+    if (lastCrossAgentUsedAt !== null && !isStrictMemoryTimestamp(lastCrossAgentUsedAt)) return undefined;
     const safeLastRetrievalAt = lastRetrievalAt as string | null;
-    if (!memoryTimestampFitsWindow(safeLastRetrievalAt, generatedAtMs, windowMinutes)) return undefined;
-    if ((retrievals === 0) !== (safeLastRetrievalAt === null)) return undefined;
+    const safeLastSelectedAt = lastSelectedAt as string | null;
+    const safeLastUsedAt = lastUsedAt as string | null;
+    const safeLastCrossAgentUsedAt = lastCrossAgentUsedAt as string | null;
+    if (
+      !memoryTimestampFitsWindow(safeLastRetrievalAt, generatedAtMs, windowMinutes)
+      || !memoryTimestampFitsWindow(safeLastSelectedAt, generatedAtMs, windowMinutes)
+      || !memoryTimestampFitsWindow(safeLastUsedAt, generatedAtMs, windowMinutes)
+      || !memoryTimestampFitsWindow(safeLastCrossAgentUsedAt, generatedAtMs, windowMinutes)
+      || ((retrievals === 0) !== (safeLastRetrievalAt === null))
+      || ((selected === 0) !== (safeLastSelectedAt === null))
+      || ((used === 0) !== (safeLastUsedAt === null))
+      || ((crossAgentUsed === 0) !== (safeLastCrossAgentUsedAt === null))
+    ) return undefined;
     seenAgents.add(agent);
-    agents.push({ agent, retrievals, hits, misses, lastRetrievalAt: safeLastRetrievalAt });
+    agents.push({
+      agent, retrievals, hits, misses, selected, used, crossAgentUsed,
+      lastRetrievalAt: safeLastRetrievalAt,
+      lastSelectedAt: safeLastSelectedAt,
+      lastUsedAt: safeLastUsedAt,
+      lastCrossAgentUsedAt: safeLastCrossAgentUsedAt,
+    });
   }
   if (HERO_AGENT_ORDER.some((agent) => !seenAgents.has(agent))) return undefined;
   if (agents.reduce((total, row) => total + row.retrievals, 0) !== counts.retrievals) return undefined;
   if (agents.reduce((total, row) => total + row.hits, 0) !== counts.hits) return undefined;
   if (agents.reduce((total, row) => total + row.misses, 0) !== counts.misses) return undefined;
+  if (agents.reduce((total, row) => total + row.selected, 0) !== counts.selected) return undefined;
+  if (agents.reduce((total, row) => total + row.used, 0) !== counts.used) return undefined;
+  if (agents.reduce((total, row) => total + row.crossAgentUsed, 0) !== counts.crossAgentUsed) return undefined;
+  for (const [signal, field] of [
+    ["retrieval", "lastRetrievalAt"],
+    ["selected", "lastSelectedAt"],
+    ["used", "lastUsedAt"],
+    ["crossAgentUsed", "lastCrossAgentUsedAt"],
+  ] as Array<[MemorySignalKey, keyof MemoryActivity["agents"][number]]>) {
+    const latestAgentTime = agents.map((row) => row[field] as string | null)
+      .filter((timestamp): timestamp is string => Boolean(timestamp))
+      .sort((a, b) => timeValue(b) - timeValue(a))[0] || null;
+    if (latestAgentTime !== lastObservedAt[signal]) return undefined;
+  }
+
+  if (!Array.isArray(activity.reuseLinks) || activity.reuseLinks.length > HERO_AGENT_ORDER.length * (HERO_AGENT_ORDER.length - 1)) return undefined;
+  const reuseLinks: MemoryActivity["reuseLinks"] = [];
+  const seenLinks = new Set<string>();
+  for (const value of activity.reuseLinks) {
+    const link = exactMemoryRecord(value, MEMORY_REUSE_LINK_KEYS);
+    if (!link) return undefined;
+    const sourceAgent = link.sourceAgent as AgentId;
+    const consumerAgent = link.consumerAgent as AgentId;
+    const uses = boundedMemoryCount(link.uses);
+    const lastUsedAt = link.lastUsedAt;
+    const key = `${sourceAgent}:${consumerAgent}`;
+    if (
+      !HERO_AGENT_ORDER.includes(sourceAgent) || !HERO_AGENT_ORDER.includes(consumerAgent)
+      || sourceAgent === consumerAgent || seenLinks.has(key) || uses === null || uses < 1
+      || !isStrictMemoryTimestamp(lastUsedAt)
+      || !memoryTimestampFitsWindow(lastUsedAt, generatedAtMs, windowMinutes)
+    ) return undefined;
+    seenLinks.add(key);
+    reuseLinks.push({ sourceAgent, consumerAgent, uses, lastUsedAt });
+  }
+  if (reuseLinks.reduce((total, row) => total + row.uses, 0) !== counts.crossAgentUsed) return undefined;
+  if (counts.crossAgentUsed > 0 && !reuseLinks.length) return undefined;
+  for (const agent of HERO_AGENT_ORDER) {
+    const linkUses = reuseLinks.filter((row) => row.consumerAgent === agent).reduce((total, row) => total + row.uses, 0);
+    if (linkUses !== agents.find((row) => row.agent === agent)?.crossAgentUsed) return undefined;
+  }
+  const latestLinkTime = reuseLinks.map((row) => row.lastUsedAt)
+    .sort((a, b) => timeValue(b) - timeValue(a))[0] || null;
+  if (latestLinkTime !== lastObservedAt.crossAgentUsed) return undefined;
 
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     generatedAt: activity.generatedAt,
     windowMinutes,
     motionWindowSeconds,
@@ -3461,6 +3540,7 @@ function sanitizedMemoryActivity(value: unknown): MemoryActivity | undefined {
     counts,
     lastObservedAt,
     agents: agents.sort((a, b) => HERO_AGENT_ORDER.indexOf(a.agent) - HERO_AGENT_ORDER.indexOf(b.agent)),
+    reuseLinks: reuseLinks.sort((a, b) => `${a.sourceAgent}:${a.consumerAgent}`.localeCompare(`${b.sourceAgent}:${b.consumerAgent}`)),
   };
 }
 
@@ -3501,6 +3581,17 @@ function latestMemorySignal(activity?: MemoryActivity) {
   if (!activity) return null;
   return (Object.entries(activity.lastObservedAt) as Array<[MemorySignalKey, string | null]>)
     .filter(([, observedAt]) => timeValue(observedAt) > 0)
+    .sort((a, b) => timeValue(b[1]) - timeValue(a[1]))[0] || null;
+}
+
+function latestAgentMemorySignal(row: MemoryActivity["agents"][number]) {
+  const signals: Array<[string, string | null]> = [
+    ["retrieval", row.lastRetrievalAt],
+    ["selected", row.lastSelectedAt],
+    ["used", row.lastUsedAt],
+    ["cross-agent reuse", row.lastCrossAgentUsedAt],
+  ];
+  return signals.filter(([, observedAt]) => timeValue(observedAt) > 0)
     .sort((a, b) => timeValue(b[1]) - timeValue(a[1]))[0] || null;
 }
 
@@ -3558,6 +3649,7 @@ function BrainAtlasPanel({
   const retrievals = count("retrievals");
   const hits = count("hits");
   const uses = count("used");
+  const crossAgentUses = count("crossAgentUsed");
   const hitRate = retrievals ? `${Math.round((hits / retrievals) * 100)}%` : "--";
   const byAgent = new Map((activity?.agents || []).map((row) => [row.agent, row]));
   const statusByAgent = new Map(statuses.map((row) => [row.agent_id, row]));
@@ -3575,8 +3667,15 @@ function BrainAtlasPanel({
     retrievals: 0,
     hits: 0,
     misses: 0,
+    selected: 0,
+    used: 0,
+    crossAgentUsed: 0,
     lastRetrievalAt: null,
+    lastSelectedAt: null,
+    lastUsedAt: null,
+    lastCrossAgentUsedAt: null,
   });
+  const reuseLinks = activity?.reuseLinks || [];
   const age = ageMinutes(atlas?.generatedAt);
   const stale = Number.isFinite(age) && age > 60;
   const unavailable = !atlas || atlas.status === "unavailable";
@@ -3670,7 +3769,7 @@ function BrainAtlasPanel({
         <div className="memory-flow-metrics" aria-label="Memory activity summary">
           <article><span>Retrievals</span><strong>{activity ? retrievals : "--"}</strong><em>{activity ? `last ${activity.windowMinutes}m` : "telemetry unavailable"}</em></article>
           <article><span>Recall hit rate</span><strong>{hitRate}</strong><em>{activity ? `${hits} exact hit${hits === 1 ? "" : "s"}` : "telemetry unavailable"}</em></article>
-          <article className={activity && uses ? "is-verified" : "is-idle"}><span>Explicit uses</span><strong>{activity ? uses : "--"}</strong><em>{activity ? (uses ? "selected + used" : "no use receipt") : "telemetry unavailable"}</em></article>
+          <article className={activity && uses ? "is-verified" : "is-idle"}><span>Explicit uses</span><strong>{activity ? uses : "--"}</strong><em>{activity ? (crossAgentUses ? `${crossAgentUses} cross-agent` : uses ? "selected + used" : "no use receipt") : "telemetry unavailable"}</em></article>
           <article><span>Durable memory</span><strong>{durableMemoryCount}</strong><em>{pendingMemoryCount} candidate{pendingMemoryCount === 1 ? "" : "s"}</em></article>
         </div>
 
@@ -3751,6 +3850,24 @@ function BrainAtlasPanel({
             <g className="brain-atlas-memory-layer" data-atlas-layer="memory">
             <text className="brain-atlas-lane-label is-memory" x={brainAtlasWideX(18)} y="14">LIVE AGENTS + GOVERNED MEMORY</text>
             <g className="memory-flow-edges" aria-hidden="true">
+            {reuseLinks.map((link) => {
+              const sourceIndex = HERO_AGENT_ORDER.indexOf(link.sourceAgent);
+              const consumerIndex = HERO_AGENT_ORDER.indexOf(link.consumerAgent);
+              const sourceY = 41 + sourceIndex * 52;
+              const consumerY = 41 + consumerIndex * 52;
+              const live = memorySignalIsRecent(link.lastUsedAt, motionWindowSeconds);
+              return (
+                <path
+                  key={`cross-agent-reuse-${link.sourceAgent}-${link.consumerAgent}`}
+                  className={`memory-flow-edge is-cross-agent${live ? " is-live" : ""}`}
+                  data-operation="cross-agent-used"
+                  data-source-agent={link.sourceAgent}
+                  data-consumer-agent={link.consumerAgent}
+                  data-observed-at={link.lastUsedAt}
+                  d={`M ${brainAtlasWideX(18)} ${sourceY} C 4 ${sourceY}, 4 ${consumerY}, ${brainAtlasWideX(18)} ${consumerY}`}
+                />
+              );
+            })}
             {flowAgents.map((row, index) => {
               const y = 22 + index * 52;
               const live = memorySignalIsRecent(row.lastRetrievalAt, motionWindowSeconds);
@@ -3775,7 +3892,9 @@ function BrainAtlasPanel({
             <g className="memory-flow-nodes">
             {flowAgents.map((row, index) => {
               const y = 22 + index * 52;
-              const live = memorySignalIsRecent(row.lastRetrievalAt, motionWindowSeconds);
+              const latestAgentSignal = latestAgentMemorySignal(row);
+              const latestAgentSignalAt = latestAgentSignal?.[1] || null;
+              const live = memorySignalIsRecent(latestAgentSignalAt, motionWindowSeconds);
               const working = workingAgentIds.has(row.agent);
               return (
                 <g
@@ -3787,7 +3906,7 @@ function BrainAtlasPanel({
                   data-memory-state={!activity ? "unavailable" : live ? "live" : "idle"}
                   style={{ "--atlas-agent-phase": `${index * -0.18}s` } as React.CSSProperties}
                 >
-                  <title>{`${AGENTS[row.agent].label}: ${working ? "working now" : "not working"}; ${!activity ? "memory telemetry unavailable" : live ? "verified memory retrieval live" : "memory quiet"}`}</title>
+                  <title>{`${AGENTS[row.agent].label}: ${working ? "working now" : "not working"}; ${!activity ? "memory telemetry unavailable" : live ? `verified ${latestAgentSignal?.[0]} live` : "memory quiet"}`}</title>
                   <rect className="memory-flow-node-aura" x={brainAtlasWideX(13)} y={y - 5} width={brainAtlasWideWidth(13, 160)} height="48" rx="12" />
                   <rect x={brainAtlasWideX(18)} y={y} width={brainAtlasWideWidth(18, 150)} height="38" rx="7" />
                   <g className="memory-flow-node-copy" clipPath={`url(#brain-atlas-agent-copy-${row.agent})`}>
@@ -3796,7 +3915,13 @@ function BrainAtlasPanel({
                   <text className="memory-flow-node-detail" x={brainAtlasWideX(30)} y={y + 35}>
                     {working
                       ? "ACTIVE · WORKING"
-                      : !activity ? "Quiet · memory unavailable" : `Quiet · ${row.retrievals} retrieval${row.retrievals === 1 ? "" : "s"}`}
+                      : !activity
+                        ? "Quiet · memory unavailable"
+                        : row.crossAgentUsed
+                          ? `Quiet · ${row.crossAgentUsed} cross-agent use${row.crossAgentUsed === 1 ? "" : "s"}`
+                          : row.used
+                            ? `Quiet · ${row.used} explicit use${row.used === 1 ? "" : "s"}`
+                            : `Quiet · ${row.retrievals} retrieval${row.retrievals === 1 ? "" : "s"}`}
                   </text>
                   </g>
                 </g>

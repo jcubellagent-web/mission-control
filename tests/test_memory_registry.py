@@ -222,7 +222,7 @@ class MemoryRegistryTest(unittest.TestCase):
         status = json.loads(status_path.read_text(encoding="utf-8"))
         activity = status["activity"]
 
-        self.assertEqual(activity["schemaVersion"], 1)
+        self.assertEqual(activity["schemaVersion"], 2)
         self.assertTrue(activity["source"]["verified"])
         self.assertTrue(activity["privacy"]["countsOnly"])
         self.assertFalse(activity["privacy"]["queryIncluded"])
@@ -242,6 +242,39 @@ class MemoryRegistryTest(unittest.TestCase):
         self.assertNotIn(retrieval["retrievalId"], rendered)
         self.assertNotIn(memory_id, rendered)
         self.assertNotIn("events", activity)
+
+    def test_activity_export_attributes_explicit_cross_agent_use_without_memory_identifiers(self) -> None:
+        memory_id = self.create_memory("cross agent reuse", privacy="dashboard-safe", owner="jaimes")
+        retrieval = self.cli(
+            "preflight", "--agent", "jain", "--query", "Privacy fixture cross agent reuse",
+            "--work-id", "private-cross-work",
+        )
+        for outcome in ("selected", "used"):
+            self.cli(
+                "reuse-outcome", "--agent", "jain", "--retrieval-id", retrieval["retrievalId"],
+                "--memory-id", memory_id, "--outcome", outcome, "--reason-code", "applied",
+                "--work-id", "private-cross-work",
+            )
+
+        status = self.cli("export")
+        activity = status["activity"]
+        jain = next(row for row in activity["agents"] if row["agent"] == "jain")
+        self.assertEqual(activity["counts"]["selected"], 1)
+        self.assertEqual(activity["counts"]["used"], 1)
+        self.assertEqual(activity["counts"]["crossAgentUsed"], 1)
+        self.assertEqual(jain["selected"], 1)
+        self.assertEqual(jain["used"], 1)
+        self.assertEqual(jain["crossAgentUsed"], 1)
+        self.assertEqual(activity["reuseLinks"], [{
+            "sourceAgent": "jaimes",
+            "consumerAgent": "jain",
+            "uses": 1,
+            "lastUsedAt": jain["lastCrossAgentUsedAt"],
+        }])
+        rendered = json.dumps(activity)
+        self.assertNotIn(memory_id, rendered)
+        self.assertNotIn(retrieval["retrievalId"], rendered)
+        self.assertNotIn("private-cross-work", rendered)
 
     def test_preflight_immediately_exports_activity(self) -> None:
         self.create_memory("preflight activity", privacy="dashboard-safe")

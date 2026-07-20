@@ -17,6 +17,51 @@ sys.modules[SPEC.name] = watcher
 SPEC.loader.exec_module(watcher)
 
 
+def test_publish_josh_retries_until_canonical_work_receipt_is_accepted():
+    failed = subprocess.CompletedProcess(["publish"], 1, stdout="", stderr="temporary")
+    accepted = subprocess.CompletedProcess(
+        ["publish"], 0,
+        stdout=json.dumps({"ok": True, "workLedger": {"accepted": True}}),
+        stderr="",
+    )
+    with patch.object(watcher.subprocess, "run", side_effect=[failed, failed, accepted]) as run, \
+         patch.object(watcher.time, "sleep"):
+        ok = watcher.publish_josh(
+            "Visible task", "active", "Working",
+            work_id="work-1", run_id="run-1", work_event="start",
+        )
+
+    assert ok is True
+    assert run.call_count == 3
+    assert all(call.kwargs["capture_output"] is True for call in run.call_args_list)
+
+
+def test_send_ack_fails_closed_when_canonical_work_visibility_cannot_publish():
+    event = {
+        "session_id": "session",
+        "ts": "2026-07-15T04:23:21Z",
+        "run_id": "before-dispatch:1",
+        "message_id": "",
+        "prompt": "Inspect the current Control Tower state",
+    }
+    with patch.object(watcher, "fast_ack_enabled", return_value=True), \
+         patch.object(watcher, "live_cards_enabled", return_value=False), \
+         patch.object(watcher, "send_chat_action"), \
+         patch.object(watcher, "send_message_draft"), \
+         patch.object(watcher, "send_prompt_reaction", return_value=True), \
+         patch.object(watcher, "publish_josh", return_value=False):
+        result = watcher.send_ack(
+            event,
+            model=watcher.DEFAULT_MODEL,
+            dry_run=False,
+            meta={"telegram_chat_id": "-100", "telegram_thread_id": "1"},
+        )
+
+    assert result["ok"] is False
+    assert result["status"] == "visibility-failed"
+    assert result["visibility_publish_ok"] is False
+
+
 def test_send_ack_uses_prompt_reaction_without_message_id_and_does_not_fail_claim():
     event = {"session_id": "session", "ts": "2026-07-15T03:42:21Z", "run_id": "before-dispatch:1", "message_id": "", "prompt": "private request"}
     with patch.object(watcher, "fast_ack_enabled", return_value=True), patch.object(watcher, "send_chat_action"), patch.object(watcher, "send_message_draft"), patch.object(watcher, "send_prompt_reaction", return_value=False) as prompt_reaction, patch.object(watcher, "publish_josh"):
@@ -386,7 +431,7 @@ def test_card_start_retries_once_only_after_durable_header(monkeypatch, tmp_path
     monkeypatch.setattr(watcher, "send_message_draft", lambda *args, **kwargs: None)
     monkeypatch.setattr(watcher, "auto_route_for_prompt", lambda *args, **kwargs: {"model": "planned model", "route": "planned route", "route_plan": {"routeId": "luna"}})
     monkeypatch.setattr(watcher, "skill_for_prompt", lambda *args, **kwargs: {"id": "", "label": "", "reason": ""})
-    monkeypatch.setattr(watcher, "publish_josh", lambda *args, **kwargs: None)
+    monkeypatch.setattr(watcher, "publish_josh", lambda *args, **kwargs: True)
     monkeypatch.setattr(watcher, "run_cmd", run_card)
 
     result = watcher.send_ack(event, watcher.DEFAULT_MODEL, meta={
@@ -606,6 +651,7 @@ def test_coordinator_worker_heartbeat_cannot_claim_verified_route():
     assert published
     assert published[-1][1]["work_event"] == "heartbeat"
     assert published[-1][1]["route_verified"] is False
+    assert published[-1][1]["brain_feed"] is True
 
 
 def test_failed_coordinator_card_is_terminal_and_not_refreshed():
@@ -682,7 +728,7 @@ def test_coordinator_submit_timeout_returns_durable_receipt(monkeypatch, tmp_pat
     monkeypatch.setattr("sys.stdin.read", lambda: "private request")
     monkeypatch.setattr(watcher, "send_ack", lambda *args, **kwargs: ack)
     monkeypatch.setattr(watcher, "run_cmd", timeout_submit)
-    monkeypatch.setattr(watcher, "publish_josh", lambda *args, **kwargs: None)
+    monkeypatch.setattr(watcher, "publish_josh", lambda *args, **kwargs: True)
     result = watcher.claim_inbox(args)
 
     assert result["ok"] is False
