@@ -2,17 +2,17 @@
   "agentId": "josh2",
   "agent": "JOSH 2.0",
   "active": true,
-  "reportedActive": false,
-  "status": "done",
-  "objective": "Done: verified fresh Topic 1 session; prior card was a false worker-evidence failure",
-  "detail": "The helper did not prove the required Topic 1 live-card receipt; no worker was queued and native fallback remains available.",
-  "updatedAt": "2026-07-20T03:07:30Z",
-  "checkedAt": "2026-07-20T03:07:30Z",
+  "reportedActive": true,
+  "status": "active",
+  "objective": "Working on task",
+  "detail": "Awaiting workspace-admin Linear trust clearance; app full access alone is insufficient.",
+  "updatedAt": "2026-07-20T16:17:45Z",
+  "checkedAt": "2026-07-20T16:17:45Z",
   "currentTool": "exec",
   "steps": [
     {
-      "label": "Done - verified fresh Topic 1 session; prior card was a false worker-evidence failure",
-      "status": "done",
+      "label": "Working on task",
+      "status": "active",
       "tool": "exec"
     }
   ],
@@ -21,14 +21,14 @@
   "model": "GPT-5.6-terra",
   "messageReceived": "2026-07-20T03:06:59Z",
   "localLiveFeed": true,
-  "workId": "work-adhoc-f2c1eb7302064a61a21bb0d5482c8458",
-  "runId": "run-6c5013952c2840b0b80621e4aa24c774",
-  "generation": 1,
-  "sequence": 1,
-  "phase": "error",
-  "originClaimHash": "b04a26b51e6396a57b9fe939990222e104390f0dda6f6448f4fa45cd4ace563a",
+  "workId": "task-josh2-20260720-telegram-gateway-lifecycle-refactor",
+  "runId": "run-3700d0425ab841b68b9c57208066f6ba",
+  "generation": 4,
+  "sequence": 4,
+  "phase": "awaiting_input",
+  "originClaimHash": "da2db416bfd62ed5f33d3d882122a2208373f0435565b49251fd85148c52e450",
   "modelFamily": null,
   "modelId": null,
   "routeVerified": false,
-  "leaseUntil": null
+  "leaseUntil": "2026-07-20T13:32:49.000Z"
 }
