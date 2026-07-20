@@ -214,6 +214,7 @@ HIGH_BLAST_CAPABILITIES = {
 }
 
 
+#JAIMES: Ollama is a first-class explicit fresh-lane provider alongside Codex, Gemini, and Grok.
 REQUESTED_PROVIDER_ALIASES = {
     "gpt": "codex",
     "gpt-5.6": "codex",
@@ -225,6 +226,9 @@ REQUESTED_PROVIDER_ALIASES = {
     "codex": "codex",
     "openai": "codex",
     "openai-codex": "codex",
+    "ollama": "ollama",
+    "ollama-local": "ollama",
+    "local": "ollama",
     "gemini": "gemini",
     "google": "gemini",
     "google-gemini-cli": "gemini",  # legacy Hermes/OpenCLAW provider id
@@ -239,6 +243,7 @@ REQUESTED_PROVIDER_ALIASES = {
 PROVIDER_DEFAULT_MODELS = {
     "codex": "gpt-5.6-terra",
     "gemini": "gemini-3.5-flash",
+    "ollama": "qwen2.5:7b",
     "xai": "grok-4.20-reasoning",
     "openrouter": "openrouter/auto",
 }
@@ -246,6 +251,7 @@ PROVIDER_DEFAULT_MODELS = {
 PROVIDER_AUTH_LABELS = {
     "codex": "OpenAI Codex OAuth/subscription",
     "gemini": "Antigravity-authenticated Gemini subscription",
+    "ollama": "Local Ollama runtime",
     "xai": "Grok CLI OAuth + xAI API feed",
     "openrouter": "OpenRouter metered API",
 }
@@ -492,6 +498,8 @@ def normalize_requested_provider(value: str = "", model: str = "") -> str:
         return "codex"
     if "gemini" in model_text:
         return "gemini"
+    if model_text.startswith("ollama/") or any(name in model_text for name in ("qwen", "llama", "gemma", "glm")):
+        return "ollama"
     if "grok" in model_text or model_text.startswith("xai/"):
         return "xai"
     if "openrouter" in model_text:
@@ -523,6 +531,17 @@ def explicit_route_unavailable(provider: str) -> str:
         auth = str(row.get("authStatus") or "").lower()
         if "pending" in auth or "missing" in auth:
             return f"xAI/Grok auth is {row.get('authStatus')}"
+    if provider == "ollama":
+        try:
+            proc = subprocess.run(
+                ["/usr/bin/curl", "-fsS", "--max-time", "2", "http://127.0.0.1:11434/api/tags"],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            return "" if proc.returncode == 0 else "local Ollama runtime is unavailable"
+        except Exception:
+            return "local Ollama runtime is unavailable"
     if provider == "openrouter":
         ok, reason = provider_budget_guard("openrouter")
         return "" if ok else reason
@@ -861,7 +880,7 @@ def main() -> int:
     parser.add_argument("--prefer", default="")
     parser.add_argument("--approval", default="none", choices=["none", "required", "approved", "rejected"])
     parser.add_argument("--codex-allowance", default="auto", choices=["auto", "normal", "conserve", "exhausted"])
-    parser.add_argument("--requested-provider", default="", help="Explicit provider/lane Josh requested: codex, gemini, grok/xai, or openrouter.")
+    parser.add_argument("--requested-provider", default="", help="Explicit provider/lane Josh requested: codex, gemini, ollama, grok/xai, or openrouter.")
     parser.add_argument("--requested-model", default="", help="Explicit model Josh requested, e.g. gpt-5.5 or gemini-3.1-pro-preview.")
     parser.add_argument("--requested-reason", default="requested by Josh", help="Short reason to include in route disclosure.")
     parser.add_argument("--create-task", action="store_true")

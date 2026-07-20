@@ -109,13 +109,23 @@ def command_for(args: argparse.Namespace, route: dict[str, Any]) -> list[str]:
     source = f"model-lane-{utc_stamp()}"
 
     if args.transport == "openclaw":
-        openclaw_model = model if "/" in model else f"openai/{model}" if provider == "codex" else model
-        session_key = f"agent:{route.get('agent')}:lane-{utc_stamp()}"
+        #JAIMES: OpenCLAW model overrides require provider-qualified ids and the configured main agent id.
+        provider_prefix = {
+            "codex": "openai",
+            "gemini": "google-gemini-cli",
+            "ollama": "ollama",
+            "xai": "xai",
+            "openrouter": "openrouter",
+        }.get(provider, provider)
+        openclaw_model = model if "/" in model else f"{provider_prefix}/{model}"
+        route_agent = str(route.get("agent") or "main")
+        agent_id = "main" if route_agent in {"josh", "josh2", "jaimes"} else route_agent
+        session_key = f"agent:{agent_id}:lane-{utc_stamp()}"
         return [
             "openclaw",
             "agent",
             "--agent",
-            str(route.get("agent") or "jaimes"),
+            agent_id,
             "--session-key",
             session_key,
             "--model",
@@ -131,6 +141,7 @@ def command_for(args: argparse.Namespace, route: dict[str, Any]) -> list[str]:
     hermes_provider = {
         "codex": "openai-codex",
         "gemini": "google-gemini-cli",
+        "ollama": "ollama-local",
         "xai": "xai",
         "openrouter": "openrouter",
     }.get(provider, provider)

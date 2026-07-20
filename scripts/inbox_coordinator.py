@@ -255,6 +255,24 @@ ROUTES: dict[str, dict[str, Any]] = {
         "role": "hard integration / escalation",
         "executor": "local-codex",
     },
+    "gpt-5.5": {
+        "provider": "codex",
+        "model": "gpt-5.5",
+        "tier": "codex-stable",
+        "worker": "josh2-codex-gpt-5-5",
+        "host": "josh2",
+        "role": "stable compatibility execution",
+        "executor": "local-codex",
+    },
+    "gpt-5.4-mini": {
+        "provider": "codex",
+        "model": "gpt-5.4-mini",
+        "tier": "codex-mini",
+        "worker": "josh2-codex-gpt-5-4-mini",
+        "host": "josh2",
+        "role": "economy bounded execution",
+        "executor": "local-codex",
+    },
     "gemini": {
         "provider": "gemini",
         "model": "gemini-3.5-flash",
@@ -311,6 +329,7 @@ ROUTES: dict[str, dict[str, Any]] = {
     },
 }
 
+#JAIMES: topic prompts may request any configured specialist family; normalize punctuation before routing.
 MODEL_ALIASES = {
     "gpt-5.6-luna": "luna",
     "luna": "luna",
@@ -319,8 +338,15 @@ MODEL_ALIASES = {
     "codex": "terra",
     "gpt-5.6-sol": "sol",
     "sol": "sol",
+    "gpt-5.5": "gpt-5.5",
+    "gpt-5.4-mini": "gpt-5.4-mini",
+    "antigravity gemini 3.5 flash": "gemini",
+    "gemini 3.5 flash": "gemini",
     "gemini flash": "gemini",
     "gemini": "gemini",
+    "antigravity gemini 3.1 pro": "gemini-pro",
+    "gemini 3.1 pro preview": "gemini-pro",
+    "gemini 3.1 pro": "gemini-pro",
     "gemini pro": "gemini-pro",
     "jaimes": "jaimes",
     "j.a.i.n": "jaimes",
@@ -420,7 +446,7 @@ def contains_sensitive_terms(prompt: str) -> bool:
 def route_allowed_for_privacy(route_id: str, privacy: str) -> bool:
     if privacy == "dashboard-safe":
         return True
-    return route_id in {"luna", "terra", "sol", "glm", "ollama"}
+    return route_id in {"luna", "terra", "sol", "gpt-5.5", "gpt-5.4-mini", "glm", "ollama"}
 
 
 def run_check(cmd: list[str], timeout: int = 4) -> bool:
@@ -456,8 +482,9 @@ def remote_check(command: str, timeout: int = 5) -> bool:
 def detect_explicit_route(prompt: str) -> str:
     lower = " ".join((prompt or "").lower().split())
     for alias, route in sorted(MODEL_ALIASES.items(), key=lambda item: len(item[0]), reverse=True):
+        flexible_alias = re.escape(alias).replace(r"\ ", r"[\s._-]+").replace(r"\-", r"[\s_-]*")
         pattern = re.compile(
-            rf"\b(?:use|run(?: this)? (?:with|on)|route(?: this)? (?:to|through)|ask|with|via|on|delegate to|send to)\s+{re.escape(alias)}\b"
+            rf"\b(?:use|run(?: this)? (?:with|on)|route(?: this)? (?:to|through)|ask|with|via|on|delegate to|send to|spawn(?: a)? sub[- ]?agent (?:with|on|using)|launch(?: a)? sub[- ]?agent (?:with|on|using))\s+(?:a\s+)?{flexible_alias}\b"
         )
         for match in pattern.finditer(lower):
             prefix = lower[max(0, match.start() - 20):match.start()]
@@ -494,7 +521,7 @@ def read_only_execution_requested(prompt: str) -> bool:
 def health(route_id: str, injected: dict[str, bool] | None = None) -> bool:
     if injected is not None and route_id in injected:
         return bool(injected[route_id])
-    if route_id in {"luna", "terra", "sol"}:
+    if route_id in {"luna", "terra", "sol", "gpt-5.5", "gpt-5.4-mini"}:
         return (
             shutil.which("codex") is not None
             and (Path.home() / ".codex" / "config.toml").exists()
