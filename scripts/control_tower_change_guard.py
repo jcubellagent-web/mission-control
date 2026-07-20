@@ -24,7 +24,9 @@ SOURCE_PATHS = (
     ".gitignore",
     "agent-skills",
     "config",
+    "schemas",
     "docs/agent-runbooks.md",
+    "docs/brain-topic-intake.md",
     "data/agent-route-benchmark-suite.json",
     "data/agent-routing-policy.json",
     "data/model-provider-budgets.json",
@@ -51,8 +53,10 @@ SOURCE_PATHS = (
     "scripts/ecosystem_runtime_probe.py",
     "scripts/ecosystem_state_reconciler.py",
     "scripts/inbox_coordinator.py",
+    "scripts/brain_media_intake.py",
+    "scripts/brain_topic_catalog.py",
+    "scripts/brain_topic_watcher.py",
     "scripts/install_ecosystem_qa_schedules.py",
-    "scripts/jaimes_cross_host_qc.py",
     "scripts/jaimes_control_tower_blackbox_qc.py",
     "scripts/jaimes_openclaw_gateway_launcher.py",
     "scripts/jaimes_telegram_health.py",
@@ -60,9 +64,12 @@ SOURCE_PATHS = (
     "scripts/jaimes_telegram_fast_ack_launcher.py",
     "scripts/jaimes_work_card.py",
     "scripts/josh_telegram_fast_ack.py",
+    "scripts/josh_telegram_callback_action.py",
     "scripts/josh_work_card.py",
     "scripts/objective_quality.py",
     "scripts/refresh_agentic_robinhood_wallet_live.py",
+    "scripts/telegram_channel_registry.py",
+    "scripts/telegram_gateway_lifecycle.py",
     "scripts/telegram_response_contract_stress.py",
     "scripts/telegram_inbox_qa_monitor.py",
     "scripts/update_mission_control.py",
@@ -102,6 +109,12 @@ PYTHON_COMPILE_PATHS = (
     "scripts/jaimes_openclaw_gateway_launcher.py",
     "scripts/josh_telegram_fast_ack.py",
     "scripts/jaimes_telegram_fast_ack.py",
+    "scripts/telegram_gateway_lifecycle.py",
+    "scripts/brain_media_intake.py",
+    "scripts/brain_topic_catalog.py",
+    "scripts/brain_topic_watcher.py",
+    "scripts/josh_telegram_callback_action.py",
+    "scripts/telegram_channel_registry.py",
     "scripts/josh_work_card.py",
     "scripts/jaimes_work_card.py",
     "scripts/ecosystem_qa_scheduler.py",
@@ -304,10 +317,14 @@ def verify(token: str) -> None:
     env = dict(os.environ)
     env["CONTROL_TOWER_ALLOW_GENERATED"] = "1"
     qa_python = str(ROOT / ".venv-qa" / "bin" / "python") if (ROOT / ".venv-qa" / "bin" / "python").exists() else sys.executable
+    # Guard paths may intentionally name files that will be created under the
+    # active lease. Compile every present module while allowing an immutable
+    # begin snapshot to prove that a newly authored module did not exist yet.
+    compile_paths = [path for path in PYTHON_COMPILE_PATHS if (ROOT / path).is_file()]
     checks = [
         ([sys.executable, "scripts/control_tower_path_guard.py"], env),
         ([sys.executable, "scripts/memory_registry_smoke_test.py"], None),
-        ([sys.executable, "-m", "py_compile", *PYTHON_COMPILE_PATHS], None),
+        ([sys.executable, "-m", "py_compile", *compile_paths], None),
         ([qa_python, "-m", "pytest", "-q", "tests", "scripts/test_telegram_approval_extraction.py", "scripts/test_ecosystem_qa_scheduler.py"], None),
         (["npm", "test", "--prefix", "plugins/inbox-coordinator"], None),
         (["npm", "run", "build"], None),

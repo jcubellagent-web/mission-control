@@ -62,6 +62,25 @@ def test_host_runtime_helpers_are_guarded_source() -> None:
     assert bridge.issubset(set(GUARD.PYTHON_COMPILE_PATHS))
 
 
+def test_guard_covers_jcu10_lifecycle_brain_and_schema_paths() -> None:
+    source_paths = set(GUARD.SOURCE_PATHS)
+    compile_paths = set(GUARD.PYTHON_COMPILE_PATHS)
+    guarded = {
+        "schemas",
+        "docs/brain-topic-intake.md",
+        "scripts/telegram_gateway_lifecycle.py",
+        "scripts/brain_media_intake.py",
+        "scripts/brain_topic_catalog.py",
+        "scripts/brain_topic_watcher.py",
+        "scripts/josh_telegram_callback_action.py",
+        "scripts/telegram_channel_registry.py",
+    }
+    compiled = {path for path in guarded if path.startswith("scripts/")}
+    assert guarded.issubset(source_paths)
+    assert compiled.issubset(compile_paths)
+    assert "scripts/jaimes_cross_host_qc.py" not in source_paths
+
+
 def test_begin_records_an_immutable_source_snapshot(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     existing = GUARD.ROOT / "existing.txt"
     existing.write_text("before\n")
