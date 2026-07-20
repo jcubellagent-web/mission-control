@@ -42,6 +42,20 @@ class SchedulerTests(unittest.TestCase):
         for job_id in ("runtime-layout-check", "full-kiosk-visual"):
             self.assertEqual(jobs[job_id]["command"][0], "/opt/homebrew/bin/python3")
 
+    def test_brain_atlas_refreshes_before_every_control_tower_projection(self) -> None:
+        config = json.loads(subject.CONFIG_PATH.read_text(encoding="utf-8"))
+        ordered_ids = [row["id"] for row in config["jobs"]]
+        jobs = {row["id"]: row for row in config["jobs"]}
+
+        atlas = jobs["brain-atlas-snapshot"]
+        projection = jobs["control-tower-refresh"]
+        self.assertEqual(atlas["schedule"], projection["schedule"])
+        self.assertLess(
+            ordered_ids.index("brain-atlas-snapshot"),
+            ordered_ids.index("control-tower-refresh"),
+        )
+        self.assertEqual(atlas["severity"], "p1")
+
     def test_scheduler_environment_restores_homebrew_tools_for_launchd(self) -> None:
         with mock.patch.dict(subject.os.environ, {"PATH": "/usr/bin"}, clear=True):
             env = subject.scheduler_environment()

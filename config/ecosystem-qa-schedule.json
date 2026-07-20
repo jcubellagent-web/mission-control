@@ -3,6 +3,24 @@
   "timezone": "America/New_York",
   "jobs": [
     {
+      "id": "brain-atlas-snapshot",
+      "owner": "josh2",
+      "team": "Verified operational graph",
+      "schedule": {"intervalMinutes": 2, "offset": 0},
+      "command": [
+        "python3",
+        "scripts/brain_atlas.py",
+        "--output",
+        "data/brain-atlas.json",
+        "--days",
+        "7",
+        "--max-nodes",
+        "100"
+      ],
+      "timeoutSeconds": 30,
+      "severity": "p1"
+    },
+    {
       "id": "control-tower-refresh",
       "owner": "josh2",
       "team": "Control Tower writer",
@@ -48,24 +66,6 @@
       ],
       "timeoutSeconds": 45,
       "severity": "p1"
-    },
-    {
-      "id": "brain-atlas-snapshot",
-      "owner": "josh2",
-      "team": "Verified operational graph",
-      "schedule": {"intervalMinutes": 10, "offset": 8},
-      "command": [
-        "python3",
-        "scripts/brain_atlas.py",
-        "--output",
-        "data/brain-atlas.json",
-        "--days",
-        "7",
-        "--max-nodes",
-        "100"
-      ],
-      "timeoutSeconds": 30,
-      "severity": "p2"
     },
     {
       "id": "reliability-scorecard",
