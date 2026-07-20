@@ -2,16 +2,16 @@
   "agentId": "josh2",
   "agent": "JOSH 2.0",
   "active": true,
-  "reportedActive": true,
+  "reportedActive": false,
   "status": "active",
-  "objective": "Working: diagnose Ollama service reachability and OpenClaw state database permissions",
-  "detail": "Running bash: running the memory registry helper",
-  "updatedAt": "2026-07-19T20:47:15Z",
-  "checkedAt": "2026-07-19T20:47:15Z",
+  "objective": "Blocked: retained handoff document prevents clean source lease",
+  "detail": "Canonical branch reconciled without overwriting live sidecars; source lease remains blocked solely by the retained untracked handoff document.",
+  "updatedAt": "2026-07-20T00:04:32Z",
+  "checkedAt": "2026-07-20T00:04:32Z",
   "currentTool": "exec",
   "steps": [
     {
-      "label": "Working - diagnose Ollama service reachability and OpenClaw state database permissions",
+      "label": "Blocked - retained handoff document prevents clean source lease",
       "status": "active",
       "tool": "exec"
     }
@@ -19,16 +19,16 @@
   "source": "josh2-local-live-feed",
   "supabaseBacked": false,
   "model": "GPT-5.6-terra",
-  "messageReceived": "2026-07-19T00:42:44Z",
+  "messageReceived": "2026-07-20T00:04:32Z",
   "localLiveFeed": true,
-  "workId": "work-telegram-28aeb33ed4b31b2b025b91c6",
-  "runId": "run-telegram-08aa97d0af9a8a5f9647f594",
+  "workId": "task-josh-20260720-000039-reconcile-canonical-runtime-only-commit",
+  "runId": "run-5d2efe5cd53246698833bcec8e6eea83",
   "generation": 1,
-  "sequence": 4,
-  "phase": "active",
-  "originClaimHash": "797555149d890fc94a0be75b1c76e738610c797898a5e7969ea1660bcd6ed7ee",
-  "modelFamily": "antigravity",
-  "modelId": "Gemini Flash / local OpenCLAW session",
+  "sequence": 6,
+  "phase": "blocked-source-dirt",
+  "originClaimHash": "7240ffbf5efda7d3e9c25d4cef4689f9ebf588c2796af1fa6a8fb3e62540c6d8",
+  "modelFamily": "codex",
+  "modelId": "gpt-5.5",
   "routeVerified": true,
-  "leaseUntil": "2026-07-19T20:50:12.000Z"
+  "leaseUntil": null
 }
