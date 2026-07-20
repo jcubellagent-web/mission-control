@@ -1,12 +1,12 @@
 {
-  "updatedAt": "2026-07-15T00:00:00Z",
+  "updatedAt": "2026-07-20T00:00:00Z",
   "currency": "USD",
   "policy": {
     "defaultProvider": "codex-luna-inbox-plus-codex-terra-execution",
     "reviewProvider": "gemini-pro-when-judgment-needed",
     "currentEventsProvider": "xai",
     "fallbackProvider": "openrouter",
-    "codexAllowanceMode": "normal",
+    "codexAllowanceMode": "auto",
     "codexExhaustedMode": {
       "trigger": "Set codexAllowanceMode to exhausted when Codex weekly allowance is gone or Josh explicitly requests outage continuity.",
       "rule": "Route dashboard-safe summaries, reviews, digests, stale-task compression, and non-execution synthesis to Gemini. Route public current-events and X-native research to xAI only when enabled and verified; otherwise disclose the verified Codex fallback. Route explicit non-sensitive fallback checks to OpenRouter. Reserve Codex, OpenAI API, or OpenRouter spend for execution, private connector work, repo edits, terminal actions, approvals, and final integration.",
@@ -23,8 +23,8 @@
     ],
     "failoverRule": "Before external fallback, keep ownership on the right internal lane. If Gemini/xAI/OpenRouter fails for dashboard-safe work, preserve a bounded state package and continue through Codex/OpenAI on the selected owner lane.",
     "statePreservation": "Failover packages may include objective summary, current step, recent safe activity, route decision, task/handoff ids, AGENTS.md/shared-skill pointers, and sanitized memory refs. They must exclude secrets, OAuth payloads, cookies, passwords, tokens, raw emails, raw connector data, and private account contents.",
-    "lastModeChangeAt": "2026-07-15T00:00:00Z",
-    "lastModeChangeReason": "restore normal Codex allowance and enforce deterministic Inbox ownership, Luna/Terra/Sol escalation, and verified Grok routing"
+    "lastModeChangeAt": "2026-07-20T00:00:00Z",
+    "lastModeChangeReason": "derive conservation mode from exact CodexBar weekly allowance while preserving GPT for execution/private integration and using verified specialist subscriptions"
   },
   "providers": [
     {
@@ -78,10 +78,10 @@
       "dailyCapUsd": 0,
       "reserveUsd": 48.97,
       "remainingCreditUsd": null,
-      "lastModelUsed": "grok-4.20-reasoning",
-      "apiModelUsed": "grok-4.20-reasoning",
+      "lastModelUsed": "grok-4.5",
+      "apiModelUsed": "grok-4.5",
       "authStatus": "available-verified",
-      "lastAuthCheck": "2026-07-15T00:00:00Z",
+      "lastAuthCheck": "2026-07-20T00:00:00Z",
       "keyMode": "host-local-env-or-secret-file",
       "lastRouteReason": "X Premium/Grok subscription-backed lane for current-events and X-native context; not treated as usage-metered by default.",
       "fixedMonthlyUsd": 8,

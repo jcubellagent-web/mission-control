@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import os
 import shlex
 import subprocess
 import sys
@@ -17,6 +18,8 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 AGENT_ROUTE = ROOT / "scripts" / "agent_route.py"
+JAIMES_SSH_HOST = os.environ.get("MODEL_LANE_JAIMES_HOST", "jaimes")
+JAIMES_REPO = "~/.openclaw/workspace/mission-control"
 
 
 def utc_stamp() -> str:
@@ -108,6 +111,28 @@ def command_for(args: argparse.Namespace, route: dict[str, Any]) -> list[str]:
     prompt = build_prompt(args, route)
     source = f"model-lane-{utc_stamp()}"
 
+    #JAIMES: Codex-app and Josh 2.0 specialist passes execute on the authenticated
+    # headless JAIMES host; the current GPT session remains coordinator/integrator.
+    if args.transport == "auto" and provider in {"gemini", "ollama", "xai"} and Path.home().name != "jc_agent":
+        remote = [
+            "python3", "scripts/model_lane.py",
+            "--task-type", args.task_type,
+            "--title", args.title,
+            "--objective", args.objective,
+            "--prompt", args.prompt or args.objective,
+            "--privacy", args.privacy,
+            "--requester", args.requester,
+            "--requested-provider", provider,
+            "--requested-model", model,
+            "--requested-reason", str(model_route.get("reason") or "usage-aware specialist route"),
+            "--codex-allowance", args.codex_allowance,
+            "--transport", "hermes",
+            "--execute",
+        ]
+        for cap in args.capability or []:
+            remote += ["--capability", cap]
+        return ["ssh", JAIMES_SSH_HOST, f"cd {JAIMES_REPO} && {shlex.join(remote)}"]
+
     if args.transport == "openclaw":
         #JAIMES: OpenCLAW model overrides require provider-qualified ids and the configured main agent id.
         provider_prefix = {
@@ -138,9 +163,27 @@ def command_for(args: argparse.Namespace, route: dict[str, Any]) -> list[str]:
     if args.transport == "codex" or (args.transport == "auto" and provider == "codex"):
         return ["codex", "exec", "-m", model or "gpt-5.5", prompt]
 
+    if provider == "gemini":
+        return [
+            "hermes", "chat", "--provider", "antigravity", "-m", model,
+            "-Q", "--source", source, "-q", prompt,
+        ]
+
+    if provider == "xai":
+        return [
+            "grok", "-m", model, "-p", prompt,
+            "--output-format", "plain", "--no-subagents", "--permission-mode", "plan",
+        ]
+
+    if provider == "ollama" and model.lower().endswith(":cloud"):
+        return [
+            sys.executable, str(ROOT / "scripts" / "ollama_cloud_pass.py"),
+            "--model", model, "--prompt", prompt,
+        ]
+
     hermes_provider = {
         "codex": "openai-codex",
-        "gemini": "google-gemini-cli",
+        "gemini": "antigravity",
         "ollama": "ollama-local",
         "xai": "xai",
         "openrouter": "openrouter",
@@ -154,9 +197,42 @@ def command_for(args: argparse.Namespace, route: dict[str, Any]) -> list[str]:
         model,
         "--source",
         source,
+        "-Q",
         "-q",
         prompt,
     ]
+
+
+def command_preview(cmd: list[str]) -> str:
+    if cmd and cmd[0] == "ssh":
+        return f"ssh {cmd[1]} <verified specialist lane; prompt redacted>"
+    visible: list[str] = []
+    redact_next = False
+    for part in cmd:
+        if redact_next:
+            visible.append("<prompt redacted>")
+            redact_next = False
+            continue
+        visible.append(part)
+        if part in {"-p", "-q", "--message", "--prompt"}:
+            redact_next = True
+    return " ".join(shlex.quote(part) for part in visible)
+
+
+def execute_verified(cmd: list[str]) -> int:
+    proc = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, check=False)
+    combined = f"{proc.stdout}\n{proc.stderr}".lower()
+    fallback_markers = ("switching to fallback", "primary auth failed", "you need to be signed in")
+    if proc.stdout:
+        print(proc.stdout, end="" if proc.stdout.endswith("\n") else "\n")
+    if proc.stderr:
+        print(proc.stderr, file=sys.stderr, end="" if proc.stderr.endswith("\n") else "\n")
+    if proc.returncode != 0:
+        return proc.returncode
+    if any(marker in combined for marker in fallback_markers):
+        print("Verified model lane failed: provider fallback or authentication failure detected.", file=sys.stderr)
+        return 3
+    return 0
 
 
 def main() -> int:
@@ -184,7 +260,7 @@ def main() -> int:
             "required": True,
             "checkpoint": checkpoint_text(args, route),
             "transport": args.transport,
-            "commandPreview": " ".join(shlex.quote(part) for part in cmd[:8]) + (" …" if len(cmd) > 8 else ""),
+            "commandPreview": command_preview(cmd),
             "verification": (route.get("modelRoute") or {}).get("verification") or {"required": True},
         },
     }
@@ -192,10 +268,7 @@ def main() -> int:
         print(json.dumps(plan, indent=2))
         return 0
 
-    proc = subprocess.run(cmd, cwd=ROOT, text=True, check=False)
-    if proc.returncode != 0:
-        raise SystemExit(proc.returncode)
-    return 0
+    return execute_verified(cmd)
 
 
 if __name__ == "__main__":

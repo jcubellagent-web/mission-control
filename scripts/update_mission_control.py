@@ -3280,21 +3280,27 @@ def fetch_ollama_usage() -> List[Dict[str, Any]]:
             size_bytes = m.get("size", 0)
             size_gb = size_bytes / 1e9
             loaded = name in loaded_names
+            is_cloud = name.lower().endswith(":cloud")
             rows.append({
-                "name": f"local/{name}",
+                "name": f"ollama/{name}" if is_cloud else f"local/{name}",
                 "source": "ollama",
                 "weeklyCost": 0.0,
                 "dailyCost": 0.0,
                 "sessionCost": 0.0,
                 "totalTokens": 0,
                 "costEstimated": False,
-                "isLocal": True,
+                "isLocal": not is_cloud,
+                "isCloud": is_cloud,
                 "sizeGb": round(size_gb, 2),
                 "loaded": loaded,
                 "billingMode": "subscription",
                 "billableCostUsd": 0.0,
                 "meteredEquivalentUsd": 0.0,
-                "_note": f"Local Ollama model ({size_gb:.1f}GB). Covered by local/Ollama Pro lane; zero incremental usage spend.",
+                "_note": (
+                    "Ollama Cloud model covered by the Ollama Pro subscription."
+                    if is_cloud
+                    else f"Local Ollama model ({size_gb:.1f}GB). Covered by local/Ollama Pro lane; zero incremental usage spend."
+                ),
             })
     except Exception as exc:
         print(f"[warn] fetch_ollama_usage failed: {exc}", file=sys.stderr)
@@ -3538,6 +3544,9 @@ def fetch_model_usage() -> Dict[str, Any] | None:
                 row["_note"] = "OpenAI/Codex subscription-backed usage; shown as usage-equivalent, not incremental spend."
             elif row.get("isLocal"):
                 row["billingMode"] = "local"
+                row["marginalCost"] = 0.0
+            elif source == "ollama" and row.get("isCloud"):
+                row["billingMode"] = "subscription"
                 row["marginalCost"] = 0.0
             else:
                 row["billingMode"] = "metered"

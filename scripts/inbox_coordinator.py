@@ -275,21 +275,21 @@ ROUTES: dict[str, dict[str, Any]] = {
     },
     "gemini": {
         "provider": "gemini",
-        "model": "gemini-3.5-flash",
+        "model": "agy-gemini-3.5-flash",
         "tier": "fast",
         "worker": "jaimes-gemini-review",
         "host": "jaimes",
         "role": "low-cost summary/review",
-        "executor": "remote-llm-router",
+        "executor": "remote-antigravity",
     },
     "gemini-pro": {
         "provider": "gemini",
-        "model": "gemini-3.1-pro-preview",
+        "model": "agy-gemini-3.1-pro",
         "tier": "reason",
         "worker": "jaimes-gemini-pro",
         "host": "jaimes",
         "role": "large-context review/reasoning",
-        "executor": "remote-llm-router",
+        "executor": "remote-antigravity",
     },
     "jaimes": {
         "provider": "jaimes",
@@ -304,10 +304,10 @@ ROUTES: dict[str, dict[str, Any]] = {
         "provider": "ollama",
         "model": "glm-5.2:cloud",
         "tier": "reason",
-        "worker": "josh2-ollama-glm",
-        "host": "josh2",
+        "worker": "jaimes-ollama-glm",
+        "host": "jaimes",
         "role": "sanitized large-context technical reasoning",
-        "executor": "local-ollama",
+        "executor": "remote-ollama",
     },
     "ollama": {
         "provider": "ollama",
@@ -547,10 +547,14 @@ def health(route_id: str, injected: dict[str, bool] | None = None) -> bool:
             and run_check(["codex", "--version"], timeout=3)
         )
     if route_id in {"gemini", "gemini-pro"}:
-        return remote_check("test -x /opt/homebrew/bin/gemini && test -f ~/.openclaw/workspace/scripts/llm_router.py")
+        return remote_check("test -x ~/.local/bin/hermes && grep -q '^[[:space:]]*antigravity:' ~/.hermes/config.yaml")
     if route_id == "jaimes":
         return remote_check("test -x ~/.local/bin/hermes")
     if route_id in {"ollama", "glm"}:
+        if route_id == "glm":
+            #JAIMES: Josh 2.0 may be signed out of Ollama Cloud; use the authenticated workhorse.
+            remote_probe = "python3 -c 'import json,urllib.request; p=json.dumps({\"model\":\"glm-5.2:cloud\",\"prompt\":\"\",\"stream\":False,\"options\":{\"num_predict\":0}}).encode(); r=urllib.request.Request(\"http://127.0.0.1:11434/api/generate\",data=p,headers={\"Content-Type\":\"application/json\"}); print(urllib.request.urlopen(r,timeout=8).status)' >/dev/null"
+            return remote_check(remote_probe, timeout=12)
         try:
             with urllib.request.urlopen("http://localhost:11434/api/tags", timeout=1) as resp:
                 if resp.status >= 500:
@@ -561,26 +565,6 @@ def health(route_id: str, injected: dict[str, bool] | None = None) -> bool:
                     for item in payload.get("models", [])
                     if isinstance(item, dict)
                 }
-                if route_id == "glm":
-                    installed = any(name == "glm-5.2" or name.startswith("glm-5.2:") for name in names)
-                    if not installed:
-                        return False
-                    #JAIMES: a catalog entry does not prove Ollama Cloud auth; use an empty zero-token probe.
-                    cloud_payload = json.dumps(
-                        {
-                            "model": "glm-5.2:cloud",
-                            "prompt": "",
-                            "stream": False,
-                            "options": {"num_predict": 0},
-                        }
-                    ).encode("utf-8")
-                    request = urllib.request.Request(
-                        "http://localhost:11434/api/generate",
-                        data=cloud_payload,
-                        headers={"Content-Type": "application/json"},
-                    )
-                    with urllib.request.urlopen(request, timeout=8) as cloud_resp:
-                        return 200 <= cloud_resp.status < 300
                 return bool(names)
         except Exception:
             return False
@@ -1332,6 +1316,62 @@ finally:
 '''
 
 
+ANTIGRAVITY_EXECUTOR_CODE = r'''import json, subprocess, sys
+cfg = json.loads(sys.argv[1])
+timeout = int(sys.argv[2])
+prompt = sys.stdin.read()
+proc = subprocess.run(
+    [
+        "/Users/jc_agent/.local/bin/hermes", "chat",
+        "--provider", "antigravity",
+        "-m", str(cfg["model"]),
+        "-Q", "--source", "telegram-antigravity",
+        "-q", prompt,
+    ],
+    capture_output=True, text=True, timeout=timeout, check=False,
+)
+combined = f"{proc.stdout}\n{proc.stderr}".lower()
+if proc.returncode != 0:
+    raise RuntimeError((proc.stderr or proc.stdout or "Antigravity failed")[-500:])
+if "switching to fallback" in combined or "primary auth failed" in combined:
+    raise RuntimeError("Antigravity authentication failed; refusing silent GPT fallback")
+lines = [
+    line for line in proc.stdout.splitlines()
+    if not line.strip().startswith("session_id:")
+    and not line.strip().startswith("Warning: Unknown toolsets:")
+]
+output = "\n".join(lines).strip()
+if not output:
+    raise RuntimeError("Antigravity returned empty output")
+print(json.dumps({"output": output, "provider": "gemini", "model": cfg["model"], "modelVerified": True}))
+'''
+
+
+OLLAMA_EXECUTOR_CODE = r'''import json, sys, urllib.error, urllib.request
+cfg = json.loads(sys.argv[1])
+timeout = int(sys.argv[2])
+prompt = sys.stdin.read()
+payload = json.dumps({
+    "model": str(cfg["model"]), "prompt": prompt, "stream": False, "think": False,
+}).encode("utf-8")
+request = urllib.request.Request(
+    "http://127.0.0.1:11434/api/generate", data=payload,
+    headers={"Content-Type": "application/json"},
+)
+try:
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+        result = json.loads(response.read())
+except urllib.error.HTTPError as exc:
+    if exc.code == 401:
+        raise RuntimeError("Ollama Cloud authentication failed") from exc
+    raise
+output = str(result.get("response") or "").strip()
+if not output:
+    raise RuntimeError("Ollama returned empty output")
+print(json.dumps({"output": output, "provider": "ollama", "model": cfg["model"], "modelVerified": True}))
+'''
+
+
 GROK_EXECUTOR_CODE = r'''import json, subprocess, sys
 cfg = json.loads(sys.argv[1])
 timeout = int(sys.argv[2])
@@ -1366,6 +1406,10 @@ def executor_command(route: dict[str, Any], timeout: int) -> tuple[list[str], st
 
     if executor == "remote-grok-cli":
         runner = GROK_EXECUTOR_CODE
+    elif executor == "remote-antigravity":
+        runner = ANTIGRAVITY_EXECUTOR_CODE
+    elif executor == "remote-ollama":
+        runner = OLLAMA_EXECUTOR_CODE
     elif executor == "remote-hermes":
         runner = HERMES_EXECUTOR_CODE
     else:

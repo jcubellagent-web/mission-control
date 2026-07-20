@@ -136,30 +136,12 @@ class InboxCoordinatorTests(unittest.TestCase):
         self.assertEqual(route["routeId"], "luna")
         self.assertIn("privacy policy blocked glm", route["fallback"])
 
-    def test_glm_health_requires_cloud_auth_not_only_catalog_presence(self):
+    def test_glm_health_requires_authenticated_jaimes_cloud_probe(self):
         coordinator = load_module()
-
-        class Response:
-            def __init__(self, payload, status=200):
-                self.payload = payload
-                self.status = status
-
-            def __enter__(self):
-                return self
-
-            def __exit__(self, *_args):
-                return False
-
-            def read(self):
-                return json.dumps(self.payload).encode("utf-8")
-
-        catalog = Response({"models": [{"name": "glm-5.2:cloud"}]})
-        with patch.object(coordinator.urllib.request, "urlopen", side_effect=[catalog, OSError("signed out")]):
+        with patch.object(coordinator, "remote_check", return_value=False) as remote:
             self.assertIs(coordinator.health("glm"), False)
-
-        catalog = Response({"models": [{"name": "glm-5.2:cloud"}]})
-        authenticated = Response({"response": ""})
-        with patch.object(coordinator.urllib.request, "urlopen", side_effect=[catalog, authenticated]):
+            self.assertIn("glm-5.2:cloud", remote.call_args.args[0])
+        with patch.object(coordinator, "remote_check", return_value=True):
             self.assertIs(coordinator.health("glm"), True)
 
     def test_private_or_secret_terms_stay_on_josh_lane(self):

@@ -235,7 +235,7 @@
       "environment": {"XAI_ENABLED": "1", "XAI_VERIFIED": "1"},
       "expectedOwner": "jain",
       "expectedProvider": "xai",
-      "expectedModel": "grok-4.20-reasoning"
+      "expectedModel": "grok-4.5"
     },
     {
       "id": "x_search_grok_verified",
@@ -245,13 +245,16 @@
       "environment": {"XAI_ENABLED": "1", "XAI_VERIFIED": "1"},
       "expectedOwner": "jain",
       "expectedProvider": "xai",
-      "expectedModel": "grok-4.20-reasoning"
+      "expectedModel": "grok-4.5"
     },
     {
       "id": "current_events_truthful_fallback",
       "taskType": "current-events",
       "title": "Current events without Grok",
       "objective": "Review current public signals through a verified fallback",
+      "environment": {
+        "XAI_ENABLED": "0"
+      },
       "expectedOwner": "jain",
       "expectedProvider": "codex",
       "expectedModel": "gpt-5.6-terra",
@@ -262,6 +265,9 @@
       "taskType": "public-news-monitor",
       "title": "Public news without Grok",
       "objective": "Monitor public news through a verified fallback",
+      "environment": {
+        "XAI_ENABLED": "0"
+      },
       "expectedOwner": "jain",
       "expectedProvider": "codex",
       "expectedModel": "gpt-5.6-terra",

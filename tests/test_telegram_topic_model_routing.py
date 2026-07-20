@@ -78,8 +78,11 @@ def test_openclaw_fresh_lane_uses_real_main_agent_and_provider_prefix() -> None:
 
 def test_remote_specialists_use_current_host_interfaces() -> None:
     coordinator = load_module("inbox_coordinator_executor", ROOT / "scripts" / "inbox_coordinator.py")
-    assert "_ask_gemini(prompt, model=cfg[\"model\"], tier=cfg[\"tier\"])" in coordinator.LLM_EXECUTOR_CODE
-    assert "_ask_gemini(prompt, model=cfg[\"model\"], timeout=" not in coordinator.LLM_EXECUTOR_CODE
+    assert coordinator.ROUTES["gemini"]["executor"] == "remote-antigravity"
+    assert coordinator.ROUTES["gemini"]["model"] == "agy-gemini-3.5-flash"
+    assert coordinator.ROUTES["gemini-pro"]["model"] == "agy-gemini-3.1-pro"
+    assert '"--provider", "antigravity"' in coordinator.ANTIGRAVITY_EXECUTOR_CODE
+    assert "refusing silent GPT fallback" in coordinator.ANTIGRAVITY_EXECUTOR_CODE
     command, host = coordinator.executor_command(coordinator.ROUTES["grok"], 60)
     joined = " ".join(command)
     assert host == "jaimes"
@@ -96,6 +99,12 @@ def test_glm_policy_is_cloud_specific_and_distinct_from_other_models() -> None:
 
     assert coordinator.ROUTES["glm"]["model"] == "glm-5.2:cloud"
     assert coordinator.ROUTES["glm"]["role"] == "sanitized large-context technical reasoning"
+    assert coordinator.ROUTES["glm"]["host"] == "jaimes"
+    assert coordinator.ROUTES["glm"]["executor"] == "remote-ollama"
+    glm_command, glm_host = coordinator.executor_command(coordinator.ROUTES["glm"], 60)
+    assert glm_host == "jaimes"
+    assert "OLLAMA_EXECUTOR_CODE" not in " ".join(glm_command)
+    assert "Ollama Cloud authentication failed" in coordinator.OLLAMA_EXECUTOR_CODE
     assert agent_route.provider_auth_label("ollama", "glm-5.2:cloud") == "Ollama Cloud"
     assert "structured-code-review" in agent_route.GLM_FIRST_TASK_TYPES
     assert "summary" in agent_route.GEMINI_FIRST_TASK_TYPES

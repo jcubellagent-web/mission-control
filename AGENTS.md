@@ -225,7 +225,16 @@ Session reset rule:
 
 ## Model And Thinking Routing
 
-Josh approved this default policy for Josh 2.0 Telegram work:
+Josh approved this default policy for Codex-app, Josh 2.0, and JAIMES work:
+
+- For every substantial dashboard-safe task, apply the checked-in
+  `agent-skills/multi-model-routing/SKILL.md` policy before committing the bulk
+  reasoning to GPT. The current Codex conversation remains coordinator and final
+  integrator; a specialist claim is valid only after an actual verified provider
+  result returns.
+- Derive Codex conservation from the exact weekly allowance: at 20% or less,
+  route eligible non-execution work to Gemini, GLM, or Grok first. Never spend a
+  specialist call merely to create artificial balance; match it to the task.
 
 - Use `openai/gpt-5.6-terra` with medium thinking as the default trusted execution route.
 - Downshift routine status, tiny edits, quick checks, and bounded low-risk work to

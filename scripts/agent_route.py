@@ -8,9 +8,12 @@ import fcntl
 import hashlib
 import json
 import os
+import re
+import shlex
 import subprocess
 import sys
 import time
+import urllib.request
 from pathlib import Path
 from typing import Any, Optional
 
@@ -274,6 +277,8 @@ PROVIDER_AUTH_LABELS = {
     "openrouter": "OpenRouter metered API",
 }
 
+JAIMES_SPECIALIST_HOST = os.environ.get("MODEL_LANE_JAIMES_HOST", "jaimes")
+
 
 def provider_auth_label(provider: str, model: str = "") -> str:
     if provider == "ollama" and str(model or "").strip().lower().endswith(":cloud"):
@@ -405,6 +410,17 @@ def provider_budget(provider_id: str) -> dict[str, Any]:
 
 
 def gemini_model(alias: str = "fast") -> str:
+    #JAIMES: Antigravity model ids are executable; human labels and retired
+    # google-gemini-cli ids must never leak into a fresh lane command.
+    antigravity_models = {
+        "deep": "agy-gemini-3.1-pro",
+        "judgment": "agy-gemini-3.1-pro",
+        "longContext": "agy-gemini-3.1-pro",
+        "review": "agy-gemini-3.5-flash",
+        "fast": "agy-gemini-3.5-flash",
+    }
+    if alias in antigravity_models:
+        return antigravity_models[alias]
     policy = read_json(JAIMES_GEMINI_POLICY_PATH, {})
     aliases = policy.get("modelAliases") if isinstance(policy, dict) else {}
     if isinstance(aliases, dict):
@@ -447,18 +463,42 @@ def codex_allowance_mode(args: argparse.Namespace) -> str:
     env_mode = os.environ.get("CODEX_ALLOWANCE_MODE", "").strip().lower()
     if env_mode in {"normal", "conserve", "exhausted"}:
         return env_mode
+
+    #JAIMES: exact CodexBar windows outrank a stale static "normal" policy.
+    usage = read_json(MODEL_USAGE_PATH, {})
+    limits = ((usage.get("codexbarLimits") or {}).get("codex") or {}) if isinstance(usage, dict) else {}
+    windows = limits.get("usageWindows") if isinstance(limits, dict) else []
+    weekly_remaining: Optional[float] = None
+    for window in windows if isinstance(windows, list) else []:
+        if not isinstance(window, dict):
+            continue
+        label = str(window.get("label") or "").strip().lower()
+        if label != "weekly":
+            continue
+        try:
+            weekly_remaining = float(window.get("remainingPercent"))
+        except (TypeError, ValueError):
+            weekly_remaining = None
+        break
+    if weekly_remaining is not None:
+        if weekly_remaining <= 0:
+            return "exhausted"
+        if weekly_remaining <= 20:
+            return "conserve"
+
+    codexbar = (((usage.get("codingVisibility") or {}).get("codexbar") or {}) if isinstance(usage, dict) else {})
+    weekly = " ".join(str(codexbar.get(key) or "") for key in ("weekly", "summary")).lower()
+    if "run out" in weekly or "exhaust" in weekly or "0% left" in weekly:
+        return "exhausted"
+    remaining_match = re.search(r"\b(\d+(?:\.\d+)?)%\s+left\b", weekly)
+    if "deficit" in weekly or (remaining_match and float(remaining_match.group(1)) <= 20):
+        return "conserve"
+
     budgets = read_json(BUDGETS_PATH, {"policy": {}})
     policy = budgets.get("policy", {}) if isinstance(budgets, dict) else {}
     policy_mode = str(policy.get("codexAllowanceMode") or "normal").strip().lower()
     if policy_mode in {"normal", "conserve", "exhausted"}:
         return policy_mode
-    usage = read_json(MODEL_USAGE_PATH, {})
-    codexbar = (((usage.get("codingVisibility") or {}).get("codexbar") or {}) if isinstance(usage, dict) else {})
-    weekly = " ".join(str(codexbar.get(key) or "") for key in ("weekly", "summary")).lower()
-    if "run out" in weekly or "exhaust" in weekly or "0% left" in weekly:
-        return "exhausted"
-    if "deficit" in weekly or "2% left" in weekly or "1% left" in weekly or "3% left" in weekly:
-        return "conserve"
     return "normal"
 
 
@@ -554,9 +594,48 @@ def explicit_model_request(args: argparse.Namespace) -> tuple[str, str, str]:
     return requested_provider, requested_model, requested_reason
 
 
-def explicit_route_unavailable(provider: str) -> str:
+def remote_specialist_available(provider: str, model: str = "") -> bool:
+    if Path.home().name == "jc_agent":
+        return False
     if provider == "gemini":
-        return "" if (Path.home() / "scripts" / "hermes_gemini_sub.sh").exists() else "Antigravity Gemini helper is not installed on this host"
+        command = "test -x ~/.local/bin/hermes && grep -q '^[[:space:]]*antigravity:' ~/.hermes/config.yaml"
+    elif provider == "ollama" and str(model or "").lower().endswith(":cloud"):
+        payload = json.dumps({
+            "model": str(model).lower().removeprefix("ollama/"),
+            "prompt": "",
+            "stream": False,
+            "options": {"num_predict": 0},
+        })
+        command = (
+            "curl -fsS --max-time 10 http://127.0.0.1:11434/api/generate "
+            f"-H 'Content-Type: application/json' -d {shlex.quote(payload)} >/dev/null"
+        )
+    elif provider == "xai":
+        command = "test -x ~/.local/bin/grok && ~/.local/bin/grok models >/dev/null 2>&1"
+    else:
+        return False
+    try:
+        proc = subprocess.run(
+            ["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=3", JAIMES_SPECIALIST_HOST, command],
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=15,
+            check=False,
+        )
+        return proc.returncode == 0
+    except Exception:
+        return False
+
+
+def explicit_route_unavailable(provider: str, model: str = "") -> str:
+    if provider == "gemini":
+        hermes = Path.home() / ".local" / "bin" / "hermes"
+        config = Path.home() / ".hermes" / "config.yaml"
+        configured = config.exists() and "antigravity:" in config.read_text(errors="ignore")
+        if hermes.exists() and configured:
+            return ""
+        return "" if remote_specialist_available(provider, model) else "Antigravity Hermes provider is not configured on this host or JAIMES"
     if provider == "xai":
         row = provider_budget("xai")
         auth = str(row.get("authStatus") or "").lower()
@@ -564,15 +643,34 @@ def explicit_route_unavailable(provider: str) -> str:
             return f"xAI/Grok auth is {row.get('authStatus')}"
     if provider == "ollama":
         try:
-            proc = subprocess.run(
-                ["/usr/bin/curl", "-fsS", "--max-time", "2", "http://127.0.0.1:11434/api/tags"],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
-            return "" if proc.returncode == 0 else "local Ollama runtime is unavailable"
+            with urllib.request.urlopen("http://127.0.0.1:11434/api/tags", timeout=2) as response:
+                tags = json.loads(response.read())
+            names = {str(row.get("name") or "").lower() for row in tags.get("models", []) if isinstance(row, dict)}
+            requested = str(model or "").lower().removeprefix("ollama/")
+            if requested and requested not in names:
+                if remote_specialist_available(provider, model):
+                    return ""
+                return f"Ollama model {requested} is not installed on this host or JAIMES"
+            if requested.endswith(":cloud"):
+                payload = json.dumps({
+                    "model": requested,
+                    "prompt": "",
+                    "stream": False,
+                    "options": {"num_predict": 0},
+                }).encode("utf-8")
+                request = urllib.request.Request(
+                    "http://127.0.0.1:11434/api/generate",
+                    data=payload,
+                    headers={"Content-Type": "application/json"},
+                )
+                with urllib.request.urlopen(request, timeout=8) as response:
+                    if not 200 <= response.status < 300:
+                        return f"Ollama Cloud model {requested} is not authenticated"
+            return ""
         except Exception:
-            return "local Ollama runtime is unavailable"
+            if remote_specialist_available(provider, model):
+                return ""
+            return "Ollama runtime or cloud authentication is unavailable on this host and JAIMES"
     if provider == "openrouter":
         ok, reason = provider_budget_guard("openrouter")
         return "" if ok else reason
@@ -647,13 +745,16 @@ def codex_model_for(args: argparse.Namespace) -> str:
 
 def xai_verified_available() -> tuple[bool, str]:
     """Require an explicit enabled signal and a current verified auth signal."""
-    enabled = os.environ.get("XAI_ENABLED", "0").strip().lower() in {"1", "true", "yes", "on"}
-    if not enabled:
-        return False, "xAI/Grok route is disabled"
-    env_verified = os.environ.get("XAI_VERIFIED", "").strip().lower() in {"1", "true", "yes", "on"}
     row = provider_budget("xai")
     auth = str(row.get("authStatus") or "").strip().lower()
     verified_auth = auth.startswith("available") or auth in {"verified", "healthy"}
+    enabled_value = os.environ.get("XAI_ENABLED", "").strip().lower()
+    if enabled_value in {"0", "false", "no", "off"}:
+        return False, "xAI/Grok route is explicitly disabled"
+    enabled = enabled_value in {"1", "true", "yes", "on"} or (not enabled_value and verified_auth)
+    if not enabled:
+        return False, "xAI/Grok route is not enabled or verified"
+    env_verified = os.environ.get("XAI_VERIFIED", "").strip().lower() in {"1", "true", "yes", "on"}
     if not (env_verified or verified_auth):
         return False, f"xAI/Grok availability is not verified ({auth or 'no auth status'})"
     budget_ok, budget_reason = provider_budget_guard("xai")
@@ -697,7 +798,7 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
         requested_model = codex_model_for(args)
         requested_reason = f"{xai_availability_reason}; using the verified Codex fallback"
     if requested_provider:
-        unavailable = explicit_route_unavailable(requested_provider)
+        unavailable = explicit_route_unavailable(requested_provider, requested_model)
         cloud_ollama = requested_provider == "ollama" and requested_model.lower().endswith(":cloud")
         unsafe_specialist = (requested_provider in {"gemini", "xai", "openrouter"} or cloud_ollama) and (
             unsafe_privacy or needs_approval or codex_only
@@ -719,7 +820,7 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
         return explicit_route_payload(requested_provider, requested_model, owner, args, allowance_mode, requested_reason)
 
     if glm_hint and not unsafe_privacy and not needs_approval and not codex_only:
-        unavailable = explicit_route_unavailable("ollama")
+        unavailable = explicit_route_unavailable("ollama", "glm-5.2:cloud")
         if not unavailable:
             return {
                 "firstStop": "ollama",
