@@ -213,13 +213,14 @@ def test_poll_preserves_pending_interpretation_flag(monkeypatch):
     started = utc_now()
     captured = {}
     monkeypatch.setattr(watcher, "load_fast_ack_state_snapshot", lambda: ({}, {}))
-    monkeypatch.setattr(watcher, "session_metadata", lambda: {
+    #JAIMES: poll_once consumes all owned topic sessions, so preserve the topic target in that collection mock.
+    monkeypatch.setattr(watcher, "session_metadatas", lambda: [{
         "sessionId": "session-1",
         "model": "openai/gpt-5.6-terra",
         "telegram_chat_id": watcher.CONTROL_CENTER_CHAT_ID,
         "telegram_thread_id": "1",
         "telegram_session_key": "agent:main:telegram:group:-1003589561528:topic:1",
-    })
+    }])
     monkeypatch.setattr(watcher, "recent_prompt_events", lambda *args, **kwargs: [{
         "session_id": "session-1",
         "ts": started,
