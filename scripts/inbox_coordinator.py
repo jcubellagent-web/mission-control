@@ -302,11 +302,11 @@ ROUTES: dict[str, dict[str, Any]] = {
     },
     "glm": {
         "provider": "ollama",
-        "model": "glm-5.2",
-        "tier": "local",
+        "model": "glm-5.2:cloud",
+        "tier": "reason",
         "worker": "josh2-ollama-glm",
         "host": "josh2",
-        "role": "local/private draft or offline fallback",
+        "role": "sanitized large-context technical reasoning",
         "executor": "local-ollama",
     },
     "ollama": {
@@ -446,7 +446,8 @@ def contains_sensitive_terms(prompt: str) -> bool:
 def route_allowed_for_privacy(route_id: str, privacy: str) -> bool:
     if privacy == "dashboard-safe":
         return True
-    return route_id in {"luna", "terra", "sol", "gpt-5.5", "gpt-5.4-mini", "glm", "ollama"}
+    #JAIMES: GLM 5.2 is reached through Ollama Cloud, so it never receives private/raw context.
+    return route_id in {"luna", "terra", "sol", "gpt-5.5", "gpt-5.4-mini", "ollama"}
 
 
 def run_check(cmd: list[str], timeout: int = 4) -> bool:
@@ -500,9 +501,27 @@ def classify_route(prompt: str, privacy: str) -> tuple[str, str]:
         return "luna", "private/sensitive content stays on Josh 2.0 coordinator lane"
     if any(token in lower for token in ("current event", "latest news", "x/twitter", "social signal", "market narrative")):
         return "grok", "public current-events/social signal request"
+    mutation_text = NEGATED_MUTATION_SIGNAL.sub("", lower)
+    #JAIMES: prefer GLM Cloud for sanitized, read-only technical depth; Codex retains execution.
+    glm_reasoning = any(
+        token in lower
+        for token in (
+            "large-context technical",
+            "architecture analysis",
+            "multi-file planning",
+            "structured code review",
+            "parallel technical reasoning",
+            "technical second opinion",
+        )
+    )
+    glm_mutation = re.search(
+        r"\b(?:fix|patch|edit|implement|deploy|repair|restart|recover|build)\b",
+        mutation_text,
+    )
+    if glm_reasoning and not glm_mutation:
+        return "glm", "dashboard-safe large-context technical reasoning"
     if any(token in lower for token in ("hard", "stabilize", "architecture", "migration", "integration", "debug", "root cause")):
         return "terra", "trusted execution/integration"
-    mutation_text = NEGATED_MUTATION_SIGNAL.sub("", lower)
     if MUTATION_SIGNAL.search(mutation_text):
         return "terra", "trusted execution/integration"
     if READ_ONLY_REQUEST.search(lower) and re.search(r"\b(?:assess|check|health|inspect|status|verify)\b", lower):

@@ -64,6 +64,24 @@ GEMINI_FIRST_CAPABILITIES = {
     "non-sensitive-log-review",
 }
 
+#JAIMES: GLM 5.2 Cloud is the deliberate long-context technical-reasoning sub-agent,
+# while Gemini owns synthesis and Codex owns mutation, permissions, and integration.
+GLM_FIRST_TASK_TYPES = {
+    "architecture-analysis",
+    "large-context-technical-analysis",
+    "multi-file-planning",
+    "parallel-technical-reasoning",
+    "structured-code-review",
+    "technical-second-opinion",
+}
+
+GLM_FIRST_CAPABILITIES = {
+    "glm-cloud",
+    "large-context-technical-reasoning",
+    "multi-file-planning",
+    "structured-code-review",
+}
+
 CODEX_ONLY_TASK_TYPES = {
     "code",
     "repair",
@@ -255,6 +273,12 @@ PROVIDER_AUTH_LABELS = {
     "xai": "Grok CLI OAuth + xAI API feed",
     "openrouter": "OpenRouter metered API",
 }
+
+
+def provider_auth_label(provider: str, model: str = "") -> str:
+    if provider == "ollama" and str(model or "").strip().lower().endswith(":cloud"):
+        return "Ollama Cloud"
+    return PROVIDER_AUTH_LABELS.get(provider, provider)
 
 
 
@@ -471,6 +495,13 @@ def hard_owner_for(args: argparse.Namespace) -> str:
     requester = str(args.requester or "").strip().lower()
     privacy = str(args.privacy or "").strip().lower()
 
+    #JAIMES: GLM specialist passes stay owned by the Telegram/agent lane that requested them.
+    if task_type in GLM_FIRST_TASK_TYPES:
+        if requester in {"josh", "josh2", "josh2.0"}:
+            return "josh"
+        if requester in {"jaimes", "jain", "j.a.i.n"}:
+            return "jaimes"
+        return "joshex"
     if task_type == "connected-account-triage" and privacy == "agent-private":
         if requester in {"josh", "josh2", "josh2.0"}:
             return "josh"
@@ -549,7 +580,7 @@ def explicit_route_unavailable(provider: str) -> str:
 
 
 def explicit_route_payload(provider: str, model: str, owner: str, args: argparse.Namespace, allowance_mode: str, reason: str) -> dict[str, Any]:
-    auth = PROVIDER_AUTH_LABELS.get(provider, provider)
+    auth = provider_auth_label(provider, model)
     first_stop = "grok" if provider == "xai" else provider
     return {
         "firstStop": first_stop,
@@ -643,6 +674,7 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
         or task_type in SORARE_TYPES
     )
     gemini_hint = task_type in GEMINI_FIRST_TASK_TYPES or bool(caps & GEMINI_FIRST_CAPABILITIES)
+    glm_hint = task_type in GLM_FIRST_TASK_TYPES or bool(caps & GLM_FIRST_CAPABILITIES)
     xai_hint = task_type in XAI_FIRST_TASK_TYPES or bool(caps & XAI_FIRST_CAPABILITIES)
     openrouter_hint = task_type in OPENROUTER_FALLBACK_TASK_TYPES or bool(caps & OPENROUTER_FALLBACK_CAPABILITIES)
     gemini_first = bool(gemini_hint and not codex_only and not unsafe_privacy and not needs_approval)
@@ -666,7 +698,10 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
         requested_reason = f"{xai_availability_reason}; using the verified Codex fallback"
     if requested_provider:
         unavailable = explicit_route_unavailable(requested_provider)
-        unsafe_specialist = requested_provider in {"gemini", "xai", "openrouter"} and (unsafe_privacy or needs_approval or codex_only)
+        cloud_ollama = requested_provider == "ollama" and requested_model.lower().endswith(":cloud")
+        unsafe_specialist = (requested_provider in {"gemini", "xai", "openrouter"} or cloud_ollama) and (
+            unsafe_privacy or needs_approval or codex_only
+        )
         if unavailable or unsafe_specialist:
             reasons = []
             if unavailable:
@@ -682,6 +717,32 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
                 "; ".join(reasons),
             )
         return explicit_route_payload(requested_provider, requested_model, owner, args, allowance_mode, requested_reason)
+
+    if glm_hint and not unsafe_privacy and not needs_approval and not codex_only:
+        unavailable = explicit_route_unavailable("ollama")
+        if not unavailable:
+            return {
+                "firstStop": "ollama",
+                "provider": "ollama",
+                "model": "glm-5.2:cloud",
+                "auth": provider_auth_label("ollama", "glm-5.2:cloud"),
+                "role": "glm-large-context-technical-reasoning",
+                "owner": owner,
+                "enforced": True,
+                "freshLaneRequired": True,
+                "verifyBeforeWork": True,
+                "codexAllowanceMode": allowance_mode,
+                "spendClass": "cloud-specialist",
+                "privacy": "dashboard-safe",
+                "reason": compact(
+                    f"{task_type} benefits from GLM 5.2's large-context, tool-capable technical reasoning before owner integration."
+                ),
+                "guardrails": [
+                    "Send sanitized technical context only; Ollama GLM 5.2 is a cloud model, not a private local lane.",
+                    "Do not send secrets, OAuth payloads, raw emails, raw connector data, private account contents, wallet data, or customer/account data.",
+                    "GLM may analyze, plan, or review; Codex on the owning host retains edits, permissions, execution, approvals, and final verification.",
+                ],
+            }
 
     if xai_first:
         budget_ok, budget_reason = provider_budget_guard("xai")

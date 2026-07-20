@@ -115,6 +115,27 @@ class InboxCoordinatorTests(unittest.TestCase):
         self.assertEqual(route["routeId"], "glm")
         self.assertIs(route["explicitRequest"], True)
 
+    def test_glm_is_selected_for_dashboard_safe_technical_reasoning(self):
+        coordinator = load_module()
+        route = coordinator.route_prompt(
+            "Give me a structured code review and make no edits.",
+            injected_health={"glm": True, "terra": True},
+        )
+        self.assertEqual(route["routeId"], "glm")
+        self.assertEqual(route["model"], "glm-5.2:cloud")
+        self.assertEqual(route["routingReason"], "dashboard-safe large-context technical reasoning")
+
+    def test_glm_cloud_cannot_receive_private_context(self):
+        coordinator = load_module()
+        route = coordinator.route_prompt(
+            "Use GLM 5.2 to review this OAuth token incident.",
+            privacy="sensitive-account",
+            injected_health={"glm": True, "luna": True},
+        )
+        self.assertEqual(route["requestedRouteId"], "glm")
+        self.assertEqual(route["routeId"], "luna")
+        self.assertIn("privacy policy blocked glm", route["fallback"])
+
     def test_private_or_secret_terms_stay_on_josh_lane(self):
         coordinator = load_module()
         route = coordinator.route_prompt(

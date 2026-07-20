@@ -242,6 +242,20 @@ Josh approved this default policy for Josh 2.0 Telegram work:
 - Prefer subscription-auth Codex lanes. Use metered providers only when Josh
   explicitly asks for that route or a standing temporary credit-burn policy is
   active.
+- Use `ollama/glm-5.2:cloud` as a deliberate sub-agent on both Josh 2.0 and
+  JAIMES for dashboard-safe large-context technical analysis, architecture
+  analysis, multi-file planning, structured code review, and parallel technical
+  second opinions. GLM may reason, plan, and review; the owning Codex lane keeps
+  repo edits, terminal execution, permissions, approvals, and final verification.
+- GLM 5.2 is Ollama Cloud, not an offline/private model. Never send it secrets,
+  OAuth payloads, cookies, raw emails, raw connector or account contents, wallet
+  data, credentials, or other private context. Use local Qwen/Llama for offline
+  private drafts, Gemini for summaries/digests/general synthesis, Grok for
+  X-native/current-events context, and the GPT/Codex ladder for trusted execution.
+- Honor an explicit privacy-safe request for GLM 5.2 in a fresh sub-agent lane and
+  disclose `ollama/glm-5.2:cloud` before substantive work. If the model is
+  unavailable or the context is unsafe for cloud processing, explain the block
+  and fall back to the appropriate Codex or local Ollama lane.
 
 ## Cookie And Keychain Disambiguation
 
