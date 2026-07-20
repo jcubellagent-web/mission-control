@@ -97,10 +97,12 @@ def test_codex_app_specialists_forward_to_jaimes_with_redacted_preview(monkeypat
     args = model_args()
     route = {"agent": "joshex", "modelRoute": {
         "provider": "gemini", "model": "agy-gemini-3.5-flash", "reason": "conserve",
+        "codexAllowanceMode": "conserve",
     }}
     command = lane.command_for(args, route)
     assert command[:2] == ["ssh", "jaimes"]
     assert "--transport hermes" in command[2]
+    assert "--codex-allowance conserve" in command[2]
     preview = lane.command_preview(command)
     assert "prompt redacted" in preview
     assert "SENSITIVE_SENTINEL" not in preview

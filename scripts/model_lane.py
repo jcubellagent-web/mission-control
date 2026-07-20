@@ -125,7 +125,7 @@ def command_for(args: argparse.Namespace, route: dict[str, Any]) -> list[str]:
             "--requested-provider", provider,
             "--requested-model", model,
             "--requested-reason", str(model_route.get("reason") or "usage-aware specialist route"),
-            "--codex-allowance", args.codex_allowance,
+            "--codex-allowance", str(model_route.get("codexAllowanceMode") or args.codex_allowance),
             "--transport", "hermes",
             "--execute",
         ]
