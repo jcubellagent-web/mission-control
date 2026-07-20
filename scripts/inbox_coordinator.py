@@ -579,7 +579,7 @@ def health(route_id: str, injected: dict[str, bool] | None = None) -> bool:
                         data=cloud_payload,
                         headers={"Content-Type": "application/json"},
                     )
-                    with urllib.request.urlopen(request, timeout=3) as cloud_resp:
+                    with urllib.request.urlopen(request, timeout=8) as cloud_resp:
                         return 200 <= cloud_resp.status < 300
                 return bool(names)
         except Exception:
