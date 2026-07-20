@@ -144,6 +144,15 @@ JOSHeX runs on Josh's personal MacBook. Treat this device as the trusted coordin
 
 Prefer Josh 2.0 or JAIMES for real agent-ecosystem work whenever the task does not specifically require this MacBook's local desktop, private browser session, keychain, OAuth state, personal account permissions, or local files that only exist here.
 
+Personal-Mac TCC fallback:
+
+- Treat the first read-only macOS TCC `Operation not permitted` result for a required local path as the single probe. Stop local retries; sandbox escalation and alternate commands do not override TCC.
+- For dashboard-safe ecosystem work available on a canonical dedicated host, continue there without copying, reaching into, or claiming access to denied personal-Mac data. Preserve JOSHeX ownership and use the owning host's current checkout.
+- If the task requires MacBook-only private state, do not route around the denial through helper apps, alternate runtimes, AppleScript, SSH, browser uploads, or an already-authorized app. Ask once for the minimum Files & Folders or file-picker permission for the exact resource, or report the blocker.
+- Never request Full Disk Access, Accessibility, Screen Recording, Input Monitoring, or Automation solely for repository inspection. Use exact-target reads and scope searches away from secret-bearing configuration, private data, and generated telemetry.
+
+#JAIMES: one failed personal-Mac TCC probe now routes ordinary ecosystem work to canonical dedicated hosts instead of expanding MacBook permissions.
+
 Default ownership:
 
 - JOSHeX: planning, coordination, architecture decisions, lightweight integration, private-Mac-only work, personal account/browser/keychain/OAuth work, and final review when the user is directly engaging from this laptop.
