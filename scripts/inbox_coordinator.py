@@ -562,7 +562,25 @@ def health(route_id: str, injected: dict[str, bool] | None = None) -> bool:
                     if isinstance(item, dict)
                 }
                 if route_id == "glm":
-                    return any(name == "glm-5.2" or name.startswith("glm-5.2:") for name in names)
+                    installed = any(name == "glm-5.2" or name.startswith("glm-5.2:") for name in names)
+                    if not installed:
+                        return False
+                    #JAIMES: a catalog entry does not prove Ollama Cloud auth; use an empty zero-token probe.
+                    cloud_payload = json.dumps(
+                        {
+                            "model": "glm-5.2:cloud",
+                            "prompt": "",
+                            "stream": False,
+                            "options": {"num_predict": 0},
+                        }
+                    ).encode("utf-8")
+                    request = urllib.request.Request(
+                        "http://localhost:11434/api/generate",
+                        data=cloud_payload,
+                        headers={"Content-Type": "application/json"},
+                    )
+                    with urllib.request.urlopen(request, timeout=3) as cloud_resp:
+                        return 200 <= cloud_resp.status < 300
                 return bool(names)
         except Exception:
             return False
