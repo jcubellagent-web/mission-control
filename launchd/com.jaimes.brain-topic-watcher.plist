@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.jaimes.brain-topic-watcher</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/opt/homebrew/bin/python3</string>
+    <string>/Users/jc_agent/.hermes/scripts/brain_topic_watcher.py</string>
+  </array>
+  <key>StartInterval</key>
+  <integer>10</integer>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>ProcessType</key>
+  <string>Background</string>
+  <key>StandardOutPath</key>
+  <string>/Users/jc_agent/.hermes/logs/brain-topic-watcher.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/jc_agent/.hermes/logs/brain-topic-watcher.error.log</string>
+</dict>
+</plist>
