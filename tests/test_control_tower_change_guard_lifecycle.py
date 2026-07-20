@@ -74,10 +74,12 @@ def test_guard_covers_jcu10_lifecycle_brain_and_schema_paths() -> None:
         "scripts/brain_topic_watcher.py",
         "scripts/josh_telegram_callback_action.py",
         "scripts/telegram_channel_registry.py",
+        "hermes-plugins",
     }
     compiled = {path for path in guarded if path.startswith("scripts/")}
     assert guarded.issubset(source_paths)
     assert compiled.issubset(compile_paths)
+    assert "hermes-plugins/jaimes-topic17-runtime-owner/__init__.py" in compile_paths
     assert "scripts/jaimes_cross_host_qc.py" not in source_paths
 
 

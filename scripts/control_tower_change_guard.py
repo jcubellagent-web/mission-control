@@ -37,6 +37,7 @@ SOURCE_PATHS = (
     "package-lock.json",
     "requirements-qa.txt",
     "plugins/inbox-coordinator",
+    "hermes-plugins",
     "launchd",
     "tests",
     "scripts/agent_task.py",
@@ -126,6 +127,7 @@ PYTHON_COMPILE_PATHS = (
     "scripts/agent_task.py",
     "scripts/agent_delegate.py",
     "scripts/linear_work_intent.py",
+    "hermes-plugins/jaimes-topic17-runtime-owner/__init__.py",
 )
 LEASE_MINUTES = 45
 
