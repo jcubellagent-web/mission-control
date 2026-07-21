@@ -1788,11 +1788,7 @@ def send_rich_message(
         result["native_rich_message"] = True
         return result
 
-    error_text = str(result.get("error") or result).lower()
-    definitive_rejection = any(
-        marker in error_text
-        for marker in ("http error 400", "http error 404", "bad request", "method not found", "unsupported")
-    )
+    definitive_rejection = rich_transport_definitively_rejected(result)
     if not definitive_rejection:
         # A timeout/connection loss can happen after Telegram accepted the rich
         # message. Sending a second fallback in that ambiguous state would be a
@@ -1809,6 +1805,23 @@ def send_rich_message(
     fallback["native_rich_message"] = False
     fallback["rich_error"] = result.get("error") or result
     return fallback
+
+
+def rich_transport_definitively_rejected(result: dict) -> bool:
+    """Return true only when Telegram proves a rich request was not accepted."""
+    error_text = str(result.get("error") or result.get("description") or result).lower()
+    return any(
+        marker in error_text
+        for marker in (
+            "http error 400",
+            "http error 403",
+            "http error 404",
+            "bad request",
+            "forbidden",
+            "method not found",
+            "unsupported",
+        )
+    )
 
 
 def delivery_indeterminate(result: dict) -> bool:
@@ -1844,6 +1857,14 @@ def edit_rich_card(
         return result
     if telegram_message_not_modified(result):
         return {"ok": True, "result": {"message_id": message_id}, "native_rich_message": True}
+
+    if not rich_transport_definitively_rejected(result):
+        # A timeout or connection loss may occur after Telegram accepted the
+        # rich edit. A legacy retry would race the same message and erase the
+        # native card or make terminal delivery appear to fail twice.
+        result["native_rich_message"] = True
+        result["delivery_indeterminate"] = True
+        return result
 
     fallback = edit_card(
         message_id,

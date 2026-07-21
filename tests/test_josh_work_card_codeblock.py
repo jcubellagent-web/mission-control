@@ -803,6 +803,29 @@ def test_rich_edit_falls_back_to_legacy_html(monkeypatch):
     assert calls[1][1]["parse_mode"] == "HTML"
 
 
+def test_ambiguous_rich_edit_is_quarantined_without_legacy_retry(monkeypatch):
+    calls = []
+
+    def fake_api(method, payload, timeout=15):
+        calls.append((method, payload))
+        return {"ok": False, "error": "timed out waiting for response"}
+
+    monkeypatch.setattr(card, "api_call", fake_api)
+    result = card.edit_rich_card(
+        42,
+        "<h3>Live</h3>",
+        "<pre>Live</pre>",
+        None,
+        15,
+        chat_id="-1003589561528",
+        thread_id="1",
+    )
+    assert not result["ok"]
+    assert result["native_rich_message"] is True
+    assert result["delivery_indeterminate"] is True
+    assert len(calls) == 1
+
+
 def test_live_receipt_is_checkpointed_before_final_retry(monkeypatch, tmp_path):
     monkeypatch.setattr(card, "STATE_PATH", tmp_path / "cards.json")
     monkeypatch.setattr(card, "LOCK_PATH", tmp_path / "cards.lock")

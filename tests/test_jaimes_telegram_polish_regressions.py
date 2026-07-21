@@ -70,6 +70,16 @@ def test_context_before_imperative_does_not_hide_actionable_request() -> None:
     assert objective_quality.semantic_reinterpretation(prompt).startswith("Confirm ")
 
 
+def test_hermes_sender_attribution_never_reaches_visible_objective() -> None:
+    prompt = "[J|private-transport-id] testing"
+    assert watcher.clean_prompt(prompt) == "testing"
+    objective = watcher.objective_from_prompt(prompt)
+    if objective_quality.objective_is_near_copy(prompt, objective):
+        objective = objective_quality.semantic_reinterpretation(prompt)
+    assert objective == objective_quality.GENERIC_CONNECTIVITY_OBJECTIVE
+    assert "private-transport-id" not in objective
+
+
 def test_only_start_may_create_a_live_card(tmp_path: Path) -> None:
     state_path = tmp_path / "cards.json"
     state_path.write_text('{"cards":{}}', encoding="utf-8")
@@ -116,6 +126,58 @@ def test_card_is_compact_semantic_and_omits_empty_sections() -> None:
     assert len(body.splitlines()) <= 22
     assert max(map(len, body.splitlines())) <= card.CARD_WRAP_WIDTH
     assert len(body) < 900
+
+
+def test_jaimes_ops_defaults_to_inbox_style_native_blocks() -> None:
+    assert card.rich_cards_enabled("-1003589561528", "17")
+    assert not card.rich_cards_enabled("-1003589561528", "19")
+    rendered = card.build_rich_card(
+        title="Confirm JAIMES is responsive",
+        status="running",
+        model="openai-codex/gpt-5.6-sol",
+        route="JAIMES verified execution",
+        now="Running the requested check",
+        done=[
+            "Received Telegram task",
+            "Objective determined",
+            "Model selected: openai-codex/gpt-5.6-sol",
+        ],
+        started_at="2026-07-20T20:00:00Z",
+        updated="2026-07-20T20:00:06Z",
+    )
+    for fragment in (
+        "<h3>JAIMES · LIVE WORK</h3>",
+        "<b>Objective</b>",
+        "<h4>Progress</h4>",
+        "<h4>Active work</h4>",
+        "<details><summary>Recent activity",
+        "stage 3/6",
+    ):
+        assert fragment in rendered
+    assert "<pre>⚙️" not in rendered
+
+
+def test_ambiguous_jaimes_rich_edit_never_rewrites_as_legacy(monkeypatch) -> None:
+    calls = []
+
+    def fake_api(method, payload, timeout=15):
+        calls.append((method, payload))
+        return {"ok": False, "error": "timed out waiting for response"}
+
+    monkeypatch.setattr(card, "api_call", fake_api)
+    result = card.edit_rich_card(
+        42,
+        "<h3>Live</h3>",
+        "<pre>Live</pre>",
+        None,
+        15,
+        chat_id="-1003589561528",
+        thread_id="17",
+    )
+    assert not result["ok"]
+    assert result["delivery_indeterminate"] is True
+    assert result["native_rich_message"] is True
+    assert len(calls) == 1
 
 
 def test_successful_numeric_benchmark_remains_complete() -> None:

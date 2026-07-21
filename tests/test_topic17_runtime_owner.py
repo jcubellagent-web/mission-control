@@ -296,6 +296,50 @@ class Topic17RuntimeOwnerTests(unittest.TestCase):
                     platform="telegram",
                 )
 
+    def test_terminal_transform_recovers_owned_session_after_context_is_cleared(self):
+        completed = SimpleNamespace(
+            returncode=0,
+            stdout='{"managed": true, "ok": true, "text": "<pre>canonical</pre>"}',
+            stderr="",
+        )
+        recovered = {
+            "session_id": "session-1",
+            "inbound_message_id": "private-origin-receipt",
+        }
+        with patch.object(self.plugin, "_session_value", return_value=""), patch.object(
+            self.plugin, "_active_managed_card", return_value=recovered
+        ), patch.object(
+            self.plugin, "_writer_rollout_required", return_value=True
+        ), patch.object(
+            self.plugin.subprocess, "run", return_value=completed
+        ) as run:
+            result = self.plugin._on_transform_llm_output(
+                response_text="model text",
+                session_id="session-1",
+                model="provider/model",
+                platform="telegram",
+            )
+        self.assertEqual(result, "<pre>canonical</pre>")
+        payload = run.call_args.kwargs["input"]
+        self.assertIn('"inbound_message_id": "private-origin-receipt"', payload)
+
+    def test_terminal_transform_does_not_claim_contextless_unmanaged_session(self):
+        with patch.object(self.plugin, "_session_value", return_value=""), patch.object(
+            self.plugin, "_active_managed_card", return_value=None
+        ), patch.object(
+            self.plugin.subprocess,
+            "run",
+            side_effect=AssertionError("unmanaged session must not prepare a terminal"),
+        ):
+            self.assertIsNone(
+                self.plugin._on_transform_llm_output(
+                    response_text="model text",
+                    session_id="session-other",
+                    model="provider/model",
+                    platform="telegram",
+                )
+            )
+
     def test_terminal_transform_leaves_native_and_unmanaged_turns_unchanged(self):
         with patch.object(
             self.plugin.subprocess,

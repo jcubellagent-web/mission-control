@@ -709,6 +709,33 @@ class JoshTelegramV3AdapterTests(unittest.TestCase):
             }
         self.assertEqual(states, {"card_edit": "delivered", "final": "delivered"})
 
+    def test_fenced_terminal_attempt_releases_ui_close_lease(self) -> None:
+        lifecycle = self.lifecycle()
+        receipt = self.working_receipt(lifecycle, tier=3)
+        WATCHER.save_json(self.state_path, self.coordinator_card_state(receipt))
+        WATCHER.save_json(self.work_cards, {"cards": {"gateway-card-1": {
+            "status": "running",
+            "message_id": "7001",
+            "header_message_id": "",
+            "surface_contract": "live-only-v2",
+        }}})
+        prepared = {
+            "managed": True,
+            "writer": True,
+            "allowed": False,
+            "fenced": True,
+        }
+        with patch.object(WATCHER, "prepare_lifecycle_terminal", return_value=prepared), \
+             patch.object(WATCHER, "publish_terminal_once", return_value=True), \
+             patch.object(WATCHER, "run_cmd") as helper, \
+             patch.object(WATCHER.sys, "stdin", io.StringIO("<b>Verified final</b>")):
+            result = WATCHER.close_before_final(self.terminal_args())
+        helper.assert_not_called()
+        self.assertEqual(result["status"], "final-delivery-indeterminate")
+        card = WATCHER.load_json(self.state_path, {})["active_cards"]["run-1"]
+        self.assertEqual(card["status"], "active")
+        self.assertNotIn("terminal_close_started_at", card)
+
     def test_terminal_visibility_failure_blocks_helper_then_replays_stable_event(self) -> None:
         lifecycle = self.lifecycle()
         receipt = self.working_receipt(lifecycle, tier=3)

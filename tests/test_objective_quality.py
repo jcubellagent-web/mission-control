@@ -43,3 +43,10 @@ def test_common_actions_become_success_oriented_objectives() -> None:
 
 def test_ambiguous_request_is_left_for_main_agent_interpretation() -> None:
     assert semantic_reinterpretation("Please handle this thoughtfully") == ""
+
+
+def test_bare_connectivity_canaries_get_one_shared_semantic_objective() -> None:
+    expected = "Confirm the Telegram agent is responsive and completes a simple request"
+    for prompt in ("test", "testing", "testing testing", "[J|redacted] testing"):
+        assert objective_is_near_copy(prompt, "testing")
+        assert semantic_reinterpretation(prompt) == expected

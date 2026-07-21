@@ -2081,6 +2081,64 @@ class MultiSessionWatcherTests(unittest.TestCase):
         edit.assert_not_called()
         run.assert_not_called()
 
+    def test_missing_terminal_receipt_turns_live_card_into_needs_attention(self) -> None:
+        user_id = self.add_user("older", "verify delivery")
+        with sqlite3.connect(self.db) as con:
+            con.execute(
+                "INSERT INTO messages(session_id,role,content,platform_message_id,timestamp) VALUES (?,?,?,?,?)",
+                ("older", "assistant", "Complete: Yes\nWhat was done:\n- Verified", "", time.time() - 600),
+            )
+        card = {
+            "key": "delivery-card",
+            "objective": "Verify delivery",
+            "model": "openai-codex/gpt-5.6-sol",
+            "route": "JAIMES verified execution",
+            "status": "active",
+        }
+        state = {"active_cards": {f"telegram-message-{user_id}": card}}
+        completion_patch = self.patches[2]
+        completion_patch.stop()
+        try:
+            with patch.object(watcher, "finish_card_terminal_delivery") as finish, \
+                 patch.object(watcher, "run_work_card_cmd", return_value={"ok": True}) as run:
+                self.assertEqual(watcher.complete_cards_from_final_responses(state, "older"), 0)
+        finally:
+            completion_patch.start()
+
+        finish.assert_not_called()
+        command = run.call_args.args[0]
+        self.assertEqual(command[2], "fail")
+        self.assertEqual(
+            command[command.index("--blocker") + 1],
+            "Telegram final delivery receipt is unavailable",
+        )
+        self.assertEqual(card["status"], "failed")
+        self.assertEqual(card["final_contract_status"], "delivery_indeterminate")
+        self.assertEqual(card["terminal_card_recovery_status"], "needs-attention")
+
+    def test_failed_delivery_card_is_not_reactivated_by_old_progress(self) -> None:
+        card = {
+            "key": "failed-card",
+            "objective": "Verify delivery",
+            "status": "failed",
+            "session_id": "older",
+            "started_at": "2026-07-20T00:00:00Z",
+        }
+        event = {
+            "event_id": "old-model-completed",
+            "run_id": "telegram-message-9",
+            "type": "model.completed",
+            "summary": "Model response prepared",
+        }
+        state = {"active_cards": {"telegram-message-9": card}}
+        with patch.dict("os.environ", {"JAIMES_TELEGRAM_LIVE_CARDS": "1"}), \
+             patch.object(watcher, "recent_progress_events", return_value=[event]), \
+             patch.object(watcher, "hermes_session_lineage", return_value={"older"}), \
+             patch.object(watcher, "run_work_card_cmd") as run:
+            self.assertEqual(watcher.update_active_cards(state, "older"), [])
+        self.assertEqual(card["status"], "failed")
+        run.assert_not_called()
+
     def test_status_only_completion_is_demoted_without_invented_success(self) -> None:
         rendered = watcher.structured_final_text(
             """Complete: Yes

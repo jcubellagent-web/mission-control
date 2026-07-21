@@ -115,8 +115,8 @@ def test_ack_message_is_adopted_instead_of_sending_duplicate():
     saved = {}
     with patch.object(card, "load_state", return_value={"cards": {}}), \
          patch.object(card, "save_state", side_effect=lambda state: saved.update(state)), \
-         patch.object(card, "edit_card", return_value={"ok": True}) as edit, \
-         patch.object(card, "send_card") as send, \
+         patch.object(card, "edit_rich_card", return_value={"ok": True}) as edit, \
+         patch.object(card, "send_rich_message") as send, \
          patch.object(card, "edit_objective_message", return_value={"ok": True}) as edit_objective, \
          patch.object(card, "publish_brain_feed"):
         assert card.upsert_card(args, "running") == 0
@@ -270,8 +270,8 @@ def test_objective_and_live_card_are_separate_messages():
     saved = {}
     with patch.object(card, "load_state", return_value={"cards": {}}), \
          patch.object(card, "save_state", side_effect=lambda state: saved.update(state)), \
-         patch.object(card, "edit_card") as edit, \
-         patch.object(card, "send_card", return_value={"ok": True, "result": {"message_id": 101}}) as send, \
+         patch.object(card, "edit_rich_card") as edit, \
+         patch.object(card, "send_rich_message", return_value={"ok": True, "result": {"message_id": 101}}) as send, \
          patch.object(card, "edit_objective_message") as edit_objective, \
          patch.object(card, "publish_brain_feed"):
         assert card.upsert_card(args, "running") == 0
@@ -405,7 +405,7 @@ def test_topic17_indeterminate_live_send_is_durably_quarantined(tmp_path):
     with patch.object(card, "STATE_PATH", state_path), \
          patch.object(card, "LOCK_PATH", tmp_path / "cards.lock"), \
          patch.object(card, "claim_pending_ack", return_value=""), \
-         patch.object(card, "send_card", side_effect=ambiguous_live), \
+         patch.object(card, "send_rich_message", side_effect=ambiguous_live), \
          patch.object(card, "publish_brain_feed"):
         assert card.upsert_card(args, "running") == 1
         partial = card.load_state()["cards"]["topic17-ambiguous-live"]
@@ -457,10 +457,10 @@ def test_topic17_heartbeat_edits_same_card_without_polluting_work_log(tmp_path):
     with patch.object(card, "STATE_PATH", state_path), \
          patch.object(card, "LOCK_PATH", tmp_path / "cards.lock"), \
          patch.object(card, "claim_pending_ack", return_value=""), \
-         patch.object(card, "send_card", return_value={
-             "ok": True, "result": {"message_id": 777}
+         patch.object(card, "send_rich_message", return_value={
+             "ok": True, "result": {"message_id": 777}, "native_rich_message": True
          }) as send, \
-         patch.object(card, "edit_card", return_value={"ok": True}) as edit, \
+         patch.object(card, "edit_rich_card", return_value={"ok": True}) as edit, \
          patch.object(card, "publish_brain_feed"):
         assert card.upsert_card(start_args, "running") == 0
         before = card.load_state()["cards"]["topic17-heartbeat"]
@@ -526,8 +526,8 @@ def test_sequential_topic17_tasks_send_fresh_cards_and_preserve_prior_task(tmp_p
          patch.object(card, "claim_pending_ack", side_effect=AssertionError(
              "separate Topic 17 tasks must not claim the prior pending acknowledgement"
          )), \
-         patch.object(card, "send_card", side_effect=lambda *_args, **_kwargs: next(sends)) as send, \
-         patch.object(card, "edit_card", side_effect=AssertionError(
+         patch.object(card, "send_rich_message", side_effect=lambda *_args, **_kwargs: next(sends)) as send, \
+         patch.object(card, "edit_rich_card", side_effect=AssertionError(
              "task B must not edit task A's card"
          )), \
          patch.object(card, "publish_brain_feed"):

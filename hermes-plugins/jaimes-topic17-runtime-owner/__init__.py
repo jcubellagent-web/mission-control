@@ -227,9 +227,54 @@ def _is_managed_topic() -> bool:
         return False
 
 
-def _is_owned_telegram_session() -> bool:
+def _active_managed_card(session_id: str) -> Optional[dict[str, Any]]:
+    """Recover ownership when Hermes finalizes outside gateway ContextVars.
+
+    Hermes can finish the model turn on a worker thread after the gateway's
+    task-local session context has been cleared. The durable fast-ack card is
+    already bound to the exact Hermes session and canonical topic, so it is a
+    safer fallback than letting an owned final bypass terminal preparation.
+    """
+    if not str(session_id or "").strip():
+        return None
+    registry = _load_registry_module()
+    if registry is None:
+        return None
+    try:
+        state = json.loads(
+            (Path.home() / ".openclaw" / "telegram" / "jaimes_fast_ack_state.json").read_text()
+        )
+    except Exception:
+        return None
+    for card in (state.get("active_cards") or {}).values():
+        if not isinstance(card, dict):
+            continue
+        if str(card.get("session_id") or "") != str(session_id):
+            continue
+        if str(card.get("status") or "").lower() not in {
+            "active",
+            "awaiting-final-gate",
+            "closing-before-final",
+        }:
+            continue
+        chat_id = str(card.get("telegram_chat_id") or "")
+        thread_id = str(card.get("telegram_thread_id") or "")
+        try:
+            accepts = getattr(registry, "owner_accepts", None)
+            if callable(accepts):
+                owned = bool(accepts(_RUNTIME_OWNER, chat_id, thread_id, direct=not bool(thread_id)))
+            else:
+                owned = str(registry.topic_owner(chat_id, thread_id) or "") == _RUNTIME_OWNER
+        except Exception:
+            owned = False
+        if owned:
+            return card
+    return None
+
+
+def _is_owned_telegram_session(session_id: str = "") -> bool:
     if _session_value("HERMES_SESSION_PLATFORM").strip().lower() != _MANAGED_PLATFORM:
-        return False
+        return _active_managed_card(session_id) is not None
     registry = _load_registry_module()
     if registry is None:
         return False
@@ -294,7 +339,8 @@ def _on_transform_llm_output(
     """Commit the terminal outbox before Hermes performs its native send."""
     if str(platform or "").strip().lower() != _MANAGED_PLATFORM:
         return None
-    if not _is_owned_telegram_session():
+    recovered_card = _active_managed_card(session_id)
+    if not _is_owned_telegram_session(session_id):
         return None
     root = _mission_control_root()
     script = root / "scripts" / "jaimes_telegram_fast_ack.py"
@@ -303,7 +349,10 @@ def _on_transform_llm_output(
         "response_text": str(response_text or ""),
         "session_id": str(session_id or ""),
         "model": str(model or ""),
-        "inbound_message_id": _session_value("HERMES_SESSION_MESSAGE_ID").strip(),
+        "inbound_message_id": (
+            _session_value("HERMES_SESSION_MESSAGE_ID").strip()
+            or str((recovered_card or {}).get("inbound_message_id") or "")
+        ),
     }
     try:
         result = subprocess.run(

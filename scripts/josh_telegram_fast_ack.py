@@ -5246,6 +5246,7 @@ def close_before_final(args: argparse.Namespace) -> dict[str, Any]:
                 "card_key": card_key,
             }
         if prepared.get("already_delivered"):
+            release_terminal_card_close(run_key, card_key)
             return {
                 "ok": True,
                 "status": "final-already-delivered",
@@ -5254,6 +5255,12 @@ def close_before_final(args: argparse.Namespace) -> dict[str, Any]:
                 "card_key": card_key,
             }
         if prepared.get("killed") or prepared.get("fenced") or (prepared.get("writer") and not prepared.get("allowed")):
+            # The lifecycle fence protects Telegram side effects, but it must
+            # not strand the UI-side close lease. Leaving this record in
+            # ``closing-before-final`` makes every heartbeat and recovery pass
+            # skip the card until the lease expires, which is the frozen 50%
+            # Inbox card observed in production.
+            release_terminal_card_close(run_key, card_key)
             return {
                 "ok": True,
                 "status": "lifecycle-writer-disabled" if prepared.get("killed") else "final-delivery-indeterminate",

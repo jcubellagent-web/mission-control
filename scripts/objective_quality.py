@@ -36,6 +36,17 @@ ACTIONABLE_RE = re.compile(
     re.I,
 )
 
+GENERIC_CONNECTIVITY_REQUESTS = {
+    "test",
+    "testing",
+    "test test",
+    "testing testing",
+    "ping",
+}
+GENERIC_CONNECTIVITY_OBJECTIVE = (
+    "Confirm the Telegram agent is responsive and completes a simple request"
+)
+
 
 def current_request_text(prompt: str) -> str:
     """Keep only the current request and discard transport/card evidence."""
@@ -96,6 +107,11 @@ def objective_is_near_copy(prompt: str, objective: str) -> bool:
     objective_words = normalized_words(objective)
     if not request_words or not objective_words:
         return True
+    if " ".join(request_words) in GENERIC_CONNECTIVITY_REQUESTS:
+        # Bare human canaries such as "testing" are actions, not useful
+        # operator-facing objectives. Force both primary Telegram runtimes
+        # through the same semantic fallback instead of displaying the prompt.
+        return True
     ratio = SequenceMatcher(None, request_words, objective_words).ratio()
     shared_run = longest_shared_run(request_words, objective_words)
     exact_after_courtesy = request_words == objective_words
@@ -117,6 +133,8 @@ def semantic_reinterpretation(prompt: str) -> str:
         request = actionable.group(0)
     request = re.sub(r"^(?:@[a-z0-9_.-]+\s+)+", "", request, flags=re.I)
     request = COURTESY_RE.sub("", request).strip(" .?!")
+    if " ".join(normalized_words(request)) in GENERIC_CONNECTIVITY_REQUESTS:
+        return GENERIC_CONNECTIVITY_OBJECTIVE
     patterns = (
         (r"^(?:test(?:ing)?|validate|validating|verify|confirm|check|make sure)\s+(.+)$", "Confirm", "meets the intended requirements"),
         (r"^(?:fix|repair|resolve|correct)\s+(.+)$", "Resolve", "and restore expected behavior"),

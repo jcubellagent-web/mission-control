@@ -76,6 +76,10 @@ TERMINAL_VISIBILITY_OUTBOX_DIR = DEFAULT_TERMINAL_VISIBILITY_OUTBOX_DIR
 X_INTELLIGENCE_QUEUE = WORKSPACE / "memory" / "x_intelligence_intake_queue.jsonl"
 X_STATUS_URL_RE = re.compile(r"https?://(?:www\.)?(?:x\.com|twitter\.com)/[A-Za-z0-9_]{1,15}/status/\d+", re.I)
 TELEGRAM_META_PATTERN = re.compile(r"Conversation info.*?```\s*\n\nSender .*?```\s*\n\n", re.S)
+HERMES_ATTRIBUTION_PREFIX_RE = re.compile(
+    r"^\s*\[J\|[^\]\r\n]{1,96}\]\s*",
+    re.I,
+)
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
@@ -2169,6 +2173,10 @@ def send_approval_options(objective: str, final_text: str, dry_run: bool = False
 
 def clean_prompt(prompt: str) -> str:
     text = TELEGRAM_META_PATTERN.sub("", prompt or "").strip()
+    # Hermes attributes observed group messages as ``[J|<private-id>]`` in
+    # the conversation transcript. That transport-only prefix must never
+    # become a Telegram objective, progress milestone, or dashboard title.
+    text = HERMES_ATTRIBUTION_PREFIX_RE.sub("", text, count=1).strip()
     return text or "Handle latest Telegram task"
 
 
@@ -3802,7 +3810,7 @@ def complete_cards_from_final_responses(state: dict[str, Any], session_id: str, 
     """Normalize the delivered native final, then align the live card to 100%."""
     completed = 0
     for run_id, card in (state.get("active_cards") or {}).items():
-        if not isinstance(card, dict) or card.get("status") == "done":
+        if not isinstance(card, dict) or card.get("status") in {"done", "failed", "cancelled"}:
             continue
         match = re.fullmatch(r"telegram-message-(\d+)", str(run_id))
         if not match:
@@ -3814,25 +3822,56 @@ def complete_cards_from_final_responses(state: dict[str, Any], session_id: str, 
         if not native_final_id:
             card["final_contract_status"] = "waiting_for_telegram_delivery_id"
             prepared_at = parse_utc(card.get("terminal_prepared_at"))
+            receipt_wait_started_at = prepared_at or parse_utc(final_record.get("recorded_at"))
             if (
                 not dry_run
-                and card.get("terminal_delivery_state") == "sending"
-                and prepared_at
-                and (dt.datetime.now(dt.timezone.utc) - prepared_at).total_seconds()
+                and receipt_wait_started_at
+                and (
+                    card.get("terminal_delivery_state") == "sending"
+                    or not card.get("terminal_prepared_at")
+                )
+                and (dt.datetime.now(dt.timezone.utc) - receipt_wait_started_at).total_seconds()
                 >= TERMINAL_FINAL_RECEIPT_SECONDS
             ):
-                finish_card_terminal_delivery(
-                    card,
-                    state="indeterminate",
-                    error_class="native-final-receipt-missing",
-                )
+                if card.get("terminal_delivery_state") == "sending":
+                    finish_card_terminal_delivery(
+                        card,
+                        state="indeterminate",
+                        error_class="native-final-receipt-missing",
+                    )
                 card["final_contract_status"] = "delivery_indeterminate"
+                key = str(card.get("key") or "")
+                if key and not card.get("no_card_required"):
+                    recovery_cmd = [
+                        "python3", "mission-control/scripts/jaimes_work_card.py", "fail",
+                        "--key", key,
+                        "--title", str(card.get("objective") or "JAIMES Telegram task"),
+                        "--model", str(card.get("model") or DEFAULT_MODEL),
+                        "--route", str(card.get("route") or DEFAULT_ROUTE),
+                        "--now", "Telegram final delivery could not be confirmed",
+                        "--done", "Work completed; final delivery receipt is unavailable",
+                        "--blocker", "Telegram final delivery receipt is unavailable",
+                        "--no-final-summary",
+                    ] + work_card_target_args(card)
+                    recovery_result = dict(run_work_card_cmd(recovery_cmd))
+                    card["terminal_card_recovery_status"] = (
+                        "needs-attention" if recovery_result.get("ok") else "retry"
+                    )
+                    if recovery_result.get("ok"):
+                        card["status"] = "failed"
+                        card["ended_at"] = utc_now()
+                        card["last_card_update_at"] = card["ended_at"]
+                    record_api_result(state, "editMessageText", {
+                        "ok": bool(recovery_result.get("ok")),
+                        "error": recovery_result.get("stderr") or recovery_result.get("error") or "",
+                        "delivery_key": f"{key}:terminal-receipt-recovery",
+                    })
             elif (
                 not dry_run
                 and card.get("lifecycle_shadow")
                 and card.get("terminal_delivery_state") == "shadow-awaiting-confirmation"
-                and prepared_at
-                and (dt.datetime.now(dt.timezone.utc) - prepared_at).total_seconds()
+                and receipt_wait_started_at
+                and (dt.datetime.now(dt.timezone.utc) - receipt_wait_started_at).total_seconds()
                 >= TERMINAL_FINAL_RECEIPT_SECONDS
             ):
                 finish_shadow_terminal_delivery(card, delivered=False)
@@ -4118,7 +4157,7 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
         (run_id, card)
         for run_id, card in active.items()
         if isinstance(card, dict)
-        and card.get("status") != "done"
+        and card.get("status") not in {"done", "failed", "cancelled"}
         and str(card.get("session_id") or "") in lineage
     ]
     lineage_cards.sort(
@@ -4140,7 +4179,9 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
             continued_run_id, card = lineage_cards[-1]
             event["run_id"] = continued_run_id
             event["continued_session_id"] = session_id
-        if not card or card.get("status") in {"done", "awaiting-final-gate", "closing-before-final"}:
+        if not card or card.get("status") in {
+            "done", "failed", "cancelled", "awaiting-final-gate", "closing-before-final"
+        }:
             processed.add(event_id)
             continue
         if card.get("no_card_required"):
@@ -4288,7 +4329,9 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
         updates.append({"event": event_id, "result": result})
     now = dt.datetime.now(dt.timezone.utc)
     for run_id, card in active.items():
-        if not isinstance(card, dict) or card.get("status") in {"done", "awaiting-final-gate", "closing-before-final"}:
+        if not isinstance(card, dict) or card.get("status") in {
+            "done", "failed", "cancelled", "awaiting-final-gate", "closing-before-final"
+        }:
             continue
         if card.get("no_card_required"):
             continue

@@ -35,7 +35,9 @@ ACK_STATE_PATH = Path(os.environ.get("JAIMES_FAST_ACK_STATE", str(Path.home() / 
 CONTROL_CENTER_CHAT_ID = "-1003589561528"
 INBOX_THREAD_ID = "1"
 JAIMES_OPS_THREAD_ID = "17"
+PRIMARY_LIVE_STAGES = ("Accepted", "Planned", "Routed", "Working", "Verifying", "Delivered")
 TASK_HEADER_ENV = "JAIMES_TELEGRAM_TASK_HEADERS"
+RICH_CARD_ENV = "JAIMES_TELEGRAM_RICH_CARDS"
 HEADER_LABEL_WIDTH = 9
 HEADER_VALUE_WIDTH = 25
 DEFAULT_RECONCILE_MAX_AGE_SECONDS = 12 * 60 * 60
@@ -518,6 +520,17 @@ def task_headers_enabled(chat_id: str | int | None, thread_id: str | int | None)
     if raw in {"1", "true", "yes", "on"}:
         return True
     return str(chat_id or "") == CONTROL_CENTER_CHAT_ID and str(thread_id or "") == INBOX_THREAD_ID
+
+
+def rich_cards_enabled(chat_id: str | int | None, thread_id: str | int | None) -> bool:
+    """Use the same native card surface as Inbox for the owned JAIMES topic."""
+    raw = os.environ.get(RICH_CARD_ENV, "").strip().lower()
+    if raw in {"0", "false", "no", "off"}:
+        return False
+    if raw in {"1", "true", "yes", "on"}:
+        return True
+    normalized_chat = str(chat_id or "").removeprefix("telegram:")
+    return normalized_chat == CONTROL_CENTER_CHAT_ID and str(thread_id or "") == JAIMES_OPS_THREAD_ID
 
 
 def route_fact(value: str, key: str) -> str:
@@ -1114,6 +1127,121 @@ def build_card(
     return f"<pre>{rendered}</pre>"
 
 
+def primary_stage_position(status: str, items: list[str]) -> int:
+    """Map semantic work events onto the shared six-stage Telegram contract."""
+    if status in {"done", "failed", "paused"}:
+        return len(PRIMARY_LIVE_STAGES)
+    combined = " ".join(clean_live_text(item).lower() for item in items)
+    position = 1
+    if any(marker in combined for marker in ("objective", "plan", "received")):
+        position = 2
+    if any(marker in combined for marker in ("model selected", "skill selected", "route", "runbook")):
+        position = 3
+    if any(marker in combined for marker in ("tool", "action", "execut", "working", "implement", "build", "deploy")):
+        position = 4
+    if any(marker in combined for marker in ("verif", "test passed", "canary", "final summary validated")):
+        position = 5
+    return position
+
+
+def primary_elapsed_text(started_at: str | None, updated_at: str | None = None) -> str:
+    started = parse_utc_timestamp(started_at)
+    updated = parse_utc_timestamp(updated_at) or dt.datetime.now(dt.timezone.utc)
+    if not started:
+        return "Elapsed <1m"
+    seconds = max(0, int((updated - started).total_seconds()))
+    minutes, seconds = divmod(seconds, 60)
+    if minutes >= 60:
+        hours, minutes = divmod(minutes, 60)
+        return f"Elapsed {hours}h {minutes}m"
+    return f"Elapsed {minutes}m {seconds:02d}s" if minutes else f"Elapsed {seconds}s"
+
+
+def build_rich_card(
+    *,
+    title: str,
+    status: str,
+    model: str = "",
+    route: str = "",
+    now: str = "",
+    done: list[str] | None = None,
+    next_step: str = "",
+    blocker: str = "None",
+    updated: str | None = None,
+    started_at: str | None = None,
+) -> str:
+    """Render JAIMES Ops with the same native block hierarchy as Inbox."""
+    done = done or []
+    model_line = model or os.environ.get("JAIMES_WORK_CARD_MODEL") or "JAIMES"
+    live_items = append_log(done, [now] if now else [])
+    position = primary_stage_position(status, live_items)
+    terminal = status in {"done", "failed", "paused"}
+    percent = 100 if terminal else round((position / len(PRIMARY_LIVE_STAGES)) * 100)
+    filled = max(0, min(10, round(percent / 10)))
+    bar = "█" * filled + "░" * (10 - filled)
+    phase = PRIMARY_LIVE_STAGES[position - 1]
+    heading = {
+        "running": "JAIMES · LIVE WORK",
+        "done": "JAIMES · COMPLETE",
+        "failed": "JAIMES · NEEDS ATTENTION",
+        "paused": "JAIMES · PAUSED",
+    }.get(status, f"JAIMES · {phase.upper()}")
+    current_plain = current_step_text(status, now, live_items)
+    current = semantic_progress_detail(now or current_plain) or current_plain
+
+    stage_items: list[str] = []
+    for index, label in enumerate(PRIMARY_LIVE_STAGES, start=1):
+        checked = " checked" if terminal or index < position else ""
+        active = index == position and not terminal
+        label_html = f"<mark>{html.escape(label)}</mark>" if active else html.escape(label)
+        stage_items.append(f'<li><input type="checkbox"{checked}>{label_html}</li>')
+
+    workers = [
+        "JAIMES owns Telegram delivery",
+        f"Hermes runs {friendly_model_line(model_line)}",
+    ]
+    route_line = friendly_route_line(route)
+    if route_line:
+        workers.append(route_line)
+    worker_html = "".join(f"<li>{html.escape(item)}</li>" for item in workers)
+
+    activity: list[str] = []
+    for item in live_items:
+        value = compact(live_line(item), limit=140)
+        if value and value not in activity:
+            activity.append(value)
+    activity = activity[-5:]
+    activity_html = "".join(f"<li>{html.escape(item)}</li>" for item in activity)
+    if not activity_html:
+        activity_html = "<li>Waiting for the first verified update.</li>"
+
+    issue = "" if is_empty_issue(blocker) else compact(clean_live_text(blocker), limit=180)
+    next_items = [
+        item for item in parse_list(next_step)
+        if not GENERIC_NEXT_RE.match(clean_live_text(item))
+    ]
+    updated_at = parse_utc_timestamp(updated)
+    updated_text = updated_at.astimezone().strftime("%H:%M %Z") if updated_at else now_label()
+    blocks = [
+        f"<h3>{html.escape(heading)}</h3>",
+        f"<p><b>Objective</b><br>{html.escape(operator_objective(title))}</p>",
+        f"<p><code>{html.escape(friendly_model_line(model_line))}</code> · JAIMES owns delivery</p>",
+        f"<pre>{bar} {percent}% · stage {position}/{len(PRIMARY_LIVE_STAGES)}\n{html.escape(phase.lower())}</pre>",
+        f"<blockquote><b>Now</b><br>{html.escape(current)}</blockquote>",
+        f"<h4>Progress</h4><ul>{''.join(stage_items)}</ul>",
+        f"<h4>Active work</h4><ul>{worker_html}</ul>",
+    ]
+    if issue:
+        blocks.append(f"<blockquote><b>Needs attention</b><br>{html.escape(issue)}</blockquote>")
+    if next_items:
+        blocks.append(f"<p><b>Next</b><br>{html.escape(compact(next_items[0], limit=180))}</p>")
+    blocks.extend([
+        f"<details><summary>Recent activity ({len(activity)})</summary><ul>{activity_html}</ul></details>",
+        f"<footer>{html.escape(primary_elapsed_text(started_at, updated))} · updated {html.escape(updated_text)}</footer>",
+    ])
+    return "".join(blocks)
+
+
 def api_call(method: str, payload: dict, timeout: int = 15) -> dict:
     #JAIMES: live cards are persistent, edit-only records. Automatic cleanup
     # must never make a work card disappear; deletion requires an explicit
@@ -1151,6 +1279,14 @@ def delivery_indeterminate(result: dict) -> bool:
     return bool(error) and not definitive
 
 
+def rich_transport_definitively_rejected(result: dict) -> bool:
+    error = str(result.get("error") or result.get("description") or result).lower()
+    return any(marker in error for marker in (
+        "http error 400", "http error 403", "http error 404", "bad request",
+        "forbidden", "method not found", "unsupported",
+    ))
+
+
 def telegram_message_not_modified(result: dict) -> bool:
     return "message is not modified" in str(result.get("error") or result.get("description") or "").lower()
 
@@ -1175,6 +1311,43 @@ def send_card(
     return api_call("sendMessage", payload, timeout=timeout)
 
 
+def send_rich_message(
+    rich_html: str,
+    fallback_text: str,
+    buttons: list | None,
+    timeout: int,
+    chat_id: str | int | None = None,
+    thread_id: str | int | None = None,
+) -> dict:
+    payload: dict[str, object] = {
+        "chat_id": chat_id or telegram_target(),
+        "disable_notification": True,
+        "rich_message": {"html": rich_html, "skip_entity_detection": True},
+    }
+    if thread_id not in {None, ""}:
+        payload["message_thread_id"] = int(thread_id)
+    if buttons:
+        payload["reply_markup"] = {"inline_keyboard": buttons}
+    result = api_call("sendRichMessage", payload, timeout=timeout)
+    if result.get("ok"):
+        result["native_rich_message"] = True
+        return result
+    if not rich_transport_definitively_rejected(result):
+        result["native_rich_message"] = False
+        result["delivery_indeterminate"] = True
+        return result
+    fallback = send_card(
+        fallback_text,
+        buttons,
+        timeout,
+        chat_id=chat_id,
+        thread_id=thread_id,
+    )
+    fallback["native_rich_message"] = False
+    fallback["rich_error"] = result.get("error") or result
+    return fallback
+
+
 def edit_card(
     message_id: int | str,
     text: str,
@@ -1194,6 +1367,47 @@ def edit_card(
     if buttons:
         payload["reply_markup"] = {"inline_keyboard": buttons}
     return api_call("editMessageText", payload, timeout=timeout)
+
+
+def edit_rich_card(
+    message_id: int | str,
+    rich_html: str,
+    fallback_text: str,
+    buttons: list | None,
+    timeout: int,
+    chat_id: str | int | None = None,
+    thread_id: str | int | None = None,
+) -> dict:
+    payload: dict[str, object] = {
+        "chat_id": chat_id or telegram_target(),
+        "message_id": message_id,
+        "rich_message": {"html": rich_html, "skip_entity_detection": True},
+    }
+    if thread_id not in {None, ""}:
+        payload["message_thread_id"] = int(thread_id)
+    if buttons:
+        payload["reply_markup"] = {"inline_keyboard": buttons}
+    result = api_call("editMessageText", payload, timeout=timeout)
+    if result.get("ok"):
+        result["native_rich_message"] = True
+        return result
+    if telegram_message_not_modified(result):
+        return {"ok": True, "result": {"message_id": message_id}, "native_rich_message": True}
+    if not rich_transport_definitively_rejected(result):
+        result["native_rich_message"] = True
+        result["delivery_indeterminate"] = True
+        return result
+    fallback = edit_card(
+        message_id,
+        fallback_text,
+        buttons,
+        timeout,
+        chat_id=chat_id,
+        thread_id=thread_id,
+    )
+    fallback["native_rich_message"] = False
+    fallback["rich_error"] = result.get("error") or result
+    return fallback
 
 
 def send_final_summary(
@@ -1463,6 +1677,17 @@ def _upsert_card(args: argparse.Namespace, status: str) -> int:
         eta=args.eta or "",
         planned_steps=planned_steps,
     )
+    rich_text = build_rich_card(
+        title=title,
+        status=status,
+        model=model,
+        route=route,
+        now=render_now,
+        done=done,
+        next_step=args.next or "",
+        blocker=args.blocker or "None",
+        started_at=task_started_at or str(existing.get("task_started_at") or ""),
+    )
     buttons = load_buttons(args, status)
     final_text = ""
     if status in {"done", "failed"} and args.final_summary and not args.no_final_summary:
@@ -1483,6 +1708,8 @@ def _upsert_card(args: argparse.Namespace, status: str) -> int:
             "task_header": header_enabled,
             "header_text": header_text,
             "text": text,
+            "rich_text": rich_text,
+            "renderer": "rich" if rich_cards_enabled(chat_id, thread_id) else "legacy",
             "final_text": final_text,
             "buttons": buttons,
             "existing": existing,
@@ -1495,6 +1722,7 @@ def _upsert_card(args: argparse.Namespace, status: str) -> int:
         str(chat_id or "") == CONTROL_CENTER_CHAT_ID
         and str(thread_id or "") in {INBOX_THREAD_ID, JAIMES_OPS_THREAD_ID}
     )
+    renderer = str(existing.get("renderer") or "")
 
     def persist_checkpoint(
         *,
@@ -1519,6 +1747,7 @@ def _upsert_card(args: argparse.Namespace, status: str) -> int:
             "planned_steps": planned_steps,
             "route": route,
             "model": model,
+            "renderer": renderer,
             "next_step": args.next or existing.get("next_step") or "",
             "retention": "persistent-edit-only",
             "chat_id": chat_id,
@@ -1621,14 +1850,49 @@ def _upsert_card(args: argparse.Namespace, status: str) -> int:
         }, indent=2), file=sys.stderr)
         return 1
 
-    if existing.get("message_id"):
+    use_rich = renderer == "rich" or (
+        not existing.get("message_id") and rich_cards_enabled(chat_id, thread_id)
+    )
+    if existing.get("message_id") and use_rich:
+        result = edit_rich_card(
+            existing["message_id"],
+            rich_text,
+            text,
+            card_buttons,
+            args.timeout,
+            chat_id=chat_id,
+            thread_id=thread_id,
+        )
+        action = "edited"
+    elif existing.get("message_id"):
         result = edit_card(existing["message_id"], text, card_buttons, args.timeout, chat_id=chat_id, thread_id=thread_id)
         action = "edited"
+    elif ack_message_id and use_rich:
+        result = edit_rich_card(
+            ack_message_id,
+            rich_text,
+            text,
+            card_buttons,
+            args.timeout,
+            chat_id=chat_id,
+            thread_id=thread_id,
+        )
+        action = "adopted"
     elif ack_message_id:
         #JAIMES: adopt the fresh acknowledgement as the one live card. Sending
         # another message here created the duplicate objective/work-card bubble.
         result = edit_card(ack_message_id, text, card_buttons, args.timeout, chat_id=chat_id, thread_id=thread_id)
         action = "adopted"
+    elif use_rich:
+        result = send_rich_message(
+            rich_text,
+            text,
+            card_buttons,
+            args.timeout,
+            chat_id=chat_id,
+            thread_id=thread_id,
+        )
+        action = "sent"
     else:
         result = send_card(text, card_buttons, args.timeout, chat_id=chat_id, thread_id=thread_id)
         action = "sent"
@@ -1676,6 +1940,10 @@ def _upsert_card(args: argparse.Namespace, status: str) -> int:
             "error": "Telegram accepted the live card without returning a message id",
         }, indent=2), file=sys.stderr)
         return 1
+    if use_rich:
+        renderer = "rich" if result.get("native_rich_message") else "legacy"
+    elif not renderer:
+        renderer = "legacy"
     final_message_id = supplied_final_message_id or existing.get("final_message_id")
     existing = persist_checkpoint(
         header_id=header_message_id,
@@ -1770,6 +2038,7 @@ def _upsert_card(args: argparse.Namespace, status: str) -> int:
         "planned_steps": planned_steps,
         "route": route,
         "model": model,
+        "renderer": renderer,
         "next_step": args.next or existing.get("next_step") or "",
         "retention": "persistent-edit-only",
         "chat_id": chat_id,
