@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import re
 import subprocess
 from pathlib import Path
 from unittest.mock import patch
@@ -87,6 +88,62 @@ def test_indeterminate_terminal_receipt_degrades_semantic_health_without_restart
     assert status == "unhealthy"
     assert issues == ["A JAIMES Telegram final response has an unresolved delivery receipt."]
     assert recovery_targets == set()
+
+
+def test_old_indeterminate_terminal_receipt_remains_unhealthy_until_receipt_backed_resolution():
+    source = MODULE_PATH.read_text(encoding="utf-8")
+    match = re.search(
+        r"def unresolved_terminal_issue\(card, cards\):\n(.*?)\n\npayload =",
+        source,
+        flags=re.S,
+    )
+    assert match
+    namespace: dict = {}
+    exec("def unresolved_terminal_issue(card, cards):\n" + match.group(1), namespace)
+    unresolved_terminal_issue = namespace["unresolved_terminal_issue"]
+    old = health.iso(health.utc_now() - health.dt.timedelta(days=2))
+    unresolved = {
+        "status": "failed",
+        "ended_at": old,
+        "final_contract_status": "delivery_indeterminate",
+        "final_message_id": None,
+    }
+    assert unresolved_terminal_issue(unresolved, {}) is True
+
+    resolved = {
+        **unresolved,
+        "final_message_id": "12345",
+        "terminal_delivery_state": "delivered",
+    }
+    assert unresolved_terminal_issue(resolved, {}) is False
+
+
+def test_indeterminate_incident_clears_only_for_matching_receipt_backed_recovery():
+    source = MODULE_PATH.read_text(encoding="utf-8")
+    match = re.search(
+        r"def unresolved_terminal_issue\(card, cards\):\n(.*?)\n\npayload =",
+        source,
+        flags=re.S,
+    )
+    assert match
+    namespace: dict = {}
+    exec("def unresolved_terminal_issue(card, cards):\n" + match.group(1), namespace)
+    unresolved_terminal_issue = namespace["unresolved_terminal_issue"]
+    incident = {
+        "final_contract_status": "delivery_indeterminate",
+        "recovered_by_work_id": "work-recovery",
+        "recovery_final_message_id": "4113",
+    }
+    cards = {
+        "recovery": {
+            "work_id": "work-recovery",
+            "final_message_id": "4113",
+            "status": "done",
+        }
+    }
+    assert unresolved_terminal_issue(incident, cards) is False
+    cards["recovery"]["final_message_id"] = "different"
+    assert unresolved_terminal_issue(incident, cards) is True
 
 
 def test_missing_or_stale_fast_ack_poll_is_unhealthy_while_fresh_is_healthy():

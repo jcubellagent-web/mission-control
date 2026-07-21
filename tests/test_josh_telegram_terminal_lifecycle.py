@@ -290,6 +290,33 @@ def test_stale_poll_merge_cannot_reopen_terminal_card(monkeypatch, tmp_path):
     assert merged["active_cards"]["run-1"]["ended_at"] == "2026-07-17T04:00:00Z"
 
 
+def test_poll_merge_persists_reconciled_abandoned_close(monkeypatch, tmp_path):
+    monkeypatch.setattr(watcher, "STATE_PATH", tmp_path / "fast-ack.json")
+    base = {"active_cards": {"run-1": {
+        "key": "card-1",
+        "status": "closing-before-final",
+        "terminal_close_started_at": "2026-07-17T04:00:00Z",
+    }}}
+    candidate = copy.deepcopy(base)
+    candidate["active_cards"]["run-1"].update({
+        "status": "failed",
+        "ended_at": "2026-07-17T04:01:00Z",
+        "terminal_close_reconciled_at": "2026-07-17T04:01:00Z",
+        "final_contract_status": "delivery_indeterminate",
+    })
+    candidate["active_cards"]["run-1"].pop("terminal_close_started_at")
+    latest = copy.deepcopy(base)
+    latest["active_cards"]["run-1"]["last_card_update_at"] = "concurrent-update"
+    watcher.save_json(watcher.STATE_PATH, latest)
+
+    merged = watcher.merge_poll_state(candidate, base)
+
+    card = merged["active_cards"]["run-1"]
+    assert card["status"] == "failed"
+    assert card["final_contract_status"] == "delivery_indeterminate"
+    assert "terminal_close_started_at" not in card
+
+
 def test_close_before_final_edits_same_card_then_marks_fast_ack_terminal(monkeypatch, tmp_path):
     monkeypatch.setattr(watcher, "STATE_PATH", tmp_path / "fast-ack.json")
     monkeypatch.setattr(watcher, "WORK_CARD_STATE_PATH", tmp_path / "work-cards.json")
@@ -506,6 +533,53 @@ def test_stale_terminal_close_claim_is_recovered_without_operator_action(monkeyp
     recovered = watcher.load_json(watcher.STATE_PATH, {})["active_cards"]["run-1"]
     assert recovered["status"] == "closing-before-final"
     assert recovered["terminal_close_recovered_at"]
+
+
+def test_poll_reconciles_abandoned_terminal_close_without_resending_final(monkeypatch, tmp_path):
+    monkeypatch.setattr(watcher, "WORK_CARD_STATE_PATH", tmp_path / "work-cards.json")
+    started = utc_now(-(watcher.TERMINAL_CLOSE_LEASE_SECONDS + 1))
+    card = pending_card(started)
+    card.update({
+        "key": "card-1",
+        "objective": "Reconcile an abandoned close",
+        "status": "closing-before-final",
+        "terminal_close_started_at": started,
+    })
+    watcher.save_json(watcher.WORK_CARD_STATE_PATH, {
+        "cards": {"card-1": visible_card(started)},
+    })
+    state = {"active_cards": {"run-1": card}}
+
+    with patch.object(watcher, "run_cmd", return_value={"ok": True}) as run_cmd, \
+         patch.object(watcher, "publish_terminal_once", return_value=True):
+        updates = watcher.reconcile_stale_terminal_closes(state)
+
+    assert updates[0]["result"]["status"] == "delivery-indeterminate-needs-attention"
+    command = run_cmd.call_args.args[0]
+    assert "fail" in command
+    assert "--no-final-summary" in command
+    assert "--final-text-file" not in command
+    persisted = state["active_cards"]["run-1"]
+    assert persisted["status"] == "failed"
+    assert persisted["final_contract_status"] == "delivery_indeterminate"
+    assert persisted["terminal_delivery_state"] == "indeterminate"
+    assert "terminal_close_started_at" not in persisted
+
+
+def test_fresh_terminal_close_lease_is_not_reconciled(monkeypatch, tmp_path):
+    monkeypatch.setattr(watcher, "WORK_CARD_STATE_PATH", tmp_path / "work-cards.json")
+    started = utc_now()
+    card = pending_card(started)
+    card.update({
+        "key": "card-1",
+        "status": "closing-before-final",
+        "terminal_close_started_at": started,
+    })
+    state = {"active_cards": {"run-1": card}}
+
+    with patch.object(watcher, "run_cmd") as run_cmd:
+        assert watcher.reconcile_stale_terminal_closes(state) == []
+    run_cmd.assert_not_called()
 
 
 def test_close_before_final_allows_exact_native_fallback_without_durable_surface(monkeypatch, tmp_path):

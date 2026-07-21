@@ -1141,7 +1141,12 @@ def merge_poll_state(candidate: dict[str, Any], base: dict[str, Any]) -> dict[st
             if isinstance(latest_card, dict) and isinstance(candidate_card, dict):
                 merged_card = {**latest_card, **copy.deepcopy(candidate_card)}
                 latest_status = str(latest_card.get("status") or "").lower()
-                if latest_status in {*TERMINAL_CARD_STATUSES, "closing-before-final", "awaiting-final-gate"}:
+                candidate_status = str(candidate_card.get("status") or "").lower()
+                reconciled_close = bool(
+                    candidate_card.get("terminal_close_reconciled_at")
+                    and candidate_status in TERMINAL_CARD_STATUSES
+                )
+                if latest_status in {*TERMINAL_CARD_STATUSES, "closing-before-final", "awaiting-final-gate"} and not reconciled_close:
                     # A poll snapshot loaded before the final-delivery gate
                     # must not reopen a terminal/closing card during merge.
                     for field in (
@@ -1154,6 +1159,8 @@ def merge_poll_state(candidate: dict[str, Any], base: dict[str, Any]) -> dict[st
                     ):
                         if field in latest_card:
                             merged_card[field] = latest_card[field]
+                if reconciled_close:
+                    merged_card.pop("terminal_close_started_at", None)
                 merged_cards[card_key] = merged_card
             elif latest_card is missing:
                 merged_cards[card_key] = copy.deepcopy(candidate_card)
@@ -4412,6 +4419,107 @@ def queue_stale_final_gate_recovery(state: dict[str, Any], dry_run: bool = False
     return queued
 
 
+def reconcile_stale_terminal_closes(state: dict[str, Any], dry_run: bool = False) -> list[dict[str, Any]]:
+    """End abandoned UI close leases without retrying an uncertain final.
+
+    The v3 lifecycle permanently fences an indeterminate Telegram send.  The
+    UI lease is a separate state machine, however, and a process can die after
+    claiming it.  Leaving that lease in ``closing-before-final`` makes every
+    later poll skip the same live card forever.  Reconcile only the existing
+    card surface to an honest failure state; never send or requeue a final.
+    """
+    active = state.get("active_cards") if isinstance(state.get("active_cards"), dict) else {}
+    now = dt.datetime.now(dt.timezone.utc)
+    reconciled: list[dict[str, Any]] = []
+    for run_key, card in active.items():
+        if not isinstance(card, dict) or str(card.get("status") or "").lower() != "closing-before-final":
+            continue
+        started = parse_utc(card.get("terminal_close_started_at"))
+        if started and (now - started).total_seconds() <= TERMINAL_CLOSE_LEASE_SECONDS:
+            continue
+        card_key = str(card.get("key") or "")
+        if not card_key:
+            continue
+        receipt = work_card_state_receipt(card_key)
+        if receipt["final_message_id"]:
+            status = receipt["status"].lower() if receipt["status"].lower() in TERMINAL_CARD_STATUSES else "done"
+            ended_at = utc_now()
+            if not dry_run:
+                card.update({"status": status, "ended_at": ended_at, "last_card_update_at": ended_at})
+                card.pop("terminal_close_started_at", None)
+                publish_terminal_once(str(run_key), card_key, status)
+            reconciled.append({
+                "event": f"stale-terminal-close:{run_key}",
+                "result": {"ok": True, "status": "already-delivered", "dry_run": dry_run},
+            })
+            continue
+
+        # Editing the existing card is idempotent and does not create a final
+        # Telegram message.  It is therefore safe even when the final send is
+        # indeterminate, while any resend remains fenced by the lifecycle.
+        result: dict[str, Any] = {"ok": True}
+        if not dry_run and not card.get("no_card_required"):
+            meta = {
+                "telegram_chat_id": str(card.get("telegram_chat_id") or ""),
+                "telegram_thread_id": str(card.get("telegram_thread_id") or ""),
+            }
+            command = [
+                "python3",
+                str(WORK_CARD_SCRIPT),
+                "fail",
+                "--key",
+                card_key,
+                "--title",
+                str(card.get("objective") or "").strip(),
+                "--model",
+                str(card.get("runtime_model") or card.get("model") or DEFAULT_MODEL),
+                "--route",
+                str(card.get("route") or DEFAULT_ROUTE),
+                "--done",
+                "Work completed; final delivery receipt unavailable",
+                "--blocker",
+                "Final delivery could not be confirmed",
+                "--timeout",
+                "6",
+                "--no-final-summary",
+            ]
+            result = run_cmd(with_work_card_target(command, meta), timeout=10)
+        if not dry_run and (bool(result.get("ok")) or card.get("no_card_required")):
+            ended_at = utc_now()
+            card.update({
+                "status": "failed",
+                "ended_at": ended_at,
+                "last_progress_at": ended_at,
+                "last_card_update_at": ended_at,
+                "final_contract_status": "delivery_indeterminate",
+                "final_delivery_status": "indeterminate",
+                "terminal_delivery_state": "indeterminate",
+                "terminal_close_reconciled_at": ended_at,
+            })
+            card.pop("terminal_close_started_at", None)
+            publish_terminal_once(str(run_key), card_key, "failed")
+        elif not dry_run:
+            # Keep the lease retryable when even the idempotent card edit did
+            # not receive a receipt.  The next poll may retry the same edit,
+            # while the final-message send remains permanently fenced.
+            card.update({
+                "final_contract_status": "delivery_indeterminate",
+                "final_delivery_status": "indeterminate",
+                "terminal_delivery_state": "indeterminate",
+                "terminal_card_reconcile_error": "existing-card-edit-unconfirmed",
+                "terminal_close_started_at": utc_now(),
+            })
+        reconciled.append({
+            "event": f"stale-terminal-close:{run_key}",
+            "result": {
+                "ok": bool(result.get("ok")),
+                "status": "delivery-indeterminate-needs-attention",
+                "dry_run": dry_run,
+            },
+        })
+    return reconciled
+
+
 def recover_terminal_final_outbox(state: dict[str, Any], dry_run: bool = False) -> list[dict[str, Any]]:
     if not TERMINAL_OUTBOX_DIR.exists():
         return []
@@ -5773,7 +5881,8 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
             state.pop("latest_pending_ack", None)
     stale_gate_updates = queue_stale_final_gate_recovery(state, dry_run=dry_run)
     terminal_outbox_updates = recover_terminal_final_outbox(state, dry_run=dry_run)
-    updates = [*stale_gate_updates, *terminal_outbox_updates, *updates]
+    stale_close_updates = reconcile_stale_terminal_closes(state, dry_run=dry_run)
+    updates = [*stale_gate_updates, *terminal_outbox_updates, *stale_close_updates, *updates]
     pruned_terminal_cards = prune_terminal_cards(state)
     if not dry_run:
         merge_poll_state(state, base_state)
