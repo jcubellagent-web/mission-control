@@ -231,7 +231,7 @@ def repository_analysis(config: dict[str, Any], *, deep: bool) -> tuple[dict[str
         "functionsAndClasses": function_count,
         "largeFiles": sum(len(lines) >= large_threshold for _path, _relative, lines in file_rows),
         "veryLargeFiles": sum(len(lines) >= very_large_threshold for _path, _relative, lines in file_rows),
-        "duplicateGroups": len(duplicate_groups),
+        "duplicateGroups": len(duplicate_groups) if deep else None,
         "changes30d": sum(churn.values()),
     }
     return metrics, candidates[:max_candidates]
@@ -259,8 +259,9 @@ def compare_baseline(metrics: dict[str, Any], score: int, config: dict[str, Any]
         "promotedAt": baseline.get("promotedAt"),
         "baselineScore": baseline_score,
         "metricDelta": {
-            key: int(metrics.get(key) or 0) - int((baseline.get("metrics") or {}).get(key) or 0)
+            key: int(metrics[key]) - int((baseline.get("metrics") or {}).get(key) or 0)
             for key in ("sourceFiles", "sourceLines", "largeFiles", "duplicateGroups")
+            if metrics.get(key) is not None
         },
     }
 

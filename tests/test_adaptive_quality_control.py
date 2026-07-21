@@ -64,6 +64,18 @@ def test_promoted_baseline_is_not_replaced_by_comparison(tmp_path: Path) -> None
     assert json.loads(baseline.read_text())["qualityScore"] == 98
 
 
+def test_snapshot_omits_unmeasured_deep_metric_from_baseline_delta(tmp_path: Path) -> None:
+    baseline = tmp_path / "baseline.json"
+    baseline.write_text(json.dumps({
+        "promotedAt": "2026-07-01T00:00:00Z",
+        "qualityScore": 100,
+        "metrics": {"sourceLines": 100, "duplicateGroups": 24},
+    }), encoding="utf-8")
+    with patch.object(quality, "BASELINE_PATH", baseline):
+        comparison = quality.compare_baseline({"sourceLines": 105, "duplicateGroups": None}, 100, {})
+    assert comparison["metricDelta"] == {"sourceLines": 5}
+
+
 def test_existing_baseline_requires_explicit_history_preserving_replacement(tmp_path: Path) -> None:
     baseline = tmp_path / "baseline.json"
     history = tmp_path / "history.json"
