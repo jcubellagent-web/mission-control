@@ -128,6 +128,9 @@ def test_antigravity_model_ids_are_executable_not_human_labels() -> None:
     assert route.gemini_model("review") == "gemini-3.6-flash-high"
     assert route.gemini_model("deep") == "gemini-3.1-pro-high"
     assert route.gemini_model("longContext") == "gemini-3.1-pro-high"
+    assert route.normalize_requested_model("gemini", "agy-gemini-3.6-flash-medium") == "gemini-3.6-flash-medium"
+    assert route.normalize_requested_model("gemini", "antigravity/gemini-3.1-pro-high") == "gemini-3.1-pro-high"
+    assert route.normalize_requested_model("gemini", "google-gemini-cli/gemini-3.6-flash-high") == "gemini-3.6-flash-high"
 
 
 def model_args(*, transport: str = "auto") -> SimpleNamespace:
@@ -212,10 +215,43 @@ def test_antigravity_pass_uses_local_proxy_and_verifies_model(monkeypatch) -> No
         return Response()
 
     monkeypatch.setattr(helper.urllib.request, "urlopen", fake_urlopen)
-    output = helper.run("gemini-3.6-flash-medium", "safe prompt", 30)
+    output = helper.run("agy-gemini-3.6-flash-medium", "safe prompt", 30)
     assert output == "GEMINI_OK"
     assert seen["url"] == "http://127.0.0.1:11435/v1/chat/completions"
     assert seen["payload"]["model"] == "gemini-3.6-flash-medium"
+
+
+def test_antigravity_status_requires_proxy_model_discovery(monkeypatch) -> None:
+    helper = load_module("gemini_agent_proxy", ROOT / "scripts" / "gemini_agent.py")
+    monkeypatch.setattr(helper.Path, "home", classmethod(lambda cls: Path("/Users/jc_agent")))
+    monkeypatch.setattr(helper.shutil, "which", lambda _name: "/opt/homebrew/bin/agy")
+
+    def proxy_missing(command, timeout, stdin_text=None):
+        if "--version" in command:
+            return 0, "1.1.5\n", ""
+        if "models" in command:
+            return 0, "gemini-3.6-flash-medium\ngemini-3.1-pro-high\n", ""
+        return 7, "", "connection refused"
+
+    monkeypatch.setattr(helper, "run", proxy_missing)
+    unavailable = helper.cli_status()
+    assert unavailable["status"] == "antigravity-proxy-unavailable"
+    assert unavailable["proxy"]["available"] is False
+
+    def proxy_ready(command, timeout, stdin_text=None):
+        if "--version" in command:
+            return 0, "1.1.5\n", ""
+        if "models" in command:
+            return 0, "gemini-3.6-flash-medium\ngemini-3.1-pro-high\n", ""
+        return 0, json.dumps({"data": [
+            {"id": "gemini-3.6-flash-medium"},
+            {"id": "gemini-3.1-pro-high"},
+        ]}), ""
+
+    monkeypatch.setattr(helper, "run", proxy_ready)
+    ready = helper.cli_status()
+    assert ready["status"] == "installed"
+    assert ready["proxy"]["status"] == "ready"
 
 
 def test_shared_skill_requires_real_verified_dispatch() -> None:

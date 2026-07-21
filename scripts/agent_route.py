@@ -578,9 +578,25 @@ def normalize_requested_provider(value: str = "", model: str = "") -> str:
     return ""
 
 
+def normalize_requested_model(provider: str, value: str = "") -> str:
+    """Map retired Antigravity labels to executable subscription model ids."""
+    text = str(value or "").strip()
+    if provider != "gemini" or not text:
+        return text
+    normalized = text.lower()
+    if normalized.startswith("agy-gemini-"):
+        return normalized.removeprefix("agy-")
+    for prefix in ("antigravity/", "agy/", "google-gemini-cli/", "google/"):
+        if normalized.startswith(prefix):
+            normalized = normalized.removeprefix(prefix)
+            break
+    return normalized
+
+
 def explicit_model_request(args: argparse.Namespace) -> tuple[str, str, str]:
-    requested_model = str(getattr(args, "requested_model", "") or "").strip()
-    requested_provider = normalize_requested_provider(getattr(args, "requested_provider", "") or "", requested_model)
+    raw_model = str(getattr(args, "requested_model", "") or "").strip()
+    requested_provider = normalize_requested_provider(getattr(args, "requested_provider", "") or "", raw_model)
+    requested_model = normalize_requested_model(requested_provider, raw_model)
     requested_reason = str(getattr(args, "requested_reason", "") or "requested by Josh").strip()
     if requested_provider and not requested_model:
         if requested_provider == "gemini":
@@ -598,7 +614,7 @@ def remote_specialist_available(provider: str, model: str = "") -> bool:
     if Path.home().name == "jc_agent":
         return False
     if provider == "gemini":
-        requested = str(model or "gemini-3.6-flash-medium").lower()
+        requested = normalize_requested_model(provider, model or "gemini-3.6-flash-medium").lower()
         command = (
             "curl -fsS --max-time 10 http://127.0.0.1:11435/v1/models "
             "-H 'Authorization: Bearer agy-local' "
@@ -647,7 +663,7 @@ def explicit_route_unavailable(provider: str, model: str = "") -> str:
                     str(row.get("id") or "").lower()
                     for row in payload.get("data", []) if isinstance(row, dict)
                 }
-                requested = str(model or "gemini-3.6-flash-medium").lower()
+                requested = normalize_requested_model(provider, model or "gemini-3.6-flash-medium").lower()
                 if requested in names:
                     return ""
             except Exception:

@@ -69,6 +69,45 @@ def run(cmd: list[str], timeout: int, stdin_text: str | None = None) -> tuple[in
         return 126, "", str(exc)
 
 
+def proxy_status(local: bool) -> dict[str, Any]:
+    """Verify the execution host's subscription proxy without exposing auth data."""
+    if local:
+        command = [
+            "curl", "-fsS", "--max-time", "10",
+            "http://127.0.0.1:11435/v1/models",
+            "-H", "Authorization: Bearer agy-local",
+        ]
+    else:
+        command = [
+            "ssh", "jaimes",
+            "curl -fsS --max-time 10 http://127.0.0.1:11435/v1/models "
+            "-H 'Authorization: Bearer agy-local'",
+        ]
+    code, out, _err = run(command, timeout=15)
+    models: list[str] = []
+    if code == 0:
+        try:
+            payload = json.loads(out)
+            models = sorted({
+                str(row.get("id") or "").strip()
+                for row in payload.get("data", [])
+                if isinstance(row, dict) and str(row.get("id") or "").strip()
+            })
+        except Exception:
+            code = 65
+    missing = sorted(REQUIRED_MODELS.difference(models))
+    available = code == 0 and not missing
+    return {
+        "available": available,
+        "status": "ready" if available else "models-outdated" if code == 0 else "unavailable",
+        "executionHost": "JAIMES",
+        "modelCount": len(models),
+        "requiredModelsPresent": not missing,
+        "missingRequiredModels": missing,
+        "checkedAt": utc_now(),
+    }
+
+
 def cli_status() -> dict[str, Any]:
     local = Path.home().name == "jc_agent"
     path = shutil.which("agy") if local else "jaimes:/opt/homebrew/bin/agy"
@@ -98,12 +137,17 @@ def cli_status() -> dict[str, Any]:
     models = [line.strip() for line in models_out.splitlines() if line.strip()]
     status["version"] = version_text.splitlines()[0] if version_code == 0 and version_text else ""
     status["models"] = models
+    proxy = proxy_status(local)
+    status["proxy"] = proxy
     missing = sorted(REQUIRED_MODELS.difference(models))
-    if version_code == 0 and models_code == 0 and not missing:
+    if version_code == 0 and models_code == 0 and not missing and proxy["available"]:
         status["status"] = "installed"
     elif models_code != 0:
         status["status"] = "antigravity-auth-required"
         status["warning"] = "Authenticated Antigravity model discovery failed on the JAIMES execution host."
+    elif not proxy["available"]:
+        status["status"] = "antigravity-proxy-unavailable"
+        status["warning"] = "The JAIMES Antigravity subscription proxy is not ready for model-lane execution."
     else:
         status["status"] = "models-outdated"
         status["warning"] = f"Required current models missing: {', '.join(missing)}"
@@ -138,6 +182,8 @@ def update_sidecar(status: dict[str, Any], smoke: dict[str, Any] | None = None) 
         "version": status.get("version", ""),
         "authMode": status.get("authMode", "Antigravity-authenticated Gemini subscription"),
         "status": status.get("status", "unknown"),
+        "proxyStatus": (status.get("proxy") or {}).get("status", "unknown"),
+        "proxyModelCount": (status.get("proxy") or {}).get("modelCount", 0),
         "checkedAt": status.get("checkedAt"),
     }
     payload["localCli"] = {
@@ -165,8 +211,8 @@ def cmd_status(args: argparse.Namespace) -> int:
 def cmd_smoke(args: argparse.Namespace) -> int:
     status = cli_status()
     prompt = args.prompt.strip()
-    if not status.get("available"):
-        print(json.dumps({"ok": False, "error": "Antigravity Gemini transport missing", "antigravityGemini": status, "geminiCli": status}, indent=2))
+    if status.get("status") != "installed":
+        print(json.dumps({"ok": False, "error": "Antigravity Gemini transport is not ready", "antigravityGemini": status, "geminiCli": status}, indent=2))
         return 1
     if not args.allow_private and prompt_is_sensitive(prompt):
         print(json.dumps({"ok": False, "error": "prompt blocked by privacy guardrail"}, indent=2))

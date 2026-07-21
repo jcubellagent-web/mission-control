@@ -10,6 +10,18 @@ import urllib.error
 import urllib.request
 
 
+def normalize_model_id(value: str) -> str:
+    """Accept canonical and retired Antigravity labels without changing provider."""
+    normalized = str(value or "").strip().lower()
+    if normalized.startswith("agy-gemini-"):
+        return normalized.removeprefix("agy-")
+    for prefix in ("antigravity/", "agy/", "google-gemini-cli/", "google/"):
+        if normalized.startswith(prefix):
+            normalized = normalized.removeprefix(prefix)
+            break
+    return normalized
+
+
 def _content_text(value: object) -> str:
     if isinstance(value, str):
         return value.strip()
@@ -27,8 +39,9 @@ def run(model: str, prompt: str, timeout: int) -> str:
     # Gemini failure cannot silently consume the GPT fallback pool.
     base_url = os.environ.get("ANTIGRAVITY_BASE_URL", "http://127.0.0.1:11435/v1").rstrip("/")
     token = os.environ.get("ANTIGRAVITY_LOCAL_TOKEN", "agy-local")
+    requested_model = normalize_model_id(model)
     payload = json.dumps({
-        "model": model,
+        "model": requested_model,
         "messages": [{"role": "user", "content": prompt}],
         "stream": False,
     }).encode("utf-8")
@@ -44,7 +57,7 @@ def run(model: str, prompt: str, timeout: int) -> str:
     except urllib.error.HTTPError as exc:
         raise RuntimeError(f"Antigravity Gemini request failed with HTTP {exc.code}") from exc
     actual_model = str(result.get("model") or "").strip()
-    if actual_model and actual_model != model:
+    if actual_model and actual_model != requested_model:
         raise RuntimeError(f"Antigravity returned unexpected model {actual_model}")
     choices = result.get("choices") or []
     message = (choices[0].get("message") or {}) if choices and isinstance(choices[0], dict) else {}
