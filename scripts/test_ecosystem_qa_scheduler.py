@@ -93,6 +93,10 @@ class SchedulerTests(unittest.TestCase):
         self.assertEqual(baseline["schedule"], {"minutes": [37], "hours": [4], "weekdays": [0]})
         self.assertEqual(discovery["command"][-1], "discover")
         self.assertEqual(baseline["command"][-1], "baseline-review")
+        self.assertEqual(snapshot["owner"], "josh2")
+        self.assertEqual(discovery["owner"], "josh2")
+        self.assertEqual(baseline["owner"], "jaimes")
+        self.assertNotIn("joshex", {job["owner"] for job in (snapshot, discovery, baseline)})
         for job in (snapshot, discovery, baseline):
             self.assertTrue(job["skipDuringChangeLease"])
             self.assertNotIn("--promote-baseline", job["command"])

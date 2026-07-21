@@ -1462,6 +1462,8 @@ function EcosystemOperationsPanel({ state, workItems }: { state: MissionControlS
   const routeAlerts = state.modelRouter?.routeAlerts || [];
   const quality = recordRow(state.qualityControl);
   const qualityPortfolio = recordRow(quality.refactorPortfolio);
+  const qualityOwnership = recordRow(quality.ownership);
+  const qualityOversight = recordRow(quality.oversight);
   const activeTasks = workItems.filter((item) => ["working", "waiting", "blocked"].includes(item.state)).slice(0, 4);
   const openHandoffs = objectRows(shared.openHandoffs).slice(0, 3);
   const busRows = objectRows(state.agentBus).filter((row) => ["queued", "accepted", "active", "running", "blocked"].includes(String(row.status || "").toLowerCase())).slice(0, 3);
@@ -1503,7 +1505,7 @@ function EcosystemOperationsPanel({ state, workItems }: { state: MissionControlS
       label: "Adaptive QA/QC",
       status: quality.status || "pending",
       detail: `${Number(quality.qualityScore || 0)}% quality · ${Number(qualityPortfolio.candidates || 0)} refactor candidates`,
-      meta: quality.nextAction || "Observation and proposal mode",
+      meta: `${missionText(qualityOwnership.dispatcher || "JOSH 2.0")} + ${missionText(qualityOwnership.analysisAndBaselineOwner || "JAIMES")} operate · JOSHeX ${missionText(qualityOversight.status || "pending")} advisory`,
     },
     {
       label: "Shared work bus",

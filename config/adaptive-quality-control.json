@@ -3,6 +3,18 @@
   "timezone": "America/New_York",
   "mode": "observe-and-propose",
   "qualityObjective": "Improve reliability, task success, latency, cost, and maintainability without weakening privacy, ownership, contracts, or rollback safety.",
+  "ownershipPolicy": {
+    "dispatcher": "josh2",
+    "analysisAndBaselineOwner": "jaimes",
+    "requiredOwners": ["josh2", "jaimes"],
+    "joshex": {
+      "role": "independent-advisory-auditor",
+      "requiredForOperation": false,
+      "requiredForScheduling": false,
+      "requiredForBaselineContinuity": false,
+      "mayPublishFindings": true
+    }
+  },
   "baselinePolicy": {
     "automaticDemotion": false,
     "requiredCleanRunsForPromotion": 7,
@@ -92,16 +104,19 @@
   "recurringActivities": [
     {
       "id": "adaptive-quality-snapshot",
+      "owner": "josh2",
       "label": "Adaptive quality snapshot",
       "purpose": "Continuously score executable contracts and repository maintainability signals."
     },
     {
       "id": "daily-refactor-discovery",
+      "owner": "josh2",
       "label": "Daily refactor discovery",
       "purpose": "Generate a bounded, risk-ranked proposal portfolio without changing source."
     },
     {
       "id": "weekly-quality-baseline-review",
+      "owner": "jaimes",
       "label": "Weekly quality baseline review",
       "purpose": "Compare current evidence with the immutable promoted baseline and recommend promotion or investigation."
     }

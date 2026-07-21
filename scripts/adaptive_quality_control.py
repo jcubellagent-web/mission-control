@@ -21,6 +21,7 @@ from typing import Any, Iterable
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = ROOT / "config" / "adaptive-quality-control.json"
+QA_SCHEDULE_PATH = ROOT / "config" / "ecosystem-qa-schedule.json"
 OUTPUT_PATH = ROOT / "data" / "adaptive-quality-control.json"
 CANDIDATES_PATH = ROOT / "data" / "adaptive-refactor-candidates.json"
 BASELINE_PATH = ROOT / "data" / "adaptive-quality-baseline.json"
@@ -266,9 +267,83 @@ def compare_baseline(metrics: dict[str, Any], score: int, config: dict[str, Any]
     }
 
 
+def build_oversight(payload: dict[str, Any], config: dict[str, Any]) -> dict[str, Any]:
+    schedule = read_json(QA_SCHEDULE_PATH, {})
+    scheduled_jobs = {
+        str(row.get("id")): row
+        for row in schedule.get("jobs", [])
+        if isinstance(row, dict) and row.get("id")
+    }
+    activities = config.get("recurringActivities") if isinstance(config.get("recurringActivities"), list) else []
+    expected_owners = {
+        str(row.get("id")): str(row.get("owner"))
+        for row in activities
+        if isinstance(row, dict) and row.get("id") and row.get("owner")
+    }
+    actual_owners = {
+        job_id: str((scheduled_jobs.get(job_id) or {}).get("owner") or "missing")
+        for job_id in expected_owners
+    }
+    ownership_policy = config.get("ownershipPolicy") if isinstance(config.get("ownershipPolicy"), dict) else {}
+    required_owners = {str(value) for value in ownership_policy.get("requiredOwners", [])}
+    portfolio = payload.get("refactorPortfolio") if isinstance(payload.get("refactorPortfolio"), dict) else {}
+    model_route = payload.get("modelRoute") if isinstance(payload.get("modelRoute"), dict) else {}
+    baseline = payload.get("baseline") if isinstance(payload.get("baseline"), dict) else {}
+    checks = [
+        {
+            "id": "dedicated-host-ownership",
+            "passed": bool(expected_owners) and actual_owners == expected_owners and set(actual_owners.values()) <= required_owners,
+            "detail": f"Required recurring owners: {', '.join(sorted(set(actual_owners.values())))}.",
+        },
+        {
+            "id": "joshex-non-blocking",
+            "passed": not bool((ownership_policy.get("joshex") or {}).get("requiredForOperation", True)),
+            "detail": "JOSHeX oversight is advisory and cannot stop schedules or baseline continuity.",
+        },
+        {
+            "id": "quality-contracts",
+            "passed": all(row.get("passed") for row in payload.get("contracts", []) if row.get("required")),
+            "detail": f"Required quality score is {payload.get('qualityScore', 0)}%.",
+        },
+        {
+            "id": "baseline-continuity",
+            "passed": baseline.get("status") in {"stable", "improved", "promoted"},
+            "detail": str(baseline.get("message") or baseline.get("policy") or "Baseline evidence available."),
+        },
+        {
+            "id": "source-mutation-guard",
+            "passed": portfolio.get("automaticSourceMutation") is False,
+            "detail": "Recurring analysis remains proposal-only.",
+        },
+        {
+            "id": "review-evidence",
+            "passed": model_route.get("reviewRequiresExactDiffEvidence") is True,
+            "detail": "Model review is accepted only when grounded in the exact diff evidence.",
+        },
+        {
+            "id": "portfolio-arithmetic",
+            "passed": int(portfolio.get("candidates") or 0) == sum(int(portfolio.get(key) or 0) for key in ("highRisk", "mediumRisk", "lowRisk")),
+            "detail": "Risk-bucket totals reconcile with the candidate portfolio.",
+        },
+    ]
+    passed = all(row["passed"] for row in checks)
+    return {
+        "checkedAt": iso(),
+        "performedBy": "joshex",
+        "role": "independent-advisory-auditor",
+        "requiredForOperation": False,
+        "status": "pass" if passed else "attention",
+        "checksPassed": sum(row["passed"] for row in checks),
+        "checksTotal": len(checks),
+        "checks": checks,
+        "actualRecurringOwners": actual_owners,
+        "summary": "Independent oversight confirms the dedicated-host QA/QC loop is logically consistent and working." if passed else "Independent oversight found a non-blocking issue for JOSH 2.0 or JAIMES to address.",
+    }
+
+
 def build_payload(config: dict[str, Any], mode: str) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     contracts = evaluate_contracts(config)
-    metrics, candidates = repository_analysis(config, deep=mode in {"discover", "baseline-review"})
+    metrics, candidates = repository_analysis(config, deep=mode in {"discover", "baseline-review", "oversight"})
     score = quality_score(contracts)
     hard_failures = [row for row in contracts if row["required"] and not row["passed"]]
     watches = [row for row in contracts if not row["required"] and not row["passed"]]
@@ -278,6 +353,13 @@ def build_payload(config: dict[str, Any], mode: str) -> tuple[dict[str, Any], li
         status = "attention"
     activities = config.get("recurringActivities") if isinstance(config.get("recurringActivities"), list) else []
     model = config.get("modelPolicy") if isinstance(config.get("modelPolicy"), dict) else {}
+    ownership = config.get("ownershipPolicy") if isinstance(config.get("ownershipPolicy"), dict) else {}
+    previous = read_json(OUTPUT_PATH, {})
+    prior_oversight = previous.get("oversight") if isinstance(previous, dict) and isinstance(previous.get("oversight"), dict) else {
+        "status": "pending",
+        "requiredForOperation": False,
+        "summary": "JOSHeX advisory oversight has not run yet; core QA/QC remains fully operational.",
+    }
     payload = {
         "schemaVersion": 1,
         "checkedAt": iso(),
@@ -287,6 +369,7 @@ def build_payload(config: dict[str, Any], mode: str) -> tuple[dict[str, Any], li
         "qualityScore": score,
         "summary": f"{len(contracts) - len(hard_failures)}/{len(contracts)} quality contracts clear; {len(candidates)} bounded refactor candidates ranked.",
         "objective": config.get("qualityObjective"),
+        "ownership": ownership,
         "contracts": contracts,
         "metrics": metrics,
         "refactorPortfolio": {
@@ -305,6 +388,7 @@ def build_payload(config: dict[str, Any], mode: str) -> tuple[dict[str, Any], li
             "reviewRequiresExactDiffEvidence": bool(model.get("reviewRequiresExactDiffEvidence")),
         },
         "recurringActivities": activities,
+        "oversight": prior_oversight,
         "privacy": {
             "dashboardSafe": True,
             "sourceContentIncluded": False,
@@ -354,7 +438,7 @@ def promote_baseline(payload: dict[str, Any], *, replace: bool = False) -> dict[
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, default=CONFIG_PATH)
-    parser.add_argument("--mode", choices=("snapshot", "discover", "baseline-review"), default="snapshot")
+    parser.add_argument("--mode", choices=("snapshot", "discover", "baseline-review", "oversight"), default="snapshot")
     parser.add_argument("--promote-baseline", action="store_true")
     parser.add_argument("--replace-baseline", action="store_true", help="Archive and explicitly replace an existing promoted baseline")
     parser.add_argument("--no-write", action="store_true")
@@ -363,6 +447,8 @@ def main() -> int:
     if not isinstance(config, dict) or not config.get("contracts"):
         raise SystemExit(f"invalid adaptive quality config: {args.config}")
     payload, candidates = build_payload(config, args.mode)
+    if args.mode == "oversight":
+        payload["oversight"] = build_oversight(payload, config)
     if args.promote_baseline:
         if args.no_write:
             raise SystemExit("--promote-baseline cannot be combined with --no-write")

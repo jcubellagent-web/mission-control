@@ -101,3 +101,32 @@ def test_cloud_model_policy_keeps_codex_as_trusted_executor() -> None:
     assert config["modelPolicy"]["trustedExecutor"] == "openai/codex"
     assert config["modelPolicy"]["reviewRequiresExactDiffEvidence"] is True
     assert config["riskPolicy"]["automaticSourceMutation"] is False
+    assert config["ownershipPolicy"]["requiredOwners"] == ["josh2", "jaimes"]
+    assert config["ownershipPolicy"]["joshex"]["requiredForOperation"] is False
+
+
+def test_joshex_oversight_is_independent_and_non_blocking(tmp_path: Path) -> None:
+    config = json.loads((Path(__file__).parents[1] / "config" / "adaptive-quality-control.json").read_text())
+    schedule = tmp_path / "schedule.json"
+    schedule.write_text(json.dumps({"jobs": [
+        {"id": "adaptive-quality-snapshot", "owner": "josh2"},
+        {"id": "daily-refactor-discovery", "owner": "josh2"},
+        {"id": "weekly-quality-baseline-review", "owner": "jaimes"},
+    ]}), encoding="utf-8")
+    payload = {
+        "qualityScore": 100,
+        "contracts": [{"required": True, "passed": True}],
+        "baseline": {"status": "stable", "message": "Stable."},
+        "refactorPortfolio": {"candidates": 3, "highRisk": 1, "mediumRisk": 1, "lowRisk": 1, "automaticSourceMutation": False},
+        "modelRoute": {"reviewRequiresExactDiffEvidence": True},
+    }
+    with patch.object(quality, "QA_SCHEDULE_PATH", schedule):
+        report = quality.build_oversight(payload, config)
+    assert report["status"] == "pass"
+    assert report["requiredForOperation"] is False
+    assert report["actualRecurringOwners"] == {
+        "adaptive-quality-snapshot": "josh2",
+        "daily-refactor-discovery": "josh2",
+        "weekly-quality-baseline-review": "jaimes",
+    }
+    assert "joshex" not in set(report["actualRecurringOwners"].values())

@@ -184,8 +184,8 @@ RUNTIME_LAYOUT_LIVE_FIELDS = frozenset({
 })
 ADAPTIVE_QUALITY_LIVE_FIELDS = frozenset({
     "schemaVersion", "checkedAt", "status", "mode", "runMode", "qualityScore",
-    "summary", "objective", "metrics", "refactorPortfolio", "baseline", "modelRoute",
-    "recurringActivities", "privacy", "nextAction",
+    "summary", "objective", "ownership", "metrics", "refactorPortfolio", "baseline", "modelRoute",
+    "recurringActivities", "oversight", "privacy", "nextAction",
 })
 CAPABILITY_NODE_IDENTITY_FIELDS = frozenset({"id", "name", "host", "agent"})
 CAPABILITY_NODE_RUNTIME_FIELDS = ("openclawCli", "hermesCli", "geminiCli", "codexCli")
@@ -5898,11 +5898,13 @@ def main() -> None:
         "mode": "observe-and-propose",
         "qualityScore": 0,
         "summary": "Adaptive QA/QC has not produced its first evidence snapshot.",
+        "ownership": {"dispatcher": "josh2", "analysisAndBaselineOwner": "jaimes", "requiredOwners": ["josh2", "jaimes"], "joshex": {"role": "independent-advisory-auditor", "requiredForOperation": False, "requiredForScheduling": False, "requiredForBaselineContinuity": False, "mayPublishFindings": True}},
         "metrics": {},
         "refactorPortfolio": {"candidates": 0, "highRisk": 0, "mediumRisk": 0, "lowRisk": 0, "automaticSourceMutation": False},
         "baseline": {"status": "candidate", "scoreDelta": None},
         "modelRoute": {"analysis": "ollama/glm-5.2:cloud", "trustedExecutor": "openai/codex", "localPrivateFallback": "ollama/qwen2.5-coder:7b", "independentVerificationRequired": True, "reviewRequiresExactDiffEvidence": True},
         "recurringActivities": [],
+        "oversight": {"status": "pending", "requiredForOperation": False, "summary": "JOSHeX advisory oversight has not run yet; core QA/QC remains fully operational."},
         "privacy": {"dashboardSafe": True, "sourceContentIncluded": False, "rawPromptsIncluded": False, "secretsIncluded": False},
         "nextAction": "Wait for the first scheduled quality snapshot.",
     })
