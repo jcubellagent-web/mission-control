@@ -516,6 +516,58 @@ def test_live_canary_closes_card_at_6_of_6_then_sends_exactly_one_final(monkeypa
     assert "never p95 or inbound-path evidence" in result["scope"]
 
 
+def test_live_canary_uses_named_transport_arguments_for_jaimes_signature(monkeypatch) -> None:
+    monkeypatch.setattr(stress.time, "sleep", lambda _seconds: None)
+
+    class JaimesSignatureLiveModule(FakeLiveModule):
+        def build_card(self, *, status: str, **_kwargs) -> str:
+            self.card_statuses.append(status)
+            if status == "done":
+                return "<pre>✅ JAIMES — Complete\nProgress\n██████████ 100% · Complete\n\nNow\nSummary ready</pre>"
+            return "<pre>✅ JAIMES — Verifying\nProgress\n████████░░ 83% · Verifying</pre>"
+
+        def build_completion_summary(
+            self,
+            *,
+            title,
+            status,
+            model="",
+            now="",
+            done=None,
+            next_step="",
+            blocker="None",
+        ) -> str:
+            return super().build_completion_summary(
+                title=title,
+                status=status,
+                model=model,
+                now=now,
+                done=done,
+                next_step=next_step,
+                blocker=blocker,
+            )
+
+        def send_rich_message(
+            self,
+            rich_html,
+            fallback_text,
+            buttons,
+            timeout,
+            chat_id=None,
+            thread_id=None,
+        ) -> dict:
+            assert buttons is None
+            assert timeout == 15
+            assert chat_id == "-1001"
+            assert thread_id == "17"
+            return super().send_rich_message(rich_html, fallback_text)
+
+    result = stress.live_canary(JaimesSignatureLiveModule(), "-1001", "17")
+
+    assert result["ok"] is True
+    assert result["cleanup"]["deleted"] == result["cleanup"]["attempted"]
+
+
 def test_live_canary_excludes_anchor_setup_from_response_slo(monkeypatch) -> None:
     clock = [0.0]
     monkeypatch.setattr(stress.time, "monotonic", lambda: clock[0])

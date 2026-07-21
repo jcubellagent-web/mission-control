@@ -7,6 +7,7 @@ import argparse
 import datetime as dt
 import html
 import importlib.util
+import inspect
 import json
 import os
 import re
@@ -1386,7 +1387,8 @@ def live_canary(
         live = module.send_rich_message(
             rich,
             legacy,
-            15,
+            timeout=15,
+            buttons=None,
             chat_id=chat_id,
             thread_id=thread_id,
         )
@@ -1418,8 +1420,12 @@ def live_canary(
                 done=items[:-1],
             )
             if terminal:
+                legacy_terminal = pre_text(legacy)
                 terminal_render_verified = (
-                    "Progress [██████████] 6/6" in pre_text(legacy)
+                    (
+                        "Progress [██████████] 6/6" in legacy_terminal
+                        or "██████████ 100% · Complete" in legacy_terminal
+                    )
                     and "██████████ 100% · stage 6/6" in final_plain_text(rich)
                     and rich.count(" checked") == len(MILESTONE_UPDATES)
                 )
@@ -1447,11 +1453,10 @@ def live_canary(
             else:
                 time.sleep(0.35)
 
-        final_text = module.build_completion_summary(
+        final_kwargs = dict(
             title=title,
             status="done",
             model=model,
-            route=route,
             now="Final response delivered",
             done=[
                 "Confirmed the eyes reaction reached the exact Inbox topic.",
@@ -1461,6 +1466,9 @@ def live_canary(
             next_step="No action needed.",
             blocker="None",
         )
+        if "route" in inspect.signature(module.build_completion_summary).parameters:
+            final_kwargs["route"] = route
+        final_text = module.build_completion_summary(**final_kwargs)
         final_problems = validate(final_text, module)
         if final_problems:
             failures.append(f"structured final validation failed: {', '.join(final_problems)}")
