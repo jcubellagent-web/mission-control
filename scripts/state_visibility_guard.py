@@ -20,7 +20,37 @@ WATCH_FILES = {
     "heartbeats": DATA / "agent-heartbeats.json",
     "dashboard": DATA / "dashboard-data.json",
 }
+AGENT_FEED_NAMES = {"brainFeed", "jaimesBrainFeed", "jainBrainFeed"}
 STALE_MINUTES = 20
+
+
+def parse_timestamp(value: object) -> dt.datetime | None:
+    if not isinstance(value, str) or not value:
+        return None
+    try:
+        return dt.datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(dt.timezone.utc)
+    except ValueError:
+        return None
+
+
+def active_feed_age_minutes(path: Path, now: dt.datetime) -> float | None:
+    """Return age only for a feed that claims live work.
+
+    Inactive terminal/ready/info feeds are valid durable state and should not
+    require no-op heartbeat writes merely to keep their file mtime young.
+    """
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return float("inf")
+    status = str(payload.get("status") or "").strip().lower()
+    active = payload.get("active") is True or status in {"active", "working", "running", "queued", "waiting"}
+    if not active:
+        return None
+    updated_at = parse_timestamp(payload.get("updatedAt") or payload.get("timestamp"))
+    if updated_at is None:
+        return float("inf")
+    return max(0.0, (now - updated_at).total_seconds() / 60)
 
 
 def run(cmd: list[str], *, cwd: Path | None = None, timeout: int = 120) -> dict:
@@ -42,13 +72,18 @@ def run(cmd: list[str], *, cwd: Path | None = None, timeout: int = 120) -> dict:
 
 
 def control_tower_issues() -> list[str]:
-    now = dt.datetime.now(dt.timezone.utc).timestamp()
+    now = dt.datetime.now(dt.timezone.utc)
     issues = []
     for name, path in WATCH_FILES.items():
         if not path.exists():
             issues.append(f"{name} missing")
             continue
-        age_minutes = (now - path.stat().st_mtime) / 60
+        if name in AGENT_FEED_NAMES:
+            age_minutes = active_feed_age_minutes(path, now)
+            if age_minutes is None:
+                continue
+        else:
+            age_minutes = (now.timestamp() - path.stat().st_mtime) / 60
         if age_minutes > STALE_MINUTES:
             issues.append(f"{name} stale")
     return issues

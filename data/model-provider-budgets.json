@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-20T00:00:00Z",
+  "updatedAt": "2026-07-21T23:05:00Z",
   "currency": "USD",
   "policy": {
     "defaultProvider": "codex-luna-inbox-plus-codex-terra-execution",
@@ -47,7 +47,7 @@
       "label": "Gemini",
       "role": "Privacy-safe review and summarization specialist; not the shared Inbox owner.",
       "budgetType": "subscription",
-      "monthlyCapUsd": 20,
+      "monthlyCapUsd": 19.99,
       "dailyCapUsd": 0,
       "remainingCreditUsd": null,
       "lastModelUsed": "Gemini subscription",
@@ -64,8 +64,9 @@
         "cheapFallback": "gemini-3.6-flash-medium"
       },
       "lastRouteReason": "Subscription-backed Gemini lane; use for dashboard-safe review and summaries without showing scary token-equivalent costs.",
-      "fixedMonthlyUsd": 20,
+      "fixedMonthlyUsd": 19.99,
       "fixedWeeklyUsd": 5.0,
+      "pricingBasis": "Google AI Pro listed at US$19.99/month on the official Google One plans page, checked 2026-07-21.",
       "allowanceLabel": "Gemini subscription allowance",
       "usageAllowance": "Google/Gemini subscription-backed route for Flash/Pro/Lite."
     },
@@ -74,7 +75,7 @@
       "label": "xAI / Grok",
       "role": "Current-events, X-native research, outside critique, and batch audit specialist",
       "budgetType": "premium-subscription",
-      "monthlyCapUsd": 8,
+      "monthlyCapUsd": 30,
       "dailyCapUsd": 0,
       "reserveUsd": 48.97,
       "remainingCreditUsd": null,
@@ -83,11 +84,12 @@
       "authStatus": "available-verified",
       "lastAuthCheck": "2026-07-20T00:00:00Z",
       "keyMode": "host-local-env-or-secret-file",
-      "lastRouteReason": "X Premium/Grok subscription-backed lane for current-events and X-native context; not treated as usage-metered by default.",
-      "fixedMonthlyUsd": 8,
-      "fixedWeeklyUsd": 2.0,
-      "allowanceLabel": "X Premium / Grok allowance",
-      "usageAllowance": "X Premium/Grok subscription; API calls tracked separately if used."
+      "lastRouteReason": "SuperGrok subscription-backed lane for current-events and X-native context; not treated as usage-metered by default.",
+      "fixedMonthlyUsd": 30,
+      "fixedWeeklyUsd": 7.5,
+      "pricingBasis": "SuperGrok listed at $30/month on xAI's official pricing page, checked 2026-07-21.",
+      "allowanceLabel": "SuperGrok allowance",
+      "usageAllowance": "SuperGrok subscription; API calls tracked separately if used."
     },
     {
       "id": "openrouter",
@@ -115,6 +117,7 @@
       "lastRouteReason": "$200/year amortized as $16.67/mo and $4.17/wk; local models remain zero incremental cost.",
       "fixedMonthlyUsd": 16.67,
       "fixedWeeklyUsd": 4.17,
+      "pricingBasis": "Ollama Pro listed at $20/month or $200/year on Ollama's official pricing page, checked 2026-07-21.",
       "allowanceLabel": "Ollama Pro annual allowance",
       "usageAllowance": "Ollama Pro paid annually; cloud/local usage shown as subscription capacity, not scary token-equivalent spend.",
       "preferredModels": {
@@ -136,5 +139,5 @@
     "Execution tasks involving code, files, tools, crons, tests, browser/auth work, trade prep, or account mutation must route to Codex/JAIMES/JOSHeX approval lanes, not Lite/Flash alone.",
     "Route telemetry must not contain raw prompts, secrets, OAuth payloads, cookies, passwords, tokens, raw emails, or private account contents."
   ],
-  "billingBasis": "Codex $200/mo, Gemini $20/mo, Grok/X Premium ~$8/mo, Ollama Pro $200/year ($16.67/mo, $4.17/wk). Fixed subscriptions; token/session estimates are telemetry only."
+  "billingBasis": "Codex $200/mo, Google AI Pro $19.99/mo, SuperGrok $30/mo, Ollama Pro $200/year ($16.67/mo, $4.17/wk). Fixed subscriptions; token/session estimates are telemetry only."
 }

@@ -1925,8 +1925,8 @@ function providerRows(modelUsage?: MissionControlState["modelUsage"], modelRoute
       lastModelUsed: /gemini|google/i.test(`${lastRoute.provider || ""} ${lastRoute.model || ""}`) ? lastRoute.model : "gemini flash / pro",
       budgetType: "subscription",
       plan: "Gemini Pro",
-      subscriptionMonthlyUsd: 20,
-      billingLabel: "$20/mo",
+      subscriptionMonthlyUsd: 19.99,
+      billingLabel: "$19.99/mo",
       status: "ready",
     },
     {
@@ -1950,9 +1950,9 @@ function providerRows(modelUsage?: MissionControlState["modelUsage"], modelRoute
       whyChosen: "Use for X-native signal discovery and current social context.",
       lastModelUsed: /xai|grok/i.test(`${lastRoute.provider || ""} ${lastRoute.model || ""}`) ? lastRoute.model : "grok",
       budgetType: "subscription",
-      plan: "X Premium",
-      subscriptionMonthlyUsd: 8,
-      billingLabel: "$8/mo",
+      plan: "SuperGrok",
+      subscriptionMonthlyUsd: 30,
+      billingLabel: "$30/mo",
       status: "ready",
     },
   ];
@@ -1989,7 +1989,7 @@ function providerRows(modelUsage?: MissionControlState["modelUsage"], modelRoute
       budgetType: row?.budgetType || existing.budgetType,
       plan: row?.plan || existing.plan,
       billingLabel: row?.billingLabel || existing.billingLabel,
-      accountEmail: row?.accountEmail || existing.accountEmail,
+      subscriptionMonthlyUsd: row?.fixedMonthlyUsd || row?.monthlyFeeUsd || existing.subscriptionMonthlyUsd,
       accountLabel: row?.accountLabel || existing.accountLabel,
       codexbarSource: row?.codexbarSource || existing.codexbarSource,
       codexbarUpdatedAt: row?.codexbarUpdatedAt || existing.codexbarUpdatedAt,
@@ -2086,7 +2086,7 @@ function providerSubscriptionMonthly(provider: any) {
   if (Number.isFinite(monthly) && monthly > 0) return monthly;
   const annual = Number(provider?.subscriptionAnnualUsd);
   if (Number.isFinite(annual) && annual > 0) return annual / 12;
-  if (String(provider?.budgetType || "").toLowerCase() === "subscription") {
+  if (String(provider?.budgetType || "").toLowerCase().includes("subscription")) {
     const cap = Number(provider?.monthlyCapUsd);
     if (Number.isFinite(cap) && cap > 0) return cap;
   }
@@ -2124,7 +2124,7 @@ function providerTone(provider: any) {
 }
 
 function providerEvidenceLabel(provider: any) {
-  const account = provider?.accountEmail || provider?.accountLabel;
+  const account = provider?.accountLabel;
   if (provider?.plan || account) return [provider?.plan, account].filter(Boolean).map((part) => missionText(String(part))).join(" · ");
   if (provider?.codexbarSource) return `CodexBar ${missionText(String(provider.codexbarSource))}`;
   const status = provider?.authStatus || provider?.lastTestStatus || provider?.status;
@@ -2197,10 +2197,14 @@ function modelUsageBreakdownRows(modelUsage?: MissionControlState["modelUsage"])
 }
 
 function modelUsageCost(model: any) {
+  if (String(model?.billingMode || "").toLowerCase().includes("subscription")) {
+    return Number(model?.usageEquivalentCost || model?.weeklyCost || model?.dailyCost || model?.cost || model?.sessionCost || 0);
+  }
   return Number(model?.dailyCost || model?.weeklyCost || model?.usageEquivalentCost || model?.marginalCost || model?.cost || model?.sessionCost || 0);
 }
 
 function modelUsageWindowLabel(model: any) {
+  if (String(model?.billingMode || "").toLowerCase().includes("subscription")) return "equiv";
   if (Number(model?.dailyCost) > 0) return "day";
   if (Number(model?.weeklyCost) > 0) return "week";
   if (Number(model?.usageEquivalentCost) > 0) return "equiv";

@@ -601,7 +601,6 @@ export type ProviderBudget = {
   lastTestStatus?: string;
   lastModelUsed?: string;
   whyChosen?: string;
-  accountEmail?: string;
   accountLabel?: string;
   codexbarSource?: string;
   codexbarUpdatedAt?: string;

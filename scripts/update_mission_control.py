@@ -1688,6 +1688,10 @@ def fetch_shared_events(now_iso: str) -> List[Dict[str, Any]]:
                 "status": str(entry.get("status") or "info")[:32],
                 "tool": plain_dashboard_text(entry.get("tool") or "", 80),
                 "detail": plain_dashboard_text(entry.get("detail") or "", 240),
+                "workId": str(entry.get("workId") or "")[:140] or None,
+                "runId": str(entry.get("runId") or "")[:140] or None,
+                "generation": entry.get("generation"),
+                "sequence": entry.get("sequence"),
             })
         events.sort(key=lambda item: str(item.get("time") or ""), reverse=True)
         return events[:20]
@@ -1738,6 +1742,7 @@ def event_key(event: Dict[str, Any]) -> tuple[str, str, str]:
 def superseded_blocked_event_ids(events: List[Dict[str, Any]]) -> set[str]:
     """Return blocked/error event ids that have a newer ok/done event for same lane."""
     latest_clear_by_key: Dict[tuple[str, str, str], str] = {}
+    latest_clear_by_work_id: Dict[str, str] = {}
     for event in events:
         status = str(event.get("status") or "").lower()
         etype = str(event.get("type") or "").lower()
@@ -1747,6 +1752,10 @@ def superseded_blocked_event_ids(events: List[Dict[str, Any]]) -> set[str]:
             previous = latest_clear_by_key.get(key)
             if not previous or event_time > previous:
                 latest_clear_by_key[key] = event_time
+            work_id = str(event.get("workId") or "")
+            previous_work_clear = latest_clear_by_work_id.get(work_id)
+            if work_id and (not previous_work_clear or event_time > previous_work_clear):
+                latest_clear_by_work_id[work_id] = event_time
 
     superseded: set[str] = set()
     for event in events:
@@ -1754,7 +1763,9 @@ def superseded_blocked_event_ids(events: List[Dict[str, Any]]) -> set[str]:
         etype = str(event.get("type") or "").lower()
         if status not in {"blocked", "error"} and etype != "blocked":
             continue
-        clear_time = latest_clear_by_key.get(event_key(event))
+        work_id = str(event.get("workId") or "")
+        clear_time = latest_clear_by_work_id.get(work_id) if work_id else None
+        clear_time = clear_time or latest_clear_by_key.get(event_key(event))
         if clear_time and clear_time > str(event.get("time") or ""):
             superseded.add(str(event.get("id") or ""))
     return superseded
@@ -2048,7 +2059,13 @@ def build_provider_usage_breakdown(
             "label": labels.get(provider_id) or budget.get("label") or provider_id,
             "budgetLabel": budget.get("label") or labels.get(provider_id) or provider_id,
             "budgetType": budget.get("budgetType") or ("local" if provider_id == "ollama" else "metered"),
-            "monthlyFeeUsd": float(budget.get("monthlyFeeUsd") or budget.get("monthlyFee") or 0),
+            "monthlyFeeUsd": float(
+                budget.get("monthlyFeeUsd")
+                or budget.get("monthlyFee")
+                or budget.get("fixedMonthlyUsd")
+                or budget.get("monthlyCapUsd")
+                or 0
+            ),
             "meteredDailyUsd": 0.0,
             "meteredWeeklyUsd": 0.0,
             "meteredMonthlyUsd": 0.0,
@@ -2069,7 +2086,12 @@ def build_provider_usage_breakdown(
         })
         return row
 
-    for provider_id in ("codex", "gemini", "xai"):
+    for provider_id in dict.fromkeys([
+        "codex",
+        "gemini",
+        "xai",
+        *(str(row.get("id")) for row in budget_rows if isinstance(row, dict) and row.get("id")),
+    ]):
         ensure(provider_id)
 
     for item in breakdown if isinstance(breakdown, list) else []:
@@ -2105,7 +2127,7 @@ def build_provider_usage_breakdown(
     for provider_id, amount in (metered_providers or {}).items():
         ensure(provider_id)["meteredMonthlyUsd"] = round(float(amount or 0.0), 6)
     for provider_id, row in provider_rows.items():
-        if row.get("budgetType") == "subscription":
+        if "subscription" in str(row.get("budgetType") or "").lower():
             row["fixedMonthlyUsd"] = round(float(row.get("monthlyFeeUsd") or 0.0), 6)
         else:
             row["fixedMonthlyUsd"] = 0.0
@@ -3599,9 +3621,15 @@ def fetch_model_usage() -> Dict[str, Any] | None:
             for row in budgets.get("providers", []):
                 if not isinstance(row, dict):
                     continue
-                if str(row.get("budgetType") or "") != "subscription":
+                if "subscription" not in str(row.get("budgetType") or "").lower():
                     continue
-                monthly_fee = float(row.get("monthlyFeeUsd") or row.get("monthlyCapUsd") or 0)
+                monthly_fee = float(
+                    row.get("monthlyFeeUsd")
+                    or row.get("monthlyFee")
+                    or row.get("fixedMonthlyUsd")
+                    or row.get("monthlyCapUsd")
+                    or 0
+                )
                 if monthly_fee <= 0:
                     continue
                 subscription_providers.append({
@@ -5183,7 +5211,6 @@ def fetch_codexbar_limits(provider: str = "codex") -> Dict[str, Any]:
             "available": True,
             "status": "limited" if exhausted else "watch" if watch else "ready",
             "authStatus": "ok",
-            "accountEmail": usage.get("accountEmail") or identity.get("accountEmail") or "",
             "accountLabel": identity.get("providerID") or "",
             "plan": usage.get("loginMethod") or identity.get("loginMethod") or "",
             "codexbarSource": entry.get("source") or "auto",
