@@ -257,22 +257,37 @@ try:
 except Exception:
     cua_screen_json = {"_error": cua_screen.stderr[-400:] or cua_screen.stdout[-400:]}
 
-def unresolved_terminal_issue(card):
+def unresolved_terminal_issue(card, cards):
     if not isinstance(card, dict):
         return False
-    if card.get("final_contract_status") not in {
-        "delivery_indeterminate", "shadow-delivery-unclean"
-    }:
+    terminal_state = str(card.get("terminal_delivery_state") or "").lower()
+    delivery_status = str(card.get("final_delivery_status") or "").lower()
+    contract_status = str(card.get("final_contract_status") or "").lower()
+    unresolved = (
+        contract_status in {"delivery_indeterminate", "shadow-delivery-unclean"}
+        or terminal_state == "indeterminate"
+        or delivery_status == "indeterminate"
+    )
+    if not unresolved:
         return False
-    if card.get("status") == "active":
-        return True
-    try:
-        ended = dt.datetime.fromisoformat(
-            str(card.get("ended_at") or card.get("last_card_update_at") or "").replace("Z", "+00:00")
-        )
-    except Exception:
+    if card.get("final_message_id") or terminal_state == "delivered" or delivery_status == "delivered":
         return False
-    return (dt.datetime.now(dt.timezone.utc) - ended).total_seconds() <= 30 * 60
+    recovery_work_id = str(card.get("recovered_by_work_id") or "")
+    recovery_message_id = str(card.get("recovery_final_message_id") or "")
+    if recovery_work_id and recovery_message_id and isinstance(cards, dict):
+        for recovery in cards.values():
+            if not isinstance(recovery, dict):
+                continue
+            if (
+                str(recovery.get("work_id") or "") == recovery_work_id
+                and str(recovery.get("final_message_id") or "") == recovery_message_id
+                and str(recovery.get("status") or "").lower() == "done"
+            ):
+                return False
+    # Receipt uncertainty is semantic state, not a transient time window.  It
+    # remains unhealthy until a receipt-backed recovery resolves the exact
+    # work item, even if the service process itself stays healthy for hours.
+    return True
 
 payload = {
     "checkedAt": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
@@ -294,7 +309,7 @@ payload = {
         ) if isinstance(fast_ack_state.get("active_cards"), dict) else 0,
         "terminalIssueCount": sum(
             1 for card in (fast_ack_state.get("active_cards") or {}).values()
-            if unresolved_terminal_issue(card)
+            if unresolved_terminal_issue(card, fast_ack_state.get("active_cards") or {})
         ) if isinstance(fast_ack_state.get("active_cards"), dict) else 0,
         "deliveryError": {
             "at": (fast_ack_state.get("last_telegram_delivery_error") or {}).get("at"),
