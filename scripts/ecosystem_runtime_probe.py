@@ -21,6 +21,7 @@ JOSH_WORK_CARD_SCRIPT = WORKSPACE / "scripts" / "josh_work_card.py"
 JOSH_SEND_REPLY_SCRIPT = JOSH_WORK_CARD_SCRIPT.with_name("send_josh_reply.py")
 CANONICAL_WORK_CARD_SCRIPT = ROOT / "scripts" / "josh_work_card.py"
 CANONICAL_FAST_ACK_SCRIPT = ROOT / "scripts" / "josh_telegram_fast_ack.py"
+CANONICAL_FAST_ACK_LAUNCHER = ROOT / "scripts" / "jaimes_telegram_fast_ack_launcher.py"
 INBOX_PLUGIN_SOURCE = ROOT / "plugins" / "inbox-coordinator" / "index.js"
 OPENCLAW_CONFIG = Path.home() / ".openclaw" / "openclaw.json"
 RECOVERY_COOLDOWN = dt.timedelta(minutes=15)
@@ -143,6 +144,16 @@ def plugin_uses_canonical_helper_default(source: str) -> bool:
     return '"mission-control", "scripts", "josh_telegram_fast_ack.py"' in source
 
 
+def launchd_uses_canonical_inbox_helper(snapshot: str) -> bool:
+    """Accept direct execution or the canonical Josh-owned credential wrapper."""
+    direct = str(CANONICAL_FAST_ACK_SCRIPT) in snapshot
+    wrapped = (
+        str(CANONICAL_FAST_ACK_LAUNCHER) in snapshot
+        and "TELEGRAM_FAST_ACK_OWNER => josh2" in snapshot
+    )
+    return direct or wrapped
+
+
 def collect(base_url: str) -> dict[str, Any]:
     root_ok, root_ms, _, root_detail = http_json(base_url.rstrip("/") + "/data/control-tower-live.json")
     live = _ if isinstance(_, dict) else {}
@@ -172,7 +183,7 @@ def collect(base_url: str) -> dict[str, Any]:
         and CANONICAL_FAST_ACK_SCRIPT.is_file()
         and effective_helper == expected_helper
         and default_contract_ok
-        and str(CANONICAL_FAST_ACK_SCRIPT) in fast_ack_launch
+        and launchd_uses_canonical_inbox_helper(fast_ack_launch)
     )
     source_stamp = parse_ts(live.get("sourceUpdatedAt"))
     source_age = round((utc_now() - source_stamp.astimezone(dt.timezone.utc)).total_seconds() / 60, 1) if source_stamp else None

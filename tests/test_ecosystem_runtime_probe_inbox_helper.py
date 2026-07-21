@@ -48,6 +48,21 @@ def test_plugin_default_contract_requires_canonical_workspace_segments() -> None
     assert probe.plugin_uses_canonical_helper_default(legacy) is False
 
 
+def test_launchd_contract_accepts_direct_helper_or_josh_owned_wrapper(monkeypatch, tmp_path) -> None:
+    helper = tmp_path / "josh_telegram_fast_ack.py"
+    launcher = tmp_path / "jaimes_telegram_fast_ack_launcher.py"
+    monkeypatch.setattr(probe, "CANONICAL_FAST_ACK_SCRIPT", helper)
+    monkeypatch.setattr(probe, "CANONICAL_FAST_ACK_LAUNCHER", launcher)
+
+    assert probe.launchd_uses_canonical_inbox_helper(f"arguments = {{ {helper} }}") is True
+    assert probe.launchd_uses_canonical_inbox_helper(
+        f"arguments = {{ {launcher} }}\nenvironment = {{ TELEGRAM_FAST_ACK_OWNER => josh2 }}"
+    ) is True
+    assert probe.launchd_uses_canonical_inbox_helper(
+        f"arguments = {{ {launcher} }}\nenvironment = {{ TELEGRAM_FAST_ACK_OWNER => jaimes }}"
+    ) is False
+
+
 def test_collect_rejects_disabled_plugin_even_when_helper_paths_match(monkeypatch, tmp_path) -> None:
     helper = tmp_path / "scripts" / "josh_telegram_fast_ack.py"
     helper.parent.mkdir(parents=True)
