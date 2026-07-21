@@ -3926,7 +3926,9 @@ et = ZoneInfo('America/New_York')
     'J.A.I.N Context Sync': '/Users/josh2.0/.openclaw/workspace/logs/mission-control-signal-refresh.log',
     'Chiro Invite Sync': '/Users/josh2.0/.openclaw/workspace/logs/chiro_invite_sync.log',
     'J.A.I.N Silence Detector': '/Users/josh2.0/.openclaw/workspace/logs/jain_silence_detector.log',
-    'Sorare Cookie Freshness': '/Users/josh2.0/.openclaw/workspace/.sorare_cookies_fresh.json',
+    # #JAIMES: the checker log is the execution receipt; the cookie artifact's
+    # mtime describes cookie age and must not be treated as the job run time.
+    'Sorare Cookie Freshness': '/Users/josh2.0/.openclaw/workspace/logs/sorare_cookie_freshness.log',
     'J.A.I.N Medic': '/Users/josh2.0/.openclaw/workspace/logs/jain_medic.log',
     'Sorare Cookie Auto-Refresh': '/Users/josh2.0/.openclaw/workspace/logs/sorare_cookie_autorefresh.log',
 }
@@ -3959,7 +3961,9 @@ PY"""
                 'J.A.I.N Context Sync': Path('/Users/josh2.0/.openclaw/workspace/logs/mission-control-signal-refresh.log'),
                 'Chiro Invite Sync': Path('/Users/josh2.0/.openclaw/workspace/logs/chiro_invite_sync.log'),
                 'J.A.I.N Silence Detector': Path('/Users/josh2.0/.openclaw/workspace/logs/jain_silence_detector.log'),
-                'Sorare Cookie Freshness': Path('/Users/josh2.0/.openclaw/workspace/.sorare_cookies_fresh.json'),
+                # #JAIMES: mirror the host probe's execution-receipt mapping in
+                # local fallback mode instead of reading the cookie artifact.
+                'Sorare Cookie Freshness': Path('/Users/josh2.0/.openclaw/workspace/logs/sorare_cookie_freshness.log'),
                 'J.A.I.N Medic': Path('/Users/josh2.0/.openclaw/workspace/logs/jain_medic.log'),
                 'Sorare Cookie Auto-Refresh': Path('/Users/josh2.0/.openclaw/workspace/logs/sorare_cookie_autorefresh.log'),
             }
