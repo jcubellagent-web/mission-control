@@ -9,18 +9,23 @@ Use X as a lead and sentiment surface, never as sole proof for a trade.
 
 ## Route
 
+- Prefer a fresh verified Grok specialist pass for X-native discovery while the live SuperGrok allowance is above zero. Treat the reported percentage as pressure telemetry, not a guaranteed request count.
+- If Grok is exhausted, limited, unavailable, or its allowance telemetry is stale, continue through the dedicated authenticated X UI collector below. Then fall back to forwarded X links and public-web primary sources if the UI is rate-limited or needs reauthentication.
 - Run authenticated X UI collection on the dedicated agent-auth browser, never Josh's personal browser.
 - Prefer Josh 2.0 for the signed-in UI session. Send longer analysis and corroboration to JAIMES/J.A.I.N without copying cookies or tokens.
 - Keep routine results local or in the user response. Publish only dashboard-safe status and conclusions to Control Tower.
 
 ## Workflow
 
-1. Normalize the asset.
+1. Check the X-insight route.
+   - Read the live Grok window from `data/modelUsage.json`; use Grok only when the signal is fresh, available, and above zero.
+   - A failed Grok check must not end the research request. Record the truthful fallback and continue with authenticated X UI.
+2. Normalize the asset.
    - Prefer the exact contract address plus chain.
    - For a ticker, request or infer the chain, project name, official handle, or contract before assigning high confidence.
    - Treat ticker-only matches as ambiguous until identifiers converge.
    - Resolve an official or primary-source handle from the project's official site or documentation when possible, then pass it with `--account`. Do not infer authority from an X badge alone.
-2. Generate a bounded query plan:
+3. Generate a bounded query plan:
 
    ```bash
    python3 scripts/plan_queries.py '<identifier>' \
@@ -29,7 +34,7 @@ Use X as a lead and sentiment surface, never as sole proof for a trade.
    ```
 
    Use at most eight UI searches per request unless the user asks for a deeper scan.
-3. Collect public search results through the authenticated UI:
+4. Collect public search results through the authenticated UI when Grok is unavailable or when direct public-post evidence is needed:
 
    ```bash
    node scripts/collect_search.mjs \
@@ -40,21 +45,21 @@ Use X as a lead and sentiment surface, never as sole proof for a trade.
    ```
 
    The collector must pass the signed-in account canary, remain on `/search`, read public post DOM only, and close its temporary tab. Never inspect cookies, local storage, DMs, notifications, or private account pages.
-4. Run the deterministic local analyzer on the collected JSON:
+5. Run the deterministic local analyzer on the collected JSON:
 
    ```bash
    python3 scripts/analyze_posts.py --input '<collector-output.json>'
    ```
 
    Use its URL/text deduplication, author-capped sentiment, and manipulation indicators as triage—not as source credibility or factual verification.
-5. Assess:
+6. Assess:
    - narrative direction and disagreement;
    - credible catalysts and risk claims;
    - source independence and authority;
    - freshness, engagement, spam, and coordinated promotion;
    - exact contract/chain match.
-6. Corroborate consequential claims with primary sources, chain explorers, official contract registries, filings, exchange notices, security disclosures, or project documentation.
-7. Return the X Signal Card defined in [references/signal-card.md](references/signal-card.md).
+7. Corroborate consequential claims with primary sources, chain explorers, official contract registries, filings, exchange notices, security disclosures, or project documentation.
+8. Return the X Signal Card defined in [references/signal-card.md](references/signal-card.md).
 
 ## Account Authority
 
@@ -81,6 +86,7 @@ Never export browser credentials, cookies, tokens, or private messages.
 
 ## Failure Handling
 
+- If Grok is exhausted or unavailable, disclose that it was not used and continue with authenticated X UI; do not silently substitute GPT and call it Grok.
 - If the session canary fails, stop and report that the dedicated X session needs reauthentication.
 - If selectors fail or X rate-limits search, return partial coverage and the exact failed phase. Do not bypass protections.
 - If the identifier remains ambiguous, return candidate mappings and ask for the contract or chain before giving a directional conclusion.

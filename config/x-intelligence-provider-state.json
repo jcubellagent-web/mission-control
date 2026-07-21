@@ -1,11 +1,18 @@
 {
-  "updated": "2026-07-17T23:00:00Z",
+  "updated": "2026-07-21T23:24:22Z",
   "identity": "@AgentJc11443",
   "xaiApi": {"status": "exhausted", "enabled": false, "autoRecharge": false},
-  "grokSubscription": {"status": "unavailable_until_reset", "enabled": false, "healthCheck": "cooldown_only"},
+  "grokSubscription": {
+    "status": "available-subject-to-live-allowance",
+    "enabled": true,
+    "healthCheck": "codexbar-live",
+    "allowanceSource": "data/modelUsage.json codexbarLimits.xai",
+    "exhaustionFallback": "authenticated-x-ui"
+  },
   "xSignal": {
     "status": "operational",
-    "paths": ["bounded authenticated read-only X UI", "forwarded X links", "public web discovery", "primary-source verification", "Gemini/Ollama/Codex analysis"],
+    "paths": ["Grok subscription while live allowance is healthy", "bounded authenticated read-only X UI", "forwarded X links", "public web discovery", "primary-source verification", "Gemini/Ollama/Codex analysis"],
+    "routeOrder": ["grok-subscription", "authenticated-x-ui", "forwarded-x-links", "public-web-primary-sources"],
     "collector": {
       "dedicatedAgentBrowserOnly": true,
       "expectedHandle": "AgentJc11443",

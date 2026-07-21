@@ -56,6 +56,7 @@ def test_verified_grok_is_auto_enabled_unless_explicitly_disabled(monkeypatch) -
     monkeypatch.setattr(route, "provider_budget", lambda provider: {"authStatus": "available-verified"})
     monkeypatch.setattr(route, "provider_budget_guard", lambda provider: (True, "budget available"))
     monkeypatch.setattr(route, "remote_specialist_available", lambda provider, model="": True)
+    monkeypatch.setattr(route, "xai_live_allowance_status", lambda: (True, "98% remaining"))
     monkeypatch.delenv("XAI_ENABLED", raising=False)
     monkeypatch.delenv("XAI_VERIFIED", raising=False)
     assert route.xai_verified_available()[0] is True
@@ -64,6 +65,61 @@ def test_verified_grok_is_auto_enabled_unless_explicitly_disabled(monkeypatch) -
     available, reason = route.xai_verified_available()
     assert available is False
     assert "explicitly disabled" in reason
+
+
+def test_live_grok_allowance_is_read_from_codexbar(tmp_path, monkeypatch) -> None:
+    route = load_module("agent_route_xai_allowance", ROOT / "scripts" / "agent_route.py")
+    usage = tmp_path / "modelUsage.json"
+    usage.write_text(json.dumps({
+        "codexbarLimits": {"xai": {
+            "available": True,
+            "status": "ready",
+            "codexbarUpdatedAt": "2026-07-21T23:20:00Z",
+            "usageWindows": [{"label": "Session", "remainingPercent": 98}],
+        }}
+    }))
+    monkeypatch.setattr(route, "MODEL_USAGE_PATH", usage)
+
+    healthy, reason = route.xai_live_allowance_status(
+        route.dt.datetime(2026, 7, 21, 23, 25, tzinfo=route.dt.timezone.utc)
+    )
+    assert healthy is True
+    assert "98% remaining" in reason
+
+    payload = json.loads(usage.read_text())
+    payload["codexbarLimits"]["xai"]["usageWindows"][0]["remainingPercent"] = 0
+    usage.write_text(json.dumps(payload))
+    healthy, reason = route.xai_live_allowance_status(
+        route.dt.datetime(2026, 7, 21, 23, 25, tzinfo=route.dt.timezone.utc)
+    )
+    assert healthy is False
+    assert "exhausted" in reason
+
+
+def test_x_search_falls_back_to_authenticated_ui_when_grok_is_unavailable(monkeypatch) -> None:
+    route = load_module("agent_route_x_fallback", ROOT / "scripts" / "agent_route.py")
+    args = model_args()
+    args.task_type = "x-search"
+    args.priority = "normal"
+    monkeypatch.setattr(route, "xai_verified_available", lambda: (False, "SuperGrok allowance is exhausted"))
+    monkeypatch.setattr(route, "codex_allowance_mode", lambda _args: "normal")
+
+    selected = route.choose_model_route(args, "joshex", False)
+
+    assert selected["provider"] == "codex"
+    assert selected["fallbackPath"] == "authenticated-x-ui"
+    assert selected["fallbackLadder"] == [
+        "authenticated-x-ui", "forwarded-x-links", "public-web-primary-sources"
+    ]
+    assert "session canary" in " ".join(selected["guardrails"]).lower()
+
+    args.requested_provider = "xai"
+    args.requested_model = "grok-4.5"
+    explicit = route.choose_model_route(args, "joshex", False)
+    assert explicit["provider"] == "codex"
+    assert explicit["explicitRequest"] is True
+    assert explicit["fallbackPath"] == "authenticated-x-ui"
+    assert explicit["fallbackFrom"] == "xai"
 
 
 def test_antigravity_model_ids_are_executable_not_human_labels() -> None:

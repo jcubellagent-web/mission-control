@@ -1,6 +1,6 @@
 {
-  "version": 2,
-  "updated": "2026-07-17",
+  "version": 3,
+  "updated": "2026-07-21",
   "identity": {
     "handle": "AgentJc11443",
     "url": "https://x.com/AgentJc11443",
@@ -21,8 +21,9 @@
     ]
   },
   "policy": {
-    "xai_api": "exhausted-disabled",
-    "grok_subscription": "unavailable-until-health-reset",
+    "xai_api": "separate-metered-lane-disabled-unless-verified-and-budgeted",
+    "grok_subscription": "use-while-live-codexbar-allowance-is-fresh-and-above-zero",
+    "grok_exhaustion_fallback": "authenticated-x-ui",
     "logged_in_x_read_only_ui": true,
     "logged_in_x_collection_limits": {
       "dedicated_agent_browser_only": true,
@@ -35,7 +36,7 @@
     "automated_public_account_mutations": false,
     "purchase_credits": false,
     "auto_recharge": false,
-    "discovery": ["authenticated-x-ui", "forwarded-x-links", "public-web-search", "primary-source-verification"],
+    "discovery": ["grok-subscription", "authenticated-x-ui", "forwarded-x-links", "public-web-search", "primary-source-verification"],
     "routine_success_delivery": "local-only"
   },
   "topic_routes": {

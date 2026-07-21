@@ -1,4 +1,4 @@
-# No-cost X intelligence runbook
+# Resilient X intelligence runbook
 
 ## Purpose
 
@@ -15,7 +15,7 @@ Standing authority covers public search and reading, bounded public-result colle
 - Never use account ownership as authorization for a trade, transfer, wallet signature, order, subscription, or purchase.
 - Do not bypass X API pricing, authentication, quotas, or rate limits.
 - Do not purchase xAI credits or enable auto-recharge.
-- xAI API stays disabled while exhausted. Grok stays unavailable until a sparse health check confirms usable credits.
+- Keep the metered xAI API disabled unless separately verified and budgeted. SuperGrok subscription access is a distinct lane whose live CodexBar allowance determines whether Grok is attempted.
 - Never export or publish cookies, tokens, credentials, private messages, protected content, or raw private account data.
 
 ## Collection
@@ -23,9 +23,9 @@ Standing authority covers public search and reading, bounded public-result colle
 Canonical watchlist: `config/x-intelligence-watchlist.json`.
 
 Allowed discovery:
-1. Search and read public X results through the dedicated authenticated UI session.
-2. Josh forwards an X URL, screenshot, or quoted post.
-3. Normal public web search finds indexed excerpts, account names, quoted phrases, or related reporting.
+1. Use Grok for X-native discovery while its exact live allowance is fresh and above zero.
+2. If Grok is exhausted, limited, unavailable, or its allowance telemetry is stale, search and read public X results through the dedicated authenticated UI session.
+3. If the X session canary or search fails, use forwarded X links and normal public-web search for indexed excerpts, account names, quoted phrases, or related reporting.
 4. Verify against official documentation, GitHub releases, company blogs, filings, status pages, explorers, or direct announcements.
 5. X-only claims remain incomplete and cannot receive high confidence.
 
@@ -56,11 +56,13 @@ Topic routing:
 
 ## Model routing
 
+- Grok subscription: first choice for genuinely X-native discovery and public social context while `data/modelUsage.json` reports a fresh, non-zero allowance. The remaining percentage is telemetry, not a promise about how many requests remain.
 - Gemini Flash: extraction, classification, deduplication, concise summary.
 - Gemini Pro: long threads, ambiguity, conflicts, judgment-heavy analysis.
 - Codex/OpenAI subscription: implementation, code/config changes, verified execution, high-stakes integration.
 - Ollama: background clustering, watchlist maintenance, repetitive comparisons, low-priority batches.
-- Grok/xAI: disabled while exhausted. Do not repeatedly probe it.
+- Authenticated X UI: first fallback when Grok is exhausted or unavailable; use the dedicated agent browser and the bounded `x-trading-signal-search` collector.
+- Public web and primary sources: final discovery/corroboration fallback when the X UI is rate-limited or needs reauthentication.
 
 Subscription-backed Gemini/Codex usage is not incremental API spend.
 
@@ -76,6 +78,6 @@ Source verification and confidence are separate from relevance and urgency.
 
 Routine success and duplicate scans stay local/log-only. Telegram alerts are limited to time-sensitive developments, material ecosystem updates, credible security/provider incidents, actionable crypto/Sorare findings, blockers, and approvals. Control Tower receives dashboard-safe conclusions only.
 
-## Grok recovery
+## Grok allowance and recovery
 
-A deterministic cooldown file may permit one low-cost health check per reset window. A failed/exhausted check remains silent and extends the cooldown. Restore Grok only after a usable-credit response, then reserve it for genuinely X-native specialist work. Never auto-recharge.
+Read the live SuperGrok window from `data/modelUsage.json` before routing. At zero remaining, a limited/error state, or telemetry older than 30 minutes, fail closed to authenticated X UI without repeatedly probing Grok. Restore Grok automatically only after fresh allowance telemetry reports it available again. Never infer a request count from the percentage, purchase credits, or enable auto-recharge.

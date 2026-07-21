@@ -273,7 +273,7 @@ PROVIDER_AUTH_LABELS = {
     "codex": "OpenAI Codex OAuth/subscription",
     "gemini": "Antigravity-authenticated Gemini subscription",
     "ollama": "Local Ollama runtime",
-    "xai": "Grok CLI OAuth + xAI API feed",
+    "xai": "SuperGrok CLI OAuth/subscription",
     "openrouter": "OpenRouter metered API",
 }
 
@@ -777,7 +777,53 @@ def xai_verified_available() -> tuple[bool, str]:
     budget_ok, budget_reason = provider_budget_guard("xai")
     if not budget_ok:
         return False, budget_reason
-    return True, "xAI/Grok route is enabled and verified"
+    allowance_ok, allowance_reason = xai_live_allowance_status()
+    if allowance_ok is False:
+        return False, allowance_reason
+    detail = f"; {allowance_reason}" if allowance_ok is True and allowance_reason else ""
+    return True, f"xAI/Grok route is enabled and verified{detail}"
+
+
+def xai_live_allowance_status(now: dt.datetime | None = None) -> tuple[bool | None, str]:
+    """Read the current SuperGrok window without treating static config as quota truth.
+
+    ``None`` means no exact live allowance was reported, so the independently
+    verified auth/budget gates may still decide availability. A reported stale,
+    exhausted, limited, or unavailable window fails closed into the X UI ladder.
+    """
+    usage = read_json(MODEL_USAGE_PATH, {})
+    limits = ((usage.get("codexbarLimits") or {}).get("xai") or {}) if isinstance(usage, dict) else {}
+    if not isinstance(limits, dict) or not limits:
+        return None, "live SuperGrok allowance is not reported"
+
+    updated_at = str(limits.get("codexbarUpdatedAt") or "")
+    if updated_at:
+        try:
+            observed = dt.datetime.fromisoformat(updated_at.replace("Z", "+00:00")).astimezone(dt.timezone.utc)
+            current = (now or dt.datetime.now(dt.timezone.utc)).astimezone(dt.timezone.utc)
+            if current - observed > dt.timedelta(minutes=30):
+                return False, "live SuperGrok allowance telemetry is stale"
+        except ValueError:
+            return False, "live SuperGrok allowance timestamp is invalid"
+
+    status = str(limits.get("status") or "").strip().lower()
+    if limits.get("available") is False or status in {"blocked", "error", "exhausted", "limited", "unavailable"}:
+        return False, f"SuperGrok allowance is {status or 'unavailable'}"
+
+    windows = limits.get("usageWindows") if isinstance(limits.get("usageWindows"), list) else []
+    remaining = [
+        float(row.get("remainingPercent"))
+        for row in windows
+        if isinstance(row, dict) and row.get("remainingPercent") is not None
+    ]
+    if remaining:
+        minimum = min(remaining)
+        if minimum <= 0:
+            return False, "SuperGrok allowance is exhausted"
+        return True, f"SuperGrok live allowance has {minimum:g}% remaining"
+    if limits.get("available") is True:
+        return True, "SuperGrok is live but its exact remaining allowance is unknown"
+    return None, "live SuperGrok allowance is not reported"
 
 def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: bool) -> dict[str, Any]:
     caps = set(args.capability or [])
@@ -810,10 +856,11 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
                 f"using {policy_model}. Sol is allowed only for earned hard/high-blast work and Luna is bounded Inbox-only."
             )
             requested_model = policy_model
-    if requested_provider == "xai" and not xai_available:
+    xai_requested_fallback = requested_provider == "xai" and not xai_available
+    if xai_requested_fallback:
         requested_provider = "codex"
         requested_model = codex_model_for(args)
-        requested_reason = f"{xai_availability_reason}; using the verified Codex fallback"
+        requested_reason = f"{xai_availability_reason}; using the authenticated X/public-source fallback ladder under Codex coordination"
     if requested_provider:
         unavailable = explicit_route_unavailable(requested_provider, requested_model)
         cloud_ollama = requested_provider == "ollama" and requested_model.lower().endswith(":cloud")
@@ -834,7 +881,22 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
                 allowance_mode,
                 "; ".join(reasons),
             )
-        return explicit_route_payload(requested_provider, requested_model, owner, args, allowance_mode, requested_reason)
+        payload = explicit_route_payload(requested_provider, requested_model, owner, args, allowance_mode, requested_reason)
+        if xai_requested_fallback:
+            payload.update({
+                "role": "xai-unavailable-fallback",
+                "fallbackFrom": "xai",
+                "fallbackPath": "authenticated-x-ui",
+                "fallbackLadder": ["authenticated-x-ui", "forwarded-x-links", "public-web-primary-sources"],
+                "freshLaneRequired": False,
+                "spendClass": "verified-fallback",
+                "guardrails": [
+                    "Use the dedicated agent-owned X browser, verify the signed-in session canary, search/read public posts only, and close temporary tabs.",
+                    "Cap a normal request at eight searches and 200 unique public posts; disclose rate limits and partial coverage.",
+                    "Corroborate material X claims with primary sources and never claim Grok was used when it was unavailable.",
+                ],
+            })
+        return payload
 
     if glm_hint and not unsafe_privacy and not needs_approval and not codex_only:
         unavailable = explicit_route_unavailable("ollama", "glm-5.2:cloud")
@@ -882,7 +944,7 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
                 "codexAllowanceMode": allowance_mode,
                 "spendClass": "codex-sparing" if codex_constrained else "normal",
                 "privacy": "dashboard-safe",
-                "reason": compact(f"{task_type} depends on public current-events, X-native, social sentiment, or market narrative context; {budget_reason}."),
+                "reason": compact(f"{task_type} depends on public current-events, X-native, social sentiment, or market narrative context; {xai_availability_reason}; {budget_reason}."),
                 "guardrails": [
                     "Send dashboard-safe public context or sanitized briefs only.",
                     "Do not send secrets, OAuth payloads, raw emails, raw connector data, private account contents, or customer/account data.",
@@ -905,10 +967,14 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
             "spendClass": "verified-fallback",
             "privacy": args.privacy,
             "fallbackFrom": "xai",
-            "reason": compact(f"{xai_availability_reason}; use the verified Codex/public-web lane and disclose that Grok was not used."),
+            "fallbackPath": "authenticated-x-ui",
+            "fallbackLadder": ["authenticated-x-ui", "forwarded-x-links", "public-web-primary-sources"],
+            "reason": compact(f"{xai_availability_reason}; use the dedicated authenticated X search lane first, then forwarded links and public-web primary sources, and disclose that Grok was not used."),
             "guardrails": [
                 "Do not claim Grok or X-native verification when the route is unavailable.",
-                "Use only verified public sources and make source limitations visible.",
+                "Use the dedicated agent-owned X browser, verify the session canary, collect public posts read-only, and close temporary tabs.",
+                "Cap a normal request at eight searches and 200 unique public posts; disclose rate limits and partial coverage.",
+                "Corroborate consequential X claims with primary sources and make source limitations visible.",
                 "Do not send or store private connector data in route telemetry.",
             ],
         }
