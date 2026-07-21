@@ -49,6 +49,7 @@ PRIORITIES = {"low", "normal", "high", "urgent"}
 PRIVACY_TIERS = {"dashboard-safe", "agent-private", "josh-approval", "sensitive-account", "destructive"}
 APPROVALS = {"none", "required", "approved", "rejected"}
 REQUIRES_APPROVAL = {"josh-approval", "sensitive-account", "destructive"}
+DEFAULT_ACTIVE_TASK_LEASE_SECONDS = 900
 
 
 def utc_now() -> str:
@@ -155,6 +156,7 @@ def publish_event(
     phase: str = "",
     work_event: str = "auto",
     handoff_to: str = "",
+    lease_seconds: int = 180,
 ) -> dict[str, Any]:
     publish_status = (
         "planned"
@@ -181,6 +183,7 @@ def publish_event(
         "--rollup",
         "--phase", compact(phase or status, 120),
         "--work-event", work_event,
+        "--lease-seconds", str(lease_seconds),
     ]
     if task:
         cmd.extend([
@@ -614,6 +617,7 @@ def set_status(args: argparse.Namespace, status: str) -> dict[str, Any]:
         task=result,
         phase=getattr(args, "phase", "") or effective_status,
         work_event=getattr(args, "work_event", "update"),
+        lease_seconds=getattr(args, "lease_seconds", DEFAULT_ACTIVE_TASK_LEASE_SECONDS),
     )
     published_event = publish_result.get("event", {}) if isinstance(publish_result, dict) else {}
     if getattr(args, "cmd", "") != "handoff" and effective_status in {"accepted", "active"}:
@@ -739,6 +743,12 @@ def main() -> int:
         p.add_argument("--no-brain-feed", action="store_true", help="Suppress Brain Feed only for dry-runs or local render tests")
         p.add_argument("--job", action="store_true")
         p.add_argument("--phase", default="")
+        p.add_argument(
+            "--lease-seconds",
+            type=int,
+            default=DEFAULT_ACTIVE_TASK_LEASE_SECONDS,
+            help="Canonical active-work lease; refresh longer tasks with heartbeat.",
+        )
         p.add_argument("--model-family", default=None)
         p.add_argument("--model-id", default=None)
         route = p.add_mutually_exclusive_group()

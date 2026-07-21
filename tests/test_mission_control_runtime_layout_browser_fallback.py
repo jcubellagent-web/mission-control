@@ -95,10 +95,10 @@ def valid_kiosk_legibility_measurements() -> dict[str, object]:
             "animatedEdgeCount": 1,
             "animatedInactiveCount": 0,
             "atlasAgentNodes": [
-                {"agent": "joshex", "layer": "memory", "working": False, "workState": "quiet", "memoryState": "idle", "workClass": False, "memoryClass": False, "auraAnimationName": "none", "presenceAnimationName": "none", "memoryAnimationName": "none", "workAnimated": False, "memoryAnimated": False, "animated": False},
-                {"agent": "josh2", "layer": "memory", "working": True, "workState": "working", "memoryState": "live", "workClass": True, "memoryClass": True, "auraAnimationName": "memory-agent-presence-halo", "presenceAnimationName": "memory-agent-presence-dot", "memoryAnimationName": "none", "memoryFilter": "drop-shadow(rgba(88, 238, 154, 0.52) 0px 0px 4px)", "memoryStrokeWidth": 2.3, "workAnimated": True, "memoryAnimated": False, "animated": True},
-                {"agent": "jaimes", "layer": "memory", "working": False, "workState": "quiet", "memoryState": "idle", "workClass": False, "memoryClass": False, "auraAnimationName": "none", "presenceAnimationName": "none", "memoryAnimationName": "none", "workAnimated": False, "memoryAnimated": False, "animated": False},
-                {"agent": "jain", "layer": "memory", "working": False, "workState": "quiet", "memoryState": "idle", "workClass": False, "memoryClass": False, "auraAnimationName": "none", "presenceAnimationName": "none", "memoryAnimationName": "none", "workAnimated": False, "memoryAnimated": False, "animated": False},
+                {"agent": "joshex", "layer": "memory", "working": False, "workState": "quiet", "memoryState": "idle", "workClass": False, "memoryClass": False, "memoryReceiptVisible": False, "auraAnimationName": "none", "presenceAnimationName": "none", "memoryAnimationName": "none", "workAnimated": False, "memoryAnimated": False, "animated": False},
+                {"agent": "josh2", "layer": "memory", "working": True, "workState": "working", "memoryState": "live", "workClass": True, "memoryClass": True, "memoryReceiptVisible": True, "auraAnimationName": "memory-agent-presence-halo", "presenceAnimationName": "memory-agent-presence-dot", "memoryAnimationName": "none", "memoryFilter": "none", "memoryStrokeWidth": 3.1, "workAnimated": True, "memoryAnimated": False, "animated": True},
+                {"agent": "jaimes", "layer": "memory", "working": False, "workState": "quiet", "memoryState": "idle", "workClass": False, "memoryClass": False, "memoryReceiptVisible": False, "auraAnimationName": "none", "presenceAnimationName": "none", "memoryAnimationName": "none", "workAnimated": False, "memoryAnimated": False, "animated": False},
+                {"agent": "jain", "layer": "memory", "working": False, "workState": "quiet", "memoryState": "idle", "workClass": False, "memoryClass": False, "memoryReceiptVisible": False, "auraAnimationName": "none", "presenceAnimationName": "none", "memoryAnimationName": "none", "workAnimated": False, "memoryAnimated": False, "animated": False},
             ],
             "liveWorkAgents": [
                 {"agent": "joshex", "working": False},
@@ -730,6 +730,7 @@ def test_layout_accepts_idle_atlas_only_when_no_path_is_live_or_animated() -> No
         assert isinstance(node, dict)
         node["memoryState"] = "idle"
         node["memoryClass"] = False
+        node["memoryReceiptVisible"] = False
         node["memoryAnimationName"] = "none"
         node["memoryAnimated"] = False
         node["animated"] = bool(node["workAnimated"])
@@ -754,7 +755,7 @@ def test_layout_accepts_working_agent_with_memory_quiet_and_no_live_edge() -> No
     nodes = memory["atlasAgentNodes"]
     assert isinstance(nodes, list)
     node = next(row for row in nodes if row.get("agent") == "josh2")
-    node.update({"memoryState": "idle", "memoryClass": False, "memoryAnimationName": "none", "memoryAnimated": False, "animated": True})
+    node.update({"memoryState": "idle", "memoryClass": False, "memoryReceiptVisible": False, "memoryAnimationName": "none", "memoryAnimated": False, "animated": True})
 
     assert runtime_layout.validate_control_tower_layout(measurements, label="reference-2048") == []
 

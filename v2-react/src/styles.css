@@ -17175,7 +17175,7 @@ body,
 .memory-flow-node.is-candidate > rect { stroke: rgba(180, 140, 255, 0.48); }
 .memory-flow-node.is-applied > rect { stroke: rgba(101, 205, 245, 0.5); }
 
-.memory-flow-node.is-live > rect:not(.memory-flow-node-aura) {
+.memory-flow-node:not(.is-agent).is-live > rect:not(.memory-flow-node-aura) {
   fill: rgba(12, 42, 58, 0.98);
   stroke-width: 2.3;
   filter: drop-shadow(0 0 4px rgba(88, 238, 154, 0.52)) drop-shadow(0 0 10px rgba(88, 238, 154, 0.34));
@@ -17196,6 +17196,15 @@ body,
   filter: drop-shadow(0 0 4px rgba(85, 215, 255, 0.9));
   transform-box: fill-box;
   transform-origin: center;
+}
+
+.memory-flow-memory-receipt-dot {
+  fill: #58ee9a;
+  opacity: 0;
+}
+
+.memory-flow-node.is-memory-live .memory-flow-memory-receipt-dot {
+  opacity: 1;
 }
 
 .memory-flow-node.is-work-active > rect:not(.memory-flow-node-aura) {
@@ -17573,7 +17582,7 @@ body,
 
   #brain-atlas.has-live-memory-flow .memory-flow-map,
   #brain-atlas.has-active-work .brain-atlas-state,
-  .memory-flow-node.is-live > rect:not(.memory-flow-node-aura),
+  .memory-flow-node:not(.is-agent).is-live > rect:not(.memory-flow-node-aura),
   .memory-flow-node.is-work-active .memory-flow-node-aura,
   .memory-flow-node.is-work-active .memory-flow-presence-dot {
     animation: none !important;

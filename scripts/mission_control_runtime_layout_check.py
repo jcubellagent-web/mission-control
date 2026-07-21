@@ -234,9 +234,11 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
   const atlasAgentNodes = [...document.querySelectorAll('#brain-atlas .memory-flow-node.is-agent')].map((element) => {
     const aura = element.querySelector('.memory-flow-node-aura');
     const presenceDot = element.querySelector('.memory-flow-presence-dot');
+    const memoryReceiptDot = element.querySelector('.memory-flow-memory-receipt-dot');
     const shell = [...element.children].find((child) => child.tagName.toLowerCase() === 'rect' && !child.classList.contains('memory-flow-node-aura'));
     const auraAnimationName = aura ? getComputedStyle(aura).animationName : 'none';
     const presenceAnimationName = presenceDot ? getComputedStyle(presenceDot).animationName : 'none';
+    const memoryReceiptOpacity = memoryReceiptDot ? Number.parseFloat(getComputedStyle(memoryReceiptDot).opacity) : 0;
     const shellStyle = shell ? getComputedStyle(shell) : null;
     const memoryAnimationName = shellStyle?.animationName || 'none';
     return {
@@ -247,6 +249,7 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
       memoryState: String(element.getAttribute('data-memory-state') || ''),
       workClass: element.classList.contains('is-work-active'),
       memoryClass: element.classList.contains('is-memory-live'),
+      memoryReceiptVisible: memoryReceiptOpacity > 0,
       auraAnimationName,
       presenceAnimationName,
       memoryAnimationName,
@@ -1266,10 +1269,10 @@ def validate_control_tower_layout(
             failures.append(f"{label}: Brain Atlas {agent} memory path motion disagrees with exact retrieval state")
         if node.get("memoryAnimated") is True or str(node.get("memoryAnimationName") or "none") != "none":
             failures.append(f"{label}: Brain Atlas {agent} node shell uses an expensive paint animation")
-        if memory_live and str(node.get("memoryFilter") or "none") == "none":
-            failures.append(f"{label}: memory-live Brain Atlas agent {agent} lacks its static node glow")
-        if memory_live and _number(node.get("memoryStrokeWidth")) < 2:
-            failures.append(f"{label}: memory-live Brain Atlas agent {agent} lacks a pronounced static stroke")
+        if memory_live and node.get("memoryReceiptVisible") is not True:
+            failures.append(f"{label}: memory-live Brain Atlas agent {agent} lacks its receipt marker")
+        if not memory_live and node.get("memoryReceiptVisible") is True:
+            failures.append(f"{label}: memory-quiet Brain Atlas agent {agent} shows a receipt marker")
         if expect_reduced_motion:
             if node.get("animated") is True:
                 failures.append(f"{label}: reduced-motion mode still animates Brain Atlas {agent} presence")
@@ -1804,10 +1807,10 @@ def self_test() -> int:
             "animatedEdgeCount": 1,
             "animatedInactiveCount": 0,
             "atlasAgentNodes": [
-                {"agent": "joshex", "layer": "memory", "working": False, "workState": "quiet", "memoryState": "idle", "workClass": False, "memoryClass": False, "auraAnimationName": "none", "presenceAnimationName": "none", "memoryAnimationName": "none", "workAnimated": False, "memoryAnimated": False, "animated": False},
-                {"agent": "josh2", "layer": "memory", "working": True, "workState": "working", "memoryState": "live", "workClass": True, "memoryClass": True, "auraAnimationName": "memory-agent-presence-halo", "presenceAnimationName": "memory-agent-presence-dot", "memoryAnimationName": "none", "memoryFilter": "drop-shadow(rgba(88, 238, 154, 0.52) 0px 0px 4px)", "memoryStrokeWidth": 2.3, "workAnimated": True, "memoryAnimated": False, "animated": True},
-                {"agent": "jaimes", "layer": "memory", "working": False, "workState": "quiet", "memoryState": "idle", "workClass": False, "memoryClass": False, "auraAnimationName": "none", "presenceAnimationName": "none", "memoryAnimationName": "none", "workAnimated": False, "memoryAnimated": False, "animated": False},
-                {"agent": "jain", "layer": "memory", "working": False, "workState": "quiet", "memoryState": "idle", "workClass": False, "memoryClass": False, "auraAnimationName": "none", "presenceAnimationName": "none", "memoryAnimationName": "none", "workAnimated": False, "memoryAnimated": False, "animated": False},
+                {"agent": "joshex", "layer": "memory", "working": False, "workState": "quiet", "memoryState": "idle", "workClass": False, "memoryClass": False, "memoryReceiptVisible": False, "auraAnimationName": "none", "presenceAnimationName": "none", "memoryAnimationName": "none", "workAnimated": False, "memoryAnimated": False, "animated": False},
+                {"agent": "josh2", "layer": "memory", "working": True, "workState": "working", "memoryState": "live", "workClass": True, "memoryClass": True, "memoryReceiptVisible": True, "auraAnimationName": "memory-agent-presence-halo", "presenceAnimationName": "memory-agent-presence-dot", "memoryAnimationName": "none", "memoryFilter": "none", "memoryStrokeWidth": 3.1, "workAnimated": True, "memoryAnimated": False, "animated": True},
+                {"agent": "jaimes", "layer": "memory", "working": False, "workState": "quiet", "memoryState": "idle", "workClass": False, "memoryClass": False, "memoryReceiptVisible": False, "auraAnimationName": "none", "presenceAnimationName": "none", "memoryAnimationName": "none", "workAnimated": False, "memoryAnimated": False, "animated": False},
+                {"agent": "jain", "layer": "memory", "working": False, "workState": "quiet", "memoryState": "idle", "workClass": False, "memoryClass": False, "memoryReceiptVisible": False, "auraAnimationName": "none", "presenceAnimationName": "none", "memoryAnimationName": "none", "workAnimated": False, "memoryAnimated": False, "animated": False},
             ],
             "liveWorkAgents": [
                 {"agent": "joshex", "working": False},

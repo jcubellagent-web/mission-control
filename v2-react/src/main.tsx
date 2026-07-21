@@ -3899,19 +3899,20 @@ function BrainAtlasPanel({
               return (
                 <g
                   key={row.agent}
-                  className={`memory-flow-node is-agent${working ? " is-work-active" : ""}${live ? " is-memory-live is-live" : ""}`}
+                  className={`memory-flow-node is-agent${working ? " is-work-active" : ""}${live ? " is-memory-live" : ""}`}
                   data-agent={row.agent}
                   data-agent-working={working ? "true" : "false"}
                   data-work-state={working ? "working" : "quiet"}
                   data-memory-state={!activity ? "unavailable" : live ? "live" : "idle"}
                   style={{ "--atlas-agent-phase": `${index * -0.18}s` } as React.CSSProperties}
                 >
-                  <title>{`${AGENTS[row.agent].label}: ${working ? "working now" : "not working"}; ${!activity ? "memory telemetry unavailable" : live ? `verified ${latestAgentSignal?.[0]} live` : "memory quiet"}`}</title>
+                  <title>{`${AGENTS[row.agent].label}: ${working ? "working now" : "not working"}; ${!activity ? "memory telemetry unavailable" : live ? `verified ${latestAgentSignal?.[0]} receipt only` : "memory quiet"}`}</title>
                   <rect className="memory-flow-node-aura" x={brainAtlasWideX(13)} y={y - 5} width={brainAtlasWideWidth(13, 160)} height="48" rx="12" />
                   <rect x={brainAtlasWideX(18)} y={y} width={brainAtlasWideWidth(18, 150)} height="38" rx="7" />
                   <g className="memory-flow-node-copy" clipPath={`url(#brain-atlas-agent-copy-${row.agent})`}>
                   <text className="memory-flow-node-title" x={brainAtlasWideX(30)} y={y + 18}>{AGENTS[row.agent].label}</text>
                   <circle className="memory-flow-presence-dot" cx={brainAtlasWideX(155)} cy={y + 12} r="5.5" />
+                  <circle className="memory-flow-memory-receipt-dot" cx={brainAtlasWideX(155)} cy={y + 30} r="3.2" />
                   <text className="memory-flow-node-detail" x={brainAtlasWideX(30)} y={y + 35}>
                     {working
                       ? "ACTIVE · WORKING"

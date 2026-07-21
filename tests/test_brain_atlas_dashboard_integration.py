@@ -705,6 +705,9 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertIn("data-memory-state", component)
         self.assertIn("is-work-active", component)
         self.assertIn("is-memory-live", component)
+        self.assertIn("memory-flow-memory-receipt-dot", component)
+        self.assertIn('live ? " is-memory-live" : ""', component)
+        self.assertNotIn('is-memory-live is-live', component)
         self.assertIn("latestAgentMemorySignal", component)
         self.assertIn('data-operation="cross-agent-used"', component)
         self.assertIn("data-source-agent", component)
@@ -773,12 +776,21 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertIn("animation: memory-flow-travel 1.05s linear infinite;", live_edge_css)
         self.assertNotIn("filter:", live_edge_css)
         live_node_css = styles[
-            styles.index(".memory-flow-node.is-live > rect:not(.memory-flow-node-aura) {"):
+            styles.index(".memory-flow-node:not(.is-agent).is-live > rect:not(.memory-flow-node-aura) {"):
             styles.index(".memory-flow-node .memory-flow-node-aura")
         ]
         self.assertIn("stroke-width: 2.3;", live_node_css)
         self.assertIn("filter: drop-shadow", live_node_css)
         self.assertNotIn("animation:", live_node_css)
+        memory_receipt_css = styles[
+            styles.index(".memory-flow-memory-receipt-dot {"):
+            styles.index(".memory-flow-node.is-work-active > rect:not(.memory-flow-node-aura)")
+        ]
+        self.assertIn(".memory-flow-node.is-memory-live .memory-flow-memory-receipt-dot", memory_receipt_css)
+        self.assertIn("opacity: 1;", memory_receipt_css)
+        self.assertNotIn("animation:", memory_receipt_css)
+        self.assertNotIn("filter:", memory_receipt_css)
+        self.assertNotIn(".memory-flow-node.is-live > rect:not(.memory-flow-node-aura)", styles)
         self.assertNotIn("@keyframes memory-node-live-pulse", styles)
         self.assertNotIn("@keyframes memory-map-live-breathe", styles)
         proof_edge_css = styles[

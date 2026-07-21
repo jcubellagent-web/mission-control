@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import json
 import os
 import subprocess
@@ -133,6 +134,7 @@ class AgentPublishWorkContractTests(unittest.TestCase):
                 task=task,
                 phase="research",
                 work_event="update",
+                lease_seconds=900,
             )
         command = run.call_args.args[0]
         self.assertIn("--work-id", command)
@@ -140,6 +142,7 @@ class AgentPublishWorkContractTests(unittest.TestCase):
         self.assertEqual(command[command.index("--run-id") + 1], "run-task-1")
         self.assertEqual(command[command.index("--origin-claim-hash") + 1], "b" * 64)
         self.assertIn("--route-verified", command)
+        self.assertEqual(command[command.index("--lease-seconds") + 1], "900")
 
     def test_non_dashboard_safe_publish_is_rejected(self) -> None:
         with self.assertRaises(SystemExit):
@@ -192,7 +195,20 @@ class AgentPublishWorkContractTests(unittest.TestCase):
                 text=True,
             )
             task = json.loads(made.stdout)["task"]
-            for command in ("start", "heartbeat", "complete"):
+            subprocess.run(
+                base + ["start", "--id", task["id"], "--agent", "jaimes"],
+                cwd=root,
+                env=environment,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            active_hot = json.loads((data / "hot.json").read_text())
+            active_work = active_hot["activeWorks"][0]
+            lease_until = dt.datetime.fromisoformat(active_work["leaseUntil"].replace("Z", "+00:00"))
+            updated_at = dt.datetime.fromisoformat(active_work["updatedAt"].replace("Z", "+00:00"))
+            self.assertEqual((lease_until - updated_at).total_seconds(), 900)
+            for command in ("heartbeat", "complete"):
                 subprocess.run(
                     base + [command, "--id", task["id"], "--agent", "jaimes"],
                     cwd=root,
