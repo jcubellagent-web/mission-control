@@ -1,12 +1,14 @@
 {
-  "version": 1,
+  "version": 2,
+  "schemaVersion": 2,
+  "lifecycleVersion": 3,
   "defaultAuthorizedOwner": "josh2",
   "groups": {
     "-1003589561528": {
       "label": "J.A.I.N Control Center",
       "defaultOwner": "josh2",
       "topics": {
-        "1": {"label": "Inbox", "owner": "josh2"},
+        "1": {"label": "Inbox", "owner": "josh2", "lane": "inbox"},
         "17": {"label": "JAIMES Ops", "owner": "jaimes"},
         "18": {"label": "JOSH 2.0", "owner": "josh2"},
         "19": {"label": "Sorare", "owner": "jaimes"},
@@ -22,5 +24,14 @@
     "@josh2": "josh2",
     "@joshex": "joshex",
     "@jain": "jain"
+  },
+  "dynamicTopics": {
+    "brain": {
+      "label": "Brain",
+      "owner": "josh2",
+      "lane": "brain-intake",
+      "topicIdSource": "private-confirmed-receipt",
+      "enabled": true
+    }
   }
 }

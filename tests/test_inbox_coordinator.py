@@ -43,6 +43,65 @@ class InboxCoordinatorTests(unittest.TestCase):
         self.assertEqual(coordinator.WORK_CARD_SCRIPT, coordinator.WORKSPACE / "scripts" / "josh_work_card.py")
         self.assertEqual(coordinator.SEND_REPLY_SCRIPT, coordinator.WORK_CARD_SCRIPT.with_name("send_josh_reply.py"))
 
+    def test_progress_uses_fixed_gateway_code_and_no_worker_text(self):
+        coordinator = load_module()
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            coordinator.TELEGRAM_GATEWAY_SCRIPT = root / "josh_telegram_fast_ack.py"
+            coordinator.TELEGRAM_GATEWAY_SCRIPT.write_text("", encoding="utf-8")
+            calls = []
+
+            def fake_run(command, **kwargs):
+                calls.append((list(command), str(kwargs.get("input") or "")))
+                return type("Result", (), {"returncode": 0})()
+
+            snapshot = {
+                "origin": {
+                    "runId": "run-safe-1",
+                    "cardKey": "card-safe-1",
+                    "chatId": "private-chat-target",
+                    "threadId": "1",
+                }
+            }
+            with patch.object(coordinator.subprocess, "run", side_effect=fake_run):
+                self.assertTrue(coordinator.update_card_progress(snapshot, "worker_started"))
+                self.assertFalse(coordinator.update_card_progress(snapshot, "MODEL SAID secret text"))
+            self.assertEqual(len(calls), 1)
+            self.assertIn("--progress-event-json-stdin", calls[0][0])
+            self.assertEqual(json.loads(calls[0][1]), {
+                "runId": "run-safe-1",
+                "progressCode": "worker_started",
+            })
+            self.assertNotIn("card-safe-1", calls[0][1])
+            self.assertNotIn("private-chat-target", calls[0][1])
+
+    def test_execution_checkpoint_is_lease_bound_and_allowlisted(self):
+        coordinator = load_module()
+        with tempfile.TemporaryDirectory() as tmp:
+            self.configure_private_state(coordinator, Path(tmp))
+            coordinator.PRIVATE_DIR.mkdir(parents=True, exist_ok=True)
+            coordinator.save_json(coordinator.STATE_PATH, {"jobs": {"job-1": {
+                "jobId": "job-1",
+                "status": "running",
+                "leaseToken": "lease-1",
+            }}})
+            execution = {
+                "actualHost": "josh2",
+                "actualWorker": "worker",
+                "actualProvider": "codex",
+                "actualModel": "verified-model",
+                "modelVerified": True,
+                "executionVerified": True,
+                "output": "must not persist in progress checkpoint",
+                "token": "must not persist either",
+            }
+            self.assertFalse(coordinator.checkpoint_worker_execution("job-1", "wrong", execution))
+            self.assertTrue(coordinator.checkpoint_worker_execution("job-1", "lease-1", execution))
+            persisted = json.loads(coordinator.STATE_PATH.read_text())["jobs"]["job-1"]
+            self.assertNotIn("output", persisted["actual"])
+            self.assertNotIn("token", persisted["actual"])
+            self.assertTrue(persisted["actual"]["executionVerified"])
+
     def configure_private_state(self, coordinator, root: Path):
         coordinator.PRIVATE_DIR = root / "private"
         coordinator.STATE_PATH = coordinator.PRIVATE_DIR / "jobs.json"
@@ -647,21 +706,23 @@ class InboxCoordinatorTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             coordinator.PRIVATE_DIR = root
-            coordinator.WORK_CARD_SCRIPT = root / "josh_work_card.py"
-            coordinator.WORK_CARD_SCRIPT.write_text("", encoding="utf-8")
+            coordinator.TELEGRAM_GATEWAY_SCRIPT = root / "josh_telegram_fast_ack.py"
+            coordinator.TELEGRAM_GATEWAY_SCRIPT.write_text("", encoding="utf-8")
             commands = []
             rendered = []
 
-            def fake_run(cmd, **_kwargs):
+            def fake_run(cmd, **kwargs):
                 commands.append(cmd)
-                final_path = Path(cmd[cmd.index("--final-text-file") + 1])
-                rendered.append(final_path.read_text(encoding="utf-8"))
-                return type("Result", (), {"returncode": 0})()
+                rendered.append(str(kwargs.get("input") or ""))
+                return type("Result", (), {
+                    "returncode": 0,
+                    "stdout": json.dumps({"ok": True, "status": "closed-and-final-delivered"}),
+                })()
 
             with patch.object(coordinator.subprocess, "run", side_effect=fake_run):
                 delivered = coordinator.deliver_result(
                     "job-weak",
-                    {"origin": {"cardKey": "card-weak", "chatId": "chat", "threadId": "1"}},
+                    {"origin": {"cardKey": "card-weak", "runId": "run-weak", "chatId": "chat", "threadId": "1"}},
                     {"routeId": "luna", "routingReason": "test"},
                     {
                         "actualProvider": "codex",
@@ -674,7 +735,8 @@ class InboxCoordinatorTests(unittest.TestCase):
                     "Complete: Yes\nWhat was done:\n- Assessment complete.\nIssues:\n- n/a\nAppropriate next steps:\n- No action needed.\nApproval needed:\n- n/a",
                 )
             self.assertIs(delivered, True)
-            self.assertEqual(commands[0][2], "fail")
+            self.assertIn("--close-before-final", commands[0])
+            self.assertEqual(commands[0][commands[0].index("--terminal-status") + 1], "failed")
             plain = re.sub(r"<[^>]+>", "", html.unescape(rendered[0]))
             self.assertIn("Complete: No", plain)
             self.assertIn(coordinator.MISSING_FINDINGS_ISSUE, html.unescape(rendered[0]).replace("\n  ", " "))
@@ -684,21 +746,23 @@ class InboxCoordinatorTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             coordinator.PRIVATE_DIR = root
-            coordinator.WORK_CARD_SCRIPT = root / "josh_work_card.py"
-            coordinator.WORK_CARD_SCRIPT.write_text("", encoding="utf-8")
+            coordinator.TELEGRAM_GATEWAY_SCRIPT = root / "josh_telegram_fast_ack.py"
+            coordinator.TELEGRAM_GATEWAY_SCRIPT.write_text("", encoding="utf-8")
             commands = []
             rendered = []
 
-            def fake_run(cmd, **_kwargs):
+            def fake_run(cmd, **kwargs):
                 commands.append(cmd)
-                final_path = Path(cmd[cmd.index("--final-text-file") + 1])
-                rendered.append(final_path.read_text(encoding="utf-8"))
-                return type("Result", (), {"returncode": 0})()
+                rendered.append(str(kwargs.get("input") or ""))
+                return type("Result", (), {
+                    "returncode": 0,
+                    "stdout": json.dumps({"ok": True, "status": "closed-and-final-delivered"}),
+                })()
 
             with patch.object(coordinator.subprocess, "run", side_effect=fake_run):
                 delivered = coordinator.deliver_result(
                     "job-health",
-                    {"origin": {"cardKey": "card-health", "chatId": "chat", "threadId": "1"}},
+                    {"origin": {"cardKey": "card-health", "runId": "run-health", "chatId": "chat", "threadId": "1"}},
                     {"routeId": "luna", "routingReason": "read-only health/status check"},
                     {
                         "actualProvider": "codex",
@@ -711,7 +775,8 @@ class InboxCoordinatorTests(unittest.TestCase):
                     TELEGRAM_HEALTH_RESULT,
                 )
             self.assertIs(delivered, True)
-            self.assertEqual(commands[0][2], "done")
+            self.assertIn("--close-before-final", commands[0])
+            self.assertEqual(commands[0][commands[0].index("--terminal-status") + 1], "done")
             plain = re.sub(r"<[^>]+>", "", html.unescape(rendered[0]))
             self.assertIn("Complete: Yes", plain)
             self.assertNotIn("supplied summary contained", plain.lower())

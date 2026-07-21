@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jcubellagent.invalid/schemas/telegram-lifecycle.schema.json",
+  "title": "Telegram gateway lifecycle receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "lifecycleVersion", "rendererVersion", "classifierVersion", "deliveryTier", "classifierReason", "eventId", "workId", "runId", "generation", "sequence", "fencingEpoch", "intakeAgent", "currentOwner", "phase", "outcome", "deliveryState", "surfaceContract"],
+  "properties": {
+    "schemaVersion": {"const": 3},
+    "lifecycleVersion": {"enum": [2, 3]},
+    "rendererVersion": {"type": "string", "minLength": 1},
+    "classifierVersion": {"type": "string", "minLength": 1},
+    "deliveryTier": {"enum": [1, 2, 3]},
+    "classifierReason": {"type": "string", "minLength": 1, "maxLength": 80},
+    "eventId": {"type": "string", "minLength": 8, "maxLength": 96},
+    "workId": {"type": "string", "minLength": 8, "maxLength": 128},
+    "runId": {"type": "string", "minLength": 1, "maxLength": 160},
+    "generation": {"type": "integer", "minimum": 1},
+    "sequence": {"type": "integer", "minimum": 1},
+    "fencingEpoch": {"type": "integer", "minimum": 1},
+    "intakeAgent": {"enum": ["josh2", "jaimes"]},
+    "currentOwner": {"enum": ["josh2", "jaimes"]},
+    "phase": {"enum": ["received", "classified", "acknowledged", "working", "awaiting_input", "verifying", "terminal"]},
+    "outcome": {"type": ["string", "null"], "enum": [null, "succeeded", "partial", "failed", "cancelled", "superseded", "expired"]},
+    "deliveryState": {"enum": ["pending", "sending", "delivered", "indeterminate", "dead_letter"]},
+    "surfaceContract": {"enum": ["telegram", "brain-intake", "native-desktop", "native-web"]},
+    "workerRoute": {"type": "string", "maxLength": 120},
+    "sourceRevision": {"type": "integer", "minimum": 1}
+  }
+}

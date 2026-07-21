@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -21,6 +22,14 @@ JOSHEX_HANDOFF_THREAD = "codex://threads/019de576-8f21-7ba1-b477-623a5b9d0068"
 APPROVAL_ACTIONS_PATH = WORKSPACE / "memory" / "telegram_approval_actions.json"
 if str(WORKSPACE / "scripts") not in sys.path:
     sys.path.insert(0, str(WORKSPACE / "scripts"))
+if str(ROOT / "scripts") not in sys.path:
+    sys.path.insert(0, str(ROOT / "scripts"))
+
+from telegram_gateway_lifecycle import (  # noqa: E402
+    GatewayLifecycle,
+    RolloutPolicy,
+    UnauthorizedActionError,
+)
 
 try:
     from send_josh_reply import send_message  # type: ignore  # noqa: E402
@@ -646,7 +655,44 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("action")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--authorized-user", default="")
+    parser.add_argument("--chat-ref", default="")
+    parser.add_argument("--topic-ref", default="")
+    parser.add_argument("--message-ref", default="")
+    parser.add_argument("--artifact-ref", default="")
+    parser.add_argument("--lifecycle-root", default=os.environ.get("TELEGRAM_LIFECYCLE_ROOT", str(Path.home() / ".openclaw/private/telegram-lifecycle")))
+    parser.add_argument("--rollout", default=os.environ.get("TELEGRAM_LIFECYCLE_ROLLOUT", str(ROOT / "config/telegram-lifecycle-rollout.json")))
     args = parser.parse_args()
+    rollout = RolloutPolicy.load(args.rollout)
+    versioned = args.action.startswith("v3.")
+    if versioned:
+        lifecycle = GatewayLifecycle(args.lifecycle_root, rollout=rollout, owner="josh2")
+        try:
+            consumed = lifecycle.consume_action(
+                args.action,
+                authorized_user=args.authorized_user,
+                chat_ref=args.chat_ref,
+                topic_ref=args.topic_ref,
+                message_ref=args.message_ref,
+                artifact_ref=args.artifact_ref,
+            )
+        except UnauthorizedActionError as exc:
+            print(json.dumps({"ok": False, "status": "rejected", "errorClass": str(exc)[:80]}))
+            return 3
+        # Callback acknowledgement and all visible output are gateway effects.
+        # This helper emits one structured event and never sends a fourth bubble.
+        print(json.dumps({
+            "ok": True,
+            "status": "accepted",
+            "workId": consumed["workId"],
+            "action": consumed["action"],
+            "artifactRef": consumed["artifactRef"],
+            "executeAsync": True,
+        }))
+        return 0
+    if rollout.writer_enabled("josh2"):
+        print(json.dumps({"ok": False, "status": "rejected", "errorClass": "legacy-callback-disabled"}))
+        return 3
     text, buttons = handle(args.action, dry_run=args.dry_run)
     if args.dry_run:
         print(text)

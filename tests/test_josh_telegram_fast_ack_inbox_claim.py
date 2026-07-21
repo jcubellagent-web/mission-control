@@ -8,6 +8,8 @@ import threading
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
+
 
 MODULE_PATH = Path(__file__).resolve().parents[1] / "scripts" / "josh_telegram_fast_ack.py"
 SPEC = importlib.util.spec_from_file_location("josh_telegram_fast_ack", MODULE_PATH)
@@ -15,6 +17,40 @@ watcher = importlib.util.module_from_spec(SPEC)
 assert SPEC and SPEC.loader
 sys.modules[SPEC.name] = watcher
 SPEC.loader.exec_module(watcher)
+
+
+@pytest.fixture(autouse=True)
+def isolate_gateway_lifecycle_store(monkeypatch, tmp_path):
+    """Keep deterministic test work IDs out of the real private journal."""
+    rollout_path = tmp_path / "telegram-lifecycle-rollout.json"
+    rollout_path.write_text(
+        json.dumps(
+            {
+                "schemaVersion": 1,
+                "writerLifecycleVersion": 3,
+                "readerLifecycleVersions": [2, 3],
+                "masterState": "off",
+                "globalKillSwitch": False,
+                "hosts": {"josh2": True, "jaimes": True},
+                "shadowMinimumPerOwner": 20,
+                "brainFixtureMinimum": 20,
+                "rollback": {
+                    "newWorkToLegacy": False,
+                    "drainExistingVersionedWork": True,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        watcher,
+        "LIFECYCLE_PRIVATE_ROOT",
+        tmp_path / "telegram-lifecycle",
+    )
+    monkeypatch.setattr(watcher, "LIFECYCLE_ROLLOUT_PATH", rollout_path)
+    monkeypatch.setattr(watcher, "_GATEWAY_LIFECYCLE", None)
+    yield
+    watcher._GATEWAY_LIFECYCLE = None
 
 
 def test_publish_josh_retries_until_canonical_work_receipt_is_accepted():
@@ -258,6 +294,7 @@ def test_queue_failure_preserves_all_durable_surface_receipts():
         "surface_contract": "header-live-v1",
         "job_id": "",
         "key": "card-904",
+        "terminal_fallback_queued": False,
     }
     persist.assert_not_called()
 
@@ -351,6 +388,9 @@ def test_valid_coordinator_envelope_returns_verified_queue_receipt():
         "live_message_id": "602",
         "header_required": True,
         "surface_contract": "header-live-v1",
+        "no_card_required": False,
+        "delivery_tier": 0,
+        "lifecycle_version": 0,
         "job_id": "job-906",
         "route_id": "luna",
         "deduplicated": False,

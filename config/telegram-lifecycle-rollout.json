@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "writerLifecycleVersion": 3,
+  "readerLifecycleVersions": [2, 3],
+  "masterState": "all",
+  "globalKillSwitch": false,
+  "brainKillSwitch": false,
+  "hosts": {"josh2": true, "jaimes": true},
+  "shadowMinimumPerOwner": 20,
+  "brainFixtureMinimum": 20,
+  "rollback": {
+    "newWorkToLegacy": false,
+    "drainExistingVersionedWork": true
+  }
+}

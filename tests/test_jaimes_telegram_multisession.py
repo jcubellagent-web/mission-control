@@ -38,6 +38,22 @@ class MultiSessionWatcherTests(unittest.TestCase):
         self.db = root / "state.db"
         self.state = root / "fast_ack.json"
         self.handoff_dir = root / "handoffs"
+        self.lifecycle_root = root / "telegram-lifecycle"
+        self.lifecycle_rollout = root / "telegram-lifecycle-rollout.json"
+        self.lifecycle_rollout.write_text(json.dumps({
+            "masterState": "off",
+            "globalKillSwitch": False,
+            "brainKillSwitch": True,
+            "hosts": {"josh2": True, "jaimes": True},
+            "writerLifecycleVersion": 3,
+            "readerLifecycleVersions": [2, 3],
+            "shadowMinimumPerOwner": 20,
+            "brainFixtureMinimum": 20,
+        }), encoding="utf-8")
+        # The imported watcher is shared across this unittest class. Clear its
+        # cached lifecycle before every case and redirect all durable state to
+        # this case's temporary root before any send/update helper can run.
+        watcher._GATEWAY_LIFECYCLE = None
         with sqlite3.connect(self.db) as con:
             con.executescript("""
                 CREATE TABLE sessions (
@@ -64,13 +80,19 @@ class MultiSessionWatcherTests(unittest.TestCase):
             patch.object(watcher, "HANDOFF_DIR", self.handoff_dir),
             patch.object(watcher, "verify_bot_identity", return_value=True),
             patch.object(watcher, "set_eyes_reaction", return_value=True),
+            # Keep the historical patch indices above stable: several legacy
+            # tests intentionally stop and restart those exact mocks.
+            patch.object(watcher, "LIFECYCLE_PRIVATE_ROOT", self.lifecycle_root),
+            patch.object(watcher, "LIFECYCLE_ROLLOUT_PATH", self.lifecycle_rollout),
         ]
         for item in self.patches:
             item.start()
 
     def tearDown(self) -> None:
+        watcher._GATEWAY_LIFECYCLE = None
         for item in reversed(self.patches):
             item.stop()
+        watcher._GATEWAY_LIFECYCLE = None
         self.tmp.cleanup()
 
     def add_user(self, session: str, content: str, age: float = 0) -> int:

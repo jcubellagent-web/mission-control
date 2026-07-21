@@ -1,6 +1,7 @@
 import importlib.util
 import sqlite3
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -16,6 +17,23 @@ def load_module():
         spec.loader.exec_module(module)
     finally:
         sys.path.remove(scripts_dir)
+    lifecycle_tmp = tempfile.TemporaryDirectory(prefix="jaimes-lifecycle-test-")
+    lifecycle_base = Path(lifecycle_tmp.name)
+    rollout_path = lifecycle_base / "rollout.json"
+    rollout_path.write_text(
+        '{"masterState":"off","globalKillSwitch":false,'
+        '"brainKillSwitch":true,"hosts":{"josh2":true,"jaimes":true},'
+        '"writerLifecycleVersion":3,"readerLifecycleVersions":[2,3],'
+        '"shadowMinimumPerOwner":20,"brainFixtureMinimum":20}',
+        encoding="utf-8",
+    )
+    # Keep the temporary directory alive for exactly as long as this isolated
+    # module instance. Every test calls load_module(), so neither the v3 cache
+    # nor its SQLite journal can leak across tests or touch the real home root.
+    module._TEST_LIFECYCLE_TMP = lifecycle_tmp
+    module.LIFECYCLE_PRIVATE_ROOT = lifecycle_base / "private"
+    module.LIFECYCLE_ROLLOUT_PATH = rollout_path
+    module._GATEWAY_LIFECYCLE = None
     return module
 
 

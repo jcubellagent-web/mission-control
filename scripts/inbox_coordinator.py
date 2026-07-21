@@ -38,6 +38,7 @@ RUNTIME_PROBE_SCRIPT = ROOT / "scripts" / "ecosystem_runtime_probe.py"
 #JAIMES: Inbox cards must use the host helper beside send_josh_reply.py so live Telegram sends keep their configured Bot API lane.
 WORK_CARD_SCRIPT = WORKSPACE / "scripts" / "josh_work_card.py"
 SEND_REPLY_SCRIPT = WORK_CARD_SCRIPT.with_name("send_josh_reply.py")
+TELEGRAM_GATEWAY_SCRIPT = ROOT / "scripts" / "josh_telegram_fast_ack.py"
 PRIVATE_DIR = Path(os.environ.get("JOSH_INBOX_COORDINATOR_PRIVATE_DIR", str(Path.home() / ".openclaw" / "private" / "inbox-coordinator")))
 STATE_PATH = PRIVATE_DIR / "jobs.json"
 LOCK_PATH = PRIVATE_DIR / "jobs.lock"
@@ -855,8 +856,6 @@ def telegram_health_host_context(prompt: str) -> dict[str, Any] | None:
         "available": False,
         "instruction": "Host-native Telegram health evidence was unavailable; do not infer service health or claim the assessment complete.",
     }
-    if not RUNTIME_PROBE_SCRIPT.exists():
-        return unavailable
     try:
         proc = subprocess.run(
             [sys.executable, str(RUNTIME_PROBE_SCRIPT), "--no-write"],
@@ -1570,73 +1569,103 @@ def write_private_text(path: Path, value: str) -> None:
         os.fsync(handle.fileno())
 
 
-def update_card_progress(snapshot: dict[str, Any], route: dict[str, Any], step: str, actual: dict[str, Any] | None = None) -> bool:
+def update_card_progress(snapshot: dict[str, Any], progress_code: str) -> bool:
     origin = snapshot.get("origin") or {}
-    card_key = str(origin.get("cardKey") or "")
-    if not card_key or not WORK_CARD_SCRIPT.exists():
+    run_id = str(origin.get("runId") or "")
+    if not run_id or progress_code not in {"worker_started", "verifying"} or not TELEGRAM_GATEWAY_SCRIPT.exists():
         return False
-    facts = actual or {}
-    verified = bool(facts.get("executionVerified"))
-    model_label = (
-        f"provider={facts.get('actualProvider')}; model={facts.get('actualModel')}; worker={facts.get('actualWorker')}; host={facts.get('actualHost')}"
-        if verified
-        else f"planned provider={route.get('provider')}; model={route.get('model')}; worker={route.get('worker')}; host={route.get('host')}"
-    )
     cmd = [
-        sys.executable, str(WORK_CARD_SCRIPT), "update",
-        "--key", card_key,
-        "--model", model_label,
-        "--route", f"route={route.get('routeId')}; reason={route.get('routingReason')}; fallback={route.get('fallback') or 'none'}",
-        "--now", step,
-        "--done", step,
+        sys.executable,
+        str(TELEGRAM_GATEWAY_SCRIPT),
+        "--progress-event-json-stdin",
     ]
-    if origin.get("chatId"):
-        cmd.extend(["--chat-id", str(origin["chatId"])])
-    if origin.get("threadId"):
-        cmd.extend(["--thread-id", str(origin["threadId"])])
     try:
-        proc = subprocess.run(cmd, cwd=WORKSPACE, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=20, check=False)
+        proc = subprocess.run(
+            cmd,
+            cwd=WORKSPACE,
+            input=json.dumps({"runId": run_id, "progressCode": progress_code}, separators=(",", ":")),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            text=True,
+            timeout=20,
+            check=False,
+        )
         return proc.returncode == 0
     except Exception:
         return False
 
 
+def checkpoint_worker_execution(job_id: str, lease_token: str, execution: dict[str, Any]) -> bool:
+    """Expose only verified route facts to the trusted progress gateway."""
+    allowed = (
+        "actualHost", "actualWorker", "actualProvider", "actualModel",
+        "modelVerified", "executionVerified",
+    )
+    with state_lock():
+        state = read_json(STATE_PATH, {"jobs": {}})
+        job = (state.get("jobs") or {}).get(job_id)
+        if (
+            not isinstance(job, dict)
+            or job.get("status") != "running"
+            or not lease_token
+            or job.get("leaseToken") != lease_token
+        ):
+            return False
+        job["actual"] = {key: execution.get(key) for key in allowed}
+        job["executionCheckpointAt"] = utc_now()
+        job["updatedAt"] = utc_now()
+        save_json(STATE_PATH, state)
+        return True
+
+
 def deliver_result(job_id: str, snapshot: dict[str, Any], route: dict[str, Any], execution: dict[str, Any], output: str) -> bool:
     origin = snapshot.get("origin") or {}
     card_key = str(origin.get("cardKey") or "")
-    if not card_key or not WORK_CARD_SCRIPT.exists():
+    origin_run_id = str(origin.get("runId") or "")
+    if not card_key or not origin_run_id or not TELEGRAM_GATEWAY_SCRIPT.exists():
         return False
-    final_path = PRIVATE_DIR / f"{job_id}.final.html"
-    write_private_text(final_path, render_final_html(route, execution, output))
-    model_label = f"provider={execution.get('actualProvider') or route.get('provider')}; model={execution.get('actualModel') or 'unverified'}; worker={execution.get('actualWorker') or route.get('worker')}; host={execution.get('actualHost') or route.get('host')}"
-    route_label = f"route={route.get('routeId')}; reason={route.get('routingReason')}; fallback={route.get('fallback') or 'none'}"
+    final_html = render_final_html(route, execution, output)
     sections = parse_model_sections(output)
     task_complete = bool(
         execution.get("executionVerified")
         and sections.get("complete")
         and sections.get("summarySufficient")
     )
-    command = "done" if task_complete else "fail"
     cmd = [
         sys.executable,
-        str(WORK_CARD_SCRIPT),
-        command,
-        "--key", card_key,
-        "--model", model_label,
-        "--route", route_label,
-        "--done", "Worker execution verified|Final result delivered" if task_complete else "Worker stopped without a verified completion|Structured issue summary delivered",
-        "--blocker", "None" if task_complete else "The objective was not verified complete",
-        "--final-text-file", str(final_path),
+        str(TELEGRAM_GATEWAY_SCRIPT),
+        "--close-before-final",
+        "--final-from-stdin",
+        "--run-id", origin_run_id,
+        "--terminal-status", "done" if task_complete else "failed",
     ]
     if origin.get("chatId"):
         cmd.extend(["--chat-id", str(origin["chatId"])])
     if origin.get("threadId"):
         cmd.extend(["--thread-id", str(origin["threadId"])])
+    proc = subprocess.run(
+        cmd,
+        cwd=WORKSPACE,
+        input=final_html,
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
+    if proc.returncode != 0:
+        return False
     try:
-        proc = subprocess.run(cmd, cwd=WORKSPACE, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=30, check=False)
-        return proc.returncode == 0
-    finally:
-        final_path.unlink(missing_ok=True)
+        receipt = json.loads(proc.stdout or "{}")
+    except (TypeError, ValueError):
+        return False
+    return bool(
+        isinstance(receipt, dict)
+        and receipt.get("ok") is True
+        and str(receipt.get("status") or "") in {
+            "closed-and-final-delivered",
+            "final-already-delivered",
+        }
+    )
 
 
 def run_worker(job_id: str) -> dict[str, Any]:
@@ -1669,7 +1698,7 @@ def run_worker(job_id: str) -> dict[str, Any]:
     delivered = False
     output = ""
     try:
-        update_card_progress(snapshot, route, "Asynchronous worker started")
+        update_card_progress(snapshot, "worker_started")
         if result_path.exists() and execution.get("executionVerified"):
             output = result_path.read_text(encoding="utf-8")
         else:
@@ -1706,7 +1735,9 @@ def run_worker(job_id: str) -> dict[str, Any]:
             model_executed = True
             if prompt_path is not None:
                 prompt_path.unlink(missing_ok=True)
-        update_card_progress(snapshot, route, "Model execution verified; formatting final result", execution)
+        if not checkpoint_worker_execution(job_id, lease_token, execution):
+            raise RuntimeError("execution checkpoint failed")
+        update_card_progress(snapshot, "verifying")
         delivered = deliver_result(job_id, snapshot, route, execution, output)
         if not delivered:
             raise RuntimeError("delivery failed")

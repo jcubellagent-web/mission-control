@@ -52,14 +52,33 @@ INTERPRETED_CARD_ADOPTION_WINDOW_SECONDS = 3 * 60
 TERMINAL_CLOSE_LEASE_SECONDS = 30
 STALE_FINAL_GATE_SECONDS = 90
 TERMINAL_OUTBOX_MAX_ATTEMPTS = 12
+TERMINAL_VISIBILITY_MAX_ATTEMPTS = 12
+TERMINAL_VISIBILITY_MAX_AGE_SECONDS = 90
 TERMINAL_CARD_STATUSES = {"done", "failed", "paused"}
 MAX_TERMINAL_CARD_RECORDS = 100
+PROGRESS_EVENT_SPECS = {
+    "worker_started": {
+        "summary": "Asynchronous worker started",
+        "lifecycle_status": "progress",
+        "phase": "active",
+        "requires_verified_execution": False,
+    },
+    "verifying": {
+        "summary": "Model execution verified; formatting final result",
+        "lifecycle_status": "verifying",
+        "phase": "verifying",
+        "requires_verified_execution": True,
+    },
+}
+MAX_PROGRESS_EVENT_BYTES = 4096
 INBOX_REACTION_ATTEMPTS = 2
 INBOX_REACTION_TIMEOUT_SECONDS = 3
 INBOX_REACTION_RETRY_DELAY_SECONDS = 0.15
 APPROVAL_ACTIONS_PATH = WORKSPACE / "memory" / "telegram_approval_actions.json"
 WORK_CARD_STATE_PATH = WORKSPACE / "memory" / "josh_work_cards.json"
 TERMINAL_OUTBOX_DIR = STATE_PATH.parent / "terminal-final-outbox"
+DEFAULT_TERMINAL_VISIBILITY_OUTBOX_DIR = STATE_PATH.parent / "terminal-visibility-outbox"
+TERMINAL_VISIBILITY_OUTBOX_DIR = DEFAULT_TERMINAL_VISIBILITY_OUTBOX_DIR
 TELEGRAM_META_PATTERN = re.compile(r"Conversation info.*?```\s*\n\nSender .*?```\s*\n\n", re.S)
 CONVERSATION_INFO_BLOCK_RE = re.compile(r"Conversation info \(untrusted metadata\):\s*```json\s*(\{.*?\})\s*```", re.S)
 CARD_KEY_TS_PATTERN = re.compile(r"(\d{4}-\d{2}-\d{2})T(\d{6})")
@@ -94,6 +113,21 @@ except Exception:  # noqa: BLE001
     )
 
 try:
+    from telegram_gateway_lifecycle import (  # type: ignore
+        GatewayLifecycle,
+        LifecycleError,
+        RolloutPolicy,
+        classify_delivery_tier,
+        render_live_card,
+    )
+except Exception:  # noqa: BLE001
+    GatewayLifecycle = None  # type: ignore
+    LifecycleError = RuntimeError  # type: ignore
+    RolloutPolicy = None  # type: ignore
+    classify_delivery_tier = None  # type: ignore
+    render_live_card = None  # type: ignore
+
+try:
     from objective_quality import objective_is_near_copy, semantic_reinterpretation  # type: ignore
 except Exception:  # noqa: BLE001
     # Fail closed so an import problem cannot expose a prompt echo as an
@@ -113,6 +147,524 @@ except Exception:  # noqa: BLE001
     ux_button_label = None
     ux_final_action_steps = None
     ux_steps_are_all_applicable = None
+
+
+LIFECYCLE_ROLLOUT_PATH = WORKSPACE / "mission-control" / "config" / "telegram-lifecycle-rollout.json"
+LIFECYCLE_PRIVATE_ROOT = HOME / ".openclaw" / "private" / "telegram-lifecycle"
+_GATEWAY_LIFECYCLE = None
+
+
+def gateway_lifecycle():
+    global _GATEWAY_LIFECYCLE
+    if GatewayLifecycle is None or RolloutPolicy is None:
+        return None
+    policy = RolloutPolicy.load(LIFECYCLE_ROLLOUT_PATH)
+    if _GATEWAY_LIFECYCLE is None:
+        _GATEWAY_LIFECYCLE = GatewayLifecycle(
+            LIFECYCLE_PRIVATE_ROOT,
+            rollout=policy,
+            owner="josh2",
+        )
+    else:
+        policy.validate()
+        _GATEWAY_LIFECYCLE.rollout = policy
+    return _GATEWAY_LIFECYCLE
+
+
+def lifecycle_rollout_state() -> str:
+    """Read only the bounded rollout state; malformed input fails closed."""
+    try:
+        payload = json.loads(LIFECYCLE_ROLLOUT_PATH.read_text())
+    except (OSError, ValueError, TypeError):
+        return "invalid"
+    return str(payload.get("masterState") or "off").strip().lower()
+
+
+def begin_gateway_lifecycle(
+    *,
+    key: str,
+    origin_run_id: str,
+    work_id: str,
+    work_run_id: str,
+    prompt: str,
+) -> dict[str, Any]:
+    """Persist classification before the first Telegram-visible effect.
+
+    Rollout ``off`` leaves the legacy path byte-for-byte visible and creates no
+    per-work v3 receipt.  Shadow and writer modes use only dashboard-safe
+    classifier metadata; raw prompt text is never stored in the journal.  The
+    explicit work ID preserves the identity already used by Control Tower.
+    """
+    lifecycle = gateway_lifecycle()
+    if lifecycle is None:
+        return {
+            "error": "gateway-lifecycle-unavailable",
+            "required": lifecycle_rollout_state() in {"josh2", "all"},
+        }
+    if (
+        lifecycle.rollout.global_kill_switch
+        or not (lifecycle.rollout.host_enabled or {}).get("josh2", True)
+    ):
+        return {"error": "gateway-kill-switch-active", "required": True}
+    existing = lifecycle.read_work(work_id)
+    if existing:
+        writer = bool(existing.get("writerEnabled"))
+        pinned_writer = bool(existing.get("writerAuthorityAtStart"))
+        if pinned_writer and not writer:
+            # An emergency host/global stop must not hand an in-flight v3 task
+            # to the legacy visible writer.  Master rollback is different:
+            # pinned receipts remain writerEnabled and continue draining.
+            return {
+                "lifecycle": lifecycle,
+                "receipt": existing,
+                "writer": False,
+                "shadow": False,
+                "error": "lifecycle-writer-safety-disabled",
+                "required": True,
+                "killed": True,
+            }
+        return {
+            "lifecycle": lifecycle,
+            "receipt": existing,
+            "writer": writer,
+            "shadow": bool(existing.get("shadowOnly")) and lifecycle.rollout.shadow_enabled("josh2"),
+        }
+    writer = bool(lifecycle.rollout.writer_enabled("josh2"))
+    shadow = bool(lifecycle.rollout.shadow_enabled("josh2"))
+    if not writer and not shadow:
+        return {}
+    try:
+        classification = classify_delivery_tier(clean_prompt(prompt))
+        receipt = lifecycle.start_work(
+            origin_key=key,
+            run_id=work_run_id,
+            work_id=work_id,
+            intake_agent="josh2",
+            current_owner="josh2",
+            surface_contract="telegram",
+            text="",
+            worker_route="pending",
+            classification=classification,
+        )
+        if str(receipt.get("workId") or "") != work_id:
+            raise LifecycleError("work-identity-mismatch")
+        if receipt.get("phase") == "received":
+            receipt = lifecycle.transition(
+                work_id,
+                "classified",
+                expected_sequence=int(receipt["sequence"]),
+                fencing_epoch=int(receipt["fencingEpoch"]),
+                safe_payload={
+                    "deliveryTier": int(receipt["deliveryTier"]),
+                    "classifierReason": str(receipt["classifierReason"]),
+                },
+            )
+        return {
+            "lifecycle": lifecycle,
+            "receipt": receipt,
+            "writer": writer,
+            "shadow": shadow,
+        }
+    except Exception as exc:  # noqa: BLE001 - fail closed before any send
+        return {
+            "error": type(exc).__name__,
+            "required": writer,
+        }
+
+
+def refresh_gateway_receipt(context: dict[str, Any]) -> dict[str, Any]:
+    lifecycle = context.get("lifecycle")
+    receipt = context.get("receipt") or {}
+    if lifecycle is None or not receipt.get("workId"):
+        return receipt
+    current = lifecycle.read_work(str(receipt["workId"])) or receipt
+    context["receipt"] = current
+    return current
+
+
+def advance_gateway_phase(context: dict[str, Any], phase: str) -> dict[str, Any]:
+    """Advance one legal phase idempotently using the current CAS fence."""
+    lifecycle = context.get("lifecycle")
+    receipt = refresh_gateway_receipt(context)
+    current_phase = str(receipt.get("phase") or "") if receipt else ""
+    already_beyond = {
+        "classified": {"acknowledged", "working", "awaiting_input", "verifying"},
+        "acknowledged": {"working", "awaiting_input", "verifying"},
+        "working": {"awaiting_input", "verifying"},
+    }
+    if (
+        lifecycle is None
+        or not receipt
+        or current_phase in {phase, "terminal"}
+        or current_phase in already_beyond.get(phase, set())
+    ):
+        return receipt
+    receipt = lifecycle.transition(
+        str(receipt["workId"]),
+        phase,
+        expected_sequence=int(receipt["sequence"]),
+        fencing_epoch=int(receipt["fencingEpoch"]),
+        safe_payload={"phase": phase},
+    )
+    context["receipt"] = receipt
+    return receipt
+
+
+def set_gateway_worker_route(context: dict[str, Any], route: str) -> dict[str, Any]:
+    lifecycle = context.get("lifecycle")
+    receipt = refresh_gateway_receipt(context)
+    if lifecycle is None or not receipt or not hasattr(lifecycle, "update_worker_route"):
+        return receipt
+    receipt = lifecycle.update_worker_route(
+        str(receipt["workId"]),
+        worker_route=str(route or "pending"),
+        expected_owner="josh2",
+        expected_sequence=int(receipt["sequence"]),
+        fencing_epoch=int(receipt["fencingEpoch"]),
+    )
+    context["receipt"] = receipt
+    return receipt
+
+
+def claim_gateway_effect(context: dict[str, Any], kind: str) -> dict[str, Any]:
+    """Reserve a visible writer effect before calling the trusted adapter."""
+    if not context.get("writer"):
+        return {"allowed": True, "legacy": True}
+    lifecycle = context.get("lifecycle")
+    receipt = refresh_gateway_receipt(context)
+    if lifecycle is None or not receipt:
+        return {"allowed": False, "state": "dead_letter", "reason": "lifecycle-unavailable"}
+    return lifecycle.claim_effect(
+        str(receipt["workId"]),
+        kind,
+        sequence=int(receipt["sequence"]),
+        fencing_epoch=int(receipt["fencingEpoch"]),
+    )
+
+
+def finish_gateway_effect(
+    context: dict[str, Any],
+    claim: dict[str, Any],
+    *,
+    delivered: bool,
+    indeterminate: bool = False,
+    error_class: str = "",
+) -> None:
+    lifecycle = context.get("lifecycle")
+    key = str(claim.get("idempotencyKey") or "")
+    if lifecycle is None or not key or claim.get("legacy"):
+        return
+    state = "delivered" if delivered else "indeterminate" if indeterminate else "dead_letter"
+    lifecycle.finish_effect(
+        key,
+        state=state,
+        private_receipt="telegram-confirmed" if delivered else "",
+        error_class=error_class,
+    )
+    refresh_gateway_receipt(context)
+
+
+def gateway_public_fields(context: dict[str, Any]) -> dict[str, Any]:
+    receipt = refresh_gateway_receipt(context)
+    if not receipt:
+        return {}
+    return {
+        "gateway_work_id": str(receipt.get("workId") or ""),
+        "lifecycle_version": int(receipt.get("lifecycleVersion") or 0),
+        "delivery_tier": int(receipt.get("deliveryTier") or 0),
+        "classifier_reason": str(receipt.get("classifierReason") or ""),
+        "lifecycle_sequence": int(receipt.get("sequence") or 0),
+        "fencing_epoch": int(receipt.get("fencingEpoch") or 0),
+        "lifecycle_writer_enabled": bool(context.get("writer")),
+        "lifecycle_shadow": bool(context.get("shadow")),
+    }
+
+
+def gateway_context_for_card(card: dict[str, Any]) -> dict[str, Any]:
+    work_id = str(card.get("work_id") or card.get("gateway_work_id") or "")
+    # A Control Tower work identity may also be attached to legacy cards.
+    # Only the explicit lifecycle version makes that identity a v3 journal
+    # key; otherwise store initialization would make legacy delivery depend
+    # on a filesystem surface it does not own.
+    if not card_uses_lifecycle_v3(card) or not work_id:
+        return {}
+    lifecycle = gateway_lifecycle()
+    if lifecycle is None:
+        return {}
+    receipt = lifecycle.read_work(work_id)
+    if not receipt:
+        return {}
+    return {
+        "lifecycle": lifecycle,
+        "receipt": receipt,
+        "writer": bool(receipt.get("writerEnabled")),
+        "shadow": bool(receipt.get("shadowOnly")) and lifecycle.rollout.shadow_enabled("josh2"),
+    }
+
+
+def advance_gateway_progress(context: dict[str, Any], status: str) -> dict[str, Any]:
+    """Advance one trusted progress fence without creating a visible effect."""
+    lifecycle = context.get("lifecycle")
+    receipt = refresh_gateway_receipt(context)
+    if lifecycle is None or not receipt:
+        raise LifecycleError("lifecycle-unavailable")
+    phase = str(receipt.get("phase") or "")
+    if phase == "terminal":
+        raise LifecycleError("progress-after-terminal")
+    if status == "verifying" and phase in {"working", "awaiting_input"}:
+        receipt = lifecycle.transition(
+            str(receipt["workId"]),
+            "verifying",
+            expected_sequence=int(receipt["sequence"]),
+            fencing_epoch=int(receipt["fencingEpoch"]),
+            safe_payload={"status": "verifying"},
+        )
+    else:
+        receipt = lifecycle.record_progress(
+            str(receipt["workId"]),
+            expected_sequence=int(receipt["sequence"]),
+            fencing_epoch=int(receipt["fencingEpoch"]),
+            status=status,
+        )
+    context["receipt"] = receipt
+    return receipt
+
+
+def run_gateway_card_update(
+    card: dict[str, Any],
+    command: list[str],
+    *,
+    meta: dict[str, Any] | None = None,
+    status: str = "progress",
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    """Fence one coalesced live-card edit before the trusted helper call."""
+    if card.get("no_card_required"):
+        return {"ok": False, "error": "card-effect-forbidden-for-delivery-tier"}
+    if dry_run:
+        return {"ok": True, "dry_run": True}
+    context = gateway_context_for_card(card)
+    receipt = context.get("receipt") or {}
+    lifecycle_managed = int(card.get("lifecycle_version") or 0) >= 3
+    if lifecycle_managed and not receipt:
+        return {"ok": False, "error": "lifecycle-receipt-unavailable"}
+    effect: dict[str, Any] = {"allowed": True, "legacy": True}
+    if receipt:
+        if receipt.get("writerAuthorityAtStart") and not receipt.get("writerEnabled"):
+            return {"ok": False, "error": "lifecycle-writer-safety-disabled", "killed": True}
+        try:
+            receipt = advance_gateway_progress(context, status)
+            if context.get("writer"):
+                effect = claim_gateway_effect(context, "card_edit")
+                if not effect.get("allowed"):
+                    return {
+                        "ok": False,
+                        "error": "canonical-card-edit-fenced",
+                        "delivery_state": str(effect.get("state") or ""),
+                    }
+        except Exception as exc:  # noqa: BLE001
+            if context.get("writer"):
+                return {"ok": False, "error": type(exc).__name__}
+    result = run_cmd(with_work_card_target(command, meta))
+    if context.get("writer") and effect.get("allowed"):
+        finish_gateway_effect(
+            context,
+            effect,
+            delivered=bool(result.get("ok")),
+            indeterminate=not bool(result.get("ok")),
+            error_class="card-edit-receipt-missing" if not result.get("ok") else "",
+        )
+    return result
+
+
+def _safe_progress_fragment(value: Any, limit: int = 120) -> str:
+    return re.sub(r"[^A-Za-z0-9._:/@+ -]", "", str(value or ""))[:limit].strip()
+
+
+def _progress_job_matches_card(job: dict[str, Any], card: dict[str, Any], run_id: str) -> bool:
+    origin = job.get("origin") if isinstance(job.get("origin"), dict) else {}
+    return bool(
+        str(job.get("jobId") or "") == str(card.get("job_id") or "")
+        and str(job.get("workId") or "") == str(card.get("work_id") or "")
+        and str(job.get("ledgerRunId") or "") == str(card.get("ledger_run_id") or "")
+        and str(job.get("originClaimHash") or "") == str(card.get("origin_claim_hash") or "")
+        and str(origin.get("runId") or "") == run_id
+        and str(origin.get("cardKey") or "") == str(card.get("key") or "")
+        and (
+            not card.get("telegram_chat_id")
+            or str(origin.get("chatId") or "") == str(card.get("telegram_chat_id") or "")
+        )
+        and (
+            not card.get("telegram_thread_id")
+            or str(origin.get("threadId") or "") == str(card.get("telegram_thread_id") or "")
+        )
+    )
+
+
+def progress_event_from_stdin() -> dict[str, Any]:
+    """Apply a fixed, origin-bound worker progress event through lifecycle v3."""
+    raw = sys.stdin.read(MAX_PROGRESS_EVENT_BYTES + 1)
+    if len(raw.encode("utf-8")) > MAX_PROGRESS_EVENT_BYTES:
+        return {"ok": False, "status": "progress-event-too-large"}
+    try:
+        payload = json.loads(raw)
+    except (TypeError, ValueError):
+        return {"ok": False, "status": "invalid-progress-event"}
+    if not isinstance(payload, dict) or set(payload) != {"runId", "progressCode"}:
+        return {"ok": False, "status": "invalid-progress-event-fields"}
+    if not isinstance(payload.get("runId"), str) or not isinstance(payload.get("progressCode"), str):
+        return {"ok": False, "status": "invalid-progress-event-types"}
+    run_id = payload["runId"]
+    progress_code = payload["progressCode"]
+    spec = PROGRESS_EVENT_SPECS.get(progress_code)
+    if not re.fullmatch(r"[A-Za-z0-9_.:@/-]{1,256}", run_id) or not spec:
+        return {"ok": False, "status": "unsupported-progress-event"}
+
+    with fast_ack_state_lock():
+        state = load_json(STATE_PATH, {})
+        active = state.get("active_cards") if isinstance(state, dict) else {}
+        card = active.get(run_id) if isinstance(active, dict) else None
+        if not isinstance(card, dict):
+            return {"ok": False, "status": "run-card-not-ready"}
+        if not card.get("coordinator_owned") or not str(card.get("job_id") or ""):
+            return {"ok": False, "status": "progress-origin-not-coordinator-owned"}
+        if str(card.get("status") or "").lower() in TERMINAL_CARD_STATUSES | {
+            "closing-before-final", "awaiting-final-gate",
+        }:
+            return {"ok": False, "status": "progress-after-terminal"}
+        card_snapshot = copy.deepcopy(card)
+
+    # The coordinator status subprocess and every Telegram/card operation run
+    # outside the fast-ack state lock. The exact private job snapshot, not the
+    # worker's input, supplies all model, route, and target facts.
+    job = coordinator_job_snapshot(str(card_snapshot.get("job_id") or ""))
+    if not job or not _progress_job_matches_card(job, card_snapshot, run_id):
+        return {"ok": False, "status": "progress-origin-mismatch"}
+    if str(job.get("status") or "") != "running":
+        return {"ok": False, "status": "worker-not-running"}
+    actual = job.get("actual") if isinstance(job.get("actual"), dict) else {}
+    if spec["requires_verified_execution"] and not (
+        bool(actual.get("executionVerified")) and bool(actual.get("modelVerified"))
+    ):
+        return {"ok": False, "status": "execution-not-verified"}
+    route = job.get("route") if isinstance(job.get("route"), dict) else {}
+    if spec["requires_verified_execution"]:
+        model_label = (
+            f"provider={_safe_progress_fragment(actual.get('actualProvider'))}; "
+            f"model={_safe_progress_fragment(actual.get('actualModel'))}; "
+            f"worker={_safe_progress_fragment(actual.get('actualWorker'))}; "
+            f"host={_safe_progress_fragment(actual.get('actualHost'))}"
+        )
+    else:
+        model_label = (
+            f"planned provider={_safe_progress_fragment(route.get('provider'))}; "
+            f"model={_safe_progress_fragment(route.get('model'))}; "
+            f"worker={_safe_progress_fragment(route.get('worker'))}; "
+            f"host={_safe_progress_fragment(route.get('host'))}"
+        )
+    if spec["requires_verified_execution"]:
+        route_label = (
+            f"verified route={_safe_progress_fragment(route.get('routeId'))}; "
+            f"provider={_safe_progress_fragment(actual.get('actualProvider'))}; "
+            f"worker={_safe_progress_fragment(actual.get('actualWorker'))}; "
+            f"host={_safe_progress_fragment(actual.get('actualHost'))}"
+        )
+    else:
+        route_label = (
+            f"planned route={_safe_progress_fragment(route.get('routeId'))}; "
+            f"reason={_safe_progress_fragment(route.get('routingReason'))}; "
+            f"fallback={_safe_progress_fragment(route.get('fallback') or 'none')}"
+        )
+    summary = str(spec["summary"])
+    command = [
+        sys.executable,
+        str(WORK_CARD_SCRIPT),
+        "update",
+        "--key",
+        str(card_snapshot.get("key") or ""),
+        "--model",
+        model_label,
+        "--route",
+        route_label,
+        "--now",
+        summary,
+        "--done",
+        summary,
+        "--no-brain-feed",
+    ]
+    meta = {
+        "telegram_chat_id": str(card_snapshot.get("telegram_chat_id") or ""),
+        "telegram_thread_id": str(card_snapshot.get("telegram_thread_id") or ""),
+    }
+    if card_snapshot.get("no_card_required"):
+        context = gateway_context_for_card(card_snapshot)
+        receipt = context.get("receipt") or {}
+        if int(card_snapshot.get("lifecycle_version") or 0) >= 3 and not receipt:
+            return {"ok": False, "status": "lifecycle-receipt-unavailable"}
+        if receipt.get("writerAuthorityAtStart") and not receipt.get("writerEnabled"):
+            return {"ok": False, "status": "lifecycle-writer-safety-disabled"}
+        try:
+            if receipt:
+                advance_gateway_progress(context, str(spec["lifecycle_status"]))
+        except Exception as exc:  # noqa: BLE001
+            return {"ok": False, "status": "progress-fence-failed", "error": type(exc).__name__}
+        result: dict[str, Any] = {"ok": True, "no_card_required": True}
+    else:
+        result = run_gateway_card_update(
+            card_snapshot,
+            command,
+            meta=meta,
+            status=str(spec["lifecycle_status"]),
+        )
+    if not result.get("ok"):
+        return {"ok": False, "status": "progress-card-update-failed"}
+
+    changed_at = utc_now()
+    state_accepted = False
+    with fast_ack_state_lock():
+        state = load_json(STATE_PATH, {})
+        active = state.get("active_cards") if isinstance(state, dict) else {}
+        current = active.get(run_id) if isinstance(active, dict) else None
+        if (
+            isinstance(current, dict)
+            and str(current.get("key") or "") == str(card_snapshot.get("key") or "")
+            and str(current.get("job_id") or "") == str(card_snapshot.get("job_id") or "")
+            and str(current.get("work_id") or "") == str(card_snapshot.get("work_id") or "")
+            and str(current.get("ledger_run_id") or "") == str(card_snapshot.get("ledger_run_id") or "")
+            and str(current.get("origin_claim_hash") or "") == str(card_snapshot.get("origin_claim_hash") or "")
+            and str(current.get("status") or "").lower() not in TERMINAL_CARD_STATUSES | {
+                "closing-before-final", "awaiting-final-gate",
+            }
+        ):
+            current["last_progress_at"] = changed_at
+            current["last_card_update_at"] = changed_at
+            if spec["requires_verified_execution"]:
+                current["runtime_model"] = _safe_progress_fragment(actual.get("actualModel"))
+                current["route"] = route_label
+                current["route_verified"] = True
+            save_json(STATE_PATH, state)
+            state_accepted = True
+    if state_accepted:
+        publish_josh(
+            str(card_snapshot.get("objective") or "Josh 2.0 Telegram task"),
+            "active",
+            summary,
+            work_id=str(card_snapshot.get("work_id") or ""),
+            run_id=str(card_snapshot.get("ledger_run_id") or ""),
+            phase=str(spec["phase"]),
+            model_id=_safe_progress_fragment(
+                actual.get("actualModel") if spec["requires_verified_execution"] else route.get("model")
+            ),
+            route_verified=bool(spec["requires_verified_execution"]),
+            origin_claim_hash=str(card_snapshot.get("origin_claim_hash") or ""),
+            brain_feed=False,
+        )
+    return {
+        "ok": True,
+        "status": "progress-recorded" if state_accepted else "progress-recorded-before-terminal",
+        "progress_code": progress_code,
+        "no_card_required": bool(card_snapshot.get("no_card_required")),
+    }
 
 
 def parse_telegram_target_from_key(key: str) -> dict[str, Any]:
@@ -683,6 +1235,7 @@ def work_card_state_receipt(card_key: str) -> dict[str, Any]:
         "status": str(card.get("status") or ""),
         "header_delivery_status": str(card.get("header_delivery_status") or ""),
         "live_delivery_status": str(card.get("live_delivery_status") or ""),
+        "final_delivery_status": str(card.get("final_delivery_status") or ""),
         "header_required": header_required,
         "surface_contract": str(card.get("surface_contract") or ("header-live-v1" if header_required else "live-only-v2")),
     }
@@ -742,7 +1295,10 @@ def safe_same_key_card_retry(card_key: str, receipt: dict[str, Any]) -> bool:
 
 def receipt_requires_header(receipt: dict[str, Any]) -> bool:
     """Honor the versioned live-only contract while keeping old receipts safe."""
-    return str(receipt.get("surface_contract") or "") != "live-only-v2"
+    contract = str(receipt.get("surface_contract") or "")
+    if contract in {"live-only-v2", "tier-1-final-v3", "tier-2-final-v3"}:
+        return False
+    return True
 
 
 def run_work_card_start(cmd: list[str]) -> dict[str, Any]:
@@ -1918,6 +2474,7 @@ def publish_josh(
     origin_claim_hash: str = "",
     brain_feed: bool = True,
     work_event: str = "",
+    event_id: str = "",
 ) -> bool:
     cmd = [
         "python3",
@@ -1941,6 +2498,8 @@ def publish_josh(
         cmd.append("--brain-feed")
     if work_event:
         cmd += ["--work-event", work_event]
+    if event_id:
+        cmd += ["--event-id", event_id]
     if work_id:
         cmd += ["--work-id", work_id]
     if run_id:
@@ -2030,20 +2589,47 @@ def send_ack(
         key = f"fast-ack-run-{stable_identity}"
     else:
         key = f"fast-ack-{event['session_id']}-{event['ts'].replace(':', '').replace('.', '-')}"
-    work_id, work_run_id, origin_claim_hash = telegram_work_identity(
-        key,
-        str(event.get("run_id") or message_id or event.get("ts") or "run"),
-    )
+    origin_run_id = str(event.get("run_id") or message_id or event.get("ts") or "run")
+    work_id, work_run_id, origin_claim_hash = telegram_work_identity(key, origin_run_id)
     prompt = event.get("prompt", "")
+    # A dry run is observational only.  Do not even begin a shadow lifecycle:
+    # start_work and its initial transition are durable writes.
+    gateway = {} if dry_run else begin_gateway_lifecycle(
+        key=key,
+        origin_run_id=origin_run_id,
+        work_id=work_id,
+        work_run_id=work_run_id,
+        prompt=prompt,
+    )
+    if gateway.get("error") and gateway.get("required"):
+        return {
+            "ok": False,
+            "status": "lifecycle-unavailable",
+            "error": "canonical_gateway_lifecycle_unavailable",
+            "reaction_ok": False,
+            "ack_message_id": "",
+            "key": key,
+            "objective": "",
+            "run_id": event.get("run_id") or "",
+            "last_card_update_at": utc_now(),
+        }
+    gateway_receipt = gateway.get("receipt") or {}
+    gateway_writer = bool(gateway.get("writer"))
+    delivery_tier = int(gateway_receipt.get("deliveryTier") or 0)
     draft_id = int(hashlib.sha1(key.encode("utf-8")).hexdigest()[:8], 16)
     ack_message_id = ""
     ack_sent = False
-    reaction_required = requires_inbox_reaction(message_id, meta)
+    reaction_required = (
+        delivery_tier >= 2
+        if gateway_writer
+        else requires_inbox_reaction(message_id, meta)
+    )
     if dry_run:
         ack_message_id = "dry-run-message"
-        ack_sent = True
+        ack_sent = delivery_tier >= 2 if gateway_writer else True
     else:
-        if fast_ack_enabled():
+        should_react = delivery_tier >= 2 if gateway_writer else fast_ack_enabled()
+        if should_react:
             # The exact Inbox path is reaction-first by contract. A global
             # watcher event may lack a message ID, so it remains best-effort.
             if effect_protocol and not telegram_claim_not_cancelled(effect_protocol):
@@ -2057,14 +2643,40 @@ def send_ack(
                     "objective": objective_from_prompt(prompt),
                     "run_id": event.get("run_id") or "",
                     "last_card_update_at": utc_now(),
+                    **gateway_public_fields(gateway),
                 }
-            ack_sent = (
-                place_inbox_reaction(message_id, meta=meta)
-                if reaction_required
-                else (send_message_reaction(message_id, meta=meta) if message_id else send_prompt_reaction(prompt, meta=meta))
-            )
+            reaction_claim = claim_gateway_effect(gateway, "reaction")
+            if not reaction_claim.get("allowed"):
+                if str(reaction_claim.get("state") or "") == "delivered":
+                    ack_sent = True
+                else:
+                    return {
+                        "ok": False,
+                        "status": "reaction-fenced",
+                        "error": "canonical_reaction_effect_fenced",
+                        "reaction_ok": False,
+                        "ack_message_id": "",
+                        "key": key,
+                        "objective": objective_from_prompt(prompt),
+                        "run_id": event.get("run_id") or "",
+                        "last_card_update_at": utc_now(),
+                        **gateway_public_fields(gateway),
+                    }
+            else:
+                ack_sent = (
+                    place_inbox_reaction(message_id, meta=meta)
+                    if requires_inbox_reaction(message_id, meta)
+                    else (send_message_reaction(message_id, meta=meta) if message_id else send_prompt_reaction(prompt, meta=meta))
+                )
+                finish_gateway_effect(
+                    gateway,
+                    reaction_claim,
+                    delivered=ack_sent,
+                    indeterminate=not ack_sent,
+                    error_class="reaction-receipt-missing" if not ack_sent else "",
+                )
         else:
-            ack_sent = not reaction_required
+            ack_sent = False
         if reaction_required and not ack_sent:
             return {
                 "ok": False,
@@ -2076,9 +2688,30 @@ def send_ack(
                 "objective": objective_from_prompt(prompt),
                 "run_id": event.get("run_id") or "",
                 "last_card_update_at": utc_now(),
+                **gateway_public_fields(gateway),
             }
-        send_chat_action(meta=meta)
-        send_message_draft(draft_id, "", meta=meta)
+        # Lifecycle v3 deliberately omits unreceipted typing/draft calls. Its
+        # visible contract is reaction/card/final only; legacy and shadow keep
+        # their existing transient behavior for byte-compatible comparison.
+        if not gateway_writer:
+            send_chat_action(meta=meta)
+            send_message_draft(draft_id, "", meta=meta)
+    if gateway.get("receipt"):
+        try:
+            advance_gateway_phase(gateway, "acknowledged")
+        except Exception as exc:  # noqa: BLE001 - visible effect is already fenced
+            return {
+                "ok": False,
+                "status": "lifecycle-transition-failed",
+                "error": type(exc).__name__,
+                "reaction_ok": bool(ack_sent),
+                "ack_message_id": ack_message_id,
+                "key": key,
+                "objective": "",
+                "run_id": event.get("run_id") or "",
+                "last_card_update_at": utc_now(),
+                **gateway_public_fields(gateway),
+            }
     # The visible acknowledgement must be first. Route and skill probes may
     # involve remote health checks and must never delay the eyes reaction.
     objective = objective_from_prompt(prompt)
@@ -2088,6 +2721,11 @@ def send_ack(
         # #JOSH2: a reaction may be immediate, but no Telegram header or
         # Control Tower row is published until the agent supplies its own
         # interpretation of intent, target, and desired outcome.
+        if gateway.get("receipt"):
+            try:
+                advance_gateway_phase(gateway, "awaiting_input")
+            except Exception:
+                pass
         return {
             "ok": True,
             "status": "awaiting-objective-interpretation",
@@ -2101,6 +2739,7 @@ def send_ack(
             "card_start_ok": False,
             "header_message_id": "",
             "live_message_id": "",
+            **gateway_public_fields(gateway),
         }
     route = auto_route_for_prompt(prompt, model or DEFAULT_MODEL)
     skill = skill_for_prompt(prompt)
@@ -2109,6 +2748,27 @@ def send_ack(
     if skill.get("label"):
         display_model = f"{display_model}; skill: {skill['label']}"
         display_route = f"{display_route}; runbook={skill['id']}"
+    if gateway.get("receipt"):
+        try:
+            route_plan = route.get("route_plan") if isinstance(route.get("route_plan"), dict) else {}
+            set_gateway_worker_route(
+                gateway,
+                str(route_plan.get("routeId") or route.get("route") or "josh2-pending"),
+            )
+        except Exception as exc:  # noqa: BLE001
+            if gateway_writer:
+                return {
+                    "ok": False,
+                    "status": "lifecycle-route-failed",
+                    "error": type(exc).__name__,
+                    "reaction_ok": bool(ack_sent),
+                    "ack_message_id": ack_message_id,
+                    "key": key,
+                    "objective": objective,
+                    "run_id": event.get("run_id") or "",
+                    "last_card_update_at": utc_now(),
+                    **gateway_public_fields(gateway),
+                }
     if is_hold_request(prompt):
         if not dry_run:
             publish_josh(
@@ -2137,12 +2797,16 @@ def send_ack(
             "no_card_required": True,
             "last_card_update_at": utc_now(),
         }
-    start_visible_card = live_cards_enabled(meta)
+    start_visible_card = delivery_tier == 3 if gateway_writer else live_cards_enabled(meta)
     card_start_attempts = 0
     header_message_id = ""
     live_message_id = ""
     header_required = False
-    surface_contract = "live-only-v2"
+    surface_contract = (
+        f"tier-{delivery_tier}-final-v3"
+        if gateway_writer and delivery_tier in {1, 2}
+        else "live-only-v2"
+    )
     card_start_ok = True
     if not dry_run and start_visible_card:
         if not telegram_claim_not_cancelled(effect_protocol):
@@ -2155,6 +2819,19 @@ def send_ack(
                 "card_start_ok": False,
                 "header_message_id": "",
                 "live_message_id": "",
+            }
+        card_claim = claim_gateway_effect(gateway, "card")
+        if not card_claim.get("allowed") and str(card_claim.get("state") or "") != "delivered":
+            return {
+                "ok": False,
+                "status": "card-fenced",
+                "error": "canonical_card_effect_fenced",
+                "reaction_ok": bool(ack_sent),
+                "key": key,
+                "card_start_ok": False,
+                "header_message_id": "",
+                "live_message_id": "",
+                **gateway_public_fields(gateway),
             }
         card_start_cmd = with_work_card_target([
             "python3",
@@ -2189,10 +2866,16 @@ def send_ack(
                     "--surface-deadline-ms",
                     str(effect_protocol["surface_deadline_ms"]),
                 ])
-        card_start_attempts = 1
-        card_start = run_work_card_start(card_start_cmd)
+        card_start_attempts = 0
+        if card_claim.get("allowed"):
+            card_start_attempts = 1
+            card_start = run_work_card_start(card_start_cmd)
+        else:
+            # A replay after a confirmed card must recover the same durable
+            # receipt and must never call sendMessage again.
+            card_start = {"ok": True, "recovered": True}
         card_receipt = parse_work_card_start_receipt(key, card_start)
-        if exact_control_center_inbox(meta) and safe_same_key_card_retry(key, card_receipt):
+        if card_claim.get("allowed") and exact_control_center_inbox(meta) and safe_same_key_card_retry(key, card_receipt):
             card_start_attempts += 1
             card_start = run_work_card_start(card_start_cmd)
             card_receipt = parse_work_card_start_receipt(key, card_start)
@@ -2216,6 +2899,14 @@ def send_ack(
             header_message_id=header_message_id,
             live_message_id=live_message_id,
         )
+        if card_claim.get("allowed"):
+            finish_gateway_effect(
+                gateway,
+                card_claim,
+                delivered=card_start_ok,
+                indeterminate=bool(card_receipt.get("surface_indeterminate")),
+                error_class="card-receipt-missing" if not card_start_ok else "",
+            )
     else:
         card_start = {"ok": True, "skipped": True}
     if not dry_run and start_visible_card and exact_control_center_inbox(meta) and not card_start_ok:
@@ -2241,7 +2932,48 @@ def send_ack(
             "surface_contract": surface_contract,
             "surface_indeterminate": bool(card_receipt.get("surface_indeterminate")),
             "card_start_receipt": str(card_start.get("stdout") or ""),
+            **gateway_public_fields(gateway),
         }
+    if gateway.get("receipt"):
+        try:
+            advance_gateway_phase(gateway, "working")
+            if gateway.get("shadow"):
+                predicted = int((gateway.get("receipt") or {}).get("deliveryTier") or 3)
+                actual_contract = (
+                    "reaction-card-final" if ack_sent and start_visible_card
+                    else "reaction-final" if ack_sent
+                    else "final-only"
+                )
+                gateway["lifecycle"].record_shadow_sample(
+                    str((gateway.get("receipt") or {})["workId"]),
+                    observed_contract=actual_contract,
+                )
+                if predicted == 3 and render_live_card is not None:
+                    rendered = render_live_card(
+                        gateway.get("receipt") or {},
+                        objective=objective,
+                        phase_label="Working",
+                        model=display_model,
+                        route=display_route,
+                        progress=50,
+                    )
+                    gateway["lifecycle"].update_render_hash(
+                        str((gateway.get("receipt") or {})["workId"]),
+                        rendered,
+                    )
+        except Exception as exc:  # noqa: BLE001
+            if gateway_writer:
+                return {
+                    "ok": False,
+                    "status": "lifecycle-transition-failed",
+                    "error": type(exc).__name__,
+                    "reaction_ok": bool(ack_sent),
+                    "key": key,
+                    "card_start_ok": card_start_ok,
+                    "header_message_id": header_message_id,
+                    "live_message_id": live_message_id,
+                    **gateway_public_fields(gateway),
+                }
     visibility_publish_ok = True
     if not dry_run:
         visibility_publish_ok = publish_josh(
@@ -2252,7 +2984,7 @@ def send_ack(
             run_id=work_run_id,
             phase="active",
             model_id=str(model or DEFAULT_MODEL),
-            route_verified=True,
+            route_verified=False,
             origin_claim_hash=origin_claim_hash,
             work_event="start",
         )
@@ -2297,6 +3029,8 @@ def send_ack(
         "surface_contract": surface_contract,
         "card_start_receipt": str(card_start.get("stdout") or ""),
         "visibility_publish_ok": visibility_publish_ok,
+        "no_card_required": bool(gateway_writer and delivery_tier in {1, 2}),
+        **gateway_public_fields(gateway),
     }
 
 
@@ -2363,11 +3097,47 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
             # Keep the event pending. Once the agent creates its interpreted
             # card, adoption replays progress into that same visible surface.
             continue
+        if card.get("coordinator_owned"):
+            # Coordinator workers report only the strict fixed-code progress
+            # envelope. Never render trajectory/model/tool summaries into the
+            # same card through this legacy observer path.
+            processed.add(event_id)
+            continue
         objective = str(card.get("objective") or "Josh 2.0 Telegram task")
         key = str(card.get("key") or "")
         if not key:
             continue
         processed.add(event_id)
+        if card.get("no_card_required"):
+            # Tier 1/2 intentionally have no live-card surface.  Consume model
+            # and tool progress into private watcher state only; their next
+            # Telegram-visible write is the gateway-owned final.
+            if event["type"] == "model.completed":
+                result = {"ok": True, "deferred_to_pre_final_gate": True, "no_card_required": True}
+                card["status"] = "awaiting-final-gate"
+            else:
+                result = {"ok": True, "no_card_required": True}
+                card["status"] = "active"
+                if not dry_run:
+                    safe_summary = {
+                        "tool.call": "Tool execution started",
+                        "tool.result": "Tool execution completed",
+                    }.get(str(event.get("type") or ""), "Work progressed")
+                    publish_josh(
+                        objective,
+                        "active",
+                        safe_summary,
+                        work_id=str(card.get("work_id") or ""),
+                        run_id=str(card.get("ledger_run_id") or ""),
+                        phase="active",
+                        model_id=str(card.get("runtime_model") or card.get("model") or DEFAULT_MODEL),
+                        route_verified=not bool(card.get("coordinator_owned")),
+                        origin_claim_hash=str(card.get("origin_claim_hash") or ""),
+                    )
+            card["last_card_update_at"] = utc_now()
+            card["last_progress_at"] = card["last_card_update_at"]
+            updates.append({"event": event_id, "result": result})
+            continue
         if event["type"] == "model.completed":
             # Final text and outcome are validated by before_agent_finalize.
             # The watcher records model completion but never races that gate
@@ -2378,8 +3148,10 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
             card["last_progress_at"] = card["last_card_update_at"]
             updates.append({"event": event_id, "result": result})
         else:
-            if not dry_run and (event_age_seconds(event.get("ts", "")) or 0) < MAX_UNACKED_PROMPT_AGE_SECONDS:
-                send_chat_action()
+            safe_summary = {
+                "tool.call": "Tool execution started",
+                "tool.result": "Tool execution completed",
+            }.get(str(event.get("type") or ""), "Work progressed")
             cmd = [
                 "python3",
                 str(WORK_CARD_SCRIPT),
@@ -2393,23 +3165,24 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
                 "--route",
                 str(card.get("route") or DEFAULT_ROUTE),
                 "--now",
-                event["summary"],
+                safe_summary,
                 "--done",
-                event["summary"],
+                safe_summary,
             ]
             if not dry_run:
-                result = run_cmd(with_work_card_target(cmd, meta))
-                publish_josh(
-                    objective,
-                    "active",
-                    event["summary"],
-                    work_id=str(card.get("work_id") or ""),
-                    run_id=str(card.get("ledger_run_id") or ""),
-                    phase="active",
-                    model_id=str(card.get("runtime_model") or card.get("model") or DEFAULT_MODEL),
-                    route_verified=not bool(card.get("coordinator_owned")),
-                    origin_claim_hash=str(card.get("origin_claim_hash") or ""),
-                )
+                result = run_gateway_card_update(card, cmd, meta=meta, status="progress")
+                if result.get("ok"):
+                    publish_josh(
+                        objective,
+                        "active",
+                        safe_summary,
+                        work_id=str(card.get("work_id") or ""),
+                        run_id=str(card.get("ledger_run_id") or ""),
+                        phase="active",
+                        model_id=str(card.get("runtime_model") or card.get("model") or DEFAULT_MODEL),
+                        route_verified=True,
+                        origin_claim_hash=str(card.get("origin_claim_hash") or ""),
+                    )
             else:
                 result = {"ok": True, "dry_run": True}
             card["status"] = "active"
@@ -2423,6 +3196,33 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
         if str(card.get("status") or "").lower() in {"closing-before-final", "awaiting-final-gate"}:
             continue
         if card.get("requires_objective_interpretation"):
+            continue
+        if card.get("no_card_required"):
+            # Coordinator recovery owns terminal delivery.  Never manufacture
+            # a work card as a failure/heartbeat/expiry fallback for Tier 1/2.
+            if card.get("coordinator_owned"):
+                worker_job = coordinator_job_snapshot(str(card.get("job_id") or ""))
+                worker_status = str(worker_job.get("status") or "")
+                if worker_status in {"done", "failed"} and worker_job.get("delivered"):
+                    card["status"] = worker_status
+                    card["ended_at"] = utc_now()
+                    card["last_card_update_at"] = card["ended_at"]
+                elif worker_status in {"done", "failed"}:
+                    if card_uses_lifecycle_v3(card):
+                        result = queue_lifecycle_terminal_fallback(
+                            str(run_id),
+                            card,
+                            card or (meta or {}),
+                            terminal_status="failed",
+                            issue="The selected worker stopped without a verified final delivery.",
+                            next_step="Retry after the worker route is healthy.",
+                            dry_run=dry_run,
+                        )
+                        updates.append({"event": f"worker-terminal:{run_id}", "result": result})
+                    else:
+                        card["status"] = "awaiting-final-gate"
+                        card["final_delivery_status"] = "retry"
+                        card["last_card_update_at"] = utc_now()
             continue
         last_raw = str(card.get("last_card_update_at") or "")
         try:
@@ -2445,6 +3245,18 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
             # A terminal coordinator row without a delivered final is not a
             # terminal Telegram task. Emit the canonical failure final through
             # the same origin-scoped work-card state and retry until accepted.
+            if card_uses_lifecycle_v3(card):
+                result = queue_lifecycle_terminal_fallback(
+                    str(run_id),
+                    card,
+                    card or (meta or {}),
+                    terminal_status="failed",
+                    issue="The selected worker exhausted its safe delivery path.",
+                    next_step="Retry after the worker route is healthy.",
+                    dry_run=dry_run,
+                )
+                updates.append({"event": f"worker-terminal:{run_id}", "result": result})
+                continue
             cmd = [
                 "python3",
                 str(WORK_CARD_SCRIPT),
@@ -2490,6 +3302,18 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
         # heartbeat path so a long model call never leaves the Inbox card frozen.
         if not coordinator_owned and card_session_id(card) and card_session_id(card) != session_id:
             summary = "Previous Telegram session ended; Josh 2.0 is back on standby."
+            if card_uses_lifecycle_v3(card):
+                result = queue_lifecycle_terminal_fallback(
+                    str(run_id),
+                    card,
+                    card or (meta or {}),
+                    terminal_status="expired",
+                    issue=summary,
+                    next_step="Send the request again if the work is still needed.",
+                    dry_run=dry_run,
+                )
+                updates.append({"event": f"session-ended:{run_id}:{utc_now()}", "result": result})
+                continue
             cmd = [
                 "python3",
                 str(WORK_CARD_SCRIPT),
@@ -2528,6 +3352,18 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
         started_at = card_started_at(card) or last
         if not coordinator_owned and (now - started_at).total_seconds() > MAX_ACTIVE_CARD_SECONDS:
             summary = "No recent tool or model progress; Josh 2.0 is back on standby."
+            if card_uses_lifecycle_v3(card):
+                result = queue_lifecycle_terminal_fallback(
+                    str(run_id),
+                    card,
+                    card or (meta or {}),
+                    terminal_status="expired",
+                    issue=summary,
+                    next_step="Retry the task if it is still needed.",
+                    dry_run=dry_run,
+                )
+                updates.append({"event": f"expired:{run_id}:{utc_now()}", "result": result})
+                continue
             cmd = [
                 "python3",
                 str(WORK_CARD_SCRIPT),
@@ -2584,10 +3420,14 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
             summary,
             "--no-brain-feed",
         ]
-        result = {"ok": True, "dry_run": True} if dry_run else run_cmd(with_work_card_target(cmd, meta))
+        result = (
+            {"ok": True, "dry_run": True}
+            if dry_run
+            else run_gateway_card_update(card, cmd, meta=meta, status="heartbeat")
+        )
         # Do not keep re-publishing heartbeat-only work-card text to
         # Brain Feed; it makes stale cards look like current truth.
-        if not dry_run:
+        if not dry_run and result.get("ok"):
             publish_josh(
                 objective,
                 "active",
@@ -2642,6 +3482,35 @@ def reconcile_orphan_work_cards(
             continue
         title = str(card.get("title") or "Josh 2.0 Telegram task")
         summary = "No active model or tool run owns this card; Josh 2.0 is idle."
+        orphan = recover_card_lifecycle_identity({
+            **card,
+            "key": str(key),
+            "objective": title,
+            "telegram_chat_id": str(card.get("telegram_chat_id") or card.get("chat_id") or (meta or {}).get("telegram_chat_id") or ""),
+            "telegram_thread_id": str(card.get("telegram_thread_id") or card.get("thread_id") or (meta or {}).get("telegram_thread_id") or ""),
+            "status": "active",
+        })
+        if card_uses_lifecycle_v3(orphan):
+            run_key = str(orphan.get("origin_run_id") or orphan.get("ledger_run_id") or f"orphan:{key}")
+            result = queue_lifecycle_terminal_fallback(
+                run_key,
+                orphan,
+                orphan,
+                terminal_status="expired",
+                issue=summary,
+                next_step="Start the task again if it is still needed.",
+                dry_run=dry_run,
+            )
+            if not dry_run:
+                state.setdefault("active_cards", {})[run_key] = orphan
+                with fast_ack_state_lock():
+                    latest = load_json(STATE_PATH, {})
+                    if not isinstance(latest, dict):
+                        latest = {}
+                    latest.setdefault("active_cards", {})[run_key] = copy.deepcopy(orphan)
+                    save_json(STATE_PATH, latest)
+            reconciled.append({"event": f"orphan-card:{key}", "result": result})
+            continue
         cmd = [
             "python3",
             str(WORK_CARD_SCRIPT),
@@ -2757,7 +3626,232 @@ def terminal_action_fields(status: str) -> tuple[str, str, str]:
         "done": ("done", "Work complete; final summary follows", "None"),
         "paused": ("pause", "Work paused; final summary explains what remains", "See final summary"),
         "failed": ("fail", "Work stopped; final summary explains the issue", "See final summary"),
+        "expired": ("fail", "Work expired; final summary explains the recovery state", "See final summary"),
     }.get(status, ("pause", "Work paused; final summary explains what remains", "See final summary"))
+
+
+def terminal_execution_evidence_hash(
+    run_key: str,
+    card: dict[str, Any],
+    evidence: dict[str, Any],
+) -> str:
+    bound = {
+        "runKey": str(run_key),
+        "cardKey": str(card.get("key") or ""),
+        "jobId": str(card.get("job_id") or ""),
+        "workId": str(card.get("work_id") or ""),
+        "ledgerRunId": str(card.get("ledger_run_id") or ""),
+        "originClaimHash": str(card.get("origin_claim_hash") or ""),
+        "provider": str(evidence.get("provider") or ""),
+        "model": str(evidence.get("model") or ""),
+        "worker": str(evidence.get("worker") or ""),
+        "host": str(evidence.get("host") or ""),
+        "routeId": str(evidence.get("routeId") or ""),
+    }
+    return hashlib.sha256(
+        json.dumps(bound, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+
+
+def validated_terminal_execution_evidence(
+    run_key: str,
+    card: dict[str, Any],
+) -> dict[str, Any]:
+    evidence = card.get("terminal_execution_evidence")
+    if not isinstance(evidence, dict):
+        return {}
+    values = {
+        key: _safe_progress_fragment(evidence.get(key))
+        for key in ("provider", "model", "worker", "host", "routeId")
+    }
+    if any(not value or value.lower() in {"unknown", "unverified", "pending"} for value in values.values()):
+        return {}
+    expected = terminal_execution_evidence_hash(run_key, card, values)
+    if not secrets_compare_digest(str(evidence.get("evidenceHash") or ""), expected):
+        return {}
+    return {**values, "evidenceHash": expected, "verifiedAt": str(evidence.get("verifiedAt") or "")}
+
+
+def secrets_compare_digest(left: str, right: str) -> bool:
+    """Keep the optional evidence receipt comparison constant-time."""
+    try:
+        import hmac
+
+        return hmac.compare_digest(left, right)
+    except Exception:
+        return False
+
+
+def live_terminal_execution_evidence(
+    run_key: str,
+    card: dict[str, Any],
+) -> dict[str, Any]:
+    if not card.get("coordinator_owned") or not str(card.get("job_id") or ""):
+        return {}
+    job = coordinator_job_snapshot(str(card.get("job_id") or ""))
+    if not job or not _progress_job_matches_card(job, card, run_key):
+        return {}
+    actual = job.get("actual") if isinstance(job.get("actual"), dict) else {}
+    route = job.get("route") if isinstance(job.get("route"), dict) else {}
+    if not (bool(actual.get("executionVerified")) and bool(actual.get("modelVerified"))):
+        return {}
+    evidence = {
+        "provider": _safe_progress_fragment(actual.get("actualProvider")),
+        "model": _safe_progress_fragment(actual.get("actualModel")),
+        "worker": _safe_progress_fragment(actual.get("actualWorker")),
+        "host": _safe_progress_fragment(actual.get("actualHost")),
+        "routeId": _safe_progress_fragment(route.get("routeId")),
+        "verifiedAt": utc_now(),
+    }
+    if any(
+        not evidence[key] or str(evidence[key]).lower() in {"unknown", "unverified", "pending"}
+        for key in ("provider", "model", "worker", "host", "routeId")
+    ):
+        return {}
+    evidence["evidenceHash"] = terminal_execution_evidence_hash(run_key, card, evidence)
+    return evidence
+
+
+def ensure_terminal_route_truth(run_key: str, card: dict[str, Any]) -> bool:
+    """Freeze verified coordinator runtime facts; never promote a route plan."""
+    if not card.get("coordinator_owned"):
+        return True
+    evidence = validated_terminal_execution_evidence(run_key, card)
+    if not evidence:
+        evidence = live_terminal_execution_evidence(run_key, card)
+    if not evidence:
+        card["terminal_route_blocked_at"] = card.get("terminal_route_blocked_at") or utc_now()
+        card["terminal_route_incident"] = "verified-runtime-evidence-unavailable"
+        return False
+    route_label = (
+        f"verified route={evidence['routeId']}; provider={evidence['provider']}; "
+        f"worker={evidence['worker']}; host={evidence['host']}"
+    )
+    card.update({
+        "runtime_model": evidence["model"],
+        "route": route_label,
+        "route_verified": True,
+        "terminal_execution_evidence": evidence,
+    })
+    with fast_ack_state_lock():
+        state = load_json(STATE_PATH, {})
+        active = state.get("active_cards") if isinstance(state, dict) else {}
+        current = active.get(run_key) if isinstance(active, dict) else None
+        if (
+            isinstance(current, dict)
+            and str(current.get("key") or "") == str(card.get("key") or "")
+            and str(current.get("work_id") or "") == str(card.get("work_id") or "")
+        ):
+            current.update({
+                "runtime_model": evidence["model"],
+                "route": route_label,
+                "route_verified": True,
+                "terminal_execution_evidence": evidence,
+            })
+            current.pop("terminal_route_incident", None)
+            save_json(STATE_PATH, state)
+    return True
+
+
+def terminal_visibility_event_id(
+    agent: str,
+    work_id: str,
+    run_id: str,
+    card_key: str,
+    status: str,
+) -> str:
+    _ = status
+    material = f"{agent}\0{work_id}\0{run_id}\0{card_key}\0terminal".encode("utf-8")
+    return f"telegram-terminal-{agent}-{hashlib.sha256(material).hexdigest()[:32]}"
+
+
+def terminal_visibility_outbox_path(event_id: str) -> Path:
+    digest = hashlib.sha256(str(event_id).encode("utf-8")).hexdigest()
+    root = TERMINAL_VISIBILITY_OUTBOX_DIR
+    if root == DEFAULT_TERMINAL_VISIBILITY_OUTBOX_DIR and STATE_PATH.parent != root.parent:
+        root = STATE_PATH.parent / "terminal-visibility-outbox"
+    return root / f"{digest}.json"
+
+
+def terminal_visibility_age_seconds(record: dict[str, Any]) -> float:
+    created = parse_utc(record.get("createdAt"))
+    if not created:
+        return float(TERMINAL_VISIBILITY_MAX_AGE_SECONDS + 1)
+    return max(0.0, (dt.datetime.now(dt.timezone.utc) - created).total_seconds())
+
+
+def queue_terminal_visibility(
+    run_key: str,
+    card_key: str,
+    card: dict[str, Any],
+    status: str,
+) -> tuple[Path, dict[str, Any]]:
+    """Persist only dashboard-safe terminal publication facts at mode 0600."""
+    work_id = str(card.get("work_id") or "")
+    ledger_run_id = str(card.get("ledger_run_id") or "")
+    origin_claim_hash = str(card.get("origin_claim_hash") or "")
+    if not work_id or not ledger_run_id:
+        work_id, ledger_run_id, derived_claim = telegram_work_identity(card_key, run_key)
+        origin_claim_hash = origin_claim_hash or derived_claim
+        card.update({
+            "work_id": work_id,
+            "ledger_run_id": ledger_run_id,
+            "origin_claim_hash": origin_claim_hash,
+        })
+    event_id = terminal_visibility_event_id("josh2", work_id, ledger_run_id, card_key, status)
+    path = terminal_visibility_outbox_path(event_id)
+    path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    os.chmod(path.parent, 0o700)
+    existing = load_json(path, {})
+    if not isinstance(existing, dict):
+        existing = {}
+    model_id = str(card.get("runtime_model") or "") if card.get("coordinator_owned") else str(
+        card.get("runtime_model") or card.get("model") or DEFAULT_MODEL
+    )
+    route_verified = bool(card.get("route_verified")) if card.get("coordinator_owned") else True
+    record = {
+        "version": 1,
+        "eventId": event_id,
+        "agent": "josh2",
+        "workId": work_id,
+        "runId": ledger_run_id,
+        "cardKeyHash": hashlib.sha256(card_key.encode("utf-8")).hexdigest(),
+        "terminalStatus": str(status or "done").lower(),
+        "modelId": _safe_progress_fragment(model_id),
+        "routeVerified": route_verified,
+        "originClaimHash": origin_claim_hash,
+        "attempts": int(existing.get("attempts") or 0),
+        "createdAt": str(existing.get("createdAt") or utc_now()),
+        "updatedAt": utc_now(),
+        "lastAttemptAt": str(existing.get("lastAttemptAt") or ""),
+        "acceptedAt": str(existing.get("acceptedAt") or ""),
+        "blockedAt": str(existing.get("blockedAt") or ""),
+        "incident": existing.get("incident") if isinstance(existing.get("incident"), dict) else {},
+    }
+    # A pending receipt may be upgraded from unverified to verified, but an
+    # accepted immutable event is never rewritten.
+    if record["acceptedAt"]:
+        record = existing
+    save_json(path, record)
+    return path, record
+
+
+def mark_terminal_visibility_blocked(
+    path: Path,
+    record: dict[str, Any],
+    code: str,
+) -> None:
+    age = int(min(86400, terminal_visibility_age_seconds(record)))
+    record.update({
+        "blockedAt": str(record.get("blockedAt") or utc_now()),
+        "updatedAt": utc_now(),
+        "incident": {
+            "status": "blocked",
+            "code": _safe_progress_fragment(code, 80),
+            "ageSeconds": age,
+        },
+    })
+    save_json(path, record)
 
 
 def terminal_outbox_path(run_key: str, card_key: str) -> Path:
@@ -2789,6 +3883,19 @@ def queue_terminal_final(
         "telegram_thread_id": str(meta.get("telegram_thread_id") or ""),
         "terminal_status": terminal_status,
         "final_summary": final_summary,
+        "work_id": str(card.get("work_id") or card.get("gateway_work_id") or ""),
+        "ledger_run_id": str(card.get("ledger_run_id") or ""),
+        "origin_claim_hash": str(card.get("origin_claim_hash") or ""),
+        "runtime_model": str(card.get("runtime_model") or card.get("model") or DEFAULT_MODEL),
+        "coordinator_owned": bool(card.get("coordinator_owned")),
+        "job_id": str(card.get("job_id") or ""),
+        "terminal_execution_evidence": card.get("terminal_execution_evidence")
+        if isinstance(card.get("terminal_execution_evidence"), dict) else {},
+        "route_verified": bool(card.get("route_verified")),
+        "lifecycle_version": int(card.get("lifecycle_version") or 0),
+        "lifecycle_writer_enabled": bool(card.get("lifecycle_writer_enabled")),
+        "delivery_tier": int(card.get("delivery_tier") or 0),
+        "no_card_required": bool(card.get("no_card_required")),
         "attempts": int(existing.get("attempts") or 0),
         "created_at": str(existing.get("created_at") or utc_now()),
         "updated_at": utc_now(),
@@ -2796,6 +3903,110 @@ def queue_terminal_final(
         "escalated_at": str(existing.get("escalated_at") or ""),
     })
     return path
+
+
+def card_uses_lifecycle_v3(card: dict[str, Any]) -> bool:
+    return int(card.get("lifecycle_version") or 0) >= 3
+
+
+def recover_card_lifecycle_identity(card: dict[str, Any]) -> dict[str, Any]:
+    """Recover a lost watcher identity from the private lifecycle journal."""
+    if card_uses_lifecycle_v3(card) and card.get("work_id"):
+        return card
+    try:
+        lifecycle = gateway_lifecycle()
+    except Exception:  # noqa: BLE001 - legacy orphan cleanup has no journal
+        return card
+    card_key = str(card.get("key") or "")
+    if lifecycle is None or not card_key:
+        return card
+    try:
+        with lifecycle.connect() as db:
+            row = db.execute(
+                "SELECT work_id FROM work_receipts WHERE origin_key=? ORDER BY created_at DESC LIMIT 1",
+                (card_key,),
+            ).fetchone()
+        receipt = lifecycle.read_work(str(row["work_id"])) if row else None
+    except Exception:  # noqa: BLE001 - orphan cleanup must remain bounded
+        receipt = None
+    if not receipt or int(receipt.get("lifecycleVersion") or 0) < 3:
+        return card
+    card.update({
+        "work_id": str(receipt.get("workId") or ""),
+        "ledger_run_id": str(receipt.get("runId") or ""),
+        "lifecycle_version": int(receipt.get("lifecycleVersion") or 0),
+        "delivery_tier": int(receipt.get("deliveryTier") or 0),
+        "lifecycle_writer_enabled": bool(receipt.get("writerEnabled")),
+        "no_card_required": int(receipt.get("deliveryTier") or 0) in {1, 2},
+    })
+    return card
+
+
+def build_terminal_fallback_final(
+    card: dict[str, Any],
+    *,
+    issue: str,
+    next_step: str,
+) -> str:
+    """Build a private, dashboard-safe terminal result for adapter recovery."""
+    lines = [
+        f"Model: {card.get('runtime_model') or card.get('model') or DEFAULT_MODEL}",
+        f"Route: {card.get('route') or DEFAULT_ROUTE}",
+        "",
+        "Complete: No - the task stopped before a verified result was delivered.",
+        "",
+        "What was done:",
+        "- Preserved the existing Telegram task identity and visible surface.",
+        "- Recorded the failure through the canonical terminal lifecycle.",
+        "- Prevented an unreceipted fallback from sending a second final.",
+        "",
+        "Issues:",
+        f"- {issue}",
+        "",
+        "Appropriate next steps:",
+        f"- {next_step}",
+        "",
+        "Approval needed:",
+        "n/a",
+    ]
+    return f"<pre>{html.escape(chr(10).join(lines))}</pre>"
+
+
+def queue_lifecycle_terminal_fallback(
+    run_key: str,
+    card: dict[str, Any],
+    meta: dict[str, Any],
+    *,
+    terminal_status: str,
+    issue: str,
+    next_step: str,
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    """Queue a v3 fallback; recovery owns commit, intents, and Telegram I/O."""
+    card_key = str(card.get("key") or "")
+    if not card_uses_lifecycle_v3(card) or not card_key:
+        return {"ok": False, "status": "legacy-or-missing-card"}
+    if not dry_run:
+        queue_terminal_final(
+            str(run_key),
+            card_key,
+            card,
+            meta,
+            terminal_status,
+            build_terminal_fallback_final(card, issue=issue, next_step=next_step),
+        )
+    now = utc_now()
+    card.update({
+        "status": "awaiting-final-gate",
+        "final_delivery_status": "terminal-fallback-queued",
+        "terminal_fallback_queued_at": now,
+        "last_card_update_at": now,
+    })
+    return {
+        "ok": True,
+        "status": "terminal-fallback-queued",
+        "dry_run": dry_run,
+    }
 
 
 @contextmanager
@@ -2822,6 +4033,258 @@ def private_terminal_final_file(final_summary: str):
             final_path.unlink(missing_ok=True)
 
 
+def lifecycle_outcome_for_status(status: str) -> str:
+    return {
+        "done": "succeeded",
+        "failed": "failed",
+        "cancelled": "cancelled",
+        "expired": "expired",
+        "superseded": "superseded",
+    }.get(str(status or "").lower(), "partial")
+
+
+def prepare_lifecycle_terminal(
+    card: dict[str, Any],
+    *,
+    terminal_status: str,
+    final_summary: str,
+) -> dict[str, Any]:
+    """Commit the v3 outcome/outbox before any final Telegram API call."""
+    work_id = str(card.get("work_id") or card.get("gateway_work_id") or "")
+    # Terminal visibility assigns a Control Tower work ID to legacy cards as
+    # well.  Treat the ID as a lifecycle journal key only when the card also
+    # carries the explicit v3 marker.
+    if not card_uses_lifecycle_v3(card) or not work_id:
+        return {"managed": False}
+    lifecycle = gateway_lifecycle()
+    if lifecycle is None:
+        return {"managed": False}
+    receipt = lifecycle.read_work(work_id)
+    if not receipt:
+        return {"managed": False}
+    # Awaiting approval/input is explicitly nonterminal.  Keep the lifecycle
+    # open and let the bound follow-up continue the same work identity.
+    if str(terminal_status or "").lower() == "paused":
+        if receipt.get("phase") == "terminal":
+            raise LifecycleError("paused-work-already-terminal")
+        phase = str(receipt.get("phase") or "")
+        if phase == "received":
+            receipt = lifecycle.transition(
+                work_id,
+                "classified",
+                expected_sequence=int(receipt["sequence"]),
+                fencing_epoch=int(receipt["fencingEpoch"]),
+            )
+            phase = "classified"
+        if phase == "classified":
+            receipt = lifecycle.transition(
+                work_id,
+                "acknowledged",
+                expected_sequence=int(receipt["sequence"]),
+                fencing_epoch=int(receipt["fencingEpoch"]),
+            )
+            phase = "acknowledged"
+        if phase in {"acknowledged", "working", "verifying"}:
+            receipt = lifecycle.transition(
+                work_id,
+                "awaiting_input",
+                expected_sequence=int(receipt["sequence"]),
+                fencing_epoch=int(receipt["fencingEpoch"]),
+                safe_payload={"status": "awaiting_input"},
+            )
+        return {
+            "managed": True,
+            "nonterminal": True,
+            "lifecycle": lifecycle,
+            "receipt": receipt,
+        }
+    if receipt.get("phase") != "terminal":
+        phase = str(receipt.get("phase") or "")
+        if phase == "classified":
+            receipt = lifecycle.transition(
+                work_id,
+                "acknowledged",
+                expected_sequence=int(receipt["sequence"]),
+                fencing_epoch=int(receipt["fencingEpoch"]),
+            )
+            phase = "acknowledged"
+        if phase == "acknowledged":
+            receipt = lifecycle.transition(
+                work_id,
+                "working",
+                expected_sequence=int(receipt["sequence"]),
+                fencing_epoch=int(receipt["fencingEpoch"]),
+            )
+            phase = "working"
+        if phase in {"working", "awaiting_input"}:
+            receipt = lifecycle.transition(
+                work_id,
+                "verifying",
+                expected_sequence=int(receipt["sequence"]),
+                fencing_epoch=int(receipt["fencingEpoch"]),
+                safe_payload={"status": "verifying"},
+            )
+    private_payload = {
+        "finalHtml": final_summary,
+        "cardKey": str(card.get("key") or ""),
+        "terminalStatus": str(terminal_status or "done"),
+    }
+    # Also call commit on terminal re-entry: its payload hash check prevents a
+    # retry from replacing the already-authoritative private final.
+    lifecycle.commit_terminal(
+        work_id,
+        lifecycle_outcome_for_status(terminal_status),
+        expected_sequence=int(receipt["sequence"]),
+        fencing_epoch=int(receipt["fencingEpoch"]),
+        private_payload=private_payload,
+    )
+    receipt = lifecycle.read_work(work_id) or receipt
+    writer = bool(receipt.get("writerEnabled"))
+    if not writer:
+        pinned_writer = bool(receipt.get("writerAuthorityAtStart"))
+        return {
+            "managed": True,
+            "shadow": bool(receipt.get("shadowOnly")),
+            "writer": False,
+            "killed": pinned_writer,
+            "lifecycle": lifecycle,
+            "receipt": receipt,
+        }
+    # The durable outbox is claimed before the final-effect reservation.  A
+    # crash at either point leaves `sending`, which recovery fences instead of
+    # guessing whether Telegram accepted the request.
+    claim = lifecycle.claim_terminal_delivery(work_id)
+    state = str(claim.get("state") or "")
+    if not claim.get("allowed"):
+        return {
+            "managed": True,
+            "writer": True,
+            "lifecycle": lifecycle,
+            "receipt": receipt,
+            "claim": claim,
+            "allowed": False,
+            "already_delivered": state == "delivered",
+            "fenced": state in {"sending", "indeterminate"},
+            "state": state,
+        }
+    card_edit_claim: dict[str, Any] = {}
+    if int(receipt.get("deliveryTier") or 0) == 3 and not card.get("no_card_required"):
+        card_edit_claim = lifecycle.claim_effect(
+            work_id,
+            "card_edit",
+            sequence=int(receipt["sequence"]),
+            fencing_epoch=int(receipt["fencingEpoch"]),
+        )
+        card_edit_state = str(card_edit_claim.get("state") or "")
+        if not card_edit_claim.get("allowed"):
+            lifecycle.finish_terminal_delivery(work_id, "indeterminate")
+            return {
+                "managed": True,
+                "writer": True,
+                "lifecycle": lifecycle,
+                "receipt": lifecycle.read_work(work_id) or receipt,
+                "claim": claim,
+                "card_edit_claim": card_edit_claim,
+                "allowed": False,
+                "fenced": card_edit_state in {"sending", "indeterminate"},
+                "state": card_edit_state,
+            }
+    effect_claim = lifecycle.claim_effect(
+        work_id,
+        "final",
+        sequence=int(receipt["sequence"]),
+        fencing_epoch=int(receipt["fencingEpoch"]),
+    )
+    effect_state = str(effect_claim.get("state") or "")
+    if not effect_claim.get("allowed"):
+        card_edit_key = str(card_edit_claim.get("idempotencyKey") or "")
+        if card_edit_key and card_edit_claim.get("allowed"):
+            lifecycle.finish_effect(
+                card_edit_key,
+                state="dead_letter",
+                error_class="terminal-final-effect-fenced",
+            )
+        if effect_state == "delivered":
+            lifecycle.finish_terminal_delivery(work_id, "delivered")
+        else:
+            lifecycle.finish_terminal_delivery(work_id, "indeterminate")
+        return {
+            "managed": True,
+            "writer": True,
+            "lifecycle": lifecycle,
+            "receipt": lifecycle.read_work(work_id) or receipt,
+            "claim": claim,
+            "card_edit_claim": card_edit_claim,
+            "effect_claim": effect_claim,
+            "allowed": False,
+            "already_delivered": effect_state == "delivered",
+            "fenced": effect_state in {"sending", "indeterminate"},
+            "state": effect_state,
+        }
+    committed_payload = claim.get("payload") if isinstance(claim.get("payload"), dict) else private_payload
+    return {
+        "managed": True,
+        "writer": True,
+        "lifecycle": lifecycle,
+        "receipt": receipt,
+        "claim": claim,
+        "card_edit_claim": card_edit_claim,
+        "effect_claim": effect_claim,
+        "allowed": True,
+        "already_delivered": False,
+        "fenced": False,
+        "state": state,
+        "final_summary": str(committed_payload.get("finalHtml") or ""),
+    }
+
+
+def finish_lifecycle_terminal(prepared: dict[str, Any], *, state: str) -> None:
+    if prepared.get("shadow"):
+        lifecycle = prepared.get("lifecycle")
+        receipt = prepared.get("receipt") or {}
+        if lifecycle is not None and receipt.get("workId"):
+            lifecycle.finish_shadow_sample(
+                str(receipt["workId"]),
+                delivered=state == "delivered",
+            )
+        return
+    if not prepared.get("writer") or not prepared.get("allowed"):
+        return
+    lifecycle = prepared.get("lifecycle")
+    receipt = prepared.get("receipt") or {}
+    if lifecycle is not None and receipt.get("workId"):
+        for claim_name, error_prefix in (
+            ("card_edit_claim", "telegram-card-edit"),
+            ("effect_claim", "telegram-final"),
+        ):
+            effect_claim = prepared.get(claim_name) or {}
+            effect_key = str(effect_claim.get("idempotencyKey") or "")
+            if not effect_key or not effect_claim.get("allowed"):
+                continue
+            lifecycle.finish_effect(
+                effect_key,
+                state=state,
+                private_receipt="telegram-confirmed" if state == "delivered" else "",
+                error_class=f"{error_prefix}-receipt-missing" if state == "indeterminate" else "",
+            )
+        lifecycle.finish_terminal_delivery(str(receipt["workId"]), state)
+
+
+def send_gateway_final_without_card(
+    final_summary: str,
+    *,
+    meta: dict[str, Any],
+    timeout: int = 10,
+) -> dict[str, Any]:
+    """Trusted final-only adapter for Tier 1/2 work."""
+    if not API_BASE or build_payload is None:
+        return {"ok": False, "error": "telegram-adapter-unavailable"}
+    payload = apply_telegram_target(build_payload(final_summary, None, silent=True), meta)
+    payload["parse_mode"] = "HTML"
+    payload["disable_web_page_preview"] = True
+    return api_post("sendMessage", payload, timeout=timeout)
+
+
 def terminal_work_card_command(
     card_key: str,
     card: dict[str, Any],
@@ -2839,7 +4302,7 @@ def terminal_work_card_command(
         "--title",
         str(card.get("objective") or "").strip(),
         "--model",
-        str(card.get("model") or DEFAULT_MODEL),
+        str(card.get("runtime_model") or card.get("model") or DEFAULT_MODEL),
         "--route",
         str(card.get("route") or DEFAULT_ROUTE),
         "--done",
@@ -2912,6 +4375,15 @@ def queue_stale_final_gate_recovery(state: dict[str, Any], dry_run: bool = False
         card_key = str(card.get("key") or "")
         if not card_key:
             continue
+        if card.get("no_card_required"):
+            # A missing model-final callback is not permission to create a
+            # Tier 1/2 card or synthesize a second terminal message.
+            card["terminal_recovery_blocked_at"] = card.get("terminal_recovery_blocked_at") or utc_now()
+            queued.append({
+                "event": f"stale-final-gate:{run_key}",
+                "result": {"ok": True, "status": "no-card-awaiting-final", "dry_run": dry_run},
+            })
+            continue
         receipt = work_card_state_receipt(card_key)
         if receipt["final_message_id"]:
             status = receipt["status"].lower() if receipt["status"].lower() in TERMINAL_CARD_STATUSES else "done"
@@ -2963,7 +4435,20 @@ def recover_terminal_final_outbox(state: dict[str, Any], dry_run: bool = False) 
             "key": card_key,
             "objective": record.get("objective"),
             "model": record.get("model"),
+            "runtime_model": record.get("runtime_model"),
             "route": record.get("route"),
+            "work_id": record.get("work_id"),
+            "ledger_run_id": record.get("ledger_run_id"),
+            "origin_claim_hash": record.get("origin_claim_hash"),
+            "lifecycle_version": record.get("lifecycle_version"),
+            "lifecycle_writer_enabled": bool(record.get("lifecycle_writer_enabled")),
+            "delivery_tier": int(record.get("delivery_tier") or 0),
+            "coordinator_owned": bool(record.get("coordinator_owned")),
+            "job_id": str(record.get("job_id") or ""),
+            "terminal_execution_evidence": record.get("terminal_execution_evidence")
+            if isinstance(record.get("terminal_execution_evidence"), dict) else {},
+            "route_verified": bool(record.get("route_verified")),
+            "no_card_required": bool(record.get("no_card_required")),
         }
         if str(card.get("key") or "") != card_key:
             continue
@@ -2980,13 +4465,171 @@ def recover_terminal_final_outbox(state: dict[str, Any], dry_run: bool = False) 
         if dry_run:
             recovered.append({"event": f"terminal-outbox:{run_key}", "result": {"ok": True, "status": "retry-planned", "dry_run": True}})
             continue
+        recovery_terminal_status = str(record.get("terminal_status") or "paused").lower()
+        if recovery_terminal_status != "paused" and not publish_terminal_once(
+            run_key,
+            card_key,
+            recovery_terminal_status,
+            card_snapshot=card,
+        ):
+            _visibility_path, visibility_record = queue_terminal_visibility(
+                run_key,
+                card_key,
+                card,
+                recovery_terminal_status,
+            )
+            blocked = bool(visibility_record.get("blockedAt"))
+            record.update({
+                "last_error": "terminal-visibility-publication-blocked" if blocked else "terminal-visibility-publication-pending",
+                "visibility_blocked_at": str(visibility_record.get("blockedAt") or ""),
+                "visibility_event_id": str(visibility_record.get("eventId") or ""),
+                "updated_at": utc_now(),
+            })
+            save_json(path, record)
+            recovered.append({
+                "event": f"terminal-outbox:{run_key}",
+                "result": {
+                    "ok": False,
+                    "status": "terminal-visibility-blocked" if blocked else "terminal-visibility-pending",
+                },
+            })
+            continue
         meta = {
             "telegram_chat_id": str(record.get("telegram_chat_id") or ""),
             "telegram_thread_id": str(record.get("telegram_thread_id") or ""),
         }
         terminal_status = str(record.get("terminal_status") or "paused").lower()
+        prepared: dict[str, Any] = {}
+        lifecycle_managed = card_uses_lifecycle_v3(card)
+        work_id = str(card.get("work_id") or card.get("gateway_work_id") or "")
+        if lifecycle_managed and not work_id:
+            record.update({
+                "lifecycle_fenced_at": record.get("lifecycle_fenced_at") or utc_now(),
+                "last_error": "v3-work-identity-missing",
+                "updated_at": utc_now(),
+            })
+            save_json(path, record)
+            recovered.append({
+                "event": f"terminal-outbox:{run_key}",
+                "result": {"ok": False, "status": "lifecycle-final-fenced"},
+            })
+            continue
+        if work_id:
+            try:
+                prepared = prepare_lifecycle_terminal(
+                    card,
+                    terminal_status=terminal_status,
+                    final_summary=final_summary,
+                )
+            except Exception as exc:  # noqa: BLE001 - never bypass a v3 conflict
+                record.update({
+                    "lifecycle_fenced_at": record.get("lifecycle_fenced_at") or utc_now(),
+                    "last_error": type(exc).__name__,
+                    "updated_at": utc_now(),
+                })
+                save_json(path, record)
+                recovered.append({
+                    "event": f"terminal-outbox:{run_key}",
+                    "result": {"ok": False, "status": "lifecycle-final-fenced"},
+                })
+                continue
+        if lifecycle_managed and not prepared.get("managed"):
+            record.update({
+                "lifecycle_fenced_at": record.get("lifecycle_fenced_at") or utc_now(),
+                "last_error": "v3-lifecycle-receipt-unavailable",
+                "updated_at": utc_now(),
+            })
+            save_json(path, record)
+            recovered.append({
+                "event": f"terminal-outbox:{run_key}",
+                "result": {"ok": False, "status": "lifecycle-final-fenced"},
+            })
+            continue
+        if prepared.get("already_delivered"):
+            status = terminal_status if terminal_status in TERMINAL_CARD_STATUSES else "done"
+            if run_key in active:
+                ended_at = utc_now()
+                active[run_key].update({"status": status, "ended_at": ended_at, "last_card_update_at": ended_at})
+            publish_terminal_once(run_key, card_key, status)
+            path.unlink(missing_ok=True)
+            recovered.append({"event": f"terminal-outbox:{run_key}", "result": {"ok": True, "status": "already-delivered"}})
+            continue
+        if prepared.get("killed") or prepared.get("fenced") or (prepared.get("writer") and not prepared.get("allowed")):
+            record.update({
+                "lifecycle_fenced_at": record.get("lifecycle_fenced_at") or utc_now(),
+                "last_error": "indeterminate-final-delivery-fenced",
+                "updated_at": utc_now(),
+            })
+            save_json(path, record)
+            recovered.append({
+                "event": f"terminal-outbox:{run_key}",
+                "result": {"ok": False, "status": "final-delivery-indeterminate"},
+            })
+            continue
+        if prepared.get("nonterminal"):
+            # Paused/awaiting-input is deliberately not a terminal outcome.
+            # Discard the stale fallback without invoking either terminal
+            # helper, regardless of whether this delivery tier has a card.
+            path.unlink(missing_ok=True)
+            recovered.append({
+                "event": f"terminal-outbox:{run_key}",
+                "result": {"ok": True, "status": "nonterminal-paused"},
+            })
+            continue
+        if prepared.get("shadow") and receipt.get("final_delivery_status") == "indeterminate":
+            finish_lifecycle_terminal(prepared, state="indeterminate")
+            record.update({
+                "lifecycle_fenced_at": record.get("lifecycle_fenced_at") or utc_now(),
+                "last_error": "shadow-final-delivery-indeterminate",
+                "updated_at": utc_now(),
+            })
+            save_json(path, record)
+            recovered.append({
+                "event": f"terminal-outbox:{run_key}",
+                "result": {"ok": False, "status": "final-delivery-indeterminate"},
+            })
+            continue
+        authoritative_final = str(prepared.get("final_summary") or final_summary)
+        if card.get("no_card_required"):
+            if not prepared.get("writer"):
+                record.update({
+                    "lifecycle_fenced_at": record.get("lifecycle_fenced_at") or utc_now(),
+                    "last_error": "no-card-lifecycle-unavailable",
+                    "updated_at": utc_now(),
+                })
+                save_json(path, record)
+                recovered.append({
+                    "event": f"terminal-outbox:{run_key}",
+                    "result": {"ok": False, "status": "no-card-recovery-fenced"},
+                })
+                continue
+            result = send_gateway_final_without_card(authoritative_final, meta=meta)
+            delivered = bool(
+                result.get("ok")
+                and positive_telegram_message_id((result.get("result") or {}).get("message_id"))
+            )
+            finish_lifecycle_terminal(prepared, state="delivered" if delivered else "indeterminate")
+            if delivered:
+                ended_at = utc_now()
+                if run_key in active:
+                    active[run_key].update({"status": "done", "ended_at": ended_at, "last_card_update_at": ended_at})
+                publish_terminal_once(run_key, card_key, "done")
+                path.unlink(missing_ok=True)
+                recovered.append({"event": f"terminal-outbox:{run_key}", "result": {"ok": True, "status": "delivered"}})
+            else:
+                record.update({
+                    "lifecycle_fenced_at": utc_now(),
+                    "last_error": "indeterminate-final-delivery-fenced",
+                    "updated_at": utc_now(),
+                })
+                save_json(path, record)
+                recovered.append({
+                    "event": f"terminal-outbox:{run_key}",
+                    "result": {"ok": False, "status": "final-delivery-indeterminate"},
+                })
+            continue
         try:
-            with private_terminal_final_file(final_summary) as final_path:
+            with private_terminal_final_file(authoritative_final) as final_path:
                 result = run_cmd(
                     terminal_work_card_command(card_key, card, meta, terminal_status, final_path),
                     timeout=10,
@@ -2995,6 +4638,7 @@ def recover_terminal_final_outbox(state: dict[str, Any], dry_run: bool = False) 
             result = {"ok": False, "returncode": -1, "stderr": "terminal outbox retry timed out"}
         persisted = work_card_state_receipt(card_key)
         if persisted["final_message_id"] and persisted["status"].lower() in TERMINAL_CARD_STATUSES:
+            finish_lifecycle_terminal(prepared, state="delivered")
             ended_at = utc_now()
             if run_key in active:
                 active[run_key].update({
@@ -3008,6 +4652,22 @@ def recover_terminal_final_outbox(state: dict[str, Any], dry_run: bool = False) 
             path.unlink(missing_ok=True)
             recovered.append({"event": f"terminal-outbox:{run_key}", "result": {"ok": True, "status": "delivered"}})
             continue
+        if prepared.get("writer"):
+            # The helper may have reached Telegram even without a durable
+            # message receipt.  Fence the v3 outbox permanently; do not fall
+            # through to the legacy timed retry loop.
+            finish_lifecycle_terminal(prepared, state="indeterminate")
+            record.update({
+                "lifecycle_fenced_at": utc_now(),
+                "last_error": "indeterminate-final-delivery-fenced",
+                "updated_at": utc_now(),
+            })
+            save_json(path, record)
+            recovered.append({
+                "event": f"terminal-outbox:{run_key}",
+                "result": {"ok": False, "status": "final-delivery-indeterminate"},
+            })
+            continue
         attempts = int(record.get("attempts") or 0) + 1
         delay = min(300, 2 ** min(attempts, 8))
         record.update({
@@ -3019,6 +4679,9 @@ def recover_terminal_final_outbox(state: dict[str, Any], dry_run: bool = False) 
         })
         if attempts >= TERMINAL_OUTBOX_MAX_ATTEMPTS and not record.get("escalated_at"):
             record["escalated_at"] = utc_now()
+            if prepared.get("shadow"):
+                finish_lifecycle_terminal(prepared, state="dead_letter")
+                record["shadow_sample_state"] = "unclean"
             publish_josh(
                 str(card.get("objective") or "Telegram final delivery"),
                 "blocked",
@@ -3049,55 +4712,139 @@ def persist_terminal_card_state(run_key: str, card_key: str, status: str = "done
         save_json(STATE_PATH, latest)
 
 
-def publish_terminal_once(run_key: str, card_key: str, status: str) -> bool:
-    """Publish one canonical terminal event for an exact Telegram work card."""
-    claimed_at = utc_now()
+def publish_terminal_once(
+    run_key: str,
+    card_key: str,
+    status: str,
+    *,
+    card_snapshot: dict[str, Any] | None = None,
+) -> bool:
+    """Accept one durable terminal work event before Telegram final delivery."""
     snapshot: dict[str, Any] = {}
     with fast_ack_state_lock():
         latest = load_json(STATE_PATH, {})
         active = latest.get("active_cards") if isinstance(latest, dict) else {}
         card = active.get(run_key) if isinstance(active, dict) else None
         if not isinstance(card, dict) or str(card.get("key") or "") != card_key:
+            card = card_snapshot
+        if not isinstance(card, dict) or str(card.get("key") or "") != card_key:
             return False
-        if card.get("ledger_terminal_published_at"):
-            return True
-        prior_claim = parse_utc(card.get("ledger_terminal_claimed_at"))
-        if prior_claim and (dt.datetime.now(dt.timezone.utc) - prior_claim).total_seconds() < 120:
-            return False
-        if not card.get("work_id") or not card.get("ledger_run_id"):
-            return False
-        card["ledger_terminal_claimed_at"] = claimed_at
         snapshot = dict(card)
-        save_json(STATE_PATH, latest)
 
-    canonical_status = {
-        "failed": "error",
-        "error": "error",
-        "blocked": "blocked",
-        "paused": "cancelled",
-        "cancelled": "cancelled",
-    }.get(str(status or "").lower(), "done")
-    published = publish_josh(
-        str(snapshot.get("objective") or "Josh 2.0 Telegram task"),
-        canonical_status,
-        "Verified Telegram final delivered and live work closed.",
-        work_id=str(snapshot.get("work_id") or ""),
-        run_id=str(snapshot.get("ledger_run_id") or ""),
-        phase=canonical_status,
-        model_id=str(snapshot.get("runtime_model") or snapshot.get("model") or DEFAULT_MODEL),
-        route_verified=not bool(snapshot.get("coordinator_owned")),
-        origin_claim_hash=str(snapshot.get("origin_claim_hash") or ""),
-        work_event="terminal",
-    )
+    route_ready = ensure_terminal_route_truth(run_key, snapshot)
+    if route_ready and isinstance(card_snapshot, dict):
+        card_snapshot.update({
+            "runtime_model": snapshot.get("runtime_model"),
+            "route": snapshot.get("route"),
+            "route_verified": snapshot.get("route_verified"),
+            "terminal_execution_evidence": snapshot.get("terminal_execution_evidence"),
+        })
+    path, record = queue_terminal_visibility(run_key, card_key, snapshot, status)
+    if isinstance(card_snapshot, dict):
+        card_snapshot.update({
+            "work_id": str(record.get("workId") or ""),
+            "ledger_run_id": str(record.get("runId") or ""),
+            "origin_claim_hash": str(record.get("originClaimHash") or ""),
+        })
+    if not route_ready:
+        mark_terminal_visibility_blocked(path, record, "terminal-route-unverified")
+        with fast_ack_state_lock():
+            latest = load_json(STATE_PATH, {})
+            active = latest.get("active_cards") if isinstance(latest, dict) else {}
+            card = active.get(run_key) if isinstance(active, dict) else None
+            if isinstance(card, dict) and str(card.get("key") or "") == card_key:
+                card["terminal_visibility_blocked_at"] = card.get("terminal_visibility_blocked_at") or utc_now()
+                card["terminal_visibility_incident"] = "terminal-route-unverified"
+                save_json(STATE_PATH, latest)
+        return False
+    # Rebuild the pending record after route verification so only actual
+    # provider/model evidence can become the accepted terminal event.
+    path, record = queue_terminal_visibility(run_key, card_key, snapshot, status)
+    if record.get("acceptedAt"):
+        published = True
+    elif (
+        int(record.get("attempts") or 0) >= TERMINAL_VISIBILITY_MAX_ATTEMPTS
+        or terminal_visibility_age_seconds(record) > TERMINAL_VISIBILITY_MAX_AGE_SECONDS
+    ):
+        mark_terminal_visibility_blocked(path, record, "terminal-visibility-publication-stale")
+        published = False
+    else:
+        canonical_status = {
+            "failed": "error",
+            "error": "error",
+            "blocked": "blocked",
+            "paused": "cancelled",
+            "cancelled": "cancelled",
+            "expired": "cancelled",
+        }.get(str(status or "").lower(), "done")
+        published = publish_josh(
+            "Josh 2.0 Telegram task",
+            canonical_status,
+            "Terminal outcome accepted by the canonical local work ledger before Telegram delivery.",
+            work_id=str(record.get("workId") or ""),
+            run_id=str(record.get("runId") or ""),
+            phase=canonical_status,
+            model_id=str(record.get("modelId") or ""),
+            route_verified=bool(record.get("routeVerified")),
+            origin_claim_hash=str(record.get("originClaimHash") or ""),
+            brain_feed=False,
+            work_event="terminal",
+            event_id=str(record.get("eventId") or ""),
+        )
+        latest_record = load_json(path, record)
+        if not isinstance(latest_record, dict):
+            latest_record = record
+        if latest_record.get("acceptedAt"):
+            published = True
+        latest_record.update({
+            "attempts": int(latest_record.get("attempts") or 0) + 1,
+            "lastAttemptAt": utc_now(),
+            "updatedAt": utc_now(),
+        })
+        if published:
+            latest_record["acceptedAt"] = str(latest_record.get("acceptedAt") or utc_now())
+            latest_record["incident"] = {}
+            latest_record["blockedAt"] = ""
+            save_json(path, latest_record)
+        elif (
+            int(latest_record.get("attempts") or 0) >= TERMINAL_VISIBILITY_MAX_ATTEMPTS
+            or terminal_visibility_age_seconds(latest_record) > TERMINAL_VISIBILITY_MAX_AGE_SECONDS
+        ):
+            mark_terminal_visibility_blocked(
+                path,
+                latest_record,
+                "terminal-visibility-publication-stale",
+            )
+        else:
+            save_json(path, latest_record)
+
     with fast_ack_state_lock():
         latest = load_json(STATE_PATH, {})
         active = latest.get("active_cards") if isinstance(latest, dict) else {}
         card = active.get(run_key) if isinstance(active, dict) else None
         if isinstance(card, dict) and str(card.get("key") or "") == card_key:
+            card.update({
+                "work_id": str(record.get("workId") or card.get("work_id") or ""),
+                "ledger_run_id": str(record.get("runId") or card.get("ledger_run_id") or ""),
+                "origin_claim_hash": str(record.get("originClaimHash") or card.get("origin_claim_hash") or ""),
+            })
             if published:
                 card["ledger_terminal_published_at"] = utc_now()
-            card.pop("ledger_terminal_claimed_at", None)
+                card["terminal_visibility_event_id"] = str(record.get("eventId") or "")
+                card.pop("terminal_visibility_incident", None)
+                card.pop("terminal_visibility_blocked_at", None)
+            else:
+                current_record = load_json(path, record)
+                if isinstance(current_record, dict) and current_record.get("blockedAt"):
+                    card["terminal_visibility_blocked_at"] = str(current_record.get("blockedAt"))
+                    card["terminal_visibility_incident"] = str(
+                        (current_record.get("incident") or {}).get("code") or "terminal-visibility-pending"
+                    )
             save_json(STATE_PATH, latest)
+        elif isinstance(card_snapshot, dict) and str(card_snapshot.get("key") or "") == card_key:
+            if published:
+                card_snapshot["ledger_terminal_published_at"] = utc_now()
+                card_snapshot["terminal_visibility_event_id"] = str(record.get("eventId") or "")
     return published
 
 
@@ -3197,6 +4944,135 @@ def close_before_final(args: argparse.Namespace) -> dict[str, Any]:
         }
     run_key, card = selected
     if card.get("no_card_required"):
+        if final_summary:
+            requested_status = str(getattr(args, "terminal_status", "done") or "done").lower()
+            outbox_path: Path | None = None
+            if requested_status != "paused":
+                try:
+                    outbox_path = queue_terminal_final(
+                        run_key,
+                        str(card.get("key") or ""),
+                        card,
+                        meta,
+                        requested_status,
+                        final_summary,
+                    )
+                except Exception:
+                    return {
+                        "ok": False,
+                        "status": "terminal-outbox-unavailable",
+                        "card_closed": False,
+                        "suppress_native_final": True,
+                    }
+                if not publish_terminal_once(
+                    run_key,
+                    str(card.get("key") or ""),
+                    requested_status,
+                    card_snapshot=card,
+                ):
+                    _visibility_path, visibility_record = queue_terminal_visibility(
+                        run_key,
+                        str(card.get("key") or ""),
+                        card,
+                        requested_status,
+                    )
+                    return {
+                        "ok": False,
+                        "status": "terminal-visibility-blocked"
+                        if visibility_record.get("blockedAt") else "terminal-visibility-pending",
+                        "card_closed": False,
+                        "suppress_native_final": True,
+                        "retry_queued": True,
+                    }
+                queue_terminal_final(
+                    run_key,
+                    str(card.get("key") or ""),
+                    card,
+                    meta,
+                    requested_status,
+                    final_summary,
+                )
+            try:
+                prepared = prepare_lifecycle_terminal(
+                    card,
+                    terminal_status=requested_status,
+                    final_summary=final_summary,
+                )
+            except Exception as exc:  # noqa: BLE001
+                return {
+                    "ok": False,
+                    "status": "terminal-outbox-unavailable",
+                    "card_closed": False,
+                    "error": type(exc).__name__,
+                }
+            if card_uses_lifecycle_v3(card) and not prepared.get("managed"):
+                return {
+                    "ok": False,
+                    "status": "terminal-outbox-unavailable",
+                    "card_closed": False,
+                    "suppress_native_final": True,
+                }
+            if prepared.get("nonterminal"):
+                return {
+                    "ok": True,
+                    "status": "no-card-required",
+                    "card_closed": False,
+                }
+            if prepared.get("killed"):
+                return {
+                    "ok": True,
+                    "status": "lifecycle-writer-disabled",
+                    "card_closed": False,
+                    "suppress_native_final": True,
+                }
+            if not prepared.get("writer"):
+                return {
+                    "ok": True,
+                    "status": "no-card-required",
+                    "card_closed": False,
+                }
+            if prepared.get("already_delivered"):
+                return {
+                    "ok": True,
+                    "status": "final-already-delivered",
+                    "card_closed": False,
+                    "suppress_native_final": True,
+                }
+            if prepared.get("fenced") or not prepared.get("allowed"):
+                return {
+                    "ok": True,
+                    "status": "final-delivery-indeterminate",
+                    "card_closed": False,
+                    "suppress_native_final": True,
+                }
+            authoritative_final = str(prepared.get("final_summary") or final_summary)
+            result = send_gateway_final_without_card(authoritative_final, meta=meta)
+            delivered = bool(
+                result.get("ok")
+                and positive_telegram_message_id((result.get("result") or {}).get("message_id"))
+            )
+            finish_lifecycle_terminal(
+                prepared,
+                state="delivered" if delivered else "indeterminate",
+            )
+            if delivered:
+                if outbox_path:
+                    outbox_path.unlink(missing_ok=True)
+                persist_terminal_card_state(run_key, str(card.get("key") or ""), "done")
+                publish_terminal_once(run_key, str(card.get("key") or ""), "done")
+                return {
+                    "ok": True,
+                    "status": "closed-and-final-delivered",
+                    "card_closed": False,
+                    "suppress_native_final": True,
+                    "terminal_status": "done",
+                }
+            return {
+                "ok": True,
+                "status": "final-delivery-indeterminate",
+                "card_closed": False,
+                "suppress_native_final": True,
+            }
         return {
             "ok": True,
             "status": "no-card-required",
@@ -3215,7 +5091,7 @@ def close_before_final(args: argparse.Namespace) -> dict[str, Any]:
 
     receipt = work_card_state_receipt(card_key)
     receipt_terminal_status = receipt["status"].lower() if receipt["status"].lower() in TERMINAL_CARD_STATUSES else ""
-    if receipt_terminal_status:
+    if receipt_terminal_status and not card_uses_lifecycle_v3(card):
         persisted_status = receipt_terminal_status
         persist_terminal_card_state(run_key, card_key, persisted_status)
         publish_terminal_once(run_key, card_key, persisted_status)
@@ -3284,10 +5160,51 @@ def close_before_final(args: argparse.Namespace) -> dict[str, Any]:
             "card_closed": False,
             "card_key": card_key,
         }
+    prepared: dict[str, Any] = {}
+    authoritative_final = final_summary
     outbox_path: Path | None = None
     if final_summary:
-        try:
-            outbox_path = queue_terminal_final(
+        if terminal_status != "paused":
+            try:
+                outbox_path = queue_terminal_final(
+                    run_key,
+                    card_key,
+                    card,
+                    meta,
+                    terminal_status,
+                    final_summary,
+                )
+            except Exception:
+                release_terminal_card_close(run_key, card_key)
+                return {
+                    "ok": False,
+                    "status": "terminal-outbox-unavailable",
+                    "card_closed": False,
+                    "card_key": card_key,
+                }
+            if not publish_terminal_once(
+                run_key,
+                card_key,
+                terminal_status,
+                card_snapshot=card,
+            ):
+                release_terminal_card_close(run_key, card_key)
+                _visibility_path, visibility_record = queue_terminal_visibility(
+                    run_key,
+                    card_key,
+                    card,
+                    terminal_status,
+                )
+                return {
+                    "ok": False,
+                    "status": "terminal-visibility-blocked"
+                    if visibility_record.get("blockedAt") else "terminal-visibility-pending",
+                    "card_closed": False,
+                    "suppress_native_final": True,
+                    "retry_queued": True,
+                    "card_key": card_key,
+                }
+            queue_terminal_final(
                 run_key,
                 card_key,
                 card,
@@ -3295,17 +5212,59 @@ def close_before_final(args: argparse.Namespace) -> dict[str, Any]:
                 terminal_status,
                 final_summary,
             )
-        except Exception:
+        try:
+            prepared = prepare_lifecycle_terminal(
+                card,
+                terminal_status=terminal_status,
+                final_summary=final_summary,
+            )
+        except Exception as exc:  # noqa: BLE001
             release_terminal_card_close(run_key, card_key)
             return {
                 "ok": False,
                 "status": "terminal-outbox-unavailable",
                 "card_closed": False,
                 "card_key": card_key,
+                "error": type(exc).__name__,
             }
+        if card_uses_lifecycle_v3(card) and not prepared.get("managed"):
+            release_terminal_card_close(run_key, card_key)
+            return {
+                "ok": False,
+                "status": "terminal-outbox-unavailable",
+                "card_closed": False,
+                "suppress_native_final": True,
+                "card_key": card_key,
+            }
+        if prepared.get("nonterminal"):
+            release_terminal_card_close(run_key, card_key)
+            return {
+                "ok": True,
+                "status": "awaiting-input",
+                "card_closed": False,
+                "suppress_native_final": True,
+                "card_key": card_key,
+            }
+        if prepared.get("already_delivered"):
+            return {
+                "ok": True,
+                "status": "final-already-delivered",
+                "card_closed": True,
+                "suppress_native_final": True,
+                "card_key": card_key,
+            }
+        if prepared.get("killed") or prepared.get("fenced") or (prepared.get("writer") and not prepared.get("allowed")):
+            return {
+                "ok": True,
+                "status": "lifecycle-writer-disabled" if prepared.get("killed") else "final-delivery-indeterminate",
+                "card_closed": False,
+                "suppress_native_final": True,
+                "card_key": card_key,
+            }
+        authoritative_final = str(prepared.get("final_summary") or final_summary)
     try:
         if final_summary:
-            with private_terminal_final_file(final_summary) as final_path:
+            with private_terminal_final_file(authoritative_final) as final_path:
                 result = run_cmd(
                     terminal_work_card_command(card_key, card, meta, terminal_status, final_path),
                     timeout=10,
@@ -3329,6 +5288,32 @@ def close_before_final(args: argparse.Namespace) -> dict[str, Any]:
         or (not final_summary and not result.get("ok"))
         or (final_summary and final_missing)
     ):
+        if final_summary and prepared.get("writer"):
+            finish_lifecycle_terminal(prepared, state="indeterminate")
+            release_terminal_card_close(run_key, card_key)
+            return {
+                "ok": True,
+                "status": "final-delivery-indeterminate",
+                "card_closed": persisted["status"].lower() in TERMINAL_CARD_STATUSES,
+                "suppress_native_final": True,
+                "card_key": card_key,
+                "live_message_id": persisted["live_message_id"],
+            }
+        if (
+            final_summary
+            and prepared.get("shadow")
+            and persisted.get("final_delivery_status") == "indeterminate"
+        ):
+            finish_lifecycle_terminal(prepared, state="indeterminate")
+            release_terminal_card_close(run_key, card_key)
+            return {
+                "ok": True,
+                "status": "final-delivery-indeterminate",
+                "card_closed": persisted["status"].lower() in TERMINAL_CARD_STATUSES,
+                "suppress_native_final": True,
+                "card_key": card_key,
+                "live_message_id": persisted["live_message_id"],
+            }
         release_terminal_card_close(run_key, card_key)
         if final_summary and outbox_path and outbox_path.exists():
             return {
@@ -3349,6 +5334,8 @@ def close_before_final(args: argparse.Namespace) -> dict[str, Any]:
         }
     if delivered and outbox_path:
         outbox_path.unlink(missing_ok=True)
+    if delivered:
+        finish_lifecycle_terminal(prepared, state="delivered")
     persisted_status = persisted["status"].lower()
     persist_terminal_card_state(run_key, card_key, persisted_status)
     publish_terminal_once(run_key, card_key, persisted_status)
@@ -3422,7 +5409,8 @@ def claim_inbox(args: argparse.Namespace) -> dict[str, Any]:
             "surface_indeterminate": bool(ack.get("surface_indeterminate")),
         }
 
-    if exact_control_center_inbox(meta) and not args.dry_run:
+    no_card_required = bool(ack.get("no_card_required"))
+    if exact_control_center_inbox(meta) and not args.dry_run and not no_card_required:
         header_message_id = positive_telegram_message_id(ack.get("header_message_id"))
         live_message_id = positive_telegram_message_id(ack.get("live_message_id"))
         header_required = receipt_requires_header(ack)
@@ -3476,7 +5464,52 @@ def claim_inbox(args: argparse.Namespace) -> dict[str, Any]:
             header_message_id=str(ack.get("header_message_id") or ""),
             live_message_id=str(ack.get("live_message_id") or ""),
         )
-        if not args.dry_run:
+        failure_card = {
+            "key": str(ack.get("key") or stable),
+            "objective": str(ack.get("objective") or "Inbox worker queue failed"),
+            "model": str(ack.get("model") or "unverified"),
+            "runtime_model": str(ack.get("runtime_model") or ack.get("model") or "unverified"),
+            "route": str(ack.get("route") or "Inbox coordinator dispatch"),
+            "session_id": session_id,
+            "telegram_session_key": str(args.session_key or ""),
+            "telegram_chat_id": str(meta["telegram_chat_id"]),
+            "telegram_thread_id": str(meta["telegram_thread_id"]),
+            "work_id": str(ack.get("work_id") or ""),
+            "ledger_run_id": str(ack.get("ledger_run_id") or ""),
+            "origin_claim_hash": str(ack.get("origin_claim_hash") or ""),
+            "no_card_required": no_card_required,
+            "delivery_tier": int(ack.get("delivery_tier") or 0),
+            "lifecycle_version": int(ack.get("lifecycle_version") or 0),
+            "lifecycle_writer_enabled": bool(ack.get("lifecycle_writer_enabled")),
+            "coordinator_owned": True,
+            "status": "active",
+            "started_at": str(ack.get("last_card_update_at") or utc_now()),
+            "last_card_update_at": str(ack.get("last_card_update_at") or utc_now()),
+        }
+        fallback_result: dict[str, Any] = {}
+        if card_uses_lifecycle_v3(failure_card):
+            fallback_result = queue_lifecycle_terminal_fallback(
+                stable,
+                failure_card,
+                meta,
+                terminal_status="failed",
+                issue="The asynchronous worker could not be queued.",
+                next_step="Retry after the coordinator service is healthy.",
+                dry_run=args.dry_run,
+            )
+            if not args.dry_run:
+                persist_claim_state(stable, failure_card, {
+                    "run_id": stable,
+                    "message_id": str(args.message_id or ""),
+                    "job_id": "",
+                    "reaction_ok": bool(ack.get("reaction_ok")),
+                    "card_start_ok": bool(ack.get("card_start_ok")),
+                    "no_card_required": no_card_required,
+                    "delivery_tier": int(ack.get("delivery_tier") or 0),
+                    "lifecycle_version": int(ack.get("lifecycle_version") or 0),
+                    "terminal_fallback_queued": True,
+                })
+        elif not args.dry_run and not no_card_required:
             run_cmd(with_work_card_target([
                 sys.executable,
                 str(WORK_CARD_SCRIPT),
@@ -3503,6 +5536,7 @@ def claim_inbox(args: argparse.Namespace) -> dict[str, Any]:
             "surface_contract": str(ack.get("surface_contract") or ("header-live-v1" if receipt_requires_header(ack) else "live-only-v2")),
             "job_id": "",
             "key": ack.get("key"),
+            "terminal_fallback_queued": fallback_result.get("ok", False),
         }
 
     try:
@@ -3545,6 +5579,13 @@ def claim_inbox(args: argparse.Namespace) -> dict[str, Any]:
         "live_message_id": str(ack.get("live_message_id") or ""),
         "header_required": receipt_requires_header(ack),
         "surface_contract": str(ack.get("surface_contract") or ("header-live-v1" if receipt_requires_header(ack) else "live-only-v2")),
+        "no_card_required": no_card_required,
+        "delivery_tier": int(ack.get("delivery_tier") or 0),
+        "lifecycle_version": int(ack.get("lifecycle_version") or 0),
+        "lifecycle_sequence": int(ack.get("lifecycle_sequence") or 0),
+        "fencing_epoch": int(ack.get("fencing_epoch") or 0),
+        "lifecycle_writer_enabled": bool(ack.get("lifecycle_writer_enabled")),
+        "lifecycle_shadow": bool(ack.get("lifecycle_shadow")),
         "started_at": ack.get("last_card_update_at"),
         "last_progress_at": ack.get("last_card_update_at"),
         "last_card_update_at": ack.get("last_card_update_at"),
@@ -3561,6 +5602,9 @@ def claim_inbox(args: argparse.Namespace) -> dict[str, Any]:
         "live_message_id": str(ack.get("live_message_id") or ""),
         "header_required": receipt_requires_header(ack),
         "surface_contract": str(ack.get("surface_contract") or ("header-live-v1" if receipt_requires_header(ack) else "live-only-v2")),
+        "no_card_required": no_card_required,
+        "delivery_tier": int(ack.get("delivery_tier") or 0),
+        "lifecycle_version": int(ack.get("lifecycle_version") or 0),
     }
     if not args.dry_run:
         persist_claim_state(stable, active_card, last_claim)
@@ -3581,6 +5625,9 @@ def claim_inbox(args: argparse.Namespace) -> dict[str, Any]:
         "live_message_id": str(ack.get("live_message_id") or ""),
         "header_required": receipt_requires_header(ack),
         "surface_contract": str(ack.get("surface_contract") or ("header-live-v1" if receipt_requires_header(ack) else "live-only-v2")),
+        "no_card_required": no_card_required,
+        "delivery_tier": int(ack.get("delivery_tier") or 0),
+        "lifecycle_version": int(ack.get("lifecycle_version") or 0),
         "job_id": str((job or {}).get("jobId") or ""),
         "route_id": str((route or {}).get("routeId") or ""),
         "deduplicated": bool(envelope.get("deduplicated")) if isinstance(envelope, dict) else False,
@@ -3670,11 +5717,19 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
                         "telegram_session_key": str(meta.get("telegram_session_key") or ""),
                         "requires_objective_interpretation": bool(result.get("requires_objective_interpretation")),
                         "no_card_required": bool(result.get("no_card_required")),
+                        "surface_contract": str(result.get("surface_contract") or ""),
+                        "delivery_tier": int(result.get("delivery_tier") or 0),
+                        "lifecycle_version": int(result.get("lifecycle_version") or 0),
+                        "lifecycle_sequence": int(result.get("lifecycle_sequence") or 0),
+                        "fencing_epoch": int(result.get("fencing_epoch") or 0),
+                        "lifecycle_writer_enabled": bool(result.get("lifecycle_writer_enabled")),
+                        "lifecycle_shadow": bool(result.get("lifecycle_shadow")),
                         "started_at": result.get("last_card_update_at"),
                         "last_progress_at": result.get("last_card_update_at"),
                         "last_card_update_at": result.get("last_card_update_at"),
                         "status": (
-                            "done" if result.get("no_card_required")
+                            "active" if result.get("no_card_required") and result.get("lifecycle_writer_enabled")
+                            else "done" if result.get("no_card_required")
                             else "pending-interpretation" if result.get("requires_objective_interpretation")
                             else "active"
                         ),
@@ -3732,6 +5787,7 @@ def main() -> int:
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--interval", type=float, default=1.5)
     parser.add_argument("--claim-inbox", action="store_true", help="Claim one Inbox event from stdin and queue its worker.")
+    parser.add_argument("--progress-event-json-stdin", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--close-before-final", action="store_true", help="Close the origin live card before native final delivery.")
     parser.add_argument("--final-from-stdin", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--run-id", default="")
@@ -3745,6 +5801,11 @@ def main() -> int:
     parser.add_argument("--cancel-path", default="")
     parser.add_argument("--surface-deadline-ms", type=int, default=0)
     args = parser.parse_args()
+
+    if args.progress_event_json_stdin:
+        result = progress_event_from_stdin()
+        print(json.dumps(result, indent=2))
+        return 0 if result.get("ok") else 4
 
     if args.close_before_final:
         result = close_before_final(args)

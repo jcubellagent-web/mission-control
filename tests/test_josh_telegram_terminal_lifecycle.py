@@ -67,6 +67,29 @@ def terminal_args() -> argparse.Namespace:
     )
 
 
+def test_legacy_gateway_context_does_not_initialize_private_lifecycle(monkeypatch):
+    def unexpected_lifecycle_init():
+        raise AssertionError("legacy card initialized the v3 lifecycle store")
+
+    monkeypatch.setattr(watcher, "gateway_lifecycle", unexpected_lifecycle_init)
+    assert watcher.gateway_context_for_card({
+        "key": "legacy-card",
+        "work_id": "control-tower-work-id",
+    }) == {}
+
+
+def test_legacy_terminal_prepare_does_not_initialize_private_lifecycle(monkeypatch):
+    def unexpected_lifecycle_init():
+        raise AssertionError("legacy terminal initialized the v3 lifecycle store")
+
+    monkeypatch.setattr(watcher, "gateway_lifecycle", unexpected_lifecycle_init)
+    assert watcher.prepare_lifecycle_terminal(
+        {"key": "legacy-card", "work_id": "control-tower-work-id"},
+        terminal_status="done",
+        final_summary=CANONICAL_FINAL,
+    ) == {"managed": False}
+
+
 CANONICAL_FINAL = """<pre>Model: openai/gpt-5.6-terra
    | Route: Josh 2.0 Inbox
    | Why: verified execution
@@ -346,6 +369,7 @@ def test_close_before_final_delivers_private_canonical_final_then_suppresses_nat
     monkeypatch.setattr(watcher, "STATE_PATH", tmp_path / "telegram" / "fast-ack.json")
     monkeypatch.setattr(watcher, "TERMINAL_OUTBOX_DIR", tmp_path / "telegram" / "terminal-final-outbox")
     monkeypatch.setattr(watcher, "WORK_CARD_STATE_PATH", tmp_path / "work-cards.json")
+    monkeypatch.setattr(watcher, "publish_josh", lambda *args, **kwargs: True)
     started = utc_now(-20)
     active = pending_card(started)
     active.update({
@@ -393,6 +417,7 @@ def test_failed_terminal_send_is_durably_queued_and_retried(monkeypatch, tmp_pat
     monkeypatch.setattr(watcher, "STATE_PATH", tmp_path / "telegram" / "fast-ack.json")
     monkeypatch.setattr(watcher, "TERMINAL_OUTBOX_DIR", tmp_path / "telegram" / "terminal-final-outbox")
     monkeypatch.setattr(watcher, "WORK_CARD_STATE_PATH", tmp_path / "work-cards.json")
+    monkeypatch.setattr(watcher, "publish_josh", lambda *args, **kwargs: True)
     started = utc_now(-20)
     active = pending_card(started)
     active.update({

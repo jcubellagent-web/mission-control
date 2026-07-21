@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import io
+import json
 from pathlib import Path
 
 import pytest
@@ -13,6 +14,36 @@ SPEC = importlib.util.spec_from_file_location("josh_telegram_fast_ack_under_test
 assert SPEC and SPEC.loader
 watcher = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(watcher)
+
+
+@pytest.fixture(autouse=True)
+def isolated_legacy_lifecycle(monkeypatch, tmp_path: Path):
+    rollout = tmp_path / "telegram-lifecycle-rollout.json"
+    rollout.write_text(
+        json.dumps(
+            {
+                "schemaVersion": 1,
+                "writerLifecycleVersion": 3,
+                "readerLifecycleVersions": [2, 3],
+                "masterState": "off",
+                "globalKillSwitch": False,
+                "brainKillSwitch": True,
+                "hosts": {"josh2": True, "jaimes": True},
+                "shadowMinimumPerOwner": 20,
+                "brainFixtureMinimum": 20,
+                "rollback": {
+                    "newWorkToLegacy": False,
+                    "drainExistingVersionedWork": True,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(watcher, "LIFECYCLE_ROLLOUT_PATH", rollout)
+    monkeypatch.setattr(watcher, "LIFECYCLE_PRIVATE_ROOT", tmp_path / "lifecycle")
+    monkeypatch.setattr(watcher, "_GATEWAY_LIFECYCLE", None)
+    yield
+    watcher._GATEWAY_LIFECYCLE = None
 
 
 def event() -> dict[str, str]:

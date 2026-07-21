@@ -655,7 +655,7 @@ function validTerminalReceipt(receipt) {
   return Boolean(
     receipt
     && receipt.ok === true
-    && ["closed", "closed-and-final-delivered", "final-queued-for-retry", "already-terminal", "no-card-required", "final-already-delivered", "not-applicable"].includes(receipt.status),
+    && ["closed", "closed-and-final-delivered", "final-queued-for-retry", "final-delivery-indeterminate", "already-terminal", "no-card-required", "final-already-delivered", "not-applicable"].includes(receipt.status),
   );
 }
 
@@ -948,6 +948,20 @@ export function validJaimesHandoffReceipt(stdout, event = {}, ctx = {}, maxAgeMs
     const target = parseTelegramTarget(event, ctx);
     const messageId = positiveTelegramId(resolveInboundMessageId(event, ctx));
     const acceptedAt = Date.parse(receipt.accepted_at || "");
+    const deliveryTier = Number(receipt.delivery_tier || 0);
+    const noCardContract = Boolean(
+      receipt.no_card_required === true
+      && receipt.lifecycle_writer_enabled === true
+      && (
+        (deliveryTier === 1 && receipt.reaction_ok === false)
+        || (deliveryTier === 2 && receipt.reaction_ok === true)
+      )
+    );
+    const cardContract = Boolean(
+      receipt.reaction_ok === true
+      && positiveTelegramId(receipt.header_message_id)
+      && positiveTelegramId(receipt.live_message_id)
+    );
     return Boolean(
       receipt
       && receipt.ok === true
@@ -956,9 +970,7 @@ export function validJaimesHandoffReceipt(stdout, event = {}, ctx = {}, maxAgeMs
       && receipt.chat_id === target.chatId
       && receipt.thread_id === target.threadId
       && receipt.inbound_message_id === messageId
-      && receipt.reaction_ok === true
-      && positiveTelegramId(receipt.header_message_id)
-      && positiveTelegramId(receipt.live_message_id)
+      && (noCardContract || cardContract)
       && Number.isFinite(acceptedAt)
       && Math.abs(Date.now() - acceptedAt) <= maxAgeMs,
     );
@@ -1120,25 +1132,42 @@ function parseReceipt(stdout) {
 export function validJoshClaimReceipt(stdout) {
   const receipt = parseReceipt(stdout);
   const surfaceContract = receipt?.surface_contract || "";
+  const deliveryTier = Number(receipt?.delivery_tier || 0);
+  const noCardRequired = receipt?.no_card_required === true;
   const knownContract = !surfaceContract
     || surfaceContract === "header-live-v1"
-    || surfaceContract === "live-only-v2";
-  const headerRequired = surfaceContract !== "live-only-v2";
+    || surfaceContract === "live-only-v2"
+    || surfaceContract === "tier-1-final-v3"
+    || surfaceContract === "tier-2-final-v3";
+  const headerRequired = ![
+    "live-only-v2", "tier-1-final-v3", "tier-2-final-v3",
+  ].includes(surfaceContract);
   const declarationConsistent = surfaceContract === "live-only-v2"
     ? receipt?.header_required !== true
+    : surfaceContract === "tier-1-final-v3" || surfaceContract === "tier-2-final-v3"
+      ? receipt?.header_required !== true && noCardRequired
     : surfaceContract === "header-live-v1"
       ? receipt?.header_required !== false
       : receipt?.header_required !== false;
+  const tierSurfaceValid = noCardRequired
+    ? (
+      (deliveryTier === 1 && receipt?.reaction_ok === false)
+      || (deliveryTier === 2 && receipt?.reaction_ok === true)
+    )
+    : (
+      (deliveryTier === 0 || deliveryTier === 3)
+      && receipt?.reaction_ok === true
+      && receipt?.card_start_ok === true
+      && positiveTelegramId(receipt?.live_message_id)
+      && (!headerRequired || positiveTelegramId(receipt?.header_message_id))
+    );
   return Boolean(
     receipt
     && knownContract
     && declarationConsistent
     && receipt.ok === true
     && receipt.status === "queued"
-    && receipt.reaction_ok === true
-    && receipt.card_start_ok === true
-    && positiveTelegramId(receipt.live_message_id)
-    && (!headerRequired || positiveTelegramId(receipt.header_message_id))
+    && tierSurfaceValid
     && typeof receipt.job_id === "string"
     && receipt.job_id.trim(),
   );

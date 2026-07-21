@@ -10,7 +10,9 @@ import importlib.util
 import json
 import os
 import re
+import stat
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -36,6 +38,9 @@ MILESTONE_UPDATES = (
     "Verification test passed",
     "Final response delivered",
 )
+CANARY_JOURNAL_FILENAME = "telegram-canary-cleanup.json"
+CANARY_CLAIM_FILENAME = "telegram-canary-one-shot.claim"
+CANARY_RECEIPT_FILENAME = "telegram-canary-cleanup-receipt.json"
 CANARY_JOURNAL_ENV = "TELEGRAM_CANARY_CLEANUP_JOURNAL"
 
 STATUS_ONLY_PATTERNS = (
@@ -131,62 +136,325 @@ UNVERIFIED_HEADER_PATTERN = re.compile(
 )
 
 
-def canary_journal_path() -> Path | None:
-    value = os.environ.get(CANARY_JOURNAL_ENV, "").strip()
-    return Path(value).expanduser() if value else None
+def _private_canary_directory(directory: Path | str) -> Path:
+    path = Path(directory).expanduser()
+    try:
+        info = path.lstat()
+    except OSError as exc:
+        raise RuntimeError("canary journal directory must already exist") from exc
+    if path.is_symlink() or not stat.S_ISDIR(info.st_mode):
+        raise RuntimeError("canary journal directory must be a real directory")
+    if info.st_uid != os.getuid() or stat.S_IMODE(info.st_mode) != 0o700:
+        raise RuntimeError("canary journal directory must be owner-only 0700")
+    return path.resolve()
+
+
+def _write_exclusive_at(directory_fd: int, name: str, payload: dict) -> None:
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    descriptor = os.open(name, flags, 0o600, dir_fd=directory_fd)
+    try:
+        encoded = (json.dumps(payload, indent=2, ensure_ascii=True) + "\n").encode()
+        offset = 0
+        while offset < len(encoded):
+            offset += os.write(descriptor, encoded[offset:])
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
+def _validated_canary_journal_filename(value: str) -> str:
+    name = str(value)
+    if (
+        not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,119}", name)
+        or Path(name).name != name
+        or name in {CANARY_CLAIM_FILENAME, CANARY_RECEIPT_FILENAME}
+    ):
+        raise RuntimeError("invalid canary journal filename")
+    return name
+
+
+def prepare_canary_journal(
+    directory: Path | str,
+    *,
+    role: str,
+    _journal_filename: str = CANARY_JOURNAL_FILENAME,
+) -> Path:
+    """Atomically claim one caller-created private directory for one live run."""
+    path = _private_canary_directory(directory)
+    journal_filename = _validated_canary_journal_filename(_journal_filename)
+    flags = os.O_RDONLY
+    if hasattr(os, "O_DIRECTORY"):
+        flags |= os.O_DIRECTORY
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    directory_fd = os.open(path, flags)
+    try:
+        now = dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+        try:
+            _write_exclusive_at(
+                directory_fd,
+                CANARY_CLAIM_FILENAME,
+                {
+                    "version": 1,
+                    "createdAt": now,
+                    "role": role,
+                    "status": "claimed",
+                    "journalFilename": journal_filename,
+                },
+            )
+        except FileExistsError as exc:
+            raise RuntimeError("canary journal directory has already been used") from exc
+        try:
+            _write_exclusive_at(
+                directory_fd,
+                journal_filename,
+                {
+                    "version": 2,
+                    "updatedAt": now,
+                    "stage": "prepared",
+                    "chatId": "",
+                    "threadId": "",
+                    "messageIds": [],
+                    "indeterminateStages": [],
+                },
+            )
+        except Exception:
+            # The durable one-shot claim deliberately remains. A partial setup
+            # must never turn into an automatic retry that could send twice.
+            raise
+        os.fsync(directory_fd)
+    finally:
+        os.close(directory_fd)
+    return path / journal_filename
+
+
+def _journal_cleanup_projection(cleanup: dict | None) -> dict | None:
+    if not isinstance(cleanup, dict):
+        return None
+    records = []
+    for row in cleanup.get("records") or []:
+        if not isinstance(row, dict):
+            continue
+        records.append({
+            "messageId": str(row.get("messageId") or ""),
+            "deleted": bool(row.get("deleted")),
+            "alreadyAbsent": bool(row.get("alreadyAbsent")),
+            "attempts": int(row.get("attempts") or 0),
+            "deferredByCooldown": bool(row.get("deferredByCooldown")),
+        })
+    return {
+        "attempted": int(cleanup.get("attempted") or 0),
+        "deleted": int(cleanup.get("deleted") or 0),
+        "failedIds": [str(value) for value in cleanup.get("failedIds") or []],
+        "indeterminateIds": [str(value) for value in cleanup.get("indeterminateIds") or []],
+        "indeterminateStages": [str(value)[:80] for value in cleanup.get("indeterminateStages") or []],
+        "records": records,
+    }
+
+
+def _load_canary_journal(path: Path) -> dict:
+    parent = _private_canary_directory(path.parent)
+    if path.parent.resolve() != parent:
+        raise RuntimeError("invalid canary journal path")
+    claim_path = parent / CANARY_CLAIM_FILENAME
+    try:
+        claim_info = claim_path.lstat()
+    except OSError as exc:
+        raise RuntimeError("canary one-shot claim is missing") from exc
+    if (
+        claim_path.is_symlink()
+        or not stat.S_ISREG(claim_info.st_mode)
+        or claim_info.st_uid != os.getuid()
+        or stat.S_IMODE(claim_info.st_mode) != 0o600
+    ):
+        raise RuntimeError("canary one-shot claim is invalid")
+    claim = json.loads(claim_path.read_text(encoding="utf-8"))
+    expected_filename = str(
+        claim.get("journalFilename") if isinstance(claim, dict) else ""
+    ) or CANARY_JOURNAL_FILENAME
+    if path.name != _validated_canary_journal_filename(expected_filename):
+        raise RuntimeError("invalid canary journal path")
+    try:
+        info = path.lstat()
+    except OSError as exc:
+        raise RuntimeError("canary journal is missing") from exc
+    if path.is_symlink() or not stat.S_ISREG(info.st_mode):
+        raise RuntimeError("canary journal is not a regular file")
+    if info.st_uid != os.getuid() or stat.S_IMODE(info.st_mode) != 0o600:
+        raise RuntimeError("canary journal must remain owner-only 0600")
+    value = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(value, dict):
+        raise RuntimeError("canary journal shape is invalid")
+    return value
 
 
 def write_canary_journal(
+    journal_path: Path,
     *,
     stage: str,
     chat_id: str,
     thread_id: str,
     message_ids: list[str],
     indeterminate_stages: list[str],
+    cleanup: dict | None = None,
+    _replace_message_ids: bool = False,
 ) -> None:
-    path = canary_journal_path()
-    if path is None:
-        return
-    path.parent.mkdir(parents=True, exist_ok=True)
-    os.chmod(path.parent, 0o700)
+    path = Path(journal_path)
+    current = _load_canary_journal(path)
+    prior_ids = [] if _replace_message_ids else [
+        str(value) for value in current.get("messageIds") or []
+    ]
     payload = {
-        "version": 1,
+        "version": 2,
         "updatedAt": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         "chatId": str(chat_id),
         "threadId": str(thread_id),
         "stage": str(stage)[:80],
-        "messageIds": list(dict.fromkeys(str(value) for value in message_ids if str(value).isdigit())),
+        "messageIds": list(dict.fromkeys(
+            str(value)
+            for value in [*prior_ids, *message_ids]
+            if str(value).isdigit()
+        )),
         "indeterminateStages": list(dict.fromkeys(str(value)[:80] for value in indeterminate_stages)),
     }
-    temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    cleanup_projection = _journal_cleanup_projection(cleanup)
+    if cleanup_projection is not None:
+        payload["cleanup"] = cleanup_projection
+    directory = _private_canary_directory(path.parent)
+    flags = os.O_RDONLY
+    if hasattr(os, "O_DIRECTORY"):
+        flags |= os.O_DIRECTORY
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    directory_fd = os.open(directory, flags)
+    temporary_name = f".{path.name}.{os.getpid()}.{os.urandom(6).hex()}.tmp"
     try:
-        with temporary.open("w", encoding="utf-8") as handle:
-            json.dump(payload, handle, indent=2, ensure_ascii=True)
-            handle.write("\n")
-            handle.flush()
-            os.fsync(handle.fileno())
-        os.chmod(temporary, 0o600)
-        os.replace(temporary, path)
-    finally:
-        temporary.unlink(missing_ok=True)
-
-
-def finalize_canary_journal(cleanup: dict, chat_id: str, thread_id: str) -> None:
-    path = canary_journal_path()
-    if path is None:
-        return
-    failed_ids = [str(value) for value in cleanup.get("failedIds") or [] if str(value).isdigit()]
-    unknown = [str(value) for value in cleanup.get("indeterminateStages") or []]
-    if failed_ids or unknown:
-        write_canary_journal(
-            stage="cleanup-pending",
-            chat_id=chat_id,
-            thread_id=thread_id,
-            message_ids=failed_ids,
-            indeterminate_stages=unknown,
+        _write_exclusive_at(directory_fd, temporary_name, payload)
+        os.replace(
+            temporary_name,
+            path.name,
+            src_dir_fd=directory_fd,
+            dst_dir_fd=directory_fd,
         )
-    else:
-        path.unlink(missing_ok=True)
+        os.fsync(directory_fd)
+    finally:
+        try:
+            os.unlink(temporary_name, dir_fd=directory_fd)
+        except FileNotFoundError:
+            pass
+        os.close(directory_fd)
+
+
+def cleanup_fully_confirmed(cleanup: dict, expected_ids: list[str]) -> bool:
+    expected = list(dict.fromkeys(str(value) for value in expected_ids if str(value).isdigit()))
+    records = [row for row in cleanup.get("records") or [] if isinstance(row, dict)]
+    record_ids = [str(row.get("messageId") or "") for row in records]
+    confirmed = {
+        str(row.get("messageId") or "")
+        for row in records
+        if bool(row.get("deleted"))
+    }
+    indeterminate_ids = {
+        str(value) for value in cleanup.get("indeterminateIds") or [] if str(value).isdigit()
+    }
+    return bool(
+        int(cleanup.get("attempted") or 0) == len(expected)
+        and int(cleanup.get("deleted") or 0) == len(expected)
+        and len(records) == len(expected)
+        and len(record_ids) == len(set(record_ids))
+        and set(expected) == confirmed
+        and not cleanup.get("failedIds")
+        and not cleanup.get("indeterminateStages")
+        and indeterminate_ids.issubset(confirmed)
+    )
+
+
+def finalize_canary_journal(
+    journal_path: Path,
+    cleanup: dict,
+    chat_id: str,
+    thread_id: str,
+    sent_ids: list[str],
+) -> bool:
+    current = _load_canary_journal(journal_path)
+    expected = list(dict.fromkeys(
+        str(value)
+        for value in [
+            *(current.get("messageIds") or []),
+            *sent_ids,
+            *(cleanup.get("indeterminateIds") or []),
+        ]
+        if str(value).isdigit()
+    ))
+    confirmed = cleanup_fully_confirmed(cleanup, expected)
+    legacy_filename = journal_path.name != CANARY_JOURNAL_FILENAME
+    unresolved_ids = list(dict.fromkeys(
+        str(value)
+        for value in [
+            *(cleanup.get("failedIds") or []),
+            *(cleanup.get("indeterminateIds") or []),
+            *(
+                str(row.get("messageId") or "")
+                for row in cleanup.get("records") or []
+                if isinstance(row, dict) and not bool(row.get("deleted"))
+            ),
+        ]
+        if str(value).isdigit()
+    ))
+    write_canary_journal(
+        journal_path,
+        stage="cleanup-confirmed" if confirmed else "cleanup-pending",
+        chat_id=chat_id,
+        thread_id=thread_id,
+        message_ids=(unresolved_ids if legacy_filename and not confirmed else expected),
+        indeterminate_stages=list(cleanup.get("indeterminateStages") or []),
+        cleanup=cleanup,
+        _replace_message_ids=legacy_filename and not confirmed,
+    )
+    if not confirmed:
+        # The journal is the recovery source of truth until every possible ID
+        # is reconciled.  Never remove it on partial or ambiguous cleanup.
+        return False
+
+    final_journal = _load_canary_journal(journal_path)
+    directory = _private_canary_directory(journal_path.parent)
+    receipt_payload = {
+        **final_journal,
+        "receiptVersion": 1,
+        "cleanupConfirmed": True,
+    }
+    flags = os.O_RDONLY
+    if hasattr(os, "O_DIRECTORY"):
+        flags |= os.O_DIRECTORY
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    directory_fd = os.open(directory, flags)
+    try:
+        try:
+            _write_exclusive_at(directory_fd, CANARY_RECEIPT_FILENAME, receipt_payload)
+        except FileExistsError:
+            receipt_path = directory / CANARY_RECEIPT_FILENAME
+            receipt_info = receipt_path.lstat()
+            if (
+                receipt_path.is_symlink()
+                or not stat.S_ISREG(receipt_info.st_mode)
+                or receipt_info.st_uid != os.getuid()
+                or stat.S_IMODE(receipt_info.st_mode) != 0o600
+                or json.loads(receipt_path.read_text(encoding="utf-8")) != receipt_payload
+            ):
+                raise RuntimeError("canary cleanup receipt conflicts")
+        os.fsync(directory_fd)
+        os.unlink(journal_path.name, dir_fd=directory_fd)
+        os.fsync(directory_fd)
+    except Exception:
+        # If receipt creation or journal removal fails, report cleanup as not
+        # fully finalized.  The one-shot claim prevents a blind rerun.
+        return False
+    finally:
+        os.close(directory_fd)
+    return not journal_path.exists() and (directory / CANARY_RECEIPT_FILENAME).is_file()
 
 
 def load_module(path: Path):
@@ -687,12 +955,66 @@ def render_final_stress(module, iterations: int) -> dict:
     }
 
 
-def basic_live_canary(module, chat_id: str, thread_id: str) -> dict:
+def _production_chat(chat_id: str) -> bool:
+    try:
+        return int(str(chat_id).strip()) == int(PRODUCTION_CHAT_ID)
+    except (TypeError, ValueError):
+        return False
+
+
+def _legacy_live_canary_journal(chat_id: str, thread_id: str) -> Path:
+    """Provide a safe journal for the old three-argument direct-call API.
+
+    Production calls still require an explicit caller-created 0700 directory.
+    Non-production direct callers get a one-shot 0700 directory, 0600 journal,
+    durable claim, and final receipt. The former environment-file convention
+    remains available only for non-production compatibility tests and tools.
+    """
+    configured = os.environ.get(CANARY_JOURNAL_ENV, "").strip()
+    role = "jaimes" if str(thread_id).strip() == PRODUCTION_JAIMES_THREAD_ID else "josh2"
+    if configured:
+        candidate = Path(configured).expanduser()
+        if candidate.suffix.lower() == ".json":
+            if _production_chat(chat_id):
+                raise RuntimeError(
+                    "production direct calls require an explicit prepared canary journal"
+                )
+            directory = candidate.parent
+            created = False
+            try:
+                directory.mkdir(mode=0o700)
+                created = True
+            except FileExistsError:
+                pass
+            if created:
+                os.chmod(directory, 0o700)
+            return prepare_canary_journal(
+                directory,
+                role=role,
+                _journal_filename=candidate.name,
+            )
+        if _production_chat(chat_id):
+            return prepare_canary_journal(candidate, role=role)
+
+    if _production_chat(chat_id):
+        raise RuntimeError(
+            "production direct calls require an explicit prepared canary journal"
+        )
+    directory = Path(tempfile.mkdtemp(prefix="telegram-canary-compat-"))
+    os.chmod(directory, 0o700)
+    return prepare_canary_journal(directory, role=role)
+
+
+def basic_live_canary(module, chat_id: str, thread_id: str, journal_path: Path) -> dict:
     start = time.monotonic()
     sent_ids: list[str] = []
     indeterminate_ids: list[str] = []
     indeterminate_stages: list[str] = []
+    final_attempts = 0
+    final_successes = 0
+    final_ids: list[str] = []
     write_canary_journal(
+        journal_path,
         stage="basic-send-intent",
         chat_id=chat_id,
         thread_id=thread_id,
@@ -701,7 +1023,7 @@ def basic_live_canary(module, chat_id: str, thread_id: str) -> dict:
     )
     try:
         sent = module.send_card(
-            "<pre>TEMPORARY QA CANARY\n- send\n- edit\n- delete</pre>",
+            "<pre>TEMPORARY QA CANARY\n- send\n- edit\n- separate final\n- delete</pre>",
             None,
             15,
             chat_id=chat_id,
@@ -715,6 +1037,7 @@ def basic_live_canary(module, chat_id: str, thread_id: str) -> dict:
     if delivery_is_indeterminate(module, sent):
         (indeterminate_ids if target else indeterminate_stages).append(target or "basic-send")
     write_canary_journal(
+        journal_path,
         stage="basic-send-receipt",
         chat_id=chat_id,
         thread_id=thread_id,
@@ -729,18 +1052,25 @@ def basic_live_canary(module, chat_id: str, thread_id: str) -> dict:
             indeterminate_ids=indeterminate_ids,
             indeterminate_stages=indeterminate_stages,
         )
-        finalize_canary_journal(cleanup, chat_id, thread_id)
+        cleanup_confirmed = finalize_canary_journal(
+            journal_path,
+            cleanup,
+            chat_id,
+            thread_id,
+            sent_ids,
+        )
         return {
             "ok": False,
             "stage": "send",
             "scope": "synthetic cumulative transport timing only; never p95 or inbound-path evidence",
             "error": str(sent.get("error") or "send failed")[:240],
             "cleanup": cleanup,
+            "cleanupConfirmed": cleanup_confirmed,
         }
     try:
         edited = module.edit_card(
             target,
-            "<pre>TEMPORARY QA CANARY\n- send ok\n- edit ok\n- deleting</pre>",
+            "<pre>TEMPORARY QA CANARY\n- send ok\n- edit ok\n- final pending</pre>",
             None,
             15,
             chat_id=chat_id,
@@ -748,6 +1078,68 @@ def basic_live_canary(module, chat_id: str, thread_id: str) -> dict:
         )
     except Exception as exc:
         edited = {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
+    failures = []
+    if not edited.get("ok"):
+        failures.append(f"basic edit failed: {str(edited.get('error') or 'edit failed')[:160]}")
+    else:
+        try:
+            final_text = module.build_completion_summary(
+                title="Temporary Telegram response canary",
+                status="done",
+                model="system/transport-canary",
+                now="Confirmed the separate final retained one delivery receipt",
+                done=[
+                    "Confirmed the temporary card was sent to the owned topic.",
+                    "Verified the same card accepted its terminal edit.",
+                ],
+                next_step="No action needed.",
+                blocker="None",
+            )
+            final_problems = validate(final_text, module)
+        except Exception as exc:
+            final_text = ""
+            final_problems = [f"final renderer failed: {type(exc).__name__}"]
+        if final_problems:
+            failures.append("basic structured final validation failed")
+        else:
+            final_attempts = 1
+            write_canary_journal(
+                journal_path,
+                stage="basic-final-intent",
+                chat_id=chat_id,
+                thread_id=thread_id,
+                message_ids=sent_ids,
+                indeterminate_stages=[*indeterminate_stages, "basic-final"],
+            )
+            try:
+                final = module.send_final_summary(
+                    final_text,
+                    15,
+                    chat_id=chat_id,
+                    thread_id=thread_id,
+                )
+            except Exception as exc:
+                final = {"ok": False, "error": f"{type(exc).__name__}: {exc}"}
+            final_target = message_id(final)
+            if final_target:
+                sent_ids.append(final_target)
+                final_ids.append(final_target)
+            if delivery_is_indeterminate(module, final):
+                (indeterminate_ids if final_target else indeterminate_stages).append(
+                    final_target or "basic-final"
+                )
+            write_canary_journal(
+                journal_path,
+                stage="basic-final-receipt",
+                chat_id=chat_id,
+                thread_id=thread_id,
+                message_ids=sent_ids,
+                indeterminate_stages=indeterminate_stages,
+            )
+            if final.get("ok") and final_target:
+                final_successes = 1
+            else:
+                failures.append("basic separate final failed")
     cleanup = cleanup_messages(
         module,
         chat_id,
@@ -755,18 +1147,35 @@ def basic_live_canary(module, chat_id: str, thread_id: str) -> dict:
         indeterminate_ids=indeterminate_ids,
         indeterminate_stages=indeterminate_stages,
     )
-    finalize_canary_journal(cleanup, chat_id, thread_id)
-    failures = []
-    if not edited.get("ok"):
-        failures.append(f"basic edit failed: {str(edited.get('error') or 'edit failed')[:160]}")
-    if cleanup["failedIds"] or cleanup["indeterminateStages"]:
+    cleanup_confirmed = finalize_canary_journal(
+        journal_path,
+        cleanup,
+        chat_id,
+        thread_id,
+        sent_ids,
+    )
+    if not (
+        final_attempts == 1
+        and final_successes == 1
+        and len(final_ids) == 1
+    ):
+        failures.append("exactly-one-final contract failed")
+    if not cleanup_confirmed:
         failures.append("temporary canary cleanup is incomplete or indeterminate")
+    failures = list(dict.fromkeys(failures))
     return {
         "ok": not failures,
         "scope": "synthetic cumulative transport timing only; never p95 or inbound-path evidence",
         "send": bool(sent.get("ok")),
         "edit": bool(edited.get("ok")),
+        "final": {
+            "attempts": final_attempts,
+            "successes": final_successes,
+            "messageIds": final_ids,
+            "exactlyOne": final_attempts == 1 and final_successes == 1 and len(final_ids) == 1,
+        },
         "cleanup": cleanup,
+        "cleanupConfirmed": cleanup_confirmed,
         "failures": failures,
         "timing": {
             "kind": "synthetic cumulative transport timing",
@@ -775,9 +1184,18 @@ def basic_live_canary(module, chat_id: str, thread_id: str) -> dict:
     }
 
 
-def live_canary(module, chat_id: str, thread_id: str) -> dict:
+def live_canary(
+    module,
+    chat_id: str,
+    thread_id: str,
+    journal_path: Path | None = None,
+) -> dict:
+    journal_path = Path(journal_path) if journal_path is not None else _legacy_live_canary_journal(
+        chat_id,
+        thread_id,
+    )
     if not all(hasattr(module, name) for name in ("build_card", "build_rich_card", "send_rich_message", "edit_rich_card")):
-        return basic_live_canary(module, chat_id, thread_id)
+        return basic_live_canary(module, chat_id, thread_id, journal_path)
     start = time.monotonic()
     response_start: float | None = None
     setup_ms: float | None = None
@@ -804,6 +1222,7 @@ def live_canary(module, chat_id: str, thread_id: str) -> dict:
         nonlocal pending_send_stage
         pending_send_stage = stage
         write_canary_journal(
+            journal_path,
             stage=f"{stage}-intent",
             chat_id=chat_id,
             thread_id=thread_id,
@@ -824,6 +1243,7 @@ def live_canary(module, chat_id: str, thread_id: str) -> dict:
         if pending_send_stage == stage:
             pending_send_stage = None
         write_canary_journal(
+            journal_path,
             stage=f"{stage}-receipt",
             chat_id=chat_id,
             thread_id=thread_id,
@@ -843,7 +1263,13 @@ def live_canary(module, chat_id: str, thread_id: str) -> dict:
             indeterminate_ids=indeterminate_ids,
             indeterminate_stages=unresolved_stages,
         )
-        finalize_canary_journal(cleanup, chat_id, thread_id)
+        cleanup_confirmed = finalize_canary_journal(
+            journal_path,
+            cleanup,
+            chat_id,
+            thread_id,
+            sent_ids,
+        )
         result_failures = list(failures)
         exactly_one_final = final_attempts == 1 and final_successes == 1 and len(final_ids) == 1
         synthetic_checks = {
@@ -859,7 +1285,7 @@ def live_canary(module, chat_id: str, thread_id: str) -> dict:
             result_failures.append("synthetic cumulative response timing exceeded one or more thresholds")
         if final_attempts and not exactly_one_final:
             result_failures.append("exactly-one-final contract failed")
-        if cleanup["failedIds"] or cleanup["indeterminateStages"]:
+        if not cleanup_confirmed:
             result_failures.append("temporary canary cleanup is incomplete or indeterminate")
         result_failures = list(dict.fromkeys(result_failures))
         return {
@@ -881,6 +1307,7 @@ def live_canary(module, chat_id: str, thread_id: str) -> dict:
                 "exactlyOne": exactly_one_final,
             },
             "cleanup": cleanup,
+            "cleanupConfirmed": cleanup_confirmed,
             "failures": result_failures,
             "elapsedMs": round((time.monotonic() - start) * 1000, 1),
         }
@@ -1059,6 +1486,62 @@ def live_canary(module, chat_id: str, thread_id: str) -> dict:
     return finish()
 
 
+def production_canary_stdout(result: dict) -> dict:
+    """Project a live run to statuses/counts; identifiers stay in the journal."""
+    stress = result.get("stress") if isinstance(result.get("stress"), dict) else {}
+    transport = result.get("transport") if isinstance(result.get("transport"), dict) else None
+    projected: dict[str, object] = {
+        "role": str(result.get("role") or ""),
+        "ok": bool(result.get("ok")),
+        "status": "passed" if result.get("ok") else "failed",
+        "problemCount": len(result.get("problems") or []),
+        "stress": {
+            "ok": bool(stress.get("ok")),
+            "status": "passed" if stress.get("ok") else "failed",
+            "iterations": int(stress.get("iterations") or 0),
+            "renderedCards": int(stress.get("renderedCards") or 0),
+            "problemCount": len(stress.get("problems") or []),
+        },
+        "transport": {
+            "ok": False,
+            "status": "not-run",
+            "failureCount": 0,
+            "cleanup": {
+                "status": "not-run",
+                "attempted": 0,
+                "deleted": 0,
+                "failedCount": 0,
+                "indeterminateCount": 0,
+            },
+            "final": {"attempts": 0, "successes": 0, "count": 0},
+        },
+    }
+    if transport is None:
+        return projected
+    cleanup = transport.get("cleanup") if isinstance(transport.get("cleanup"), dict) else {}
+    final = transport.get("final") if isinstance(transport.get("final"), dict) else {}
+    cleanup_confirmed = bool(transport.get("cleanupConfirmed"))
+    projected["transport"] = {
+        "ok": bool(transport.get("ok")),
+        "status": "passed" if transport.get("ok") else "failed",
+        "failureCount": len(transport.get("failures") or []) + int(bool(transport.get("error"))),
+        "cleanup": {
+            "status": "confirmed" if cleanup_confirmed else "pending",
+            "attempted": int(cleanup.get("attempted") or 0),
+            "deleted": int(cleanup.get("deleted") or 0),
+            "failedCount": len(cleanup.get("failedIds") or []),
+            "indeterminateCount": len(cleanup.get("indeterminateIds") or [])
+            + len(cleanup.get("indeterminateStages") or []),
+        },
+        "final": {
+            "attempts": int(final.get("attempts") or 0),
+            "successes": int(final.get("successes") or 0),
+            "count": len(final.get("messageIds") or []),
+        },
+    }
+    return projected
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--role", choices=("josh2", "jaimes"), required=True)
@@ -1074,6 +1557,14 @@ def main() -> int:
         "--confirm-production-canary",
         action="store_true",
         help="allow temporary canary messages in production Inbox topic 1",
+    )
+    parser.add_argument(
+        "--canary-journal-dir",
+        default=os.environ.get(CANARY_JOURNAL_ENV, ""),
+        help=(
+            "caller-created one-shot 0700 directory for the private 0600 live-canary journal; "
+            "the directory cannot be reused; defaults to TELEGRAM_CANARY_CLEANUP_JOURNAL"
+        ),
     )
     args = parser.parse_args()
     if args.live and args.work_card_path:
@@ -1134,13 +1625,28 @@ def main() -> int:
             target_problems.append(
                 "JAIMES live canary requires JAIMES_ALLOW_EXPLICIT_CARD_DELETE=1 so cleanup is permitted"
             )
+        if not args.canary_journal_dir:
+            target_problems.append("--canary-journal-dir is required for a one-shot live canary")
         problems.extend(target_problems)
         if not target_problems:
-            transport = live_canary(module, args.chat_id, args.thread_id)
-            if not transport.get("ok"):
-                problems.append("live send/edit/delete canary failed")
+            try:
+                journal_path = prepare_canary_journal(
+                    args.canary_journal_dir,
+                    role=args.role,
+                )
+            except (OSError, RuntimeError):
+                problems.append("private one-shot canary journal preparation failed")
+            else:
+                transport = live_canary(
+                    module,
+                    args.chat_id,
+                    args.thread_id,
+                    journal_path,
+                )
+                if not transport.get("ok"):
+                    problems.append("live send/edit/delete canary failed")
     result = {"role": args.role, "ok": not problems, "problems": sorted(set(problems)), "stress": stress, "transport": transport}
-    print(json.dumps(result, indent=2))
+    print(json.dumps(production_canary_stdout(result) if args.live else result, indent=2))
     return 0 if result["ok"] else 1
 
 

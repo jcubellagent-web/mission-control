@@ -8,15 +8,30 @@ file, and execution work alone.
 
 from __future__ import annotations
 
+import importlib.util
+import json
+import os
 import re
+import subprocess
+import sys
 from collections.abc import Mapping
+from functools import lru_cache
+from pathlib import Path
 from typing import Any, Optional
 
 
 _MANAGED_PLATFORM = "telegram"
-_MANAGED_CHAT_ID = "-1003589561528"
-_MANAGED_THREAD_ID = "17"
+_RUNTIME_OWNER = "jaimes"
+_MANAGED_LANE_LABEL = "JAIMES Ops"
 _MAX_INSPECTION_CHARS = 128 * 1024
+
+_SILENT_BOT_REASON = "telegram-bot-origin"
+_SILENT_NON_OWNER_REASON = "telegram-non-owner"
+_SILENT_REGISTRY_REASON = "telegram-ownership-unavailable"
+
+
+class GatewayLifecycleAbort(BaseException):
+    """Abort a managed turn before delivery when its terminal intent is absent."""
 
 _BLOCK_MESSAGE = (
     "JAIMES Ops Telegram and Control Tower lifecycle updates are managed by "
@@ -87,6 +102,94 @@ _BRAIN_FEED_HELPER_RE = re.compile(
 )
 
 
+def _registry_candidates() -> tuple[Path, ...]:
+    """Locate canonical registry code without embedding any topic identifiers."""
+    roots: list[Path] = []
+    for name in ("MISSION_CONTROL_ROOT", "CONTROL_TOWER_ROOT"):
+        value = os.environ.get(name, "").strip()
+        if value:
+            roots.append(Path(value).expanduser())
+
+    plugin_path = Path(__file__).resolve()
+    if len(plugin_path.parents) > 2:
+        roots.append(plugin_path.parents[2])
+    roots.append(Path.home() / ".openclaw" / "workspace" / "mission-control")
+
+    candidates: list[Path] = []
+    seen: set[str] = set()
+    for root in roots:
+        candidate = root / "scripts" / "telegram_channel_registry.py"
+        key = str(candidate)
+        if key not in seen:
+            seen.add(key)
+            candidates.append(candidate)
+    return tuple(candidates)
+
+
+@lru_cache(maxsize=1)
+def _load_registry_module() -> Any | None:
+    """Load canonical ownership helpers; callers deny Telegram on failure."""
+    for path in _registry_candidates():
+        try:
+            if not path.is_file():
+                continue
+            spec = importlib.util.spec_from_file_location(
+                "_jaimes_telegram_channel_registry",
+                path,
+            )
+            if spec is None or spec.loader is None:
+                continue
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            if all(
+                callable(getattr(module, name, None))
+                for name in (
+                    "owner_accepts_source",
+                    "telegram_source_is_bot",
+                    "topic_matches",
+                    "topic_owner",
+                )
+            ):
+                return module
+        except Exception:
+            continue
+    return None
+
+
+def _platform_name(value: Any) -> str:
+    raw = getattr(value, "value", value)
+    return str(raw or "").strip().lower()
+
+
+def _on_pre_gateway_dispatch(
+    event: Any = None,
+    **_: Any,
+) -> Optional[dict[str, str]]:
+    """Silently reject Telegram bot traffic and messages owned elsewhere."""
+    source = getattr(event, "source", None)
+    if _platform_name(getattr(source, "platform", "")) != _MANAGED_PLATFORM:
+        return None
+
+    if bool(getattr(source, "is_bot", False)):
+        return {"action": "skip", "reason": _SILENT_BOT_REASON}
+
+    registry = _load_registry_module()
+    if registry is None:
+        return {"action": "skip", "reason": _SILENT_REGISTRY_REASON}
+    try:
+        if registry.telegram_source_is_bot(source):
+            return {"action": "skip", "reason": _SILENT_BOT_REASON}
+        if not registry.owner_accepts_source(
+            _RUNTIME_OWNER,
+            source,
+            text=getattr(event, "text", ""),
+        ):
+            return {"action": "skip", "reason": _SILENT_NON_OWNER_REASON}
+    except Exception:
+        return {"action": "skip", "reason": _SILENT_REGISTRY_REASON}
+    return None
+
+
 def _session_value(name: str) -> str:
     """Read task-local gateway context without process-global leakage."""
     try:
@@ -99,15 +202,139 @@ def _session_value(name: str) -> str:
 
 
 def _is_managed_topic() -> bool:
-    return (
+    if (
         _session_value("HERMES_SESSION_PLATFORM").strip().lower()
-        == _MANAGED_PLATFORM
-        and _session_value("HERMES_SESSION_CHAT_ID").strip()
-        == _MANAGED_CHAT_ID
-        and _session_value("HERMES_SESSION_THREAD_ID").strip()
-        == _MANAGED_THREAD_ID
-    )
+        != _MANAGED_PLATFORM
+    ):
+        return False
+    registry = _load_registry_module()
+    if registry is None:
+        return False
+    chat_id = _session_value("HERMES_SESSION_CHAT_ID").strip()
+    thread_id = _session_value("HERMES_SESSION_THREAD_ID").strip()
+    try:
+        if registry.topic_matches(
+            chat_id,
+            thread_id,
+            owner=_RUNTIME_OWNER,
+            label=_MANAGED_LANE_LABEL,
+        ):
+            return True
+        # Preserve the existing managed-lane tool scope. Ingress ownership is
+        # independently fail-closed by ``_on_pre_gateway_dispatch``.
+        return False
+    except Exception:
+        return False
 
+
+def _is_owned_telegram_session() -> bool:
+    if _session_value("HERMES_SESSION_PLATFORM").strip().lower() != _MANAGED_PLATFORM:
+        return False
+    registry = _load_registry_module()
+    if registry is None:
+        return False
+    chat_id = _session_value("HERMES_SESSION_CHAT_ID").strip()
+    thread_id = _session_value("HERMES_SESSION_THREAD_ID").strip()
+    try:
+        accepts = getattr(registry, "owner_accepts", None)
+        if callable(accepts):
+            return bool(accepts(_RUNTIME_OWNER, chat_id, thread_id, direct=not bool(thread_id)))
+        return str(registry.topic_owner(chat_id, thread_id) or "") == _RUNTIME_OWNER
+    except Exception:
+        return False
+
+
+def _mission_control_root() -> Path:
+    for name in ("MISSION_CONTROL_ROOT", "CONTROL_TOWER_ROOT"):
+        value = os.environ.get(name, "").strip()
+        if value:
+            return Path(value).expanduser()
+    plugin_path = Path(__file__).resolve()
+    if len(plugin_path.parents) > 2:
+        candidate = plugin_path.parents[2]
+        if (candidate / "scripts" / "jaimes_telegram_fast_ack.py").is_file():
+            return candidate
+    return Path.home() / ".openclaw" / "workspace" / "mission-control"
+
+
+def _writer_rollout_required(session_id: str) -> bool:
+    root = _mission_control_root()
+    try:
+        rollout = json.loads((root / "config" / "telegram-lifecycle-rollout.json").read_text())
+        if rollout.get("globalKillSwitch"):
+            return True
+        if str(rollout.get("masterState") or "off") in {"jaimes", "all"}:
+            return True
+    except Exception:
+        return True
+    try:
+        state = json.loads(
+            (Path.home() / ".openclaw" / "telegram" / "jaimes_fast_ack_state.json").read_text()
+        )
+        for card in (state.get("active_cards") or {}).values():
+            if (
+                isinstance(card, dict)
+                and card.get("status") == "active"
+                and str(card.get("session_id") or "") == str(session_id or "")
+                and card.get("lifecycle_writer_enabled") is True
+            ):
+                return True
+    except Exception:
+        pass
+    return False
+
+
+def _on_transform_llm_output(
+    response_text: str = "",
+    session_id: str = "",
+    model: str = "",
+    platform: str = "",
+    **_: Any,
+) -> Optional[str]:
+    """Commit the terminal outbox before Hermes performs its native send."""
+    if str(platform or "").strip().lower() != _MANAGED_PLATFORM:
+        return None
+    if not _is_owned_telegram_session():
+        return None
+    root = _mission_control_root()
+    script = root / "scripts" / "jaimes_telegram_fast_ack.py"
+    required = _writer_rollout_required(session_id)
+    payload = {
+        "response_text": str(response_text or ""),
+        "session_id": str(session_id or ""),
+        "model": str(model or ""),
+        "inbound_message_id": _session_value("HERMES_SESSION_MESSAGE_ID").strip(),
+    }
+    try:
+        result = subprocess.run(
+            [sys.executable, str(script), "--prepare-terminal-json-stdin"],
+            input=json.dumps(payload),
+            text=True,
+            capture_output=True,
+            timeout=10,
+            check=False,
+            cwd=root,
+        )
+        if result.returncode != 0:
+            raise RuntimeError("terminal-preparation-command-failed")
+        receipt = json.loads(result.stdout)
+        if not isinstance(receipt, dict) or receipt.get("ok") is not True:
+            raise RuntimeError("terminal-preparation-receipt-invalid")
+        if receipt.get("managed") is not True:
+            if required:
+                raise RuntimeError("required-terminal-lifecycle-not-managed")
+            return None
+        transformed = str(receipt.get("text") or "")
+        if not transformed:
+            raise RuntimeError("terminal-preparation-empty-final")
+        return transformed
+    except Exception as exc:
+        if required:
+            # Hermes deliberately catches ordinary Exception from plugins and
+            # would otherwise deliver the untracked model text. BaseException
+            # crosses that boundary and fails the managed turn closed.
+            raise GatewayLifecycleAbort("managed Telegram terminal preparation failed") from exc
+        return None
 
 def _payload_text(value: Any) -> str:
     """Flatten bounded tool arguments for narrow execution-pattern checks."""
@@ -209,4 +436,6 @@ def _on_pre_tool_call(
 
 
 def register(ctx: Any) -> None:
+    ctx.register_hook("pre_gateway_dispatch", _on_pre_gateway_dispatch)
     ctx.register_hook("pre_tool_call", _on_pre_tool_call)
+    ctx.register_hook("transform_llm_output", _on_transform_llm_output)

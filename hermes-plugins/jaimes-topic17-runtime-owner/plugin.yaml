@@ -1,7 +1,9 @@
 name: jaimes-topic17-runtime-owner
-version: "1.0.0"
-description: "Keep JAIMES Ops Telegram surfaces owned by the gateway runtime."
+version: "1.2.0"
+description: "Silently enforce JAIMES Telegram intake and surface ownership."
 author: "Josh Cubell / Codex"
 kind: standalone
 hooks:
+  - pre_gateway_dispatch
   - pre_tool_call
+  - transform_llm_output

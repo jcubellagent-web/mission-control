@@ -38,6 +38,7 @@ def isolated_guard(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     root = tmp_path / "repo"
     root.mkdir()
     monkeypatch.setattr(GUARD, "ROOT", root)
+    monkeypatch.setattr(GUARD, "STATE_DIR", tmp_path / "state")
     monkeypatch.setattr(GUARD, "LOCK_PATH", tmp_path / "lease.json")
     monkeypatch.setattr(GUARD, "BACKUP_ROOT", tmp_path / "backups")
     monkeypatch.setattr(GUARD, "source_changes", lambda: [])
@@ -70,10 +71,17 @@ def test_guard_covers_jcu10_lifecycle_brain_and_schema_paths() -> None:
         "docs/brain-topic-intake.md",
         "scripts/telegram_gateway_lifecycle.py",
         "scripts/brain_media_intake.py",
+        "scripts/brain_intake_worker.py",
+        "scripts/brain_fixture_suite.py",
+        "scripts/brain_gateway_actions.py",
+        "scripts/brain_gateway_dispatcher.py",
+        "scripts/brain_topic_manager.py",
         "scripts/brain_topic_catalog.py",
         "scripts/brain_topic_watcher.py",
         "scripts/josh_telegram_callback_action.py",
         "scripts/telegram_channel_registry.py",
+        "scripts/telegram_lifecycle_release.py",
+        "scripts/telegram_shadow_fixture.py",
         "hermes-plugins",
     }
     compiled = {path for path in guarded if path.startswith("scripts/")}
@@ -97,6 +105,49 @@ def test_begin_records_an_immutable_source_snapshot(tmp_path: Path, monkeypatch:
         {"path": "missing.txt", "existedAtBegin": False},
     ]
     assert (Path(payload["backup"]) / "existing.txt").read_text() == "before\n"
+
+
+def test_extend_snapshot_adds_only_newly_guarded_absent_paths(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    payload = lease(tmp_path)
+    payload["sourceSnapshot"] = [
+        {"path": "scripts/existing.py", "existedAtBegin": True},
+    ]
+    GUARD.LOCK_PATH.write_text(json.dumps(payload))
+    monkeypatch.setattr(
+        GUARD,
+        "SOURCE_PATHS",
+        ("scripts/existing.py", "scripts/new_worker.py", "scripts/new_dispatcher.py"),
+    )
+
+    GUARD.extend_snapshot("own-token")
+
+    extended = json.loads(GUARD.LOCK_PATH.read_text())
+    assert extended["sourceSnapshot"] == [
+        {"path": "scripts/existing.py", "existedAtBegin": True},
+        {"path": "scripts/new_worker.py", "existedAtBegin": False},
+        {"path": "scripts/new_dispatcher.py", "existedAtBegin": False},
+    ]
+
+
+def test_extend_snapshot_rejects_a_newly_guarded_path_that_already_exists(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    payload = lease(tmp_path)
+    payload["sourceSnapshot"] = []
+    GUARD.LOCK_PATH.write_text(json.dumps(payload))
+    existing = GUARD.ROOT / "scripts" / "untracked.py"
+    existing.parent.mkdir(parents=True)
+    existing.write_text("cannot prove begin state\n")
+    monkeypatch.setattr(GUARD, "SOURCE_PATHS", ("scripts/untracked.py",))
+
+    with pytest.raises(SystemExit, match="begin-state cannot be proven"):
+        GUARD.extend_snapshot("own-token")
+
+    assert json.loads(GUARD.LOCK_PATH.read_text())["sourceSnapshot"] == []
 
 
 def test_successful_completion_verifies_and_releases_own_lease(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.josh2.brain-intake-worker</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/opt/homebrew/bin/python3</string>
+    <string>/Users/josh2.0/.openclaw/workspace/mission-control/scripts/brain_intake_worker.py</string>
+    <string>run-once</string>
+    <string>--max-jobs</string>
+    <string>2</string>
+    <string>--max-seconds</string>
+    <string>12</string>
+  </array>
+  <key>StartInterval</key>
+  <integer>15</integer>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>ProcessType</key>
+  <string>Background</string>
+  <key>LowPriorityIO</key>
+  <true/>
+  <key>StandardOutPath</key>
+  <string>/Users/josh2.0/.openclaw/logs/brain-intake-worker.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/josh2.0/.openclaw/logs/brain-intake-worker.error.log</string>
+</dict>
+</plist>

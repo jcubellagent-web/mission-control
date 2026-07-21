@@ -14,7 +14,6 @@ import datetime as dt
 import fcntl
 import json
 import os
-import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -42,6 +41,7 @@ SSH_BASE = [
 RECOVERY_COOLDOWN_SECONDS = 15 * 60
 LOCK_STALE_SECONDS = 10 * 60
 FAST_ACK_STALE_SECONDS = 5 * 60
+RECOVERY_TARGET_NAMES = frozenset({"gateway", "fast_ack", "cua"})
 
 
 def utc_now() -> dt.datetime:
@@ -62,6 +62,27 @@ def parse_ts(value: Any) -> dt.datetime | None:
 def compact(value: Any, limit: int = 600) -> str:
     text = " ".join(str(value or "").split())
     return text if len(text) <= limit else text[: limit - 1].rstrip() + "..."
+
+
+def safe_timestamp(value: Any) -> str | None:
+    stamp = parse_ts(value)
+    if stamp is None:
+        return None
+    return iso(stamp.astimezone(dt.timezone.utc))
+
+
+def safe_bool(value: Any) -> bool | None:
+    return value if isinstance(value, bool) else None
+
+
+def safe_nonnegative_int(value: Any, default: int = 0) -> int:
+    if isinstance(value, bool):
+        return default
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        return default
+    return parsed if 0 <= parsed <= 1_000_000 else default
 
 
 def read_json(path: Path, default: Any) -> Any:
@@ -106,12 +127,89 @@ def lock_or_exit() -> Any:
         yield
 
 
-def run(cmd: list[str], timeout: int = 45) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, check=False)
+def run(
+    cmd: list[str],
+    timeout: int = 45,
+    *,
+    input_text: str | None = None,
+) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        cmd,
+        capture_output=True,
+        text=True,
+        timeout=timeout,
+        check=False,
+        input=input_text,
+    )
 
 
 def remote(script: str, timeout: int = 45) -> subprocess.CompletedProcess[str]:
-    return run([*SSH_BASE, JAIMES_ALIAS, "/bin/zsh", "-lc", script], timeout=timeout)
+    #JAIMES: feed remote scripts over stdin so shell parsing cannot turn `set -e`
+    # into a bare `set` that prints the remote environment.
+    return run(
+        [*SSH_BASE, JAIMES_ALIAS, "/bin/zsh", "-s", "--"],
+        timeout=timeout,
+        input_text=script,
+    )
+
+
+def safe_process_status(proc: subprocess.CompletedProcess[str]) -> dict[str, Any]:
+    """Return diagnostics that cannot carry child-process output."""
+    return {
+        "ok": proc.returncode == 0,
+        "returncode": int(proc.returncode),
+        "capturedOutputSuppressed": bool(proc.stdout or proc.stderr),
+    }
+
+
+def safe_probe_snapshot(probe: dict[str, Any]) -> dict[str, Any]:
+    """Reduce private/raw probe material to the health fields consumers need."""
+    gateway = probe.get("gateway") if isinstance(probe.get("gateway"), dict) else {}
+    platforms = gateway.get("platforms") if isinstance(gateway.get("platforms"), dict) else {}
+    telegram = platforms.get("telegram") if isinstance(platforms.get("telegram"), dict) else {}
+    fast_ack = probe.get("fastAckState") if isinstance(probe.get("fastAckState"), dict) else {}
+    identity = fast_ack.get("identity") if isinstance(fast_ack.get("identity"), dict) else {}
+    delivery_error = fast_ack.get("deliveryError") if isinstance(fast_ack.get("deliveryError"), dict) else {}
+    brain = probe.get("brainFeed") if isinstance(probe.get("brainFeed"), dict) else {}
+    brain_status = str(brain.get("status") or "").lower()
+    if brain_status not in {"active", "ready", "done", "info", "error", "blocked", "failed"}:
+        brain_status = "unknown"
+    cua = probe.get("cua") if isinstance(probe.get("cua"), dict) else {}
+    permissions = cua.get("permissions") if isinstance(cua.get("permissions"), dict) else {}
+    screen_probe = cua.get("screenProbe") if isinstance(cua.get("screenProbe"), dict) else {}
+    screen_returncode = screen_probe.get("returncode")
+    if isinstance(screen_returncode, bool) or not isinstance(screen_returncode, int):
+        screen_returncode = None
+    return {
+        "gatewayState": "running" if gateway.get("gateway_state") == "running" else "not-running",
+        "telegramState": "connected" if telegram.get("state") == "connected" else "not-connected",
+        "fastAckState": "running" if "state = running" in str(probe.get("fastAckLaunchd") or "") else "not-running",
+        "fastAckIdentity": {"ok": identity.get("ok") is True},
+        "fastAckDelivery": {
+            "lastSurfaceAt": safe_timestamp(fast_ack.get("lastSurfaceAt")),
+            "lastSurfaceOk": safe_bool(fast_ack.get("lastSurfaceOk")),
+            "surfaceIndeterminate": fast_ack.get("surfaceIndeterminate") is True,
+            "activeCardCount": safe_nonnegative_int(fast_ack.get("activeCardCount")),
+            "deliveryErrorPresent": bool(delivery_error),
+        },
+        "brainFeed": {
+            "status": brain_status,
+            "updatedAt": safe_timestamp(brain.get("updatedAt")),
+        },
+        "computerUse": {
+            "status": "running" if cua.get("statusCode") == 0 and "daemon is running" in str(cua.get("status") or "") else "not-running",
+            "permissions": {
+                "accessibility": permissions.get("accessibility") is True,
+                "screenRecording": permissions.get("screen_recording") is True,
+            },
+            "screenProbe": {
+                "timeout": screen_probe.get("timeout") is True,
+                "returncode": screen_returncode,
+            },
+        },
+        "telegramSessionPresent": any("telegram" in str(key).lower() for key in (probe.get("sessions") or {})) if isinstance(probe.get("sessions"), dict) else False,
+        "activeSessions": len(probe.get("sessions") or {}) if isinstance(probe.get("sessions"), dict) else 0,
+    }
 
 
 def probe_jaimes() -> dict[str, Any]:
@@ -215,13 +313,19 @@ PY
     if proc.returncode != 0:
         return {
             "checkedAt": iso(),
-            "probeError": compact(proc.stderr or proc.stdout or f"ssh returned {proc.returncode}"),
+            "probeError": "JAIMES SSH health probe failed.",
+            "probeReturncode": int(proc.returncode),
             "ok": False,
         }
     try:
         return json.loads(proc.stdout)
-    except Exception as exc:
-        return {"checkedAt": iso(), "probeError": f"Probe JSON parse failed: {exc}", "raw": proc.stdout[-2000:]}
+    except Exception:
+        return {
+            "checkedAt": iso(),
+            "probeError": "JAIMES SSH health probe returned invalid JSON.",
+            "probeReturncode": int(proc.returncode),
+            "ok": False,
+        }
 
 
 def evaluate(probe: dict[str, Any]) -> tuple[str, list[str], set[str]]:
@@ -237,7 +341,7 @@ def evaluate(probe: dict[str, Any]) -> tuple[str, list[str], set[str]]:
     ] if isinstance(sessions, dict) else []
 
     if probe.get("probeError"):
-        issues.append(f"Cannot reach JAIMES over SSH: {probe.get('probeError')}")
+        issues.append("Cannot reach JAIMES over SSH.")
     if gateway.get("gateway_state") != "running":
         issues.append("Hermes gateway state is not running.")
         recovery_targets.add("gateway")
@@ -348,10 +452,7 @@ def reconcile_visibility() -> dict[str, Any]:
     proc = run(cmd, timeout=75)
     return {
         "attemptedAt": iso(),
-        "ok": proc.returncode == 0,
-        "returncode": proc.returncode,
-        "stdout": compact(proc.stdout, 1800),
-        "stderr": compact(proc.stderr, 1200),
+        **safe_process_status(proc),
     }
 
 
@@ -361,12 +462,13 @@ def can_recover(previous: dict[str, Any]) -> bool:
 
 
 def recover(targets: set[str]) -> dict[str, Any]:
+    safe_targets = set(targets) & RECOVERY_TARGET_NAMES
     commands = ["set -e"]
-    if "gateway" in targets:
+    if "gateway" in safe_targets:
         commands.append("launchctl kickstart -k gui/$(id -u)/ai.hermes.gateway")
-    if "fast_ack" in targets:
+    if "fast_ack" in safe_targets:
         commands.append("launchctl kickstart -k gui/$(id -u)/ai.jaimes.telegram-fast-ack")
-    if "cua" in targets:
+    if "cua" in safe_targets:
         commands.append("launchctl kickstart -k gui/$(id -u)/ai.jaimes.cua-driver")
     commands.extend([
         "sleep 4",
@@ -378,11 +480,8 @@ def recover(targets: set[str]) -> dict[str, Any]:
     proc = remote(cmd, timeout=45)
     return {
         "attemptedAt": iso(),
-        "targets": sorted(targets),
-        "ok": proc.returncode == 0,
-        "returncode": proc.returncode,
-        "stdout": compact(proc.stdout, 1800),
-        "stderr": compact(proc.stderr, 1200),
+        "targets": sorted(safe_targets),
+        **safe_process_status(proc),
     }
 
 
@@ -470,35 +569,13 @@ def main() -> int:
             "recovery": recovery,
             "visibilityReconcile": visibility_reconcile,
             "telegramAlertPolicy": "alert only when recovery fails or approval is required",
-            "probe": {
-                "gatewayState": (probe.get("gateway") or {}).get("gateway_state") if isinstance(probe.get("gateway"), dict) else None,
-                "telegramState": (((probe.get("gateway") or {}).get("platforms") or {}).get("telegram") or {}).get("state") if isinstance(probe.get("gateway"), dict) else None,
-                "fastAckState": "running" if "state = running" in str(probe.get("fastAckLaunchd") or "") else "not-running",
-                "fastAckIdentity": (probe.get("fastAckState") or {}).get("identity") if isinstance(probe.get("fastAckState"), dict) else None,
-                "fastAckDelivery": {
-                    "lastSurfaceAt": (probe.get("fastAckState") or {}).get("lastSurfaceAt"),
-                    "lastSurfaceOk": (probe.get("fastAckState") or {}).get("lastSurfaceOk"),
-                    "surfaceIndeterminate": (probe.get("fastAckState") or {}).get("surfaceIndeterminate"),
-                    "activeCardCount": (probe.get("fastAckState") or {}).get("activeCardCount"),
-                    "deliveryError": (probe.get("fastAckState") or {}).get("deliveryError"),
-                } if isinstance(probe.get("fastAckState"), dict) else None,
-                "brainFeed": probe.get("brainFeed"),
-                "computerUse": {
-                    "status": (probe.get("cua") or {}).get("status") if isinstance(probe.get("cua"), dict) else None,
-                    "version": (probe.get("cua") or {}).get("version") if isinstance(probe.get("cua"), dict) else None,
-                    "permissions": (probe.get("cua") or {}).get("permissions") if isinstance(probe.get("cua"), dict) else None,
-                    "screenProbe": (probe.get("cua") or {}).get("screenProbe") if isinstance(probe.get("cua"), dict) else None,
-                    "update": (probe.get("cua") or {}).get("update") if isinstance(probe.get("cua"), dict) else None,
-                },
-                "telegramSessionPresent": any("telegram" in str(key).lower() for key in (probe.get("sessions") or {})) if isinstance(probe.get("sessions"), dict) else False,
-                "activeSessions": len(probe.get("sessions") or {}) if isinstance(probe.get("sessions"), dict) else 0,
-            },
+            "probe": safe_probe_snapshot(probe),
         }
         if recovery:
             state["lastRecoveryAt"] = recovery["attemptedAt"]
         else:
-            state["lastRecoveryAt"] = previous.get("lastRecoveryAt")
-        state["lastHealthyAt"] = iso() if status == "ok" else previous.get("lastHealthyAt")
+            state["lastRecoveryAt"] = safe_timestamp(previous.get("lastRecoveryAt"))
+        state["lastHealthyAt"] = iso() if status == "ok" else safe_timestamp(previous.get("lastHealthyAt"))
 
         summary = "JAIMES Telegram, Hermes, and Computer Use are healthy." if status == "ok" else "JAIMES needs attention: " + "; ".join(issues[:3])
         state_changed = previous.get("status") != status
@@ -509,14 +586,14 @@ def main() -> int:
             and (utc_now() - last_published) >= dt.timedelta(hours=2)
         )
         if args.dry_run:
-            state["lastPublishedAt"] = previous.get("lastPublishedAt")
+            state["lastPublishedAt"] = safe_timestamp(previous.get("lastPublishedAt"))
         else:
             heartbeat(status, summary)
             if args.force_publish or state_changed or recovery or unresolved_reminder:
                 publish("ok" if status == "ok" else "error", "JAIMES health loop", summary)
                 state["lastPublishedAt"] = iso()
             else:
-                state["lastPublishedAt"] = previous.get("lastPublishedAt")
+                state["lastPublishedAt"] = safe_timestamp(previous.get("lastPublishedAt"))
             write_json(STATE_PATH, state)
             log(f"{status}: {summary}")
         print(json.dumps({"ok": status == "ok", **state}, indent=2))

@@ -58,6 +58,9 @@ WORK_CARD_PARENT_TIMEOUT_SECONDS = 12
 SURFACE_RETRY_BASE_SECONDS = 5
 SURFACE_RETRY_MAX_SECONDS = 60
 SURFACE_RETRY_MAX_RECORDS = 100
+TERMINAL_FINAL_RECEIPT_SECONDS = 90
+TERMINAL_VISIBILITY_MAX_ATTEMPTS = 12
+TERMINAL_VISIBILITY_MAX_AGE_SECONDS = 90
 CONTROL_TOWER_SSH_HOST = os.environ.get("CONTROL_TOWER_SSH_HOST", "josh2.0@josh2")
 CONTROL_TOWER_REMOTE_ROOT = os.environ.get(
     "CONTROL_TOWER_REMOTE_ROOT",
@@ -68,6 +71,8 @@ CONTROL_TOWER_REMOTE_PYTHON = os.environ.get(
     "/opt/homebrew/bin/python3",
 )
 APPROVAL_ACTIONS_PATH = WORKSPACE / "memory" / "telegram_approval_actions.json"
+DEFAULT_TERMINAL_VISIBILITY_OUTBOX_DIR = STATE_PATH.parent / "jaimes-terminal-visibility-outbox"
+TERMINAL_VISIBILITY_OUTBOX_DIR = DEFAULT_TERMINAL_VISIBILITY_OUTBOX_DIR
 X_INTELLIGENCE_QUEUE = WORKSPACE / "memory" / "x_intelligence_intake_queue.jsonl"
 X_STATUS_URL_RE = re.compile(r"https?://(?:www\.)?(?:x\.com|twitter\.com)/[A-Za-z0-9_]{1,15}/status/\d+", re.I)
 TELEGRAM_META_PATTERN = re.compile(r"Conversation info.*?```\s*\n\nSender .*?```\s*\n\n", re.S)
@@ -102,6 +107,21 @@ except Exception:  # noqa: BLE001
     )
 
 try:
+    from telegram_gateway_lifecycle import (  # type: ignore
+        GatewayLifecycle,
+        LifecycleError,
+        RolloutPolicy,
+        classify_delivery_tier,
+        render_live_card,
+    )
+except Exception:  # noqa: BLE001
+    GatewayLifecycle = None  # type: ignore
+    LifecycleError = RuntimeError  # type: ignore
+    RolloutPolicy = None  # type: ignore
+    classify_delivery_tier = None  # type: ignore
+    render_live_card = None  # type: ignore
+
+try:
     from objective_quality import objective_is_near_copy, semantic_reinterpretation  # type: ignore
 except Exception:  # noqa: BLE001
     # Fail closed so an import problem cannot expose a prompt echo as an
@@ -121,6 +141,201 @@ except Exception:  # noqa: BLE001
     ux_button_label = None
     ux_final_action_steps = None
     ux_steps_are_all_applicable = None
+
+
+LIFECYCLE_ROLLOUT_PATH = WORKSPACE / "mission-control" / "config" / "telegram-lifecycle-rollout.json"
+LIFECYCLE_PRIVATE_ROOT = HOME / ".openclaw" / "private" / "telegram-lifecycle"
+_GATEWAY_LIFECYCLE = None
+
+
+def gateway_lifecycle():
+    global _GATEWAY_LIFECYCLE
+    if GatewayLifecycle is None or RolloutPolicy is None:
+        return None
+    policy = RolloutPolicy.load(LIFECYCLE_ROLLOUT_PATH)
+    if _GATEWAY_LIFECYCLE is None:
+        _GATEWAY_LIFECYCLE = GatewayLifecycle(
+            LIFECYCLE_PRIVATE_ROOT,
+            rollout=policy,
+            owner="jaimes",
+        )
+    else:
+        policy.validate()
+        _GATEWAY_LIFECYCLE.rollout = policy
+    return _GATEWAY_LIFECYCLE
+
+
+def lifecycle_rollout_state() -> str:
+    try:
+        payload = json.loads(LIFECYCLE_ROLLOUT_PATH.read_text())
+    except (OSError, ValueError, TypeError):
+        return "invalid"
+    return str(payload.get("masterState") or "off").strip().lower()
+
+
+def begin_gateway_lifecycle(
+    *,
+    key: str,
+    work_id: str,
+    work_run_id: str,
+    prompt: str,
+) -> dict[str, Any]:
+    lifecycle = gateway_lifecycle()
+    if lifecycle is None:
+        return {
+            "error": "gateway-lifecycle-unavailable",
+            "required": lifecycle_rollout_state() in {"jaimes", "all"},
+        }
+    if (
+        lifecycle.rollout.global_kill_switch
+        or not (lifecycle.rollout.host_enabled or {}).get("jaimes", True)
+    ):
+        return {"error": "gateway-kill-switch-active", "required": True}
+    existing = lifecycle.read_work(work_id)
+    if existing:
+        writer = bool(existing.get("writerEnabled"))
+        if existing.get("writerAuthorityAtStart") and not writer:
+            return {
+                "lifecycle": lifecycle,
+                "receipt": existing,
+                "writer": False,
+                "shadow": False,
+                "error": "lifecycle-writer-safety-disabled",
+                "required": True,
+                "killed": True,
+            }
+        return {
+            "lifecycle": lifecycle,
+            "receipt": existing,
+            "writer": writer,
+            "shadow": bool(existing.get("shadowOnly")) and lifecycle.rollout.shadow_enabled("jaimes"),
+        }
+    writer = bool(lifecycle.rollout.writer_enabled("jaimes"))
+    shadow = bool(lifecycle.rollout.shadow_enabled("jaimes"))
+    if not writer and not shadow:
+        return {}
+    try:
+        receipt = lifecycle.start_work(
+            origin_key=key,
+            run_id=work_run_id,
+            work_id=work_id,
+            intake_agent="jaimes",
+            current_owner="jaimes",
+            surface_contract="telegram",
+            text="",
+            worker_route="pending",
+            classification=classify_delivery_tier(clean_prompt(prompt)),
+        )
+        if str(receipt.get("workId") or "") != work_id:
+            raise LifecycleError("work-identity-mismatch")
+        if receipt.get("phase") == "received":
+            receipt = lifecycle.transition(
+                work_id,
+                "classified",
+                expected_sequence=int(receipt["sequence"]),
+                fencing_epoch=int(receipt["fencingEpoch"]),
+                safe_payload={
+                    "deliveryTier": int(receipt["deliveryTier"]),
+                    "classifierReason": str(receipt["classifierReason"]),
+                },
+            )
+        return {"lifecycle": lifecycle, "receipt": receipt, "writer": writer, "shadow": shadow}
+    except Exception as exc:  # noqa: BLE001
+        return {"error": type(exc).__name__, "required": writer}
+
+
+def refresh_gateway_receipt(context: dict[str, Any]) -> dict[str, Any]:
+    lifecycle = context.get("lifecycle")
+    receipt = context.get("receipt") or {}
+    if lifecycle is None or not receipt.get("workId"):
+        return receipt
+    receipt = lifecycle.read_work(str(receipt["workId"])) or receipt
+    context["receipt"] = receipt
+    return receipt
+
+
+def advance_gateway_phase(context: dict[str, Any], phase: str) -> dict[str, Any]:
+    lifecycle = context.get("lifecycle")
+    receipt = refresh_gateway_receipt(context)
+    if lifecycle is None or not receipt or receipt.get("phase") in {phase, "terminal"}:
+        return receipt
+    receipt = lifecycle.transition(
+        str(receipt["workId"]),
+        phase,
+        expected_sequence=int(receipt["sequence"]),
+        fencing_epoch=int(receipt["fencingEpoch"]),
+        safe_payload={"phase": phase},
+    )
+    context["receipt"] = receipt
+    return receipt
+
+
+def set_gateway_worker_route(context: dict[str, Any], route: str) -> dict[str, Any]:
+    lifecycle = context.get("lifecycle")
+    receipt = refresh_gateway_receipt(context)
+    if lifecycle is None or not receipt:
+        return receipt
+    receipt = lifecycle.update_worker_route(
+        str(receipt["workId"]),
+        str(route or "jaimes-pending"),
+        expected_owner="jaimes",
+        expected_sequence=int(receipt["sequence"]),
+        fencing_epoch=int(receipt["fencingEpoch"]),
+    )
+    context["receipt"] = receipt
+    return receipt
+
+
+def claim_gateway_effect(context: dict[str, Any], kind: str) -> dict[str, Any]:
+    if not context.get("writer"):
+        return {"allowed": True, "legacy": True}
+    lifecycle = context.get("lifecycle")
+    receipt = refresh_gateway_receipt(context)
+    if lifecycle is None or not receipt:
+        return {"allowed": False, "state": "dead_letter", "reason": "lifecycle-unavailable"}
+    return lifecycle.claim_effect(
+        str(receipt["workId"]),
+        kind,
+        sequence=int(receipt["sequence"]),
+        fencing_epoch=int(receipt["fencingEpoch"]),
+    )
+
+
+def finish_gateway_effect(
+    context: dict[str, Any],
+    claim: dict[str, Any],
+    *,
+    delivered: bool,
+    indeterminate: bool = False,
+    error_class: str = "",
+) -> None:
+    lifecycle = context.get("lifecycle")
+    key = str(claim.get("idempotencyKey") or "")
+    if lifecycle is None or not key or claim.get("legacy"):
+        return
+    lifecycle.finish_effect(
+        key,
+        state="delivered" if delivered else "indeterminate" if indeterminate else "dead_letter",
+        private_receipt="telegram-confirmed" if delivered else "",
+        error_class=error_class,
+    )
+    refresh_gateway_receipt(context)
+
+
+def gateway_public_fields(context: dict[str, Any]) -> dict[str, Any]:
+    receipt = refresh_gateway_receipt(context)
+    if not receipt:
+        return {}
+    return {
+        "gateway_work_id": str(receipt.get("workId") or ""),
+        "lifecycle_version": int(receipt.get("lifecycleVersion") or 0),
+        "delivery_tier": int(receipt.get("deliveryTier") or 0),
+        "classifier_reason": str(receipt.get("classifierReason") or ""),
+        "lifecycle_sequence": int(receipt.get("sequence") or 0),
+        "fencing_epoch": int(receipt.get("fencingEpoch") or 0),
+        "lifecycle_writer_enabled": bool(context.get("writer")),
+        "lifecycle_shadow": bool(context.get("shadow")),
+    }
 
 
 def parse_telegram_target_from_key(key: str) -> dict[str, Any]:
@@ -367,9 +582,18 @@ def verify_bot_identity(state: dict[str, Any]) -> bool:
     return ok
 
 
-def set_eyes_reaction(platform_message_id: str, state: dict[str, Any], meta: dict[str, Any] | None = None) -> bool:
+def set_eyes_reaction_result(
+    platform_message_id: str,
+    state: dict[str, Any],
+    meta: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Return the trusted adapter receipt for lifecycle ambiguity handling."""
     if work_card is None or not platform_message_id:
-        return False
+        return {
+            "ok": False,
+            "error": "missing Telegram adapter or inbound message receipt",
+            "delivery_indeterminate": False,
+        }
     payload = apply_telegram_target({
         "chat_id": telegram_target(meta),
         "message_id": int(platform_message_id),
@@ -378,7 +602,17 @@ def set_eyes_reaction(platform_message_id: str, state: dict[str, Any], meta: dic
     }, meta)
     result = work_card.api_call("setMessageReaction", payload, timeout=4)
     record_api_result(state, "setMessageReaction", result)
-    return bool(result.get("ok"))
+    if not result.get("ok"):
+        classifier = getattr(work_card, "delivery_indeterminate", None)
+        result = dict(result)
+        result["delivery_indeterminate"] = bool(
+            classifier(result) if callable(classifier) else result.get("error")
+        )
+    return result
+
+
+def set_eyes_reaction(platform_message_id: str, state: dict[str, Any], meta: dict[str, Any] | None = None) -> bool:
+    return bool(set_eyes_reaction_result(platform_message_id, state, meta=meta).get("ok"))
 
 
 def send_message_draft(draft_id: int, text: str = "", meta: dict[str, Any] | None = None) -> None:
@@ -443,6 +677,20 @@ def load_json(path: Path, fallback: Any) -> Any:
         return fallback
 
 
+@contextlib.contextmanager
+def fast_ack_state_lock():
+    """Serialize short watcher/plugin state commits without holding over I/O."""
+    STATE_PATH.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    lock_path = STATE_PATH.with_name(f".{STATE_PATH.name}.lock")
+    with lock_path.open("a+", encoding="utf-8") as handle:
+        try:
+            os.chmod(lock_path, 0o600)
+        except OSError:
+            pass
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        yield
+
+
 def save_json(path: Path, data: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     # Multiple watcher ticks can overlap briefly during launchd reloads. A
@@ -485,19 +733,27 @@ def positive_message_id(value: Any) -> str:
 
 
 def registerable_ack_result(result: dict[str, Any]) -> bool:
-    """Only a concrete, objective-bound surface may become active state."""
+    """Only an objective-bound, contract-complete intake may become active."""
     if not result.get("ok"):
         return False
     if str(result.get("status") or "").strip().lower() == "awaiting-objective-interpretation":
         return False
     if result.get("requires_objective_interpretation"):
         return False
-    return bool(
+    identity_complete = bool(
         str(result.get("key") or "").strip()
         and str(result.get("objective") or "").strip()
         and str(result.get("route") or "").strip()
-        and positive_message_id(result.get("ack_message_id"))
     )
+    if not identity_complete:
+        return False
+    if result.get("no_card_required") and result.get("lifecycle_writer_enabled"):
+        tier = int(result.get("delivery_tier") or 0)
+        return bool(
+            (tier == 1 and not result.get("reaction_ok"))
+            or (tier == 2 and result.get("reaction_ok"))
+        )
+    return bool(positive_message_id(result.get("ack_message_id")))
 
 
 def handoff_identity(chat_id: Any, thread_id: Any, message_id: Any) -> tuple[str, str, str]:
@@ -695,6 +951,11 @@ def recover_accepted_handoff_card(
         "route": "Recovered from durable JAIMES Inbox acceptance",
         "header_message_id": str(record.get("header_message_id") or ""),
         "ack_message_id": str(record.get("live_message_id") or ""),
+        "inbound_message_id": message_id,
+        "no_card_required": bool(record.get("no_card_required")),
+        "delivery_tier": int(record.get("delivery_tier") or 0),
+        "lifecycle_version": int(record.get("lifecycle_version") or 0),
+        "lifecycle_writer_enabled": bool(record.get("lifecycle_writer_enabled")),
         "telegram_chat_id": str(meta.get("telegram_chat_id") or ""),
         "telegram_thread_id": str(meta.get("telegram_thread_id") or ""),
         "session_id": str(event.get("session_id") or meta.get("sessionId") or ""),
@@ -744,9 +1005,22 @@ def await_handoff(chat_id: Any, thread_id: Any, message_id: Any, timeout: float)
                 and record.get("status") == "accepted"
                 and handoff_record_matches(record, chat, thread, message)
                 and handoff_record_fresh(record)
-                and record.get("reaction_ok") is True
-                and _handoff_id(record.get("header_message_id"))
-                and _handoff_id(record.get("live_message_id"))
+                and (
+                    (
+                        record.get("no_card_required") is True
+                        and (
+                            int(record.get("delivery_tier") or 0) == 1
+                            and record.get("reaction_ok") is False
+                            or int(record.get("delivery_tier") or 0) == 2
+                            and record.get("reaction_ok") is True
+                        )
+                    )
+                    or (
+                        record.get("reaction_ok") is True
+                        and _handoff_id(record.get("header_message_id"))
+                        and _handoff_id(record.get("live_message_id"))
+                    )
+                )
             )
             if accepted:
                 return 0, {"ok": True, **record}
@@ -804,7 +1078,12 @@ def await_handoff(chat_id: Any, thread_id: Any, message_id: Any, timeout: float)
                                 "chat_id": chat,
                                 "thread_id": thread,
                                 "inbound_message_id": message,
-                            }
+                                }
+                    # A network failure after the reaction intent cannot be
+                    # distinguished from Telegram acceptance. Fence Josh's
+                    # fallback exactly as for an ambiguous card send.
+                    if record.get("ownership_state") == "reaction_inflight":
+                        record["reason"] = "handoff_reaction_delivery_indeterminate"
                     now = dt.datetime.now(dt.timezone.utc)
                     record.update({
                         "status": "indeterminate",
@@ -2219,6 +2498,8 @@ def publish_jaimes(
     origin_claim_hash: str = "",
     brain_feed: bool = True,
     work_event: str = "",
+    event_id: str = "",
+    require_accepted_ledger: bool = False,
 ) -> bool:
     publish_args = [
         "--agent",
@@ -2240,6 +2521,8 @@ def publish_jaimes(
         publish_args.append("--brain-feed")
     if work_event:
         publish_args += ["--work-event", work_event]
+    if event_id:
+        publish_args += ["--event-id", event_id]
     if work_id:
         publish_args += ["--work-id", work_id]
     if run_id:
@@ -2265,24 +2548,54 @@ def publish_jaimes(
             *publish_args,
         ]),
     )
-    try:
-        result = subprocess.run(
-            [
-                "ssh",
-                "-o", "BatchMode=yes",
-                "-o", "ConnectTimeout=4",
-                CONTROL_TOWER_SSH_HOST,
-                remote_command,
-            ],
-            cwd=WORKSPACE,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            timeout=12,
-            check=False,
-        )
-        return result.returncode == 0
-    except Exception:
-        return False
+    for delay in (0.0, 0.2, 0.5):
+        if delay:
+            time.sleep(delay)
+        try:
+            result = subprocess.run(
+                [
+                    "ssh",
+                    "-o", "BatchMode=yes",
+                    "-o", "ConnectTimeout=4",
+                    CONTROL_TOWER_SSH_HOST,
+                    remote_command,
+                ],
+                cwd=WORKSPACE,
+                capture_output=True,
+                text=True,
+                timeout=12,
+                check=False,
+            )
+            if result.returncode != 0:
+                continue
+            raw_stdout = str(result.stdout or "").strip()
+            if not raw_stdout:
+                # Older agent_publish wrappers acknowledged success only with
+                # their exit status. Retain that contract for non-terminal
+                # progress while terminal publication explicitly requires the
+                # identity-bearing canonical work-ledger receipt below.
+                if not require_accepted_ledger:
+                    return True
+                continue
+            payload = json.loads(raw_stdout)
+            ledger = payload.get("workLedger") if isinstance(payload, dict) else None
+            if (
+                isinstance(payload, dict)
+                and payload.get("ok") is True
+                and isinstance(ledger, dict)
+                and ledger.get("accepted") is True
+            ):
+                return True
+            if (
+                not require_accepted_ledger
+                and isinstance(payload, dict)
+                and payload.get("ok") is True
+                and ledger is None
+            ):
+                return True
+        except Exception:
+            continue
+    return False
 
 
 def event_age_seconds(ts: str) -> float | None:
@@ -2304,6 +2617,7 @@ def send_ack(
     dry_run: bool = False,
     meta: dict[str, Any] | None = None,
     reaction_already_done: bool = False,
+    reaction_attempt_callback: Callable[[], bool] | None = None,
     surface_attempt_callback: Callable[[], bool] | None = None,
 ) -> dict[str, Any]:
     task_identity = event.get("platform_message_id") or event.get("db_message_id") or event["ts"].replace(":", "").replace(".", "-")
@@ -2332,20 +2646,111 @@ def send_ack(
             "last_card_update_at": utc_now(),
         }
     prompt = event.get("prompt", "")
+    gateway = {} if dry_run else begin_gateway_lifecycle(
+        key=key,
+        work_id=work_id,
+        work_run_id=work_run_id,
+        prompt=prompt,
+    )
+    if gateway.get("error") and gateway.get("required"):
+        return {
+            "ok": False,
+            "status": "lifecycle-unavailable",
+            "error": "canonical_gateway_lifecycle_unavailable",
+            "reaction_ok": False,
+            "header_message_id": "",
+            "ack_message_id": "",
+            "key": key,
+            "objective": "",
+            "run_id": event.get("run_id") or "",
+            "last_card_update_at": utc_now(),
+        }
+    gateway_receipt = gateway.get("receipt") or {}
+    gateway_writer = bool(gateway.get("writer"))
+    delivery_tier = int(gateway_receipt.get("deliveryTier") or 0)
     objective = objective_from_prompt(prompt)
     inbound_message_id = event.get("platform_message_id") or str(((meta or {}).get("origin") or {}).get("message_id") or "")
     handoff_topic = bool(
         str((meta or {}).get("telegram_chat_id") or "") == CONTROL_CENTER_CHAT_ID
         and str((meta or {}).get("telegram_thread_id") or "") in JAIMES_DIRECT_MENTION_TOPICS
     )
-    reaction_ok = bool(reaction_already_done)
-    if not dry_run and not reaction_already_done:
-        reaction_ok = set_eyes_reaction(inbound_message_id, state, meta=meta)
-    if handoff_topic and not dry_run and not reaction_ok:
+    reaction_required = delivery_tier >= 2 if gateway_writer else True
+    reaction_ok = bool(dry_run and reaction_required)
+    reaction_indeterminate = False
+    if not dry_run and reaction_required and not (not gateway_writer and reaction_already_done):
+        reaction_claim = claim_gateway_effect(gateway, "reaction")
+        if not reaction_claim.get("allowed"):
+            if str(reaction_claim.get("state") or "") == "delivered":
+                reaction_ok = True
+            else:
+                return {
+                    "ok": False,
+                    "handoff_terminal_failure": handoff_topic,
+                    "surface_indeterminate": str(reaction_claim.get("state") or "") in {"sending", "indeterminate"},
+                    "error": "canonical_reaction_effect_fenced",
+                    "reaction_ok": False,
+                    "header_message_id": "",
+                    "ack_message_id": "",
+                    "key": key,
+                    "objective": objective,
+                    "run_id": event.get("run_id") or "",
+                    "last_card_update_at": utc_now(),
+                    **gateway_public_fields(gateway),
+                }
+        else:
+            if reaction_attempt_callback and not reaction_attempt_callback():
+                finish_gateway_effect(
+                    gateway,
+                    reaction_claim,
+                    delivered=False,
+                    error_class="handoff-claim-cancelled",
+                )
+                return {
+                    "ok": False,
+                    "handoff_terminal_failure": handoff_topic,
+                    "error": "handoff_claim_cancelled_before_reaction",
+                    "reaction_ok": False,
+                    "header_message_id": "",
+                    "ack_message_id": "",
+                    "key": key,
+                    "objective": objective,
+                    "run_id": event.get("run_id") or "",
+                    "last_card_update_at": utc_now(),
+                    **gateway_public_fields(gateway),
+                }
+            # A durable lifecycle receipt, and for handoffs a durable claim
+            # transition, precede the trusted Telegram API call.
+            if gateway_writer:
+                # v3 needs the richer receipt so an ambiguous Telegram outcome
+                # is durably fenced instead of being retried as a fresh effect.
+                reaction_result = set_eyes_reaction_result(inbound_message_id, state, meta=meta)
+            else:
+                # The rollout-off/shadow lane remains the N-1 implementation.
+                # Keep its stable boolean adapter boundary so existing callers
+                # and tests can inject the legacy reaction operation without
+                # weakening the v3 writer's ambiguity handling above.
+                reaction_result = {
+                    "ok": bool(set_eyes_reaction(inbound_message_id, state, meta=meta)),
+                    "delivery_indeterminate": False,
+                }
+            reaction_ok = bool(reaction_result.get("ok"))
+            reaction_indeterminate = bool(reaction_result.get("delivery_indeterminate"))
+            finish_gateway_effect(
+                gateway,
+                reaction_claim,
+                delivered=reaction_ok,
+                indeterminate=reaction_indeterminate,
+                error_class="reaction-receipt-missing" if reaction_indeterminate else "reaction-failed" if not reaction_ok else "",
+            )
+    elif not dry_run and not gateway_writer and reaction_already_done:
+        reaction_ok = True
+
+    if reaction_required and not dry_run and not reaction_ok:
         return {
             "ok": False,
-            "handoff_terminal_failure": True,
-            "error": "eyes_reaction_failed",
+            "handoff_terminal_failure": handoff_topic and not reaction_indeterminate,
+            "surface_indeterminate": reaction_indeterminate,
+            "error": "eyes_reaction_indeterminate" if reaction_indeterminate else "eyes_reaction_failed",
             "header_message_id": "",
             "ack_message_id": "",
             "key": key,
@@ -2357,7 +2762,26 @@ def send_ack(
             "button_triggered": is_button_prompt(prompt),
             "run_id": event.get("run_id") or "",
             "last_card_update_at": utc_now(),
+            **gateway_public_fields(gateway),
         }
+
+    if gateway.get("receipt"):
+        try:
+            advance_gateway_phase(gateway, "acknowledged")
+        except Exception as exc:  # noqa: BLE001
+            return {
+                "ok": False,
+                "status": "lifecycle-transition-failed",
+                "error": type(exc).__name__,
+                "reaction_ok": reaction_ok,
+                "header_message_id": "",
+                "ack_message_id": "",
+                "key": key,
+                "objective": "",
+                "run_id": event.get("run_id") or "",
+                "last_card_update_at": utc_now(),
+                **gateway_public_fields(gateway),
+            }
 
     if objective_is_near_copy(prompt, objective):
         objective = semantic_reinterpretation(prompt)
@@ -2365,8 +2789,13 @@ def send_ack(
         # #JAIMES: keep only the immediate reaction when deterministic intake
         # cannot produce a genuine interpretation; the main agent must decide
         # the objective before Telegram or Control Tower receives one.
-        if not dry_run:
+        if not dry_run and not gateway_writer:
             send_chat_action(meta=meta)
+        if gateway.get("receipt"):
+            try:
+                advance_gateway_phase(gateway, "awaiting_input")
+            except Exception:
+                pass
         return {
             "ok": True,
             "status": "awaiting-objective-interpretation",
@@ -2382,6 +2811,9 @@ def send_ack(
             "button_triggered": is_button_prompt(prompt),
             "run_id": event.get("run_id") or "",
             "last_card_update_at": utc_now(),
+            "no_card_required": bool(gateway_writer and delivery_tier in {1, 2}),
+            "inbound_message_id": inbound_message_id,
+            **gateway_public_fields(gateway),
         }
 
     skill = skill_for_prompt(prompt)
@@ -2392,17 +2824,66 @@ def send_ack(
     display_route = f"{active_lane} | Why: {active_reason}"
     if skill.get("label"):
         display_route = f"{display_route}; runbook={skill['id']}"
+    if gateway.get("receipt"):
+        try:
+            set_gateway_worker_route(gateway, active_lane or "jaimes-pending")
+        except Exception as exc:  # noqa: BLE001
+            if gateway_writer:
+                return {
+                    "ok": False,
+                    "status": "lifecycle-route-failed",
+                    "error": type(exc).__name__,
+                    "reaction_ok": reaction_ok,
+                    "header_message_id": "",
+                    "ack_message_id": "",
+                    "key": key,
+                    "objective": objective,
+                    "run_id": event.get("run_id") or "",
+                    "last_card_update_at": utc_now(),
+                    **gateway_public_fields(gateway),
+                }
     cards_flag = os.environ.get("JAIMES_TELEGRAM_LIVE_CARDS", "").lower()
-    start_visible_card = should_start_visible_card(prompt, meta, cards_flag)
+    start_visible_card = (
+        delivery_tier == 3
+        if gateway_writer
+        else should_start_visible_card(prompt, meta, cards_flag)
+    )
 
-    if handoff_topic and not dry_run and start_visible_card and surface_attempt_callback:
-        # The durable owner records card-attempt intent immediately before the
-        # child is spawned. A crash during routing still remains no-effect and
-        # can safely fall back to Josh.
-        if not surface_attempt_callback():
+    #JAIMES: send the first stable surface once. The previous placeholder ->
+    # objective -> live-card edit chain forced Telegram to remove/redraw the same
+    # bubble several times in two seconds, which looked like cards disappearing.
+    header_message_id = "dry-run-header" if dry_run else ""
+    ack_message_id = "dry-run-message" if dry_run else ""
+    surface_indeterminate = False
+    card_result: dict[str, Any] = {"ok": True, "skipped": True}
+    card_receipt: dict[str, Any] = {}
+    if not dry_run and start_visible_card:
+        card_claim = claim_gateway_effect(gateway, "card")
+        if not card_claim.get("allowed") and str(card_claim.get("state") or "") != "delivered":
             return {
                 "ok": False,
-                "handoff_terminal_failure": True,
+                "handoff_terminal_failure": handoff_topic,
+                "surface_indeterminate": str(card_claim.get("state") or "") in {"sending", "indeterminate"},
+                "error": "canonical_card_effect_fenced",
+                "reaction_ok": reaction_ok,
+                "header_message_id": "",
+                "ack_message_id": "",
+                "key": key,
+                "objective": objective,
+                "run_id": event.get("run_id") or "",
+                "last_card_update_at": utc_now(),
+                **gateway_public_fields(gateway),
+            }
+        if card_claim.get("allowed") and surface_attempt_callback and not surface_attempt_callback():
+            finish_gateway_effect(
+                gateway,
+                card_claim,
+                delivered=False,
+                error_class="handoff-claim-cancelled",
+            )
+            return {
+                "ok": False,
+                "handoff_terminal_failure": handoff_topic,
                 "error": "handoff_claim_cancelled_before_surface",
                 "reaction_ok": reaction_ok,
                 "header_message_id": "",
@@ -2411,15 +2892,8 @@ def send_ack(
                 "objective": objective,
                 "run_id": event.get("run_id") or "",
                 "last_card_update_at": utc_now(),
+                **gateway_public_fields(gateway),
             }
-
-    #JAIMES: send the first stable surface once. The previous placeholder ->
-    # objective -> live-card edit chain forced Telegram to remove/redraw the same
-    # bubble several times in two seconds, which looked like cards disappearing.
-    header_message_id = "dry-run-header" if dry_run else ""
-    ack_message_id = "dry-run-message" if dry_run else ""
-    surface_indeterminate = False
-    if not dry_run and start_visible_card:
         card_command = [
             "python3",
             "mission-control/scripts/jaimes_work_card.py",
@@ -2461,8 +2935,11 @@ def send_ack(
         # Every managed surface uses the same bounded helper. Topic 17 used to
         # run a 15-second Bot API child under a 6-second parent; Telegram could
         # accept the card just before the parent killed receipt persistence.
-        card_result = run_work_card_cmd(card_command + work_card_target_args(meta))
-        card_receipt: dict[str, Any] = {}
+        card_result = (
+            run_work_card_cmd(card_command + work_card_target_args(meta))
+            if card_claim.get("allowed")
+            else {"ok": True, "recovered": True, "stdout": ""}
+        )
         if card_result.get("stdout"):
             try:
                 parsed_receipt = json.loads(str(card_result["stdout"]))
@@ -2497,7 +2974,15 @@ def send_ack(
             "error": card_result.get("stderr") or card_result.get("error") or "",
             "delivery_key": key,
         })
-    elif not dry_run:
+        if card_claim.get("allowed"):
+            finish_gateway_effect(
+                gateway,
+                card_claim,
+                delivered=confirmed_card_receipt,
+                indeterminate=surface_indeterminate,
+                error_class="card-receipt-missing" if surface_indeterminate else "card-failed" if not confirmed_card_receipt else "",
+            )
+    elif not dry_run and not gateway_writer:
         ack_result = send_initial_ack(
             f"🤖 {display_model}\n\n👀 Objective\n{objective}",
             meta=meta,
@@ -2506,7 +2991,7 @@ def send_ack(
         record_api_result(state, "sendMessage", ack_result)
         ack_message_id = str(ack_result.get("result", {}).get("message_id") or "") if ack_result.get("ok") else ""
 
-    if not dry_run and not ack_message_id:
+    if not dry_run and not ack_message_id and (start_visible_card or not gateway_writer):
         # Do not silently mark this event deduplicated when Telegram did not
         # confirm the durable acknowledgement or live card.
         record_api_result(state, "sendMessage", {
@@ -2514,13 +2999,62 @@ def send_ack(
             "error": "No message_id returned by initial Telegram surface",
             "delivery_key": key,
         })
-    surface_ok = bool(
-        ack_message_id
-        and not surface_indeterminate
-        and (not handoff_topic or header_message_id)
-    )
+    if gateway_writer and delivery_tier == 1:
+        surface_ok = True
+    elif gateway_writer and delivery_tier == 2:
+        surface_ok = reaction_ok and not reaction_indeterminate
+    else:
+        surface_ok = bool(
+            ack_message_id
+            and not surface_indeterminate
+            and (not handoff_topic or header_message_id)
+        )
+
+    if gateway.get("receipt"):
+        try:
+            advance_gateway_phase(gateway, "working")
+            if gateway.get("shadow"):
+                predicted = int((gateway.get("receipt") or {}).get("deliveryTier") or 3)
+                actual_contract = (
+                    "reaction-card-final" if reaction_ok and start_visible_card
+                    else "reaction-final" if reaction_ok
+                    else "final-only"
+                )
+                gateway["lifecycle"].record_shadow_sample(
+                    str((gateway.get("receipt") or {})["workId"]),
+                    observed_contract=actual_contract,
+                )
+                if predicted == 3 and render_live_card is not None:
+                    rendered = render_live_card(
+                        gateway.get("receipt") or {},
+                        objective=objective,
+                        phase_label="Working",
+                        model=display_model,
+                        route=display_route,
+                        progress=50,
+                    )
+                    gateway["lifecycle"].update_render_hash(
+                        str((gateway.get("receipt") or {})["workId"]),
+                        rendered,
+                    )
+        except Exception as exc:  # noqa: BLE001
+            if gateway_writer:
+                return {
+                    "ok": False,
+                    "status": "lifecycle-transition-failed",
+                    "error": type(exc).__name__,
+                    "reaction_ok": reaction_ok,
+                    "header_message_id": header_message_id,
+                    "ack_message_id": ack_message_id,
+                    "key": key,
+                    "objective": objective,
+                    "run_id": event.get("run_id") or "",
+                    "last_card_update_at": utc_now(),
+                    **gateway_public_fields(gateway),
+                }
     if not dry_run:
-        send_chat_action(meta=meta)
+        if not gateway_writer:
+            send_chat_action(meta=meta)
         if surface_ok:
             publish_jaimes(
                 objective,
@@ -2530,13 +3064,19 @@ def send_ack(
                 run_id=work_run_id,
                 phase="active",
                 model_id=display_model,
-                route_verified=True,
+                route_verified=False,
                 origin_claim_hash=origin_claim_hash,
                 work_event="start",
             )
 
     return {
-        "ok": bool(dry_run or (surface_ok and (reaction_ok or not handoff_topic))),
+        "ok": bool(
+            dry_run
+            or (
+                surface_ok
+                and (reaction_ok if reaction_required else True)
+            )
+        ),
         "header_message_id": header_message_id,
         "ack_message_id": ack_message_id,
         "key": key,
@@ -2551,10 +3091,12 @@ def send_ack(
         "button_triggered": is_button_prompt(prompt),
         "run_id": event.get("run_id") or "",
         "task_started_at": task_started_at,
+        "inbound_message_id": inbound_message_id,
         "last_card_update_at": utc_now(),
         "telegram_chat_id": (meta or {}).get("telegram_chat_id"),
         "telegram_thread_id": (meta or {}).get("telegram_thread_id"),
         "retention": "persistent-edit-only",
+        "no_card_required": bool(gateway_writer and delivery_tier in {1, 2}),
         "surface_indeterminate": bool(
             not dry_run and surface_indeterminate
         ) if start_visible_card else False,
@@ -2563,7 +3105,697 @@ def send_ack(
             limit=240,
         )
         if start_visible_card and not dry_run and not surface_ok else "",
+        **gateway_public_fields(gateway),
     }
+
+
+def gateway_context_for_card(card: dict[str, Any]) -> dict[str, Any]:
+    lifecycle = gateway_lifecycle()
+    work_id = str(card.get("work_id") or card.get("gateway_work_id") or "")
+    if lifecycle is None or not work_id:
+        return {}
+    receipt = lifecycle.read_work(work_id)
+    if not receipt:
+        return {}
+    return {
+        "lifecycle": lifecycle,
+        "receipt": receipt,
+        "writer": bool(receipt.get("writerEnabled")),
+        "shadow": bool(receipt.get("shadowOnly")),
+    }
+
+
+def advance_gateway_progress(context: dict[str, Any], status: str) -> dict[str, Any]:
+    lifecycle = context.get("lifecycle")
+    receipt = refresh_gateway_receipt(context)
+    if lifecycle is None or not receipt:
+        raise LifecycleError("lifecycle-unavailable")
+    phase = str(receipt.get("phase") or "")
+    if phase == "terminal":
+        raise LifecycleError("progress-after-terminal")
+    if status == "verifying" and phase in {"working", "awaiting_input"}:
+        receipt = lifecycle.transition(
+            str(receipt["workId"]),
+            "verifying",
+            expected_sequence=int(receipt["sequence"]),
+            fencing_epoch=int(receipt["fencingEpoch"]),
+            safe_payload={"status": "verifying"},
+        )
+    else:
+        receipt = lifecycle.record_progress(
+            str(receipt["workId"]),
+            expected_sequence=int(receipt["sequence"]),
+            fencing_epoch=int(receipt["fencingEpoch"]),
+            status=status,
+        )
+    context["receipt"] = receipt
+    return receipt
+
+
+def run_gateway_card_command(
+    card: dict[str, Any],
+    command: list[str],
+    *,
+    status: str = "progress",
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    """Reserve every JAIMES card edit before the trusted Telegram helper."""
+    if card.get("no_card_required"):
+        return {"ok": False, "error": "card-effect-forbidden-for-delivery-tier"}
+    if dry_run:
+        return {"ok": True, "dry_run": True}
+    context = gateway_context_for_card(card)
+    receipt = context.get("receipt") or {}
+    lifecycle_managed = int(card.get("lifecycle_version") or 0) >= 3
+    if lifecycle_managed and not receipt:
+        return {"ok": False, "error": "lifecycle-receipt-unavailable"}
+    effect: dict[str, Any] = {"allowed": True, "legacy": True}
+    if receipt:
+        if receipt.get("writerAuthorityAtStart") and not receipt.get("writerEnabled"):
+            return {"ok": False, "error": "lifecycle-writer-safety-disabled", "killed": True}
+        try:
+            if str(receipt.get("phase") or "") == "terminal":
+                if status != "delivery":
+                    return {"ok": False, "error": "progress-after-terminal"}
+            else:
+                advance_gateway_progress(context, status)
+            if context.get("writer"):
+                effect = claim_gateway_effect(context, "card_edit")
+                if not effect.get("allowed"):
+                    return {
+                        "ok": False,
+                        "error": "canonical-card-edit-fenced",
+                        "delivery_state": str(effect.get("state") or ""),
+                    }
+        except Exception as exc:  # noqa: BLE001
+            if context.get("writer"):
+                return {"ok": False, "error": type(exc).__name__}
+    result = dict(run_work_card_cmd(command))
+    if context.get("writer") and effect.get("allowed"):
+        finish_gateway_effect(
+            context,
+            effect,
+            delivered=bool(result.get("ok")),
+            indeterminate=not bool(result.get("ok")),
+            error_class="card-edit-receipt-missing" if not result.get("ok") else "",
+        )
+    return result
+
+
+def terminal_outcome_for_response(response_text: str) -> str:
+    complete, _ = parse_final_sections(response_text)
+    if complete:
+        return "succeeded"
+    lowered = clean_prompt(response_text).lower()
+    if re.search(r"\b(?:cancelled|canceled)\b", lowered):
+        return "cancelled"
+    if re.search(r"\bfailed\b", lowered):
+        return "failed"
+    return "partial"
+
+
+def jaimes_terminal_runtime_evidence_hash(
+    run_id: str,
+    card: dict[str, Any],
+    evidence: dict[str, Any],
+) -> str:
+    bound = {
+        "runId": str(run_id),
+        "cardKey": str(card.get("key") or ""),
+        "sessionId": str(card.get("session_id") or ""),
+        "workId": str(card.get("work_id") or ""),
+        "ledgerRunId": str(card.get("ledger_run_id") or ""),
+        "originClaimHash": str(card.get("origin_claim_hash") or ""),
+        "provider": str(evidence.get("provider") or ""),
+        "model": str(evidence.get("model") or ""),
+        "route": str(evidence.get("route") or ""),
+    }
+    return hashlib.sha256(
+        json.dumps(bound, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+
+
+def validated_jaimes_terminal_runtime_evidence(
+    run_id: str,
+    card: dict[str, Any],
+) -> dict[str, str]:
+    evidence = card.get("terminal_runtime_evidence")
+    if not isinstance(evidence, dict):
+        return {}
+    values = {
+        "provider": clean_final_item(str(evidence.get("provider") or "")),
+        "model": clean_final_item(str(evidence.get("model") or "")),
+        "route": clean_final_item(str(evidence.get("route") or "")),
+        "why": clean_final_item(str(evidence.get("why") or "")),
+    }
+    if any(
+        not values[key] or values[key].lower() in {"unknown", "unverified", "pending"}
+        for key in ("provider", "model", "route")
+    ):
+        return {}
+    expected = jaimes_terminal_runtime_evidence_hash(run_id, card, values)
+    if not secrets.compare_digest(str(evidence.get("evidenceHash") or ""), expected):
+        return {}
+    return {
+        **values,
+        "verifiedAt": str(evidence.get("verifiedAt") or ""),
+        "evidenceHash": expected,
+    }
+
+
+def live_jaimes_terminal_runtime_evidence(
+    run_id: str,
+    card: dict[str, Any],
+    session_id: str,
+    claimed_model: str,
+) -> dict[str, str]:
+    metadata = next(
+        (
+            item for item in active_hermes_sessions_metadata()
+            if str(item.get("sessionId") or "") == str(session_id or "")
+        ),
+        {},
+    )
+    if not metadata or str(card.get("session_id") or "") != str(session_id or ""):
+        return {}
+    provider = clean_final_item(str(metadata.get("provider") or ""))
+    raw_model = clean_final_item(str(metadata.get("runtime_model") or metadata.get("model") or ""))
+    if "/" in raw_model:
+        raw_model = raw_model.rsplit("/", 1)[-1]
+    if (
+        not provider
+        or not raw_model
+        or provider.lower() in {"unknown", "unverified", "pending"}
+        or raw_model.lower() in {"unknown", "unverified", "pending"}
+    ):
+        return {}
+    verified_model = f"{provider}/{raw_model}"
+    claim = clean_final_item(str(claimed_model or "")).lower()
+    if claim and claim not in {raw_model.lower(), verified_model.lower()} and not claim.endswith(f"/{raw_model.lower()}"):
+        return {}
+    route, why = runtime_route(verified_model)
+    evidence = {
+        "provider": provider,
+        "model": verified_model,
+        "route": clean_final_item(route),
+        "why": clean_final_item(why),
+        "verifiedAt": utc_now(),
+    }
+    evidence["evidenceHash"] = jaimes_terminal_runtime_evidence_hash(run_id, card, evidence)
+    return evidence
+
+
+def terminal_visibility_event_id(
+    work_id: str,
+    ledger_run_id: str,
+    card_key: str,
+    status: str,
+) -> str:
+    _ = status
+    material = f"jaimes\0{work_id}\0{ledger_run_id}\0{card_key}\0terminal".encode("utf-8")
+    return f"telegram-terminal-jaimes-{hashlib.sha256(material).hexdigest()[:32]}"
+
+
+def terminal_visibility_outbox_path(event_id: str) -> Path:
+    root = TERMINAL_VISIBILITY_OUTBOX_DIR
+    if root == DEFAULT_TERMINAL_VISIBILITY_OUTBOX_DIR and STATE_PATH.parent != root.parent:
+        root = STATE_PATH.parent / "jaimes-terminal-visibility-outbox"
+    return root / (
+        hashlib.sha256(event_id.encode("utf-8")).hexdigest() + ".json"
+    )
+
+
+def terminal_visibility_age_seconds(record: dict[str, Any]) -> float:
+    created = parse_utc(record.get("createdAt"))
+    if not created:
+        return float(TERMINAL_VISIBILITY_MAX_AGE_SECONDS + 1)
+    return max(0.0, (dt.datetime.now(dt.timezone.utc) - created).total_seconds())
+
+
+def queue_terminal_visibility(
+    run_id: str,
+    card: dict[str, Any],
+    status: str,
+    evidence: dict[str, str],
+) -> tuple[Path, dict[str, Any]]:
+    card_key = str(card.get("key") or "")
+    work_id = str(card.get("work_id") or "")
+    ledger_run_id = str(card.get("ledger_run_id") or "")
+    origin_claim_hash = str(card.get("origin_claim_hash") or "")
+    if not work_id or not ledger_run_id:
+        work_id, ledger_run_id, derived_claim = telegram_work_identity(card_key, run_id)
+        origin_claim_hash = origin_claim_hash or derived_claim
+        card.update({
+            "work_id": work_id,
+            "ledger_run_id": ledger_run_id,
+            "origin_claim_hash": origin_claim_hash,
+        })
+    event_id = terminal_visibility_event_id(work_id, ledger_run_id, card_key, status)
+    path = terminal_visibility_outbox_path(event_id)
+    path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    os.chmod(path.parent, 0o700)
+    existing = load_json(path, {})
+    if not isinstance(existing, dict):
+        existing = {}
+    record = {
+        "version": 1,
+        "eventId": event_id,
+        "agent": "jaimes",
+        "workId": work_id,
+        "runId": ledger_run_id,
+        "cardKeyHash": hashlib.sha256(card_key.encode("utf-8")).hexdigest(),
+        "terminalStatus": str(status or "done").lower(),
+        "modelId": clean_final_item(str(evidence.get("model") or "")),
+        "routeVerified": bool(evidence),
+        "originClaimHash": origin_claim_hash,
+        "attempts": int(existing.get("attempts") or 0),
+        "createdAt": str(existing.get("createdAt") or utc_now()),
+        "updatedAt": utc_now(),
+        "lastAttemptAt": str(existing.get("lastAttemptAt") or ""),
+        "acceptedAt": str(existing.get("acceptedAt") or ""),
+        "blockedAt": str(existing.get("blockedAt") or ""),
+        "incident": existing.get("incident") if isinstance(existing.get("incident"), dict) else {},
+    }
+    if record["acceptedAt"]:
+        record = existing
+    save_json(path, record)
+    return path, record
+
+
+def mark_terminal_visibility_blocked(
+    path: Path,
+    record: dict[str, Any],
+    code: str,
+) -> None:
+    record.update({
+        "blockedAt": str(record.get("blockedAt") or utc_now()),
+        "updatedAt": utc_now(),
+        "incident": {
+            "status": "blocked",
+            "code": clean_final_item(code),
+            "ageSeconds": int(min(86400, terminal_visibility_age_seconds(record))),
+        },
+    })
+    save_json(path, record)
+
+
+def publish_terminal_visibility_record(path: Path, record: dict[str, Any]) -> bool:
+    if record.get("acceptedAt"):
+        return True
+    if not record.get("routeVerified") or not str(record.get("modelId") or ""):
+        mark_terminal_visibility_blocked(path, record, "terminal-runtime-route-unverified")
+        return False
+    if (
+        int(record.get("attempts") or 0) >= TERMINAL_VISIBILITY_MAX_ATTEMPTS
+        or terminal_visibility_age_seconds(record) > TERMINAL_VISIBILITY_MAX_AGE_SECONDS
+    ):
+        mark_terminal_visibility_blocked(path, record, "terminal-visibility-publication-stale")
+        return False
+    outcome = str(record.get("terminalStatus") or "done")
+    control_tower_status = {
+        "failed": "error",
+        "cancelled": "cancelled",
+        "partial": "blocked",
+        "paused": "cancelled",
+    }.get(outcome, "done")
+    published = publish_jaimes(
+        "JAIMES Telegram task",
+        control_tower_status,
+        "Terminal outcome accepted by the canonical local work ledger before Telegram delivery.",
+        work_id=str(record.get("workId") or ""),
+        run_id=str(record.get("runId") or ""),
+        phase=control_tower_status,
+        model_id=str(record.get("modelId") or ""),
+        route_verified=True,
+        origin_claim_hash=str(record.get("originClaimHash") or ""),
+        brain_feed=False,
+        work_event="terminal",
+        event_id=str(record.get("eventId") or ""),
+        require_accepted_ledger=True,
+    )
+    latest = load_json(path, record)
+    if not isinstance(latest, dict):
+        latest = record
+    if latest.get("acceptedAt"):
+        published = True
+    latest.update({
+        "attempts": int(latest.get("attempts") or 0) + 1,
+        "lastAttemptAt": utc_now(),
+        "updatedAt": utc_now(),
+    })
+    if published:
+        latest["acceptedAt"] = str(latest.get("acceptedAt") or utc_now())
+        latest["blockedAt"] = ""
+        latest["incident"] = {}
+        save_json(path, latest)
+    elif (
+        int(latest.get("attempts") or 0) >= TERMINAL_VISIBILITY_MAX_ATTEMPTS
+        or terminal_visibility_age_seconds(latest) > TERMINAL_VISIBILITY_MAX_AGE_SECONDS
+    ):
+        mark_terminal_visibility_blocked(path, latest, "terminal-visibility-publication-stale")
+    else:
+        save_json(path, latest)
+    return published
+
+
+def recover_terminal_visibility_outbox(dry_run: bool = False) -> list[dict[str, Any]]:
+    root = TERMINAL_VISIBILITY_OUTBOX_DIR
+    if root == DEFAULT_TERMINAL_VISIBILITY_OUTBOX_DIR and STATE_PATH.parent != root.parent:
+        root = STATE_PATH.parent / "jaimes-terminal-visibility-outbox"
+    if not root.exists():
+        return []
+    recovered: list[dict[str, Any]] = []
+    for path in sorted(root.glob("*.json")):
+        record = load_json(path, {})
+        if not isinstance(record, dict) or not str(record.get("eventId") or ""):
+            continue
+        if record.get("acceptedAt"):
+            recovered.append({"eventId": record["eventId"], "status": "accepted"})
+            continue
+        if dry_run:
+            recovered.append({"eventId": record["eventId"], "status": "retry-planned"})
+            continue
+        accepted = publish_terminal_visibility_record(path, record)
+        current = load_json(path, record)
+        recovered.append({
+            "eventId": str(record.get("eventId") or ""),
+            "status": "accepted" if accepted else "blocked" if current.get("blockedAt") else "pending",
+        })
+    return recovered
+
+
+def prepare_terminal_response(
+    *,
+    response_text: str,
+    session_id: str,
+    model: str,
+    inbound_message_id: str = "",
+    response_recorded_at: str = "",
+) -> dict[str, Any]:
+    """Commit the v3 terminal outbox before Hermes performs its native send."""
+    with fast_ack_state_lock():
+        state = load_json(STATE_PATH, {})
+        active = state.get("active_cards") if isinstance(state, dict) else {}
+        candidates: list[tuple[str, str, dict[str, Any]]] = []
+        for run_id, card in (active or {}).items():
+            if not isinstance(card, dict) or card.get("status") != "active":
+                continue
+            if session_id and str(card.get("session_id") or "") != session_id:
+                continue
+            if inbound_message_id and str(card.get("inbound_message_id") or "") not in {"", inbound_message_id}:
+                continue
+            candidates.append((str(card.get("started_at") or ""), str(run_id), dict(card)))
+    if not candidates:
+        return {"ok": True, "managed": False, "text": response_text}
+    _, run_id, card = max(candidates, key=lambda item: item[0])
+    context = gateway_context_for_card(card)
+    receipt = context.get("receipt") or {}
+    if int(card.get("lifecycle_version") or 0) >= 3 and not receipt:
+        raise LifecycleError("terminal-lifecycle-receipt-unavailable")
+    if receipt.get("writerAuthorityAtStart") and not receipt.get("writerEnabled"):
+        raise LifecycleError("terminal-lifecycle-writer-safety-disabled")
+    writer_delivery = bool(context.get("writer"))
+    shadow_delivery = bool(context.get("shadow"))
+    if not writer_delivery and not shadow_delivery:
+        return {"ok": True, "managed": False, "text": response_text}
+
+    evidence = validated_jaimes_terminal_runtime_evidence(run_id, card)
+    if not evidence:
+        evidence = live_jaimes_terminal_runtime_evidence(
+            run_id,
+            card,
+            session_id,
+            model,
+        )
+    if not evidence:
+        visibility_path, visibility_record = queue_terminal_visibility(
+            run_id,
+            card,
+            terminal_outcome_for_response(response_text),
+            {},
+        )
+        mark_terminal_visibility_blocked(
+            visibility_path,
+            visibility_record,
+            "terminal-runtime-route-unverified",
+        )
+        raise LifecycleError("terminal-runtime-route-unverified")
+    card.update({
+        "runtime_model": evidence["model"],
+        "model": evidence["model"],
+        "route": evidence["route"],
+        "route_verified": True,
+        "terminal_runtime_evidence": evidence,
+    })
+    with fast_ack_state_lock():
+        state = load_json(STATE_PATH, {})
+        active = state.get("active_cards") if isinstance(state, dict) else {}
+        current = (active or {}).get(run_id) if isinstance(active, dict) else None
+        if (
+            not isinstance(current, dict)
+            or current.get("status") != "active"
+            or str(current.get("key") or "") != str(card.get("key") or "")
+        ):
+            raise LifecycleError("active-card-missing-before-terminal-visibility")
+        current.update({
+            "runtime_model": evidence["model"],
+            "model": evidence["model"],
+            "route": evidence["route"],
+            "route_verified": True,
+            "terminal_runtime_evidence": evidence,
+        })
+        save_json(STATE_PATH, state)
+
+    formatted = structured_final_text(
+        response_text,
+        objective=str(card.get("objective") or "JAIMES Telegram task"),
+        model=evidence["model"],
+        route=evidence["route"],
+        work_id=str(card.get("work_id") or ""),
+        run_id=str(card.get("ledger_run_id") or ""),
+        task_started_at=str(card.get("task_started_at") or card.get("started_at") or ""),
+        response_recorded_at=response_recorded_at or utc_now(),
+    )
+    if writer_delivery and not final_contract_is_canonical(formatted):
+        raise LifecycleError("canonical-final-render-failed")
+    terminal_text = formatted if writer_delivery else response_text
+    response_digest = hashlib.sha256(terminal_text.encode("utf-8")).hexdigest()
+    outcome = terminal_outcome_for_response(response_text)
+    visibility_path, visibility_record = queue_terminal_visibility(
+        run_id,
+        card,
+        outcome,
+        evidence,
+    )
+    if not publish_terminal_visibility_record(visibility_path, visibility_record):
+        current_visibility = load_json(visibility_path, visibility_record)
+        with fast_ack_state_lock():
+            state = load_json(STATE_PATH, {})
+            active = state.get("active_cards") if isinstance(state, dict) else {}
+            current = (active or {}).get(run_id) if isinstance(active, dict) else None
+            if isinstance(current, dict):
+                current["terminal_visibility_incident"] = str(
+                    (current_visibility.get("incident") or {}).get("code")
+                    or "terminal-visibility-publication-pending"
+                )
+                current["terminal_visibility_blocked_at"] = str(current_visibility.get("blockedAt") or "")
+                save_json(STATE_PATH, state)
+        raise LifecycleError(
+            "terminal-visibility-publication-blocked"
+            if current_visibility.get("blockedAt")
+            else "terminal-visibility-publication-pending"
+        )
+    with fast_ack_state_lock():
+        state = load_json(STATE_PATH, {})
+        active = state.get("active_cards") if isinstance(state, dict) else {}
+        current = (active or {}).get(run_id) if isinstance(active, dict) else None
+        if isinstance(current, dict):
+            current["terminal_visibility_event_id"] = str(visibility_record.get("eventId") or "")
+            current["terminal_control_tower_published_at"] = utc_now()
+            current.pop("terminal_visibility_incident", None)
+            current.pop("terminal_visibility_blocked_at", None)
+            save_json(STATE_PATH, state)
+    lifecycle = context["lifecycle"]
+    receipt = refresh_gateway_receipt(context)
+    if receipt.get("phase") != "terminal":
+        phase = str(receipt.get("phase") or "")
+        for next_phase in {
+            "received": ("classified", "acknowledged", "working", "verifying"),
+            "classified": ("acknowledged", "working", "verifying"),
+            "acknowledged": ("working", "verifying"),
+            "working": ("verifying",),
+            "awaiting_input": ("verifying",),
+            "verifying": (),
+        }.get(phase, ()):
+            advance_gateway_phase(context, next_phase)
+        receipt = refresh_gateway_receipt(context)
+        lifecycle.commit_terminal(
+            str(receipt["workId"]),
+            terminal_outcome_for_response(response_text),
+            expected_sequence=int(receipt["sequence"]),
+            fencing_epoch=int(receipt["fencingEpoch"]),
+            private_payload={
+                "format": "telegram-html-v3" if writer_delivery else "telegram-legacy-shadow",
+                "html": terminal_text,
+                "responseHash": response_digest,
+            },
+        )
+        receipt = refresh_gateway_receipt(context)
+    else:
+        existing_hash = str(card.get("terminal_response_hash") or "")
+        if not existing_hash or not secrets.compare_digest(existing_hash, response_digest):
+            raise LifecycleError("terminal-response-replay-conflict")
+
+    if shadow_delivery:
+        with fast_ack_state_lock():
+            state = load_json(STATE_PATH, {})
+            active = state.get("active_cards") if isinstance(state, dict) else {}
+            current = (active or {}).get(run_id) if isinstance(active, dict) else None
+            if not isinstance(current, dict) or current.get("status") != "active":
+                raise LifecycleError("active-card-missing-before-shadow-final")
+            current.update({
+                "terminal_prepared_at": utc_now(),
+                "terminal_shadow_prepared_at": utc_now(),
+                "terminal_response_hash": response_digest,
+                "terminal_delivery_state": "shadow-awaiting-confirmation",
+                "terminal_outcome": outcome,
+                "terminal_formatted_html": "",
+            })
+            save_json(STATE_PATH, state)
+        return {
+            "ok": True,
+            "managed": True,
+            "shadow": True,
+            "text": response_text,
+            "run_id": run_id,
+        }
+
+    delivery = lifecycle.claim_terminal_delivery(str(receipt["workId"]))
+    if not delivery.get("allowed"):
+        raise LifecycleError(f"terminal-delivery-fenced:{delivery.get('state')}")
+    receipt = refresh_gateway_receipt(context)
+    card_edit_effect: dict[str, Any] = {}
+    if int(receipt.get("deliveryTier") or 0) == 3 and not card.get("no_card_required"):
+        card_edit_effect = lifecycle.claim_effect(
+            str(receipt["workId"]),
+            "card_edit",
+            sequence=int(receipt["sequence"]),
+            fencing_epoch=int(receipt["fencingEpoch"]),
+        )
+        if not card_edit_effect.get("allowed"):
+            lifecycle.finish_terminal_delivery(str(receipt["workId"]), "indeterminate")
+            raise LifecycleError(
+                f"terminal-card-edit-effect-fenced:{card_edit_effect.get('state')}"
+            )
+    effect = lifecycle.claim_effect(
+        str(receipt["workId"]),
+        "final",
+        sequence=int(receipt["sequence"]),
+        fencing_epoch=int(receipt["fencingEpoch"]),
+    )
+    if not effect.get("allowed"):
+        card_edit_key = str(card_edit_effect.get("idempotencyKey") or "")
+        if card_edit_key and card_edit_effect.get("allowed"):
+            lifecycle.finish_effect(
+                card_edit_key,
+                state="dead_letter",
+                error_class="terminal-final-effect-fenced",
+            )
+        lifecycle.finish_terminal_delivery(str(receipt["workId"]), "indeterminate")
+        raise LifecycleError(f"terminal-final-effect-fenced:{effect.get('state')}")
+
+    with fast_ack_state_lock():
+        state = load_json(STATE_PATH, {})
+        active = state.get("active_cards") if isinstance(state, dict) else {}
+        current = (active or {}).get(run_id) if isinstance(active, dict) else None
+        if not isinstance(current, dict) or current.get("status") != "active":
+            card_edit_key = str(card_edit_effect.get("idempotencyKey") or "")
+            if card_edit_key and card_edit_effect.get("allowed"):
+                lifecycle.finish_effect(
+                    card_edit_key,
+                    state="dead_letter",
+                    error_class="watcher-state-missing",
+                )
+            lifecycle.finish_effect(
+                str(effect["idempotencyKey"]),
+                state="dead_letter",
+                error_class="watcher-state-missing",
+            )
+            lifecycle.finish_terminal_delivery(str(receipt["workId"]), "dead_letter")
+            raise LifecycleError("active-card-missing-before-final")
+        current.update({
+            "terminal_prepared_at": utc_now(),
+            "terminal_response_hash": response_digest,
+            "terminal_final_effect_key": str(effect["idempotencyKey"]),
+            "terminal_card_edit_effect_key": str(card_edit_effect.get("idempotencyKey") or ""),
+            "terminal_delivery_state": "sending",
+            "terminal_outcome": terminal_outcome_for_response(response_text),
+            "terminal_formatted_html": formatted,
+        })
+        save_json(STATE_PATH, state)
+    return {"ok": True, "managed": True, "text": formatted, "run_id": run_id}
+
+
+def finish_card_terminal_delivery(
+    card: dict[str, Any],
+    *,
+    state: str,
+    error_class: str = "",
+) -> None:
+    context = gateway_context_for_card(card)
+    lifecycle = context.get("lifecycle")
+    receipt = context.get("receipt") or {}
+    effect_key = str(card.get("terminal_final_effect_key") or "")
+    if lifecycle is None or not receipt or not effect_key:
+        return
+    lifecycle.finish_effect(
+        effect_key,
+        state=state,
+        private_receipt="telegram-confirmed" if state == "delivered" else "",
+        error_class=error_class,
+    )
+    lifecycle.finish_terminal_delivery(str(receipt["workId"]), state)
+    card["terminal_delivery_state"] = state
+    if state != "delivered":
+        finish_prepared_terminal_card_edit(
+            card,
+            state="dead_letter",
+            error_class=error_class or "terminal-final-not-delivered",
+        )
+
+
+def finish_shadow_terminal_delivery(card: dict[str, Any], *, delivered: bool) -> None:
+    context = gateway_context_for_card(card)
+    lifecycle = context.get("lifecycle")
+    receipt = context.get("receipt") or {}
+    if lifecycle is None or not receipt.get("workId") or not context.get("shadow"):
+        return
+    lifecycle.finish_shadow_sample(
+        str(receipt["workId"]),
+        delivered=bool(delivered),
+    )
+    card["terminal_delivery_state"] = "shadow-delivered" if delivered else "shadow-unclean"
+    card["terminal_shadow_confirmed_at"] = utc_now()
+
+
+def finish_prepared_terminal_card_edit(
+    card: dict[str, Any],
+    *,
+    state: str,
+    error_class: str = "",
+) -> None:
+    context = gateway_context_for_card(card)
+    lifecycle = context.get("lifecycle")
+    effect_key = str(card.get("terminal_card_edit_effect_key") or "")
+    if lifecycle is None or not effect_key:
+        return
+    lifecycle.finish_effect(
+        effect_key,
+        state=state,
+        private_receipt="telegram-card-confirmed" if state == "delivered" else "",
+        error_class=error_class,
+    )
+    card["terminal_card_edit_state"] = state
 
 
 def complete_cards_from_final_responses(state: dict[str, Any], session_id: str, dry_run: bool = False) -> int:
@@ -2581,19 +3813,48 @@ def complete_cards_from_final_responses(state: dict[str, Any], session_id: str, 
         native_final_id = str(final_record.get("platform_message_id") or "")
         if not native_final_id:
             card["final_contract_status"] = "waiting_for_telegram_delivery_id"
+            prepared_at = parse_utc(card.get("terminal_prepared_at"))
+            if (
+                not dry_run
+                and card.get("terminal_delivery_state") == "sending"
+                and prepared_at
+                and (dt.datetime.now(dt.timezone.utc) - prepared_at).total_seconds()
+                >= TERMINAL_FINAL_RECEIPT_SECONDS
+            ):
+                finish_card_terminal_delivery(
+                    card,
+                    state="indeterminate",
+                    error_class="native-final-receipt-missing",
+                )
+                card["final_contract_status"] = "delivery_indeterminate"
+            elif (
+                not dry_run
+                and card.get("lifecycle_shadow")
+                and card.get("terminal_delivery_state") == "shadow-awaiting-confirmation"
+                and prepared_at
+                and (dt.datetime.now(dt.timezone.utc) - prepared_at).total_seconds()
+                >= TERMINAL_FINAL_RECEIPT_SECONDS
+            ):
+                finish_shadow_terminal_delivery(card, delivered=False)
+                card["final_contract_status"] = "shadow-delivery-unclean"
             continue
         key = str(card.get("key") or "")
         if not key:
             continue
-        formatted_final = structured_final_text(
-            str(final_record.get("content") or ""),
-            objective=str(card.get("objective") or "JAIMES Telegram task"),
-            model=str(card.get("model") or DEFAULT_MODEL),
-            route=str(card.get("route") or DEFAULT_ROUTE),
-            work_id=str(card.get("work_id") or ""),
-            run_id=str(card.get("ledger_run_id") or ""),
-            task_started_at=str(card.get("task_started_at") or card.get("started_at") or ""),
-            response_recorded_at=str(final_record.get("recorded_at") or ""),
+        native_content = str(final_record.get("content") or "")
+        formatted_final = (
+            native_content
+            if final_contract_is_canonical(native_content)
+            else structured_final_text(
+                native_content,
+                objective=str(card.get("objective") or "JAIMES Telegram task"),
+                model=str(card.get("model") or DEFAULT_MODEL),
+                route=str(card.get("route") or DEFAULT_ROUTE),
+                work_id=str(card.get("work_id") or ""),
+                run_id=str(card.get("ledger_run_id") or ""),
+                task_started_at=str(card.get("task_started_at") or card.get("started_at") or ""),
+                response_recorded_at=str(final_record.get("recorded_at") or ""),
+            )
         )
         evidence_problems = final_evidence_problems(
             str(final_record.get("content") or ""),
@@ -2610,10 +3871,41 @@ def complete_cards_from_final_responses(state: dict[str, Any], session_id: str, 
             card.get("task_started_at") or card.get("started_at") or ""
         )
         card["final_response_recorded_at"] = str(final_record.get("recorded_at") or "")
+        writer_delivery = bool(card.get("lifecycle_writer_enabled"))
+        shadow_delivery = bool(
+            card.get("lifecycle_shadow")
+            and card.get("terminal_shadow_prepared_at")
+        )
+        expected_hash = str(card.get("terminal_response_hash") or "")
+        observed_hash = hashlib.sha256(native_content.encode("utf-8")).hexdigest()
+        if (
+            shadow_delivery
+            and card.get("terminal_delivery_state") == "shadow-awaiting-confirmation"
+            and not dry_run
+        ):
+            finish_shadow_terminal_delivery(
+                card,
+                delivered=bool(expected_hash and secrets.compare_digest(expected_hash, observed_hash)),
+            )
         if not final_contract_is_canonical(formatted_final):
             card["final_contract_status"] = "formatter_error"
             continue
-        if dry_run:
+        if writer_delivery and (
+            not card.get("terminal_prepared_at")
+            or not expected_hash
+            or not secrets.compare_digest(expected_hash, observed_hash)
+            or not final_contract_is_canonical(native_content)
+        ):
+            if card.get("terminal_delivery_state") == "sending" and not dry_run:
+                finish_card_terminal_delivery(
+                    card,
+                    state="indeterminate",
+                    error_class="native-final-payload-mismatch",
+                )
+            card["final_contract_status"] = "writer_payload_mismatch"
+            card["native_final_message_id"] = native_final_id
+            continue
+        if dry_run or writer_delivery:
             edit_result = {"ok": True, "dry_run": True}
         else:
             edit_result = edit_message(
@@ -2636,6 +3928,30 @@ def complete_cards_from_final_responses(state: dict[str, Any], session_id: str, 
             card["final_contract_attempts"] = int(card.get("final_contract_attempts") or 0) + 1
             card["native_final_message_id"] = native_final_id
             continue
+        if writer_delivery and card.get("terminal_delivery_state") == "sending" and not dry_run:
+            finish_card_terminal_delivery(card, state="delivered")
+        if writer_delivery and card.get("no_card_required"):
+            card["status"] = "done"
+            card["ended_at"] = utc_now()
+            card["last_card_update_at"] = card["ended_at"]
+            card["native_final_message_id"] = native_final_id
+            card["final_db_message_id"] = final_record.get("id")
+            card["final_contract_status"] = "canonical"
+            card["final_contract_attempts"] = int(card.get("final_contract_attempts") or 0) + 1
+            if not dry_run:
+                publish_jaimes(
+                    str(card.get("objective") or "JAIMES Telegram task"),
+                    "done",
+                    "Verified final response delivered in JAIMES Telegram.",
+                    work_id=str(card.get("work_id") or ""),
+                    run_id=str(card.get("ledger_run_id") or ""),
+                    phase="done",
+                    model_id=str(card.get("model") or DEFAULT_MODEL),
+                    route_verified=True,
+                    origin_claim_hash=str(card.get("origin_claim_hash") or ""),
+                )
+            completed += 1
+            continue
         cmd = [
             "python3", "mission-control/scripts/jaimes_work_card.py", "done",
             "--key", key,
@@ -2646,7 +3962,19 @@ def complete_cards_from_final_responses(state: dict[str, Any], session_id: str, 
             "--blocker", "None",
             "--no-final-summary",
         ] + work_card_target_args(card)
-        result = {"ok": True, "dry_run": True} if dry_run else run_work_card_cmd(cmd)
+        if dry_run:
+            result = {"ok": True, "dry_run": True}
+        elif writer_delivery and card.get("terminal_card_edit_effect_key"):
+            # prepare_terminal_response reserved this exact terminal card edit
+            # before Hermes was allowed to send the native final.
+            result = dict(run_work_card_cmd(cmd))
+            finish_prepared_terminal_card_edit(
+                card,
+                state="delivered" if result.get("ok") else "indeterminate",
+                error_class="terminal-card-edit-receipt-missing" if not result.get("ok") else "",
+            )
+        else:
+            result = run_gateway_card_command(card, cmd, status="delivery")
         if not dry_run:
             record_api_result(state, "editMessageText", {
                 "ok": bool(result.get("ok")),
@@ -2689,7 +4017,7 @@ def reconcile_adapter_confirmed_deliveries(
         return 0
     confirmed = 0
     for card in (state.get("active_cards") or {}).values():
-        if not isinstance(card, dict) or card.get("status") == "done":
+        if not isinstance(card, dict) or card.get("status") in {"done", "awaiting-final-gate", "closing-before-final"}:
             continue
         record = work_cards.get(str(card.get("key") or ""))
         if not isinstance(record, dict) or record.get("status") != "done":
@@ -2711,6 +4039,33 @@ def reconcile_adapter_confirmed_deliveries(
         work_log = " ".join(str(item) for item in (record.get("work_log") or record.get("done") or []))
         if "Final summary delivered" not in work_log:
             continue
+        writer_delivery = bool(card.get("lifecycle_writer_enabled"))
+        shadow_delivery = bool(
+            card.get("lifecycle_shadow")
+            and card.get("terminal_shadow_prepared_at")
+        )
+        if writer_delivery and (
+            not card.get("terminal_prepared_at")
+            or not card.get("terminal_final_effect_key")
+            or (
+                int(card.get("delivery_tier") or 0) == 3
+                and not card.get("no_card_required")
+                and not card.get("terminal_card_edit_effect_key")
+            )
+        ):
+            card["final_contract_status"] = "terminal_intents_missing"
+            continue
+        if writer_delivery and not dry_run:
+            if card.get("terminal_delivery_state") == "sending":
+                finish_card_terminal_delivery(card, state="delivered")
+            if card.get("terminal_card_edit_effect_key"):
+                finish_prepared_terminal_card_edit(card, state="delivered")
+        elif (
+            shadow_delivery
+            and card.get("terminal_delivery_state") == "shadow-awaiting-confirmation"
+            and not dry_run
+        ):
+            finish_shadow_terminal_delivery(card, delivered=True)
         ended_at = str(record.get("updated_at") or utc_now())
         card["status"] = "done"
         card["ended_at"] = ended_at
@@ -2746,7 +4101,9 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
     cards_flag = os.environ.get("JAIMES_TELEGRAM_LIVE_CARDS", "").lower()
     active = state.get("active_cards") or {}
     has_direct_card = any(
-        isinstance(card, dict) and not card.get("telegram_thread_id")
+        isinstance(card, dict)
+        and not card.get("telegram_thread_id")
+        and not card.get("no_card_required")
         for card in active.values()
     )
     if cards_flag in {"0", "false", "no"} or (cards_flag not in {"1", "true", "yes"} and not has_direct_card):
@@ -2783,7 +4140,12 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
             continued_run_id, card = lineage_cards[-1]
             event["run_id"] = continued_run_id
             event["continued_session_id"] = session_id
-        if not card or card.get("status") == "done":
+        if not card or card.get("status") in {"done", "awaiting-final-gate", "closing-before-final"}:
+            processed.add(event_id)
+            continue
+        if card.get("no_card_required"):
+            # Tier 1/2 work has no managed card surface. Hermes progress stays
+            # private; only the gateway-owned native final is visible.
             processed.add(event_id)
             continue
         if card.get("session_id") and str(card.get("session_id")) not in lineage:
@@ -2822,7 +4184,11 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
                 "--now",
                 "Final response prepared; awaiting Telegram delivery",
             ] + work_card_target_args(card)
-            result = {"ok": True, "dry_run": True} if dry_run else run_work_card_cmd(cmd)
+            result = (
+                {"ok": True, "dry_run": True}
+                if dry_run
+                else run_gateway_card_command(card, cmd, status="verifying")
+            )
             if not dry_run:
                 record_api_result(state, "editMessageText", {
                     "ok": bool(result.get("ok")),
@@ -2855,8 +4221,17 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
                 card["last_card_update_at"] = utc_now()
                 card["last_progress_at"] = card["last_card_update_at"]
         else:
-            if not dry_run:
+            gateway_writer = bool(card.get("lifecycle_writer_enabled"))
+            if not dry_run and not gateway_writer:
                 send_chat_action(meta=card)
+            safe_summary = (
+                {
+                    "tool.call": "Tool execution started",
+                    "tool.result": "Tool execution completed",
+                }.get(str(event.get("type") or ""), "Work progressed")
+                if gateway_writer
+                else event["summary"]
+            )
             cmd = [
                 "python3",
                 "mission-control/scripts/jaimes_work_card.py",
@@ -2870,12 +4245,16 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
                 "--route",
                 str(card.get("route") or DEFAULT_ROUTE),
                 "--now",
-                event["summary"],
+                safe_summary,
             ]
             if event["type"] == "tool.result":
-                cmd += ["--done", event["summary"]]
+                cmd += ["--done", safe_summary]
             cmd += work_card_target_args(card)
-            result = {"ok": True, "dry_run": True} if dry_run else run_work_card_cmd(cmd)
+            result = (
+                {"ok": True, "dry_run": True}
+                if dry_run
+                else run_gateway_card_command(card, cmd, status="progress")
+            )
             if not dry_run:
                 record_api_result(state, "editMessageText", {
                     "ok": bool(result.get("ok")),
@@ -2886,7 +4265,7 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
                 publish_jaimes(
                     objective,
                     "active",
-                    event["summary"],
+                    safe_summary,
                     work_id=str(card.get("work_id") or ""),
                     run_id=str(card.get("ledger_run_id") or ""),
                     phase="active",
@@ -2903,13 +4282,15 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
                         value for value in dict.fromkeys(card["continued_from_session_ids"]) if value
                     ][-8:]
                     card["session_id"] = session_id
-                card["current_summary"] = event["summary"]
+                card["current_summary"] = safe_summary
                 card["last_card_update_at"] = utc_now()
                 card["last_progress_at"] = card["last_card_update_at"]
         updates.append({"event": event_id, "result": result})
     now = dt.datetime.now(dt.timezone.utc)
     for run_id, card in active.items():
-        if not isinstance(card, dict) or card.get("status") == "done":
+        if not isinstance(card, dict) or card.get("status") in {"done", "awaiting-final-gate", "closing-before-final"}:
+            continue
+        if card.get("no_card_required"):
             continue
         last_raw = str(card.get("last_card_update_at") or "")
         try:
@@ -2945,7 +4326,12 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
                 "None",
                 "--no-final-summary",
             ] + work_card_target_args(card)
-            result = {"ok": True, "dry_run": True} if dry_run else run_work_card_cmd(cmd)
+            if bool(card.get("lifecycle_writer_enabled")):
+                result = {"ok": False, "gateway_terminal_required": True}
+                card["status"] = "awaiting-final-gate"
+                card["final_delivery_status"] = "terminal-gate-required"
+            else:
+                result = {"ok": True, "dry_run": True} if dry_run else run_work_card_cmd(cmd)
             if not dry_run:
                 record_api_result(state, "editMessageText", {
                     "ok": bool(result.get("ok")),
@@ -3001,7 +4387,11 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
             "--now",
             heartbeat_summary,
         ] + work_card_target_args(card)
-        result = {"ok": True, "dry_run": True} if dry_run else run_work_card_cmd(cmd)
+        result = (
+            {"ok": True, "dry_run": True}
+            if dry_run
+            else run_gateway_card_command(card, cmd, status="heartbeat")
+        )
         heartbeat_at = utc_now()
         card["heartbeat_checked_at"] = heartbeat_at
         if not dry_run:
@@ -3297,28 +4687,20 @@ def process_ack_event(
             }
             write_handoff_record(record_path, claimed)
 
-        # The eyes reaction is idempotent and is the first permitted Telegram
-        # effect. Keep the claim in `claimed_no_effect` until that call proves
-        # an effect, so a pre-request crash remains safe for Josh fallback.
-        reaction_ok = set_eyes_reaction(str(message_id or ""), state, meta=meta)
-        if not reaction_ok:
+        def mark_reaction_attempt() -> bool:
+            """Persist cross-host intent immediately before the Bot API call."""
             with handoff_lock(chat_id, thread_id, message_id) as record_path:
                 current = load_json(record_path, {})
-                if handoff_claim_matches(current, chat_id, thread_id, message_id, claim_token):
-                    current.update({
-                        "status": "failed",
-                        "failed_at": utc_now(),
-                        "reason": "eyes_reaction_failed",
-                    })
-                    write_handoff_record(record_path, current)
-            return {
-                "ok": False,
-                "handoff_terminal_failure": True,
-                "error": "eyes_reaction_failed",
-                "reaction_ok": False,
-                "header_message_id": "",
-                "ack_message_id": "",
-            }
+                claim_active = handoff_claim_matches(
+                    current, chat_id, thread_id, message_id, claim_token
+                ) and handoff_record_fresh(current)
+                if not claim_active:
+                    return False
+                current["ownership_state"] = "reaction_inflight"
+                current["card_key"] = f"jaimes-fast-ack-{chat_id or 'telegram'}-{message_id}"
+                current["reaction_attempt_started_at"] = utc_now()
+                write_handoff_record(record_path, current)
+                return True
 
         def mark_surface_attempt() -> bool:
             # This callback runs after routing and immediately before the
@@ -3348,7 +4730,8 @@ def process_ack_event(
             state=state,
             dry_run=False,
             meta=meta,
-            reaction_already_done=True,
+            reaction_already_done=reaction_already_done,
+            reaction_attempt_callback=mark_reaction_attempt,
             surface_attempt_callback=mark_surface_attempt,
         )
 
@@ -3375,9 +4758,13 @@ def process_ack_event(
                     "chat_id": str(chat_id),
                     "thread_id": str(thread_id),
                     "inbound_message_id": str(message_id),
-                    "reaction_ok": True,
+                    "reaction_ok": bool(result.get("reaction_ok")),
                     "header_message_id": str(result.get("header_message_id") or ""),
                     "live_message_id": str(result.get("ack_message_id") or ""),
+                    "no_card_required": bool(result.get("no_card_required")),
+                    "delivery_tier": int(result.get("delivery_tier") or 0),
+                    "lifecycle_version": int(result.get("lifecycle_version") or 0),
+                    "lifecycle_writer_enabled": bool(result.get("lifecycle_writer_enabled")),
                     "accepted_at": accepted_at.replace(microsecond=0).isoformat().replace("+00:00", "Z"),
                     "expires_at": (accepted_at + dt.timedelta(seconds=HANDOFF_RECEIPT_TTL_SECONDS)).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
                 }
@@ -3427,13 +4814,14 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
     state = load_json(STATE_PATH, {})
     if not isinstance(state, dict):
         state = {}
+    terminal_visibility_updates = recover_terminal_visibility_outbox(dry_run=dry_run)
     if not dry_run and not verify_bot_identity(state):
         state["last_checked_at"] = utc_now()
         state["status"] = "telegram-identity-error"
         state["last_error_at"] = utc_now()
         state["last_error"] = "JAIMES Telegram bot identity verification failed"
         save_json(STATE_PATH, state)
-        return {"ok": False, "status": state["status"]}
+        return {"ok": False, "status": state["status"], "terminal_visibility": terminal_visibility_updates}
     acked = set(state.get("acked_prompt_events") or [])
     metas = active_hermes_sessions_metadata()
     if not metas:
@@ -3446,7 +4834,7 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
         state["status"] = "no-direct-session"
         if not dry_run:
             save_json(STATE_PATH, state)
-        return {"ok": False, "status": "no-direct-session"}
+        return {"ok": False, "status": "no-direct-session", "terminal_visibility": terminal_visibility_updates}
 
     state.setdefault("active_cards", {})
     surface_retries = state.get("surface_retry_events")
@@ -3652,6 +5040,15 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
                     "route": result.get("route"),
                     "header_message_id": result.get("header_message_id"),
                     "ack_message_id": result.get("ack_message_id"),
+                    "inbound_message_id": result.get("inbound_message_id"),
+                    "no_card_required": bool(result.get("no_card_required")),
+                    "delivery_tier": int(result.get("delivery_tier") or 0),
+                    "classifier_reason": str(result.get("classifier_reason") or ""),
+                    "lifecycle_version": int(result.get("lifecycle_version") or 0),
+                    "lifecycle_sequence": int(result.get("lifecycle_sequence") or 0),
+                    "fencing_epoch": int(result.get("fencing_epoch") or 0),
+                    "lifecycle_writer_enabled": bool(result.get("lifecycle_writer_enabled")),
+                    "lifecycle_shadow": bool(result.get("lifecycle_shadow")),
                     "telegram_chat_id": selected_meta.get("telegram_chat_id"),
                     "telegram_thread_id": selected_meta.get("telegram_thread_id"),
                     "session_id": selected_session_id,
@@ -3789,8 +5186,26 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
             except Exception:
                 # Observability must never prevent Telegram state from saving.
                 state["completion_evidence_error_at"] = utc_now()
-        save_json(STATE_PATH, state)
-    return {"ok": True, "session_id": selected_session_id, "session_ids": session_ids, "sent": sent, "updates": updates, "dry_run": dry_run}
+        with fast_ack_state_lock():
+            latest = load_json(STATE_PATH, {})
+            latest_cards = latest.get("active_cards") if isinstance(latest, dict) else {}
+            for run_id, disk_card in (latest_cards or {}).items():
+                current_card = (state.get("active_cards") or {}).get(run_id)
+                if not isinstance(disk_card, dict) or not isinstance(current_card, dict):
+                    continue
+                for key, value in disk_card.items():
+                    if str(key).startswith("terminal_"):
+                        current_card[key] = value
+            save_json(STATE_PATH, state)
+    return {
+        "ok": True,
+        "session_id": selected_session_id,
+        "session_ids": session_ids,
+        "sent": sent,
+        "updates": updates,
+        "terminal_visibility": terminal_visibility_updates,
+        "dry_run": dry_run,
+    }
 
 
 def main() -> int:
@@ -3799,6 +5214,11 @@ def main() -> int:
         "--format-final-json-stdin",
         action="store_true",
         help="Read a private JSON payload from stdin and emit one canonical Topic 17 final.",
+    )
+    parser.add_argument(
+        "--prepare-terminal-json-stdin",
+        action="store_true",
+        help="Privately commit the v3 terminal outbox before native gateway delivery.",
     )
     parser.add_argument("--once", action="store_true", help="Run one poll and exit.")
     parser.add_argument("--dry-run", action="store_true")
@@ -3809,6 +5229,18 @@ def main() -> int:
     parser.add_argument("--message-id", default="")
     parser.add_argument("--timeout", type=float, default=10.0)
     args = parser.parse_args()
+
+    if args.prepare_terminal_json_stdin:
+        payload = json.load(sys.stdin)
+        result = prepare_terminal_response(
+            response_text=str(payload.get("response_text") or ""),
+            session_id=str(payload.get("session_id") or ""),
+            model=str(payload.get("model") or DEFAULT_MODEL),
+            inbound_message_id=str(payload.get("inbound_message_id") or ""),
+            response_recorded_at=str(payload.get("response_recorded_at") or ""),
+        )
+        print(json.dumps(result, sort_keys=True))
+        return 0
 
     if args.format_final_json_stdin:
         payload = json.load(sys.stdin)

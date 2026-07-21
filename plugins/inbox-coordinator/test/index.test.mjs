@@ -378,6 +378,31 @@ test("exact accepted JAIMES receipt is required", () => {
   assert.equal(validJaimesHandoffReceipt("not-json", event, inboxCtx), false);
 });
 
+test("JAIMES v3 Tier 1 and Tier 2 handoffs need no card receipt", () => {
+  const event = { content: "@JAIMES answer this", channel: "telegram" };
+  const base = {
+    ok: true,
+    status: "accepted",
+    agent: "jaimes",
+    chat_id: "-1003589561528",
+    thread_id: "1",
+    inbound_message_id: "42",
+    header_message_id: "",
+    live_message_id: "",
+    no_card_required: true,
+    lifecycle_writer_enabled: true,
+    lifecycle_version: 3,
+    accepted_at: new Date().toISOString(),
+  };
+  const tier1 = { ...base, delivery_tier: 1, reaction_ok: false };
+  const tier2 = { ...base, delivery_tier: 2, reaction_ok: true };
+  assert.equal(validJaimesHandoffReceipt(JSON.stringify(tier1), event, inboxCtx), true);
+  assert.equal(validJaimesHandoffReceipt(JSON.stringify(tier2), event, inboxCtx), true);
+  assert.equal(validJaimesHandoffReceipt(JSON.stringify({ ...tier1, reaction_ok: true }), event, inboxCtx), false);
+  assert.equal(validJaimesHandoffReceipt(JSON.stringify({ ...tier2, reaction_ok: false }), event, inboxCtx), false);
+  assert.equal(validJaimesHandoffReceipt(JSON.stringify({ ...tier2, lifecycle_writer_enabled: false }), event, inboxCtx), false);
+});
+
 test("exact fresh JAIMES in-flight ownership receipt is handled without claiming acceptance", () => {
   const event = { content: "@JAIMES verify this", channel: "telegram" };
   const now = new Date();

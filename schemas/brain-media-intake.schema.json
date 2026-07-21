@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://jcubellagent.invalid/schemas/brain-media-intake.schema.json",
+  "title": "Governed Brain media intake",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "lifecycleVersion", "extractionVersion", "workId", "sourceRevision", "intakeAgent", "currentOwner", "ingestionPhase", "privacyClass", "captionPresent", "candidateStatus", "promotionStatus"],
+  "properties": {
+    "schemaVersion": {"const": 3},
+    "lifecycleVersion": {"const": 3},
+    "extractionVersion": {"type": "string", "minLength": 1},
+    "workId": {"type": "string", "minLength": 8, "maxLength": 128},
+    "sourceRevision": {"type": "integer", "minimum": 1},
+    "intakeAgent": {"const": "josh2"},
+    "currentOwner": {"const": "josh2"},
+    "ingestionPhase": {"enum": ["receipt_pending", "downloading", "stored", "scanning", "extracting", "classifying", "deduplicating", "candidate_pending", "reviewing", "indexed", "unsupported", "quarantined", "forgotten"]},
+    "privacyClass": {"enum": ["private", "internal", "dashboard-safe"]},
+    "captionPresent": {"type": "boolean"},
+    "privateSourceArtifactRef": {"type": "string", "maxLength": 128},
+    "contentHash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "mediaClass": {"type": "string", "maxLength": 80},
+    "candidateStatus": {"enum": ["none", "pending", "active", "rejected", "disputed", "forgotten"]},
+    "promotionStatus": {"enum": ["none", "eligible", "pending", "active", "blocked", "forgotten"]}
+  }
+}

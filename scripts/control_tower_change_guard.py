@@ -55,6 +55,11 @@ SOURCE_PATHS = (
     "scripts/ecosystem_state_reconciler.py",
     "scripts/inbox_coordinator.py",
     "scripts/brain_media_intake.py",
+    "scripts/brain_intake_worker.py",
+    "scripts/brain_fixture_suite.py",
+    "scripts/brain_gateway_actions.py",
+    "scripts/brain_gateway_dispatcher.py",
+    "scripts/brain_topic_manager.py",
     "scripts/brain_topic_catalog.py",
     "scripts/brain_topic_watcher.py",
     "scripts/install_ecosystem_qa_schedules.py",
@@ -71,6 +76,8 @@ SOURCE_PATHS = (
     "scripts/refresh_agentic_robinhood_wallet_live.py",
     "scripts/telegram_channel_registry.py",
     "scripts/telegram_gateway_lifecycle.py",
+    "scripts/telegram_lifecycle_release.py",
+    "scripts/telegram_shadow_fixture.py",
     "scripts/telegram_response_contract_stress.py",
     "scripts/telegram_inbox_qa_monitor.py",
     "scripts/update_mission_control.py",
@@ -112,10 +119,17 @@ PYTHON_COMPILE_PATHS = (
     "scripts/jaimes_telegram_fast_ack.py",
     "scripts/telegram_gateway_lifecycle.py",
     "scripts/brain_media_intake.py",
+    "scripts/brain_intake_worker.py",
+    "scripts/brain_fixture_suite.py",
+    "scripts/brain_gateway_actions.py",
+    "scripts/brain_gateway_dispatcher.py",
+    "scripts/brain_topic_manager.py",
     "scripts/brain_topic_catalog.py",
     "scripts/brain_topic_watcher.py",
     "scripts/josh_telegram_callback_action.py",
     "scripts/telegram_channel_registry.py",
+    "scripts/telegram_lifecycle_release.py",
+    "scripts/telegram_shadow_fixture.py",
     "scripts/josh_work_card.py",
     "scripts/jaimes_work_card.py",
     "scripts/ecosystem_qa_scheduler.py",
@@ -312,6 +326,45 @@ def renew(token: str) -> None:
     print(json.dumps({"ok": True, "lease": public_lease(payload)}, indent=2))
 
 
+def extend_snapshot(token: str) -> None:
+    """Add newly guarded, still-absent paths to an active immutable lease.
+
+    A long-running governed change can add a new source path to SOURCE_PATHS
+    after the lease begins.  Rollback may cover that path only while the live
+    target is still absent, which proves it was also absent when this clean
+    lease started.  Existing paths are deliberately rejected because their
+    begin-state cannot be reconstructed after the fact.
+    """
+    payload = require_token(token)
+    if lease_expired(payload):
+        raise SystemExit("Expired Control Tower change lease requires safe recovery.")
+    snapshot = payload.get("sourceSnapshot")
+    if not isinstance(snapshot, list):
+        raise SystemExit("Legacy lease cannot extend its rollback snapshot safely.")
+    seen = {
+        str(entry.get("path") or "")
+        for entry in snapshot
+        if isinstance(entry, dict)
+    }
+    additions = [relative for relative in SOURCE_PATHS if relative not in seen]
+    unsafe = [relative for relative in additions if (ROOT / relative).exists()]
+    if unsafe:
+        raise SystemExit(json.dumps({
+            "ok": False,
+            "reason": "newly guarded path already exists; begin-state cannot be proven",
+            "paths": unsafe,
+        }, indent=2))
+    snapshot.extend({"path": relative, "existedAtBegin": False} for relative in additions)
+    payload["sourceSnapshot"] = snapshot
+    LOCK_PATH.write_text(json.dumps(payload, indent=2) + "\n")
+    print(json.dumps({
+        "ok": True,
+        "extended": len(additions),
+        "paths": additions,
+        "lease": public_lease(payload),
+    }, indent=2))
+
+
 def verify(token: str) -> None:
     payload = require_token(token)
     if lease_expired(payload):
@@ -476,7 +529,7 @@ def main() -> None:
     start.add_argument("--agent", required=True, choices=["joshex", "josh2", "jaimes", "jain"])
     start.add_argument("--objective", required=True)
     sub.add_parser("status")
-    for name in ("renew", "verify", "finish", "abort"):
+    for name in ("renew", "extend-snapshot", "verify", "finish", "abort"):
         command = sub.add_parser(name)
         command.add_argument("--token", required=True)
     approve = sub.add_parser("approve-push")
@@ -487,6 +540,7 @@ def main() -> None:
     if args.command == "begin": begin(args.agent, args.objective)
     elif args.command == "status": status()
     elif args.command == "renew": renew(args.token)
+    elif args.command == "extend-snapshot": extend_snapshot(args.token)
     elif args.command == "verify": verify(args.token)
     elif args.command == "finish": finish(args.token)
     elif args.command == "abort": abort(args.token)

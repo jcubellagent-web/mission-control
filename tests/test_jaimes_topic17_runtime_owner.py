@@ -285,7 +285,7 @@ class Topic17RuntimeOwnerTests(unittest.TestCase):
                         self.plugin._on_pre_tool_call(tool_name, args)
                     )
 
-    def test_register_wires_one_pre_tool_call_hook(self):
+    def test_register_wires_gateway_ownership_surface_and_terminal_hooks(self):
         calls = []
 
         class Context:
@@ -293,7 +293,14 @@ class Topic17RuntimeOwnerTests(unittest.TestCase):
                 calls.append((name, callback))
 
         self.plugin.register(Context())
-        self.assertEqual(calls, [("pre_tool_call", self.plugin._on_pre_tool_call)])
+        self.assertEqual(
+            calls,
+            [
+                ("pre_gateway_dispatch", self.plugin._on_pre_gateway_dispatch),
+                ("pre_tool_call", self.plugin._on_pre_tool_call),
+                ("transform_llm_output", self.plugin._on_transform_llm_output),
+            ],
+        )
 
 
 if __name__ == "__main__":

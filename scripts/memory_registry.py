@@ -25,7 +25,7 @@ DB_PATH = Path(os.environ.get("MEMORY_REGISTRY_DB", DATA / "memory-registry.sqli
 STATUS_PATH = Path(os.environ.get("MEMORY_OPERATIONS_PATH", DATA / "memory-operations.json"))
 INDEX_PATH = DATA / "agent-semantic-memory-index.json"
 ALLOWED_TYPES = {"fact", "decision", "preference", "procedure", "lesson", "entity", "relationship", "episode"}
-ALLOWED_STATUS = {"candidate", "active", "disputed", "superseded", "expired", "rejected"}
+ALLOWED_STATUS = {"candidate", "active", "disputed", "superseded", "expired", "rejected", "forgotten"}
 AUTO_PROMOTE_TYPES = {"fact", "lesson", "entity", "relationship"}
 FEEDBACK_OUTCOMES = {"helpful", "ignored", "corrected", "harmful"}
 REUSE_OUTCOMES = {"selected", "used", "ignored"}
@@ -251,12 +251,29 @@ def connect() -> sqlite3.Connection:
         );
         CREATE INDEX IF NOT EXISTS memory_reuse_retrieval
           ON memory_reuse_events(retrieval_id, memory_id, time);
+        CREATE TABLE IF NOT EXISTS memory_deletions (
+          id TEXT PRIMARY KEY,
+          time TEXT NOT NULL,
+          source_hash TEXT NOT NULL,
+          actor TEXT NOT NULL,
+          candidate_count INTEGER NOT NULL,
+          record_count INTEGER NOT NULL,
+          fts_count INTEGER NOT NULL,
+          status TEXT NOT NULL
+        );
         """
     )
     ensure_column(db, "retrieval_events", "work_id_hash", "TEXT")
     ensure_column(db, "retrieval_events", "run_id_hash", "TEXT")
     ensure_column(db, "retrieval_events", "session_id_hash", "TEXT")
     ensure_column(db, "retrieval_events", "preflight", "INTEGER NOT NULL DEFAULT 0")
+    ensure_column(db, "memory_candidates", "source_ref", "TEXT NOT NULL DEFAULT ''")
+    ensure_column(db, "memory_candidates", "source_kind", "TEXT NOT NULL DEFAULT 'legacy'")
+    ensure_column(db, "memory_candidates", "extraction_version", "TEXT NOT NULL DEFAULT ''")
+    ensure_column(db, "memory_candidates", "governance_eligible", "INTEGER NOT NULL DEFAULT 1")
+    ensure_column(db, "memory_candidates", "injection_status", "TEXT NOT NULL DEFAULT 'not-applicable'")
+    ensure_column(db, "memory_candidates", "source_state", "TEXT NOT NULL DEFAULT 'active'")
+    ensure_column(db, "memory_candidates", "metadata_json", "TEXT NOT NULL DEFAULT '{}'")
     db.commit()
     return db
 
@@ -378,19 +395,48 @@ def propose(db: sqlite3.Connection, args: argparse.Namespace) -> dict[str, Any]:
     if row:
         return {"id": row["id"], "status": row["status"], "duplicate": True}
     candidate_id = f"candidate-{uuid.uuid4().hex[:16]}"
+    source_kind = clean_text(getattr(args, "source_kind", "legacy"), 40) or "legacy"
+    source_ref = clean_text(getattr(args, "source_ref", ""), 240)
+    extraction_version = clean_text(getattr(args, "extraction_version", ""), 120)
+    governance_eligible = int(bool(getattr(args, "governance_eligible", source_kind != "brain-source")))
+    injection_status = clean_text(getattr(args, "injection_status", "not-applicable"), 40) or "not-applicable"
+    source_state = clean_text(getattr(args, "source_state", "active"), 40) or "active"
+    metadata = getattr(args, "metadata", {})
     db.execute(
         """INSERT INTO memory_candidates(
           id,proposed_by,memory_type,subject,predicate,object_text,owner,visibility,privacy,
-          source_path,evidence,confidence,status,proposed_at,content_hash
-        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+          source_path,evidence,confidence,status,proposed_at,content_hash,source_ref,source_kind,
+          extraction_version,governance_eligible,injection_status,source_state,metadata_json
+        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
         (
             candidate_id, args.agent, memory_type, clean_text(args.subject, 240), clean_text(args.predicate, 160),
             clean_text(args.value), args.owner, args.visibility, args.privacy, clean_text(args.source, 500),
             clean_text(args.evidence), args.confidence, "candidate", iso(), digest,
+            source_ref, source_kind, extraction_version, governance_eligible, injection_status,
+            source_state, json.dumps(metadata if isinstance(metadata, dict) else {}, sort_keys=True),
         ),
     )
     db.commit()
     return {"id": candidate_id, "status": "candidate", "duplicate": False}
+
+
+def brain_candidate_governance_ready(row: sqlite3.Row) -> bool:
+    """Fail closed unless a Brain candidate passed the trusted review boundary."""
+    if row["source_kind"] != "brain-source":
+        return True
+    return (
+        bool(row["governance_eligible"])
+        and row["injection_status"] == "clear"
+        and row["source_state"] == "active"
+    )
+
+
+def candidate_metadata(row: sqlite3.Row) -> dict[str, Any]:
+    try:
+        value = json.loads(row["metadata_json"] or "{}")
+    except (json.JSONDecodeError, TypeError):
+        return {}
+    return value if isinstance(value, dict) else {}
 
 
 def review(db: sqlite3.Connection, *, apply_safe: bool) -> dict[str, Any]:
@@ -413,12 +459,16 @@ def review(db: sqlite3.Connection, *, apply_safe: bool) -> dict[str, Any]:
         safe = (
             apply_safe and row["memory_type"] in AUTO_PROMOTE_TYPES and float(row["confidence"]) >= 0.9
             and privacy_class(row["privacy"]) == "public" and row["source_path"]
+            and row["source_state"] == "active"
+            and row["injection_status"] not in {"flagged", "quarantined"}
+            and brain_candidate_governance_ready(row)
         )
         if safe:
             upsert_record(
                 db, memory_type=row["memory_type"], subject=row["subject"], predicate=row["predicate"],
                 value=row["object_text"], owner=row["owner"], visibility=row["visibility"], privacy=row["privacy"],
-                source_path=row["source_path"], evidence=row["evidence"] or "", confidence=float(row["confidence"]),
+                source_path=row["source_path"], source_ref=row["source_ref"], evidence=row["evidence"] or "",
+                confidence=float(row["confidence"]), metadata=candidate_metadata(row),
             )
             db.execute(
                 "UPDATE memory_candidates SET status='active',reviewed_at=?,review_reason='Auto-promoted: verified low-risk memory' WHERE id=?",
@@ -466,6 +516,10 @@ def approve_candidate(db: sqlite3.Connection, args: argparse.Namespace) -> dict[
     row = db.execute("SELECT * FROM memory_candidates WHERE id = ?", (args.id,)).fetchone()
     if not row or row["status"] not in {"candidate", "disputed"}:
         raise SystemExit(f"Candidate {args.id} is not pending review.")
+    if row["source_state"] != "active":
+        raise SystemExit("Candidate source is not active.")
+    if row["source_kind"] == "brain-source" and not brain_candidate_governance_ready(row):
+        raise SystemExit("Brain candidate is not eligible for approval or has not passed the untrusted-content boundary.")
     conflicts = db.execute(
         "SELECT id FROM memory_records WHERE subject=? AND predicate=? AND status='active' AND object_text!=?",
         (row["subject"], row["predicate"], row["object_text"]),
@@ -478,8 +532,9 @@ def approve_candidate(db: sqlite3.Connection, args: argparse.Namespace) -> dict[
     record_id, _ = upsert_record(
         db, memory_type=row["memory_type"], subject=row["subject"], predicate=row["predicate"],
         value=row["object_text"], owner=row["owner"], visibility=row["visibility"], privacy=row["privacy"],
-        source_path=row["source_path"], evidence=row["evidence"] or "", confidence=float(row["confidence"]),
-        supersedes=args.supersedes or "",
+        source_path=row["source_path"], source_ref=row["source_ref"], evidence=row["evidence"] or "",
+        confidence=float(row["confidence"]), supersedes=args.supersedes or "",
+        metadata=candidate_metadata(row),
     )
     if args.supersedes:
         db.execute("UPDATE memory_records SET status='superseded' WHERE id=?", (args.supersedes,))
@@ -500,6 +555,60 @@ def reject_candidate(db: sqlite3.Connection, args: argparse.Namespace) -> dict[s
         raise SystemExit(f"Candidate {args.id} is not pending review.")
     db.commit()
     return {"id": args.id, "status": "rejected", "reviewer": args.reviewer, "reason": args.reason}
+
+
+def forget_source(db: sqlite3.Connection, args: argparse.Namespace) -> dict[str, Any]:
+    """Tombstone all registry state bound to one private source reference."""
+    if not args.confirm:
+        raise SystemExit("Source forgetting requires --confirm.")
+    source = clean_text(args.source, 500)
+    if not source or not source.startswith("brain-source:"):
+        raise SystemExit("Only an exact Brain source reference may use this path.")
+    candidates = db.execute(
+        "SELECT id FROM memory_candidates WHERE source_path=? OR source_ref=?",
+        (source, source),
+    ).fetchall()
+    records = db.execute(
+        "SELECT id FROM memory_records WHERE source_path=? OR source_ref=?",
+        (source, source),
+    ).fetchall()
+    candidate_ids = [row["id"] for row in candidates]
+    record_ids = [row["id"] for row in records]
+    if candidate_ids:
+        placeholders = ",".join("?" for _ in candidate_ids)
+        db.execute(
+            f"""UPDATE memory_candidates
+                SET status='forgotten',source_state='forgotten',subject='',predicate='',
+                    object_text='',evidence='',metadata_json='{{}}',review_reason='Source forgotten'
+                WHERE id IN ({placeholders})""",
+            candidate_ids,
+        )
+    fts_deleted = 0
+    for record_id in record_ids:
+        fts_deleted += db.execute("DELETE FROM memory_fts WHERE id=?", (record_id,)).rowcount
+    if record_ids:
+        placeholders = ",".join("?" for _ in record_ids)
+        db.execute(
+            f"""UPDATE memory_records
+                SET status='forgotten',subject='',predicate='',object_text='',evidence='',
+                    valid_from=NULL,valid_until=NULL,supersedes=NULL,metadata_json='{{}}'
+                WHERE id IN ({placeholders})""",
+            record_ids,
+        )
+    deletion_id = f"memory-delete-{uuid.uuid4().hex[:14]}"
+    db.execute(
+        "INSERT INTO memory_deletions VALUES(?,?,?,?,?,?,?,?)",
+        (
+            deletion_id, iso(), stable_hash(source), args.actor, len(candidate_ids),
+            len(record_ids), fts_deleted, "forgotten",
+        ),
+    )
+    db.commit()
+    return {
+        "id": deletion_id, "status": "forgotten",
+        "candidateCount": len(candidate_ids), "recordCount": len(record_ids),
+        "ftsDeleted": fts_deleted,
+    }
 
 
 def retrieve(db: sqlite3.Connection, args: argparse.Namespace, *, preflight: bool = False) -> dict[str, Any]:
@@ -1059,6 +1168,11 @@ def main() -> int:
     propose_cmd.add_argument("--source", required=True)
     propose_cmd.add_argument("--evidence", default="")
     propose_cmd.add_argument("--confidence", type=float, default=0.8)
+    propose_cmd.add_argument("--source-ref", default="")
+    propose_cmd.add_argument("--source-kind", default="legacy", choices=["legacy", "brain-source"])
+    propose_cmd.add_argument("--extraction-version", default="")
+    propose_cmd.add_argument("--governance-eligible", action="store_true")
+    propose_cmd.add_argument("--injection-status", default="not-applicable", choices=["not-applicable", "clear", "flagged", "quarantined"])
     retrieve_cmd = sub.add_parser("retrieve")
     retrieve_cmd.add_argument("--agent", required=True, choices=["joshex", "josh2", "jaimes", "jain"])
     retrieve_cmd.add_argument("--query", required=True)
@@ -1085,6 +1199,10 @@ def main() -> int:
     feedback_cmd.add_argument("--memory-id", default="")
     feedback_cmd.add_argument("--reason", required=True)
     feedback_cmd.add_argument("--correction", default="")
+    forget_cmd = sub.add_parser("forget-source")
+    forget_cmd.add_argument("--source", required=True)
+    forget_cmd.add_argument("--actor", required=True, choices=["joshex", "josh2", "josh"])
+    forget_cmd.add_argument("--confirm", action="store_true")
     sub.add_parser("privacy-check")
     sub.add_parser("status")
     sub.add_parser("export")
@@ -1103,6 +1221,7 @@ def main() -> int:
     elif args.command == "retrieve": result = retrieve(db, args)
     elif args.command == "reuse-outcome": result = record_reuse_outcome(db, args)
     elif args.command == "feedback": result = record_feedback(db, args)
+    elif args.command == "forget-source": result = forget_source(db, args)
     elif args.command == "privacy-check": result = privacy_audit_payload(db)
     elif args.command == "status": result = status_payload(db)
     else: result = export_status(db)
