@@ -1146,7 +1146,12 @@ def merge_poll_state(candidate: dict[str, Any], base: dict[str, Any]) -> dict[st
                     candidate_card.get("terminal_close_reconciled_at")
                     and candidate_status in TERMINAL_CARD_STATUSES
                 )
-                if latest_status in {*TERMINAL_CARD_STATUSES, "closing-before-final", "awaiting-final-gate"} and not reconciled_close:
+                receipt_backed_terminal = bool(
+                    candidate_status in TERMINAL_CARD_STATUSES
+                    and positive_telegram_message_id(candidate_card.get("final_message_id"))
+                    and str(candidate_card.get("final_delivery_status") or "").lower() == "delivered"
+                )
+                if latest_status in {*TERMINAL_CARD_STATUSES, "closing-before-final", "awaiting-final-gate"} and not (reconciled_close or receipt_backed_terminal):
                     # A poll snapshot loaded before the final-delivery gate
                     # must not reopen a terminal/closing card during merge.
                     for field in (
@@ -1159,7 +1164,7 @@ def merge_poll_state(candidate: dict[str, Any], base: dict[str, Any]) -> dict[st
                     ):
                         if field in latest_card:
                             merged_card[field] = latest_card[field]
-                if reconciled_close:
+                if reconciled_close or receipt_backed_terminal:
                     merged_card.pop("terminal_close_started_at", None)
                 merged_cards[card_key] = merged_card
             elif latest_card is missing:
@@ -2724,6 +2729,17 @@ def send_ack(
     objective = objective_from_prompt(prompt)
     if objective_is_near_copy(prompt, objective):
         objective = semantic_reinterpretation(prompt)
+    if (
+        (not objective or objective_is_near_copy(prompt, objective))
+        and gateway_writer
+        and delivery_tier in {1, 2}
+    ):
+        # Tier 1/2 intentionally has no visible work card, but the Inbox
+        # coordinator still needs an objective-bound lifecycle record before
+        # it can return a durable queue receipt. Exact-reply prompts are often
+        # near-copies by construction, so use a neutral internal objective
+        # rather than falling through to generic OpenClaw handling.
+        objective = "Respond to the current Telegram message"
     if not objective or objective_is_near_copy(prompt, objective):
         # #JOSH2: a reaction may be immediate, but no Telegram header or
         # Control Tower row is published until the agent supplies its own
@@ -4245,7 +4261,12 @@ def prepare_lifecycle_terminal(
     }
 
 
-def finish_lifecycle_terminal(prepared: dict[str, Any], *, state: str) -> None:
+def finish_lifecycle_terminal(
+    prepared: dict[str, Any],
+    *,
+    state: str,
+    telegram_message_id: str = "",
+) -> None:
     if prepared.get("shadow"):
         lifecycle = prepared.get("lifecycle")
         receipt = prepared.get("receipt") or {}
@@ -4271,7 +4292,11 @@ def finish_lifecycle_terminal(prepared: dict[str, Any], *, state: str) -> None:
             lifecycle.finish_effect(
                 effect_key,
                 state=state,
-                private_receipt="telegram-confirmed" if state == "delivered" else "",
+                private_receipt=(
+                    f"telegram-message:{telegram_message_id}"
+                    if state == "delivered" and claim_name == "effect_claim" and telegram_message_id
+                    else "telegram-confirmed" if state == "delivered" else ""
+                ),
                 error_class=f"{error_prefix}-receipt-missing" if state == "indeterminate" else "",
             )
         lifecycle.finish_terminal_delivery(str(receipt["workId"]), state)
@@ -4394,7 +4419,16 @@ def queue_stale_final_gate_recovery(state: dict[str, Any], dry_run: bool = False
         receipt = work_card_state_receipt(card_key)
         if receipt["final_message_id"]:
             status = receipt["status"].lower() if receipt["status"].lower() in TERMINAL_CARD_STATUSES else "done"
-            card.update({"status": status, "ended_at": utc_now(), "last_card_update_at": utc_now()})
+            ended_at = utc_now()
+            card.update({
+                "status": status,
+                "ended_at": ended_at,
+                "last_progress_at": ended_at,
+                "last_card_update_at": ended_at,
+                "final_message_id": str(receipt["final_message_id"]),
+                "final_delivery_status": "delivered",
+                "terminal_delivery_state": "delivered",
+            })
             publish_terminal_once(str(run_key), card_key, status)
             queued.append({"event": f"stale-final-gate:{run_key}", "result": {"ok": True, "status": "already-delivered"}})
             continue
@@ -4411,7 +4445,11 @@ def queue_stale_final_gate_recovery(state: dict[str, Any], dry_run: bool = False
                 card_key,
                 card,
                 meta,
-                "paused",
+                # A stale final gate means the owned run ended without a
+                # deliverable model final. Queue one honest terminal failure
+                # instead of a nonterminal pause that the outbox immediately
+                # discards and leaves the live card frozen forever.
+                "failed",
                 build_stale_gate_recovery_final(card),
             )
             card["terminal_recovery_queued_at"] = utc_now()
@@ -4800,7 +4838,13 @@ def recover_terminal_final_outbox(state: dict[str, Any], dry_run: bool = False) 
     return recovered
 
 
-def persist_terminal_card_state(run_key: str, card_key: str, status: str = "done") -> None:
+def persist_terminal_card_state(
+    run_key: str,
+    card_key: str,
+    status: str = "done",
+    *,
+    final_message_id: str = "",
+) -> None:
     with fast_ack_state_lock():
         latest = load_json(STATE_PATH, {})
         if not isinstance(latest, dict):
@@ -4817,6 +4861,15 @@ def persist_terminal_card_state(run_key: str, card_key: str, status: str = "done
             "last_card_update_at": ended_at,
             "terminal_closed_before_final_at": ended_at,
         })
+        if final_message_id:
+            card.update({
+                "final_message_id": final_message_id,
+                "final_delivery_status": "delivered",
+                "final_delivery_confirmed_at": ended_at,
+                "final_delivery_verified_by": "telegram-adapter-success",
+                "final_contract_status": "canonical",
+                "terminal_delivery_state": "delivered",
+            })
         save_json(STATE_PATH, latest)
 
 
@@ -5155,25 +5208,32 @@ def close_before_final(args: argparse.Namespace) -> dict[str, Any]:
                 }
             authoritative_final = str(prepared.get("final_summary") or final_summary)
             result = send_gateway_final_without_card(authoritative_final, meta=meta)
-            delivered = bool(
-                result.get("ok")
-                and positive_telegram_message_id((result.get("result") or {}).get("message_id"))
+            final_message_id = positive_telegram_message_id(
+                (result.get("result") or {}).get("message_id")
             )
+            delivered = bool(result.get("ok") and final_message_id)
             finish_lifecycle_terminal(
                 prepared,
                 state="delivered" if delivered else "indeterminate",
+                telegram_message_id=final_message_id,
             )
             if delivered:
                 if outbox_path:
                     outbox_path.unlink(missing_ok=True)
-                persist_terminal_card_state(run_key, str(card.get("key") or ""), "done")
-                publish_terminal_once(run_key, str(card.get("key") or ""), "done")
+                persist_terminal_card_state(
+                    run_key,
+                    str(card.get("key") or ""),
+                    requested_status,
+                    final_message_id=final_message_id,
+                )
+                publish_terminal_once(run_key, str(card.get("key") or ""), requested_status)
                 return {
                     "ok": True,
                     "status": "closed-and-final-delivered",
                     "card_closed": False,
                     "suppress_native_final": True,
-                    "terminal_status": "done",
+                    "terminal_status": requested_status,
+                    "final_message_id": final_message_id,
                 }
             return {
                 "ok": True,
@@ -5558,6 +5618,7 @@ def claim_inbox(args: argparse.Namespace) -> dict[str, Any]:
         "--card-key", str(ack.get("key") or ""),
         "--chat-id", str(meta["telegram_chat_id"]),
         "--thread-id", str(meta["telegram_thread_id"]),
+        "--delivery-tier", str(int(ack.get("delivery_tier") or 3)),
     ]
     route_plan = ack.get("route_plan")
     if isinstance(route_plan, dict) and route_plan.get("routeId"):

@@ -96,6 +96,7 @@ SECRET_VALUE_PATTERNS = (
     re.compile(r"(?im)\b(password|passwd|token|api[_ -]?key|secret)\s*[:=]\s*([^\s,;]{4,})"),
 )
 WORKER_OUTPUT_CONTRACT = """Return a concise structured result using exactly these plain-text sections in this order: Complete: Yes or No plus whether the objective was completed; What was done: 3-5 unique, source-supported bullets that state concrete findings, outcomes, or changes; Issues: bullets or n/a; Appropriate next steps: one evidence-based recommendation or next action; Approval needed: one approval bullet per issue when approval is genuinely required, otherwise n/a. For an assessment, review, or research request, surface the key findings and recommendation instead of merely saying the assessment or review finished. Generic process statements such as task complete, execution verified, result prepared, or summary delivered are not findings and must not be used to fill the bullets. Put every reported risk or limitation in Issues as well as the relevant finding. Use No action needed only when the findings explicitly support that conclusion and there are no issues, risks, limitations, approvals, or recommendations to act on. Do not include a Model line or claim a provider, model, host, worker, route, or latency; the verified delivery layer adds those facts. Never repeat or reveal passwords, tokens, API keys, cookies, OAuth payloads, or other secret values."""
+QUICK_WORKER_OUTPUT_CONTRACT = """Return a concise structured result using exactly these plain-text sections in this order: Complete: Yes or No; What was done: 1-3 brief bullets containing the direct answer or conversational result; Issues: bullets or n/a; Appropriate next steps: one brief next action or n/a; Approval needed: a bullet only when approval is genuinely required, otherwise n/a. Do not pad a quick answer with invented findings. Do not include a Model line or claim a provider, model, host, worker, route, or latency; the verified delivery layer adds those facts. Never repeat or reveal passwords, tokens, API keys, cookies, OAuth payloads, or other secret values."""
 TELEGRAM_HEALTH_EVIDENCE_UNAVAILABLE_RESULT = """Complete: No — current Telegram health could not be verified.
 What was done:
 - The coordinator requested the host-native read-only runtime probe.
@@ -968,7 +969,7 @@ def enforce_host_evidence_gate(output: str, host_context: dict[str, Any] | None)
     return str(output or "")
 
 
-def parse_model_sections(output: str) -> dict[str, Any]:
+def parse_model_sections(output: str, delivery_tier: int = 3) -> dict[str, Any]:
     cleaned = html.unescape(str(output or "")).replace("\r\n", "\n").replace("\r", "\n")
     cleaned = re.sub(r"</?pre>", "", cleaned, flags=re.I)
     sections: dict[str, list[str]] = {key: [] for key in ("done", "issues", "next", "approval")}
@@ -1018,17 +1019,22 @@ def parse_model_sections(output: str) -> dict[str, Any]:
     substantive_done = [item for item in source_done if is_substantive_final_item(item)]
     concrete_done = [item for item in source_done if is_concrete_result_item(item)]
     quality_issues: list[str] = []
+    quick_result = int(delivery_tier or 3) in {1, 2}
 
     if not complete_declared:
         quality_issues.append("Worker did not return a verifiable completion status.")
     if complete:
-        if not 3 <= len(source_done) <= 5:
-            quality_issues.append("A completion claim requires three to five unique result bullets.")
-        if len(substantive_done) != len(source_done):
-            quality_issues.append("Status or delivery-process text was used in place of substantive findings or outcomes.")
-        if len(concrete_done) < 2:
-            quality_issues.append("The completion claim did not include enough concrete findings or outcomes.")
-        if not source_next:
+        if quick_result:
+            if not 1 <= len(source_done) <= 3:
+                quality_issues.append("A quick-answer completion requires one to three concise result bullets.")
+        else:
+            if not 3 <= len(source_done) <= 5:
+                quality_issues.append("A completion claim requires three to five unique result bullets.")
+            if len(substantive_done) != len(source_done):
+                quality_issues.append("Status or delivery-process text was used in place of substantive findings or outcomes.")
+            if len(concrete_done) < 2:
+                quality_issues.append("The completion claim did not include enough concrete findings or outcomes.")
+        if not source_next and not quick_result:
             quality_issues.append("The completion claim did not include an evidence-based next step.")
 
         reported_text = " ".join([*source_done, *source_next, *source_approval])
@@ -1090,10 +1096,15 @@ def parse_model_sections(output: str) -> dict[str, Any]:
     }
 
 
-def render_final_html(route: dict[str, Any], execution: dict[str, Any], output: str) -> str:
+def render_final_html(
+    route: dict[str, Any],
+    execution: dict[str, Any],
+    output: str,
+    delivery_tier: int = 3,
+) -> str:
     #JAIMES: the delivery layer, not the model, owns the fixed final format and
     # inserts only verified runtime routing facts.
-    sections = parse_model_sections(output)
+    sections = parse_model_sections(output, delivery_tier=delivery_tier)
     execution_verified = bool(execution.get("executionVerified"))
     model_verified = bool(execution.get("modelVerified"))
     if not execution_verified:
@@ -1169,6 +1180,9 @@ def make_job(
                 if "ledgerPrestarted" not in existing:
                     existing["ledgerPrestarted"] = bool(safe_context.get("workId"))
                     changed = True
+                if "deliveryTier" not in existing:
+                    existing["deliveryTier"] = int(safe_context.get("deliveryTier") or 3)
+                    changed = True
                 if changed:
                     save_json(STATE_PATH, state)
                 return existing, True
@@ -1209,6 +1223,7 @@ def make_job(
         job["ledgerRunId"] = str(safe_context.get("ledgerRunId") or f"run-inbox-{job_id}")
         job["originClaimHash"] = str(safe_context.get("originClaimHash") or hashlib.sha256(key.encode("utf-8")).hexdigest())
         job["ledgerPrestarted"] = bool(safe_context.get("workId"))
+        job["deliveryTier"] = int(safe_context.get("deliveryTier") or 3)
         jobs[job_id] = job
         save_json(STATE_PATH, state)
         return job, False
@@ -1527,6 +1542,7 @@ def submit_job(args: argparse.Namespace) -> dict[str, Any]:
         "workId": str(getattr(args, "work_id", "") or ""),
         "ledgerRunId": str(getattr(args, "work_run_id", "") or ""),
         "originClaimHash": str(getattr(args, "origin_claim_hash", "") or ""),
+        "deliveryTier": int(getattr(args, "delivery_tier", 3) or 3),
     }
     job, deduplicated = make_job(prompt, route, origin, args.timeout, work_context)
     telemetry = {
@@ -1624,8 +1640,9 @@ def deliver_result(job_id: str, snapshot: dict[str, Any], route: dict[str, Any],
     origin_run_id = str(origin.get("runId") or "")
     if not card_key or not origin_run_id or not TELEGRAM_GATEWAY_SCRIPT.exists():
         return False
-    final_html = render_final_html(route, execution, output)
-    sections = parse_model_sections(output)
+    delivery_tier = int(snapshot.get("deliveryTier") or 3)
+    final_html = render_final_html(route, execution, output, delivery_tier=delivery_tier)
+    sections = parse_model_sections(output, delivery_tier=delivery_tier)
     task_complete = bool(
         execution.get("executionVerified")
         and sections.get("complete")
@@ -1722,7 +1739,12 @@ def run_worker(job_id: str) -> dict[str, Any]:
                     "host service health from end-to-end Telegram delivery. If available is "
                     "false, report Complete: No and do not infer current health."
                 )
-            execution_prompt = f"{WORKER_OUTPUT_CONTRACT}{context_block}\n\nUser request:\n{prompt}"
+            output_contract = (
+                QUICK_WORKER_OUTPUT_CONTRACT
+                if int(snapshot.get("deliveryTier") or 3) in {1, 2}
+                else WORKER_OUTPUT_CONTRACT
+            )
+            execution_prompt = f"{output_contract}{context_block}\n\nUser request:\n{prompt}"
             execution_route = dict(route)
             execution_route["readOnly"] = read_only_execution_requested(prompt)
             execution = execute_route(
@@ -1741,7 +1763,10 @@ def run_worker(job_id: str) -> dict[str, Any]:
         delivered = deliver_result(job_id, snapshot, route, execution, output)
         if not delivered:
             raise RuntimeError("delivery failed")
-        parsed_sections = parse_model_sections(output)
+        parsed_sections = parse_model_sections(
+            output,
+            delivery_tier=int(snapshot.get("deliveryTier") or 3),
+        )
         task_complete = bool(
             execution.get("executionVerified")
             and parsed_sections.get("complete")
@@ -1762,7 +1787,10 @@ def run_worker(job_id: str) -> dict[str, Any]:
         if execution.get("executionVerified") and output:
             delivered = deliver_result(job_id, snapshot, route, execution, output)
             if delivered:
-                recovered_sections = parse_model_sections(output)
+                recovered_sections = parse_model_sections(
+                    output,
+                    delivery_tier=int(snapshot.get("deliveryTier") or 3),
+                )
                 outcome = "done" if (
                     recovered_sections.get("complete")
                     and recovered_sections.get("summarySufficient")
@@ -2483,7 +2511,10 @@ def recover(job_id: str = "") -> dict[str, Any]:
             delivered = deliver_result(job_id, snapshot, route, execution, output)
         except Exception:
             delivered = False
-        recovered_sections = parse_model_sections(output)
+        recovered_sections = parse_model_sections(
+            output,
+            delivery_tier=int(job.get("deliveryTier") or 3),
+        )
         complete = bool(
             recovered_sections.get("complete")
             and recovered_sections.get("summarySufficient")
@@ -2719,6 +2750,7 @@ def main() -> int:
     submit_p.add_argument("--work-id", default="")
     submit_p.add_argument("--work-run-id", default="")
     submit_p.add_argument("--origin-claim-hash", default="")
+    submit_p.add_argument("--delivery-tier", type=int, choices=(1, 2, 3), default=3)
     submit_p.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT_SECONDS)
     submit_p.add_argument("--dry-run", action="store_true")
 

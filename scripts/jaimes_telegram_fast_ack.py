@@ -2793,6 +2793,18 @@ def send_ack(
 
     if objective_is_near_copy(prompt, objective):
         objective = semantic_reinterpretation(prompt)
+    if (
+        (not objective or objective_is_near_copy(prompt, objective))
+        and gateway_writer
+        and delivery_tier in {1, 2}
+    ):
+        # Tier 1/2 intentionally has no visible work card, but it still needs
+        # an objective-bound lifecycle record so the runtime-owner plugin can
+        # reserve the terminal effect before Hermes sends the native reply.
+        # Exact-reply prompts are often near-copies by construction; a neutral
+        # internal objective preserves receipt ownership without echoing the
+        # user's text onto a managed surface.
+        objective = "Respond to the current Telegram message"
     if not objective or objective_is_near_copy(prompt, objective):
         # #JAIMES: keep only the immediate reaction when deterministic intake
         # cannot produce a genuine interpretation; the main agent must decide

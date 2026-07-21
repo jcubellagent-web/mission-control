@@ -1275,6 +1275,7 @@ def delivery_indeterminate(result: dict) -> bool:
     definitive = any(marker in error for marker in (
         "http error 400", "http error 403", "http error 404", "bad request",
         "forbidden", "method not found", "unsupported", "too many requests", "429",
+        "telegram token or target chat is unavailable",
     ))
     return bool(error) and not definitive
 
