@@ -89,6 +89,13 @@ type BrainAtlasView = {
   candidateReceipts: number;
   shownReceipts: number;
 };
+type BrainAtlasLoadTier = "idle" | "light" | "active" | "heavy";
+type BrainAtlasLoad = {
+  tier: BrainAtlasLoadTier;
+  label: string;
+  score: number;
+  workingAgents: number;
+};
 type BrainAtlasProofRow = {
   id: string;
   agent: BrainAtlasNode;
@@ -3639,6 +3646,55 @@ function brainAtlasWideWidth(start: number, width: number) {
   return Number((brainAtlasWideX(start + width) - brainAtlasWideX(start)).toFixed(2));
 }
 
+const BRAIN_ATLAS_ACTIVE_STEP_STATES = new Set([
+  "active",
+  "current",
+  "in_progress",
+  "running",
+  "verifying",
+  "working",
+]);
+
+function brainAtlasLoadTier(score: number): BrainAtlasLoadTier {
+  if (score >= 4) return "heavy";
+  if (score >= 2) return "active";
+  if (score >= 1) return "light";
+  return "idle";
+}
+
+function brainAtlasAgentLoad(
+  agent: AgentId,
+  liveWork: AgentLiveWorkPresentation,
+  workItems: WorkItem[],
+): BrainAtlasLoad {
+  if (!liveWork.working) return { tier: "idle", label: "Idle", score: 0, workingAgents: 0 };
+
+  const claimedPriority = workItems
+    .filter((item) => item.agent_id === agent && item.state === "working" && isFreshActiveTimestamp(item.updated_at))
+    .reduce((highest, item) => Math.max(highest, item.priority), liveWork.activeWork?.priority || 0);
+  const priorityWeight = claimedPriority >= 80 ? 3 : claimedPriority >= 70 ? 2 : claimedPriority >= 60 ? 1 : 0;
+  const freshStatus = isFreshActiveTimestamp(liveWork.status.updated_at);
+  const activeStepCount = freshStatus
+    ? liveWork.status.steps.filter((step) => BRAIN_ATLAS_ACTIVE_STEP_STATES.has(String(step.status || "").toLowerCase())).length
+    : 0;
+  const freshOperationalSignals = activeStepCount + (freshStatus && liveWork.status.current_tool ? 1 : 0);
+  const score = Math.min(4, 1 + priorityWeight + (freshOperationalSignals >= 3 ? 1 : 0));
+  const tier = brainAtlasLoadTier(score);
+  return { tier, label: tier === "heavy" ? "Heavy" : tier === "active" ? "Active" : "Light", score, workingAgents: 1 };
+}
+
+function brainAtlasSystemLoad(loads: BrainAtlasLoad[]): BrainAtlasLoad {
+  const workingAgents = loads.filter((load) => load.workingAgents).length;
+  const score = Math.min(4, loads.reduce((sum, load) => sum + load.score, 0) + (workingAgents >= 2 ? 1 : 0));
+  const tier = brainAtlasLoadTier(score);
+  return {
+    tier,
+    label: tier === "heavy" ? "Heavy" : tier === "active" ? "Active" : tier === "light" ? "Light" : "Idle",
+    score,
+    workingAgents,
+  };
+}
+
 function BrainAtlasPanel({
   atlas,
   memoryOperations,
@@ -3687,6 +3743,12 @@ function BrainAtlasPanel({
   ]));
   const workingAgentIds = new Set(HERO_AGENT_ORDER.filter((agent) => liveWorkByAgent.get(agent)?.working));
   const workingAgentCount = workingAgentIds.size;
+  const loadByAgent = new Map(HERO_AGENT_ORDER.map((agent) => [
+    agent,
+    brainAtlasAgentLoad(agent, liveWorkByAgent.get(agent)!, workItems),
+  ]));
+  const systemLoad = brainAtlasSystemLoad(HERO_AGENT_ORDER.map((agent) => loadByAgent.get(agent)!));
+  const loadDisclosure = `${systemLoad.label} load (${systemLoad.score}/4): derived from verified working agents, fresh claimed-work priority, and current step/tool signals. Moving paths represent recent governed memory receipts only; neither signal depicts private reasoning.`;
   const headerActivityStateLabel = workingAgentCount > 0 && activity && !latestSignalRecent
     ? "Memory quiet"
     : activityStateLabel;
@@ -3751,6 +3813,8 @@ function BrainAtlasPanel({
       data-memory-flow-state={latestSignalRecent ? "live" : activity ? "idle" : "unavailable"}
       data-exact-proof-state={proofState}
       data-working-agent-count={workingAgentCount}
+      data-load-tier={systemLoad.tier}
+      data-load-score={systemLoad.score}
       aria-label="Brain Atlas unified observable agent activity and exact execution evidence"
     >
       <header className="brain-atlas-header">
@@ -3763,8 +3827,11 @@ function BrainAtlasPanel({
           <span className="is-memory"><i aria-hidden="true" />Moving memory receipt</span>
           <span className="is-proof"><i aria-hidden="true" />Static exact proof</span>
         </div>
-        <span className={`brain-atlas-state is-${selectedTone}${latestSignalRecent ? " is-live" : ""}`} aria-live="polite">
-          <strong>{workingAgentCount ? `${workingAgentCount} WORKING` : "NONE WORKING"}</strong>
+        <span className={`brain-atlas-state is-${selectedTone}${latestSignalRecent ? " is-live" : ""}`} title={loadDisclosure} aria-live="polite">
+          <span className="brain-atlas-load-meter" role="img" aria-label={`${systemLoad.label} ecosystem load, ${systemLoad.score} of 4`}>
+            {Array.from({ length: 4 }, (_, index) => <i key={index} className={index < systemLoad.score ? "is-lit" : ""} />)}
+          </span>
+          <strong>{systemLoad.label.toUpperCase()} · {workingAgentCount ? `${workingAgentCount} WORKING` : "NONE WORKING"}</strong>
           <em>· {headerActivityStateLabel} · {evidenceStateLabel}</em>
         </span>
       </header>
@@ -3785,6 +3852,7 @@ function BrainAtlasPanel({
           <div className="brain-atlas-context">
             <div className="brain-atlas-scope" aria-label="Brain Atlas scope and evidence policy">
               <span className={workingAgentCount ? "is-working" : ""}>Live Work linked · {workingAgentCount} working</span>
+              <span className={workingAgentCount ? "is-working" : ""} title={loadDisclosure}>Load {systemLoad.label.toLowerCase()} · {systemLoad.score}/4</span>
               <span>{activity ? `${activity.windowMinutes}m memory window` : "Memory window unavailable"}</span>
               <span>Counts only · no contents</span>
             </div>
@@ -3832,7 +3900,7 @@ function BrainAtlasPanel({
           >
             <title id="brain-atlas-title">Unified observable agent activity, governed memory, and exact execution proof</title>
             <desc id="brain-atlas-description">
-              Shared agent nodes show {workingAgentCount} agents working from the same current state as the Live Work Board. Only governed memory receipt paths move when a recent exact registry timestamp exists. The lower lane shows {proofRows.length} static, exact agent to named work to timestamped receipt to verified model paths. This visualization shows observable operations and evidence, not private model reasoning or memory contents.
+              Shared agent nodes show {workingAgentCount} agents working from the same current state as the Live Work Board. Verified claimed-work priority and fresh step or tool signals set the {systemLoad.label.toLowerCase()} halo intensity. Only governed memory receipt paths move when a recent exact registry timestamp exists. The lower lane shows {proofRows.length} static, exact agent to named work to timestamped receipt to verified model paths. This visualization shows observable operations and evidence, not private model reasoning or memory contents.
             </desc>
             <defs>
               {flowAgents.map((row, index) => {
@@ -3924,6 +3992,7 @@ function BrainAtlasPanel({
               const latestAgentSignalAt = latestAgentSignal?.[1] || null;
               const live = memorySignalIsRecent(latestAgentSignalAt, motionWindowSeconds);
               const working = workingAgentIds.has(row.agent);
+              const agentLoad = loadByAgent.get(row.agent)!;
               return (
                 <g
                   key={row.agent}
@@ -3932,9 +4001,11 @@ function BrainAtlasPanel({
                   data-agent-working={working ? "true" : "false"}
                   data-work-state={working ? "working" : "quiet"}
                   data-memory-state={!activity ? "unavailable" : live ? "live" : "idle"}
+                  data-agent-load-tier={agentLoad.tier}
+                  data-agent-load-score={agentLoad.score}
                   style={{ "--atlas-agent-phase": `${index * -0.18}s` } as React.CSSProperties}
                 >
-                  <title>{`${AGENTS[row.agent].label}: ${working ? "working now" : "not working"}; ${!activity ? "memory telemetry unavailable" : live ? `verified ${latestAgentSignal?.[0]} receipt only` : "memory quiet"}`}</title>
+                  <title>{`${AGENTS[row.agent].label}: ${working ? `${agentLoad.label.toLowerCase()} verified work load (${agentLoad.score}/4)` : "not working"}; ${!activity ? "memory telemetry unavailable" : live ? `verified ${latestAgentSignal?.[0]} receipt only` : "memory quiet"}`}</title>
                   <rect className="memory-flow-node-aura" x={brainAtlasWideX(13)} y={y - 5} width={brainAtlasWideWidth(13, 160)} height="48" rx="12" />
                   <rect x={brainAtlasWideX(18)} y={y} width={brainAtlasWideWidth(18, 150)} height="38" rx="7" />
                   <g className="memory-flow-node-copy" clipPath={`url(#brain-atlas-agent-copy-${row.agent})`}>
