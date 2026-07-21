@@ -95,6 +95,12 @@ QUICK_QUESTION_RE = re.compile(
     r"^\s*(?:what|who|when|where|why|how|is|are|can|could|does|do|did|will|would)\b",
     re.I,
 )
+EXACT_REPLY_RE = re.compile(
+    r"^\s*(?:canary(?:\s+[A-Za-z0-9_-]+)?\s*:\s*)?"
+    r"(?:please\s+)?(?:reply|respond|answer)\s+exactly\s+"
+    r"(?:\"[^\"\r\n]{1,160}\"|'[^'\r\n]{1,160}')\s*[.!]?\s*$",
+    re.I,
+)
 
 
 class LifecycleError(RuntimeError):
@@ -181,6 +187,8 @@ def classify_delivery_tier(
         return 3, "approval"
     if CONVERSATION_RE.fullmatch(compact):
         return 1, "conversation"
+    if EXACT_REPLY_RE.fullmatch(compact):
+        return 2, "quick-answer"
     if COMPLEX_TASK_RE.search(compact):
         return 3, "multi-step"
     if QUICK_QUESTION_RE.search(compact) and len(compact) <= 220 and compact.count("\n") <= 1:

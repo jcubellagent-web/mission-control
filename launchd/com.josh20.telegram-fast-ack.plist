@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.josh20.telegram-fast-ack</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/opt/homebrew/bin/python3</string>
+    <string>/Users/josh2.0/.openclaw/workspace/mission-control/scripts/jaimes_telegram_fast_ack_launcher.py</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>/Users/josh2.0/.openclaw/workspace/mission-control</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>HOME</key>
+    <string>/Users/josh2.0</string>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+    <key>TELEGRAM_FAST_ACK_OWNER</key>
+    <string>josh2</string>
+  </dict>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ThrottleInterval</key>
+  <integer>10</integer>
+  <key>StandardOutPath</key>
+  <string>/Users/josh2.0/.openclaw/workspace/logs/josh_telegram_fast_ack.launchd.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/josh2.0/.openclaw/workspace/logs/josh_telegram_fast_ack.launchd.err</string>
+</dict>
+</plist>

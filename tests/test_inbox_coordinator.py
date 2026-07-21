@@ -448,6 +448,24 @@ class InboxCoordinatorTests(unittest.TestCase):
         self.assertNotIn("supplied summary contained", serialized.lower())
         self.assertNotIn("did not include enough concrete", serialized.lower())
 
+    def test_quick_answer_accepts_one_concise_result_without_weakening_tier_three(self):
+        coordinator = load_module()
+        output = (
+            "Complete: Yes — greeting received.\n"
+            "What was done:\n"
+            "- Acknowledged your message.\n"
+            "Issues:\n- n/a\n"
+            "Appropriate next steps:\n- n/a\n"
+            "Approval needed:\n- n/a"
+        )
+        quick = coordinator.parse_model_sections(output, delivery_tier=1)
+        substantial = coordinator.parse_model_sections(output, delivery_tier=3)
+        self.assertIs(quick["complete"], True)
+        self.assertIs(quick["summarySufficient"], True)
+        self.assertEqual(quick["done"], ["Acknowledged your message."])
+        self.assertIs(substantial["complete"], False)
+        self.assertIs(substantial["summarySufficient"], False)
+
     def test_agent_rh_findings_pass_semantic_gate(self):
         coordinator = load_module()
         sections = coordinator.parse_model_sections(

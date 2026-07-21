@@ -515,10 +515,37 @@ def test_stale_awaiting_final_gate_queues_transparent_recovery(monkeypatch, tmp_
     queued = watcher.queue_stale_final_gate_recovery(state)
     assert queued[0]["result"]["status"] == "recovery-queued"
     outbox = watcher.load_json(next(watcher.TERMINAL_OUTBOX_DIR.glob("*.json")), {})
-    assert outbox["terminal_status"] == "paused"
+    assert outbox["terminal_status"] == "failed"
     assert outbox["final_summary"].startswith("<pre>")
     plain = outbox["final_summary"][5:-6]
     assert all(len(line) <= 38 for line in plain.splitlines())
+
+
+def test_poll_merge_accepts_receipt_backed_terminal_over_awaiting_gate(monkeypatch, tmp_path):
+    monkeypatch.setattr(watcher, "STATE_PATH", tmp_path / "fast-ack.json")
+    base_card = {
+        "key": "receipt-backed-final",
+        "status": "awaiting-final-gate",
+        "last_card_update_at": "2026-07-21T14:08:00Z",
+    }
+    base = {"active_cards": {"run-1": copy.deepcopy(base_card)}}
+    latest = copy.deepcopy(base)
+    latest["active_cards"]["run-1"]["terminal_recovery_queued_at"] = "2026-07-21T14:20:00Z"
+    watcher.save_json(watcher.STATE_PATH, latest)
+    candidate = copy.deepcopy(base)
+    candidate["active_cards"]["run-1"].update({
+        "status": "failed",
+        "ended_at": "2026-07-21T14:22:07Z",
+        "last_card_update_at": "2026-07-21T14:22:07Z",
+        "final_message_id": "5002",
+        "final_delivery_status": "delivered",
+        "terminal_delivery_state": "delivered",
+    })
+    merged = watcher.merge_poll_state(candidate, base)
+    card = merged["active_cards"]["run-1"]
+    assert card["status"] == "failed"
+    assert card["final_message_id"] == "5002"
+    assert card["terminal_delivery_state"] == "delivered"
 
 
 def test_stale_terminal_close_claim_is_recovered_without_operator_action(monkeypatch, tmp_path):
@@ -597,6 +624,29 @@ def test_close_before_final_allows_exact_native_fallback_without_durable_surface
     assert persisted["status"] == "done"
     assert persisted["no_card_required"] is True
     assert persisted["native_fallback_finalized_at"]
+
+
+def test_no_card_terminal_state_retains_confirmed_final_message_id(monkeypatch, tmp_path):
+    monkeypatch.setattr(watcher, "STATE_PATH", tmp_path / "fast-ack.json")
+    watcher.save_json(watcher.STATE_PATH, {"active_cards": {"run-1": {
+        "key": "no-card-final",
+        "status": "active",
+        "no_card_required": True,
+    }}})
+
+    watcher.persist_terminal_card_state(
+        "run-1",
+        "no-card-final",
+        "done",
+        final_message_id="7001",
+    )
+
+    persisted = watcher.load_json(watcher.STATE_PATH, {})["active_cards"]["run-1"]
+    assert persisted["status"] == "done"
+    assert persisted["final_message_id"] == "7001"
+    assert persisted["final_delivery_status"] == "delivered"
+    assert persisted["terminal_delivery_state"] == "delivered"
+    assert persisted["final_delivery_verified_by"] == "telegram-adapter-success"
 
 
 def test_close_before_final_keeps_uninterpreted_owned_or_visible_runs_fail_closed(monkeypatch, tmp_path):

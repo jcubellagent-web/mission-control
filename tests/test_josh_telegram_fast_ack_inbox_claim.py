@@ -126,6 +126,65 @@ def test_send_ack_starts_card_with_workspace_helper_and_returns_receipt():
     assert result["card_start_receipt"] == card_receipt
 
 
+def test_send_ack_exact_reply_tier_two_keeps_coordinator_lifecycle():
+    event = {
+        "session_id": "session",
+        "ts": "2026-07-21T14:07:36Z",
+        "run_id": "telegram-message:-1003589561528:1:4121",
+        "message_id": "4121",
+        "prompt": 'Canary Inbox: reply exactly "Inbox receipt confirmed"',
+    }
+    gateway = {
+        "writer": True,
+        "shadow": False,
+        "receipt": {
+            "workId": "work-inbox-canary",
+            "lifecycleVersion": 3,
+            "deliveryTier": 2,
+            "classifierReason": "exact-reply",
+            "sequence": 1,
+            "fencingEpoch": 1,
+        },
+    }
+    with patch.object(watcher, "begin_gateway_lifecycle", return_value=gateway), \
+         patch.object(watcher, "advance_gateway_phase"), \
+         patch.object(watcher, "set_gateway_worker_route"), \
+         patch.object(watcher, "claim_gateway_effect", return_value={"allowed": True, "idempotencyKey": "reaction"}), \
+         patch.object(watcher, "finish_gateway_effect"), \
+         patch.object(watcher, "gateway_public_fields", return_value={
+             "lifecycle_version": 3,
+             "delivery_tier": 2,
+             "lifecycle_writer_enabled": True,
+         }), \
+         patch.object(watcher, "objective_from_prompt", return_value=event["prompt"]), \
+         patch.object(watcher, "semantic_reinterpretation", return_value=""), \
+         patch.object(watcher, "place_inbox_reaction", return_value=True), \
+         patch.object(watcher, "auto_route_for_prompt", return_value={
+             "model": "planned model",
+             "route": "planned route",
+             "route_plan": {"routeId": "luna"},
+         }), \
+         patch.object(watcher, "skill_for_prompt", return_value={"id": "", "label": "", "reason": ""}), \
+         patch.object(watcher, "publish_josh", return_value=True), \
+         patch.object(watcher, "run_work_card_start") as card_start:
+        result = watcher.send_ack(
+            event,
+            model=watcher.DEFAULT_MODEL,
+            dry_run=False,
+            meta={
+                "telegram_chat_id": watcher.CONTROL_CENTER_CHAT_ID,
+                "telegram_thread_id": "1",
+            },
+        )
+
+    assert result["ok"] is True
+    assert result["objective"] == "Respond to the current Telegram message"
+    assert result["no_card_required"] is True
+    assert result["delivery_tier"] == 2
+    assert result["surface_contract"] == "tier-2-final-v3"
+    card_start.assert_not_called()
+
+
 def test_live_only_v2_receipt_is_a_complete_topic_surface():
     receipt = watcher.parse_work_card_start_receipt(
         "missing-card-state",

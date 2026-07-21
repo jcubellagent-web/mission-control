@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 from unittest.mock import patch
@@ -70,3 +71,43 @@ def test_resolver_falls_back_after_gateway_scrubs_its_environment() -> None:
     ):
         assert launcher.resolve_telegram_token() == "telegram-value"
     fallback.assert_called_once_with()
+
+
+def test_josh_owner_reuses_live_openclaw_gateway_without_changing_jaimes_default() -> None:
+    assert launcher.gateway_service_label() == "ai.hermes.gateway"
+    assert launcher.watcher_path().name == "jaimes_telegram_fast_ack.py"
+    with patch.dict(os.environ, {"TELEGRAM_FAST_ACK_OWNER": "josh2"}):
+        assert launcher.gateway_service_label() == "ai.openclaw.gateway"
+        assert launcher.watcher_path().name == "josh_telegram_fast_ack.py"
+        assert launcher.credential_template_path().name == "agent-ecosystem.op.env"
+
+
+def test_josh_resolver_uses_local_gateway_config_before_1password_fallback() -> None:
+    with patch.dict(os.environ, {"TELEGRAM_FAST_ACK_OWNER": "josh2"}), patch.object(
+        launcher, "gateway_pid", side_effect=RuntimeError("gateway environment scrubbed")
+    ), patch.object(
+        launcher, "local_openclaw_telegram_token", return_value="telegram-value"
+    ) as local, patch.object(
+        launcher,
+        "secure_telegram_token",
+        side_effect=AssertionError("local provisioned credential should win"),
+    ):
+        assert launcher.resolve_telegram_token() == "telegram-value"
+    local.assert_called_once_with()
+
+
+def test_josh_local_secretref_reads_only_the_protected_telegram_store_path(tmp_path) -> None:
+    config = tmp_path / "openclaw.json"
+    store = tmp_path / "secrets.json"
+    config.write_text(
+        '{"channels":{"telegram":{"botToken":{"source":"file","provider":"default","id":"opaque"}}}}',
+        encoding="utf-8",
+    )
+    store.write_text(
+        '{"openclaw":{"channels":{"telegram":{"botToken":"123456789:telegram-value_abcdefghijklmnopqrstuvwxyz"}}}}',
+        encoding="utf-8",
+    )
+    with patch.dict(os.environ, {"TELEGRAM_FAST_ACK_OWNER": "josh2"}), patch.object(
+        launcher, "OPENCLAW_CONFIG", config
+    ), patch.object(launcher, "OPENCLAW_SECRET_STORE", store):
+        assert launcher.local_openclaw_telegram_token().startswith("123456789:")

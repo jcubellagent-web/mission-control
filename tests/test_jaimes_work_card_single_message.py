@@ -39,6 +39,11 @@ def test_default_state_path_is_absolute_and_workspace_scoped():
     assert card.STATE_PATH == card.ROOT.parent / "memory" / "jaimes_work_cards.json"
 
 
+def test_missing_local_telegram_credential_is_definitive_before_network_io():
+    result = {"ok": False, "error": "JAIMES Telegram token or target chat is unavailable"}
+    assert card.delivery_indeterminate(result) is False
+
+
 def test_brain_feed_publish_uses_canonical_josh_ledger_with_identity():
     args = SimpleNamespace(
         no_brain_feed=False,

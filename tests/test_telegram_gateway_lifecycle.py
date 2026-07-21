@@ -142,6 +142,12 @@ class GatewayLifecycleTests(unittest.TestCase):
     def test_classifier_promotion_and_tier_effect_contract(self) -> None:
         self.assertEqual(LIFECYCLE.classify_delivery_tier("hello"), (1, "conversation"))
         self.assertEqual(LIFECYCLE.classify_delivery_tier("What time is it?"), (2, "quick-answer"))
+        self.assertEqual(
+            LIFECYCLE.classify_delivery_tier(
+                'Canary JAIMES: reply exactly "JAIMES receipt confirmed".'
+            ),
+            (2, "quick-answer"),
+        )
         self.assertEqual(LIFECYCLE.classify_delivery_tier("please deploy the change")[0], 3)
         self.assertEqual(LIFECYCLE.classify_delivery_tier("opaque request")[0], 3)
         self.assertEqual(LIFECYCLE.classify_delivery_tier("hello", has_media=True), (3, "brain-media"))

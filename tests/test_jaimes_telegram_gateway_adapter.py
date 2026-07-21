@@ -98,7 +98,14 @@ class JaimesGatewayAdapterTests(unittest.TestCase):
         })
         return key, work_id, run_id
 
-    def run_writer_tier(self, tier: int):
+    def run_writer_tier(
+        self,
+        tier: int,
+        *,
+        objective: str = "Verify the current service",
+        near_copy: bool = False,
+        semantic: str = "",
+    ):
         events: list[str] = []
         receipt = {
             "workId": "work-telegram-" + "a" * 24,
@@ -144,15 +151,23 @@ class JaimesGatewayAdapterTests(unittest.TestCase):
                 "delivery_tier": tier,
                 "lifecycle_writer_enabled": True,
             }),
-            patch.object(self.module, "objective_from_prompt", return_value="Verify the current service"),
-            patch.object(self.module, "objective_is_near_copy", return_value=False),
+            patch.object(self.module, "objective_from_prompt", return_value=objective),
+            patch.object(
+                self.module,
+                "objective_is_near_copy",
+                side_effect=lambda _prompt, candidate: bool(
+                    near_copy
+                    and candidate != "Respond to the current Telegram message"
+                ),
+            ),
+            patch.object(self.module, "semantic_reinterpretation", return_value=semantic),
             patch.object(self.module, "runtime_route", return_value=("jaimes-local", "verified lane")),
             patch.object(self.module, "skill_for_prompt", return_value={}),
             patch.object(self.module, "publish_jaimes", side_effect=publish),
             patch.object(self.module, "send_initial_ack", side_effect=AssertionError("v3 must not create an ack bubble")),
             patch.object(self.module, "send_chat_action"),
         )
-        with patches[0], patches[1], patches[2], patches[3], patches[4], patches[5], patches[6], patches[7], patches[8], patches[9], patches[10], patches[11], patches[12], patches[13], patches[14], patches[15]:
+        with patches[0], patches[1], patches[2], patches[3], patches[4], patches[5], patches[6], patches[7], patches[8], patches[9], patches[10], patches[11], patches[12], patches[13], patches[14], patches[15], patches[16]:
             result = self.module.send_ack(
                 dict(self.event),
                 model="provider/model",
@@ -176,6 +191,23 @@ class JaimesGatewayAdapterTests(unittest.TestCase):
         self.assertTrue(result["reaction_ok"])
         self.assertTrue(result["no_card_required"])
         self.assertLess(events.index("claim:reaction"), events.index("api:reaction"))
+        self.assertNotIn("api:card", events)
+
+    def test_writer_quick_answer_near_copy_keeps_terminal_lifecycle(self):
+        result, events = self.run_writer_tier(
+            2,
+            objective=self.event["prompt"],
+            near_copy=True,
+            semantic="",
+        )
+        self.assertTrue(result["ok"])
+        self.assertEqual(
+            result["objective"],
+            "Respond to the current Telegram message",
+        )
+        self.assertTrue(result["no_card_required"])
+        self.assertTrue(self.module.registerable_ack_result(result))
+        self.assertNotEqual(result.get("status"), "awaiting-objective-interpretation")
         self.assertNotIn("api:card", events)
 
     def test_writer_tier_3_claims_each_surface_before_api(self):
