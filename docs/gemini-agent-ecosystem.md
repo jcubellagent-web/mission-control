@@ -27,7 +27,7 @@ python3 scripts/gemini_agent.py status --write-status
 Run a dashboard-safe smoke prompt and update the sidecar:
 
 ```sh
-python3 scripts/gemini_agent.py smoke --model gemini-2.5-flash --write-status
+python3 scripts/gemini_agent.py smoke --model gemini-3.6-flash-medium --write-status
 ```
 
 Route a Gemini review task:

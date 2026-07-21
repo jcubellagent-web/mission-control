@@ -16,6 +16,8 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "data"
 STATUS_PATH = DATA_DIR / "gemini-ecosystem.json"
+DEFAULT_MODEL = "gemini-3.6-flash-medium"
+REQUIRED_MODELS = {"gemini-3.6-flash-medium", "gemini-3.1-pro-high"}
 
 SENSITIVE_MARKERS = [
     "api_key",
@@ -68,40 +70,43 @@ def run(cmd: list[str], timeout: int, stdin_text: str | None = None) -> tuple[in
 
 
 def cli_status() -> dict[str, Any]:
-    path = shutil.which("gemini")
+    local = Path.home().name == "jc_agent"
+    path = shutil.which("agy") if local else "jaimes:/opt/homebrew/bin/agy"
     status: dict[str, Any] = {
         "available": bool(path),
         "path": path or "",
         "version": "",
         "authMode": "Antigravity-authenticated Gemini subscription",
         "accessRoute": "antigravity",
-        "transportCommand": "gemini",
+        "transportCommand": "scripts/model_lane.py",
         "displayName": "Antigravity Gemini",
-        "legacyName": "gemini-cli",
+        "legacyName": "google-gemini-cli",
         "checkedAt": utc_now(),
     }
     if not path:
         status["status"] = "missing"
         return status
-    code, out, err = run([path, "--version"], timeout=6)
-    text = (out or err).strip()
-    lower = text.lower()
-    auth_failed = "auth failed" in lower or "auth login" in lower or "authentication" in lower
-    if code == 0 and text and not auth_failed and not text.lstrip().startswith("{"):
-        status["version"] = text.splitlines()[0]
-        status["status"] = "installed"
-    elif auth_failed:
-        status["version"] = ""
-        status["status"] = "antigravity-auth-required"
-        status["warning"] = "Antigravity shell auth is not usable from this host session."
-    elif code == 0:
-        status["version"] = ""
-        status["status"] = "installed-version-unknown"
-        status["warning"] = "Antigravity command exists, but version probe returned non-version output."
+    if local:
+        version_cmd = [str(path), "--version"]
+        models_cmd = [str(path), "models"]
     else:
-        status["version"] = ""
-        status["status"] = "installed-version-unknown"
-        status["warning"] = "Antigravity command exists, but version probe did not return cleanly."
+        version_cmd = ["ssh", "jaimes", "/opt/homebrew/bin/agy --version"]
+        models_cmd = ["ssh", "jaimes", "/opt/homebrew/bin/agy models"]
+    version_code, version_out, version_err = run(version_cmd, timeout=10)
+    models_code, models_out, models_err = run(models_cmd, timeout=20)
+    version_text = (version_out or version_err).strip()
+    models = [line.strip() for line in models_out.splitlines() if line.strip()]
+    status["version"] = version_text.splitlines()[0] if version_code == 0 and version_text else ""
+    status["models"] = models
+    missing = sorted(REQUIRED_MODELS.difference(models))
+    if version_code == 0 and models_code == 0 and not missing:
+        status["status"] = "installed"
+    elif models_code != 0:
+        status["status"] = "antigravity-auth-required"
+        status["warning"] = "Authenticated Antigravity model discovery failed on the JAIMES execution host."
+    else:
+        status["status"] = "models-outdated"
+        status["warning"] = f"Required current models missing: {', '.join(missing)}"
     return status
 
 
@@ -166,17 +171,37 @@ def cmd_smoke(args: argparse.Namespace) -> int:
     if not args.allow_private and prompt_is_sensitive(prompt):
         print(json.dumps({"ok": False, "error": "prompt blocked by privacy guardrail"}, indent=2))
         return 2
-    cmd = [str(status["path"])]
-    if args.model:
-        cmd += ["-m", args.model]
-    cmd += ["-p", prompt]
-    code, out, err = run(cmd, timeout=args.timeout, stdin_text="y\n")
+    model = args.model or DEFAULT_MODEL
+    cmd = [
+        sys.executable,
+        str(ROOT / "scripts" / "model_lane.py"),
+        "--task-type",
+        args.role,
+        "--title",
+        "Antigravity Gemini broker probe",
+        "--objective",
+        "Run one dashboard-safe Gemini specialist pass",
+        "--prompt",
+        prompt,
+        "--privacy",
+        "dashboard-safe",
+        "--requester",
+        "joshex",
+        "--requested-provider",
+        "gemini",
+        "--requested-model",
+        model,
+        "--requested-reason",
+        "Explicit broker smoke test",
+        "--execute",
+    ]
+    code, out, err = run(cmd, timeout=args.timeout)
     smoke_status = classify_smoke(code, out, err)
     smoke = {
         "status": smoke_status,
         "checkedAt": utc_now(),
         "cliVersion": status.get("version", ""),
-        "model": args.model or "default",
+        "model": model,
         "role": args.role,
         "privacy": "private-approved" if args.allow_private else "dashboard-safe",
         "promptStored": False,

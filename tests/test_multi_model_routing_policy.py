@@ -68,10 +68,10 @@ def test_verified_grok_is_auto_enabled_unless_explicitly_disabled(monkeypatch) -
 
 def test_antigravity_model_ids_are_executable_not_human_labels() -> None:
     route = load_module("agent_route_gemini", ROOT / "scripts" / "agent_route.py")
-    assert route.gemini_model("fast") == "agy-gemini-3.5-flash"
-    assert route.gemini_model("review") == "agy-gemini-3.5-flash"
-    assert route.gemini_model("deep") == "agy-gemini-3.1-pro"
-    assert route.gemini_model("longContext") == "agy-gemini-3.1-pro"
+    assert route.gemini_model("fast") == "gemini-3.6-flash-medium"
+    assert route.gemini_model("review") == "gemini-3.6-flash-high"
+    assert route.gemini_model("deep") == "gemini-3.1-pro-high"
+    assert route.gemini_model("longContext") == "gemini-3.1-pro-high"
 
 
 def model_args(*, transport: str = "auto") -> SimpleNamespace:
@@ -96,7 +96,7 @@ def test_codex_app_specialists_forward_to_jaimes_with_redacted_preview(monkeypat
     monkeypatch.setattr(lane.Path, "home", classmethod(lambda cls: Path("/Users/josh2.0")))
     args = model_args()
     route = {"agent": "joshex", "modelRoute": {
-        "provider": "gemini", "model": "agy-gemini-3.5-flash", "reason": "conserve",
+        "provider": "gemini", "model": "gemini-3.6-flash-medium", "reason": "conserve",
         "codexAllowanceMode": "conserve",
     }}
     command = lane.command_for(args, route)
@@ -113,7 +113,7 @@ def test_direct_specialist_commands_cannot_silently_use_gpt(monkeypatch) -> None
     monkeypatch.setattr(lane.Path, "home", classmethod(lambda cls: Path("/Users/jc_agent")))
 
     gemini = lane.command_for(model_args(transport="hermes"), {
-        "agent": "jaimes", "modelRoute": {"provider": "gemini", "model": "agy-gemini-3.5-flash"},
+        "agent": "jaimes", "modelRoute": {"provider": "gemini", "model": "gemini-3.6-flash-medium"},
     })
     assert gemini[1].endswith("scripts/antigravity_pass.py")
     assert "SENSITIVE_SENTINEL" not in lane.command_preview(gemini)
@@ -145,7 +145,7 @@ def test_antigravity_pass_uses_local_proxy_and_verifies_model(monkeypatch) -> No
 
         def read(self):
             return json.dumps({
-                "model": "agy-gemini-3.5-flash",
+                "model": "gemini-3.6-flash-medium",
                 "choices": [{"message": {"content": "GEMINI_OK"}}],
             }).encode()
 
@@ -156,16 +156,16 @@ def test_antigravity_pass_uses_local_proxy_and_verifies_model(monkeypatch) -> No
         return Response()
 
     monkeypatch.setattr(helper.urllib.request, "urlopen", fake_urlopen)
-    output = helper.run("agy-gemini-3.5-flash", "safe prompt", 30)
+    output = helper.run("gemini-3.6-flash-medium", "safe prompt", 30)
     assert output == "GEMINI_OK"
     assert seen["url"] == "http://127.0.0.1:11435/v1/chat/completions"
-    assert seen["payload"]["model"] == "agy-gemini-3.5-flash"
+    assert seen["payload"]["model"] == "gemini-3.6-flash-medium"
 
 
 def test_shared_skill_requires_real_verified_dispatch() -> None:
     skill = " ".join((ROOT / "agent-skills" / "multi-model-routing" / "SKILL.md").read_text().lower().split())
     assert "never infer success" in skill
     assert "executed route" in skill
-    assert "agy-gemini-3.5-flash" in skill
+    assert "gemini-3.6-flash-medium" in skill
     assert "glm-5.2:cloud" in skill
     assert "grok-4.5" in skill

@@ -56,7 +56,7 @@ def run(model: str, prompt: str, timeout: int) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--model", default="agy-gemini-3.5-flash")
+    parser.add_argument("--model", default="gemini-3.6-flash-medium")
     parser.add_argument("--prompt", default="")
     parser.add_argument("--timeout", type=int, default=180)
     args = parser.parse_args()

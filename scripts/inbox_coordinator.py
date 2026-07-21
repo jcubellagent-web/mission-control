@@ -277,7 +277,7 @@ ROUTES: dict[str, dict[str, Any]] = {
     },
     "gemini": {
         "provider": "gemini",
-        "model": "agy-gemini-3.5-flash",
+        "model": "gemini-3.6-flash-medium",
         "tier": "fast",
         "worker": "jaimes-gemini-review",
         "host": "jaimes",
@@ -286,7 +286,7 @@ ROUTES: dict[str, dict[str, Any]] = {
     },
     "gemini-pro": {
         "provider": "gemini",
-        "model": "agy-gemini-3.1-pro",
+        "model": "gemini-3.1-pro-high",
         "tier": "reason",
         "worker": "jaimes-gemini-pro",
         "host": "jaimes",

@@ -55,13 +55,13 @@
       "lastAuthCheck": "2026-06-20T16:40:35Z",
       "lastAuthIssue": null,
       "preferredModels": {
-        "frontdesk": "google/gemini-3.5-flash",
-        "routine": "google/gemini-3.5-flash",
-        "review": "google/gemini-3.5-pro",
-        "deep": "google/gemini-3.5-pro",
-        "longContext": "google/gemini-3.5-pro",
-        "tinyWorker": "google/gemini-3.5-flash-lite",
-        "cheapFallback": "google/gemini-3.5-flash"
+        "frontdesk": "gemini-3.6-flash-medium",
+        "routine": "gemini-3.6-flash-medium",
+        "review": "gemini-3.6-flash-high",
+        "deep": "gemini-3.1-pro-high",
+        "longContext": "gemini-3.1-pro-high",
+        "tinyWorker": "gemini-3.6-flash-low",
+        "cheapFallback": "gemini-3.6-flash-medium"
       },
       "lastRouteReason": "Subscription-backed Gemini lane; use for dashboard-safe review and summaries without showing scary token-equivalent costs.",
       "fixedMonthlyUsd": 20,

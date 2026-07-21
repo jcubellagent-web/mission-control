@@ -22,9 +22,9 @@ final answer.
 
 ## Selection
 
-- Antigravity `agy-gemini-3.5-flash`: summaries, digests, compression, broad
+- Antigravity `gemini-3.6-flash-medium` (or `-high` for review): summaries, digests, compression, broad
   synthesis, routine document review, and low-risk second passes.
-- Antigravity `agy-gemini-3.1-pro`: nuanced multi-document judgment and deep
+- Antigravity `gemini-3.1-pro-high`: nuanced multi-document judgment and deep
   dashboard-safe review when Flash is insufficient.
 - Ollama Cloud `glm-5.2:cloud`: large-context technical analysis, architecture
   analysis, multi-file planning, structured code review, and parallel technical

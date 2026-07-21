@@ -79,8 +79,8 @@ def test_openclaw_fresh_lane_uses_real_main_agent_and_provider_prefix() -> None:
 def test_remote_specialists_use_current_host_interfaces() -> None:
     coordinator = load_module("inbox_coordinator_executor", ROOT / "scripts" / "inbox_coordinator.py")
     assert coordinator.ROUTES["gemini"]["executor"] == "remote-antigravity"
-    assert coordinator.ROUTES["gemini"]["model"] == "agy-gemini-3.5-flash"
-    assert coordinator.ROUTES["gemini-pro"]["model"] == "agy-gemini-3.1-pro"
+    assert coordinator.ROUTES["gemini"]["model"] == "gemini-3.6-flash-medium"
+    assert coordinator.ROUTES["gemini-pro"]["model"] == "gemini-3.1-pro-high"
     assert "127.0.0.1:11435/v1" in coordinator.ANTIGRAVITY_EXECUTOR_CODE
     assert "unexpected model" in coordinator.ANTIGRAVITY_EXECUTOR_CODE
     assert "hermes" not in coordinator.ANTIGRAVITY_EXECUTOR_CODE.lower()

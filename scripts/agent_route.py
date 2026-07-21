@@ -263,7 +263,7 @@ REQUESTED_PROVIDER_ALIASES = {
 
 PROVIDER_DEFAULT_MODELS = {
     "codex": "gpt-5.6-terra",
-    "gemini": "gemini-3.5-flash",
+    "gemini": "gemini-3.6-flash-medium",
     "ollama": "qwen2.5:7b",
     "xai": "grok-4.20-reasoning",
     "openrouter": "openrouter/auto",
@@ -413,11 +413,11 @@ def gemini_model(alias: str = "fast") -> str:
     #JAIMES: Antigravity model ids are executable; human labels and retired
     # google-gemini-cli ids must never leak into a fresh lane command.
     antigravity_models = {
-        "deep": "agy-gemini-3.1-pro",
-        "judgment": "agy-gemini-3.1-pro",
-        "longContext": "agy-gemini-3.1-pro",
-        "review": "agy-gemini-3.5-flash",
-        "fast": "agy-gemini-3.5-flash",
+        "deep": "gemini-3.1-pro-high",
+        "judgment": "gemini-3.1-pro-high",
+        "longContext": "gemini-3.1-pro-high",
+        "review": "gemini-3.6-flash-high",
+        "fast": "gemini-3.6-flash-medium",
     }
     if alias in antigravity_models:
         return antigravity_models[alias]
@@ -598,7 +598,7 @@ def remote_specialist_available(provider: str, model: str = "") -> bool:
     if Path.home().name == "jc_agent":
         return False
     if provider == "gemini":
-        requested = str(model or "agy-gemini-3.5-flash").lower()
+        requested = str(model or "gemini-3.6-flash-medium").lower()
         command = (
             "curl -fsS --max-time 10 http://127.0.0.1:11435/v1/models "
             "-H 'Authorization: Bearer agy-local' "
@@ -647,7 +647,7 @@ def explicit_route_unavailable(provider: str, model: str = "") -> str:
                     str(row.get("id") or "").lower()
                     for row in payload.get("data", []) if isinstance(row, dict)
                 }
-                requested = str(model or "agy-gemini-3.5-flash").lower()
+                requested = str(model or "gemini-3.6-flash-medium").lower()
                 if requested in names:
                     return ""
             except Exception:

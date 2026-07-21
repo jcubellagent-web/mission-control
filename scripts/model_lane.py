@@ -87,14 +87,11 @@ def checkpoint_text(args: argparse.Namespace, route: dict[str, Any]) -> str:
 
 
 def build_prompt(args: argparse.Namespace, route: dict[str, Any]) -> str:
-    model_route = route.get("modelRoute") or {}
-    header = f"""You are starting a fresh verified model lane for Josh.
+    header = f"""You are working in a fresh model lane for Josh.
 
-First visible lines MUST be:
-Active Model/Auth: {model_route.get('model') or model_route.get('provider')} ({model_route.get('auth') or model_route.get('provider')})
-Route reason: {model_route.get('reason')}
-
-Do not claim a different model. If this lane did not start on that model, stop and say verification failed.
+The launcher owns runtime-model verification. Do not infer, debate, or restate
+your model identity; complete the task itself. If provider selection or
+authentication fails, the fail-closed launcher will reject the run.
 
 {checkpoint_text(args, route)}
 
@@ -219,19 +216,30 @@ def command_preview(cmd: list[str]) -> str:
     return " ".join(shlex.quote(part) for part in visible)
 
 
-def execute_verified(cmd: list[str]) -> int:
+def execute_verified(cmd: list[str], route: dict[str, Any]) -> int:
     proc = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, check=False)
     combined = f"{proc.stdout}\n{proc.stderr}".lower()
     fallback_markers = ("switching to fallback", "primary auth failed", "you need to be signed in")
-    if proc.stdout:
-        print(proc.stdout, end="" if proc.stdout.endswith("\n") else "\n")
-    if proc.stderr:
-        print(proc.stderr, file=sys.stderr, end="" if proc.stderr.endswith("\n") else "\n")
     if proc.returncode != 0:
+        if proc.stdout:
+            print(proc.stdout, end="" if proc.stdout.endswith("\n") else "\n")
+        if proc.stderr:
+            print(proc.stderr, file=sys.stderr, end="" if proc.stderr.endswith("\n") else "\n")
         return proc.returncode
     if any(marker in combined for marker in fallback_markers):
         print("Verified model lane failed: provider fallback or authentication failure detected.", file=sys.stderr)
         return 3
+    if not (cmd and cmd[0] == "ssh"):
+        model_route = route.get("modelRoute") or {}
+        print(
+            f"Active Model/Auth: {model_route.get('model') or model_route.get('provider')} "
+            f"({model_route.get('auth') or model_route.get('provider')})"
+        )
+        print(f"Route reason: {model_route.get('reason')}")
+    if proc.stdout:
+        print(proc.stdout, end="" if proc.stdout.endswith("\n") else "\n")
+    if proc.stderr:
+        print(proc.stderr, file=sys.stderr, end="" if proc.stderr.endswith("\n") else "\n")
     return 0
 
 
@@ -268,7 +276,7 @@ def main() -> int:
         print(json.dumps(plan, indent=2))
         return 0
 
-    return execute_verified(cmd)
+    return execute_verified(cmd, route)
 
 
 if __name__ == "__main__":
