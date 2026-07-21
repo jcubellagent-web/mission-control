@@ -3866,6 +3866,16 @@ def complete_cards_from_final_responses(state: dict[str, Any], session_id: str, 
                         "error": recovery_result.get("stderr") or recovery_result.get("error") or "",
                         "delivery_key": f"{key}:terminal-receipt-recovery",
                     })
+                elif card.get("no_card_required"):
+                    # Tier 1/2 work deliberately has no progress card to edit.
+                    # Still terminate the durable run so semantic health can
+                    # surface the failed delivery instead of reporting an
+                    # indefinitely active task as healthy. Do not retry the
+                    # final here: a missing native receipt is ambiguous.
+                    card["terminal_card_recovery_status"] = "no-card-needs-attention"
+                    card["status"] = "failed"
+                    card["ended_at"] = utc_now()
+                    card["last_card_update_at"] = card["ended_at"]
             elif (
                 not dry_run
                 and card.get("lifecycle_shadow")

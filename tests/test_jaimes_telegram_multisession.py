@@ -2116,6 +2116,38 @@ class MultiSessionWatcherTests(unittest.TestCase):
         self.assertEqual(card["final_contract_status"], "delivery_indeterminate")
         self.assertEqual(card["terminal_card_recovery_status"], "needs-attention")
 
+    def test_missing_terminal_receipt_terminates_no_card_task_without_retry(self) -> None:
+        user_id = self.add_user("older", "verify delivery")
+        with sqlite3.connect(self.db) as con:
+            con.execute(
+                "INSERT INTO messages(session_id,role,content,platform_message_id,timestamp) VALUES (?,?,?,?,?)",
+                ("older", "assistant", "Complete: Yes\nWhat was done:\n- Verified", "", time.time() - 600),
+            )
+        card = {
+            "key": "",
+            "objective": "Verify delivery",
+            "model": "openai-codex/gpt-5.6-sol",
+            "route": "JAIMES verified execution",
+            "status": "active",
+            "no_card_required": True,
+        }
+        state = {"active_cards": {f"telegram-message-{user_id}": card}}
+        completion_patch = self.patches[2]
+        completion_patch.stop()
+        try:
+            with patch.object(watcher, "finish_card_terminal_delivery") as finish, \
+                 patch.object(watcher, "run_work_card_cmd") as run:
+                self.assertEqual(watcher.complete_cards_from_final_responses(state, "older"), 0)
+        finally:
+            completion_patch.start()
+
+        finish.assert_not_called()
+        run.assert_not_called()
+        self.assertEqual(card["status"], "failed")
+        self.assertEqual(card["final_contract_status"], "delivery_indeterminate")
+        self.assertEqual(card["terminal_card_recovery_status"], "no-card-needs-attention")
+        self.assertTrue(card["ended_at"])
+
     def test_failed_delivery_card_is_not_reactivated_by_old_progress(self) -> None:
         card = {
             "key": "failed-card",

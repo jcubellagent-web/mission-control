@@ -190,6 +190,7 @@ def safe_probe_snapshot(probe: dict[str, Any]) -> dict[str, Any]:
             "lastSurfaceOk": safe_bool(fast_ack.get("lastSurfaceOk")),
             "surfaceIndeterminate": fast_ack.get("surfaceIndeterminate") is True,
             "activeCardCount": safe_nonnegative_int(fast_ack.get("activeCardCount")),
+            "terminalIssueCount": safe_nonnegative_int(fast_ack.get("terminalIssueCount")),
             "deliveryErrorPresent": bool(delivery_error),
         },
         "brainFeed": {
@@ -255,6 +256,24 @@ try:
     cua_screen_json = json.loads(cua_screen.stdout or "{}")
 except Exception:
     cua_screen_json = {"_error": cua_screen.stderr[-400:] or cua_screen.stdout[-400:]}
+
+def unresolved_terminal_issue(card):
+    if not isinstance(card, dict):
+        return False
+    if card.get("final_contract_status") not in {
+        "delivery_indeterminate", "shadow-delivery-unclean"
+    }:
+        return False
+    if card.get("status") == "active":
+        return True
+    try:
+        ended = dt.datetime.fromisoformat(
+            str(card.get("ended_at") or card.get("last_card_update_at") or "").replace("Z", "+00:00")
+        )
+    except Exception:
+        return False
+    return (dt.datetime.now(dt.timezone.utc) - ended).total_seconds() <= 30 * 60
+
 payload = {
     "checkedAt": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
     "hermesStatusCode": status.returncode,
@@ -272,6 +291,10 @@ payload = {
         "activeCardCount": sum(
             1 for card in (fast_ack_state.get("active_cards") or {}).values()
             if isinstance(card, dict) and card.get("status") != "done"
+        ) if isinstance(fast_ack_state.get("active_cards"), dict) else 0,
+        "terminalIssueCount": sum(
+            1 for card in (fast_ack_state.get("active_cards") or {}).values()
+            if unresolved_terminal_issue(card)
         ) if isinstance(fast_ack_state.get("active_cards"), dict) else 0,
         "deliveryError": {
             "at": (fast_ack_state.get("last_telegram_delivery_error") or {}).get("at"),
@@ -378,6 +401,8 @@ def evaluate(probe: dict[str, Any]) -> tuple[str, list[str], set[str]]:
     )
     if unresolved_delivery_error or recent_failed_surface:
         issues.append("A JAIMES Telegram card send or edit still lacks a confirmed receipt.")
+    if safe_nonnegative_int(fast_ack_state.get("terminalIssueCount")):
+        issues.append("A JAIMES Telegram final response has an unresolved delivery receipt.")
     if not telegram_sessions:
         issues.append("No Telegram session binding is present.")
         recovery_targets.add("gateway")

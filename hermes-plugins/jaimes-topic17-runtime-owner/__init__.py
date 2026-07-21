@@ -350,8 +350,8 @@ def _on_transform_llm_output(
         "session_id": str(session_id or ""),
         "model": str(model or ""),
         "inbound_message_id": (
-            _session_value("HERMES_SESSION_MESSAGE_ID").strip()
-            or str((recovered_card or {}).get("inbound_message_id") or "")
+            str((recovered_card or {}).get("inbound_message_id") or "")
+            or _session_value("HERMES_SESSION_MESSAGE_ID").strip()
         ),
     }
     try:
