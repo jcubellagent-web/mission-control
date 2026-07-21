@@ -180,6 +180,30 @@
       "severity": "p2"
     },
     {
+      "id": "adaptive-quality-snapshot",
+      "owner": "josh2",
+      "team": "Adaptive QA/QC snapshot",
+      "activeFrom": "2026-07-21T21:22:05Z",
+      "schedule": {"minutes": [14], "hours": [0, 6, 12, 18]},
+      "command": ["python3", "scripts/adaptive_quality_control.py", "--mode", "snapshot"],
+      "timeoutSeconds": 180,
+      "severity": "p1",
+      "alertAfterFailures": 2,
+      "skipDuringChangeLease": true
+    },
+    {
+      "id": "daily-refactor-discovery",
+      "owner": "josh2",
+      "team": "Daily refactor discovery",
+      "activeFrom": "2026-07-21T21:22:05Z",
+      "schedule": {"minutes": [17], "hours": [5]},
+      "command": ["python3", "scripts/adaptive_quality_control.py", "--mode", "discover"],
+      "timeoutSeconds": 300,
+      "severity": "p2",
+      "alertAfterFailures": 2,
+      "skipDuringChangeLease": true
+    },
+    {
       "id": "daily-qa-rollup",
       "owner": "josh2",
       "team": "QA status",
@@ -188,6 +212,18 @@
       "timeoutSeconds": 120,
       "severity": "p2",
       "aggregateHealth": true,
+      "skipDuringChangeLease": true
+    },
+    {
+      "id": "weekly-quality-baseline-review",
+      "owner": "joshex",
+      "team": "Quality baseline review",
+      "activeFrom": "2026-07-21T21:22:05Z",
+      "schedule": {"minutes": [37], "hours": [4], "weekdays": [0]},
+      "command": ["python3", "scripts/adaptive_quality_control.py", "--mode", "baseline-review"],
+      "timeoutSeconds": 300,
+      "severity": "p1",
+      "alertAfterFailures": 1,
       "skipDuringChangeLease": true
     },
     {

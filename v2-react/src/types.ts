@@ -324,6 +324,7 @@ export type MissionControlState = {
   agenticCrypto?: AgenticCryptoWallet;
   modelUsage?: ModelUsage;
   modelRouter?: ModelRouter;
+  qualityControl?: Record<string, unknown>;
   reliabilityUpgrades?: ReliabilityUpgrades;
   brainAtlas?: BrainAtlas;
   capabilityStack?: CapabilityStackItem[];

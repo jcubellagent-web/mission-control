@@ -141,6 +141,22 @@ def test_hermes_and_qa_definitions_keep_stable_ids_and_run_evidence() -> None:
     assert qa[0]["runStatus"] == "done"
 
 
+def test_new_qa_job_does_not_invent_failures_before_activation() -> None:
+    definitions = discover_qa_definitions({"jobs": [{
+        "id": "new-daily-quality",
+        "owner": "josh2",
+        "team": "Daily quality",
+        "activeFrom": "2026-07-17T15:30:00Z",
+        "schedule": {"minutes": [0], "hours": [8, 12, 16]},
+    }]})
+
+    rows, _meta = materialize_today_jobs(definitions, now=NOW)
+
+    assert definitions[0]["activeFrom"] == "2026-07-17T15:30:00Z"
+    assert [row["scheduledTime"] for row in rows] == ["12:00 PM", "4:00 PM"]
+    assert all(row["runStatus"] != "overdue" for row in rows)
+
+
 def _definition(
     name: str,
     hour: int,

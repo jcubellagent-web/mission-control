@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "timezone": "America/New_York",
+  "mode": "observe-and-propose",
+  "qualityObjective": "Improve reliability, task success, latency, cost, and maintainability without weakening privacy, ownership, contracts, or rollback safety.",
+  "baselinePolicy": {
+    "automaticDemotion": false,
+    "requiredCleanRunsForPromotion": 7,
+    "minimumScoreImprovement": 2,
+    "maximumRegressionPoints": 3
+  },
+  "modelPolicy": {
+    "analysis": "ollama/glm-5.2:cloud",
+    "trustedExecutor": "openai/codex",
+    "localPrivateFallback": "ollama/qwen2.5-coder:7b",
+    "independentVerificationRequired": true,
+    "reviewRequiresExactDiffEvidence": true,
+    "cloudPrivacy": "dashboard-safe summaries and repository-safe source only; never secrets, credentials, raw connector content, cookies, tokens, private account data, or customer data"
+  },
+  "repository": {
+    "roots": ["scripts", "v2-react/src", "config", "agent-skills", "tests"],
+    "extensions": [".py", ".ts", ".tsx", ".js", ".mjs", ".sh"],
+    "excludedParts": ["__pycache__", "node_modules", "dist", ".git", "fixtures", "snapshots"],
+    "largeFileLines": 1200,
+    "veryLargeFileLines": 2500,
+    "duplicateBlockLines": 8,
+    "maximumCandidates": 25
+  },
+  "riskPolicy": {
+    "protectedPathFragments": [
+      "auth",
+      "secret",
+      "wallet",
+      "payment",
+      "migration",
+      "agent_route",
+      "telegram_gateway",
+      "control_tower_change_guard",
+      "shared-edit-coordination"
+    ],
+    "highRiskRequiresHumanApproval": true,
+    "databaseChangesRequireForwardCompatiblePlan": true,
+    "automaticSourceMutation": false
+  },
+  "contracts": [
+    {
+      "id": "qa-scheduler",
+      "label": "QA scheduler",
+      "path": "data/ecosystem-qa-scheduler.json",
+      "field": "status",
+      "accepted": ["ok", "running"],
+      "required": true,
+      "weight": 20
+    },
+    {
+      "id": "qa-benchmark",
+      "label": "QA benchmark",
+      "path": "data/ecosystem-qa-benchmark.json",
+      "field": "ok",
+      "accepted": [true],
+      "required": true,
+      "weight": 25
+    },
+    {
+      "id": "ecosystem-health",
+      "label": "Ecosystem health",
+      "path": "data/ecosystem-health-sweep.json",
+      "field": "ok",
+      "accepted": [true],
+      "required": true,
+      "weight": 25
+    },
+    {
+      "id": "runtime-layout",
+      "label": "Control Tower runtime",
+      "path": "data/mission-control-runtime-layout.json",
+      "field": "ok",
+      "accepted": [true],
+      "required": true,
+      "weight": 20
+    },
+    {
+      "id": "route-quality",
+      "label": "Model route quality",
+      "path": "data/route-quality-audit.json",
+      "field": "status",
+      "accepted": ["ok"],
+      "required": false,
+      "weight": 10
+    }
+  ],
+  "recurringActivities": [
+    {
+      "id": "adaptive-quality-snapshot",
+      "label": "Adaptive quality snapshot",
+      "purpose": "Continuously score executable contracts and repository maintainability signals."
+    },
+    {
+      "id": "daily-refactor-discovery",
+      "label": "Daily refactor discovery",
+      "purpose": "Generate a bounded, risk-ranked proposal portfolio without changing source."
+    },
+    {
+      "id": "weekly-quality-baseline-review",
+      "label": "Weekly quality baseline review",
+      "purpose": "Compare current evidence with the immutable promoted baseline and recommend promotion or investigation."
+    }
+  ]
+}

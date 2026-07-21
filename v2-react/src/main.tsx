@@ -1460,6 +1460,8 @@ function EcosystemOperationsPanel({ state, workItems }: { state: MissionControlS
   const machine = recordRow(state.machineHealth);
   const route = recordRow(state.modelRouter?.lastRoute);
   const routeAlerts = state.modelRouter?.routeAlerts || [];
+  const quality = recordRow(state.qualityControl);
+  const qualityPortfolio = recordRow(quality.refactorPortfolio);
   const activeTasks = workItems.filter((item) => ["working", "waiting", "blocked"].includes(item.state)).slice(0, 4);
   const openHandoffs = objectRows(shared.openHandoffs).slice(0, 3);
   const busRows = objectRows(state.agentBus).filter((row) => ["queued", "accepted", "active", "running", "blocked"].includes(String(row.status || "").toLowerCase())).slice(0, 3);
@@ -1496,6 +1498,12 @@ function EcosystemOperationsPanel({ state, workItems }: { state: MissionControlS
       status: routeAlerts.length ? "watch" : "ok",
       detail: route.model || route.provider || "No active route",
       meta: route.whyChosen || route.reason || state.modelRouter?.summary || "Policy ready",
+    },
+    {
+      label: "Adaptive QA/QC",
+      status: quality.status || "pending",
+      detail: `${Number(quality.qualityScore || 0)}% quality · ${Number(qualityPortfolio.candidates || 0)} refactor candidates`,
+      meta: quality.nextAction || "Observation and proposal mode",
     },
     {
       label: "Shared work bus",
@@ -2955,11 +2963,16 @@ function BrainOperationsSummary({
   const reliabilityWhy = reliabilityFocus
     ? `${reliabilityAttention ? "Attention" : "Watch"}: ${missionText(reliabilityFocus.label)} - ${missionText(reliabilityFocus.signal)}`
     : "Reliability: all tracked probes ready";
+  const quality = recordRow(state.qualityControl);
+  const qualityStatus = String(quality.status || "pending").toLowerCase();
+  const qualityScoreValue = Number(quality.qualityScore);
+  const qualityScore = Number.isFinite(qualityScoreValue) ? Math.max(0, Math.min(100, Math.round(qualityScoreValue))) : 0;
+  const qualityAttention = ["attention", "blocked", "error", "failed"].includes(qualityStatus);
   const dataScore = dataIssues.some((issue) => issue.tone === "risk") ? 58 : dataIssues.length ? 82 : 100;
   const operationalScore = operationalAlerts.some((alert) => operationalAlertTone(alert) === "risk") ? 58 : operationalAlerts.length ? 82 : 100;
   const agentScore = Math.min(100, Math.round((readyAgents / trackedAgents) * 100));
   const freshnessLabelText = freshness >= 100 ? "Fresh" : freshness >= 82 ? "Aging" : "Stale";
-  const overall = Math.round((freshness + dataScore + operationalScore + agentScore + (riskJobs ? 58 : 100) + (pendingApprovals ? 70 : 100)) / 6);
+  const overall = Math.round((freshness + dataScore + operationalScore + agentScore + (riskJobs ? 58 : 100) + (pendingApprovals ? 70 : 100) + qualityScore) / 7);
   const confidenceReason = riskJobs
     ? "Lower because a job is blocked."
     : pendingApprovals
@@ -2989,6 +3002,13 @@ function BrainOperationsSummary({
           detail: operationalAlertReason(firstOperationalAlert),
           icon: <AlertTriangle size={22} />,
         }
+    : qualityAttention
+    ? {
+        tone: "risk",
+        title: "QA/QC contract attention",
+        detail: missionText(quality.nextAction || quality.summary || "Inspect the adaptive quality evidence."),
+        icon: <AlertTriangle size={22} />,
+      }
     : riskJobs
     ? {
         tone: "risk",
@@ -3031,10 +3051,12 @@ function BrainOperationsSummary({
     ? approvalAlertReason(state.approvals.find((row) => row.status === "pending")!).replace(/^Why:\s*/i, "")
     : firstRiskJob
       ? jobAlertReason(firstRiskJob).replace(/^Why:\s*/i, "")
+      : qualityAttention
+        ? missionText(quality.nextAction || quality.summary || "Adaptive quality evidence needs review.")
       : reliabilityFocus
         ? reliabilityWhy
         : "Reliability probes are ready and no job needs intervention.";
-  const coverageLine = `${readyAgents}/${trackedAgents} agents ready · ${trackedJobs.length} jobs tracked`;
+  const coverageLine = `${readyAgents}/${trackedAgents} agents ready · ${trackedJobs.length} jobs tracked · QA ${qualityScore}%`;
   const nextItem = workItems.find((item) => item.state === "ready")
     || workItems.find((item) => item.state === "working")
     || workItems.find((item) => item.state === "done");
@@ -3042,7 +3064,7 @@ function BrainOperationsSummary({
     ? firstDataIssue.target
     : firstOperationalAlert
       ? operationalAlertTarget(firstOperationalAlert)
-      : riskJobs || pendingApprovals
+      : qualityAttention || riskJobs || pendingApprovals
         ? "today-jobs"
         : "brain-feed";
   return (

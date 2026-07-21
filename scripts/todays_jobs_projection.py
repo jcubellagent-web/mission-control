@@ -558,6 +558,7 @@ def discover_qa_definitions(
             "agent": owner_labels.get(owner, "JOSH 2.0"),
             "enabled": bool(job.get("enabled", True)),
             "present": True,
+            "activeFrom": job.get("activeFrom"),
             "todayRelevant": not weekdays or dt.datetime.now(ET).weekday() in weekdays,
             "status": "error" if failed else "ok",
             "runStatus": "missed" if failed else ("done" if state_name == "ok" else "upcoming"),
@@ -948,6 +949,9 @@ def materialize_today_jobs(
         if definition.get("todayRelevant") is False:
             continue
         times = occurrence_times(definition, day)
+        active_from = _parse_timestamp(definition.get("activeFrom"))
+        if active_from:
+            times = [scheduled for scheduled in times if scheduled >= active_from]
         if not times:
             continue
         spec = definition.get("scheduleSpec") if isinstance(definition.get("scheduleSpec"), Mapping) else {}

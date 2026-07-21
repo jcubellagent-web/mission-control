@@ -81,6 +81,22 @@ class SchedulerTests(unittest.TestCase):
             self.assertTrue(jobs[job_id]["aggregateHealth"])
             self.assertTrue(jobs[job_id]["skipDuringChangeLease"])
 
+    def test_adaptive_quality_jobs_are_visible_recurring_and_source_safe(self) -> None:
+        config = json.loads(subject.CONFIG_PATH.read_text(encoding="utf-8"))
+        jobs = {row["id"]: row for row in config["jobs"]}
+
+        snapshot = jobs["adaptive-quality-snapshot"]
+        discovery = jobs["daily-refactor-discovery"]
+        baseline = jobs["weekly-quality-baseline-review"]
+        self.assertEqual(snapshot["schedule"], {"minutes": [14], "hours": [0, 6, 12, 18]})
+        self.assertEqual(discovery["schedule"], {"minutes": [17], "hours": [5]})
+        self.assertEqual(baseline["schedule"], {"minutes": [37], "hours": [4], "weekdays": [0]})
+        self.assertEqual(discovery["command"][-1], "discover")
+        self.assertEqual(baseline["command"][-1], "baseline-review")
+        for job in (snapshot, discovery, baseline):
+            self.assertTrue(job["skipDuringChangeLease"])
+            self.assertNotIn("--promote-baseline", job["command"])
+
     def test_configured_precondition_exit_maps_to_skip(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             with mock.patch.object(subject, "LOCK_DIR", Path(directory)):

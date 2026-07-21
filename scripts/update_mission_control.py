@@ -90,6 +90,7 @@ JOSH_OPS_GMAIL_STATUS_PATH = DATA_DIR / "josh2-ops-gmail-status.json"
 ECOSYSTEM_QA_SCHEDULE_PATH = ROOT.parent / "config" / "ecosystem-qa-schedule.json"
 ECOSYSTEM_QA_STATE_PATH = DATA_DIR / "ecosystem-qa-scheduler.json"
 TELEGRAM_INBOX_QA_PATH = DATA_DIR / "telegram-inbox-qa.json"
+ADAPTIVE_QUALITY_CONTROL_PATH = DATA_DIR / "adaptive-quality-control.json"
 
 
 def atomic_write_json(path: Path, payload: Any, *, compact: bool = False) -> None:
@@ -165,7 +166,7 @@ LIVE_DASHBOARD_KEYS = {
     "brainAtlas", "brainFeed", "capabilityInventory", "capabilityStack", "capabilityWatch", "codingVisibility",
     "codexJobs", "generatedAt", "jaimesBrainFeed", "jainBrainFeed", "joshBrainFeed",
     "lastUpdated", "liveObjectives", "machineHealth", "memoryOperations", "modelRouter", "modelUsage",
-    "recentActivity", "reliabilityUpgrades", "runtimeLayout", "sharedOperatingLayer", "sourceFreshness",
+    "qualityControl", "recentActivity", "reliabilityUpgrades", "runtimeLayout", "sharedOperatingLayer", "sourceFreshness",
     "sourceUpdatedAt", "telegramInboxQa", "trackedTasks",
     "todayJobs", "todayJobsMeta",
 }
@@ -180,6 +181,11 @@ SHARED_OPERATING_LAYER_LIVE_FIELDS = frozenset({
 })
 RUNTIME_LAYOUT_LIVE_FIELDS = frozenset({
     "ok", "status", "checkedAt", "summary",
+})
+ADAPTIVE_QUALITY_LIVE_FIELDS = frozenset({
+    "schemaVersion", "checkedAt", "status", "mode", "runMode", "qualityScore",
+    "summary", "objective", "metrics", "refactorPortfolio", "baseline", "modelRoute",
+    "recurringActivities", "privacy", "nextAction",
 })
 CAPABILITY_NODE_IDENTITY_FIELDS = frozenset({"id", "name", "host", "agent"})
 CAPABILITY_NODE_RUNTIME_FIELDS = ("openclawCli", "hermesCli", "geminiCli", "codexCli")
@@ -1114,6 +1120,9 @@ def build_live_dashboard(dashboard: Dict[str, Any]) -> Dict[str, Any]:
         dashboard.get("sharedOperatingLayer"), SHARED_OPERATING_LAYER_LIVE_FIELDS
     )
     live["runtimeLayout"] = _project_mapping(dashboard.get("runtimeLayout"), RUNTIME_LAYOUT_LIVE_FIELDS)
+    live["qualityControl"] = _project_mapping(
+        dashboard.get("qualityControl"), ADAPTIVE_QUALITY_LIVE_FIELDS
+    )
     live["capabilityInventory"] = _project_capability_inventory(dashboard.get("capabilityInventory"))
     live["brainAtlas"] = sanitize_brain_atlas(
         dashboard.get("brainAtlas"),
@@ -5879,6 +5888,23 @@ def main() -> None:
         "summary": "Reliability upgrade probes have not run yet.",
         "items": [],
         "metrics": [],
+    })
+    # #JAIMES: adaptive QA/QC is proposal-only telemetry; Control Tower gets
+    # aggregate evidence and model policy, never source content or raw prompts.
+    dashboard["qualityControl"] = load_json_file(ADAPTIVE_QUALITY_CONTROL_PATH, {
+        "schemaVersion": 1,
+        "checkedAt": now_iso,
+        "status": "pending",
+        "mode": "observe-and-propose",
+        "qualityScore": 0,
+        "summary": "Adaptive QA/QC has not produced its first evidence snapshot.",
+        "metrics": {},
+        "refactorPortfolio": {"candidates": 0, "highRisk": 0, "mediumRisk": 0, "lowRisk": 0, "automaticSourceMutation": False},
+        "baseline": {"status": "candidate", "scoreDelta": None},
+        "modelRoute": {"analysis": "ollama/glm-5.2:cloud", "trustedExecutor": "openai/codex", "localPrivateFallback": "ollama/qwen2.5-coder:7b", "independentVerificationRequired": True, "reviewRequiresExactDiffEvidence": True},
+        "recurringActivities": [],
+        "privacy": {"dashboardSafe": True, "sourceContentIncluded": False, "rawPromptsIncluded": False, "secretsIncluded": False},
+        "nextAction": "Wait for the first scheduled quality snapshot.",
     })
     # #JAIMES: Brain Atlas is a read-only, bounded receipt projection. Fail
     # closed instead of forwarding malformed labels, raw identifiers, or
