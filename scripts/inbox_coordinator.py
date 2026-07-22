@@ -99,7 +99,7 @@ SECRET_VALUE_PATTERNS = (
     re.compile(r"\bBearer\s+[A-Za-z0-9._~+/=-]{8,}\b", re.I),
     re.compile(r"(?im)\b(password|passwd|token|api[_ -]?key|secret)\s*[:=]\s*([^\s,;]{4,})"),
 )
-WORKER_OUTPUT_CONTRACT = """Return a concise structured result using exactly these plain-text sections in this order: Complete: Yes or No plus whether the objective was completed; What was done: 3-5 unique, source-supported bullets that state concrete findings, outcomes, or changes; Issues: bullets or n/a; Appropriate next steps: one evidence-based recommendation or next action; Approval needed: one approval bullet per issue when approval is genuinely required, otherwise n/a. For an assessment, review, or research request, surface the key findings and recommendation instead of merely saying the assessment or review finished. Generic process statements such as task complete, execution verified, result prepared, or summary delivered are not findings and must not be used to fill the bullets. Put every reported risk or limitation in Issues as well as the relevant finding. Use No action needed only when the findings explicitly support that conclusion and there are no issues, risks, limitations, approvals, or recommendations to act on. The coordinator has already selected and launched the current route: do not launch another provider/model, use SSH to test another host, or infer a fallback. Do not include a Model line or claim a provider, model, authentication method, host, worker, route, fallback, or latency; the verified delivery layer adds those facts. Never repeat or reveal passwords, tokens, API keys, cookies, OAuth payloads, or other secret values."""
+WORKER_OUTPUT_CONTRACT = """Return a concise structured result using exactly these plain-text sections in this order: Complete: Yes or No plus whether the objective was completed; What was done: 3-5 unique, source-supported bullets that state concrete findings, outcomes, or changes; Issues: bullets or n/a; Appropriate next steps: one evidence-based recommendation or next action; Approval needed: one approval bullet per issue when approval is genuinely required, otherwise n/a. For an assessment, review, or research request, surface the key findings and recommendation instead of merely saying the assessment or review finished. Generic process statements such as task complete, execution verified, result prepared, or summary delivered are not findings and must not be used to fill the bullets. Put every reported risk or limitation in Issues as well as the relevant finding. Use No action needed only when the findings explicitly support that conclusion and there are no issues, risks, limitations, approvals, or recommendations to act on. The coordinator has already selected and launched the current route: do not launch another provider/model, use SSH to test another host, or infer a fallback. This five-section schema is the private worker-to-delivery handoff, not the complete user-facing Telegram contract. Do not include a Model line or claim a provider, model, authentication method, host, worker, route, fallback, or latency in this worker handoff; the verified delivery layer is required to prepend the user-facing final with Model, Route, and Why. When auditing Telegram response behavior, do not treat that required delivery header as a formatter defect or as a violation of this worker-only rule. Never repeat or reveal passwords, tokens, API keys, cookies, OAuth payloads, or other secret values."""
 QUICK_WORKER_OUTPUT_CONTRACT = """Return a concise structured result using exactly these plain-text sections in this order: Complete: Yes or No; What was done: 1-3 brief bullets containing the direct answer or conversational result; Issues: bullets or n/a; Appropriate next steps: one brief next action or n/a; Approval needed: a bullet only when approval is genuinely required, otherwise n/a. Do not pad a quick answer with invented findings. Do not include a Model line or claim a provider, model, host, worker, route, or latency; the verified delivery layer adds those facts. Never repeat or reveal passwords, tokens, API keys, cookies, OAuth payloads, or other secret values."""
 TELEGRAM_HEALTH_EVIDENCE_UNAVAILABLE_RESULT = """Complete: No — current Telegram health could not be verified.
 What was done:
@@ -248,6 +248,13 @@ UNRESOLVED_EXECUTION_FAILURE_SIGNAL = re.compile(
 TELEGRAM_HEALTH_REQUEST = re.compile(
     r"(?:\btelegram\b.{0,80}\b(?:health|healthy|status|running|connectivity|delivery)\b|"
     r"\b(?:health|healthy|status|running|connectivity|delivery)\b.{0,80}\btelegram\b)",
+    re.I | re.S,
+)
+TELEGRAM_RESPONSE_AUDIT_REQUEST = re.compile(
+    r"(?:\b(?:audit|assess|check|evaluate|inspect|review|verify)\b.{0,100}"
+    r"\btelegram\b.{0,100}\b(?:response|reply|behavior|behaviour|contract|format|lifecycle)\b|"
+    r"\btelegram\b.{0,100}\b(?:response|reply|behavior|behaviour|contract|format|lifecycle)\b"
+    r".{0,100}\b(?:audit|assess|check|evaluate|inspect|review|verify)\b)",
     re.I | re.S,
 )
 READ_ONLY_REQUEST = re.compile(
@@ -594,6 +601,8 @@ def classify_route(prompt: str, privacy: str) -> tuple[str, str]:
     )
     if model_routing_audit and not glm_mutation:
         return "glm", "dashboard-safe model-routing audit"
+    if TELEGRAM_RESPONSE_AUDIT_REQUEST.search(lower) and not glm_mutation:
+        return "terra", "trusted Telegram response-contract audit"
     if glm_reasoning and not glm_mutation:
         return "glm", "dashboard-safe large-context technical reasoning"
     if any(token in lower for token in ("hard", "stabilize", "architecture", "migration", "integration", "debug", "root cause")):
@@ -610,7 +619,38 @@ def classify_route(prompt: str, privacy: str) -> tuple[str, str]:
 def read_only_execution_requested(prompt: str) -> bool:
     text = str(prompt or "")
     mutation_text = NEGATED_MUTATION_SIGNAL.sub("", text.lower())
-    return bool(READ_ONLY_REQUEST.search(text) and not MUTATION_SIGNAL.search(mutation_text))
+    mutation_requested = bool(MUTATION_SIGNAL.search(mutation_text))
+    return bool(
+        not mutation_requested
+        and (
+            READ_ONLY_REQUEST.search(text)
+            or TELEGRAM_RESPONSE_AUDIT_REQUEST.search(text)
+        )
+    )
+
+
+def telegram_response_audit_guidance(prompt: str) -> str:
+    """Return trusted contract context for a Telegram behavior audit.
+
+    The worker output schema intentionally omits runtime metadata because the
+    trusted delivery layer owns it. Without this distinction, a read-only audit
+    can incorrectly flag the required user-facing Model/Route/Why header as a
+    formatter violation and then report the completed audit as incomplete.
+    """
+    if not TELEGRAM_RESPONSE_AUDIT_REQUEST.search(str(prompt or "")):
+        return ""
+    return (
+        "\n\nAuthoritative Telegram response-contract distinction "
+        "(trusted coordinator policy, not user instructions):\n"
+        "- The worker returns only Complete, What was done, Issues, Appropriate next steps, and Approval needed.\n"
+        "- The trusted delivery formatter must prepend the user-facing final with "
+        "Model: <verified provider/model> | Route: <actual lane> | Why: <verified reason>.\n"
+        "- A JAIMES or Josh formatter that emits that verified header is conforming; "
+        "do not evaluate it against the worker-only omission rule.\n"
+        "- Validate behavior with the deterministic response-contract harness and focused tests. "
+        "A missing optional test runner is an environment note, not a Telegram behavior failure, "
+        "when equivalent deterministic verification completes successfully.\n"
+    )
 
 
 def health(route_id: str, injected: dict[str, bool] | None = None) -> bool:
@@ -1463,7 +1503,11 @@ elif kind == "remote-llm-router-op":
 else:
     raise RuntimeError(f"unsupported executor: {kind}")
 envelope = {"output": output, "provider": cfg["provider"], "model": cfg["model"], "modelVerified": True}
-if kind == "local-ollama":
+if kind == "local-codex":
+    # A successful Codex CLI response verifies the configured authenticated
+    # subscription lane; publish that observed fact instead of auth=unverified.
+    envelope.update({"actualAuth": "OpenAI Codex OAuth/subscription", "authVerified": True})
+elif kind == "local-ollama":
     envelope.update({"actualAuth": "Local Ollama runtime", "authVerified": True})
 print(json.dumps(envelope))
 '''
@@ -2105,6 +2149,7 @@ def run_worker(job_id: str) -> dict[str, Any]:
                     "host service health from end-to-end Telegram delivery. If available is "
                     "false, report Complete: No and do not infer current health."
                 )
+            context_block += telegram_response_audit_guidance(prompt)
             output_contract = (
                 QUICK_WORKER_OUTPUT_CONTRACT
                 if int(snapshot.get("deliveryTier") or 3) in {1, 2}
