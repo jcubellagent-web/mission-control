@@ -95,6 +95,18 @@ QUICK_QUESTION_RE = re.compile(
     r"^\s*(?:what|who|when|where|why|how|is|are|can|could|does|do|did|will|would)\b",
     re.I,
 )
+LIGHTWEIGHT_READINESS_RE = re.compile(
+    r"^(?:"
+    r"\s*(?:(?:testing|checking)(?:\s+(?:behavior|behaviour|response|replies?))?"
+    r"|(?:quick|simple)\s+(?:behavior\s+|behaviour\s+|response\s+)?(?:test|check)"
+    r"|(?:behavior|behaviour|response)\s+(?:test|check))\s*[,;:\-—]*\s*"
+    r"(?:are|is|can|could|do|does|will|would)\b.{0,180}"
+    r"\b(?:function(?:ing|al)?|work(?:ing)?|online|ready|responsive|respond(?:ing)?|repl(?:y|ying)|available)\b"
+    r"|\s*(?:are|is|can|could|do|does|will|would)\b.{0,180}"
+    r"\b(?:function(?:ing|al)?|work(?:ing)?|online|ready|responsive|respond(?:ing)?|repl(?:y|ying)|available)\b"
+    r")\s*[?.!]*\s*$",
+    re.I,
+)
 EXACT_REPLY_RE = re.compile(
     r"^\s*(?:canary(?:\s+[A-Za-z0-9_-]+)?\s*:\s*)?"
     r"(?:please\s+)?(?:reply|respond|answer)\s+exactly\s+"
@@ -188,6 +200,15 @@ def classify_delivery_tier(
     if CONVERSATION_RE.fullmatch(compact):
         return 1, "conversation"
     if EXACT_REPLY_RE.fullmatch(compact):
+        return 2, "quick-answer"
+    # A tightly bounded readiness/canary question is a direct-answer task even
+    # when it starts with "testing behavior" instead of an interrogative. Keep
+    # mutations and broad health audits on tier 3 by requiring the whole prompt
+    # to match this narrow response/readiness shape.
+    if (
+        LIGHTWEIGHT_READINESS_RE.fullmatch(compact)
+        and not COMPLEX_TASK_RE.search(compact)
+    ):
         return 2, "quick-answer"
     if COMPLEX_TASK_RE.search(compact):
         return 3, "multi-step"

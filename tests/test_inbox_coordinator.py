@@ -462,9 +462,47 @@ class InboxCoordinatorTests(unittest.TestCase):
         substantial = coordinator.parse_model_sections(output, delivery_tier=3)
         self.assertIs(quick["complete"], True)
         self.assertIs(quick["summarySufficient"], True)
-        self.assertEqual(quick["done"], ["Acknowledged your message."])
+        self.assertEqual(quick["done"], ["greeting received.", "Acknowledged your message."])
         self.assertIs(substantial["complete"], False)
         self.assertIs(substantial["summarySufficient"], False)
+
+    def test_quick_readiness_answer_preserves_direct_result_and_drops_formatter_metadata(self):
+        coordinator = load_module()
+        output = (
+            "Complete: Yes — the response system is functioning for this test.\n"
+            "What was done:\n"
+            "- Followed the requested section order and plain-text format.\n"
+            "- Omitted the prohibited Model line.\n"
+            "- Kept the response concise and structured.\n"
+            "- Included findings, issues, next step, and approval status.\n"
+            "Issues: n/a\n"
+            "Appropriate next steps: Send a specific task to test tool use.\n"
+            "Approval needed: n/a"
+        )
+        quick = coordinator.parse_model_sections(output, delivery_tier=2)
+        substantial = coordinator.parse_model_sections(output, delivery_tier=3)
+        self.assertIs(quick["complete"], True)
+        self.assertIs(quick["summarySufficient"], True)
+        self.assertEqual(
+            quick["done"],
+            ["the response system is functioning for this test."],
+        )
+        self.assertIs(substantial["complete"], False)
+
+    def test_quick_answer_with_only_formatter_metadata_still_fails_closed(self):
+        coordinator = load_module()
+        sections = coordinator.parse_model_sections(
+            "Complete: Yes\n"
+            "What was done:\n"
+            "- Followed the requested format.\n"
+            "- Omitted the prohibited Model line.\n"
+            "Issues: n/a\n"
+            "Appropriate next steps: n/a\n"
+            "Approval needed: n/a",
+            delivery_tier=2,
+        )
+        self.assertIs(sections["complete"], False)
+        self.assertIs(sections["summarySufficient"], False)
 
     def test_agent_rh_findings_pass_semantic_gate(self):
         coordinator = load_module()

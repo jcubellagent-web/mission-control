@@ -201,6 +201,41 @@ n/a"""
     assert sections["next"] == ["No action needed."]
 
 
+def test_quick_readiness_final_accepts_direct_result_without_weakening_tier_three() -> None:
+    source = """Complete: Yes — the response system is functioning for this test.
+What was done:
+- Followed the requested section order and plain-text format.
+- Omitted the prohibited Model line.
+- Kept the response concise and structured.
+Issues:
+n/a
+Appropriate next steps:
+n/a
+Approval needed:
+n/a"""
+    quick_complete, quick_sections = watcher.parse_final_sections(source, delivery_tier=2)
+    strict_complete, _ = watcher.parse_final_sections(source, delivery_tier=3)
+    assert quick_complete is True
+    assert quick_sections["done"] == ["the response system is functioning for this test."]
+    assert strict_complete is False
+    assert watcher.terminal_outcome_for_response(source, delivery_tier=2) == "succeeded"
+    assert watcher.terminal_outcome_for_response(source, delivery_tier=3) == "partial"
+
+
+def test_quick_final_with_only_formatter_metadata_fails_closed() -> None:
+    complete, _ = watcher.parse_final_sections(
+        """Complete: Yes
+What was done:
+- Followed the requested format.
+- Omitted the prohibited Model line.
+Issues: n/a
+Appropriate next steps: n/a
+Approval needed: n/a""",
+        delivery_tier=2,
+    )
+    assert complete is False
+
+
 def test_structured_final_preserves_explicit_verified_why() -> None:
     rendered = watcher.structured_final_text(
         """Complete: Yes

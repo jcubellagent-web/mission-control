@@ -132,6 +132,13 @@ STATUS_ONLY_FINAL_PATTERNS = tuple(
         r"^(?:acknowledged|routed)(?: the)? request(?: .+)?[.!]?$",
     )
 )
+WORKER_META_COMPLIANCE_RE = re.compile(
+    r"^(?:followed|used|kept|omitted|included|formatted|structured)\b.{0,180}\b"
+    r"(?:requested\s+(?:section|format)|section\s+order|plain[- ]text\s+format|"
+    r"prohibited\s+model\s+line|response\s+(?:concise|structured)|"
+    r"final\s+summary\s+template|approval\s+status)\b",
+    re.I,
+)
 CONCRETE_RESULT_SIGNAL = re.compile(
     r"\b(?:found|identified|confirmed|determined|discovered|revealed?|show(?:s|ed)?|"
     r"describ(?:e|es|ed)|indicat(?:e|es|ed)|support(?:s|ed)?|does(?: not)?|cannot|can't|"
@@ -799,10 +806,20 @@ def is_status_only_final_item(value: str) -> bool:
     return not text or any(pattern.fullmatch(text) for pattern in STATUS_ONLY_FINAL_PATTERNS)
 
 
+def is_worker_meta_compliance_item(value: str) -> bool:
+    """Reject formatter obedience as a user-facing result."""
+    return bool(WORKER_META_COMPLIANCE_RE.search(clean_final_item(value)))
+
+
 def is_substantive_final_item(value: str) -> bool:
     text = clean_final_item(value)
     words = re.findall(r"[A-Za-z0-9][A-Za-z0-9'._/-]*", text)
-    return len(text) >= 24 and len(words) >= 4 and not is_status_only_final_item(text)
+    return (
+        len(text) >= 24
+        and len(words) >= 4
+        and not is_status_only_final_item(text)
+        and not is_worker_meta_compliance_item(text)
+    )
 
 
 def is_concrete_result_item(value: str) -> bool:
@@ -975,6 +992,7 @@ def parse_model_sections(output: str, delivery_tier: int = 3) -> dict[str, Any]:
     sections: dict[str, list[str]] = {key: [] for key in ("done", "issues", "next", "approval")}
     complete = False
     complete_declared = False
+    quick_result = int(delivery_tier or 3) in {1, 2}
     current = ""
     loose: list[str] = []
     for raw_line in cleaned.splitlines():
@@ -985,9 +1003,18 @@ def parse_model_sections(output: str, delivery_tier: int = 3) -> dict[str, Any]:
         if lower.startswith("model:"):
             continue
         if lower.startswith("complete:"):
-            match = re.match(r"^complete:\s*(yes|no)\b", lower)
-            complete = bool(match and match.group(1) == "yes")
+            normalized_line = clean_final_item(line)
+            match = re.match(
+                r"^complete:\s*(yes|no)\b(?:\s*[-—:,]?\s*(.*))?$",
+                normalized_line,
+                flags=re.I,
+            )
+            complete = bool(match and match.group(1).lower() == "yes")
             complete_declared = match is not None
+            if quick_result and match and match.group(2):
+                detail = clean_final_item(match.group(2))
+                if detail:
+                    sections["done" if complete else "issues"].append(detail)
             current = ""
             continue
         matched = False
@@ -1012,14 +1039,17 @@ def parse_model_sections(output: str, delivery_tier: int = 3) -> dict[str, Any]:
         else:
             loose.append(item)
 
-    source_done = unique_final_items(sections["done"] or loose, limit=6)
+    source_done = [
+        item
+        for item in unique_final_items(sections["done"] or loose, limit=8)
+        if not is_worker_meta_compliance_item(item)
+    ][:6]
     source_issues = unique_final_items(sections["issues"])
     source_next = unique_final_items(sections["next"])
     source_approval = unique_final_items(sections["approval"])
     substantive_done = [item for item in source_done if is_substantive_final_item(item)]
     concrete_done = [item for item in source_done if is_concrete_result_item(item)]
     quality_issues: list[str] = []
-    quick_result = int(delivery_tier or 3) in {1, 2}
 
     if not complete_declared:
         quality_issues.append("Worker did not return a verifiable completion status.")
@@ -1027,6 +1057,8 @@ def parse_model_sections(output: str, delivery_tier: int = 3) -> dict[str, Any]:
         if quick_result:
             if not 1 <= len(source_done) <= 3:
                 quality_issues.append("A quick-answer completion requires one to three concise result bullets.")
+            elif any(is_status_only_final_item(item) for item in source_done):
+                quality_issues.append("A quick-answer completion must contain the direct conversational result.")
         else:
             if not 3 <= len(source_done) <= 5:
                 quality_issues.append("A completion claim requires three to five unique result bullets.")

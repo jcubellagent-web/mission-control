@@ -182,6 +182,19 @@ class TelegramChannelRegistryTests(unittest.TestCase):
         )
         self.assertEqual(self.module.topics_for_owner("unknown", "group-alpha"), set())
 
+    def test_every_canonical_control_center_topic_has_an_audited_owner_path(self):
+        canonical_path = MODULE_PATH.parents[1] / "config" / "telegram-intake-lanes.json"
+        payload = json.loads(canonical_path.read_text(encoding="utf-8"))
+        topics = payload["groups"]["-1003589561528"]["topics"]
+        self.assertEqual(
+            {topic_id for topic_id, row in topics.items() if row["owner"] == "josh2"},
+            {"1", "18", "21", "22"},
+        )
+        self.assertEqual(
+            {topic_id for topic_id, row in topics.items() if row["owner"] == "jaimes"},
+            {"17", "19", "20", "56"},
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

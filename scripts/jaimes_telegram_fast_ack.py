@@ -1572,6 +1572,26 @@ def substantive_final_item(value: str) -> bool:
         "response formatting was recovered",
         "live card ordering was preserved",
         "checked the request and identified the unresolved issue",
+        "followed the requested section order",
+        "followed the requested format",
+        "omitted the prohibited model line",
+        "kept the response concise and structured",
+        "included findings, issues, next step, and approval status",
+    ))
+
+
+def quick_final_item(value: str) -> bool:
+    """Allow a direct short reply, but never formatter/process bookkeeping."""
+    cleaned = clean_final_item(value)
+    if not cleaned or FINAL_STATUS_ONLY_RE.fullmatch(cleaned):
+        return False
+    lowered = cleaned.lower()
+    return not any(marker in lowered for marker in (
+        "followed the requested section order",
+        "followed the requested format",
+        "omitted the prohibited model line",
+        "kept the response concise and structured",
+        "included findings, issues, next step, and approval status",
     ))
 
 
@@ -1597,7 +1617,10 @@ def truthful_incomplete_sections(
     return False, sections
 
 
-def parse_final_sections(text: str) -> tuple[bool, dict[str, list[str]]]:
+def parse_final_sections(
+    text: str,
+    delivery_tier: int = 3,
+) -> tuple[bool, dict[str, list[str]]]:
     sections: dict[str, list[str]] = {"done": [], "issues": [], "next": [], "approval": []}
     current = "done"
     explicit_complete: bool | None = None
@@ -1612,6 +1635,17 @@ def parse_final_sections(text: str) -> tuple[bool, dict[str, list[str]]]:
                 sections["done" if explicit_complete else "issues"].extend(
                     split_final_items(complete_match.group(2))
                 )
+            continue
+        section_match = re.match(
+            r"(?i)^(what was done|issues?|appropriate next steps?|approval needed)\s*:\s*(.*)$",
+            line,
+        )
+        if section_match:
+            label = re.sub(r"[^a-z; ]", "", section_match.group(1).lower()).strip()
+            current = FINAL_SECTION_ALIASES.get(label, current)
+            remainder = clean_final_item(section_match.group(2))
+            if remainder and remainder.lower() not in {"n/a", "na", "none", "not applicable"}:
+                sections[current].extend(split_final_items(remainder))
             continue
         normalized = re.sub(r"[^a-z; ]", "", line.lower()).strip()
         if normalized in FINAL_SECTION_ALIASES:
@@ -1631,6 +1665,8 @@ def parse_final_sections(text: str) -> tuple[bool, dict[str, list[str]]]:
         ))
     source_text = html.unescape(str(text or ""))
     substantive = [item for item in sections["done"] if substantive_final_item(item)]
+    quick_items = [item for item in sections["done"] if quick_final_item(item)]
+    quick_result = int(delivery_tier or 3) in {1, 2}
     result_bearing = [
         item for item in substantive
         if FINAL_RESULT_SIGNAL_RE.search(item) or FINAL_NUMERIC_RESULT_RE.search(item)
@@ -1662,14 +1698,18 @@ def parse_final_sections(text: str) -> tuple[bool, dict[str, list[str]]]:
     recommendation_or_risk = bool(recommendation_items or risk_items or sections["issues"])
     quality_problems: list[str] = []
     if explicit_complete:
-        if len(substantive) < 3 and not benchmark_success:
-            quality_problems.append("fewer than three substantive source-provided findings")
-        if len(result_bearing) < 2 and not benchmark_success:
-            quality_problems.append("fewer than two concrete findings or outcomes")
-        if not sections["next"]:
-            quality_problems.append("no supported recommendation or next step")
-        if no_action and recommendation_or_risk:
-            quality_problems.append("No action needed conflicts with the reported recommendation or risk")
+        if quick_result:
+            if not 1 <= len(quick_items) <= 3:
+                quality_problems.append("a quick answer requires one to three direct result statements")
+        else:
+            if len(substantive) < 3 and not benchmark_success:
+                quality_problems.append("fewer than three substantive source-provided findings")
+            if len(result_bearing) < 2 and not benchmark_success:
+                quality_problems.append("fewer than two concrete findings or outcomes")
+            if not sections["next"]:
+                quality_problems.append("no supported recommendation or next step")
+            if no_action and recommendation_or_risk:
+                quality_problems.append("No action needed conflicts with the reported recommendation or risk")
     if quality_problems:
         return truthful_incomplete_sections(
             sections,
@@ -1682,7 +1722,7 @@ def parse_final_sections(text: str) -> tuple[bool, dict[str, list[str]]]:
             sections,
             "The source response did not establish a complete, reliable outcome.",
         )
-    sections["done"] = substantive[:5]
+    sections["done"] = quick_items[:3] if quick_result else substantive[:5]
     sections["issues"] = sections["issues"][:5]
     sections["next"] = sections["next"][:5]
     sections["approval"] = sections["approval"][:5]
@@ -1700,9 +1740,10 @@ def structured_final_text(
     run_id: str = "",
     task_started_at: str = "",
     response_recorded_at: str = "",
+    delivery_tier: int = 3,
 ) -> str:
     """Normalize a native Hermes final to the canonical fixed-width contract."""
-    complete, sections = parse_final_sections(text)
+    complete, sections = parse_final_sections(text, delivery_tier=delivery_tier)
     if complete and (
         not clean_final_item(model)
         or not clean_final_item(route)
@@ -3222,8 +3263,8 @@ def run_gateway_card_command(
     return result
 
 
-def terminal_outcome_for_response(response_text: str) -> str:
-    complete, _ = parse_final_sections(response_text)
+def terminal_outcome_for_response(response_text: str, delivery_tier: int = 3) -> str:
+    complete, _ = parse_final_sections(response_text, delivery_tier=delivery_tier)
     if complete:
         return "succeeded"
     lowered = clean_prompt(response_text).lower()
@@ -3530,6 +3571,7 @@ def prepare_terminal_response(
     _, run_id, card = max(candidates, key=lambda item: item[0])
     context = gateway_context_for_card(card)
     receipt = context.get("receipt") or {}
+    delivery_tier = int(receipt.get("deliveryTier") or card.get("delivery_tier") or 3)
     if int(card.get("lifecycle_version") or 0) >= 3 and not receipt:
         raise LifecycleError("terminal-lifecycle-receipt-unavailable")
     if receipt.get("writerAuthorityAtStart") and not receipt.get("writerEnabled"):
@@ -3551,7 +3593,7 @@ def prepare_terminal_response(
         visibility_path, visibility_record = queue_terminal_visibility(
             run_id,
             card,
-            terminal_outcome_for_response(response_text),
+            terminal_outcome_for_response(response_text, delivery_tier=delivery_tier),
             {},
         )
         mark_terminal_visibility_blocked(
@@ -3595,12 +3637,13 @@ def prepare_terminal_response(
         run_id=str(card.get("ledger_run_id") or ""),
         task_started_at=str(card.get("task_started_at") or card.get("started_at") or ""),
         response_recorded_at=response_recorded_at or utc_now(),
+        delivery_tier=delivery_tier,
     )
     if writer_delivery and not final_contract_is_canonical(formatted):
         raise LifecycleError("canonical-final-render-failed")
     terminal_text = formatted if writer_delivery else response_text
     response_digest = hashlib.sha256(terminal_text.encode("utf-8")).hexdigest()
-    outcome = terminal_outcome_for_response(response_text)
+    outcome = terminal_outcome_for_response(response_text, delivery_tier=delivery_tier)
     visibility_path, visibility_record = queue_terminal_visibility(
         run_id,
         card,
@@ -3651,7 +3694,7 @@ def prepare_terminal_response(
         receipt = refresh_gateway_receipt(context)
         lifecycle.commit_terminal(
             str(receipt["workId"]),
-            terminal_outcome_for_response(response_text),
+            terminal_outcome_for_response(response_text, delivery_tier=delivery_tier),
             expected_sequence=int(receipt["sequence"]),
             fencing_epoch=int(receipt["fencingEpoch"]),
             private_payload={
@@ -3749,7 +3792,10 @@ def prepare_terminal_response(
             "terminal_final_effect_key": str(effect["idempotencyKey"]),
             "terminal_card_edit_effect_key": str(card_edit_effect.get("idempotencyKey") or ""),
             "terminal_delivery_state": "sending",
-            "terminal_outcome": terminal_outcome_for_response(response_text),
+            "terminal_outcome": terminal_outcome_for_response(
+                response_text,
+                delivery_tier=delivery_tier,
+            ),
             "terminal_formatted_html": formatted,
         })
         save_json(STATE_PATH, state)
