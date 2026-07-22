@@ -273,6 +273,103 @@ def test_poll_preserves_pending_interpretation_flag(monkeypatch):
     assert card["telegram_thread_id"] == "1"
 
 
+def test_session_rollover_requires_a_real_prior_session():
+    target = "agent:main:telegram:group:-1003589561528:topic:1"
+    assert watcher.session_rollovers({}, {target: "session-new"}) == []
+    assert watcher.session_rollovers(
+        {target: "session-old"},
+        {target: "session-new"},
+    ) == [(target, "session-old", "session-new")]
+
+
+def test_session_ready_is_delivered_once_and_preserves_background_cards(monkeypatch):
+    calls = []
+    state = {
+        "latest_pending_ack": {"message_id": "99"},
+        "active_cards": {
+            "background": {
+                "session_id": "session-old",
+                "coordinator_owned": True,
+                "status": "active",
+            }
+        },
+    }
+    meta = {
+        "sessionId": "session-new",
+        "telegram_chat_id": watcher.CONTROL_CENTER_CHAT_ID,
+        "telegram_thread_id": "1",
+        "telegram_session_key": "agent:main:telegram:group:-1003589561528:topic:1",
+    }
+    monkeypatch.setattr(
+        watcher,
+        "api_post",
+        lambda method, payload, timeout=10: calls.append((method, payload)) or {
+            "ok": True,
+            "result": {"message_id": 501},
+        },
+    )
+    monkeypatch.setattr(watcher, "publish_josh", lambda *args, **kwargs: True)
+
+    first = watcher.announce_session_ready(
+        state,
+        meta,
+        previous_session_id="session-old",
+    )
+    second = watcher.announce_session_ready(
+        state,
+        meta,
+        previous_session_id="session-old",
+    )
+
+    assert first["ok"] is True
+    assert first["message_id"] == "501"
+    assert second["status"] == "already-delivered"
+    assert len(calls) == 1
+    assert "latest_pending_ack" not in state
+    assert state["active_cards"]["background"]["status"] == "active"
+
+
+def test_poll_detects_new_session_and_keeps_coordinator_job_tracking(monkeypatch):
+    target = "agent:main:telegram:group:-1003589561528:topic:1"
+    captured = {}
+    prior = {
+        "owned_session_map": {target: "session-old"},
+        "active_cards": {
+            "background": {
+                "session_id": "session-old",
+                "coordinator_owned": True,
+                "status": "active",
+            }
+        },
+        "acked_prompt_events": [],
+        "last_checked_at": watcher.utc_now(),
+    }
+    monkeypatch.setattr(watcher, "load_fast_ack_state_snapshot", lambda: (copy.deepcopy(prior), copy.deepcopy(prior)))
+    monkeypatch.setattr(watcher, "session_metadatas", lambda: [{
+        "sessionId": "session-new",
+        "model": watcher.DEFAULT_MODEL,
+        "telegram_chat_id": watcher.CONTROL_CENTER_CHAT_ID,
+        "telegram_thread_id": "1",
+        "telegram_session_key": target,
+    }])
+    monkeypatch.setattr(watcher, "recent_prompt_events", lambda *args, **kwargs: [])
+
+    def capture_state(state, *args, **kwargs):
+        captured.update(copy.deepcopy(state))
+        return []
+
+    monkeypatch.setattr(watcher, "update_active_cards", capture_state)
+    monkeypatch.setattr(watcher, "reconcile_orphan_work_cards", lambda *args, **kwargs: [])
+    monkeypatch.setattr(watcher, "queue_stale_final_gate_recovery", lambda *args, **kwargs: [])
+    monkeypatch.setattr(watcher, "recover_terminal_final_outbox", lambda *args, **kwargs: [])
+    monkeypatch.setattr(watcher, "reconcile_stale_terminal_closes", lambda *args, **kwargs: [])
+
+    result = watcher.poll_once(dry_run=True)
+
+    assert result["session_rollovers"][0]["status"] == "dry-run"
+    assert captured["active_cards"]["background"]["status"] == "active"
+
+
 def test_stale_poll_merge_cannot_reopen_terminal_card(monkeypatch, tmp_path):
     monkeypatch.setattr(watcher, "STATE_PATH", tmp_path / "fast-ack.json")
     base = {"active_cards": {"run-1": {"key": "card-1", "status": "active", "last_card_update_at": "old"}}}

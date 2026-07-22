@@ -63,6 +63,34 @@ def test_launchd_contract_accepts_direct_helper_or_josh_owned_wrapper(monkeypatc
     ) is False
 
 
+def test_fast_ack_health_requires_fresh_watcher_heartbeat() -> None:
+    now = dt.datetime(2026, 7, 22, 1, 30, tzinfo=dt.timezone.utc)
+    healthy, detail, age = probe.fast_ack_runtime_health(
+        True,
+        {"status": "ok", "last_checked_at": "2026-07-22T01:29:55Z"},
+        now=now,
+    )
+    assert healthy is True
+    assert detail == "launchd running; watcher heartbeat fresh"
+    assert age == 5.0
+
+    stale, stale_detail, stale_age = probe.fast_ack_runtime_health(
+        True,
+        {"status": "ok", "last_checked_at": "2026-07-22T01:28:00Z"},
+        now=now,
+    )
+    assert stale is False
+    assert stale_detail == "watcher heartbeat stale"
+    assert stale_age == 120.0
+
+
+def test_fast_ack_health_rejects_launchd_only_presence() -> None:
+    healthy, detail, age = probe.fast_ack_runtime_health(True, {})
+    assert healthy is False
+    assert detail == "watcher heartbeat missing"
+    assert age is None
+
+
 def test_collect_rejects_disabled_plugin_even_when_helper_paths_match(monkeypatch, tmp_path) -> None:
     helper = tmp_path / "scripts" / "josh_telegram_fast_ack.py"
     helper.parent.mkdir(parents=True)

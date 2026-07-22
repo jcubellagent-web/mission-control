@@ -22,10 +22,12 @@ JOSH_SEND_REPLY_SCRIPT = JOSH_WORK_CARD_SCRIPT.with_name("send_josh_reply.py")
 CANONICAL_WORK_CARD_SCRIPT = ROOT / "scripts" / "josh_work_card.py"
 CANONICAL_FAST_ACK_SCRIPT = ROOT / "scripts" / "josh_telegram_fast_ack.py"
 CANONICAL_FAST_ACK_LAUNCHER = ROOT / "scripts" / "jaimes_telegram_fast_ack_launcher.py"
+FAST_ACK_STATE_PATH = Path.home() / ".openclaw" / "telegram" / "fast_ack_state.json"
 INBOX_PLUGIN_SOURCE = ROOT / "plugins" / "inbox-coordinator" / "index.js"
 OPENCLAW_CONFIG = Path.home() / ".openclaw" / "openclaw.json"
 RECOVERY_COOLDOWN = dt.timedelta(minutes=15)
 CLEAN_PROBES_TO_CLEAR = 2
+FAST_ACK_MAX_STALE_SECONDS = 30
 SERVICE_LABELS = {
     "controlTower": "com.josh20.mission-control-react-v2",
     "brainFeed": "com.josh20.brain-feed-server",
@@ -124,6 +126,28 @@ def launchd_snapshot(label: str) -> tuple[bool, str]:
     return running, text
 
 
+def fast_ack_runtime_health(
+    launchd_ok: bool,
+    state: dict[str, Any],
+    *,
+    now: dt.datetime | None = None,
+) -> tuple[bool, str, float | None]:
+    """Require a fresh watcher heartbeat; a launchd crash loop is not healthy."""
+    if not launchd_ok:
+        return False, "launchd not running", None
+    checked_at = parse_ts(state.get("last_checked_at")) if isinstance(state, dict) else None
+    if checked_at is None:
+        return False, "watcher heartbeat missing", None
+    current = now or utc_now()
+    age_seconds = max(0.0, (current - checked_at.astimezone(dt.timezone.utc)).total_seconds())
+    status = str(state.get("status") or "").strip().lower()
+    if age_seconds > FAST_ACK_MAX_STALE_SECONDS:
+        return False, "watcher heartbeat stale", round(age_seconds, 1)
+    if status not in {"ok", "no-direct-session"}:
+        return False, f"watcher status {status or 'unknown'}", round(age_seconds, 1)
+    return True, "launchd running; watcher heartbeat fresh", round(age_seconds, 1)
+
+
 def configured_inbox_helper(config: dict[str, Any]) -> str:
     plugins = config.get("plugins") if isinstance(config.get("plugins"), dict) else {}
     entries = plugins.get("entries") if isinstance(plugins.get("entries"), dict) else {}
@@ -159,7 +183,11 @@ def collect(base_url: str) -> dict[str, Any]:
     live = _ if isinstance(_, dict) else {}
     brain_ok, brain_ms, brain_detail = tcp_probe(8765)
     gateway_ok, gateway_ms, gateway_detail = tcp_probe(18790)
-    fast_ack_ok, fast_ack_launch = launchd_snapshot(SERVICE_LABELS["telegramFastAck"])
+    fast_ack_launchd_ok, fast_ack_launch = launchd_snapshot(SERVICE_LABELS["telegramFastAck"])
+    fast_ack_ok, fast_ack_detail, fast_ack_age = fast_ack_runtime_health(
+        fast_ack_launchd_ok,
+        read_json(FAST_ACK_STATE_PATH, {}),
+    )
     telegram_helper_missing = [
         path.name
         for path in (JOSH_WORK_CARD_SCRIPT, JOSH_SEND_REPLY_SCRIPT, CANONICAL_WORK_CARD_SCRIPT)
@@ -191,7 +219,11 @@ def collect(base_url: str) -> dict[str, Any]:
         "controlTower": {"ok": root_ok, "latencyMs": root_ms, "detail": root_detail},
         "brainFeed": {"ok": brain_ok, "latencyMs": brain_ms, "detail": brain_detail},
         "gateway": {"ok": gateway_ok, "latencyMs": gateway_ms, "detail": gateway_detail},
-        "telegramFastAck": {"ok": fast_ack_ok, "detail": "launchd running" if fast_ack_ok else "launchd not running"},
+        "telegramFastAck": {
+            "ok": fast_ack_ok,
+            "heartbeatAgeSeconds": fast_ack_age,
+            "detail": fast_ack_detail,
+        },
         "telegramWorkCardHelper": {
             "ok": telegram_helper_ok,
             "detail": (

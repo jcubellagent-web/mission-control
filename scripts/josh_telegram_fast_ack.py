@@ -56,6 +56,7 @@ TERMINAL_VISIBILITY_MAX_ATTEMPTS = 12
 TERMINAL_VISIBILITY_MAX_AGE_SECONDS = 90
 TERMINAL_CARD_STATUSES = {"done", "failed", "paused"}
 MAX_TERMINAL_CARD_RECORDS = 100
+SESSION_READY_RECEIPT_LIMIT = 20
 PROGRESS_EVENT_SPECS = {
     "worker_started": {
         "summary": "Asynchronous worker started",
@@ -1075,6 +1076,8 @@ POLL_STATE_FIELDS = {
     "last_sent_at",
     "last_result",
     "latest_pending_ack",
+    "owned_session_map",
+    "session_ready_receipts",
 }
 
 
@@ -1524,6 +1527,109 @@ def session_metadata() -> dict[str, Any]:
     """Compatibility accessor for callers that need only the freshest lane."""
     candidates = session_metadatas()
     return candidates[0] if candidates else {}
+
+
+def session_target_key(meta: dict[str, Any]) -> str:
+    """Return the stable Telegram lane key without exposing message content."""
+    explicit = str(meta.get("telegram_session_key") or "").strip()
+    if explicit:
+        return explicit
+    chat_id = str(meta.get("telegram_chat_id") or "").strip()
+    thread_id = str(meta.get("telegram_thread_id") or "").strip()
+    return f"telegram:{chat_id}:{thread_id or 'direct'}"
+
+
+def owned_session_map(metas: list[dict[str, Any]]) -> dict[str, str]:
+    return {
+        session_target_key(meta): str(meta.get("sessionId") or "")
+        for meta in metas
+        if str(meta.get("sessionId") or "")
+    }
+
+
+def session_rollovers(
+    previous: dict[str, Any],
+    current: dict[str, str],
+) -> list[tuple[str, str, str]]:
+    """Return only real session-ID transitions, never first-observation startup."""
+    if not isinstance(previous, dict) or not previous:
+        return []
+    return [
+        (target, str(previous.get(target) or ""), session_id)
+        for target, session_id in current.items()
+        if str(previous.get(target) or "")
+        and str(previous.get(target) or "") != session_id
+    ]
+
+
+def announce_session_ready(
+    state: dict[str, Any],
+    meta: dict[str, Any],
+    *,
+    previous_session_id: str = "",
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    """Acknowledge one OpenCLAW session rollover without stopping background jobs."""
+    target = session_target_key(meta)
+    session_id = str(meta.get("sessionId") or "")
+    receipts = state.setdefault("session_ready_receipts", {})
+    if not isinstance(receipts, dict):
+        receipts = {}
+        state["session_ready_receipts"] = receipts
+    existing = receipts.get(target) if isinstance(receipts.get(target), dict) else {}
+    if session_id and existing.get("session_id") == session_id and existing.get("delivered"):
+        return {"ok": True, "status": "already-delivered", "session_id": session_id}
+
+    # A previous session's pending acknowledgement must never become the next
+    # request's live-card pointer. Coordinator-owned background jobs remain in
+    # active_cards so their verified terminal delivery can still finish.
+    state.pop("latest_pending_ack", None)
+    ready_at = utc_now()
+    result: dict[str, Any] = {
+        "ok": True,
+        "status": "dry-run" if dry_run else "session-ready",
+        "session_id": session_id,
+        "previous_session_id": previous_session_id,
+        "delivered": bool(dry_run),
+    }
+    if not dry_run:
+        payload = apply_telegram_target({
+            "chat_id": target_chat_id(meta),
+            "text": "✅ <b>New session ready</b>\nSend your next request here.",
+            "parse_mode": "HTML",
+            "disable_web_page_preview": True,
+        }, meta)
+        response = api_post("sendMessage", payload, timeout=10)
+        telegram_result = response.get("result") if isinstance(response, dict) else None
+        message_id = positive_telegram_message_id(
+            telegram_result.get("message_id") if isinstance(telegram_result, dict) else ""
+        )
+        delivered = bool(response.get("ok") and message_id) if isinstance(response, dict) else False
+        result.update({"ok": delivered, "delivered": delivered, "message_id": message_id})
+        if delivered:
+            publish_josh(
+                "Josh 2.0 Telegram session ready",
+                "ready",
+                "A new Telegram session is ready; stale foreground card tracking was cleared and background jobs were preserved.",
+                phase="ready",
+                route_verified=True,
+            )
+
+    receipts[target] = {
+        "session_id": session_id,
+        "previous_session_id": previous_session_id,
+        "delivered": bool(result.get("delivered")),
+        "message_id": str(result.get("message_id") or ""),
+        "updated_at": ready_at,
+    }
+    if len(receipts) > SESSION_READY_RECEIPT_LIMIT:
+        oldest = sorted(
+            receipts,
+            key=lambda key: str((receipts.get(key) or {}).get("updated_at") or ""),
+        )[:-SESSION_READY_RECEIPT_LIMIT]
+        for key in oldest:
+            receipts.pop(key, None)
+    return result
 
 
 def session_paths_for(session_id: str, meta: dict[str, Any] | None = None) -> list[Path]:
@@ -5845,8 +5951,29 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
 
     sent: list[dict[str, Any]] = []
     updates: list[dict[str, Any]] = []
+    rollover_results: list[dict[str, Any]] = []
     session_ids: list[str] = []
     state.setdefault("active_cards", {})
+    current_session_map = owned_session_map(metas)
+    previous_session_map = state.get("owned_session_map")
+    if not isinstance(previous_session_map, dict):
+        previous_session_map = {}
+    metas_by_target = {session_target_key(meta): meta for meta in metas}
+    for target, previous_session_id, _session_id in session_rollovers(
+        previous_session_map,
+        current_session_map,
+    ):
+        meta = metas_by_target.get(target)
+        if not isinstance(meta, dict):
+            continue
+        rollover_results.append(
+            announce_session_ready(
+                state,
+                meta,
+                previous_session_id=previous_session_id,
+                dry_run=dry_run,
+            )
+        )
     first_bootstrap = not acked and not state.get("last_checked_at")
     for meta in metas:
         session_id = str(meta.get("sessionId") or "")
@@ -5922,7 +6049,7 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
     state["acked_prompt_events"] = sorted(acked)[-200:]
     state["last_checked_at"] = utc_now()
     state["direct_session_id"] = session_ids[0] if session_ids else ""
-    state["owned_session_ids"] = session_ids
+    state["owned_session_map"] = current_session_map
     state["model"] = str(metas[0].get("model") or DEFAULT_MODEL)
     state["status"] = "ok"
     state.pop("last_error", None)
@@ -5953,15 +6080,47 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
         "session_ids": session_ids,
         "sent": sent,
         "updates": updates,
+        "session_rollovers": rollover_results,
         "pruned_terminal_cards": pruned_terminal_cards,
         "dry_run": dry_run,
     }
+
+
+def force_current_session_ready(dry_run: bool = False) -> dict[str, Any]:
+    """Recover one already-rotated session whose original /new had no receipt."""
+    state, base_state = load_fast_ack_state_snapshot()
+    metas = session_metadatas()
+    meta = next(
+        (
+            row
+            for row in metas
+            if str(row.get("telegram_chat_id") or "") == CONTROL_CENTER_CHAT_ID
+            and str(row.get("telegram_thread_id") or "") == "1"
+        ),
+        metas[0] if metas else None,
+    )
+    if not isinstance(meta, dict):
+        return {"ok": False, "status": "no-telegram-session"}
+    result = announce_session_ready(
+        state,
+        meta,
+        previous_session_id=str(state.get("direct_session_id") or ""),
+        dry_run=dry_run,
+    )
+    state["last_checked_at"] = utc_now()
+    state["direct_session_id"] = str(meta.get("sessionId") or "")
+    state["owned_session_map"] = owned_session_map(metas)
+    state["status"] = "ok" if result.get("ok") else "session-ready-delivery-failed"
+    if not dry_run:
+        merge_poll_state(state, base_state)
+    return result
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--once", action="store_true", help="Run one poll and exit.")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--session-ready", action="store_true", help="Confirm the current Telegram session once.")
     parser.add_argument("--interval", type=float, default=1.5)
     parser.add_argument("--claim-inbox", action="store_true", help="Claim one Inbox event from stdin and queue its worker.")
     parser.add_argument("--progress-event-json-stdin", action="store_true", help=argparse.SUPPRESS)
@@ -5978,6 +6137,11 @@ def main() -> int:
     parser.add_argument("--cancel-path", default="")
     parser.add_argument("--surface-deadline-ms", type=int, default=0)
     args = parser.parse_args()
+
+    if args.session_ready:
+        result = force_current_session_ready(dry_run=args.dry_run)
+        print(json.dumps(result, indent=2))
+        return 0 if result.get("ok") else 5
 
     if args.progress_event_json_stdin:
         result = progress_event_from_stdin()
