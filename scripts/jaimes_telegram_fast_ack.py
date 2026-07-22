@@ -1414,7 +1414,9 @@ FINAL_RESULT_SIGNAL_RE = re.compile(
     r"recorded|delivered|returned|produced|passed|failed|"
     r"cannot|can't|could not|does not|"
     r"unsupported|risk|recommend(?:ed|ation)?|should|avoid|blocked|requires?|"
-    r"increased|decreased|matched|differs?|supports?)\b"
+    r"increased|decreased|matched|differs?|supports?|select(?:s|ed)?|"
+    r"reserv(?:e|es|ed)|occur(?:s|red)?|rout(?:e|es|ed|ing)|"
+    r"authenticat(?:e|es|ed|ion)|fallback|quota|allowance)\b"
 )
 FINAL_NUMERIC_RESULT_RE = re.compile(
     r"(?i)(?:\b\d+(?:\.\d+)?\s*/\s*\d+(?:\.\d+)?\b|"
@@ -2272,7 +2274,8 @@ LEADING_REQUEST_RE = re.compile(
 
 
 def summarize_objective(text: str) -> str:
-    clean = " ".join((text or "").split())
+    layout = text or ""
+    clean = " ".join(layout.split())
 
     #JAIMES: objective cards must describe the current request, not a quoted
     # objective/final-card example pasted below it. Structured card rows are
@@ -2285,7 +2288,13 @@ def summarize_objective(text: str) -> str:
     )
     eligible_lines: list[str] = []
     skip_objective_value = False
-    for raw_line in (text or "").splitlines():
+    output_instruction = re.compile(
+        r"^(?:return|respond(?:\s+with)?|output(?:\s+format)?|include)\b"
+        r".*\b(?:findings?|model|authentication|route|fallback|conclusion|"
+        r"format|sections?|status|complete|issues?|next steps?|approval)\b",
+        re.I,
+    )
+    for raw_line in layout.splitlines():
         line = raw_line.strip()
         if not line:
             continue
@@ -2295,7 +2304,11 @@ def summarize_objective(text: str) -> str:
         if skip_objective_value:
             skip_objective_value = False
             continue
-        if embedded_card_row.match(line) or line.startswith(("```", "- ")):
+        if (
+            embedded_card_row.match(line)
+            or output_instruction.match(line)
+            or line.startswith(("```", "- "))
+        ):
             continue
         eligible_lines.append(line)
     parts = [
@@ -2303,13 +2316,34 @@ def summarize_objective(text: str) -> str:
         for p in re.split(r"(?<=[.!?])\s+|\n+", "\n".join(eligible_lines))
         if p.strip()
     ]
-    request_markers = ("please", "can you", "could you", "would you", "why ", "did you", "fix ", "make ", "change ", "add ", "remove ", "check ", "find ", "build ", "run ", "verify ")
+    constraint_only = re.compile(
+        r"^(?:(?:please\s+)?(?:make|do)\s+no\s+changes|"
+        r"(?:please\s+)?do\s+not\s+(?:make|apply|change|edit)\b|"
+        r"read[- ]only(?:\s+only)?)[.!]?$",
+        re.I,
+    )
+    request_intent = re.compile(
+        r"\b(?:assess|audit|check|evaluate|examine|find|fix|format|implement|inspect|"
+        r"investigate|repair|review|run|test|turn|validate|verify|build|add|remove|update)\b",
+        re.I,
+    )
+    leading_intent = re.compile(
+        r"^(?:(?:please\s+)?|(?:can|could|would)\s+you\s+)(?:assess|audit|check|"
+        r"evaluate|examine|find|fix|format|implement|inspect|investigate|repair|review|"
+        r"run|test|turn|validate|verify|build|add|remove|update)\b",
+        re.I,
+    )
     candidates = [
         p for p in parts
         if not embedded_card_row.match(p)
-        and any(marker in p.lower() for marker in request_markers)
+        and request_intent.search(p)
+        and not constraint_only.fullmatch(p)
     ]
-    intent = candidates[-1] if candidates else clean
+    intent = (
+        max(candidates, key=lambda part: (3 if leading_intent.search(part) else 2, len(part.split())))
+        if candidates
+        else " ".join(eligible_lines) or clean
+    )
     intent = re.sub(r"^(?:okay|ok|perfect|great|thanks|thank you|much better)[,! .-]*", "", intent, flags=re.I)
     intent_lower = intent.lower()
     request_context = " ".join(eligible_lines).lower()
@@ -2351,18 +2385,40 @@ def summarize_objective(text: str) -> str:
     intent = re.sub(r"^please\s+(?:actually\s+)?", "", intent, flags=re.I)
     words = intent.split()
     if len(words) > 12:
-        intent = " ".join(words[:12])
+        words = words[:12]
+    while len(words) > 1 and words[-1].lower() in {
+        "a", "an", "and", "or", "the", "that", "with", "for", "to", "in", "on", "at",
+    }:
+        words.pop()
+    intent = " ".join(words)
     return intent[:80] or "Handle Telegram task"
 
 
 def classify_privacy(prompt: str) -> str:
     text = clean_prompt(prompt).lower()
-    private_markers = {
-        "password", "cookie", "oauth", "token", "keychain", "gmail", "email",
-        "calendar", "account", "login", "sorare", "browser", "chrome",
-        "bank", "stripe", "payment", "private", "personal account",
-    }
-    return "sensitive-account" if any(marker in text for marker in private_markers) else "dashboard-safe"
+    high_confidence_private = re.compile(
+        r"\b(?:password|cookies?|oauth|tokens?|keychain|gmail|emails?|calendar|"
+        r"accounts?|logins?|sorare|browsers?|chrome|bank|stripe|payments?)\b",
+        re.I,
+    )
+    if high_confidence_private.search(text):
+        return "sensitive-account"
+    if re.search(r"\bprivate\b", text):
+        architectural_private = bool(
+            re.search(
+                r"\b(?:private work|private data|private-data|private execution|"
+                r"private route|private routing|private lane)\b",
+                text,
+            )
+            and re.search(
+                r"\b(?:assess|audit|evaluate|review|route|routing|policy|"
+                r"architecture|configuration|configured|ecosystem|boundary)\b",
+                text,
+            )
+        )
+        if not architectural_private:
+            return "sensitive-account"
+    return "dashboard-safe"
 
 
 def classify_task_type(prompt: str) -> str:

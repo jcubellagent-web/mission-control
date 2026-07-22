@@ -53,7 +53,11 @@ class InboxCoordinatorTests(unittest.TestCase):
 
             def fake_run(command, **kwargs):
                 calls.append((list(command), str(kwargs.get("input") or "")))
-                return type("Result", (), {"returncode": 0})()
+                return type("Result", (), {
+                    "returncode": 0,
+                    "stdout": json.dumps({"ok": True, "status": "progress-recorded"}),
+                    "stderr": "",
+                })()
 
             snapshot = {
                 "origin": {
@@ -74,6 +78,49 @@ class InboxCoordinatorTests(unittest.TestCase):
             })
             self.assertNotIn("card-safe-1", calls[0][1])
             self.assertNotIn("private-chat-target", calls[0][1])
+
+    def test_progress_retries_only_until_the_run_card_binding_is_ready(self):
+        coordinator = load_module()
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            coordinator.TELEGRAM_GATEWAY_SCRIPT = root / "josh_telegram_fast_ack.py"
+            coordinator.TELEGRAM_GATEWAY_SCRIPT.write_text("", encoding="utf-8")
+            not_ready = type("Result", (), {
+                "returncode": 4,
+                "stdout": json.dumps({"ok": False, "status": "run-card-not-ready"}),
+                "stderr": "",
+            })()
+            accepted = type("Result", (), {
+                "returncode": 0,
+                "stdout": json.dumps({"ok": True, "status": "progress-recorded"}),
+                "stderr": "",
+            })()
+            snapshot = {"origin": {"runId": "run-race-1"}}
+            with patch.object(coordinator.subprocess, "run", side_effect=[not_ready, accepted]) as run, \
+                 patch.object(coordinator.time, "sleep") as sleep:
+                self.assertTrue(coordinator.update_card_progress(snapshot, "worker_started"))
+            self.assertEqual(run.call_count, 2)
+            sleep.assert_called_once_with(0.1)
+
+    def test_progress_rejects_a_zero_exit_without_an_accepted_receipt(self):
+        coordinator = load_module()
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            coordinator.TELEGRAM_GATEWAY_SCRIPT = root / "josh_telegram_fast_ack.py"
+            coordinator.TELEGRAM_GATEWAY_SCRIPT.write_text("", encoding="utf-8")
+            ambiguous = type("Result", (), {
+                "returncode": 0,
+                "stdout": json.dumps({"ok": False, "status": "progress-card-update-failed"}),
+                "stderr": "",
+            })()
+            with patch.object(coordinator.subprocess, "run", return_value=ambiguous) as run, \
+                 patch.object(coordinator.time, "sleep") as sleep:
+                self.assertFalse(coordinator.update_card_progress(
+                    {"origin": {"runId": "run-ambiguous-1"}},
+                    "verifying",
+                ))
+            self.assertEqual(run.call_count, 1)
+            sleep.assert_not_called()
 
     def test_execution_checkpoint_is_lease_bound_and_allowlisted(self):
         coordinator = load_module()
@@ -523,6 +570,22 @@ class InboxCoordinatorTests(unittest.TestCase):
         self.assertEqual(len(sections["done"]), 3)
         self.assertIn("cannot control or trade", sections["done"][1])
         self.assertIn("risk", sections["issues"][0])
+
+    def test_route_assessment_findings_are_not_downgraded_by_verb_wording(self):
+        coordinator = load_module()
+        sections = coordinator.parse_model_sections(
+            "Complete: Yes\n"
+            "What was done:\n"
+            "- Dashboard-safe architecture reviews route to the verified specialist lane when allowance remains.\n"
+            "- Private execution remains reserved for the Josh 2.0 coordinator and never crosses the public specialist boundary.\n"
+            "- The actual fallback occurred only when the requested provider authentication route was unavailable.\n"
+            "Issues:\n- No routing contradiction was observed in this assessment.\n"
+            "Appropriate next steps:\n- Keep the current policy and rerun the parity canary after routing changes.\n"
+            "Approval needed:\n- n/a"
+        )
+        self.assertIs(sections["complete"], True)
+        self.assertIs(sections["summarySufficient"], True)
+        self.assertEqual(len(sections["done"]), 3)
 
     def test_negative_telegram_health_findings_are_concrete_and_complete(self):
         coordinator = load_module()

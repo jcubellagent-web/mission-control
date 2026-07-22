@@ -149,7 +149,9 @@ CONCRETE_RESULT_SIGNAL = re.compile(
     r"remov(?:e|es|ed)|implement(?:s|ed)?|configur(?:e|es|ed)|creat(?:e|es|ed)|"
     r"migrat(?:e|es|ed)|deploy(?:s|ed)?|pass(?:es|ed)?|fail(?:s|ed)?|block(?:s|ed)?|"
     r"resolv(?:e|es|ed)|reduc(?:e|es|ed)|increas(?:e|es|ed)|decreas(?:e|es|ed)|"
-    r"compar(?:e|es|ed)|estimat(?:e|es|ed)|measur(?:e|es|ed)|validat(?:e|es|ed))\b",
+    r"compar(?:e|es|ed)|estimat(?:e|es|ed)|measur(?:e|es|ed)|validat(?:e|es|ed)|"
+    r"select(?:s|ed)?|reserv(?:e|es|ed)|occur(?:s|red)?|"
+    r"rout(?:e|es|ed|ing)|authenticat(?:e|es|ed|ion)|fallback|quota|allowance)\b",
     re.I,
 )
 CONCRETE_EVIDENCE_SIGNAL = re.compile(
@@ -1627,20 +1629,45 @@ def update_card_progress(snapshot: dict[str, Any], progress_code: str) -> bool:
         str(TELEGRAM_GATEWAY_SCRIPT),
         "--progress-event-json-stdin",
     ]
-    try:
-        proc = subprocess.run(
-            cmd,
-            cwd=WORKSPACE,
-            input=json.dumps({"runId": run_id, "progressCode": progress_code}, separators=(",", ":")),
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            text=True,
-            timeout=20,
-            check=False,
-        )
-        return proc.returncode == 0
-    except Exception:
-        return False
+    payload = json.dumps(
+        {"runId": run_id, "progressCode": progress_code},
+        separators=(",", ":"),
+    )
+    retryable = {
+        "run-card-not-ready",
+        "progress-origin-not-coordinator-owned",
+        "progress-origin-mismatch",
+        "worker-not-running",
+    }
+    for attempt in range(6):
+        try:
+            proc = subprocess.run(
+                cmd,
+                cwd=WORKSPACE,
+                input=payload,
+                capture_output=True,
+                text=True,
+                timeout=20,
+                check=False,
+            )
+            try:
+                receipt = json.loads(proc.stdout or "{}")
+            except (TypeError, ValueError, json.JSONDecodeError):
+                receipt = {}
+            if (
+                proc.returncode == 0
+                and isinstance(receipt, dict)
+                and receipt.get("ok") is True
+                and str(receipt.get("status") or "").startswith("progress-recorded")
+            ):
+                return True
+            status = str(receipt.get("status") or "") if isinstance(receipt, dict) else ""
+            if status not in retryable or attempt == 5:
+                return False
+            time.sleep(min(0.1 * (2**attempt), 0.8))
+        except Exception:
+            return False
+    return False
 
 
 def checkpoint_worker_execution(job_id: str, lease_token: str, execution: dict[str, Any]) -> bool:

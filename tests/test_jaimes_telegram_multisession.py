@@ -2419,6 +2419,40 @@ Approval needed:
         self.assertEqual(saved["multipart_rows_attached"], 1)
         self.assertIn(str(media), saved["active_cards"]["telegram-message-1"]["attachment_message_ids"])
 
+    def test_architecture_review_objective_and_privacy_ignore_output_labels(self) -> None:
+        prompt = (
+            "Assess whether our model routing is resilient and whether private work and "
+            "execution are routed appropriately. Make no changes.\n"
+            "Return three findings, the verified model and authentication route actually "
+            "used, any fallback that occurred, and a final conclusion of functioning or "
+            "needs attention."
+        )
+        self.assertEqual(watcher.classify_privacy(prompt), "dashboard-safe")
+        self.assertEqual(
+            watcher.objective_from_prompt(prompt),
+            "Assess whether our model routing is resilient and whether private work",
+        )
+
+    def test_real_private_content_remains_sensitive(self) -> None:
+        self.assertEqual(
+            watcher.classify_privacy("Review this private email account login failure."),
+            "sensitive-account",
+        )
+
+    def test_route_assessment_findings_complete_on_semantic_evidence(self) -> None:
+        complete, sections = watcher.parse_final_sections(
+            "Complete: Yes\n"
+            "What was done:\n"
+            "- Dashboard-safe architecture reviews route to the verified specialist lane when allowance remains.\n"
+            "- Private execution remains reserved for the coordinator and never crosses the public specialist boundary.\n"
+            "- The actual fallback occurred only when the requested provider authentication route was unavailable.\n"
+            "Issues:\n- No routing contradiction was observed in this assessment.\n"
+            "Appropriate next steps:\n- Keep the current policy and rerun the parity canary after routing changes.\n"
+            "Approval needed:\n- n/a"
+        )
+        self.assertTrue(complete)
+        self.assertEqual(len(sections["done"]), 3)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -72,6 +72,24 @@ def test_publish_josh_retries_until_canonical_work_receipt_is_accepted():
     assert all(call.kwargs["capture_output"] is True for call in run.call_args_list)
 
 
+def test_architecture_review_keeps_private_work_phrase_dashboard_safe():
+    prompt = (
+        "Assess whether our model routing is resilient and whether private work and "
+        "execution are routed appropriately. Make no changes.\n"
+        "Return three findings, the verified model and authentication route actually "
+        "used, any fallback that occurred, and a final conclusion of functioning or "
+        "needs attention."
+    )
+    assert watcher.classify_privacy(prompt) == "dashboard-safe"
+    assert watcher.objective_from_prompt(prompt) == (
+        "Assess whether our model routing is resilient and whether private work"
+    )
+
+
+def test_real_private_content_still_stays_on_the_sensitive_lane():
+    assert watcher.classify_privacy("Review this private email account login failure.") == "sensitive-account"
+
+
 def test_send_ack_fails_closed_when_canonical_work_visibility_cannot_publish():
     event = {
         "session_id": "session",

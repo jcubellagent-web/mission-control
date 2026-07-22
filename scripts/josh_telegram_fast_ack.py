@@ -2081,6 +2081,12 @@ def current_request_text(text: str) -> str:
     )
     eligible: list[str] = []
     skip_objective_value = False
+    output_instruction = re.compile(
+        r"^(?:return|respond(?:\s+with)?|output(?:\s+format)?|include)\b"
+        r".*\b(?:findings?|model|authentication|route|fallback|conclusion|"
+        r"format|sections?|status|complete|issues?|next steps?|approval)\b",
+        re.I,
+    )
     for raw_line in (text or "").splitlines():
         line = raw_line.strip()
         if not line:
@@ -2091,7 +2097,11 @@ def current_request_text(text: str) -> str:
         if skip_objective_value:
             skip_objective_value = False
             continue
-        if embedded_card_row.match(line) or line.startswith(("```", "- ")):
+        if (
+            embedded_card_row.match(line)
+            or output_instruction.match(line)
+            or line.startswith(("```", "- "))
+        ):
             continue
         eligible.append(line)
     parts = [
@@ -2384,12 +2394,29 @@ def classify_privacy(prompt: str) -> str:
     text = clean_prompt(prompt).lower()
     if any(marker in text for marker in ("espn", "fantasy baseball", "roster", "lineup", "matchup", "waiver", "trade")):
         return "agent-private"
-    private_markers = {
-        "password", "cookie", "oauth", "token", "keychain", "gmail", "email",
-        "calendar", "account", "login", "sorare", "browser", "chrome",
-        "bank", "stripe", "payment", "private", "personal account",
-    }
-    return "sensitive-account" if any(marker in text for marker in private_markers) else "dashboard-safe"
+    high_confidence_private = re.compile(
+        r"\b(?:password|cookies?|oauth|tokens?|keychain|gmail|emails?|calendar|"
+        r"accounts?|logins?|sorare|browsers?|chrome|bank|stripe|payments?)\b",
+        re.I,
+    )
+    if high_confidence_private.search(text):
+        return "sensitive-account"
+    if re.search(r"\bprivate\b", text):
+        architectural_private = bool(
+            re.search(
+                r"\b(?:private work|private data|private-data|private execution|"
+                r"private route|private routing|private lane)\b",
+                text,
+            )
+            and re.search(
+                r"\b(?:assess|audit|evaluate|review|route|routing|policy|"
+                r"architecture|configuration|configured|ecosystem|boundary)\b",
+                text,
+            )
+        )
+        if not architectural_private:
+            return "sensitive-account"
+    return "dashboard-safe"
 
 
 def classify_task_type(prompt: str) -> str:
