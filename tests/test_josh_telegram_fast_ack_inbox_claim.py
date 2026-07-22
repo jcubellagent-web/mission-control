@@ -84,6 +84,11 @@ def test_architecture_review_keeps_private_work_phrase_dashboard_safe():
     assert watcher.objective_from_prompt(prompt) == (
         "Assess whether our model routing is resilient and whether private work"
     )
+    objective = watcher.objective_from_prompt(prompt)
+    if watcher.objective_is_near_copy(prompt, objective):
+        objective = watcher.semantic_reinterpretation(prompt)
+    assert objective == "Assess model-routing resilience and private-execution boundaries"
+    assert "needs attention" not in objective.lower()
 
 
 def test_real_private_content_still_stays_on_the_sensitive_lane():

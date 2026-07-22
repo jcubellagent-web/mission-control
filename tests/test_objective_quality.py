@@ -9,6 +9,7 @@ MODULE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MODULE)
 objective_is_near_copy = MODULE.objective_is_near_copy
 semantic_reinterpretation = MODULE.semantic_reinterpretation
+current_request_text = MODULE.current_request_text
 
 
 def test_exact_request_after_courtesy_is_rejected() -> None:
@@ -50,3 +51,56 @@ def test_bare_connectivity_canaries_get_one_shared_semantic_objective() -> None:
     for prompt in ("test", "testing", "testing testing", "[J|redacted] testing"):
         assert objective_is_near_copy(prompt, "testing")
         assert semantic_reinterpretation(prompt) == expected
+
+
+def test_output_contract_cannot_override_model_routing_objective() -> None:
+    prompt = (
+        "Assess whether our model routing is resilient and whether private work and "
+        "execution are routed appropriately. Make no changes.\n"
+        "Return three findings, the verified model and authentication route actually "
+        "used, any fallback that occurred, and a final conclusion of functioning or "
+        "needs attention."
+    )
+    request = current_request_text(prompt)
+    assert request == (
+        "Assess whether our model routing is resilient and whether private work and "
+        "execution are routed appropriately read-only"
+    )
+    assert "authentication" not in request.lower()
+    assert "fallback" not in request.lower()
+    assert "needs attention" not in request.lower()
+    objective = semantic_reinterpretation(prompt)
+    assert objective == "Assess model-routing resilience and private-execution boundaries"
+    assert not objective_is_near_copy(prompt, objective)
+
+
+def test_output_instruction_variants_are_not_actionable_objectives() -> None:
+    core = "Review model routing and private execution boundaries."
+    for instruction in (
+        "Respond with findings, model, route, and status.",
+        "Output format: findings, fallback, conclusion, and approval.",
+        "Include the authentication route, issues, and next steps.",
+    ):
+        request = current_request_text(f"{core}\n{instruction}")
+        assert request == core.rstrip(".")
+
+
+def test_multiple_actionable_clauses_are_preserved_in_source_order() -> None:
+    request = current_request_text(
+        "Review Inbox ownership. Fix JAIMES Ops routing. "
+        "Return three findings, model, route, and status."
+    )
+    assert request == "Review Inbox ownership; Fix JAIMES Ops routing"
+    assert "Return" not in request
+
+
+def test_common_no_change_variants_preserve_the_read_only_constraint() -> None:
+    for constraint in (
+        "Do not make any changes.",
+        "Do not apply any changes.",
+        "Don't make any changes.",
+        "No changes.",
+    ):
+        assert current_request_text(f"Review Inbox ownership. {constraint}") == (
+            "Review Inbox ownership read-only"
+        )

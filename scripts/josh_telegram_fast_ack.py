@@ -64,6 +64,12 @@ PROGRESS_EVENT_SPECS = {
         "phase": "active",
         "requires_verified_execution": False,
     },
+    "fallback_selected": {
+        "summary": "Primary route failed; executing the disclosed fallback",
+        "lifecycle_status": "progress",
+        "phase": "active",
+        "requires_verified_execution": False,
+    },
     "verifying": {
         "summary": "Model execution verified; formatting final result",
         "lifecycle_status": "verifying",
@@ -5765,7 +5771,12 @@ def claim_inbox(args: argparse.Namespace) -> dict[str, Any]:
     if args.dry_run:
         cmd.append("--dry-run")
 
-    def queue_failure_receipt(error_name: str) -> dict[str, Any]:
+    def queue_failure_receipt(
+        error_name: str,
+        *,
+        issue: str = "The asynchronous worker could not be queued.",
+        next_step: str = "Retry after the coordinator service is healthy.",
+    ) -> dict[str, Any]:
         update_telegram_effect(
             effect_protocol,
             state="indeterminate",
@@ -5802,8 +5813,8 @@ def claim_inbox(args: argparse.Namespace) -> dict[str, Any]:
                 failure_card,
                 meta,
                 terminal_status="failed",
-                issue="The asynchronous worker could not be queued.",
-                next_step="Retry after the coordinator service is healthy.",
+                issue=issue,
+                next_step=next_step,
                 dry_run=args.dry_run,
             )
             if not args.dry_run:
@@ -5827,8 +5838,8 @@ def claim_inbox(args: argparse.Namespace) -> dict[str, Any]:
                 "--model", "unverified",
                 "--route", "Inbox coordinator dispatch",
                 "--done", "Acknowledged the Inbox request|Stopped before model execution",
-                "--blocker", "The asynchronous worker could not be queued",
-                "--next", "Retry after the coordinator service is healthy",
+                "--blocker", issue,
+                "--next", next_step,
             ], meta))
             publish_josh("Inbox worker queue failed", "error", "The request was acknowledged but no worker was queued.")
         # Preserve every proven Telegram effect. The plugin uses these durable
@@ -5861,6 +5872,23 @@ def claim_inbox(args: argparse.Namespace) -> dict[str, Any]:
         return queue_failure_receipt("coordinator_receipt_invalid_json")
     if not isinstance(envelope, dict):
         return queue_failure_receipt("coordinator_receipt_not_object")
+    if str(envelope.get("status") or "") == "explicit-route-preflight-failed":
+        blocked_route = envelope.get("route") if isinstance(envelope.get("route"), dict) else {}
+        route_id = _safe_progress_fragment(blocked_route.get("routeId") or "requested")
+        privacy_blocked = str(envelope.get("error") or "") == "privacy-policy"
+        return queue_failure_receipt(
+            "explicit_route_preflight_failed",
+            issue=(
+                f"The explicitly requested {route_id} route is blocked for this private request."
+                if privacy_blocked
+                else f"The explicitly requested {route_id} route is currently unavailable."
+            ),
+            next_step=(
+                "Use a privacy-safe route or remove the explicit model request."
+                if privacy_blocked
+                else "Retry when that route is healthy or remove the explicit model request."
+            ),
+        )
     job = envelope.get("job")
     if not isinstance(job, dict) or not str(job.get("jobId") or "").strip():
         return queue_failure_receipt("coordinator_receipt_missing_job")

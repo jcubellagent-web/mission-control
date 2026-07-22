@@ -56,6 +56,10 @@ function internalReplayPrompt(text) {
   ].some((prefix) => lowered.startsWith(prefix));
 }
 
+function nativeTelegramSessionCommand(text) {
+  return /^\/(?:new|reset)(?:@[A-Za-z0-9_]+)?\s*$/i.test(String(text || "").trim());
+}
+
 function sessionIdentity(event = {}, ctx = {}) {
   return stringValue(ctx.sessionKey || event.sessionKey || ctx.conversationId || event.conversationId);
 }
@@ -216,6 +220,7 @@ export function inboxDecision(event = {}, ctx = {}, config = {}) {
     ? config.jaimesMentions
     : DEFAULT_MENTIONS;
   const content = event.bodyForAgent || event.body || event.content || "";
+  if (nativeTelegramSessionCommand(content)) return "ignore";
   if (internalReplayPrompt(content)) return "silence";
   return isJaimesMention(content, mentions) ? "handoff" : "claim";
 }
@@ -880,6 +885,11 @@ export async function handleInboxEvent(event = {}, ctx = {}, config = {}, logger
   if (decision === "ignore") return undefined;
   if (decision === "silence") return { handled: true };
   const boundCtx = bindInboundMessage(event, ctx, hookPhase);
+  const inboundMessageId = positiveTelegramId(boundCtx.messageId || event.messageId);
+  if (!inboundMessageId) {
+    logger.error?.("inbox-coordinator: exact Telegram message id unavailable; allowing normal OpenCLAW handling");
+    return undefined;
+  }
   if (decision === "handoff") {
     if (jaimesHandoffReady(config) && await dispatchJaimesHandoff(event, boundCtx, config, logger)) {
       return { handled: true };

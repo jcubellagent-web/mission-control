@@ -70,6 +70,21 @@ def test_context_before_imperative_does_not_hide_actionable_request() -> None:
     assert objective_quality.semantic_reinterpretation(prompt).startswith("Confirm ")
 
 
+def test_model_routing_output_contract_has_same_safe_objective_as_inbox() -> None:
+    prompt = (
+        "Assess whether our model routing is resilient and whether private work and "
+        "execution are routed appropriately. Make no changes.\n"
+        "Return three findings, the verified model and authentication route actually "
+        "used, any fallback that occurred, and a final conclusion of functioning or "
+        "needs attention."
+    )
+    objective = watcher.objective_from_prompt(prompt)
+    if objective_quality.objective_is_near_copy(prompt, objective):
+        objective = objective_quality.semantic_reinterpretation(prompt)
+    assert objective == "Assess model-routing resilience and private-execution boundaries"
+    assert "needs attention" not in objective.lower()
+
+
 def test_hermes_sender_attribution_never_reaches_visible_objective() -> None:
     prompt = "[J|private-transport-id] testing"
     assert watcher.clean_prompt(prompt) == "testing"

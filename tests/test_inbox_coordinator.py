@@ -102,6 +102,28 @@ class InboxCoordinatorTests(unittest.TestCase):
             self.assertEqual(run.call_count, 2)
             sleep.assert_called_once_with(0.1)
 
+    def test_fallback_progress_is_fixed_and_disclosed_before_execution(self):
+        coordinator = load_module()
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            coordinator.TELEGRAM_GATEWAY_SCRIPT = root / "josh_telegram_fast_ack.py"
+            coordinator.TELEGRAM_GATEWAY_SCRIPT.write_text("", encoding="utf-8")
+            accepted = type("Result", (), {
+                "returncode": 0,
+                "stdout": json.dumps({"ok": True, "status": "progress-recorded"}),
+                "stderr": "",
+            })()
+            with patch.object(coordinator.subprocess, "run", return_value=accepted) as run:
+                self.assertTrue(coordinator.update_card_progress(
+                    {"origin": {"runId": "run-fallback-1"}},
+                    "fallback_selected",
+                ))
+            payload = json.loads(str(run.call_args.kwargs["input"]))
+            self.assertEqual(payload, {
+                "runId": "run-fallback-1",
+                "progressCode": "fallback_selected",
+            })
+
     def test_progress_rejects_a_zero_exit_without_an_accepted_receipt(self):
         coordinator = load_module()
         with tempfile.TemporaryDirectory() as tmp:
@@ -137,6 +159,8 @@ class InboxCoordinatorTests(unittest.TestCase):
                 "actualWorker": "worker",
                 "actualProvider": "codex",
                 "actualModel": "verified-model",
+                "actualAuth": "Verified runtime checkpoint",
+                "authVerified": True,
                 "modelVerified": True,
                 "executionVerified": True,
                 "output": "must not persist in progress checkpoint",
@@ -148,6 +172,33 @@ class InboxCoordinatorTests(unittest.TestCase):
             self.assertNotIn("output", persisted["actual"])
             self.assertNotIn("token", persisted["actual"])
             self.assertTrue(persisted["actual"]["executionVerified"])
+            self.assertEqual(persisted["actual"]["actualAuth"], "Verified runtime checkpoint")
+            self.assertIs(persisted["actual"]["authVerified"], True)
+
+    def test_fallback_route_checkpoint_is_lease_bound_and_allowlisted(self):
+        coordinator = load_module()
+        with tempfile.TemporaryDirectory() as tmp:
+            self.configure_private_state(coordinator, Path(tmp))
+            coordinator.PRIVATE_DIR.mkdir(parents=True, exist_ok=True)
+            coordinator.save_json(coordinator.STATE_PATH, {"jobs": {"job-1": {
+                "jobId": "job-1",
+                "status": "running",
+                "leaseToken": "lease-1",
+            }}})
+            route = {
+                **coordinator.ROUTES["gemini-pro"],
+                "routeId": "gemini-pro",
+                "routingReason": "dashboard-safe model-routing audit",
+                "fallback": "glm execution failed; selected gemini-pro",
+                "privacy": "dashboard-safe",
+                "secret": "must not persist",
+            }
+            self.assertFalse(coordinator.checkpoint_worker_route("job-1", "wrong", route))
+            self.assertTrue(coordinator.checkpoint_worker_route("job-1", "lease-1", route))
+            persisted = json.loads(coordinator.STATE_PATH.read_text())["jobs"]["job-1"]
+            self.assertEqual(persisted["route"]["routeId"], "gemini-pro")
+            self.assertEqual(persisted["route"]["auth"], "Antigravity session")
+            self.assertNotIn("secret", persisted["route"])
 
     def configure_private_state(self, coordinator, root: Path):
         coordinator.PRIVATE_DIR = root / "private"
@@ -167,15 +218,52 @@ class InboxCoordinatorTests(unittest.TestCase):
         self.assertIs(route["requestedRouteHealthy"], True)
         self.assertEqual(route["provider"], "xai")
 
-    def test_explicit_model_request_falls_back_when_unhealthy(self):
+    def test_explicit_model_request_fails_closed_when_unhealthy(self):
         coordinator = load_module()
         route = coordinator.route_prompt(
             "Use Gemini for this review.",
-            injected_health={"gemini": False, "luna": True, "terra": True},
+            injected_health={"gemini": False, "glm": False, "terra": True},
         )
         self.assertEqual(route["requestedRouteId"], "gemini")
-        self.assertEqual(route["routeId"], "luna")
-        self.assertIn("unhealthy", route["fallback"])
+        self.assertEqual(route["routeId"], "gemini")
+        self.assertIs(route["ok"], False)
+        self.assertIs(route["preflightVerified"], False)
+        self.assertEqual(route["preflightError"], "route-unhealthy")
+        self.assertEqual(route["outcome"], "blocked")
+        self.assertEqual(route["fallback"], "")
+
+    def test_submit_rejects_a_blocked_explicit_route_without_creating_a_job(self):
+        coordinator = load_module()
+        blocked = coordinator.route_prompt(
+            "Use Gemini for this review.",
+            injected_health={"gemini": False, "terra": True},
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            self.configure_private_state(coordinator, Path(tmp))
+
+            class Args:
+                prompt = "Use Gemini for this review."
+                prompt_file = ""
+                privacy = "dashboard-safe"
+                route_plan_json = json.dumps(blocked)
+                origin_run_id = "run-explicit-blocked"
+                message_id = "100"
+                card_key = "card-explicit-blocked"
+                chat_id = "chat"
+                thread_id = "1"
+                work_id = ""
+                work_run_id = ""
+                origin_claim_hash = ""
+                delivery_tier = 3
+                timeout = 30
+                dry_run = False
+
+            with patch.object(coordinator, "spawn_worker") as spawn:
+                result = coordinator.submit_job(Args())
+            spawn.assert_not_called()
+            self.assertIs(result["ok"], False)
+            self.assertEqual(result["status"], "explicit-route-preflight-failed")
+            self.assertFalse(coordinator.STATE_PATH.exists())
 
     def test_negated_model_name_is_not_an_explicit_route(self):
         coordinator = load_module()
@@ -231,16 +319,73 @@ class InboxCoordinatorTests(unittest.TestCase):
         self.assertEqual(route["model"], "glm-5.2:cloud")
         self.assertEqual(route["routingReason"], "dashboard-safe large-context technical reasoning")
 
+    def test_model_routing_audit_uses_verified_specialist_before_read_only_health(self):
+        coordinator = load_module()
+        prompt = (
+            "Assess whether our model routing is resilient and whether private work and "
+            "execution are routed appropriately. Make no changes.\n"
+            "Return three findings, the verified model and authentication route actually "
+            "used, any fallback that occurred, and a final conclusion of functioning or "
+            "needs attention."
+        )
+        route = coordinator.route_prompt(
+            prompt,
+            injected_health={"glm": True, "luna": True, "terra": True},
+        )
+        self.assertEqual(route["routeId"], "glm")
+        self.assertEqual(route["model"], "glm-5.2:cloud")
+        self.assertEqual(route["auth"], "Ollama Cloud")
+        self.assertEqual(route["routingReason"], "dashboard-safe model-routing audit")
+
+    def test_output_contract_route_fields_cannot_hijack_unrelated_requests(self):
+        coordinator = load_module()
+        output_contract = (
+            "Return three findings, the verified model and authentication route actually "
+            "used, any fallback, and a conclusion."
+        )
+        health = coordinator.route_prompt(
+            f"Check Telegram health. {output_contract}",
+            injected_health={"luna": True, "glm": True, "gemini": True},
+        )
+        review = coordinator.route_prompt(
+            f"Review this document. {output_contract}",
+            injected_health={"gemini": True, "glm": True, "luna": True},
+        )
+        self.assertEqual(health["routeId"], "luna")
+        self.assertEqual(health["routingReason"], "fast Inbox coordination")
+        self.assertEqual(review["routeId"], "gemini")
+        self.assertEqual(review["routingReason"], "dashboard-safe review/summarization")
+
+        comparison = coordinator.route_prompt(
+            "Review this document. Include a comparison with Gemini.",
+            injected_health={"gemini": False, "glm": True, "terra": True},
+        )
+        self.assertIs(comparison["explicitRequest"], False)
+        self.assertEqual(comparison["routeId"], "glm")
+        self.assertIn("gemini unhealthy; selected glm", comparison["fallback"])
+
+    def test_model_routing_audit_uses_policy_fallback_not_shallow_luna(self):
+        coordinator = load_module()
+        route = coordinator.route_prompt(
+            "Audit the model routing, provider authentication, and fallback policy read-only.",
+            injected_health={"glm": False, "gemini-pro": True, "terra": True, "luna": True},
+        )
+        self.assertEqual(route["routeId"], "gemini-pro")
+        self.assertIn("glm unhealthy; selected gemini-pro", route["fallback"])
+
     def test_glm_cloud_cannot_receive_private_context(self):
         coordinator = load_module()
         route = coordinator.route_prompt(
             "Use GLM 5.2 to review this OAuth token incident.",
             privacy="sensitive-account",
-            injected_health={"glm": True, "luna": True},
+            injected_health={"glm": True, "terra": True},
         )
         self.assertEqual(route["requestedRouteId"], "glm")
-        self.assertEqual(route["routeId"], "luna")
-        self.assertIn("privacy policy blocked glm", route["fallback"])
+        self.assertEqual(route["routeId"], "glm")
+        self.assertIs(route["ok"], False)
+        self.assertIs(route["preflightVerified"], False)
+        self.assertEqual(route["preflightError"], "privacy-policy")
+        self.assertEqual(route["fallback"], "")
 
     def test_glm_health_requires_authenticated_jaimes_cloud_probe(self):
         coordinator = load_module()
@@ -249,6 +394,168 @@ class InboxCoordinatorTests(unittest.TestCase):
             self.assertIn("glm-5.2:cloud", remote.call_args.args[0])
         with patch.object(coordinator, "remote_check", return_value=True):
             self.assertIs(coordinator.health("glm"), True)
+
+    def test_runtime_execution_failure_launches_fresh_disclosed_fallback(self):
+        coordinator = load_module()
+        initial = coordinator.route_prompt(
+            "Audit model routing and authentication fallback behavior read-only.",
+            injected_health={"glm": True},
+        )
+        attempts = []
+        events = []
+
+        def fake_execute(_prompt, route, _timeout):
+            events.append(f"execute:{route['routeId']}")
+            attempts.append(route["routeId"])
+            if route["routeId"] == "glm":
+                raise RuntimeError("primary failed")
+            return {
+                "output": "Complete: Yes",
+                "actualHost": "jaimes",
+                "actualWorker": route["worker"],
+                "actualProvider": route["provider"],
+                "actualModel": route["model"],
+                "modelVerified": True,
+                "executionVerified": True,
+            }
+
+        with patch.object(coordinator, "execute_route", side_effect=fake_execute):
+            effective, execution = coordinator.execute_route_with_fallback(
+                "safe prompt",
+                initial,
+                60,
+                injected_health={"gemini-pro": True, "terra": True},
+                on_fallback=lambda route: events.append(f"disclose:{route['routeId']}") or True,
+            )
+        self.assertEqual(attempts, ["glm", "gemini-pro"])
+        self.assertEqual(events, ["execute:glm", "disclose:gemini-pro", "execute:gemini-pro"])
+        self.assertEqual(effective["routeId"], "gemini-pro")
+        self.assertEqual(effective["auth"], "Antigravity session")
+        self.assertIn("glm (ollama/glm-5.2:cloud) execution failed", effective["fallback"])
+        self.assertEqual(effective["attemptedRoutes"], ["glm", "gemini-pro"])
+        self.assertEqual(execution["actualModel"], "gemini-3.1-pro-high")
+
+    def test_runtime_fallback_fails_closed_when_every_eligible_route_fails(self):
+        coordinator = load_module()
+        initial = coordinator.route_prompt(
+            "Audit model routing and authentication fallback behavior read-only.",
+            injected_health={"glm": True},
+        )
+        with patch.object(coordinator, "execute_route", side_effect=RuntimeError("failed")):
+            with self.assertRaisesRegex(
+                coordinator.RouteExecutionError,
+                "No verified execution route completed",
+            ) as caught:
+                coordinator.execute_route_with_fallback(
+                    "safe prompt",
+                    initial,
+                    60,
+                    injected_health={"gemini-pro": False, "terra": False},
+                )
+        self.assertEqual(caught.exception.attempts, ["glm"])
+        self.assertEqual(caught.exception.route["attemptedRoutes"], ["glm"])
+        self.assertIn("no eligible fallback remained", caught.exception.route["fallback"])
+
+    def test_runtime_fallback_never_expands_beyond_the_original_policy_ladder(self):
+        coordinator = load_module()
+        cases = (
+            (
+                "Audit model routing and authentication fallback behavior read-only.",
+                {"glm": True},
+                ["glm", "gemini-pro", "terra"],
+            ),
+            (
+                "Review this dashboard-safe document.",
+                {"gemini": True},
+                ["gemini", "glm", "terra"],
+            ),
+            (
+                "Review this dashboard-safe document after the primary preflight fails.",
+                {"gemini": False, "glm": True, "terra": True},
+                ["glm", "terra"],
+            ),
+        )
+        for prompt, initial_health, expected in cases:
+            with self.subTest(prompt=prompt):
+                initial = coordinator.route_prompt(prompt, injected_health=initial_health)
+                self.assertEqual(
+                    initial["policyRouteId"],
+                    "glm" if prompt.startswith("Audit model") else "gemini",
+                )
+                attempts = []
+                disclosures = []
+
+                def fail(_prompt, route, _timeout):
+                    attempts.append(route["routeId"])
+                    raise RuntimeError("failed")
+
+                with patch.object(coordinator, "execute_route", side_effect=fail):
+                    with self.assertRaises(coordinator.RouteExecutionError) as caught:
+                        coordinator.execute_route_with_fallback(
+                            "safe prompt",
+                            initial,
+                            60,
+                            injected_health={
+                                "gemini": True,
+                                "gemini-pro": True,
+                                "glm": True,
+                                "terra": True,
+                                "sol": True,
+                                "luna": True,
+                            },
+                            on_fallback=lambda route: disclosures.append(route["routeId"]) or True,
+                        )
+                self.assertEqual(attempts, expected)
+                self.assertEqual(caught.exception.attempts, expected)
+                self.assertEqual(disclosures, expected[1:])
+
+    def test_runtime_fallback_does_not_execute_before_disclosure_is_accepted(self):
+        coordinator = load_module()
+        initial = coordinator.route_prompt(
+            "Audit model routing and authentication fallback behavior read-only.",
+            injected_health={"glm": True},
+        )
+        attempts = []
+
+        def fail_primary(_prompt, route, _timeout):
+            attempts.append(route["routeId"])
+            raise RuntimeError("failed")
+
+        with patch.object(coordinator, "execute_route", side_effect=fail_primary):
+            with self.assertRaisesRegex(RuntimeError, "could not be disclosed"):
+                coordinator.execute_route_with_fallback(
+                    "safe prompt",
+                    initial,
+                    60,
+                    injected_health={"gemini-pro": True},
+                    on_fallback=lambda _route: False,
+                )
+        self.assertEqual(attempts, ["glm"])
+
+    def test_runtime_explicit_failure_never_executes_or_discloses_a_fallback(self):
+        coordinator = load_module()
+        initial = coordinator.route_prompt(
+            "Use GLM for this dashboard-safe audit.",
+            injected_health={"glm": True},
+        )
+        attempts = []
+        disclosures = []
+
+        def fail_explicit(_prompt, route, _timeout):
+            attempts.append(route["routeId"])
+            raise RuntimeError("explicit route failed")
+
+        with patch.object(coordinator, "execute_route", side_effect=fail_explicit):
+            with self.assertRaisesRegex(coordinator.RouteExecutionError, "automatic fallback is disabled"):
+                coordinator.execute_route_with_fallback(
+                    "safe prompt",
+                    initial,
+                    60,
+                    injected_health={"gemini-pro": True, "terra": True},
+                    on_fallback=lambda route: disclosures.append(route["routeId"]) or True,
+                )
+        self.assertEqual(attempts, ["glm"])
+        self.assertEqual(disclosures, [])
 
     def test_private_or_secret_terms_stay_on_josh_lane(self):
         coordinator = load_module()
@@ -264,12 +571,15 @@ class InboxCoordinatorTests(unittest.TestCase):
         route = coordinator.route_prompt(
             "Use Grok on this OAuth token incident.",
             privacy="sensitive-account",
-            injected_health={"grok": True, "luna": True},
+            injected_health={"grok": True, "terra": True},
         )
         self.assertEqual(route["requestedRouteId"], "grok")
-        self.assertEqual(route["routeId"], "luna")
+        self.assertEqual(route["routeId"], "grok")
+        self.assertIs(route["ok"], False)
         self.assertIs(route["policyAllowed"], False)
-        self.assertIn("privacy policy blocked", route["fallback"])
+        self.assertIs(route["preflightVerified"], False)
+        self.assertEqual(route["preflightError"], "privacy-policy")
+        self.assertEqual(route["fallback"], "")
 
     def test_final_summary_is_deterministic_proportional_html(self):
         coordinator = load_module()
@@ -435,14 +745,17 @@ class InboxCoordinatorTests(unittest.TestCase):
             "provider": "xai",
             "worker": "jaimes-grok-public",
             "host": "jaimes",
+            "auth": "Grok CLI authentication",
             "routingReason": "explicit model request",
-            "fallback": "",
+            "fallback": "gemini execution failed; selected grok",
         }
         execution = {
             "actualProvider": "xai",
             "actualModel": "grok-test",
             "actualWorker": "jaimes-grok-public",
             "actualHost": "jaimes",
+            "actualAuth": "Grok CLI authentication",
+            "authVerified": True,
             "modelVerified": True,
             "executionVerified": True,
         }
@@ -457,6 +770,8 @@ class InboxCoordinatorTests(unittest.TestCase):
         self.assertTrue(text.startswith("<b>JOSH 2.0 · COMPLETE</b>"))
         self.assertFalse(text.startswith("<pre>"))
         self.assertIn("Model: xai/grok-test | Route:", body)
+        self.assertIn("auth=Grok CLI authentication", body)
+        self.assertIn("fallback=gemini execution failed; selected grok", body)
         self.assertIn("Complete: Yes", body)
         self.assertIn("What was done:", body)
         self.assertIn("Issues:", body)
@@ -469,6 +784,38 @@ class InboxCoordinatorTests(unittest.TestCase):
         self.assertNotIn("abcdefghijklmnop", decoded)
         self.assertIn("[redacted]", decoded)
         self.assertIn("• ", text)
+
+    def test_final_auth_is_unverified_without_an_executor_checkpoint(self):
+        coordinator = load_module()
+        route = {
+            "routeId": "gemini",
+            "auth": "Antigravity session",
+            "routingReason": "dashboard-safe review/summarization",
+            "fallback": "",
+        }
+        base_execution = {
+            "actualProvider": "gemini",
+            "actualModel": "gemini-test",
+            "modelVerified": True,
+            "executionVerified": True,
+        }
+        output = (
+            "Complete: Yes\nWhat was done:\n"
+            "- The document identifies three supported operating constraints.\n"
+            "- The review confirms the second section supersedes the first.\n"
+            "- The conclusion recommends retaining the current policy.\n"
+            "Issues:\n- n/a\nAppropriate next steps:\n- Keep the current policy.\n"
+            "Approval needed:\n- n/a"
+        )
+        no_checkpoint = html.unescape(coordinator.render_final_html(route, base_execution, output))
+        unverified_checkpoint = html.unescape(coordinator.render_final_html(
+            route,
+            {**base_execution, "actualAuth": "Antigravity session", "authVerified": False},
+            output,
+        ))
+        self.assertIn("auth=unverified", no_checkpoint)
+        self.assertIn("auth=unverified", unverified_checkpoint)
+        self.assertNotIn("auth=Antigravity session", no_checkpoint)
 
     def test_weak_assessment_is_downgraded_without_invented_results(self):
         coordinator = load_module()
@@ -586,6 +933,63 @@ class InboxCoordinatorTests(unittest.TestCase):
         self.assertIs(sections["complete"], True)
         self.assertIs(sections["summarySufficient"], True)
         self.assertEqual(len(sections["done"]), 3)
+
+    def test_complete_yes_cannot_hide_that_no_specialist_executed(self):
+        coordinator = load_module()
+        sections = coordinator.parse_model_sections(
+            "Complete: Yes — review completed; ecosystem needs attention.\n"
+            "What was done:\n"
+            "- Verified automatic summary and planning policies from configuration.\n"
+            "- Confirmed each documented fallback ladder has a named provider.\n"
+            "- Attempted the required canary, but no specialist model completed execution.\n"
+            "Issues:\n"
+            "- Specialist-host connectivity prevented successful verification.\n"
+            "- Codex fallback also failed to initialize in the restricted environment.\n"
+            "Appropriate next steps:\n"
+            "- Restore the specialist runtime and rerun the canary end-to-end.\n"
+            "Approval needed:\n- n/a",
+            require_successful_execution=True,
+        )
+        self.assertIs(sections["complete"], False)
+        self.assertIs(sections["summarySufficient"], False)
+        self.assertIn(
+            "The completion claim contradicted an unresolved model or route execution failure.",
+            sections["summaryQualityIssues"],
+        )
+
+    def test_diagnostic_primary_failure_with_verified_fallback_can_complete(self):
+        coordinator = load_module()
+        sections = coordinator.parse_model_sections(
+            "Complete: Yes — the diagnostic objective completed.\n"
+            "What was done:\n"
+            "- The GLM provider failed to initialize during the injected diagnostic canary.\n"
+            "- The coordinator disclosed the Gemini Pro fallback before retrying.\n"
+            "- Gemini Pro completed with a verified execution checkpoint.\n"
+            "Issues:\n"
+            "- GLM initialization remains unavailable for this diagnostic path.\n"
+            "Appropriate next steps:\n"
+            "- Repair GLM initialization and rerun the canary.\n"
+            "Approval needed:\n- n/a"
+        )
+        self.assertIs(sections["complete"], True)
+        self.assertIs(sections["summarySufficient"], True)
+
+    def test_no_specialist_execution_is_valid_for_a_completed_failure_diagnosis(self):
+        coordinator = load_module()
+        sections = coordinator.parse_model_sections(
+            "Complete: Yes — the failure diagnosis completed.\n"
+            "What was done:\n"
+            "- Confirmed no specialist model completed execution because DNS resolution failed.\n"
+            "- The diagnostic isolated the failed hostname lookup before any provider request.\n"
+            "- The remediation is to restore the resolver entry and rerun the canary.\n"
+            "Issues:\n"
+            "- DNS resolution still blocks the specialist runtime.\n"
+            "Appropriate next steps:\n"
+            "- Restore the resolver entry and rerun the canary.\n"
+            "Approval needed:\n- n/a"
+        )
+        self.assertIs(sections["complete"], True)
+        self.assertIs(sections["summarySufficient"], True)
 
     def test_negative_telegram_health_findings_are_concrete_and_complete(self):
         coordinator = load_module()

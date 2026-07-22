@@ -64,6 +64,16 @@ test("claims untagged Inbox messages and ignores other topics", () => {
   ), "ignore");
 });
 
+test("leaves native Telegram session commands to OpenCLAW", () => {
+  for (const content of ["/new", "/reset", "/new@JCUBELL_bot", "/reset@JCUBELL_bot"]) {
+    assert.equal(inboxDecision({ channel: "telegram", content }, inboxCtx), "ignore", content);
+  }
+  assert.equal(
+    inboxDecision({ channel: "telegram", content: "Explain how /new resets a session" }, inboxCtx),
+    "claim",
+  );
+});
+
 test("classifies a direct JAIMES mention as a health-gated handoff", () => {
   assert.equal(isJaimesMention("@JAIMES please take this"), true);
   assert.equal(inboxDecision({ channel: "telegram", content: "@JAIMES please take this" }, inboxCtx), "handoff");
@@ -133,6 +143,42 @@ test("claims the runtime-shaped global before_dispatch Inbox event", async () =>
   });
   assert.deepEqual(result, { handled: true });
   assert.equal(dispatched, true);
+});
+
+test("fails open before reserving a claim when no exact message id can be recovered", async () => {
+  const sessionKey = `${inboxCtx.sessionKey}:missing-message-id`;
+  const event = {
+    content: "ordinary Inbox request without a remembered message id",
+    channel: "telegram",
+    sessionKey,
+    timestamp: 1784086200100,
+    isGroup: true,
+  };
+  const ctx = { channelId: "telegram", sessionKey };
+  let dispatched = false;
+  const result = await handleInboxEvent(event, ctx, {}, { error() {} }, async () => {
+    dispatched = true;
+    return true;
+  }, "before_dispatch");
+  assert.equal(result, undefined);
+  assert.equal(dispatched, false);
+});
+
+test("native session command never reaches claim dispatch", async () => {
+  let dispatched = false;
+  const result = await handleInboxEvent(
+    { channel: "telegram", content: "/new@JCUBELL_bot", messageId: "89" },
+    { ...inboxCtx, messageId: "89" },
+    {},
+    console,
+    async () => {
+      dispatched = true;
+      return true;
+    },
+    "before_dispatch",
+  );
+  assert.equal(result, undefined);
+  assert.equal(dispatched, false);
 });
 
 test("consumes burst correlations one-to-one even when hook bodies differ", async () => {

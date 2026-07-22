@@ -276,6 +276,45 @@ class JoshTelegramV3AdapterTests(unittest.TestCase):
             )]
         self.assertEqual(states, ["delivered"])
 
+    def test_fallback_progress_discloses_the_persisted_route_before_retry(self) -> None:
+        lifecycle = self.lifecycle()
+        receipt = self.working_receipt(lifecycle, tier=3)
+        WATCHER.save_json(self.state_path, self.coordinator_card_state(receipt))
+        job = self.coordinator_job(work_id=receipt["workId"])
+        job["route"] = {
+            "routeId": "gemini-pro",
+            "provider": "gemini",
+            "model": "gemini-3.1-pro-high",
+            "worker": "jaimes-antigravity-pro",
+            "host": "jaimes",
+            "routingReason": "dashboard-safe model-routing audit",
+            "fallback": (
+                "glm (ollama/glm-5.2:cloud) execution failed; selected "
+                "gemini-pro (gemini/gemini-3.1-pro-high)"
+            ),
+        }
+        commands: list[list[str]] = []
+        payload = {"runId": "run-1", "progressCode": "fallback_selected"}
+        with patch.object(WATCHER, "gateway_lifecycle", return_value=lifecycle), \
+             patch.object(WATCHER, "coordinator_job_snapshot", return_value=job), \
+             patch.object(WATCHER, "run_cmd", side_effect=lambda command, *args, **kwargs: commands.append(list(command)) or {"ok": True}), \
+             patch.object(WATCHER, "publish_josh", return_value=True) as publish, \
+             patch.object(WATCHER.sys, "stdin", io.StringIO(json.dumps(payload))):
+            result = WATCHER.progress_event_from_stdin()
+        self.assertTrue(result["ok"])
+        self.assertIn("Primary route failed; executing the disclosed fallback", commands[0])
+        self.assertIn(
+            "planned route=gemini-pro; reason=dashboard-safe model-routing audit; "
+            "fallback=glm ollama/glm-5.2:cloud execution failed selected "
+            "gemini-pro gemini/gemini-3.1-pro-high",
+            commands[0],
+        )
+        publish.assert_called_once()
+        self.assertEqual(publish.call_args.kwargs["model_id"], "gemini-3.1-pro-high")
+        self.assertIs(publish.call_args.kwargs["route_verified"], False)
+        saved_card = WATCHER.load_json(self.state_path, {})["active_cards"]["run-1"]
+        self.assertFalse(saved_card.get("route_verified", False))
+
     def test_verifying_progress_uses_trusted_checkpoint_and_transitions_phase(self) -> None:
         lifecycle = self.lifecycle()
         receipt = self.working_receipt(lifecycle, tier=3)

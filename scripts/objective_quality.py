@@ -18,6 +18,33 @@ CARD_ROW_RE = re.compile(
     r"appropriate next steps|approval needed|status|progress)\s*(?::|$)",
     re.I,
 )
+OUTPUT_INSTRUCTION_RE = re.compile(
+    r"^(?:return|respond(?:\s+with)?|output(?:\s+format)?|include)\b"
+    r".*\b(?:findings?|model|authentication|auth|route|routing|fallback|"
+    r"conclusion|format|sections?|status|complete|issues?|next steps?|approval)\b",
+    re.I,
+)
+CONSTRAINT_ONLY_RE = re.compile(
+    r"^(?:(?:please\s+)?(?:make|do)\s+no\s+changes|"
+    r"(?:please\s+)?no\s+changes|"
+    r"(?:please\s+)?(?:do\s+not|don't)\s+(?:make|apply)(?:\s+any)?\s+changes\b|"
+    r"(?:please\s+)?(?:do\s+not|don't)\s+(?:change|edit)\b|"
+    r"read[- ]only(?:\s+only)?)[.!]?$",
+    re.I,
+)
+INTENT_RE = re.compile(
+    r"\b(?:assess|audit|check|evaluate|examine|find|fix|implement|inspect|"
+    r"investigate|repair|review|run|test|validate|verify|build|add|remove|update|"
+    r"confirm|create|execute|improve|optimize|resolve|sync|synchronize|reconcile|align)\b",
+    re.I,
+)
+LEADING_INTENT_RE = re.compile(
+    r"^(?:(?:please\s+)?|(?:can|could|would|may)\s+you(?:\s+please)?\s+)"
+    r"(?:assess|audit|check|evaluate|examine|find|fix|implement|inspect|"
+    r"investigate|repair|review|run|test|validate|verify|build|add|remove|update|"
+    r"confirm|create|execute|improve|optimize|resolve|sync|synchronize|reconcile|align)\b",
+    re.I,
+)
 TRANSPORT_PREFIX_RE = re.compile(
     r"^(?:\[J(?:\|[^\]]+)?\]\s*|TEST\s+ID\s*:\s*\S+\s*)",
     re.I,
@@ -49,7 +76,7 @@ GENERIC_CONNECTIVITY_OBJECTIVE = (
 
 
 def current_request_text(prompt: str) -> str:
-    """Keep only the current request and discard transport/card evidence."""
+    """Select the actionable request, excluding transport and output contracts."""
     raw = prompt or ""
     match = CURRENT_REQUEST_RE.search(raw)
     if match:
@@ -76,7 +103,50 @@ def current_request_text(prompt: str) -> str:
         ):
             continue
         lines.append(line)
-    return " ".join(lines).strip()
+
+    parts = [
+        part.strip(" ,.-")
+        for part in re.split(r"(?<=[.!?])\s+|\n+", "\n".join(lines))
+        if part.strip()
+    ]
+    normalized_parts = [
+        re.sub(r"^read[- ]only\s+acceptance\s+check\s*:\s*", "", part, flags=re.I).strip()
+        for part in parts
+    ]
+    candidates = [
+        part
+        for part in normalized_parts
+        if part
+        and INTENT_RE.search(part)
+        and not CONSTRAINT_ONLY_RE.fullmatch(part)
+        and not OUTPUT_INSTRUCTION_RE.match(part)
+    ]
+    if not candidates:
+        return " ".join(
+            part for part in normalized_parts
+            if part and not OUTPUT_INSTRUCTION_RE.match(part)
+        ).strip()
+    # Preserve every actionable clause in source order. Choosing only the
+    # longest sentence silently drops legitimate compound work such as
+    # "Review Inbox ownership. Fix JAIMES Ops routing." Output-contract rows
+    # have already been removed above, so joining these clauses is safe.
+    selected = "; ".join(dict.fromkeys(candidates))
+    has_no_change_constraint = any(
+        CONSTRAINT_ONLY_RE.fullmatch(part)
+        or re.search(
+            r"\b(?:read[- ]only|(?:make|do|no) changes|"
+            r"(?:do not|don't) (?:make|apply)(?: any)? changes)\b",
+            part,
+            re.I,
+        )
+        for part in normalized_parts
+    )
+    if (
+        has_no_change_constraint
+        and not re.search(r"\b(?:read[- ]only|without (?:making )?changes)\b", selected, re.I)
+    ):
+        selected = f"{selected} read-only"
+    return selected
 
 
 def normalized_words(value: str, *, strip_courtesy: bool = False) -> list[str]:
@@ -135,6 +205,13 @@ def semantic_reinterpretation(prompt: str) -> str:
     request = COURTESY_RE.sub("", request).strip(" .?!")
     if " ".join(normalized_words(request)) in GENERIC_CONNECTIVITY_REQUESTS:
         return GENERIC_CONNECTIVITY_OBJECTIVE
+    request_words = set(normalized_words(request))
+    if (
+        {"model", "routing"}.issubset(request_words)
+        and ({"private", "execution"}.issubset(request_words) or "fallback" in request_words)
+        and re.match(r"^(?:review|audit|inspect|examine|assess|look at)\b", request, re.I)
+    ):
+        return "Assess model-routing resilience and private-execution boundaries"
     patterns = (
         (r"^(?:test(?:ing)?|validate|validating|verify|confirm|check|make sure)\s+(.+)$", "Confirm", "meets the intended requirements"),
         (r"^(?:fix|repair|resolve|correct)\s+(.+)$", "Resolve", "and restore expected behavior"),

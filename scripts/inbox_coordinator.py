@@ -29,11 +29,15 @@ import unicodedata
 import uuid
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 
 ROOT = Path(__file__).resolve().parents[1]
 WORKSPACE = ROOT.parent
+SCRIPTS_DIR = Path(__file__).resolve().parent
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
+from objective_quality import current_request_text as objective_current_request_text  # type: ignore  # noqa: E402
 RUNTIME_PROBE_SCRIPT = ROOT / "scripts" / "ecosystem_runtime_probe.py"
 #JAIMES: Inbox cards must use the host helper beside send_josh_reply.py so live Telegram sends keep their configured Bot API lane.
 WORK_CARD_SCRIPT = WORKSPACE / "scripts" / "josh_work_card.py"
@@ -95,7 +99,7 @@ SECRET_VALUE_PATTERNS = (
     re.compile(r"\bBearer\s+[A-Za-z0-9._~+/=-]{8,}\b", re.I),
     re.compile(r"(?im)\b(password|passwd|token|api[_ -]?key|secret)\s*[:=]\s*([^\s,;]{4,})"),
 )
-WORKER_OUTPUT_CONTRACT = """Return a concise structured result using exactly these plain-text sections in this order: Complete: Yes or No plus whether the objective was completed; What was done: 3-5 unique, source-supported bullets that state concrete findings, outcomes, or changes; Issues: bullets or n/a; Appropriate next steps: one evidence-based recommendation or next action; Approval needed: one approval bullet per issue when approval is genuinely required, otherwise n/a. For an assessment, review, or research request, surface the key findings and recommendation instead of merely saying the assessment or review finished. Generic process statements such as task complete, execution verified, result prepared, or summary delivered are not findings and must not be used to fill the bullets. Put every reported risk or limitation in Issues as well as the relevant finding. Use No action needed only when the findings explicitly support that conclusion and there are no issues, risks, limitations, approvals, or recommendations to act on. Do not include a Model line or claim a provider, model, host, worker, route, or latency; the verified delivery layer adds those facts. Never repeat or reveal passwords, tokens, API keys, cookies, OAuth payloads, or other secret values."""
+WORKER_OUTPUT_CONTRACT = """Return a concise structured result using exactly these plain-text sections in this order: Complete: Yes or No plus whether the objective was completed; What was done: 3-5 unique, source-supported bullets that state concrete findings, outcomes, or changes; Issues: bullets or n/a; Appropriate next steps: one evidence-based recommendation or next action; Approval needed: one approval bullet per issue when approval is genuinely required, otherwise n/a. For an assessment, review, or research request, surface the key findings and recommendation instead of merely saying the assessment or review finished. Generic process statements such as task complete, execution verified, result prepared, or summary delivered are not findings and must not be used to fill the bullets. Put every reported risk or limitation in Issues as well as the relevant finding. Use No action needed only when the findings explicitly support that conclusion and there are no issues, risks, limitations, approvals, or recommendations to act on. The coordinator has already selected and launched the current route: do not launch another provider/model, use SSH to test another host, or infer a fallback. Do not include a Model line or claim a provider, model, authentication method, host, worker, route, fallback, or latency; the verified delivery layer adds those facts. Never repeat or reveal passwords, tokens, API keys, cookies, OAuth payloads, or other secret values."""
 QUICK_WORKER_OUTPUT_CONTRACT = """Return a concise structured result using exactly these plain-text sections in this order: Complete: Yes or No; What was done: 1-3 brief bullets containing the direct answer or conversational result; Issues: bullets or n/a; Appropriate next steps: one brief next action or n/a; Approval needed: a bullet only when approval is genuinely required, otherwise n/a. Do not pad a quick answer with invented findings. Do not include a Model line or claim a provider, model, host, worker, route, or latency; the verified delivery layer adds those facts. Never repeat or reveal passwords, tokens, API keys, cookies, OAuth payloads, or other secret values."""
 TELEGRAM_HEALTH_EVIDENCE_UNAVAILABLE_RESULT = """Complete: No — current Telegram health could not be verified.
 What was done:
@@ -215,6 +219,32 @@ ACTION_OR_RECOMMENDATION_SIGNAL = re.compile(
     re.I,
 )
 NO_ACTION_SIGNAL = re.compile(r"^no (?:further )?actions? (?:(?:is|are) )?(?:needed|required)\b", re.I)
+MODEL_ROUTING_AUDIT_SIGNAL = re.compile(
+    r"(?:\b(?:model|provider|specialist)\b.{0,140}\b(?:route|routing|fallback|authentication|auth)\b|"
+    r"\b(?:route|routing|fallback|authentication|auth)\b.{0,140}\b(?:model|provider|specialist)\b)",
+    re.I | re.S,
+)
+
+
+class RouteExecutionError(RuntimeError):
+    """Fail-closed execution error carrying only dashboard-safe route facts."""
+
+    def __init__(self, message: str, route: dict[str, Any], attempts: list[str]):
+        super().__init__(message)
+        self.route = dict(route)
+        self.attempts = list(attempts)
+UNRESOLVED_EXECUTION_FAILURE_SIGNAL = re.compile(
+    r"(?:\bno\s+(?:verified\s+)?(?:specialist|provider|model|route)\b.{0,80}"
+    r"\b(?:completed|executed|ran|returned)\b|"
+    r"\b(?:exact\s+)?(?:model|provider|specialist|authentication|auth)\b.{0,100}"
+    r"\b(?:was not|were not|could not be|failed to be)\s+(?:executed|verified|initialized|run)\b|"
+    r"\b(?:all|every|both|neither|none\s+of\s+the)\b.{0,80}"
+    r"\b(?:specialists?|providers?|models?|routes?|fallbacks?)\b.{0,100}"
+    r"\b(?:failed|unverified|could not be confirmed|failed to initialize)\b|"
+    r"\b(?:final|required|selected)\s+(?:specialist|provider|model|route|fallback)\b.{0,100}"
+    r"\b(?:failed|unverified|could not be confirmed|failed to initialize)\b)",
+    re.I | re.S,
+)
 TELEGRAM_HEALTH_REQUEST = re.compile(
     r"(?:\btelegram\b.{0,80}\b(?:health|healthy|status|running|connectivity|delivery)\b|"
     r"\b(?:health|healthy|status|running|connectivity|delivery)\b.{0,80}\btelegram\b)",
@@ -242,6 +272,7 @@ ROUTES: dict[str, dict[str, Any]] = {
     "luna": {
         "provider": "codex",
         "model": "gpt-5.6-luna",
+        "auth": "OpenAI Codex OAuth/subscription",
         "tier": "codex-luna",
         "worker": "josh2-codex-luna",
         "host": "josh2",
@@ -251,6 +282,7 @@ ROUTES: dict[str, dict[str, Any]] = {
     "terra": {
         "provider": "codex",
         "model": "gpt-5.6-terra",
+        "auth": "OpenAI Codex OAuth/subscription",
         "tier": "codex",
         "worker": "josh2-codex-terra",
         "host": "josh2",
@@ -260,6 +292,7 @@ ROUTES: dict[str, dict[str, Any]] = {
     "sol": {
         "provider": "codex",
         "model": "gpt-5.6-sol",
+        "auth": "OpenAI Codex OAuth/subscription",
         "tier": "codex-sol",
         "worker": "josh2-codex-sol",
         "host": "josh2",
@@ -269,6 +302,7 @@ ROUTES: dict[str, dict[str, Any]] = {
     "gpt-5.5": {
         "provider": "codex",
         "model": "gpt-5.5",
+        "auth": "OpenAI Codex OAuth/subscription",
         "tier": "codex-stable",
         "worker": "josh2-codex-gpt-5-5",
         "host": "josh2",
@@ -278,6 +312,7 @@ ROUTES: dict[str, dict[str, Any]] = {
     "gpt-5.4-mini": {
         "provider": "codex",
         "model": "gpt-5.4-mini",
+        "auth": "OpenAI Codex OAuth/subscription",
         "tier": "codex-mini",
         "worker": "josh2-codex-gpt-5-4-mini",
         "host": "josh2",
@@ -287,6 +322,7 @@ ROUTES: dict[str, dict[str, Any]] = {
     "gemini": {
         "provider": "gemini",
         "model": "gemini-3.6-flash-medium",
+        "auth": "Antigravity session",
         "tier": "fast",
         "worker": "jaimes-gemini-review",
         "host": "jaimes",
@@ -296,6 +332,7 @@ ROUTES: dict[str, dict[str, Any]] = {
     "gemini-pro": {
         "provider": "gemini",
         "model": "gemini-3.1-pro-high",
+        "auth": "Antigravity session",
         "tier": "reason",
         "worker": "jaimes-gemini-pro",
         "host": "jaimes",
@@ -305,6 +342,7 @@ ROUTES: dict[str, dict[str, Any]] = {
     "jaimes": {
         "provider": "jaimes",
         "model": "jaimes-workhorse",
+        "auth": "Hermes runtime authentication",
         "tier": "delegate",
         "worker": "jaimes-hermes-workhorse",
         "host": "jaimes",
@@ -314,6 +352,7 @@ ROUTES: dict[str, dict[str, Any]] = {
     "glm": {
         "provider": "ollama",
         "model": "glm-5.2:cloud",
+        "auth": "Ollama Cloud",
         "tier": "reason",
         "worker": "jaimes-ollama-glm",
         "host": "jaimes",
@@ -323,6 +362,7 @@ ROUTES: dict[str, dict[str, Any]] = {
     "ollama": {
         "provider": "ollama",
         "model": "local",
+        "auth": "Local Ollama runtime",
         "tier": "local",
         "worker": "josh2-ollama-local",
         "host": "josh2",
@@ -332,12 +372,27 @@ ROUTES: dict[str, dict[str, Any]] = {
     "grok": {
         "provider": "xai",
         "model": "grok-4.5",
+        "auth": "Grok CLI authentication",
         "tier": "grok-fast",
         "worker": "jaimes-grok-public",
         "host": "jaimes",
         "role": "X/current-events specialist",
         "executor": "remote-grok-cli",
     },
+}
+
+FALLBACK_LADDERS: dict[str, tuple[str, ...]] = {
+    "gemini": ("glm", "terra"),
+    "gemini-pro": ("glm", "terra"),
+    "glm": ("gemini-pro", "terra"),
+    "grok": ("gemini", "terra"),
+    "jaimes": ("glm", "terra"),
+    "luna": ("terra",),
+    "terra": ("sol", "luna"),
+    "sol": ("terra", "luna"),
+    "gpt-5.5": ("terra", "luna"),
+    "gpt-5.4-mini": ("luna", "terra"),
+    "ollama": ("luna", "terra"),
 }
 
 #JAIMES: topic prompts may request any configured specialist family; normalize punctuation before routing.
@@ -507,7 +562,11 @@ def detect_explicit_route(prompt: str) -> str:
 
 
 def classify_route(prompt: str, privacy: str) -> tuple[str, str]:
-    lower = (prompt or "").lower()
+    # Output-format instructions are not task intent. Reuse the same canonical
+    # request extractor that drives Telegram objective text so a request for a
+    # model/auth field in the final summary cannot hijack the selected route.
+    core_request = objective_current_request_text(prompt) or str(prompt or "")
+    lower = core_request.lower()
     if privacy != "dashboard-safe" or contains_sensitive_terms(prompt):
         return "luna", "private/sensitive content stays on Josh 2.0 coordinator lane"
     if any(token in lower for token in ("current event", "latest news", "x/twitter", "social signal", "market narrative")):
@@ -529,6 +588,12 @@ def classify_route(prompt: str, privacy: str) -> tuple[str, str]:
         r"\b(?:fix|patch|edit|implement|deploy|repair|restart|recover|build)\b",
         mutation_text,
     )
+    model_routing_audit = bool(
+        MODEL_ROUTING_AUDIT_SIGNAL.search(lower)
+        and re.search(r"\b(?:assess|audit|check|evaluate|inspect|review|verify|confirm)\b", lower)
+    )
+    if model_routing_audit and not glm_mutation:
+        return "glm", "dashboard-safe model-routing audit"
     if glm_reasoning and not glm_mutation:
         return "glm", "dashboard-safe large-context technical reasoning"
     if any(token in lower for token in ("hard", "stabilize", "architecture", "migration", "integration", "debug", "root cause")):
@@ -590,9 +655,7 @@ def health(route_id: str, injected: dict[str, bool] | None = None) -> bool:
 
 
 def fallback_for(route_id: str, privacy: str, injected: dict[str, bool] | None = None) -> tuple[str, str]:
-    candidates = ["luna", "terra", "gemini", "ollama"]
-    if privacy != "dashboard-safe":
-        candidates = ["luna", "terra", "ollama"]
+    candidates = FALLBACK_LADDERS.get(route_id, ("luna", "terra"))
     for candidate in candidates:
         if candidate != route_id and route_allowed_for_privacy(candidate, privacy) and health(candidate, injected):
             return candidate, f"{route_id} unhealthy; selected {candidate}"
@@ -602,7 +665,8 @@ def fallback_for(route_id: str, privacy: str, injected: dict[str, bool] | None =
 
 def route_prompt(prompt: str, privacy: str = "dashboard-safe", injected_health: dict[str, bool] | None = None) -> dict[str, Any]:
     started = time.perf_counter()
-    explicit = detect_explicit_route(prompt)
+    core_request = objective_current_request_text(prompt) or str(prompt or "")
+    explicit = detect_explicit_route(core_request)
     if explicit:
         route_id = explicit
         reason = "explicit model request"
@@ -613,26 +677,42 @@ def route_prompt(prompt: str, privacy: str = "dashboard-safe", injected_health: 
     policy_allowed = route_allowed_for_privacy(route_id, privacy)
     fallback = ""
     selected = route_id
+    outcome = "planned"
+    preflight_error = ""
     if explicit and not policy_allowed:
-        selected, fallback = fallback_for(route_id, privacy, injected_health)
+        # Explicit model requests are fail-closed. Never replace the named
+        # provider with a different model when privacy policy rejects it.
         reason = "explicit model request blocked by privacy policy"
-        fallback = f"privacy policy blocked {route_id}; selected {selected}"
+        fallback = ""
+        outcome = "blocked"
+        preflight_error = "privacy-policy"
     elif explicit and not requested_healthy:
-        selected, fallback = fallback_for(route_id, privacy, injected_health)
+        reason = "explicit model request unavailable; automatic fallback disabled"
+        fallback = ""
+        outcome = "blocked"
+        preflight_error = "route-unhealthy"
     elif not requested_healthy:
         selected, fallback = fallback_for(route_id, privacy, injected_health)
 
     cfg = ROUTES[selected]
+    preflight_verified = bool(
+        policy_allowed
+        and (requested_healthy if explicit else health(selected, injected_health))
+    )
     latency_ms = max(0, round((time.perf_counter() - started) * 1000))
     return {
-        "ok": True,
+        "ok": not bool(explicit and preflight_error),
         "routeId": selected,
+        "policyRouteId": route_id,
         "requestedRouteId": route_id if explicit else "",
         "explicitRequest": bool(explicit),
         "requestedRouteHealthy": requested_healthy,
         "policyAllowed": policy_allowed,
+        "preflightVerified": preflight_verified,
+        "preflightError": preflight_error,
         "provider": cfg["provider"],
         "model": cfg["model"],
+        "auth": cfg["auth"],
         "tier": cfg["tier"],
         "worker": cfg["worker"],
         "host": cfg["host"],
@@ -643,7 +723,7 @@ def route_prompt(prompt: str, privacy: str = "dashboard-safe", injected_health: 
         "privacy": privacy,
         "latencyMs": latency_ms,
         "executionVerified": False,
-        "outcome": "planned",
+        "outcome": outcome,
     }
 
 
@@ -655,11 +735,15 @@ def append_telemetry(record: dict[str, Any]) -> None:
         "worker": record.get("actualWorker") or record.get("worker"),
         "provider": record.get("actualProvider") or record.get("provider"),
         "model": record.get("actualModel") or record.get("model"),
+        "auth": record.get("actualAuth") if record.get("authVerified") else "unverified",
+        "authVerified": bool(record.get("authVerified")),
         "routeId": record.get("routeId"),
+        "policyRouteId": record.get("policyRouteId") or record.get("routeId"),
         "requestedRouteId": record.get("requestedRouteId") or "",
         "explicitRequest": bool(record.get("explicitRequest")),
         "routingReason": record.get("routingReason"),
         "fallback": record.get("fallback") or "",
+        "attemptedRoutes": list(record.get("attemptedRoutes") or []),
         "latencyMs": record.get("latencyMs"),
         "outcome": record.get("outcome"),
         "jobId": record.get("jobId") or "",
@@ -988,7 +1072,19 @@ def enforce_host_evidence_gate(output: str, host_context: dict[str, Any] | None)
     return str(output or "")
 
 
-def parse_model_sections(output: str, delivery_tier: int = 3) -> dict[str, Any]:
+def route_requires_successful_execution(route: dict[str, Any] | None) -> bool:
+    """Return whether this objective specifically requires a live route proof."""
+    if not isinstance(route, dict):
+        return False
+    return str(route.get("routingReason") or "") == "dashboard-safe model-routing audit"
+
+
+def parse_model_sections(
+    output: str,
+    delivery_tier: int = 3,
+    *,
+    require_successful_execution: bool = False,
+) -> dict[str, Any]:
     cleaned = html.unescape(str(output or "")).replace("\r\n", "\n").replace("\r", "\n")
     cleaned = re.sub(r"</?pre>", "", cleaned, flags=re.I)
     sections: dict[str, list[str]] = {key: [] for key in ("done", "issues", "next", "approval")}
@@ -1072,6 +1168,14 @@ def parse_model_sections(output: str, delivery_tier: int = 3) -> dict[str, Any]:
             quality_issues.append("The completion claim did not include an evidence-based next step.")
 
         reported_text = " ".join([*source_done, *source_next, *source_approval])
+        execution_truth_text = " ".join([*source_done, *source_issues, *source_next])
+        if (
+            require_successful_execution
+            and UNRESOLVED_EXECUTION_FAILURE_SIGNAL.search(execution_truth_text)
+        ):
+            quality_issues.append(
+                "The completion claim contradicted an unresolved model or route execution failure."
+            )
         reported_risk = bool(
             RISK_OR_LIMITATION_SIGNAL.search(reported_text)
             or has_operational_risk(reported_text)
@@ -1138,7 +1242,11 @@ def render_final_html(
 ) -> str:
     #JAIMES: the delivery layer, not the model, owns the fixed final format and
     # inserts only verified runtime routing facts.
-    sections = parse_model_sections(output, delivery_tier=delivery_tier)
+    sections = parse_model_sections(
+        output,
+        delivery_tier=delivery_tier,
+        require_successful_execution=route_requires_successful_execution(route),
+    )
     execution_verified = bool(execution.get("executionVerified"))
     model_verified = bool(execution.get("modelVerified"))
     if not execution_verified:
@@ -1148,10 +1256,20 @@ def render_final_html(
     provider = clean_final_item(str(execution.get("actualProvider") or ""), limit=40)
     model = clean_final_item(str(execution.get("actualModel") or ""), limit=80)
     verified_model = f"{provider}/{model}" if model_verified and provider and model else "unverified"
+    verified_auth = (
+        clean_final_item(str(execution.get("actualAuth") or ""), limit=80)
+        if execution_verified and bool(execution.get("authVerified"))
+        else "unverified"
+    ) or "unverified"
+    verified_fallback = clean_final_item(str(route.get("fallback") or ""), limit=220) or "none"
+    verified_reason = clean_final_item(
+        str(route.get("routingReason") or "verified Inbox routing"),
+        limit=120,
+    )
     args = argparse.Namespace(
         model=verified_model,
         route=clean_final_item(str(route.get("routeId") or "unverified"), limit=80),
-        why=clean_final_item(str(route.get("routingReason") or "verified Inbox routing"), limit=120),
+        why=f"{verified_reason}; auth={verified_auth}; fallback={verified_fallback}",
         complete=bool(sections["complete"]),
         done=sections["done"],
         issue=sections["issues"],
@@ -1245,8 +1363,11 @@ def make_job(
             "route": {
                 key: route.get(key)
                 for key in (
-                    "routeId", "provider", "model", "tier", "worker", "host",
-                    "executor", "routingReason", "fallback", "privacy",
+                    "routeId", "policyRouteId", "provider", "model", "auth", "tier", "worker", "host",
+                    "executor", "routingReason", "fallback", "privacy", "requestedRouteId",
+                    "explicitRequest", "requestedRouteHealthy", "policyAllowed",
+                    "preflightVerified", "preflightError", "outcome",
+                    "attemptedRoutes",
                 )
             },
             "promptSignature": "" if sensitive else prompt_signature(prompt),
@@ -1341,7 +1462,10 @@ elif kind == "remote-llm-router-op":
     output = llm_router._ask_xai(prompt, model=cfg["model"], timeout=timeout, tier=cfg["tier"])
 else:
     raise RuntimeError(f"unsupported executor: {kind}")
-print(json.dumps({"output": output, "provider": cfg["provider"], "model": cfg["model"], "modelVerified": True}))
+envelope = {"output": output, "provider": cfg["provider"], "model": cfg["model"], "modelVerified": True}
+if kind == "local-ollama":
+    envelope.update({"actualAuth": "Local Ollama runtime", "authVerified": True})
+print(json.dumps(envelope))
 '''
 
 
@@ -1406,7 +1530,10 @@ else:
     output = str(content or "").strip()
 if not output:
     raise RuntimeError("Antigravity returned empty output")
-print(json.dumps({"output": output, "provider": "gemini", "model": model, "modelVerified": True}))
+print(json.dumps({
+    "output": output, "provider": "gemini", "model": model,
+    "modelVerified": True, "actualAuth": "Antigravity session", "authVerified": True,
+}))
 '''
 
 
@@ -1431,7 +1558,10 @@ except urllib.error.HTTPError as exc:
 output = str(result.get("response") or "").strip()
 if not output:
     raise RuntimeError("Ollama returned empty output")
-print(json.dumps({"output": output, "provider": "ollama", "model": cfg["model"], "modelVerified": True}))
+print(json.dumps({
+    "output": output, "provider": "ollama", "model": cfg["model"],
+    "modelVerified": True, "actualAuth": "Ollama Cloud", "authVerified": True,
+}))
 '''
 
 
@@ -1457,7 +1587,10 @@ payload = json.loads(proc.stdout)
 output = str(payload.get("text") or "").strip()
 if not output:
     raise RuntimeError("Grok CLI returned empty output")
-print(json.dumps({"output": output, "provider": "xai", "model": cfg.get("model") or "grok-4.5", "modelVerified": True}))
+print(json.dumps({
+    "output": output, "provider": "xai", "model": cfg.get("model") or "grok-4.5",
+    "modelVerified": True, "actualAuth": "Grok CLI authentication", "authVerified": True,
+}))
 '''
 
 
@@ -1508,15 +1641,130 @@ def execute_route(prompt: str, route: dict[str, Any], timeout: int) -> dict[str,
     output = str(result.get("output") or "").strip()
     if not output:
         raise RuntimeError("executor returned empty model output")
+    actual_auth = clean_final_item(str(result.get("actualAuth") or ""), limit=80)
+    auth_verified = bool(result.get("authVerified") is True and actual_auth)
     return {
         "output": output,
         "actualHost": actual_host,
         "actualWorker": route.get("worker"),
         "actualProvider": result.get("provider") or route.get("provider"),
         "actualModel": result.get("model") or "unverified",
+        "actualAuth": actual_auth,
+        "authVerified": auth_verified,
         "modelVerified": bool(result.get("modelVerified")),
         "executionVerified": True,
     }
+
+
+def execution_fallback_route(
+    route: dict[str, Any],
+    attempted: set[str],
+    injected_health: dict[str, bool] | None = None,
+    candidate_order: tuple[str, ...] | None = None,
+) -> dict[str, Any] | None:
+    """Return the next healthy, privacy-safe runtime route with disclosure."""
+    route_id = str(route.get("routeId") or "")
+    privacy = str(route.get("privacy") or "dashboard-safe")
+    candidates = candidate_order or FALLBACK_LADDERS.get(route_id, ("luna", "terra"))
+    for candidate in candidates:
+        if (
+            candidate in attempted
+            or not route_allowed_for_privacy(candidate, privacy)
+            or not health(candidate, injected_health)
+        ):
+            continue
+        current_cfg = ROUTES.get(route_id, {})
+        candidate_cfg = ROUTES[candidate]
+        disclosure = (
+            f"{route_id} ({current_cfg.get('provider', 'unverified')}/"
+            f"{current_cfg.get('model', 'unverified')}) execution failed; selected "
+            f"{candidate} ({candidate_cfg['provider']}/{candidate_cfg['model']})"
+        )
+        previous = clean_final_item(str(route.get("fallback") or ""), limit=220)
+        fallback = "; ".join(value for value in (previous, disclosure) if value)
+        return {
+            **route,
+            "routeId": candidate,
+            "provider": candidate_cfg["provider"],
+            "model": candidate_cfg["model"],
+            "auth": candidate_cfg["auth"],
+            "tier": candidate_cfg["tier"],
+            "worker": candidate_cfg["worker"],
+            "host": candidate_cfg["host"],
+            "role": candidate_cfg["role"],
+            "executor": candidate_cfg["executor"],
+            "fallback": fallback[:440],
+            "executionVerified": False,
+            "outcome": "fallback-planned",
+        }
+    return None
+
+
+def execute_route_with_fallback(
+    prompt: str,
+    route: dict[str, Any],
+    timeout: int,
+    injected_health: dict[str, bool] | None = None,
+    on_fallback: Callable[[dict[str, Any]], bool] | None = None,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Execute the planned route, then fresh disclosed fallbacks if it fails."""
+    current = dict(route)
+    attempted: set[str] = set()
+    attempted_order: list[str] = []
+    original_route_id = str(current.get("policyRouteId") or current.get("routeId") or "")
+    fallback_candidates = FALLBACK_LADDERS.get(original_route_id, ("luna", "terra"))
+    if current.get("explicitRequest") and not current.get("preflightVerified"):
+        raise RouteExecutionError(
+            "Explicit route preflight failed; automatic fallback is disabled",
+            current,
+            attempted_order,
+        )
+    while True:
+        route_id = str(current.get("routeId") or "unverified")
+        attempted.add(route_id)
+        attempted_order.append(route_id)
+        try:
+            execution = execute_route(prompt, current, timeout)
+            current["attemptedRoutes"] = list(attempted_order)
+            return current, execution
+        except Exception as exc:  # noqa: BLE001 - only safe route IDs leave this boundary
+            current["attemptedRoutes"] = list(attempted_order)
+            if current.get("explicitRequest"):
+                raise RouteExecutionError(
+                    f"Explicit route {route_id} failed; automatic fallback is disabled",
+                    current,
+                    attempted_order,
+                ) from exc
+            next_route = execution_fallback_route(
+                current,
+                attempted,
+                injected_health,
+                candidate_order=fallback_candidates,
+            )
+            if next_route is None:
+                final_failure = (
+                    f"{route_id} ({current.get('provider', 'unverified')}/"
+                    f"{current.get('model', 'unverified')}) execution failed; "
+                    "no eligible fallback remained"
+                )
+                previous = clean_final_item(str(current.get("fallback") or ""), limit=440)
+                current["fallback"] = "; ".join(
+                    value for value in (previous, final_failure) if value
+                )[:660]
+                raise RouteExecutionError(
+                    "No verified execution route completed; attempted "
+                    + ", ".join(attempted_order),
+                    current,
+                    attempted_order,
+                ) from exc
+            next_route["attemptedRoutes"] = list(attempted_order)
+            if on_fallback is None or not on_fallback(dict(next_route)):
+                raise RouteExecutionError(
+                    "Fallback route could not be disclosed before execution",
+                    current,
+                    attempted_order,
+                ) from exc
+            current = next_route
 
 
 def submit_job(args: argparse.Namespace) -> dict[str, Any]:
@@ -1531,12 +1779,16 @@ def submit_job(args: argparse.Namespace) -> dict[str, Any]:
                 route = {
                     "ok": True,
                     "routeId": route_id,
+                    "policyRouteId": str(planned.get("policyRouteId") or route_id),
                     "requestedRouteId": str(planned.get("requestedRouteId") or ""),
                     "explicitRequest": bool(planned.get("explicitRequest")),
                     "requestedRouteHealthy": bool(planned.get("requestedRouteHealthy")),
-                    "policyAllowed": True,
+                    "policyAllowed": bool(planned.get("policyAllowed", True)),
+                    "preflightVerified": bool(planned.get("preflightVerified")),
+                    "preflightError": clean_final_item(str(planned.get("preflightError") or ""), limit=40),
                     "provider": cfg["provider"],
                     "model": cfg["model"],
+                    "auth": cfg["auth"],
                     "tier": cfg["tier"],
                     "worker": cfg["worker"],
                     "host": cfg["host"],
@@ -1547,12 +1799,20 @@ def submit_job(args: argparse.Namespace) -> dict[str, Any]:
                     "privacy": args.privacy,
                     "latencyMs": planned.get("latencyMs"),
                     "executionVerified": False,
-                    "outcome": "planned",
+                    "outcome": clean_final_item(str(planned.get("outcome") or "planned"), limit=40),
+                    "attemptedRoutes": [],
                 }
         except (KeyError, TypeError, ValueError, json.JSONDecodeError):
             route = None
     if route is None:
         route = route_prompt(prompt, args.privacy)
+    if route.get("explicitRequest") and not route.get("preflightVerified"):
+        return {
+            "ok": False,
+            "status": "explicit-route-preflight-failed",
+            "error": str(route.get("preflightError") or "route-unhealthy"),
+            "route": route,
+        }
     origin = {
         "runId": args.origin_run_id or "",
         "messageId": args.message_id or "",
@@ -1622,7 +1882,7 @@ def write_private_text(path: Path, value: str) -> None:
 def update_card_progress(snapshot: dict[str, Any], progress_code: str) -> bool:
     origin = snapshot.get("origin") or {}
     run_id = str(origin.get("runId") or "")
-    if not run_id or progress_code not in {"worker_started", "verifying"} or not TELEGRAM_GATEWAY_SCRIPT.exists():
+    if not run_id or progress_code not in {"worker_started", "fallback_selected", "verifying"} or not TELEGRAM_GATEWAY_SCRIPT.exists():
         return False
     cmd = [
         sys.executable,
@@ -1670,11 +1930,43 @@ def update_card_progress(snapshot: dict[str, Any], progress_code: str) -> bool:
     return False
 
 
-def checkpoint_worker_execution(job_id: str, lease_token: str, execution: dict[str, Any]) -> bool:
+def checkpoint_worker_route(job_id: str, lease_token: str, effective_route: dict[str, Any]) -> bool:
+    """Persist a disclosed fallback route before its execution begins."""
+    with state_lock():
+        state = read_json(STATE_PATH, {"jobs": {}})
+        job = (state.get("jobs") or {}).get(job_id)
+        if (
+            not isinstance(job, dict)
+            or job.get("status") != "running"
+            or not lease_token
+            or job.get("leaseToken") != lease_token
+        ):
+            return False
+        job["route"] = {
+            key: effective_route.get(key)
+            for key in (
+                "routeId", "policyRouteId", "provider", "model", "auth", "tier", "worker", "host",
+                "executor", "routingReason", "fallback", "privacy", "requestedRouteId",
+                "explicitRequest", "requestedRouteHealthy", "policyAllowed",
+                "preflightVerified", "preflightError", "outcome",
+                "attemptedRoutes",
+            )
+        }
+        job["updatedAt"] = utc_now()
+        save_json(STATE_PATH, state)
+        return True
+
+
+def checkpoint_worker_execution(
+    job_id: str,
+    lease_token: str,
+    execution: dict[str, Any],
+    effective_route: dict[str, Any] | None = None,
+) -> bool:
     """Expose only verified route facts to the trusted progress gateway."""
     allowed = (
         "actualHost", "actualWorker", "actualProvider", "actualModel",
-        "modelVerified", "executionVerified",
+        "actualAuth", "authVerified", "modelVerified", "executionVerified",
     )
     with state_lock():
         state = read_json(STATE_PATH, {"jobs": {}})
@@ -1687,6 +1979,17 @@ def checkpoint_worker_execution(job_id: str, lease_token: str, execution: dict[s
         ):
             return False
         job["actual"] = {key: execution.get(key) for key in allowed}
+        if effective_route is not None:
+            job["route"] = {
+                key: effective_route.get(key)
+                for key in (
+                    "routeId", "policyRouteId", "provider", "model", "auth", "tier", "worker", "host",
+                    "executor", "routingReason", "fallback", "privacy", "requestedRouteId",
+                    "explicitRequest", "requestedRouteHealthy", "policyAllowed",
+                    "preflightVerified", "preflightError", "outcome",
+                    "attemptedRoutes",
+                )
+            }
         job["executionCheckpointAt"] = utc_now()
         job["updatedAt"] = utc_now()
         save_json(STATE_PATH, state)
@@ -1701,7 +2004,11 @@ def deliver_result(job_id: str, snapshot: dict[str, Any], route: dict[str, Any],
         return False
     delivery_tier = int(snapshot.get("deliveryTier") or 3)
     final_html = render_final_html(route, execution, output, delivery_tier=delivery_tier)
-    sections = parse_model_sections(output, delivery_tier=delivery_tier)
+    sections = parse_model_sections(
+        output,
+        delivery_tier=delivery_tier,
+        require_successful_execution=route_requires_successful_execution(route),
+    )
     task_complete = bool(
         execution.get("executionVerified")
         and sections.get("complete")
@@ -1806,17 +2113,34 @@ def run_worker(job_id: str) -> dict[str, Any]:
             execution_prompt = f"{output_contract}{context_block}\n\nUser request:\n{prompt}"
             execution_route = dict(route)
             execution_route["readOnly"] = read_only_execution_requested(prompt)
-            execution = execute_route(
-                execution_prompt,
-                execution_route,
-                int(snapshot.get("timeoutSeconds") or DEFAULT_TIMEOUT_SECONDS),
-            )
+
+            def disclose_fallback(next_route: dict[str, Any]) -> bool:
+                snapshot["route"] = dict(next_route)
+                return bool(
+                    checkpoint_worker_route(job_id, lease_token, next_route)
+                    and update_card_progress(snapshot, "fallback_selected")
+                )
+
+            try:
+                effective_route, execution = execute_route_with_fallback(
+                    execution_prompt,
+                    execution_route,
+                    int(snapshot.get("timeoutSeconds") or DEFAULT_TIMEOUT_SECONDS),
+                    on_fallback=disclose_fallback,
+                )
+            except RouteExecutionError as route_exc:
+                route = dict(route_exc.route)
+                snapshot["route"] = dict(route)
+                checkpoint_worker_route(job_id, lease_token, route)
+                raise
+            route = effective_route
+            snapshot["route"] = dict(effective_route)
             output = enforce_host_evidence_gate(str(execution["output"]), host_context)
             write_private_text(result_path, output)
             model_executed = True
             if prompt_path is not None:
                 prompt_path.unlink(missing_ok=True)
-        if not checkpoint_worker_execution(job_id, lease_token, execution):
+        if not checkpoint_worker_execution(job_id, lease_token, execution, route):
             raise RuntimeError("execution checkpoint failed")
         update_card_progress(snapshot, "verifying")
         delivered = deliver_result(job_id, snapshot, route, execution, output)
@@ -1825,6 +2149,7 @@ def run_worker(job_id: str) -> dict[str, Any]:
         parsed_sections = parse_model_sections(
             output,
             delivery_tier=int(snapshot.get("deliveryTier") or 3),
+            require_successful_execution=route_requires_successful_execution(route),
         )
         task_complete = bool(
             execution.get("executionVerified")
@@ -1849,6 +2174,7 @@ def run_worker(job_id: str) -> dict[str, Any]:
                 recovered_sections = parse_model_sections(
                     output,
                     delivery_tier=int(snapshot.get("deliveryTier") or 3),
+                    require_successful_execution=route_requires_successful_execution(route),
                 )
                 outcome = "done" if (
                     recovered_sections.get("complete")
@@ -1860,6 +2186,8 @@ def run_worker(job_id: str) -> dict[str, Any]:
                 "actualWorker": route.get("worker") or "unverified",
                 "actualProvider": "unverified",
                 "actualModel": "unverified",
+                "actualAuth": "",
+                "authVerified": False,
                 "modelVerified": False,
                 "executionVerified": False,
             }
@@ -1895,7 +2223,10 @@ def run_worker(job_id: str) -> dict[str, Any]:
         if execution:
             job["actual"] = {
                 key: execution.get(key)
-                for key in ("actualHost", "actualWorker", "actualProvider", "actualModel", "modelVerified", "executionVerified")
+                for key in (
+                    "actualHost", "actualWorker", "actualProvider", "actualModel",
+                    "actualAuth", "authVerified", "modelVerified", "executionVerified",
+                )
             }
         if outcome == "done":
             job.pop("lastError", None)
@@ -2573,6 +2904,7 @@ def recover(job_id: str = "") -> dict[str, Any]:
         recovered_sections = parse_model_sections(
             output,
             delivery_tier=int(job.get("deliveryTier") or 3),
+            require_successful_execution=route_requires_successful_execution(route),
         )
         complete = bool(
             recovered_sections.get("complete")
