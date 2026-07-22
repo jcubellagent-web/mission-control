@@ -7,6 +7,7 @@ import argparse
 import json
 import os
 from pathlib import Path
+import plistlib
 
 
 GROUP_ID = "-1003589561528"
@@ -74,6 +75,23 @@ def check_josh2(home: Path) -> list[str]:
     preflight = home / ".openclaw/workspace/mission-control/scripts/ecosystem_edit_preflight.py"
 
     check(bool(group), "Josh 2.0 group config missing", problems)
+    # The gateway/fast-ack lifecycle is the only progress/final writer. Pin
+    # upstream OpenClaw surfaces off so a future default change cannot create
+    # an extra preview, rich final, or implicit quote reply beside that card.
+    streaming = telegram.get("streaming", {})
+    check(streaming.get("mode") == "off", "OpenClaw Telegram streaming must stay off", problems)
+    check(
+        streaming.get("preview", {}).get("toolProgress") is False,
+        "OpenClaw Telegram tool progress must stay off",
+        problems,
+    )
+    check(telegram.get("richMessages") is False, "OpenClaw native rich messages must stay off", problems)
+    check(telegram.get("replyToMode") == "off", "OpenClaw implicit reply quoting must stay off", problems)
+    check(
+        config.get("messages", {}).get("ackReactionScope") == "off",
+        "OpenClaw built-in acknowledgement reactions must stay off",
+        problems,
+    )
     for topic_id, owner in TOPIC_OWNERS.items():
         topic = topics.get(topic_id, {})
         check(topic.get("enabled") is True, f"Topic {topic_id} must be enabled for Josh 2.0", problems)
@@ -105,11 +123,45 @@ def check_jaimes(home: Path) -> list[str]:
     memory = (home / ".hermes/memories/MEMORY.md").read_text()
     edit_skill = home / ".openclaw/workspace/mission-control/agent-skills/shared-edit-coordination/SKILL.md"
     preflight = home / ".openclaw/workspace/mission-control/scripts/ecosystem_edit_preflight.py"
+    gateway_plist = home / "Library/LaunchAgents/ai.hermes.gateway.plist"
 
     allowed_groups = telegram.get("group_allowed_chats", telegram.get("allowed_group_ids", []))
     check(GROUP_ID in {str(item) for item in allowed_groups}, "JAIMES group allowlist missing", problems)
     expected_free = {topic for topic, owner in TOPIC_OWNERS.items() if owner == "jaimes"}
     check(free_topics == expected_free, "JAIMES free-response topics do not exactly match ownership", problems)
+    # Hermes 0.19 adds native draft/rich transports. They remain deliberately
+    # disabled in managed topics: the custom gateway owns one editable card and
+    # one final while Hermes keeps important-only notifications and reactions.
+    streaming = config.get("gateway", {}).get("streaming", {})
+    extra = telegram.get("extra", {})
+    notifications = config.get("display", {}).get("platforms", {}).get("telegram", {})
+    check(streaming.get("enabled") is False, "Hermes Telegram streaming must stay disabled", problems)
+    check(streaming.get("transport") == "auto", "Hermes Telegram transport fallback drifted", problems)
+    check(extra.get("rich_messages") is False, "Hermes native rich messages must stay off", problems)
+    check(extra.get("rich_drafts") is False, "Hermes native rich drafts must stay off", problems)
+    check(telegram.get("reactions") is True, "Hermes processing reactions must stay enabled", problems)
+    check(telegram.get("exclusive_bot_mentions") is True, "Hermes exclusive bot mentions must stay enabled", problems)
+    check(telegram.get("require_mention") is True, "Hermes group mention gate must stay enabled", problems)
+    check(
+        telegram.get("observe_unmentioned_group_messages") is True,
+        "Hermes unmentioned context observation must stay enabled",
+        problems,
+    )
+    check(notifications.get("notifications") == "important", "Hermes Telegram notifications must stay important-only", problems)
+    try:
+        gateway_args = plistlib.loads(gateway_plist.read_bytes()).get("ProgramArguments", [])
+    except (OSError, plistlib.InvalidFileException):
+        gateway_args = []
+    check(
+        gateway_args[:3]
+        == [
+            str(home / ".openclaw/workspace/scripts/op_agent_env.sh"),
+            str(home / ".openclaw/workspace/config/agent-ecosystem-hermes.op.env"),
+            "--",
+        ],
+        "Hermes gateway must resolve managed credentials before launch",
+        problems,
+    )
     missing_families = REQUIRED_MODEL_FAMILIES - subagent_model_families(openclaw.get("agents", {}).get("defaults", {}))
     check(not missing_families, f"JAIMES sub-agent routes missing: {', '.join(sorted(missing_families))}", problems)
     for topic_id, owner in TOPIC_OWNERS.items():

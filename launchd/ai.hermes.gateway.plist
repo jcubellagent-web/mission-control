@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>ai.hermes.gateway</string>
+
+    <key>ProgramArguments</key>
+    <!-- Resolve the host-scoped 1Password references in memory before Hermes
+         starts. Never install the package-generated direct Python command: it
+         omits Telegram credentials after an update or service reinstall. -->
+    <array>
+        <string>/Users/jc_agent/.openclaw/workspace/scripts/op_agent_env.sh</string>
+        <string>/Users/jc_agent/.openclaw/workspace/config/agent-ecosystem-hermes.op.env</string>
+        <string>--</string>
+        <string>/Users/jc_agent/.hermes/hermes-agent/venv/bin/python</string>
+        <string>-m</string>
+        <string>hermes_cli.main</string>
+        <string>gateway</string>
+        <string>run</string>
+        <string>--replace</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/jc_agent/.hermes</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/Users/jc_agent/.hermes/hermes-agent/venv/bin:/Users/jc_agent/.hermes/hermes-agent/node_modules/.bin:/Users/jc_agent/.hermes/node/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/jc_agent/.local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>VIRTUAL_ENV</key>
+        <string>/Users/jc_agent/.hermes/hermes-agent/venv</string>
+        <key>HERMES_HOME</key>
+        <string>/Users/jc_agent/.hermes</string>
+    </dict>
+
+    <key>LimitLoadToSessionType</key>
+    <array>
+        <string>Aqua</string>
+        <string>Background</string>
+    </array>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <!-- ThrottleInterval raises launchd's default 10s minimum respawn interval
+         to 30s so a crash-looping gateway can't hammer launchd into a rapid
+         respawn storm; ExitTimeOut gives the gateway 25s of graceful-drain
+         headroom before launchd escalates from SIGTERM to SIGKILL on stop. -->
+    <key>ThrottleInterval</key>
+    <integer>30</integer>
+
+    <key>ExitTimeOut</key>
+    <integer>25</integer>
+
+    <key>StandardOutPath</key>
+    <string>/Users/jc_agent/.hermes/logs/gateway.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/jc_agent/.hermes/logs/gateway.error.log</string>
+</dict>
+</plist>
