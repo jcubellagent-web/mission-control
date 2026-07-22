@@ -373,6 +373,28 @@ class InboxCoordinatorTests(unittest.TestCase):
         self.assertEqual(route["routeId"], "gemini-pro")
         self.assertIn("glm unhealthy; selected gemini-pro", route["fallback"])
 
+    def test_telegram_response_behavior_audit_uses_read_only_terra(self):
+        coordinator = load_module()
+        prompt = "Please run an audit to make sure your Telegram response behavior is as expected."
+        route = coordinator.route_prompt(
+            prompt,
+            injected_health={"terra": True, "luna": True, "gemini": True},
+        )
+        self.assertEqual(route["routeId"], "terra")
+        self.assertEqual(route["routingReason"], "trusted Telegram response-contract audit")
+        self.assertTrue(coordinator.read_only_execution_requested(prompt))
+
+    def test_telegram_response_audit_guidance_separates_worker_and_delivery_contracts(self):
+        coordinator = load_module()
+        guidance = coordinator.telegram_response_audit_guidance(
+            "Audit the Telegram reply contract and response formatting."
+        )
+        self.assertIn("worker returns only Complete", guidance)
+        self.assertIn("delivery formatter must prepend", guidance)
+        self.assertIn("Model: <verified provider/model> | Route: <actual lane> | Why:", guidance)
+        self.assertIn("missing optional test runner", guidance)
+        self.assertEqual(coordinator.telegram_response_audit_guidance("Summarize this note."), "")
+
     def test_glm_cloud_cannot_receive_private_context(self):
         coordinator = load_module()
         route = coordinator.route_prompt(
@@ -1332,6 +1354,16 @@ class InboxCoordinatorTests(unittest.TestCase):
         self.assertIn("Generic process statements", coordinator.WORKER_OUTPUT_CONTRACT)
         self.assertIn("every reported risk or limitation in Issues", coordinator.WORKER_OUTPUT_CONTRACT)
         self.assertIn("Do not include a Model line", coordinator.WORKER_OUTPUT_CONTRACT)
+        self.assertIn("private worker-to-delivery handoff", coordinator.WORKER_OUTPUT_CONTRACT)
+        self.assertIn("delivery layer is required to prepend", coordinator.WORKER_OUTPUT_CONTRACT)
+        self.assertIn("do not treat that required delivery header as a formatter defect", coordinator.WORKER_OUTPUT_CONTRACT)
+
+    def test_local_codex_execution_reports_verified_runtime_auth(self):
+        coordinator = load_module()
+        self.assertIn(
+            '"actualAuth": "OpenAI Codex OAuth/subscription", "authVerified": True',
+            coordinator.LLM_EXECUTOR_CODE,
+        )
 
     def test_recovery_requeues_only_dead_workers(self):
         coordinator = load_module()
