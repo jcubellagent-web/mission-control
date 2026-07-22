@@ -290,6 +290,16 @@
       "expectedProvider": "gemini"
     },
     {
+      "id": "dashboard_safe_architecture_uses_glm",
+      "taskType": "architecture",
+      "title": "Architecture analysis",
+      "objective": "Analyze a sanitized multi-provider architecture",
+      "expectedOwner": "joshex",
+      "expectedProvider": "ollama",
+      "expectedModel": "glm-5.2:cloud",
+      "expectedRole": "glm-large-context-technical-reasoning"
+    },
+    {
       "id": "private_summary_stays_codex",
       "taskType": "summary",
       "title": "Private summary",

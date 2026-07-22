@@ -16,6 +16,9 @@ final answer.
    dashboard-safe or explicitly sanitized context.
 2. Read the current Codex allowance from `data/modelUsage.json`. Weekly remaining
    at or below 20% means `conserve`; zero means `exhausted`.
+   Read Antigravity and Ollama allowance from the same CodexBar projection when
+   available. A quota-cookie failure is not an inference failure: require a
+   separate verified runtime health result and label exact allowance unknown.
 3. Verify the selected provider and exact model. Never infer success from a
    configured catalog entry and never describe a requested route as an executed
    route.
@@ -40,6 +43,54 @@ final answer.
 Do not call an outside model for trivial conversation or when its output would
 not materially improve the answer. In conservation mode, send eligible bulk
 reasoning out first and reserve GPT for orchestration, execution, and synthesis.
+
+## Exact Task Cases
+
+- Gemini Flash Medium: routine dashboard-safe summaries, scheduled digests,
+  compression, classification, broad synthesis, ordinary report drafts, and
+  low-risk second passes.
+- Gemini Flash High: UI/readability review, decision or handoff review, and a
+  stronger dashboard-safe second pass where latency still matters.
+- Gemini Pro High: nuanced multi-document judgment, deep research synthesis,
+  model evaluation, escalation review, and long-context dashboard-safe analysis.
+- GLM 5.2 Cloud: architecture, repository analysis, debugging hypotheses,
+  multi-file planning, structured code review, long-context technical analysis,
+  and parallel technical second opinions. It does not edit or execute.
+- Local Ollama: private/offline bounded drafting and extraction only. On the
+  current 16 GB hosts, keep Qwen 2.5 7B as the verified general fallback and use
+  GLM-OCR only for local OCR after its dedicated canary passes.
+- Codex: private data, tools, connectors, repo edits, terminal work, permissions,
+  side effects, approval handling, high-stakes integration, and final proof.
+
+## Runtime Resilience
+
+- Automatic Gemini routes use: selected Gemini -> GLM 5.2 Cloud -> Codex Terra.
+- Automatic GLM routes use: GLM 5.2 Cloud -> Gemini Pro High -> Codex Terra.
+- Check the selected model before work. If execution then fails, announce the
+  provider/model switch before trying the next fresh lane. Never silently reuse
+  an output under the original model label.
+- Explicit model requests remain fail-closed; do not substitute a different
+  model merely to satisfy the request.
+- Keep provider health and quota separate. Health controls whether a lane may
+  execute; quota controls preference and conservation. Unknown quota with
+  verified health is usable, while exhausted quota or failed health is not.
+
+## Ollama Catalog Decisions
+
+- Production: `glm-5.2:cloud` for the technical cases above.
+- Specialized candidate: `glm-ocr` for local text, table, formula, and figure
+  extraction; it is not a general reasoning model.
+- Shadow-test on 16 GB hardware before promotion: `qwen3.5:4b` or `:9b` for
+  lighter private multimodal work and `ornith:9b` for bounded coding review.
+- Cloud shadow-test only: `minimax-m2.7:cloud` for skill adherence/document
+  productivity and `nemotron-3-super:cloud` for high-volume multi-agent review.
+- Hold: Qwen 3.6 27B/35B, Ornith 35B, Gemma 4 26B/31B, Qwen3-Coder-Next,
+  GPT-OSS 20B local, Laguna S 2.1, and Nemotron 3 Super local exceed or crowd the
+  current 16 GB production envelope.
+- Hold Laguna XS 2.1 on macOS until its documented Metal chat-output issue is
+  resolved. Keep GLM 5.1 and MiniMax M2.5 as older rollback comparators, not
+  preferred routes. Gemma 4 small variants may enter a later private multimodal
+  bake-off but do not duplicate Qwen/GLM lanes by default.
 
 ## Codex-App Dispatch
 

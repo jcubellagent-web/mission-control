@@ -191,6 +191,69 @@ def test_direct_specialist_commands_cannot_silently_use_gpt(monkeypatch) -> None
     assert "SENSITIVE_SENTINEL" not in lane.command_preview(glm)
 
 
+def test_architecture_uses_glm_with_explicit_runtime_fallbacks(monkeypatch) -> None:
+    route = load_module("agent_route_glm_architecture", ROOT / "scripts" / "agent_route.py")
+    args = model_args()
+    args.task_type = "architecture"
+    args.priority = "normal"
+    args.complexity = "auto"
+    args.blast_radius = "auto"
+    monkeypatch.setattr(route, "codex_allowance_mode", lambda _args: "normal")
+    monkeypatch.setattr(route, "explicit_route_unavailable", lambda provider, model="": "")
+
+    selected = route.choose_model_route(args, "jaimes", False)
+
+    assert selected["provider"] == "ollama"
+    assert selected["model"] == "glm-5.2:cloud"
+    assert selected["fallbackLadder"] == [
+        "ollama/glm-5.2:cloud", "gemini/gemini-3.1-pro-high", "codex/gpt-5.6-terra"
+    ]
+    assert [row["provider"] for row in selected["fallbackRoutes"]] == ["gemini", "codex"]
+
+
+def test_automatic_model_lane_discloses_and_executes_declared_fallback(monkeypatch, capsys) -> None:
+    lane = load_module("model_lane_runtime_fallback", ROOT / "scripts" / "model_lane.py")
+    args = model_args(transport="hermes")
+    attempts = []
+
+    def fake_command(_args, route):
+        model_route = route["modelRoute"]
+        return [str(model_route["provider"]), str(model_route["model"])]
+
+    def fake_execute(command, _route):
+        attempts.append(command)
+        return 3 if len(attempts) == 1 else 0
+
+    monkeypatch.setattr(lane, "command_for", fake_command)
+    monkeypatch.setattr(lane, "execute_verified", fake_execute)
+    route = {"modelRoute": {
+        "provider": "gemini",
+        "model": "gemini-3.6-flash-medium",
+        "fallbackRoutes": [{"provider": "ollama", "model": "glm-5.2:cloud"}],
+    }}
+
+    result = lane.execute_with_disclosed_fallbacks(args, ["gemini", "primary"], route)
+
+    assert result == 0
+    assert attempts == [["gemini", "primary"], ["ollama", "glm-5.2:cloud"]]
+    assert "Fallback disclosure" in capsys.readouterr().err
+
+
+def test_specialist_catalog_covers_reviewed_ollama_families() -> None:
+    catalog = json.loads((ROOT / "config" / "model-specialist-catalog.json").read_text())
+    names = " ".join(
+        str(row.get("model") or "")
+        for group in ("production", "candidates", "held")
+        for row in catalog[group]
+    )
+    for family in (
+        "ornith", "laguna-xs-2.1", "laguna-s-2.1", "gemma4", "qwen3.5",
+        "qwen3.6", "glm-ocr", "glm-5.1", "glm-5.2", "minimax-m2.5",
+        "minimax-m2.7", "nemotron-3-super",
+    ):
+        assert family in names
+
+
 def test_antigravity_pass_uses_local_proxy_and_verifies_model(monkeypatch) -> None:
     helper = load_module("antigravity_pass", ROOT / "scripts" / "antigravity_pass.py")
     seen = {}

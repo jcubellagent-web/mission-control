@@ -243,6 +243,61 @@ def execute_verified(cmd: list[str], route: dict[str, Any]) -> int:
     return 0
 
 
+def execute_with_disclosed_fallbacks(
+    args: argparse.Namespace,
+    primary_cmd: list[str],
+    route: dict[str, Any],
+) -> int:
+    """Run a selected lane, then only policy-declared dashboard-safe fallbacks.
+
+    Explicit model requests stay fail-closed. Automatic specialist routes may
+    continue through the router-provided ladder, but every provider/model
+    switch is printed before execution so a fallback can never be mistaken for
+    the selected model.
+    """
+    result = execute_verified(primary_cmd, route)
+    model_route = route.get("modelRoute") or {}
+    fallbacks = model_route.get("fallbackRoutes") or []
+    if (
+        result == 0
+        or args.requested_provider
+        or args.requested_model
+        or args.privacy != "dashboard-safe"
+        or not isinstance(fallbacks, list)
+    ):
+        return result
+
+    primary_label = f"{model_route.get('provider')}/{model_route.get('model')}"
+    for candidate in fallbacks:
+        if not isinstance(candidate, dict):
+            continue
+        provider = str(candidate.get("provider") or "").strip()
+        model = str(candidate.get("model") or "").strip()
+        if not provider or not model:
+            continue
+        print(
+            f"Fallback disclosure: {primary_label} failed verification; trying {provider}/{model}.",
+            file=sys.stderr,
+        )
+        fallback_route = dict(route)
+        fallback_model_route = dict(model_route)
+        fallback_model_route.update(candidate)
+        fallback_model_route.update({
+            "firstStop": provider,
+            "provider": provider,
+            "model": model,
+            "fallbackFrom": primary_label,
+            "freshLaneRequired": True,
+            "verifyBeforeWork": True,
+        })
+        fallback_route["modelRoute"] = fallback_model_route
+        result = execute_verified(command_for(args, fallback_route), fallback_route)
+        if result == 0:
+            return 0
+        primary_label = f"{provider}/{model}"
+    return result
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Preview or launch a verified fresh model lane.")
     parser.add_argument("--task-type", required=True)
@@ -276,7 +331,7 @@ def main() -> int:
         print(json.dumps(plan, indent=2))
         return 0
 
-    return execute_verified(cmd, route)
+    return execute_with_disclosed_fallbacks(args, cmd, route)
 
 
 if __name__ == "__main__":

@@ -9,6 +9,7 @@ import math
 import os
 import socket
 import re
+import shlex
 import subprocess
 import sys
 import urllib.error
@@ -5154,9 +5155,71 @@ def fetch_codexbar_limits(provider: str = "codex") -> Dict[str, Any]:
     try:
         proc = subprocess.run(
             ["/opt/homebrew/bin/codexbar", "usage", "--provider", provider, "--json"],
-            capture_output=True, text=True, timeout=10,
+            capture_output=True, text=True, timeout=20,
         )
+        #JAIMES: Antigravity is authenticated on the specialist host. A
+        # transient local CodexBar timeout must not erase usable subscription
+        # allowance when JAIMES can still report it directly.
+        if (proc.returncode != 0 or not proc.stdout.strip()) and provider == "gemini":
+            proc = subprocess.run(
+                [
+                    "ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=4", "jaimes",
+                    "/opt/homebrew/bin/codexbar usage --provider gemini --json",
+                ],
+                capture_output=True, text=True, timeout=20,
+            )
         if proc.returncode != 0 or not proc.stdout.strip():
+            # Ollama's browser-cookie quota window is independent from its
+            # signed-in inference runtime. Report the distinction instead of
+            # falsely marking a verified cloud route unavailable.
+            if provider == "ollama":
+                verified = False
+                try:
+                    probe_object = {
+                        "model": "glm-5.2:cloud",
+                        "prompt": "",
+                        "stream": False,
+                        "options": {"num_predict": 0},
+                    }
+                    probe_payload = json.dumps(probe_object).encode("utf-8")
+                    probe_request = urllib.request.Request(
+                        "http://127.0.0.1:11434/api/generate",
+                        data=probe_payload,
+                        headers={"Content-Type": "application/json"},
+                    )
+                    with urllib.request.urlopen(probe_request, timeout=8) as probe:
+                        verified = 200 <= probe.status < 300
+                except Exception:
+                    pass
+                if not verified:
+                    remote_payload = json.dumps(probe_object)
+                    remote_command = (
+                        "curl -fsS --max-time 8 http://127.0.0.1:11434/api/generate "
+                        "-H 'Content-Type: application/json' "
+                        f"-d {shlex.quote(remote_payload)} >/dev/null"
+                    )
+                    try:
+                        remote_probe = subprocess.run(
+                            ["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=4", "jaimes", remote_command],
+                            capture_output=True, text=True, timeout=12,
+                        )
+                        verified = remote_probe.returncode == 0
+                    except Exception:
+                        pass
+                if verified:
+                    empty.update({
+                        "available": True,
+                        "status": "ready",
+                        "authStatus": "ok",
+                        "accountLabel": "ollama",
+                        "plan": "cloud subscription",
+                        "dataConfidence": "runtime-verified; exact quota unavailable on this host",
+                        "lastError": "CodexBar quota cookie unavailable; Ollama Cloud inference verified",
+                    })
+                    return empty
+            empty["lastError"] = " ".join(
+                str(proc.stderr or proc.stdout or "CodexBar provider query failed").split()
+            )[:300]
             return empty
         raw = json.loads(proc.stdout)
         entry = raw[0] if isinstance(raw, list) and raw else raw if isinstance(raw, dict) else {}

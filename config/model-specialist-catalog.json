@@ -1,0 +1,133 @@
+{
+  "version": 1,
+  "reviewedAt": "2026-07-21",
+  "policy": {
+    "owner": "joshex",
+    "privateExecutionProvider": "codex",
+    "productionHostMemoryGiB": 16,
+    "promotionRequires": [
+      "official capability fit",
+      "host capacity fit",
+      "verified authentication or local install",
+      "task-specific canary",
+      "no silent fallback",
+      "dashboard-safe telemetry"
+    ]
+  },
+  "production": [
+    {
+      "provider": "antigravity",
+      "model": "gemini-3.6-flash-medium",
+      "status": "production",
+      "cases": ["summaries", "digests", "classification", "compression", "broad synthesis"]
+    },
+    {
+      "provider": "antigravity",
+      "model": "gemini-3.6-flash-high",
+      "status": "production",
+      "cases": ["UI review", "decision review", "handoff review", "strong low-latency second pass"]
+    },
+    {
+      "provider": "antigravity",
+      "model": "gemini-3.1-pro-high",
+      "status": "production",
+      "cases": ["multi-document judgment", "deep dashboard-safe review", "research synthesis", "model evaluation"]
+    },
+    {
+      "provider": "ollama-cloud",
+      "model": "glm-5.2:cloud",
+      "status": "production",
+      "cases": ["architecture", "repository analysis", "multi-file planning", "structured code review", "debugging hypotheses", "technical second opinion"]
+    },
+    {
+      "provider": "ollama-local",
+      "model": "qwen2.5:7b",
+      "status": "production-fallback",
+      "cases": ["bounded private draft", "offline low-risk analysis"]
+    }
+  ],
+  "candidates": [
+    {
+      "model": "glm-ocr",
+      "status": "specialized-canary",
+      "fit": "local OCR for text, tables, formulas, and figures",
+      "hostDecision": "fits-16gb",
+      "notes": "0.9B architecture, approximately 2.2 GB; never use as a general reasoning route"
+    },
+    {
+      "model": "qwen3.5:4b-or-9b",
+      "status": "shadow-benchmark",
+      "fit": "local private multimodal and tool-aware fallback",
+      "hostDecision": "fits-with-bounded-context",
+      "notes": "Prefer a small variant; do not promote on popularity alone"
+    },
+    {
+      "model": "ornith:9b",
+      "status": "shadow-benchmark",
+      "fit": "bounded local coding review",
+      "hostDecision": "fits-16gb",
+      "notes": "Newer model family with insufficient ecosystem evidence for default routing"
+    },
+    {
+      "model": "minimax-m2.7:cloud",
+      "status": "cloud-shadow-benchmark",
+      "fit": "document productivity, skill adherence, and code-review comparison",
+      "hostDecision": "cloud-only"
+    },
+    {
+      "model": "nemotron-3-super:cloud",
+      "status": "cloud-shadow-benchmark",
+      "fit": "high-volume multi-agent and IT workflow comparison",
+      "hostDecision": "cloud-only"
+    },
+    {
+      "model": "gemma4:e4b-or-12b",
+      "status": "deferred-bakeoff",
+      "fit": "private multimodal and audio-capable analysis",
+      "hostDecision": "small-variants-only",
+      "notes": "Adopt only if it wins a task-specific canary over Qwen 3.5 and GLM-OCR"
+    }
+  ],
+  "held": [
+    {
+      "model": "qwen3.6:27b-or-35b",
+      "reason": "17-24 GB model footprint exceeds or crowds a 16 GB production host"
+    },
+    {
+      "model": "ornith:35b",
+      "reason": "approximately 21 GB footprint exceeds the production memory envelope"
+    },
+    {
+      "model": "laguna-xs-2.1",
+      "reason": "documented macOS Metal chat API empty-output issue"
+    },
+    {
+      "model": "laguna-s-2.1",
+      "reason": "approximately 75 GB and practical 128 GB unified-memory minimum"
+    },
+    {
+      "model": "qwen3-coder-next",
+      "reason": "approximately 52 GB local footprint"
+    },
+    {
+      "model": "gpt-oss:20b-local",
+      "reason": "approximately 14 GB leaves insufficient runtime headroom on a 16 GB host; cloud tag remains only a comparator"
+    },
+    {
+      "model": "nemotron-3-super-local",
+      "reason": "approximately 87 GB local footprint"
+    },
+    {
+      "model": "gemma4:26b-or-31b",
+      "reason": "insufficient runtime headroom on a 16 GB host"
+    },
+    {
+      "model": "glm-5.1:cloud",
+      "reason": "older rollback comparator; GLM 5.2 is the preferred technical route"
+    },
+    {
+      "model": "minimax-m2.5:cloud",
+      "reason": "older rollback comparator; evaluate M2.7 instead"
+    }
+  ]
+}

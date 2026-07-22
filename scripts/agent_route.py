@@ -70,7 +70,11 @@ GEMINI_FIRST_CAPABILITIES = {
 #JAIMES: GLM 5.2 Cloud is the deliberate long-context technical-reasoning sub-agent,
 # while Gemini owns synthesis and Codex owns mutation, permissions, and integration.
 GLM_FIRST_TASK_TYPES = {
+    "architecture",
+    "architecture-review",
     "architecture-analysis",
+    "repository-analysis",
+    "debugging-analysis",
     "large-context-technical-analysis",
     "multi-file-planning",
     "parallel-technical-reasoning",
@@ -915,9 +919,7 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
         return payload
 
     if glm_hint and not unsafe_privacy and not needs_approval and not codex_only:
-        unavailable = explicit_route_unavailable("ollama", "glm-5.2:cloud")
-        if not unavailable:
-            return {
+        return {
                 "firstStop": "ollama",
                 "provider": "ollama",
                 "model": "glm-5.2:cloud",
@@ -930,6 +932,27 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
                 "codexAllowanceMode": allowance_mode,
                 "spendClass": "cloud-specialist",
                 "privacy": "dashboard-safe",
+                "fallbackLadder": [
+                    "ollama/glm-5.2:cloud",
+                    "gemini/gemini-3.1-pro-high",
+                    "codex/gpt-5.6-terra",
+                ],
+                "fallbackRoutes": [
+                    {
+                        "provider": "gemini",
+                        "model": "gemini-3.1-pro-high",
+                        "auth": provider_auth_label("gemini", "gemini-3.1-pro-high"),
+                        "role": "glm-runtime-fallback",
+                        "reason": "GLM runtime failed after selection; use a verified dashboard-safe Gemini Pro lane.",
+                    },
+                    {
+                        "provider": "codex",
+                        "model": "gpt-5.6-terra",
+                        "auth": provider_auth_label("codex", "gpt-5.6-terra"),
+                        "role": "specialist-runtime-fallback",
+                        "reason": "Both outside specialist lanes failed; use Codex for the bounded fallback and disclose it.",
+                    },
+                ],
                 "reason": compact(
                     f"{task_type} benefits from GLM 5.2's large-context, tool-capable technical reasoning before owner integration."
                 ),
@@ -938,7 +961,7 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
                     "Do not send secrets, OAuth payloads, raw emails, raw connector data, private account contents, wallet data, or customer/account data.",
                     "GLM may analyze, plan, or review; Codex on the owning host retains edits, permissions, execution, approvals, and final verification.",
                 ],
-            }
+        }
 
     if xai_first:
         budget_ok, budget_reason = provider_budget_guard("xai")
@@ -1064,7 +1087,7 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
         role = "gemini-review"
         model = gemini_model("fast")
 
-    return {
+    result = {
         "firstStop": "gemini",
         "provider": "gemini",
         "model": model,
@@ -1074,6 +1097,27 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
         "codexAllowanceMode": allowance_mode,
         "spendClass": "codex-sparing" if codex_constrained else "normal",
         "privacy": "dashboard-safe",
+        "fallbackLadder": [
+            f"gemini/{model}",
+            "ollama/glm-5.2:cloud",
+            "codex/gpt-5.6-terra",
+        ],
+        "fallbackRoutes": [
+            {
+                "provider": "ollama",
+                "model": "glm-5.2:cloud",
+                "auth": provider_auth_label("ollama", "glm-5.2:cloud"),
+                "role": "gemini-runtime-fallback",
+                "reason": "Antigravity failed after selection; use the verified dashboard-safe GLM lane.",
+            },
+            {
+                "provider": "codex",
+                "model": "gpt-5.6-terra",
+                "auth": provider_auth_label("codex", "gpt-5.6-terra"),
+                "role": "specialist-runtime-fallback",
+                "reason": "Both outside specialist lanes failed; use Codex for the bounded fallback and disclose it.",
+            },
+        ],
         "reason": compact(
             f"{task_type} is dashboard-safe synthesis/review work; use Gemini before Codex."
             if not codex_constrained
@@ -1085,6 +1129,7 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
             "The selected owner still owns execution, approvals, repo edits, and final integration.",
         ],
     }
+    return result
 
 
 def create_task(args: argparse.Namespace, owner: str, approval: str, model_route: dict[str, Any]) -> dict[str, Any]:
