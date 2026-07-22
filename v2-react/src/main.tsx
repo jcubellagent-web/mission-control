@@ -21,6 +21,13 @@ type WorkState = "working" | "waiting" | "blocked" | "ready" | "done" | "quiet";
 type AgentVisualState = "working" | "ready" | "waiting" | "blocked" | "stale" | "offline";
 type StepTrailState = "done" | "current" | "pending";
 type AgentHeadline = { title: string; description: string };
+type ActiveAgentReadout = {
+  objective: string;
+  phase: string;
+  action: string;
+  expectedOutput: string;
+  objectivePublished: boolean;
+};
 type ControlTowerDisplayState = {
   nightMode?: boolean;
   mode?: string;
@@ -4566,7 +4573,7 @@ function headlineShortText(value: string, maxLength = 54) {
   return kept.join(" ") || text.slice(0, maxLength).trim();
 }
 
-function headlineTitle(value: string) {
+function headlineTitle(value: string, maxLength = 34) {
   return headlineShortText(value
     .replace(/\s*\([^)]*\)/g, "")
     .replace(/^make\s+/i, "")
@@ -4577,7 +4584,7 @@ function headlineTitle(value: string) {
     .replace(/\bMorning Inbox Triage\b/i, "Inbox Triage")
     .replace(/\bFantasy Waiver Review\b/i, "Fantasy Waivers")
     .replace(/\bMission Control Refresh\b/i, "Control Tower Refresh")
-    .replace(/\bBrain Feed Server\b/i, "Live Work Board Refresh"), 34);
+    .replace(/\bBrain Feed Server\b/i, "Live Work Board Refresh"), maxLength);
 }
 
 function briefOutputForHeadline(title: string, rows: AgentBriefRow[]) {
@@ -4586,6 +4593,7 @@ function briefOutputForHeadline(title: string, rows: AgentBriefRow[]) {
   if (/fantasy|waiver|roster|injury|pitcher|player|baseball/.test(text)) return "Checks injuries, waivers, and roster moves.";
   if (/daily mission|missions|claim|reward|sorare/.test(text)) return "Checks missions, rewards, and blockers.";
   if (/lineup|lineups|gw|game-week|pre-lock|rp|champion|challenger|deadline|submit/.test(text)) return "Validates slots, deadlines, and risk.";
+  if (/live work board|agent row|work description|active description|objective.*phase/.test(text)) return "Publishes a clear objective, current action, and expected result.";
   if (/brain feed|heartbeat|visibility|agent status|status check/.test(text)) return "Confirms each agent is fresh and mapped.";
   if (/mission control|kiosk|dashboard|react|watchdog|refresh/.test(text)) return "Refreshes data and checks kiosk health.";
   if (/signal|intelligence|news|newsletter|breaking/.test(text)) return "Dedupes sources into high-signal alerts.";
@@ -4595,6 +4603,75 @@ function briefOutputForHeadline(title: string, rows: AgentBriefRow[]) {
     || rows.find((item) => item.label.toLowerCase() === "checks")
     || rows[0];
   return headlineShortText(row?.text.replace(/^a\s+/i, "").replace(/\.$/, "") || "Reports the result.", 76);
+}
+
+function activeWorkPlaceholder(value?: string | null) {
+  const text = missionText(value).replace(/\s+/g, " ").trim();
+  if (!text) return true;
+  return /^(?:active work|current work|task active|working(?: now)?|in progress)$/i.test(text)
+    || /^(?:JOSHeX|Josh 2\.0|JAIMES|J\.A\.I\.N)\s+(?:is\s+)?working(?:\s+now)?[.!]?$/i.test(text)
+    || /^(?:current:)?\s*(?:checks routes, ownership, and handoffs|working through the current (?:step|objective)|current live work board objective)[.!]?$/i.test(text);
+}
+
+function cleanActiveWorkText(value?: string | null) {
+  return missionText(value)
+    .replace(/\s+/g, " ")
+    .replace(/^(?:now|current|objective):\s*/i, "")
+    .replace(/^task active:\s*/i, "")
+    .trim();
+}
+
+function descriptiveActiveText(values: Array<string | null | undefined>, fallback: string) {
+  for (const value of values) {
+    const clean = cleanActiveWorkText(value);
+    if (clean && !activeWorkPlaceholder(clean)) return clean;
+  }
+  return fallback;
+}
+
+function activePhaseLabel(status: AgentStatus) {
+  const phase = missionText(status.phase || status.status).trim().toLowerCase();
+  if (/block|error|fail/.test(phase)) return "Blocked";
+  if (/verif|test|qa|review/.test(phase)) return "Verifying";
+  if (/deploy|release|cutover/.test(phase)) return "Deploying";
+  if (/plan|design|audit|investigat/.test(phase)) return "Planning";
+  if (/route|handoff|delegate/.test(phase)) return "Routing";
+  if (/accept|start|queue|pending/.test(phase)) return "Starting";
+  if (/implement|work|active|run|execut/.test(phase)) return "Working";
+  return phase ? headlineShortText(phase.replace(/^./, (letter) => letter.toUpperCase()), 22) : "Working";
+}
+
+function activeExpectedOutput(objective: string, action: string, objectivePublished: boolean) {
+  if (!objectivePublished) return "Awaiting a source-backed expected result.";
+  const output = briefOutputForHeadline(objective, [{ label: "Current", text: action }]);
+  if (output.toLowerCase().replace(/\W/g, "") !== action.toLowerCase().replace(/\W/g, "")) return output;
+  return `Verified result for ${headlineShortText(objective, 52)}.`;
+}
+
+function activeAgentReadout(status: AgentStatus, activeWork?: WorkItem): ActiveAgentReadout {
+  const objective = descriptiveActiveText(
+    [activeWork?.title, status.objective],
+    "Objective not published",
+  );
+  const objectivePublished = objective !== "Objective not published";
+  const phase = activePhaseLabel(status);
+  const activeStep = status.steps?.find((step) => ["active", "working", "running", "current"].includes(String(step.status || "").toLowerCase()));
+  const phaseText = missionText(status.phase).trim().toLowerCase();
+  let action = descriptiveActiveText(
+    [activeWork?.detail, status.detail, activeStep?.label, activeStep?.title, status.current_tool],
+    "Waiting for a descriptive progress update.",
+  );
+  if (action.toLowerCase() === phaseText || action.toLowerCase() === phase.toLowerCase()) {
+    action = "Waiting for a descriptive progress update.";
+  }
+  if (!objectivePublished) action = "Waiting for a descriptive progress update.";
+  return {
+    objective,
+    phase,
+    action: readoutFit(action, 82),
+    expectedOutput: activeExpectedOutput(objective, action, objectivePublished),
+    objectivePublished,
+  };
 }
 
 function readoutFit(value: string, maxLength = 68) {
@@ -4683,14 +4760,14 @@ function buildAgentInsights(
   ];
 }
 
-function agentHeadline(activeFocus: boolean, objectiveText: string, idleContext: AgentIdleContext, idleRows: AgentBriefRow[]): AgentHeadline {
+function agentHeadline(activeFocus: boolean, activeReadout: ActiveAgentReadout, idleContext: AgentIdleContext, idleRows: AgentBriefRow[]): AgentHeadline {
   const nextTitle = headlineTitle(idleContext.nextTitle);
   const nextOutput = briefOutputForHeadline(nextTitle, idleRows);
   if (activeFocus) {
-    const current = headlineTitle(objectiveText || "Active work");
+    const current = headlineTitle(activeReadout.objective, 62);
     return {
       title: `Now: ${current}`,
-      description: `Next: ${nextTitle} - ${nextOutput}`,
+      description: `${activeReadout.phase}: ${activeReadout.action}`,
     };
   }
   if (!idleContext.nextAt && /awaiting instruction/i.test(idleContext.nextTitle)) {
@@ -4721,24 +4798,19 @@ function AgentHeroCard({
   const objectiveRef = useRef<HTMLHeadingElement | null>(null);
   const [objectiveScroll, setObjectiveScroll] = useState({ active: false, distance: 0, duration: 18 });
   const freshness = freshnessClass(status.updated_at);
-  const objectiveText = missionText(status.objective);
   const verifiedRoute = verifiedRouteForAgentStatus(status);
   const route = verifiedRoute || routeForAgentStatus(status);
   const activeWorkFresh = activeWork?.state === "working" && isFreshActiveTimestamp(activeWork.updated_at);
   const activeWorkDetail = activeWorkFresh ? activeWork : undefined;
-  const currentStep = status.steps?.find((step) => step.label || step.title)?.label
-    || status.steps?.find((step) => step.label || step.title)?.title
-    || status.current_tool
-    || status.detail
-    || AGENTS[agent].role;
   const idleBriefRows = [
     ...idleContext.nextBullets.slice(0, 4),
     { label: "Last", text: compactText(idleContext.complete, 84) },
     { label: "Next", text: compactText(idleContext.countdown ? `${idleContext.countdown} + ${idleContext.nextTitle}` : idleContext.nextTitle, 84) },
   ];
-  const headline = agentHeadline(activeFocus, objectiveText, idleContext, idleBriefRows);
+  const activeReadout = activeAgentReadout(status, activeWorkDetail);
+  const headline = agentHeadline(activeFocus, activeReadout, idleContext, idleBriefRows);
   const supportNote = activeFocus
-    ? `Current: ${readoutSummary(activeWorkDetail?.detail || activeWorkDetail?.title || currentStep, "Working through the current step.", 78)}`
+    ? `Output: ${readoutFit(activeReadout.expectedOutput, 78)}`
     : `Complete: ${readoutSummary(idleContext.complete, "No recent completion reported.", 78)}`;
   const stepTrail = stepTrailForAgent(status, activeFocus, activeWork);
   const showStepTrail = activeFocus || visualState === "waiting" || visualState === "blocked";

@@ -715,6 +715,23 @@ def main() -> int:
             severity="high",
         ),
         status(
+            "function activeWorkPlaceholder" in react_main
+            and "function descriptiveActiveText" in react_main
+            and "function activeAgentReadout" in react_main
+            and '"Objective not published"' in react_main
+            and '"Waiting for a descriptive progress update."' in react_main
+            and "activeWork?.title, status.objective" in react_main
+            and "activeWork?.detail, status.detail, activeStep?.label" in react_main
+            and "description: `${activeReadout.phase}: ${activeReadout.action}`" in react_main
+            and "`Output: ${readoutFit(activeReadout.expectedOutput, 78)}`" in react_main
+            and "headlineTitle(activeReadout.objective, 62)" in react_main
+            and 'return "Publishes a clear objective, current action, and expected result.";' in react_main
+            and "description: `Next: ${nextTitle} - ${nextOutput}`" not in react_main,
+            "Live Work Board descriptive active readout",
+            "active agent cards prioritize source-backed objective and action detail, expose phase plus expected output, reject working-now placeholders, and disclose missing telemetry without borrowing idle schedules",
+            severity="high",
+        ),
+        status(
             'type AgentVisualState = "working" | "routine" | "ready" | "waiting" | "blocked" | "stale";' in react_main
             and "function workItemIsRoutineActivity" in react_main
             and 'eyebrow: routineFocus ? "Keeping current" : "Active now"' in react_main
