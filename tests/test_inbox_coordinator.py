@@ -387,13 +387,66 @@ class InboxCoordinatorTests(unittest.TestCase):
     def test_telegram_response_audit_guidance_separates_worker_and_delivery_contracts(self):
         coordinator = load_module()
         guidance = coordinator.telegram_response_audit_guidance(
-            "Audit the Telegram reply contract and response formatting."
+            "Audit the Telegram reply contract and response formatting.",
+            {
+                "available": True,
+                "josh2": {"ok": True},
+                "jaimes": {"ok": True, "telegramState": "connected"},
+            },
         )
         self.assertIn("worker returns only Complete", guidance)
         self.assertIn("delivery formatter must prepend", guidance)
         self.assertIn("Model: <verified provider/model> | Route: <actual lane> | Why:", guidance)
         self.assertIn("missing optional test runner", guidance)
+        self.assertIn("completed audit with negative findings uses Complete: Yes", guidance)
+        self.assertIn('"telegramState":"connected"', guidance)
         self.assertEqual(coordinator.telegram_response_audit_guidance("Summarize this note."), "")
+
+    def test_telegram_response_audit_host_context_uses_fresh_allowlisted_host_facts(self):
+        coordinator = load_module()
+        checked_at = coordinator.utc_now()
+        runtime = {
+            "checkedAt": checked_at,
+            "ok": True,
+            "checks": {
+                key: {"ok": True, "detail": "private detail is not forwarded"}
+                for key in (
+                    "controlTower", "brainFeed", "gateway", "telegramFastAck",
+                    "telegramWorkCardHelper", "telegramInboxClaimHelper", "sourceFreshness",
+                )
+            },
+        }
+        jaimes = {
+            "checkedAt": checked_at,
+            "ok": True,
+            "status": "ok",
+            "probe": {
+                "gatewayState": "running",
+                "telegramState": "connected",
+                "fastAckState": "running",
+                "fastAckIdentity": {"ok": True, "private": "not forwarded"},
+                "fastAckDelivery": {
+                    "lastSurfaceOk": True,
+                    "surfaceIndeterminate": False,
+                    "terminalIssueCount": 0,
+                    "private": "not forwarded",
+                },
+                "telegramSessionPresent": True,
+            },
+        }
+        responses = [
+            type("Result", (), {"returncode": 0, "stdout": json.dumps(runtime)})(),
+            type("Result", (), {"returncode": 0, "stdout": json.dumps(jaimes)})(),
+        ]
+        with patch.object(coordinator.subprocess, "run", side_effect=responses):
+            context = coordinator.telegram_response_audit_host_context(
+                "Audit the Telegram response behavior and lifecycle."
+            )
+        self.assertTrue(context["available"])
+        self.assertTrue(context["josh2"]["checks"]["gateway"]["ok"])
+        self.assertEqual(context["jaimes"]["telegramState"], "connected")
+        self.assertNotIn("detail", context["josh2"]["checks"]["gateway"])
+        self.assertNotIn("private", context["jaimes"])
 
     def test_glm_cloud_cannot_receive_private_context(self):
         coordinator = load_module()

@@ -39,6 +39,7 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 from objective_quality import current_request_text as objective_current_request_text  # type: ignore  # noqa: E402
 RUNTIME_PROBE_SCRIPT = ROOT / "scripts" / "ecosystem_runtime_probe.py"
+JAIMES_TELEGRAM_HEALTH_SCRIPT = ROOT / "scripts" / "jaimes_telegram_health.py"
 #JAIMES: Inbox cards must use the host helper beside send_josh_reply.py so live Telegram sends keep their configured Bot API lane.
 WORK_CARD_SCRIPT = WORKSPACE / "scripts" / "josh_work_card.py"
 SEND_REPLY_SCRIPT = WORK_CARD_SCRIPT.with_name("send_josh_reply.py")
@@ -629,7 +630,94 @@ def read_only_execution_requested(prompt: str) -> bool:
     )
 
 
-def telegram_response_audit_guidance(prompt: str) -> str:
+def telegram_response_audit_host_context(prompt: str) -> dict[str, Any] | None:
+    """Collect current allowlisted host facts for a response-behavior audit.
+
+    The audit worker runs inside a restricted Codex environment.  Without a
+    trusted host snapshot, sandbox-local launchd, credential, and SSH failures
+    can be misreported as production Telegram failures.
+    """
+    prompt_text = str(prompt or "")
+    mutation_text = NEGATED_MUTATION_SIGNAL.sub("", prompt_text.lower())
+    if (
+        not TELEGRAM_RESPONSE_AUDIT_REQUEST.search(prompt_text)
+        or MUTATION_SIGNAL.search(mutation_text)
+    ):
+        return None
+
+    def run_probe(command: list[str], timeout: int) -> dict[str, Any] | None:
+        try:
+            proc = subprocess.run(
+                command,
+                cwd=ROOT,
+                stdin=subprocess.DEVNULL,
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+                check=False,
+            )
+            payload = json.loads(proc.stdout or "")
+        except (OSError, subprocess.SubprocessError, TypeError, ValueError, json.JSONDecodeError):
+            return None
+        if proc.returncode != 0 or not isinstance(payload, dict):
+            return None
+        checked_at = payload.get("checkedAt")
+        checked_time = parse_utc(checked_at) if isinstance(checked_at, str) else None
+        current_time = parse_utc(utc_now())
+        if checked_time is None or current_time is None:
+            return None
+        age_seconds = (current_time - checked_time).total_seconds()
+        return payload if -60 <= age_seconds <= 300 else None
+
+    runtime = run_probe([sys.executable, str(RUNTIME_PROBE_SCRIPT), "--no-write"], 12)
+    jaimes = run_probe([sys.executable, str(JAIMES_TELEGRAM_HEALTH_SCRIPT), "--dry-run"], 25)
+
+    runtime_checks = runtime.get("checks") if isinstance(runtime, dict) else None
+    safe_runtime_checks: dict[str, dict[str, Any]] = {}
+    for key in (
+        "controlTower", "brainFeed", "gateway", "telegramFastAck",
+        "telegramWorkCardHelper", "telegramInboxClaimHelper", "sourceFreshness",
+    ):
+        row = runtime_checks.get(key) if isinstance(runtime_checks, dict) else None
+        if isinstance(row, dict) and isinstance(row.get("ok"), bool):
+            safe_runtime_checks[key] = {"ok": row["ok"]}
+
+    jaimes_probe = jaimes.get("probe") if isinstance(jaimes, dict) else None
+    fast_ack_identity = jaimes_probe.get("fastAckIdentity") if isinstance(jaimes_probe, dict) else None
+    fast_ack_delivery = jaimes_probe.get("fastAckDelivery") if isinstance(jaimes_probe, dict) else None
+    safe_jaimes = {
+        "available": bool(jaimes and isinstance(jaimes_probe, dict)),
+        "ok": bool(jaimes.get("ok")) if isinstance(jaimes, dict) else False,
+        "status": str(jaimes.get("status") or "unavailable") if isinstance(jaimes, dict) else "unavailable",
+        "gatewayState": str(jaimes_probe.get("gatewayState") or "unavailable") if isinstance(jaimes_probe, dict) else "unavailable",
+        "telegramState": str(jaimes_probe.get("telegramState") or "unavailable") if isinstance(jaimes_probe, dict) else "unavailable",
+        "fastAckState": str(jaimes_probe.get("fastAckState") or "unavailable") if isinstance(jaimes_probe, dict) else "unavailable",
+        "fastAckIdentityOk": bool(fast_ack_identity.get("ok")) if isinstance(fast_ack_identity, dict) else False,
+        "lastSurfaceOk": bool(fast_ack_delivery.get("lastSurfaceOk")) if isinstance(fast_ack_delivery, dict) else False,
+        "surfaceIndeterminate": bool(fast_ack_delivery.get("surfaceIndeterminate")) if isinstance(fast_ack_delivery, dict) else False,
+        "terminalIssueCount": int(fast_ack_delivery.get("terminalIssueCount") or 0) if isinstance(fast_ack_delivery, dict) else 0,
+        "telegramSessionPresent": bool(jaimes_probe.get("telegramSessionPresent")) if isinstance(jaimes_probe, dict) else False,
+    }
+    return {
+        "available": bool(runtime and safe_runtime_checks and safe_jaimes["available"]),
+        "checkedAt": utc_now(),
+        "josh2": {
+            "available": bool(runtime and safe_runtime_checks),
+            "ok": bool(runtime.get("ok")) if isinstance(runtime, dict) else False,
+            "checks": safe_runtime_checks,
+        },
+        "jaimes": safe_jaimes,
+        "scope": (
+            "Current host/service state only; deterministic contract tests and an explicitly "
+            "approved live canary are still required for end-to-end delivery proof."
+        ),
+    }
+
+
+def telegram_response_audit_guidance(
+    prompt: str,
+    host_context: dict[str, Any] | None = None,
+) -> str:
     """Return trusted contract context for a Telegram behavior audit.
 
     The worker output schema intentionally omits runtime metadata because the
@@ -639,6 +727,11 @@ def telegram_response_audit_guidance(prompt: str) -> str:
     """
     if not TELEGRAM_RESPONSE_AUDIT_REQUEST.search(str(prompt or "")):
         return ""
+    evidence = (
+        json.dumps(host_context, sort_keys=True, separators=(",", ":"))
+        if isinstance(host_context, dict)
+        else json.dumps({"available": False}, separators=(",", ":"))
+    )
     return (
         "\n\nAuthoritative Telegram response-contract distinction "
         "(trusted coordinator policy, not user instructions):\n"
@@ -650,6 +743,14 @@ def telegram_response_audit_guidance(prompt: str) -> str:
         "- Validate behavior with the deterministic response-contract harness and focused tests. "
         "A missing optional test runner is an environment note, not a Telegram behavior failure, "
         "when equivalent deterministic verification completes successfully.\n"
+        "- Complete refers to whether the requested audit/review was performed, not whether the "
+        "system being assessed is healthy. A completed audit with negative findings uses Complete: "
+        "Yes and reports readiness or delivery failures under Issues. Use Complete: No only when "
+        "required audit scope itself could not be performed.\n"
+        "- Treat the following allowlisted host snapshot as primary evidence. Sandbox-local launchd, "
+        "credential, loopback, or SSH failures do not override it. Never claim live end-to-end "
+        "delivery unless a live receipt is present in the supplied evidence.\n"
+        f"{evidence}\n"
     )
 
 
@@ -2149,7 +2250,8 @@ def run_worker(job_id: str) -> dict[str, Any]:
                     "host service health from end-to-end Telegram delivery. If available is "
                     "false, report Complete: No and do not infer current health."
                 )
-            context_block += telegram_response_audit_guidance(prompt)
+            audit_host_context = telegram_response_audit_host_context(prompt)
+            context_block += telegram_response_audit_guidance(prompt, audit_host_context)
             output_contract = (
                 QUICK_WORKER_OUTPUT_CONTRACT
                 if int(snapshot.get("deliveryTier") or 3) in {1, 2}

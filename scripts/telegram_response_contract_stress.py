@@ -12,6 +12,7 @@ import json
 import os
 import re
 import stat
+import subprocess
 import sys
 import tempfile
 import time
@@ -466,6 +467,26 @@ def load_module(path: Path):
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module
+
+
+def ensure_live_telegram_credential(role: str, work_card_script: Path) -> None:
+    """Resolve JAIMES' managed bot token in-memory for an explicit live canary.
+
+    Normal Telegram delivery receives the token from the launchd launcher.  A
+    manual SSH canary does not inherit that process environment, so reuse the
+    same checked-in resolver instead of treating the missing shell variable as
+    a production outage.  The value is never printed or persisted.
+    """
+    if role != "jaimes" or os.environ.get("TELEGRAM_BOT_TOKEN"):
+        return
+    launcher_path = work_card_script.with_name("jaimes_telegram_fast_ack_launcher.py")
+    if not launcher_path.is_file():
+        raise RuntimeError("JAIMES secure Telegram credential launcher is unavailable")
+    launcher = load_module(launcher_path)
+    token = str(launcher.resolve_telegram_token() or "").strip()
+    if not token or re.search(r"\s", token):
+        raise RuntimeError("JAIMES secure Telegram credential is unavailable")
+    os.environ["TELEGRAM_BOT_TOKEN"] = token
 
 
 def pre_text(text: str) -> str:
@@ -1635,6 +1656,11 @@ def main() -> int:
             )
         if not args.canary_journal_dir:
             target_problems.append("--canary-journal-dir is required for a one-shot live canary")
+        if not target_problems:
+            try:
+                ensure_live_telegram_credential(args.role, script)
+            except (OSError, RuntimeError, subprocess.SubprocessError):
+                target_problems.append("JAIMES secure Telegram credential is unavailable for the live canary")
         problems.extend(target_problems)
         if not target_problems:
             try:

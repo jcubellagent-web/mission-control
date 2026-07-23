@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -486,6 +487,28 @@ def test_live_target_requires_numeric_ids_and_explicit_production_confirmation()
         stress.PRODUCTION_INBOX_THREAD_ID,
         True,
     ) == []
+
+
+def test_jaimes_live_canary_reuses_secure_launcher_credential(monkeypatch, tmp_path) -> None:
+    monkeypatch.delenv("TELEGRAM_BOT_TOKEN", raising=False)
+    launcher = tmp_path / "jaimes_telegram_fast_ack_launcher.py"
+    launcher.write_text("# test launcher\n", encoding="utf-8")
+
+    class FakeLauncher:
+        @staticmethod
+        def resolve_telegram_token() -> str:
+            return "managed-test-token"
+
+    monkeypatch.setattr(stress, "load_module", lambda path: FakeLauncher())
+    stress.ensure_live_telegram_credential("jaimes", tmp_path / "jaimes_work_card.py")
+    assert os.environ["TELEGRAM_BOT_TOKEN"] == "managed-test-token"
+
+
+def test_josh_live_canary_does_not_resolve_jaimes_credential(monkeypatch, tmp_path) -> None:
+    monkeypatch.delenv("TELEGRAM_BOT_TOKEN", raising=False)
+    monkeypatch.setattr(stress, "load_module", lambda _path: pytest.fail("must not load launcher"))
+    stress.ensure_live_telegram_credential("josh2", tmp_path / "josh_work_card.py")
+    assert "TELEGRAM_BOT_TOKEN" not in os.environ
 
 
 def test_live_canary_closes_card_at_6_of_6_then_sends_exactly_one_final(monkeypatch) -> None:
