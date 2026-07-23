@@ -747,6 +747,10 @@ class JoshTelegramV3AdapterTests(unittest.TestCase):
                 )
             }
         self.assertEqual(states, {"card_edit": "delivered", "final": "delivered"})
+        projected = WATCHER.load_json(self.state_path, {})["active_cards"]["run-1"]
+        self.assertEqual(projected["final_message_id"], "9001")
+        self.assertEqual(projected["final_delivery_status"], "delivered")
+        self.assertEqual(projected["terminal_delivery_state"], "delivered")
 
     def test_terminal_budget_drains_heartbeat_lock_and_indeterminate_delivery_fences_card(self) -> None:
         lifecycle = self.lifecycle()

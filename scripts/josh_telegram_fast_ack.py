@@ -5530,7 +5530,12 @@ def close_before_final(args: argparse.Namespace) -> dict[str, Any]:
     if delivered:
         finish_lifecycle_terminal(prepared, state="delivered")
     persisted_status = persisted["status"].lower()
-    persist_terminal_card_state(run_key, card_key, persisted_status)
+    persist_terminal_card_state(
+        run_key,
+        card_key,
+        persisted_status,
+        final_message_id=str(persisted.get("final_message_id") or ""),
+    )
     publish_terminal_once(run_key, card_key, persisted_status)
     if final_summary:
         return {
