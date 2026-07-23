@@ -3,17 +3,17 @@
   "agent": "JOSH 2.0",
   "active": true,
   "reportedActive": true,
-  "status": "done",
-  "objective": "Done: identified the Chrome crash-recovery popup on Control Tower",
-  "detail": "Tool execution started",
-  "updatedAt": "2026-07-23T00:10:31Z",
-  "checkedAt": "2026-07-23T00:10:31Z",
-  "currentTool": "exec",
+  "status": "active",
+  "objective": "Receiving: add a live dashboard signal for active versus stalled work",
+  "detail": "Objective confirmed; planned provider=codex; model=gpt-5.6-terra; worker=josh2-codex-terra; host=josh2; why=explicit model request; fallback=none; skill=none",
+  "updatedAt": "2026-07-23T00:13:47Z",
+  "checkedAt": "2026-07-23T00:13:47Z",
+  "currentTool": "telegram",
   "steps": [
     {
-      "label": "Done - identified the Chrome crash-recovery popup on Control Tower",
-      "status": "done",
-      "tool": "exec"
+      "label": "Receiving - add a live dashboard signal for active versus stalled work",
+      "status": "active",
+      "tool": "telegram"
     }
   ],
   "source": "josh2-local-live-feed",
@@ -21,14 +21,14 @@
   "model": "Unknown",
   "messageReceived": "2026-07-20T03:06:59Z",
   "localLiveFeed": true,
-  "workId": "work-telegram-6a53a2d42d2aceb7dfa63cca",
-  "runId": "run-telegram-45e0ca4d0da3bd8891fc60ed",
+  "workId": "work-telegram-a84a1b790048a1830e2c1a23",
+  "runId": "run-telegram-7202a7f481d96d94a1ac10ae",
   "generation": 1,
-  "sequence": 12,
+  "sequence": 1,
   "phase": "active",
-  "originClaimHash": "4486ccd635aefbc093c9b1f8863e159f459ccca06f2ee378000e977c07739e71",
-  "modelFamily": "antigravity",
-  "modelId": "Gemini Flash / local OpenCLAW session",
-  "routeVerified": true,
-  "leaseUntil": "2026-07-23T00:13:30.000Z"
+  "originClaimHash": "78ec13390744e9629fb308f9044f082e35e1497ebacb27bbba2d7397d3e2ac7e",
+  "modelFamily": "codex",
+  "modelId": "gpt-5.6-terra",
+  "routeVerified": false,
+  "leaseUntil": "2026-07-23T00:16:32.000Z"
 }
