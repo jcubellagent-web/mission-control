@@ -102,6 +102,12 @@ def test_direct_objective_summary_request_still_maps_normally():
     assert watcher.objective_from_prompt(prompt) == "Make objective cards summarize task intent"
 
 
+def test_installed_model_question_is_not_misread_as_install_request():
+    watcher = load_module()
+    prompt = "Please explain to me how often you are using codex that is installed on your device vs other models?"
+    assert watcher.objective_from_prompt(prompt) != "Update JAIMES stack"
+
+
 def test_objective_copy_complaint_maps_to_interpreted_intent():
     watcher = load_module()
     prompt = "The Telegram and Control Tower objective is just a copy of my message. Interpret it in your own words first."

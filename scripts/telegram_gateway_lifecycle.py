@@ -92,7 +92,8 @@ CONVERSATION_RE = re.compile(
     re.I,
 )
 QUICK_QUESTION_RE = re.compile(
-    r"^\s*(?:what|who|when|where|why|how|is|are|can|could|does|do|did|will|would)\b",
+    r"^\s*(?:(?:please\s+)?(?:explain|tell\s+me)\b|"
+    r"(?:what|who|when|where|why|how|is|are|can|could|does|do|did|will|would)\b)",
     re.I,
 )
 LIGHTWEIGHT_READINESS_RE = re.compile(

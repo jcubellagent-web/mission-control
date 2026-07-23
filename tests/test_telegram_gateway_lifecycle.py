@@ -144,6 +144,12 @@ class GatewayLifecycleTests(unittest.TestCase):
         self.assertEqual(LIFECYCLE.classify_delivery_tier("What time is it?"), (2, "quick-answer"))
         self.assertEqual(
             LIFECYCLE.classify_delivery_tier(
+                "Please explain to me how often you are using codex that is installed on your device vs other models?"
+            ),
+            (2, "quick-answer"),
+        )
+        self.assertEqual(
+            LIFECYCLE.classify_delivery_tier(
                 "testing behavior, are you fully functioning?"
             ),
             (2, "quick-answer"),
