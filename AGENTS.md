@@ -287,23 +287,41 @@ freshness or Sorare auth refresh unless the user explicitly says Sorare.
 When the user says "Sorare cookie", treat that as Sorare auth/cookie freshness.
 Keep the two paths separate in Brain Feed, work cards, and final reports.
 
-## Telegram Completion UX
+## Telegram Completion Authority
 
-For Josh 2.0 and JAIMES Telegram tasks:
+Do not maintain a second detailed Telegram UX specification here. The authority
+chain is:
 
-- For group/forum work, react `👀` first. For direct work, the fast-ack watcher may acknowledge receipt; the model must continue through the real result.
-- Before publishing an objective to Telegram or Control Tower, interpret the request into intent, target, and desired outcome, then state that objective in your own words. Removing courtesy phrases or changing one verb is not interpretation. Never reuse a six-word span from the current request. If intake cannot interpret confidently, leave only the reaction and let the main agent determine the objective before starting the work card or Brain Feed row.
-- Once the objective is known, make it specific enough to identify the target, concrete change/check, and intended outcome.
-- Do not create a work card until the objective is known. Resolve it from the current user request only. Quoted prior objectives, pasted cards, screenshots, compaction summaries, and example templates are evidence—not the live objective. When Josh reports a stale card, make the requested correction the current objective. For multi-step work, use exactly one editable card with Model, Path, status, Objective, Current step, and Progress.
-- In the Josh 2.0 Inbox, use one native-rich editable card and one proportional rich final; the task-header bubble is diagnostic opt-in only. Across JAIMES, JOSH 2.0, J.A.I.N, and JOSHeX, retain Telegram HTML `<pre>` at 38 fixed-width columns as the fallback/legacy renderer. Emoji/check rows use three ASCII spaces on continuation lines; plain `- ` rows use two. Pre-wrap fallback content server-side and never use proportional-text spacing or nonbreaking spaces as a substitute.
-- If no new tool/model event is visible for a longer-running task, update the card with a short "still working" heartbeat instead of letting the card look frozen.
-- Publish Brain Feed under the agent that received the Telegram task. If the task was in Josh 2.0 Telegram, publish as `--agent josh2`; if it was in JAIMES Telegram, publish as `--agent jaimes`.
-- Do not show routing/model buttons by default. Only show routing buttons when it is useful for Josh to steer the objective toward a specific model or agent.
-- Context compaction, session rollover, replayed history, and framework continuation markers are not new Telegram tasks. Do not send another objective/acknowledgement or create another live card; keep editing the existing origin-scoped card, append resumed work, close it at 100%, then send only the final summary.
-- Start every native reply and work-card model field from verified runtime state. Use the compact format `Model: <provider/model> — <lane>` in native replies.
-- Show buttons only for real approvals or mitigations. Never add routine model-routing, status, or `n/a` controls.
+1. `config/telegram-intake-lanes.json` defines registered topics, one owner per
+   topic, and configured mention overrides.
+2. `scripts/telegram_channel_registry.py` enforces that authority and fails
+   closed when ownership is missing or ambiguous.
+3. `scripts/telegram_gateway_lifecycle.py` owns durable work identity, receipt,
+   fencing, recovery, and delivery state.
+4. `agent-skills/telegram-task-flow/SKILL.md` owns the visible reaction,
+   objective, live-card, final-summary, routing-disclosure, button, and Brain
+   Feed contract.
 
-#JAIMES: this section preserves one live card plus one gateway-delivered completion; the model returns the substantive final and never creates a parallel surface.
+Keep these hard invariants at every runtime boundary:
+
+- Exactly one registered owner may answer an untagged topic message. One
+  unambiguous configured `@mention` may override that owner; multiple agent
+  mentions are silent. Replies, cards, and finals remain in the origin topic.
+- The gateway and fast-ack runtime exclusively own Telegram reactions, live
+  cards, edits, and final delivery. Models return substantive work normally and
+  never create a parallel Telegram surface through tools or Bot API calls.
+- One owned task produces at most one acknowledgement reaction, one editable
+  live card, and one structured final. The card receives heartbeats while work
+  is active, and model/route labels come only from verified execution state.
+- Telegram work publishes lifecycle state under the receiving agent's Brain
+  Feed lane. Compaction, replay, and session rollover reuse the existing
+  origin-scoped work; they never create another task surface.
+- Buttons are reserved for concrete approvals or mitigations. Normal routing,
+  status, and `n/a` states do not create controls.
+
+#JAIMES: runtime mechanics may differ, but registry ownership, gateway
+single-writer delivery, the shared visible contract, and origin-topic closure
+are common to Josh 2.0 and JAIMES.
 
 ## Shared Tooling Preferences
 

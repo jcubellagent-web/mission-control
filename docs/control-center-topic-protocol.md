@@ -1,46 +1,77 @@
 # J.A.I.N Control Center Topic Protocol
 
-This document records the Telegram topic routing protocol Josh asked JAIMES to install on 2026-07-06. It exists so JOSHeX, JOSH 2.0, and future JAIMES sessions can audit the pinned-topic messages without relying on Telegram history alone.
+This document records the Telegram topic protocol and the historical pin
+mechanics first installed on 2026-07-06. It is an operator reference, not an
+independent routing authority.
 
-## Source of truth
+## Canonical authority
+
+- `config/telegram-intake-lanes.json` is the only checked-in topic ownership and
+  mention-override registry.
+- `scripts/telegram_channel_registry.py` is the fail-closed runtime resolver.
+- `agent-skills/telegram-task-flow/SKILL.md` is the detailed visible reaction,
+  card, final, model-disclosure, and Brain Feed contract.
+- `scripts/telegram_primary_topics_check.py` verifies that both host configs
+  match the registry. Host-local maps and prompts are deployment mirrors, never
+  fallback ownership sources.
+
+If this document conflicts with any authority above, the checked-in registry,
+resolver, and skill win.
+
+## Historical pin mechanics
 
 - Telegram supergroup: `J.A.I.N Control Center`
 - Chat id: `-1003589561528`
-- Topic map: `~/.hermes/state/jain_control_center_topics.json` on both JAIMES/J.AI.N and Josh 2.0
+- Historical discovery map: `~/.hermes/state/jain_control_center_topics.json`
 - Pin helper: `mission-control/scripts/control_center_topic_pins.py`
 - Pin manifest: `~/.hermes/state/jain_control_center_pinned_protocol.json`
 
+The discovery map and pin manifest are retained for pin cleanup and migration
+context only. They do not authorize a responder or override the canonical
+registry.
+
 ## Operating protocol
 
-- JOSH 2.0 owns front-line conversation, triage, and daily flow.
-- JOSH 2.0 answers first in Inbox; if the work belongs elsewhere, it routes to JAIMES and keeps the thread moving.
-- JAIMES owns backend execution: crons, code, SSH, batch jobs, alert hygiene.
-- JOSHeX reviews/checks codebase work and deployment quality when needed.
-- Other agents stay quiet unless tagged, delegated, or asked to verify.
-- Specialist work should be moved to the matching topic instead of staying in Inbox.
-- Routine progress belongs on the Live Work Board; Telegram should be used for direct completions, blockers, approvals, urgent alerts, or material findings.
-- Replies should stay in the topic where the request was made unless the agent explicitly summarizes and redirects the work into a better topic.
-- If multiple agents see the same group message, the first appropriate owner should acknowledge; other agents should stay quiet unless tagged, delegated, or asked to verify.
+- The registry assigns exactly one owner to every authorized static topic.
+- The registered owner alone acknowledges an untagged request. One unambiguous
+  configured `@mention` may override topic ownership; multiple agent mentions
+  are ambiguous and every responder remains silent.
+- JOSH 2.0 owns Inbox conversation and may delegate backend execution while
+  retaining delivery ownership. JAIMES owns untagged work in its registered
+  operational topics.
+- Delegation and specialist execution do not move, copy, or duplicate the human
+  request. The acknowledgement, live card, and final stay in the origin topic.
+- Non-owners observe silently unless the registry selects them, they are
+  explicitly delegated internal work, or the user addresses them with one
+  configured mention.
+- Routine progress belongs on the Live Work Board. Telegram background
+  notifications are limited to failures, blockers, approvals, time-sensitive
+  alerts, and material findings; direct task replies still follow the shared
+  Telegram task-flow contract.
 
 ## Topic responsibilities
 
-| Topic | Use |
-|---|---|
-| Inbox | General asks, triage, unclear routing. |
-| JAIMES Ops | Backend work: crons, scripts, SSH, system alerts, repairs. |
-| JOSH 2.0 | JOSH 2.0 status, protocol, recovery, cross-agent handoffs. |
-| Sorare | Sorare MLB lineups, missions, GW locks, player-risk alerts. |
-| Crypto Alerts | Wallet, token, watchlist, and trade-signal alerts. |
-| Approvals | Josh approve/reject/adjust decisions before execution. |
-| Mission Control | Legacy topic label for Control Tower, Live Work Board, and dashboard visibility. Rename to `Control Tower` in Telegram when convenient; until then, treat it as the Control Tower topic. |
-| News | J.A.I.N breaking-news alerts and scheduled intelligence digests. |
+| Topic | Owner | Use |
+|---|---|---|
+| Inbox | JOSH 2.0 | General asks, triage, and unclear routing. |
+| JAIMES Ops | JAIMES | Backend work: crons, scripts, SSH, system alerts, and repairs. |
+| JOSH 2.0 | JOSH 2.0 | JOSH 2.0 status, protocol, recovery, and cross-agent handoffs. |
+| Sorare | JAIMES | Sorare MLB lineups, missions, GW locks, and player-risk alerts. |
+| Crypto Alerts | JAIMES | Wallet, token, watchlist, and trade-signal alerts. |
+| Approvals | JOSH 2.0 | Josh approve/reject/adjust decisions before execution. |
+| Mission Control | JOSH 2.0 | Legacy Telegram label for Control Tower, Live Work Board, and dashboard visibility. |
+| News | JAIMES | Breaking-news alerts and scheduled intelligence digests. |
 
 ## Notes for future agents
 
 - Josh specifically asked the visible pinned messages to be short statements about what each chat is used for. Keep detailed protocol here, not in the pinned text.
-- Inbox triage routes through JOSH 2.0 first so untagged questions can be answered or handed to JAIMES without waiting for a mention.
-- Live OpenClaw config keeps Inbox topic 1 mention-free, while the other topics can stay mention-gated.
-- Keep topic labels and routing state mirrored on Josh 2.0 and JAIMES so either host can route without guessing.
+- Inbox triage routes through JOSH 2.0 so untagged questions can be answered or
+  delegated without creating a second responder.
+- Mention gates on each host are deployment details derived from the registry;
+  do not describe all non-Inbox topics as mention-gated.
+- Keep host configs synchronized with `config/telegram-intake-lanes.json` and
+  verify them with `scripts/telegram_primary_topics_check.py`. Never route by a
+  guessed or stale host-local map.
 - Telegram Bot API can post/pin into known topic IDs, but it cannot reliably list all forum topics. Keep the JSON topic map current.
 - If a topic is recreated, update the topic ID before rerunning the pin helper.
 - The helper intentionally posts short one-line purpose messages.
@@ -49,6 +80,10 @@ This document records the Telegram topic routing protocol Josh asked JAIMES to i
 - Do not print bot tokens in logs or reports. The helper reads local secret files and only prints topic/message IDs.
 - If Josh changes the operating protocol, update both this doc and `TOPIC_MESSAGES` in the helper, then rerun the helper and commit/push/deploy through the normal Control Tower path.
 
-## Quick Inbox routing tags
+## Inbox routing hints
 
-If Josh starts in `Inbox` but wants to hint the destination, prefix the message with the topic name or hashtag, for example `#sorare`, `#crypto`, `#approvals`, `#control`, `#controltower`, `#mission`, `#news`, `#jaimes`, or `#josh2`. Telegram does not natively move an existing human message between topics for us; agents should copy/summarize the work into the correct topic when the route matters. Topic buttons on the pinned messages are navigation shortcuts only.
+Only configured `@mentions` change response ownership. A `#jaimes` hashtag or
+plain-language delegation request may help JOSH 2.0 select an internal worker,
+but JOSH 2.0 still owns the Inbox card and final. Other historical hashtag
+shortcuts are not advertised because the runtime registry does not implement
+them. Topic buttons on pinned messages are navigation shortcuts only.
