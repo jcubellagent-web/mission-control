@@ -65,6 +65,16 @@ class GatewayLifecycleTests(unittest.TestCase):
     def test_canonical_and_explicit_work_identity_round_trip_and_collisions_fail_closed(self) -> None:
         expected = "work-telegram-" + hashlib.sha256(b"message-key|run-42").hexdigest()[:24]
         self.assertEqual(LIFECYCLE.canonical_work_id("message-key", "run-42"), expected)
+        material = b"message-key|run-42"
+        digest = hashlib.sha256(material).hexdigest()
+        self.assertEqual(
+            LIFECYCLE.canonical_work_identity("message-key", "run-42"),
+            (
+                expected,
+                "run-telegram-" + digest[24:48],
+                hashlib.sha256(b"telegram-origin|" + material).hexdigest(),
+            ),
+        )
 
         gateway = self.gateway()
         explicit = "work-telegram-0123456789abcdef01234567"
@@ -95,6 +105,19 @@ class GatewayLifecycleTests(unittest.TestCase):
                 current_owner="jaimes",
                 intake_agent="jaimes",
             )
+
+    def test_runtime_timestamp_parsing_and_age_share_one_safe_contract(self) -> None:
+        parsed = LIFECYCLE.parse_optional_utc("2026-07-22T20:00:00-04:00")
+        self.assertEqual(parsed, dt.datetime(2026, 7, 23, 0, 0, tzinfo=dt.timezone.utc))
+        self.assertIsNone(LIFECYCLE.parse_optional_utc(""))
+        self.assertIsNone(LIFECYCLE.parse_optional_utc("not-a-timestamp"))
+
+        recent = LIFECYCLE.utc_now()
+        age = LIFECYCLE.event_age_seconds(recent)
+        self.assertIsNotNone(age)
+        self.assertGreaterEqual(age, 0.0)
+        self.assertLess(age, 2.0)
+        self.assertIsNone(LIFECYCLE.event_age_seconds("not-a-timestamp"))
 
     def test_fsm_rejects_illegal_stale_and_old_epoch_events(self) -> None:
         gateway = self.gateway()

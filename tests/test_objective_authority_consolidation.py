@@ -28,6 +28,14 @@ def objective_quality_imports(tree: ast.Module) -> set[str]:
     return names
 
 
+def lifecycle_imports(tree: ast.Module) -> set[str]:
+    names: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom) and node.module == "telegram_gateway_lifecycle":
+            names.update(alias.name for alias in node.names)
+    return names
+
+
 def test_request_selection_has_one_shared_implementation() -> None:
     shared = parsed("objective_quality.py")
     josh = parsed("josh_telegram_fast_ack.py")
@@ -45,3 +53,14 @@ def test_agent_summarizers_do_not_redeclare_card_or_output_contract_filters() ->
         source = (SCRIPTS / name).read_text(encoding="utf-8")
         assert "embedded_card_row = re.compile" not in source
         assert "output_instruction = re.compile" not in source
+
+
+def test_time_and_work_identity_have_one_lifecycle_implementation() -> None:
+    shared = parsed("telegram_gateway_lifecycle.py")
+    required = {"utc_now", "parse_optional_utc", "event_age_seconds", "canonical_work_identity"}
+    assert required <= function_names(shared)
+
+    for name in ("josh_telegram_fast_ack.py", "jaimes_telegram_fast_ack.py"):
+        watcher = parsed(name)
+        assert required <= lifecycle_imports(watcher)
+        assert not (required & function_names(watcher))

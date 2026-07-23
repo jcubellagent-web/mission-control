@@ -124,8 +124,12 @@ try:
         GatewayLifecycle,
         LifecycleError,
         RolloutPolicy,
+        canonical_work_identity as telegram_work_identity,
         classify_delivery_tier,
+        event_age_seconds,
+        parse_optional_utc as parse_utc,
         render_live_card,
+        utc_now,
     )
 except Exception:  # noqa: BLE001
     GatewayLifecycle = None  # type: ignore
@@ -133,6 +137,14 @@ except Exception:  # noqa: BLE001
     RolloutPolicy = None  # type: ignore
     classify_delivery_tier = None  # type: ignore
     render_live_card = None  # type: ignore
+
+    def _missing_lifecycle_authority(*_args: Any, **_kwargs: Any) -> Any:
+        raise LifecycleError("canonical-telegram-lifecycle-unavailable")
+
+    telegram_work_identity = _missing_lifecycle_authority  # type: ignore
+    event_age_seconds = _missing_lifecycle_authority  # type: ignore
+    parse_utc = _missing_lifecycle_authority  # type: ignore
+    utc_now = _missing_lifecycle_authority  # type: ignore
 
 try:
     from objective_quality import (  # type: ignore
@@ -903,10 +915,6 @@ def send_buttons_message(text: str, buttons: list, timeout: int = 15, meta: dict
         return ""
 
 
-def utc_now() -> str:
-    return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
-
-
 def load_json(path: Path, fallback: Any) -> Any:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
@@ -1342,21 +1350,6 @@ def run_work_card_start(cmd: list[str]) -> dict[str, Any]:
 
 def local_time_label() -> str:
     return dt.datetime.now().astimezone().strftime("%H:%M:%S %Z")
-
-
-def parse_utc(value: Any) -> dt.datetime | None:
-    if not value:
-        return None
-    try:
-        text = str(value)
-        if text.endswith("Z"):
-            text = text[:-1] + "+00:00"
-        parsed = dt.datetime.fromisoformat(text)
-        if parsed.tzinfo is None:
-            parsed = parsed.replace(tzinfo=dt.timezone.utc)
-        return parsed.astimezone(dt.timezone.utc)
-    except Exception:
-        return None
 
 
 def card_started_at(card: dict[str, Any]) -> dt.datetime | None:
@@ -2528,16 +2521,6 @@ def with_work_card_target(cmd: list[str], meta: dict[str, Any] | None = None) ->
     return routed
 
 
-def telegram_work_identity(key: str, run_id: str) -> tuple[str, str, str]:
-    stable = f"{key}|{run_id}".encode("utf-8")
-    digest = hashlib.sha256(stable).hexdigest()
-    return (
-        f"work-telegram-{digest[:24]}",
-        f"run-telegram-{digest[24:48]}",
-        hashlib.sha256(b"telegram-origin|" + stable).hexdigest(),
-    )
-
-
 def canonical_model_family(value: str) -> str:
     lowered = str(value or "").lower()
     if "gemini" in lowered or "google" in lowered or "antigravity" in lowered:
@@ -2626,18 +2609,6 @@ def publish_josh(
         except Exception:
             continue
     return False
-
-
-def event_age_seconds(ts: str) -> float | None:
-    try:
-        if ts.endswith("Z"):
-            ts = ts[:-1] + "+00:00"
-        event_time = dt.datetime.fromisoformat(ts)
-        if event_time.tzinfo is None:
-            event_time = event_time.replace(tzinfo=dt.timezone.utc)
-        return (dt.datetime.now(dt.timezone.utc) - event_time).total_seconds()
-    except Exception:
-        return None
 
 
 def internal_replay_prompt(prompt: str) -> bool:

@@ -148,6 +148,24 @@ def parse_utc(value: str) -> dt.datetime:
     return parsed if parsed.tzinfo else parsed.replace(tzinfo=dt.timezone.utc)
 
 
+def parse_optional_utc(value: Any) -> dt.datetime | None:
+    """Parse one runtime timestamp safely and normalize it to UTC."""
+    if not value:
+        return None
+    try:
+        return parse_utc(str(value)).astimezone(dt.timezone.utc)
+    except (TypeError, ValueError):
+        return None
+
+
+def event_age_seconds(value: Any) -> float | None:
+    """Return the signed age of a runtime event, or ``None`` when invalid."""
+    parsed = parse_optional_utc(value)
+    if parsed is None:
+        return None
+    return (dt.datetime.now(dt.timezone.utc) - parsed).total_seconds()
+
+
 def stable_id(prefix: str, *parts: Any, length: int = 24) -> str:
     material = "\x1f".join(str(part or "") for part in parts)
     return f"{prefix}-{hashlib.sha256(material.encode()).hexdigest()[:length]}"
@@ -155,8 +173,18 @@ def stable_id(prefix: str, *parts: Any, length: int = 24) -> str:
 
 def canonical_work_id(key: str, run_id: str) -> str:
     """Match the identity already emitted by both canonical fast-ack owners."""
+    return canonical_work_identity(key, run_id)[0]
+
+
+def canonical_work_identity(key: str, run_id: str) -> tuple[str, str, str]:
+    """Derive the one work, run, and origin identity used by both owners."""
     material = f"{key}|{run_id}".encode("utf-8")
-    return f"work-telegram-{hashlib.sha256(material).hexdigest()[:24]}"
+    digest = hashlib.sha256(material).hexdigest()
+    return (
+        f"work-telegram-{digest[:24]}",
+        f"run-telegram-{digest[24:48]}",
+        hashlib.sha256(b"telegram-origin|" + material).hexdigest(),
+    )
 
 
 def clean_plain_text(value: Any, limit: int = 1200) -> str:
