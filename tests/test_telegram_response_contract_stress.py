@@ -525,6 +525,13 @@ def test_live_canary_closes_card_at_6_of_6_then_sends_exactly_one_final(monkeypa
     assert not terminal_edit[2].startswith("<pre>")
     assert "Progress [██████████] 6/6" in terminal_edit[3]
     assert result["timing"]["checks"]["terminalLiveCard100Percent"] is True
+    assert result["timing"]["checks"]["exactlyOneLiveCard"] is True
+    assert result["liveCard"] == {
+        "attempts": 1,
+        "successes": 1,
+        "messageIds": ["102"],
+        "exactlyOne": True,
+    }
     assert result["final"] == {
         "attempts": 1,
         "successes": 1,
@@ -700,6 +707,40 @@ def test_live_canary_counts_one_failed_final_attempt_and_returned_id_without_ret
     assert len([call for call in module.calls if call[0] == "send_final"]) == 1
     assert ("delete", "103") in module.calls
     assert "exactly-one-final contract failed" in result["failures"]
+
+
+def test_production_projection_exposes_one_card_without_message_identifiers() -> None:
+    projected = stress.production_canary_stdout({
+        "role": "josh2",
+        "ok": True,
+        "stress": {"ok": True, "iterations": 100, "renderedCards": 1100},
+        "transport": {
+            "ok": True,
+            "liveCard": {
+                "attempts": 1,
+                "successes": 1,
+                "messageIds": ["102"],
+                "exactlyOne": True,
+            },
+            "final": {
+                "attempts": 1,
+                "successes": 1,
+                "messageIds": ["103"],
+                "exactlyOne": True,
+            },
+            "cleanup": {"attempted": 3, "deleted": 3, "failedIds": [], "indeterminateIds": []},
+            "cleanupConfirmed": True,
+            "failures": [],
+        },
+    })
+    assert projected["stress"]["renderedCards"] == 1100
+    assert projected["transport"]["liveCard"] == {
+        "attempts": 1,
+        "successes": 1,
+        "count": 1,
+        "exactlyOne": True,
+    }
+    assert "messageIds" not in json.dumps(projected)
 
 
 def test_cleanup_uses_retry_after_and_continues_after_one_id_raises(monkeypatch) -> None:

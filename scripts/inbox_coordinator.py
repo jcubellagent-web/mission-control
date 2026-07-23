@@ -209,6 +209,13 @@ POSITIVE_OPERATIONAL_ABSENCE_SIGNAL = re.compile(
     r"(?:remaining\s+)?(?:service\s+)?(?:issues?|failures?|errors?|problems?|risks?|blockers?)\b",
     re.I,
 )
+NEGATED_REPORTED_RISK_SIGNAL = re.compile(
+    r"(?:\b(?:no|zero|0|without)\s+(?:\w+[\s/_-]+){0,3}"
+    r"(?:failed|failures?|errors?|risks?|limitations?|blockers?|warnings?)\b|"
+    r"\b(?:failed|failures?|errors?|risks?|limitations?|blockers?|warnings?)"
+    r"(?:[\s_-]*(?:count|total))?\s*(?:[:=]|is|was|were)?\s*(?:zero|0)\b)",
+    re.I,
+)
 RISK_OR_LIMITATION_SIGNAL = re.compile(
     r"\b(?:risk|risks|risky|limitation|limitations|limited|cannot|can't|unable|unsupported|"
     r"not supported|could\s+not|does\s+not|did\s+not|do not|don't|avoid|"
@@ -754,6 +761,7 @@ def telegram_e2e_canary_context(
                 "status": "not-run", "attempted": 0, "deleted": 0,
                 "failedCount": 0, "indeterminateCount": 0,
             },
+            "liveCard": {"attempts": 0, "successes": 0, "count": 0, "exactlyOne": False},
             "final": {"attempts": 0, "successes": 0, "count": 0},
         },
     }
@@ -809,6 +817,7 @@ def telegram_e2e_canary_context(
     stress = payload.get("stress") if isinstance(payload.get("stress"), dict) else {}
     transport = payload.get("transport") if isinstance(payload.get("transport"), dict) else {}
     cleanup = transport.get("cleanup") if isinstance(transport.get("cleanup"), dict) else {}
+    live_card = transport.get("liveCard") if isinstance(transport.get("liveCard"), dict) else {}
     final = transport.get("final") if isinstance(transport.get("final"), dict) else {}
     safe["stress"] = {
         "ok": bool(stress.get("ok")),
@@ -827,6 +836,12 @@ def telegram_e2e_canary_context(
             "failedCount": int(cleanup.get("failedCount") or 0),
             "indeterminateCount": int(cleanup.get("indeterminateCount") or 0),
         },
+        "liveCard": {
+            "attempts": int(live_card.get("attempts") or 0),
+            "successes": int(live_card.get("successes") or 0),
+            "count": int(live_card.get("count") or 0),
+            "exactlyOne": bool(live_card.get("exactlyOne")),
+        },
         "final": {
             "attempts": int(final.get("attempts") or 0),
             "successes": int(final.get("successes") or 0),
@@ -842,6 +857,8 @@ def telegram_e2e_canary_context(
         and safe["transport"]["cleanup"]["attempted"] == safe["transport"]["cleanup"]["deleted"]
         and safe["transport"]["cleanup"]["failedCount"] == 0
         and safe["transport"]["cleanup"]["indeterminateCount"] == 0
+        and safe["transport"]["liveCard"]
+        == {"attempts": 1, "successes": 1, "count": 1, "exactlyOne": True}
         and safe["transport"]["final"] == {"attempts": 1, "successes": 1, "count": 1}
     )
     safe["ok"] = receipt_agrees
@@ -901,6 +918,8 @@ def telegram_response_audit_guidance(
         "single production canary. Do not run another canary. Complete may be Yes only when the "
         "canary receipt says executed=true. Report a failed transport or cleanup receipt under Issues; "
         "never infer cleanup success.\n"
+        "- stress.renderedCards is an offline render-state count, never a Telegram message count. "
+        "Use transport.liveCard.count and transport.liveCard.exactlyOne for the one-card claim.\n"
         f"- Sanitized production-canary receipt: {canary_evidence}\n"
     )
 
@@ -1217,6 +1236,11 @@ def has_operational_risk(value: str) -> bool:
     return bool(OPERATIONAL_RISK_SIGNAL.search(text))
 
 
+def has_reported_risk(value: str) -> bool:
+    text = NEGATED_REPORTED_RISK_SIGNAL.sub("", clean_final_item(value))
+    return bool(RISK_OR_LIMITATION_SIGNAL.search(text) or has_operational_risk(text))
+
+
 def no_action_item(value: str) -> bool:
     return bool(NO_ACTION_SIGNAL.match(clean_final_item(value)))
 
@@ -1395,7 +1419,7 @@ def enforce_e2e_canary_evidence_gate(
         f"- The explicit canary approval gate was {'satisfied' if approval else 'not satisfied'}.",
         f"- The canonical production canary execution status was {status}.",
         f"- Renderer stress reported {int(stress.get('iterations') or 0)} iterations and "
-        f"{int(stress.get('renderedCards') or 0)} rendered cards.",
+        f"{int(stress.get('renderedCards') or 0)} rendered states.",
         f"- Telegram reported {int(final.get('successes') or 0)} successful final delivery and cleanup "
         f"deleted {int(cleanup.get('deleted') or 0)} of {int(cleanup.get('attempted') or 0)} tracked messages.",
         "Issues:",
@@ -1511,10 +1535,7 @@ def parse_model_sections(
             quality_issues.append(
                 "The completion claim contradicted an unresolved model or route execution failure."
             )
-        reported_risk = bool(
-            RISK_OR_LIMITATION_SIGNAL.search(reported_text)
-            or has_operational_risk(reported_text)
-        )
+        reported_risk = has_reported_risk(reported_text)
         if reported_risk and not source_issues:
             quality_issues.append("A reported risk or limitation was not reflected in Issues.")
 

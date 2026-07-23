@@ -431,6 +431,7 @@ class InboxCoordinatorTests(unittest.TestCase):
                     "status": "pending", "attempted": 3, "deleted": 2,
                     "failedCount": 1, "indeterminateCount": 0,
                 },
+                "liveCard": {"attempts": 1, "successes": 1, "count": 1, "exactlyOne": True},
                 "final": {"attempts": 1, "successes": 1, "count": 1},
             },
         }
@@ -475,6 +476,7 @@ class InboxCoordinatorTests(unittest.TestCase):
         self.assertIn("Model: <verified provider/model> | Route: <actual lane> | Why:", guidance)
         self.assertIn("missing optional test runner", guidance)
         self.assertIn("completed audit with negative findings uses Complete: Yes", guidance)
+        self.assertIn("render-state count, never a Telegram message count", guidance)
         self.assertIn('"telegramState":"connected"', guidance)
         self.assertEqual(coordinator.telegram_response_audit_guidance("Summarize this note."), "")
 
@@ -1084,6 +1086,55 @@ class InboxCoordinatorTests(unittest.TestCase):
         self.assertIs(sections["complete"], True)
         self.assertIs(sections["summarySufficient"], True)
         self.assertEqual(len(sections["done"]), 3)
+
+    def test_zero_failed_canary_evidence_keeps_terminal_completion_truthful(self):
+        coordinator = load_module()
+        output = (
+            "Complete: Yes. The requested end-to-end reliability verification was performed.\n"
+            "What was done:\n"
+            "- Josh 2.0 sole ownership was confirmed with one coherent work path.\n"
+            "- Exactly one native-rich card was verified across all required milestones.\n"
+            "- Fresh heartbeat edits were delivered while the worker remained active.\n"
+            "- Transport passed with 1/1 successes and cleanup deleted 3/3 messages.\n"
+            "- Cleanup reported 0 failed/indeterminate records and problemCount=0.\n"
+            "Issues: n/a\n"
+            "Appropriate next steps: No action needed.\n"
+            "Approval needed: n/a"
+        )
+        sections = coordinator.parse_model_sections(
+            output,
+            require_successful_execution=True,
+        )
+        self.assertIs(sections["complete"], True)
+        self.assertIs(sections["summarySufficient"], True)
+        self.assertEqual(sections["summaryQualityIssues"], [])
+
+        route = {
+            "routeId": "glm",
+            "provider": "ollama",
+            "auth": "Ollama Cloud",
+            "routingReason": "dashboard-safe model-routing audit",
+            "fallback": "",
+        }
+        execution = {
+            "actualProvider": "ollama",
+            "actualModel": "glm-5.2:cloud",
+            "actualAuth": "Ollama Cloud",
+            "authVerified": True,
+            "modelVerified": True,
+            "executionVerified": True,
+        }
+        rendered = html.unescape(coordinator.render_final_html(route, execution, output))
+        self.assertTrue(rendered.startswith("<b>JOSH 2.0 · COMPLETE</b>"))
+        self.assertIn("Model: ollama/glm-5.2:cloud | Route: glm", rendered)
+        self.assertIn("<b>Complete:</b> Yes", rendered)
+
+    def test_nonzero_failed_evidence_still_requires_an_issue(self):
+        coordinator = load_module()
+        self.assertFalse(coordinator.has_reported_risk("0 failed/indeterminate records"))
+        self.assertFalse(coordinator.has_reported_risk("failed count=0"))
+        self.assertTrue(coordinator.has_reported_risk("1 failed delivery"))
+        self.assertTrue(coordinator.has_reported_risk("The final delivery failed"))
 
     def test_complete_yes_cannot_hide_that_no_specialist_executed(self):
         coordinator = load_module()

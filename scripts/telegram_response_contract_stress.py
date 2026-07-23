@@ -1032,6 +1032,9 @@ def basic_live_canary(module, chat_id: str, thread_id: str, journal_path: Path) 
     sent_ids: list[str] = []
     indeterminate_ids: list[str] = []
     indeterminate_stages: list[str] = []
+    live_attempts = 1
+    live_successes = 0
+    live_ids: list[str] = []
     final_attempts = 0
     final_successes = 0
     final_ids: list[str] = []
@@ -1056,6 +1059,9 @@ def basic_live_canary(module, chat_id: str, thread_id: str, journal_path: Path) 
     target = message_id(sent)
     if target:
         sent_ids.append(target)
+        live_ids.append(target)
+    if sent.get("ok") and target:
+        live_successes = 1
     if delivery_is_indeterminate(module, sent):
         (indeterminate_ids if target else indeterminate_stages).append(target or "basic-send")
     write_canary_journal(
@@ -1190,6 +1196,12 @@ def basic_live_canary(module, chat_id: str, thread_id: str, journal_path: Path) 
         "scope": "synthetic cumulative transport timing only; never p95 or inbound-path evidence",
         "send": bool(sent.get("ok")),
         "edit": bool(edited.get("ok")),
+        "liveCard": {
+            "attempts": live_attempts,
+            "successes": live_successes,
+            "messageIds": live_ids,
+            "exactlyOne": live_attempts == 1 and live_successes == 1 and len(live_ids) == 1,
+        },
         "final": {
             "attempts": final_attempts,
             "successes": final_successes,
@@ -1226,6 +1238,9 @@ def live_canary(
     failures: list[str] = []
     indeterminate_ids: list[str] = []
     indeterminate_stages: list[str] = []
+    live_attempts = 0
+    live_successes = 0
+    live_ids: list[str] = []
     final_attempts = 0
     final_successes = 0
     final_ids: list[str] = []
@@ -1293,12 +1308,14 @@ def live_canary(
             sent_ids,
         )
         result_failures = list(failures)
+        exactly_one_live = live_attempts == 1 and live_successes == 1 and len(live_ids) == 1
         exactly_one_final = final_attempts == 1 and final_successes == 1 and len(final_ids) == 1
         synthetic_checks = {
             "eyesUnder2s": stage_ms.get("eyes", float("inf")) <= 2_000,
             "headerUnder5s": (not header_required) or stage_ms.get("header", float("inf")) <= 5_000,
             "liveCardUnder8s": stage_ms.get("liveCard", float("inf")) <= 8_000,
             "terminalLiveCard100Percent": terminal_render_verified and terminal_edit_verified,
+            "exactlyOneLiveCard": exactly_one_live,
             "exactlyOneFinal": exactly_one_final,
         }
         if final_successes == 1 and not all(
@@ -1307,6 +1324,8 @@ def live_canary(
             result_failures.append("synthetic cumulative response timing exceeded one or more thresholds")
         if final_attempts and not exactly_one_final:
             result_failures.append("exactly-one-final contract failed")
+        if live_attempts and not exactly_one_live:
+            result_failures.append("exactly-one-live-card contract failed")
         if not cleanup_confirmed:
             result_failures.append("temporary canary cleanup is incomplete or indeterminate")
         result_failures = list(dict.fromkeys(result_failures))
@@ -1322,6 +1341,12 @@ def live_canary(
                 "checks": synthetic_checks,
             },
             "milestoneEdits": len(edit_results),
+            "liveCard": {
+                "attempts": live_attempts,
+                "successes": live_successes,
+                "messageIds": live_ids,
+                "exactlyOne": exactly_one_live,
+            },
             "final": {
                 "attempts": final_attempts,
                 "successes": final_successes,
@@ -1404,6 +1429,7 @@ def live_canary(
             now=first_items[-1],
             done=first_items[:-1],
         )
+        live_attempts += 1
         before_send("live-card")
         live = module.send_rich_message(
             rich,
@@ -1414,6 +1440,10 @@ def live_canary(
             thread_id=thread_id,
         )
         live_id = track_delivery(live, "live-card")
+        if live_id:
+            live_ids.append(live_id)
+        if live.get("ok") and live_id:
+            live_successes += 1
         renderer = "rich" if live.get("native_rich_message") else "fallback"
         stage_ms["liveCard"] = round((time.monotonic() - response_start) * 1000, 1)
         if not live.get("ok") or not live_id:
@@ -1542,12 +1572,14 @@ def production_canary_stdout(result: dict) -> dict:
                 "failedCount": 0,
                 "indeterminateCount": 0,
             },
+            "liveCard": {"attempts": 0, "successes": 0, "count": 0, "exactlyOne": False},
             "final": {"attempts": 0, "successes": 0, "count": 0},
         },
     }
     if transport is None:
         return projected
     cleanup = transport.get("cleanup") if isinstance(transport.get("cleanup"), dict) else {}
+    live_card = transport.get("liveCard") if isinstance(transport.get("liveCard"), dict) else {}
     final = transport.get("final") if isinstance(transport.get("final"), dict) else {}
     cleanup_confirmed = bool(transport.get("cleanupConfirmed"))
     projected["transport"] = {
@@ -1561,6 +1593,12 @@ def production_canary_stdout(result: dict) -> dict:
             "failedCount": len(cleanup.get("failedIds") or []),
             "indeterminateCount": len(cleanup.get("indeterminateIds") or [])
             + len(cleanup.get("indeterminateStages") or []),
+        },
+        "liveCard": {
+            "attempts": int(live_card.get("attempts") or 0),
+            "successes": int(live_card.get("successes") or 0),
+            "count": len(live_card.get("messageIds") or []),
+            "exactlyOne": bool(live_card.get("exactlyOne")),
         },
         "final": {
             "attempts": int(final.get("attempts") or 0),
