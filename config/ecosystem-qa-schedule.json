@@ -189,6 +189,7 @@
       "timeoutSeconds": 180,
       "severity": "p1",
       "alertAfterFailures": 2,
+      "aggregateHealth": true,
       "skipDuringChangeLease": true
     },
     {
@@ -201,6 +202,7 @@
       "timeoutSeconds": 300,
       "severity": "p2",
       "alertAfterFailures": 2,
+      "aggregateHealth": true,
       "skipDuringChangeLease": true
     },
     {
@@ -224,6 +226,7 @@
       "timeoutSeconds": 300,
       "severity": "p1",
       "alertAfterFailures": 1,
+      "aggregateHealth": true,
       "skipDuringChangeLease": true
     },
     {

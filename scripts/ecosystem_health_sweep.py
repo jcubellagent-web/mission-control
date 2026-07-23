@@ -18,7 +18,13 @@ HEALTH_PATH = DATA_DIR / "ecosystem-health-sweep.json"
 HEARTBEATS_PATH = DATA_DIR / "agent-heartbeats.json"
 DASHBOARD_PATH = DATA_DIR / "dashboard-data.json"
 REQUIRED_AGENTS = ("josh2", "jaimes", "jain")
-QA_META_JOB_IDS = frozenset({"nightly-control-tower-suite", "daily-qa-rollup"})
+QA_META_JOB_IDS = frozenset({
+    "nightly-control-tower-suite",
+    "daily-qa-rollup",
+    "adaptive-quality-snapshot",
+    "daily-refactor-discovery",
+    "weekly-quality-baseline-review",
+})
 SIDECAR_PATHS = {
     "josh2": DATA_DIR / "brain-feed.json",
     "jaimes": DATA_DIR / "jaimes-brain-feed.json",

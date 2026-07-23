@@ -65,6 +65,31 @@ def test_qa_aggregate_failures_remain_visible_without_recursing_into_health(monk
     assert result["nonBlockingActionRequiredCount"] == 0
 
 
+def test_adaptive_quality_failure_cannot_recursively_fail_its_health_input(monkeypatch) -> None:
+    dashboard = {
+        "actionRequired": [{
+            "priority": "high",
+            "title": "Adaptive QA/QC snapshot needs attention",
+            "qaMetaOnly": True,
+        }],
+        "crons": [{
+            "name": "Adaptive QA/QC snapshot",
+            "status": "error",
+            "runStatus": "missed",
+            "errors": 1,
+            "qaJobId": "adaptive-quality-snapshot",
+            "qaMeta": False,
+        }],
+    }
+
+    returncode, result = _run_main(monkeypatch, dashboard)
+
+    assert returncode == 0
+    assert result["ok"] is True
+    assert result["operationalCronAttention"] == []
+    assert result["qaMetaAttention"][0]["qaJobId"] == "adaptive-quality-snapshot"
+
+
 def test_real_operational_cron_failure_still_fails_health(monkeypatch) -> None:
     dashboard = {
         "actionRequired": [],

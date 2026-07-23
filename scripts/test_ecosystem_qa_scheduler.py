@@ -99,6 +99,7 @@ class SchedulerTests(unittest.TestCase):
         self.assertNotIn("joshex", {job["owner"] for job in (snapshot, discovery, baseline)})
         for job in (snapshot, discovery, baseline):
             self.assertTrue(job["skipDuringChangeLease"])
+            self.assertTrue(job["aggregateHealth"])
             self.assertNotIn("--promote-baseline", job["command"])
 
     def test_configured_precondition_exit_maps_to_skip(self) -> None:
