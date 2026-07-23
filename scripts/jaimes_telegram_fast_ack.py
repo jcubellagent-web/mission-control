@@ -4492,14 +4492,78 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
     return updates
 
 
-def retire_noncurrent_active_cards(state: dict[str, Any], current_run_id: str) -> int:
-    """Silently retire every historical card except the current user turn."""
+def retire_noncurrent_active_cards(
+    state: dict[str, Any],
+    current_run_id: str,
+    *,
+    dry_run: bool = False,
+) -> int:
+    """Retire every historical card before admitting the current user turn.
+
+    A managed lifecycle must not remain ``working`` after Hermes accepts a
+    newer message for the same topic.  Close the old visible card first, then
+    commit a superseded terminal outcome without reserving or sending a final.
+    """
     retired = 0
     ended_at = utc_now()
     for run_id, card in (state.get("active_cards") or {}).items():
-        if not isinstance(card, dict) or card.get("status") == "done" or run_id == current_run_id:
+        if (
+            not isinstance(card, dict)
+            or card.get("status") in {"done", "failed", "cancelled"}
+            or run_id == current_run_id
+        ):
             continue
-        card["status"] = "done"
+        context = gateway_context_for_card(card)
+        lifecycle = context.get("lifecycle")
+        receipt = context.get("receipt") or {}
+        managed_writer = bool(lifecycle is not None and receipt and context.get("writer"))
+        if managed_writer and not dry_run:
+            key = str(card.get("key") or "")
+            if key and not card.get("no_card_required"):
+                pause_cmd = [
+                    "python3", "mission-control/scripts/jaimes_work_card.py", "pause",
+                    "--key", key,
+                    "--title", str(card.get("objective") or "JAIMES Telegram task"),
+                    "--model", str(card.get("model") or DEFAULT_MODEL),
+                    "--route", str(card.get("route") or DEFAULT_ROUTE),
+                    "--now", "Superseded by your newer message",
+                    "--blocker", "None",
+                    "--no-final-summary",
+                ] + work_card_target_args(card)
+                pause_result = run_gateway_card_command(card, pause_cmd, status="progress")
+                record_api_result(state, "editMessageText", {
+                    "ok": bool(pause_result.get("ok")),
+                    "error": pause_result.get("stderr") or pause_result.get("error") or "",
+                    "delivery_key": key,
+                })
+                card["superseded_card_edit_ok"] = bool(pause_result.get("ok"))
+            try:
+                receipt = lifecycle.read_work(str(receipt["workId"])) or receipt
+                if str(receipt.get("phase") or "") != "terminal":
+                    lifecycle.commit_terminal(
+                        str(receipt["workId"]),
+                        "superseded",
+                        expected_sequence=int(receipt["sequence"]),
+                        fencing_epoch=int(receipt["fencingEpoch"]),
+                        private_payload={
+                            "reason": "superseded-by-newer-user-turn",
+                            "transportAttempted": False,
+                        },
+                    )
+                    receipt = lifecycle.read_work(str(receipt["workId"])) or receipt
+                delivery_state = str(receipt.get("deliveryState") or "")
+                if delivery_state == "pending":
+                    claim = lifecycle.claim_terminal_delivery(str(receipt["workId"]))
+                    delivery_state = str(claim.get("state") or delivery_state)
+                if delivery_state == "sending":
+                    lifecycle.finish_terminal_delivery(str(receipt["workId"]), "dead_letter")
+                    delivery_state = "dead_letter"
+                card["terminal_outcome"] = "superseded"
+                card["terminal_delivery_state"] = delivery_state
+                card["final_contract_status"] = "superseded-no-final"
+            except Exception as exc:  # noqa: BLE001
+                card["retirement_error"] = sanitize_error_text(str(exc), limit=160)
+        card["status"] = "cancelled" if managed_writer else "done"
         card["ended_at"] = ended_at
         card["retired_reason"] = "superseded-by-newer-user-turn"
         card_key = str(card.get("key") or "")
@@ -4510,11 +4574,20 @@ def retire_noncurrent_active_cards(state: dict[str, Any], current_run_id: str) -
     return retired
 
 
-def retire_for_genuine_events(state: dict[str, Any], events: list[dict[str, Any]]) -> int:
+def retire_for_genuine_events(
+    state: dict[str, Any],
+    events: list[dict[str, Any]],
+    *,
+    dry_run: bool = False,
+) -> int:
     """Retire cards only when an actual ingested Telegram user turn exists."""
     if not events:
         return 0
-    return retire_noncurrent_active_cards(state, str(events[-1]["run_id"]))
+    return retire_noncurrent_active_cards(
+        state,
+        str(events[-1]["run_id"]),
+        dry_run=dry_run,
+    )
 
 
 def internal_replay_prompt(prompt: str) -> bool:
@@ -5070,7 +5143,11 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
     selected_model = str(selected_meta.get("model") or DEFAULT_MODEL)
     events = [selected[0][1]] if selected else []
     if events:
-        state["silently_retired_cards"] = int(state.get("silently_retired_cards") or 0) + retire_for_genuine_events(state, events)
+        state["silently_retired_cards"] = int(state.get("silently_retired_cards") or 0) + retire_for_genuine_events(
+            state,
+            events,
+            dry_run=dry_run,
+        )
     for event in events:
         event_id = f"{event['session_id']}:{event['ts']}"
         retry_record = surface_retries.get(event_id)

@@ -13,7 +13,7 @@ import time
 import types
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 # The watcher is a tracked runtime script rather than an installed package.
 # Prefer the sibling staged copy when this regression file is exercised before
@@ -1929,6 +1929,69 @@ class MultiSessionWatcherTests(unittest.TestCase):
         self.assertIn(current_live, state["unresolved_telegram_deliveries"])
         self.assertEqual(
             state["last_telegram_delivery_error"]["operation"], current_live
+        )
+
+    def test_superseding_managed_card_pauses_surface_and_terminalizes_without_final(self) -> None:
+        receipt = {
+            "workId": "work-telegram-" + "a" * 24,
+            "phase": "working",
+            "sequence": 4,
+            "fencingEpoch": 1,
+            "deliveryState": "pending",
+        }
+        lifecycle = Mock()
+        lifecycle.read_work.side_effect = [
+            dict(receipt),
+            {**receipt, "phase": "terminal", "sequence": 5, "deliveryState": "pending"},
+        ]
+        lifecycle.claim_terminal_delivery.return_value = {
+            "allowed": True,
+            "state": "sending",
+        }
+        state = {
+            "active_cards": {
+                "run-old": {
+                    "key": "old-card",
+                    "status": "active",
+                    "objective": "Run the older task",
+                    "model": "openai-codex/gpt-5.6-sol",
+                    "route": "JAIMES verified execution",
+                    "work_id": receipt["workId"],
+                    "telegram_chat_id": "-1003589561528",
+                    "telegram_thread_id": "17",
+                },
+                "run-current": {"key": "current-card", "status": "active"},
+            }
+        }
+
+        with patch.object(
+            watcher,
+            "gateway_context_for_card",
+            side_effect=lambda card: (
+                {"lifecycle": lifecycle, "receipt": receipt, "writer": True}
+                if card.get("key") == "old-card"
+                else {}
+            ),
+        ), patch.object(
+            watcher,
+            "run_gateway_card_command",
+            return_value={"ok": True},
+        ) as pause_card:
+            retired = watcher.retire_noncurrent_active_cards(state, "run-current")
+
+        self.assertEqual(retired, 1)
+        old = state["active_cards"]["run-old"]
+        self.assertEqual(old["status"], "cancelled")
+        self.assertEqual(old["terminal_outcome"], "superseded")
+        self.assertEqual(old["terminal_delivery_state"], "dead_letter")
+        self.assertEqual(old["final_contract_status"], "superseded-no-final")
+        pause_card.assert_called_once()
+        self.assertEqual(pause_card.call_args.kwargs["status"], "progress")
+        lifecycle.commit_terminal.assert_called_once()
+        self.assertEqual(lifecycle.commit_terminal.call_args.args[1], "superseded")
+        lifecycle.claim_terminal_delivery.assert_called_once_with(receipt["workId"])
+        lifecycle.finish_terminal_delivery.assert_called_once_with(
+            receipt["workId"], "dead_letter"
         )
 
     def test_adapter_receipt_without_final_message_id_does_not_close_watcher_card(self) -> None:
