@@ -3626,17 +3626,6 @@ function latestMemorySignal(activity?: MemoryActivity) {
     .sort((a, b) => timeValue(b[1]) - timeValue(a[1]))[0] || null;
 }
 
-function latestAgentMemorySignal(row: MemoryActivity["agents"][number]) {
-  const signals: Array<[string, string | null]> = [
-    ["retrieval", row.lastRetrievalAt],
-    ["selected", row.lastSelectedAt],
-    ["used", row.lastUsedAt],
-    ["cross-agent reuse", row.lastCrossAgentUsedAt],
-  ];
-  return signals.filter(([, observedAt]) => timeValue(observedAt) > 0)
-    .sort((a, b) => timeValue(b[1]) - timeValue(a[1]))[0] || null;
-}
-
 const BRAIN_ATLAS_WIDE_VIEWBOX_WIDTH = 1464;
 const BRAIN_ATLAS_SOURCE_LEFT = 18;
 const BRAIN_ATLAS_SOURCE_RIGHT = 982;
@@ -3995,9 +3984,7 @@ function BrainAtlasPanel({
             <g className="memory-flow-nodes">
             {flowAgents.map((row, index) => {
               const y = 22 + index * 52;
-              const latestAgentSignal = latestAgentMemorySignal(row);
-              const latestAgentSignalAt = latestAgentSignal?.[1] || null;
-              const live = memorySignalIsRecent(latestAgentSignalAt, motionWindowSeconds);
+              const live = memorySignalIsRecent(row.lastRetrievalAt, motionWindowSeconds);
               const working = workingAgentIds.has(row.agent);
               const agentLoad = loadByAgent.get(row.agent)!;
               return (
@@ -4012,7 +3999,7 @@ function BrainAtlasPanel({
                   data-agent-load-score={agentLoad.score}
                   style={{ "--atlas-agent-phase": `${index * -0.18}s` } as React.CSSProperties}
                 >
-                  <title>{`${AGENTS[row.agent].label}: ${working ? `${agentLoad.label.toLowerCase()} verified work load (${agentLoad.score}/4)` : "not working"}; ${!activity ? "memory telemetry unavailable" : live ? `verified ${latestAgentSignal?.[0]} receipt only` : "memory quiet"}`}</title>
+                  <title>{`${AGENTS[row.agent].label}: ${working ? `${agentLoad.label.toLowerCase()} verified work load (${agentLoad.score}/4)` : "not working"}; ${!activity ? "memory telemetry unavailable" : live ? "verified retrieval receipt only" : "memory quiet"}`}</title>
                   <rect className="memory-flow-node-aura" x={brainAtlasWideX(13)} y={y - 5} width={brainAtlasWideWidth(13, 160)} height="48" rx="12" />
                   <rect x={brainAtlasWideX(18)} y={y} width={brainAtlasWideWidth(18, 150)} height="38" rx="7" />
                   <g className="memory-flow-node-copy" clipPath={`url(#brain-atlas-agent-copy-${row.agent})`}>
