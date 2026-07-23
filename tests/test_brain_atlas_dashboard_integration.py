@@ -718,7 +718,11 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertIn("memory-flow-memory-receipt-dot", component)
         self.assertIn('live ? " is-memory-live" : ""', component)
         self.assertNotIn('is-memory-live is-live', component)
-        self.assertIn("latestAgentMemorySignal", component)
+        self.assertNotIn("latestAgentMemorySignal", component)
+        self.assertGreaterEqual(
+            component.count("memorySignalIsRecent(row.lastRetrievalAt, motionWindowSeconds)"),
+            2,
+        )
         self.assertIn('data-operation="cross-agent-used"', component)
         self.assertIn("data-source-agent", component)
         self.assertIn("data-consumer-agent", component)
