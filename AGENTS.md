@@ -303,7 +303,7 @@ For Josh 2.0 and JAIMES Telegram tasks:
 - Start every native reply and work-card model field from verified runtime state. Use the compact format `Model: <provider/model> — <lane>` in native replies.
 - Show buttons only for real approvals or mitigations. Never add routine model-routing, status, or `n/a` controls.
 
-#JAIMES: this section preserves one live card plus one separate completion card; native completion replies remain suppressed.
+#JAIMES: this section preserves one live card plus one gateway-delivered completion; the model returns the substantive final and never creates a parallel surface.
 
 ## Shared Tooling Preferences
 

@@ -2151,6 +2151,32 @@ class MultiSessionWatcherTests(unittest.TestCase):
         self.assertEqual(card["final_contract_status"], "delivery_indeterminate")
         self.assertEqual(card["terminal_card_recovery_status"], "needs-attention")
 
+    def test_concurrent_terminal_merge_does_not_reopen_indeterminate_delivery(self) -> None:
+        current = {
+            "final_contract_status": "delivery_indeterminate",
+            "terminal_delivery_state": "indeterminate",
+        }
+        disk = {
+            "terminal_delivery_state": "sending",
+            "terminal_final_effect_key": "effect-from-concurrent-preparation",
+        }
+
+        watcher.merge_concurrent_terminal_fields(current, disk)
+
+        self.assertEqual(current["terminal_delivery_state"], "indeterminate")
+        self.assertEqual(
+            current["terminal_final_effect_key"],
+            "effect-from-concurrent-preparation",
+        )
+
+    def test_concurrent_terminal_merge_accepts_confirmed_delivery(self) -> None:
+        current = {"terminal_delivery_state": "sending"}
+        disk = {"terminal_delivery_state": "delivered"}
+
+        watcher.merge_concurrent_terminal_fields(current, disk)
+
+        self.assertEqual(current["terminal_delivery_state"], "delivered")
+
     def test_missing_terminal_receipt_terminates_no_card_task_without_retry(self) -> None:
         user_id = self.add_user("older", "verify delivery")
         with sqlite3.connect(self.db) as con:

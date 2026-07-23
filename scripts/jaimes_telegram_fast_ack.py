@@ -3928,6 +3928,39 @@ def finish_prepared_terminal_card_edit(
     card["terminal_card_edit_state"] = state
 
 
+TERMINAL_STATE_RANK = {
+    "": 0,
+    "pending": 1,
+    "sending": 2,
+    "shadow-awaiting-confirmation": 2,
+    "indeterminate": 3,
+    "dead_letter": 3,
+    "shadow-unclean": 3,
+    "delivered": 4,
+    "shadow-delivered": 4,
+}
+
+
+def merge_concurrent_terminal_fields(
+    current_card: dict[str, Any],
+    disk_card: dict[str, Any],
+) -> None:
+    """Preserve concurrent terminal metadata without reopening a closed state."""
+    for key, value in disk_card.items():
+        if not str(key).startswith("terminal_"):
+            continue
+        if key in {"terminal_delivery_state", "terminal_card_edit_state"}:
+            current_state = str(current_card.get(key) or "")
+            disk_state = str(value or "")
+            if (
+                TERMINAL_STATE_RANK.get(disk_state, 1)
+                > TERMINAL_STATE_RANK.get(current_state, 1)
+            ):
+                current_card[key] = value
+            continue
+        current_card[key] = value
+
+
 def complete_cards_from_final_responses(state: dict[str, Any], session_id: str, dry_run: bool = False) -> int:
     """Normalize the delivered native final, then align the live card to 100%."""
     completed = 0
@@ -5389,9 +5422,9 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
                 current_card = (state.get("active_cards") or {}).get(run_id)
                 if not isinstance(disk_card, dict) or not isinstance(current_card, dict):
                     continue
-                for key, value in disk_card.items():
-                    if str(key).startswith("terminal_"):
-                        current_card[key] = value
+                #JAIMES: merge terminal states monotonically so a stale disk
+                # snapshot cannot reopen an indeterminate or delivered final.
+                merge_concurrent_terminal_fields(current_card, disk_card)
             save_json(STATE_PATH, state)
     return {
         "ok": True,
