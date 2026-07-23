@@ -307,6 +307,19 @@ def unresolved_terminal_issue(card, cards):
     # work item, even if the service process itself stays healthy for hours.
     return True
 
+
+def active_card_count(cards) -> int:
+    """Count only genuinely live watcher cards, not terminal dispositions."""
+    if not isinstance(cards, dict):
+        return 0
+    terminal_statuses = {"done", "failed", "cancelled", "paused", "retired"}
+    return sum(
+        1
+        for card in cards.values()
+        if isinstance(card, dict)
+        and str(card.get("status") or "").strip().lower() not in terminal_statuses
+    )
+
 payload = {
     "checkedAt": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
     "hermesStatusCode": status.returncode,
@@ -321,10 +334,7 @@ payload = {
         "lastSurfaceAt": fast_ack_state.get("last_attempt_at") or fast_ack_state.get("last_sent_at"),
         "lastSurfaceOk": (fast_ack_state.get("last_result") or {}).get("ok") if isinstance(fast_ack_state.get("last_result"), dict) else None,
         "surfaceIndeterminate": bool((fast_ack_state.get("last_result") or {}).get("surface_indeterminate")) if isinstance(fast_ack_state.get("last_result"), dict) else False,
-        "activeCardCount": sum(
-            1 for card in (fast_ack_state.get("active_cards") or {}).values()
-            if isinstance(card, dict) and card.get("status") != "done"
-        ) if isinstance(fast_ack_state.get("active_cards"), dict) else 0,
+        "activeCardCount": active_card_count(fast_ack_state.get("active_cards")),
         "terminalIssueCount": sum(
             1 for card in (fast_ack_state.get("active_cards") or {}).values()
             if unresolved_terminal_issue(card, fast_ack_state.get("active_cards") or {})

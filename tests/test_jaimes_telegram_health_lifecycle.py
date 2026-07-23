@@ -102,6 +102,32 @@ def test_cardless_multi_step_receipt_degrades_semantic_health_without_restart_lo
     assert recovery_targets == set()
 
 
+def test_active_card_count_excludes_every_terminal_disposition():
+    source = MODULE_PATH.read_text(encoding="utf-8")
+    match = re.search(
+        r"def active_card_count\(cards\) -> int:\n(.*?)\n\npayload =",
+        source,
+        flags=re.S,
+    )
+    assert match
+    namespace: dict = {}
+    exec("def active_card_count(cards) -> int:\n" + match.group(1), namespace)
+    active_card_count = namespace["active_card_count"]
+    cards = {
+        "active": {"status": "active"},
+        "working": {"status": "working"},
+        "done": {"status": "done"},
+        "failed": {"status": "failed"},
+        "cancelled": {"status": "cancelled"},
+        "paused": {"status": "paused"},
+        "retired": {"status": "retired"},
+        "junk": "not-a-card",
+    }
+
+    assert active_card_count(cards) == 2
+    assert active_card_count(None) == 0
+
+
 def test_old_indeterminate_terminal_receipt_remains_unhealthy_until_receipt_backed_resolution():
     source = MODULE_PATH.read_text(encoding="utf-8")
     match = re.search(
