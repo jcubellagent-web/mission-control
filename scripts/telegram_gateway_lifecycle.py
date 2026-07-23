@@ -34,6 +34,7 @@ CLASSIFIER_VERSION = "delivery-tier-v3"
 SUPPORTED_READER_VERSIONS = frozenset({2, 3})
 ALLOWED_OWNERS = frozenset({"josh2", "jaimes"})
 WORK_ID_RE = re.compile(r"^work-telegram-[0-9a-f]{24}$")
+TERMINAL_VISIBILITY_MAX_AGE_SECONDS = 90
 
 PHASES = frozenset({
     "received", "classified", "acknowledged", "working", "awaiting_input",
@@ -164,6 +165,14 @@ def event_age_seconds(value: Any) -> float | None:
     if parsed is None:
         return None
     return (dt.datetime.now(dt.timezone.utc) - parsed).total_seconds()
+
+
+def terminal_visibility_age_seconds(record: Mapping[str, Any]) -> float:
+    """Return the canonical non-negative age for one terminal-delivery record."""
+    age = event_age_seconds(record.get("createdAt"))
+    if age is None:
+        return float(TERMINAL_VISIBILITY_MAX_AGE_SECONDS + 1)
+    return max(0.0, age)
 
 
 def stable_id(prefix: str, *parts: Any, length: int = 24) -> str:

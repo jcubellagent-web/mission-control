@@ -43,7 +43,6 @@ CONTROL_CENTER_CHAT_ID = "-1003589561528"
 JAIMES_CONTROL_CENTER_TOPICS: set[str] = set()
 JAIMES_DIRECT_MENTION_TOPICS = {"1"}
 JAIMES_MENTION_RE = re.compile(r"(?:^|[\s,.:;!?()\[\]{}])@jaimes(?=$|[\s,.:;!?()\[\]{}])", re.I)
-TELEGRAM_GROUP_TOPIC_RE = re.compile(r"telegram:group:(-?\d+):(?:topic:)?(\d+)")
 DEFAULT_MODEL = "openai-codex/gpt-5.6-sol"
 DEFAULT_ROUTE = "JAIMES Telegram -> Hermes task"
 STALE_BOOTSTRAP_SECONDS = 120
@@ -60,7 +59,6 @@ SURFACE_RETRY_MAX_SECONDS = 60
 SURFACE_RETRY_MAX_RECORDS = 100
 TERMINAL_FINAL_RECEIPT_SECONDS = 90
 TERMINAL_VISIBILITY_MAX_ATTEMPTS = 12
-TERMINAL_VISIBILITY_MAX_AGE_SECONDS = 90
 CONTROL_TOWER_SSH_HOST = os.environ.get("CONTROL_TOWER_SSH_HOST", "josh2.0@josh2")
 CONTROL_TOWER_REMOTE_ROOT = os.environ.get(
     "CONTROL_TOWER_REMOTE_ROOT",
@@ -119,6 +117,8 @@ try:
         event_age_seconds,
         parse_optional_utc as parse_utc,
         render_live_card,
+        terminal_visibility_age_seconds,
+        TERMINAL_VISIBILITY_MAX_AGE_SECONDS,
         utc_now,
     )
 except Exception:  # noqa: BLE001
@@ -134,7 +134,16 @@ except Exception:  # noqa: BLE001
     telegram_work_identity = _missing_lifecycle_authority  # type: ignore
     event_age_seconds = _missing_lifecycle_authority  # type: ignore
     parse_utc = _missing_lifecycle_authority  # type: ignore
+    terminal_visibility_age_seconds = _missing_lifecycle_authority  # type: ignore
     utc_now = _missing_lifecycle_authority  # type: ignore
+
+from telegram_ux_contract import (  # type: ignore
+    actionable_approval_step,
+    approval_button_label,
+    clean_approval_step,
+    friendly_tool_name,
+    parse_telegram_target_from_key,
+)
 
 try:
     from objective_quality import (  # type: ignore
@@ -150,20 +159,6 @@ except Exception:  # noqa: BLE001
     semantic_reinterpretation = lambda _prompt: ""
     current_request_text = lambda prompt: str(prompt or "")
     request_context_text = lambda prompt: str(prompt or "")
-
-try:
-    from telegram_ux_helpers import (  # type: ignore
-        approve_all_step as ux_approve_all_step,
-        button_label as ux_button_label,
-        final_action_steps as ux_final_action_steps,
-        steps_are_all_applicable as ux_steps_are_all_applicable,
-    )
-except Exception:  # noqa: BLE001
-    ux_approve_all_step = None
-    ux_button_label = None
-    ux_final_action_steps = None
-    ux_steps_are_all_applicable = None
-
 
 LIFECYCLE_ROLLOUT_PATH = WORKSPACE / "mission-control" / "config" / "telegram-lifecycle-rollout.json"
 LIFECYCLE_PRIVATE_ROOT = HOME / ".openclaw" / "private" / "telegram-lifecycle"
@@ -358,19 +353,6 @@ def gateway_public_fields(context: dict[str, Any]) -> dict[str, Any]:
         "lifecycle_writer_enabled": bool(context.get("writer")),
         "lifecycle_shadow": bool(context.get("shadow")),
     }
-
-
-def parse_telegram_target_from_key(key: str) -> dict[str, Any]:
-    match = TELEGRAM_GROUP_TOPIC_RE.search(key or "")
-    if match:
-        return {
-            "telegram_chat_id": match.group(1),
-            "telegram_thread_id": match.group(2),
-            "telegram_session_key": key,
-        }
-    if "telegram:direct:" in key or "telegram:dm:" in key:
-        return {"telegram_chat_id": "6218150306", "telegram_session_key": key}
-    return {"telegram_session_key": key}
 
 
 def telegram_target(meta: dict[str, Any] | None = None) -> Any:
@@ -1915,17 +1897,6 @@ def first_existing_session_path(session_id: str) -> Path:
     return SESSION_DIR / f"{session_id}.trajectory.jsonl"
 
 
-def friendly_tool_name(name: str) -> str:
-    raw = (name or "").split(".")[-1].replace("_", " ").strip().lower()
-    labels = {
-        "exec command": "local check",
-        "apply patch": "file edit",
-        "parallel": "parallel checks",
-        "tool search tool": "tool lookup",
-    }
-    return labels.get(raw, raw or "task step")
-
-
 def short_progress_text(value: str, limit: int = 58) -> str:
     text = " ".join(str(value or "").split())
     return text if len(text) <= limit else text[: max(1, limit - 1)].rstrip() + "…"
@@ -2087,8 +2058,6 @@ def hermes_session_lineage(session_id: str) -> set[str]:
 
 
 def mitigation_steps_from_text(text: str) -> list[str]:
-    if ux_final_action_steps is not None:
-        return ux_final_action_steps(text)[1]
     if not text:
         return []
     match = re.search(r"(?im)^\s*(?:🔐\s*)?(?:\*\*)?(?:Approval needed|Mitigation steps for approval):?(?:\*\*)?\s*$", text)
@@ -2112,43 +2081,6 @@ def mitigation_steps_from_text(text: str) -> list[str]:
     return steps
 
 
-def clean_approval_step(step: str) -> str:
-    text = " ".join((step or "").split())
-    text = re.sub(r"`([^`]+)`", r"\1", text)
-    text = re.sub(r"\*\*([^*]+)\*\*", r"\1", text)
-    text = re.sub(r"__([^_]+)__", r"\1", text)
-    text = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", text)
-    text = re.sub(r"^[-*•\s]+", "", text).strip()
-    text = text.strip("*_ ")
-    text = re.sub(r"^\*{1,2}|\*{1,2}$", "", text).strip()
-    text = re.sub(r"\s+([,.!?;:])", r"\1", text)
-    return text
-
-
-def actionable_approval_step(step: str) -> bool:
-    normalized = " ".join(clean_approval_step(step).strip().lower().split())
-    if normalized in {"", "n/a", "na", "none", "not applicable", "no action needed"}:
-        return False
-    if re.match(r"^(context|complete|what was done|issues|appropriate next steps|approval needed|approval options|objective|status|next|model|route|using|sources?|references?)\b", normalized):
-        return False
-    if re.match(r"^https?://", normalized):
-        return False
-    if re.match(r"^context:\s*\d+%$", normalized):
-        return False
-    if re.match(r"^(say|send|reply)\s+[\"'`]", normalized) or re.search(r"\bif you want\b", normalized):
-        return False
-    return True
-
-
-def approval_button_label(step: str) -> str:
-    label = clean_approval_step(step)
-    label = re.sub(r"(?i)^(optional:\s*)", "", label).strip()
-    label = re.sub(r"(?i)^(approve|approval to|approval for)\s+", "", label).strip()
-    label = label.rstrip(".")
-    label = label[:38] + ("..." if len(label) > 38 else "")
-    return f"Approve: {label or 'next action'}"
-
-
 def approval_callback(objective: str, step: str, index: int) -> str:
     digest = hashlib.sha1(f"jaimes|{objective}|{step}|{index}".encode("utf-8")).hexdigest()[:10]
     return f"approve:jaimes:{digest}:{index}"
@@ -2164,28 +2096,13 @@ def save_approval_actions(actions: dict[str, Any]) -> None:
 
 def send_approval_options(objective: str, final_text: str, dry_run: bool = False, meta: dict[str, Any] | None = None) -> str:
     mode = "approval"
-    steps: list[str]
-    if ux_final_action_steps is not None:
-        mode, steps = ux_final_action_steps(final_text)
-    else:
-        steps = [step for step in mitigation_steps_from_text(final_text) if actionable_approval_step(step)]
+    steps = [step for step in mitigation_steps_from_text(final_text) if actionable_approval_step(step)]
     steps = [step for step in steps if actionable_approval_step(step)]
     if not steps:
         return ""
     actions: dict[str, Any] = {}
     buttons = []
     numeric_mode = str((meta or {}).get("telegram_thread_id") or "") == "17"
-    if not numeric_mode and ux_steps_are_all_applicable is not None and ux_steps_are_all_applicable(mode, steps, final_text):
-        all_step = ux_approve_all_step(steps) if ux_approve_all_step is not None else "Run all listed steps"
-        callback = approval_callback(objective, all_step, 0)
-        actions[callback] = {
-            "agent": "jaimes",
-            "objective": objective,
-            "step": all_step,
-            "created_at": utc_now(),
-        }
-        buttons.append([{"text": "Approve all", "callback_data": callback}])
-    prefix = "Approve" if mode == "approval" else "Next"
     for index, step in enumerate(steps[:4], start=1):
         callback = approval_callback(objective, step, index)
         actions[callback] = {
@@ -2196,8 +2113,6 @@ def send_approval_options(objective: str, final_text: str, dry_run: bool = False
         }
         if numeric_mode:
             button = {"text": str(index), "callback_data": callback}
-        elif ux_button_label is not None:
-            button = {"text": ux_button_label(step, prefix=prefix, limit=46), "callback_data": callback}
         else:
             button = {"text": approval_button_label(step), "callback_data": callback}
         if numeric_mode:
@@ -3362,13 +3277,6 @@ def terminal_visibility_outbox_path(event_id: str) -> Path:
     return root / (
         hashlib.sha256(event_id.encode("utf-8")).hexdigest() + ".json"
     )
-
-
-def terminal_visibility_age_seconds(record: dict[str, Any]) -> float:
-    created = parse_utc(record.get("createdAt"))
-    if not created:
-        return float(TERMINAL_VISIBILITY_MAX_AGE_SECONDS + 1)
-    return max(0.0, (dt.datetime.now(dt.timezone.utc) - created).total_seconds())
 
 
 def queue_terminal_visibility(
