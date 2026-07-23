@@ -26,7 +26,11 @@ Inbound `message_received` correlations are consumed one-to-one. This keeps a
 burst of global `before_dispatch` hooks from binding multiple requests to the
 same Telegram message ID.
 
-Direct `@JAIMES` mentions are handed off only when the JAIMES health
+Topic and mention ownership is read from the canonical
+`config/telegram-intake-lanes.json` registry. A single registered direct
+mention overrides the topic owner; multiple agent mentions are ambiguous and
+remain silent rather than creating a responder race. Direct `@JAIMES` mentions
+are handed off only when the JAIMES health
 snapshot is fresh and JAIMES returns a per-message acceptance receipt for the
 exact chat, topic, and inbound message. That receipt proves the eyes reaction,
 immutable task header, and editable live card all exist before Josh 2.0 stands
@@ -34,8 +38,7 @@ down. A timeout, stale or mismatched receipt, missing surface, or unhealthy
 watcher falls back to Josh 2.0 instead of silently dropping the message. The
 cross-host handoff carries numeric origin IDs only; prompt text never leaves the
 normal Telegram delivery lanes. `#jaimes` and plain-language delegation
-requests, including `@JAIN`, remain Josh-owned routing hints for explicit
-worker delegation.
+requests remain Josh-owned routing hints for explicit worker delegation.
 
 Natural Inbox finals use a pre-delivery gate. The fast-ack watcher waits for
 the agent to create an interpreted, own-words objective card, adopts that exact

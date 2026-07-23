@@ -35,7 +35,7 @@ SESSION_DIR = SESSIONS_PATH.parent
 STATE_PATH = HOME / ".openclaw" / "telegram" / "fast_ack_state.json"
 DIRECT_SESSION_KEY = "agent:main:telegram:direct:6218150306"
 CONTROL_CENTER_CHAT_ID = "-1003589561528"
-JOSH_CONTROL_CENTER_TOPICS = {"1", "18", "21", "22"}
+JOSH_CONTROL_CENTER_TOPICS: set[str] = set()
 TELEGRAM_GROUP_TOPIC_RE = re.compile(r"telegram:group:(-?\d+):(?:topic:)?(\d+)")
 #JAIMES: JOSH 2.0 now advertises Gemini Flash as the front-line triage lane.
 DEFAULT_MODEL = "Gemini Flash / local OpenCLAW session"
@@ -112,12 +112,12 @@ except Exception:  # noqa: BLE001
 
 try:
     from telegram_channel_registry import owner_accepts, topics_for_owner  # type: ignore
-    JOSH_CONTROL_CENTER_TOPICS = topics_for_owner("josh2", CONTROL_CENTER_CHAT_ID) or JOSH_CONTROL_CENTER_TOPICS
+    JOSH_CONTROL_CENTER_TOPICS = topics_for_owner("josh2", CONTROL_CENTER_CHAT_ID)
 except Exception:  # noqa: BLE001
-    owner_accepts = lambda owner, chat_id, thread_id, direct=False: (  # type: ignore
-        owner == "josh2"
-        and (direct or (str(chat_id) == CONTROL_CENTER_CHAT_ID and str(thread_id) in JOSH_CONTROL_CENTER_TOPICS))
-    )
+    # Ownership is authorization, not availability. If the canonical registry
+    # cannot load, the watcher observes silently instead of reviving a stale
+    # hand-maintained topic map.
+    owner_accepts = lambda *_args, **_kwargs: False  # type: ignore
 
 try:
     from telegram_gateway_lifecycle import (  # type: ignore

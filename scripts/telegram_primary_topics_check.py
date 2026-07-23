@@ -10,18 +10,8 @@ from pathlib import Path
 import plistlib
 
 
-GROUP_ID = "-1003589561528"
-#JAIMES: validate every visible Control Center topic and every supported sub-agent model family.
-TOPIC_OWNERS = {
-    "1": "josh2",
-    "17": "jaimes",
-    "18": "josh2",
-    "19": "jaimes",
-    "20": "jaimes",
-    "21": "josh2",
-    "22": "josh2",
-    "56": "jaimes",
-}
+ROOT = Path(__file__).resolve().parents[1]
+INTAKE_REGISTRY_PATH = ROOT / "config" / "telegram-intake-lanes.json"
 REQUIRED_MODEL_FAMILIES = {"gpt", "gemini", "ollama", "grok"}
 REQUIRED_FINAL_LABELS = (
     "Model:",
@@ -46,6 +36,26 @@ def load_yaml(path: Path) -> dict:
     return yaml.safe_load(path.read_text()) or {}
 
 
+def canonical_topic_authority() -> tuple[str, dict[str, str]]:
+    """Load the one checked-in group/topic ownership map, failing closed."""
+    payload = json.loads(INTAKE_REGISTRY_PATH.read_text(encoding="utf-8"))
+    groups = payload.get("groups") if isinstance(payload, dict) else None
+    if not isinstance(groups, dict) or len(groups) != 1:
+        raise ValueError("canonical Telegram registry must contain exactly one group")
+    group_id, group = next(iter(groups.items()))
+    topics = group.get("topics") if isinstance(group, dict) else None
+    if not isinstance(topics, dict) or not topics:
+        raise ValueError("canonical Telegram registry has no topics")
+    owners = {
+        str(topic_id): str(row.get("owner") or "")
+        for topic_id, row in topics.items()
+        if isinstance(row, dict)
+    }
+    if len(owners) != len(topics) or any(owner not in {"josh2", "jaimes"} for owner in owners.values()):
+        raise ValueError("canonical Telegram registry contains an unsupported topic owner")
+    return str(group_id), owners
+
+
 def subagent_model_families(defaults: dict) -> set[str]:
     route = defaults.get("subagents", {}).get("model", {})
     models = [route.get("primary"), *(route.get("fallbacks") or [])]
@@ -65,9 +75,13 @@ def subagent_model_families(defaults: dict) -> set[str]:
 
 def check_josh2(home: Path) -> list[str]:
     problems: list[str] = []
+    try:
+        group_id, topic_owners = canonical_topic_authority()
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        return [f"Canonical Telegram registry unavailable: {type(exc).__name__}"]
     config = json.loads((home / ".openclaw/openclaw.json").read_text())
     telegram = config.get("channels", {}).get("telegram", {})
-    group = telegram.get("groups", {}).get(GROUP_ID, {})
+    group = telegram.get("groups", {}).get(group_id, {})
     topics = group.get("topics", {})
     agents = (home / ".openclaw/workspace/AGENTS.md").read_text()
     skill = (home / ".openclaw/workspace/mission-control/agent-skills/telegram-task-flow/SKILL.md").read_text()
@@ -92,7 +106,7 @@ def check_josh2(home: Path) -> list[str]:
         "OpenClaw built-in acknowledgement reactions must stay off",
         problems,
     )
-    for topic_id, owner in TOPIC_OWNERS.items():
+    for topic_id, owner in topic_owners.items():
         topic = topics.get(topic_id, {})
         check(topic.get("enabled") is True, f"Topic {topic_id} must be enabled for Josh 2.0", problems)
         check(topic.get("ingest") is True, f"Topic {topic_id} must be ingested by Josh 2.0", problems)
@@ -115,10 +129,14 @@ def check_josh2(home: Path) -> list[str]:
 
 def check_jaimes(home: Path) -> list[str]:
     problems: list[str] = []
+    try:
+        group_id, topic_owners = canonical_topic_authority()
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        return [f"Canonical Telegram registry unavailable: {type(exc).__name__}"]
     config = load_yaml(home / ".hermes/config.yaml")
     openclaw = json.loads((home / ".openclaw/openclaw.json").read_text())
     telegram = config.get("telegram", {})
-    prompt = telegram.get("channel_prompts", {}).get(GROUP_ID, "")
+    prompt = telegram.get("channel_prompts", {}).get(group_id, "")
     free_topics = {str(item) for item in telegram.get("free_response_topics", [])}
     memory = (home / ".hermes/memories/MEMORY.md").read_text()
     edit_skill = home / ".openclaw/workspace/mission-control/agent-skills/shared-edit-coordination/SKILL.md"
@@ -126,8 +144,8 @@ def check_jaimes(home: Path) -> list[str]:
     gateway_plist = home / "Library/LaunchAgents/ai.hermes.gateway.plist"
 
     allowed_groups = telegram.get("group_allowed_chats", telegram.get("allowed_group_ids", []))
-    check(GROUP_ID in {str(item) for item in allowed_groups}, "JAIMES group allowlist missing", problems)
-    expected_free = {topic for topic, owner in TOPIC_OWNERS.items() if owner == "jaimes"}
+    check(group_id in {str(item) for item in allowed_groups}, "JAIMES group allowlist missing", problems)
+    expected_free = {topic for topic, owner in topic_owners.items() if owner == "jaimes"}
     check(free_topics == expected_free, "JAIMES free-response topics do not exactly match ownership", problems)
     # Hermes 0.19 adds native draft/rich transports. They remain deliberately
     # disabled in managed topics: the custom gateway owns one editable card and
@@ -164,7 +182,7 @@ def check_jaimes(home: Path) -> list[str]:
     )
     missing_families = REQUIRED_MODEL_FAMILIES - subagent_model_families(openclaw.get("agents", {}).get("defaults", {}))
     check(not missing_families, f"JAIMES sub-agent routes missing: {', '.join(sorted(missing_families))}", problems)
-    for topic_id, owner in TOPIC_OWNERS.items():
+    for topic_id, owner in topic_owners.items():
         owner_label = "JAIMES" if owner == "jaimes" else "Josh 2.0"
         check(f"Topic {topic_id}" in prompt and owner_label in prompt, f"JAIMES prompt missing Topic {topic_id} ownership", problems)
     check("Topic 17" in prompt and "JAIMES" in prompt, "JAIMES Ops ownership missing from channel prompt", problems)

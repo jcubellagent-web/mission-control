@@ -78,8 +78,28 @@ test("classifies a direct JAIMES mention as a health-gated handoff", () => {
   assert.equal(isJaimesMention("@JAIMES please take this"), true);
   assert.equal(inboxDecision({ channel: "telegram", content: "@JAIMES please take this" }, inboxCtx), "handoff");
   assert.equal(inboxDecision({ channel: "telegram", content: "#jaimes please take this" }, inboxCtx), "claim");
-  assert.equal(inboxDecision({ channel: "telegram", content: "@JAIN please take this" }, inboxCtx), "claim");
   assert.equal(isJaimesMention("hey,@JAIMES please take this"), true);
+});
+
+test("uses canonical mention ownership instead of claiming every non-JAIMES tag", () => {
+  assert.equal(inboxDecision({ channel: "telegram", content: "@JAIN please take this" }, inboxCtx), "silence");
+  assert.equal(inboxDecision({ channel: "telegram", content: "@JOSHEX please take this" }, inboxCtx), "silence");
+  assert.equal(inboxDecision({ channel: "telegram", content: "@JOSH2 please take this" }, inboxCtx), "claim");
+  assert.equal(
+    inboxDecision({ channel: "telegram", content: "@JAIMES and @JOSH2 should answer" }, inboxCtx),
+    "silence",
+  );
+});
+
+test("does not claim from an unavailable ownership registry", () => {
+  assert.equal(
+    inboxDecision(
+      { channel: "telegram", content: "please review this" },
+      inboxCtx,
+      { registryPath: join(tmpdir(), "missing-telegram-intake-lanes.json") },
+    ),
+    "ignore",
+  );
 });
 
 test("builds helper arguments without prompt content", () => {

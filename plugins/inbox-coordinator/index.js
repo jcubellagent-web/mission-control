@@ -1,11 +1,19 @@
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
 import { spawn } from "node:child_process";
 
 const DEFAULT_CHAT_ID = "-1003589561528";
 const DEFAULT_THREAD_ID = "1";
 const DEFAULT_MENTIONS = ["@jaimes"];
+const DEFAULT_REGISTRY_PATH = path.join(
+  process.env.HOME || "/Users/josh2.0",
+  ".openclaw", "workspace", "mission-control", "config", "telegram-intake-lanes.json",
+);
+const BUNDLED_REGISTRY_PATH = fileURLToPath(
+  new URL("../../config/telegram-intake-lanes.json", import.meta.url),
+);
 const GROUP_TOPIC_RE = /telegram:group:(-?\d+):(?:topic:)?(\d+)/i;
 // Header + live-card setup has an 8-second SLO. Keep the helper receipt wait
 // inside OpenCLAW's 15-second hook budget without timing out a healthy card
@@ -209,20 +217,67 @@ export function isJaimesMention(text, mentions = DEFAULT_MENTIONS) {
   });
 }
 
+export function inboxAuthority(config = {}) {
+  const registryPath = stringValue(config.registryPath)
+    || (fs.existsSync(DEFAULT_REGISTRY_PATH) ? DEFAULT_REGISTRY_PATH : BUNDLED_REGISTRY_PATH);
+  try {
+    const registry = JSON.parse(fs.readFileSync(registryPath, "utf8"));
+    const group = registry?.groups?.[DEFAULT_CHAT_ID];
+    const topic = group?.topics?.[DEFAULT_THREAD_ID];
+    if (topic?.owner !== "josh2" || topic?.lane !== "inbox") {
+      return { available: false, reason: "inbox-authority-mismatch" };
+    }
+    const mentionOwners = new Map();
+    for (const [rawHandle, rawOwner] of Object.entries(registry.mentionOverrides || {})) {
+      const handle = String(rawHandle || "").trim().toLowerCase();
+      const owner = String(rawOwner || "").trim().toLowerCase();
+      if (/^@[a-z0-9_]+$/.test(handle) && ["josh2", "jaimes", "joshex", "jain"].includes(owner)) {
+        mentionOwners.set(handle, owner);
+      }
+    }
+    return {
+      available: true,
+      chatId: DEFAULT_CHAT_ID,
+      threadId: DEFAULT_THREAD_ID,
+      owner: topic.owner,
+      mentionOwners,
+    };
+  } catch {
+    return { available: false, reason: "inbox-authority-unavailable" };
+  }
+}
+
+function registeredMentionOwners(text, authority) {
+  const content = String(text || "");
+  const owners = new Set();
+  for (const [handle, owner] of authority.mentionOwners || []) {
+    if (new RegExp(`(^|[\\s,.:;!?()\\[\\]{}])${escapeRegExp(handle)}(?=$|[\\s,.:;!?()\\[\\]{}])`, "i").test(content)) {
+      owners.add(owner);
+    }
+  }
+  return owners;
+}
+
 export function inboxDecision(event = {}, ctx = {}, config = {}) {
   const channel = String(ctx.channelId || event.channel || "").toLowerCase();
   if (channel !== "telegram") return "ignore";
   const target = parseTelegramTarget(event, ctx);
-  const chatId = stringValue(config.chatId, DEFAULT_CHAT_ID);
-  const threadId = stringValue(config.threadId, DEFAULT_THREAD_ID);
-  if (target.chatId !== chatId || target.threadId !== threadId) return "ignore";
-  const mentions = Array.isArray(config.jaimesMentions) && config.jaimesMentions.length
-    ? config.jaimesMentions
-    : DEFAULT_MENTIONS;
+  if (target.chatId !== DEFAULT_CHAT_ID || target.threadId !== DEFAULT_THREAD_ID) return "ignore";
+  const authority = inboxAuthority(config);
+  // A clean authority failure leaves the event to OpenCLAW's native fallback;
+  // this plugin must never claim from a stale embedded ownership map.
+  if (!authority.available) return "ignore";
   const content = event.bodyForAgent || event.body || event.content || "";
   if (nativeTelegramSessionCommand(content)) return "ignore";
   if (internalReplayPrompt(content)) return "silence";
-  return isJaimesMention(content, mentions) ? "handoff" : "claim";
+  const mentioned = registeredMentionOwners(content, authority);
+  if (mentioned.size > 1) return "silence";
+  if (mentioned.size === 1) {
+    const owner = [...mentioned][0];
+    if (owner === "jaimes") return "handoff";
+    if (owner !== "josh2") return "silence";
+  }
+  return "claim";
 }
 
 export function helperArgs(event = {}, ctx = {}, config = {}) {
@@ -257,8 +312,10 @@ export function helperArgs(event = {}, ctx = {}, config = {}) {
 
 function exactInboxTarget(event = {}, ctx = {}, config = {}) {
   const target = parseTelegramTarget(event, ctx);
-  return target.chatId === stringValue(config.chatId, DEFAULT_CHAT_ID)
-    && target.threadId === stringValue(config.threadId, DEFAULT_THREAD_ID);
+  const authority = inboxAuthority(config);
+  return authority.available
+    && target.chatId === authority.chatId
+    && target.threadId === authority.threadId;
 }
 
 function decodeFinalHtml(value) {

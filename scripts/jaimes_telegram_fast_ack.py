@@ -40,7 +40,7 @@ DIRECT_SESSION_KEYS = (
     "agent:main:telegram:direct:6218150306",
 )
 CONTROL_CENTER_CHAT_ID = "-1003589561528"
-JAIMES_CONTROL_CENTER_TOPICS = {"17", "19", "20", "56"}
+JAIMES_CONTROL_CENTER_TOPICS: set[str] = set()
 JAIMES_DIRECT_MENTION_TOPICS = {"1"}
 JAIMES_MENTION_RE = re.compile(r"(?:^|[\s,.:;!?()\[\]{}])@jaimes(?=$|[\s,.:;!?()\[\]{}])", re.I)
 TELEGRAM_GROUP_TOPIC_RE = re.compile(r"telegram:group:(-?\d+):(?:topic:)?(\d+)")
@@ -103,12 +103,11 @@ except Exception:  # noqa: BLE001
 
 try:
     from telegram_channel_registry import owner_accepts, topics_for_owner  # type: ignore
-    JAIMES_CONTROL_CENTER_TOPICS = topics_for_owner("jaimes", CONTROL_CENTER_CHAT_ID) or JAIMES_CONTROL_CENTER_TOPICS
+    JAIMES_CONTROL_CENTER_TOPICS = topics_for_owner("jaimes", CONTROL_CENTER_CHAT_ID)
 except Exception:  # noqa: BLE001
-    owner_accepts = lambda owner, chat_id, thread_id, direct=False: (  # type: ignore
-        owner == "jaimes"
-        and (direct or (str(chat_id) == CONTROL_CENTER_CHAT_ID and str(thread_id) in JAIMES_CONTROL_CENTER_TOPICS))
-    )
+    # A registry failure must never reactivate an obsolete topic map. Hermes
+    # keeps observing, but no unverified lane is allowed to create a surface.
+    owner_accepts = lambda *_args, **_kwargs: False  # type: ignore
 
 try:
     from telegram_gateway_lifecycle import (  # type: ignore
@@ -5126,8 +5125,8 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
                     session_meta.get("telegram_chat_id"),
                     session_meta.get("telegram_thread_id"),
                     direct=False,
+                    text=event.get("prompt") or "",
                 )
-                and not direct_jaimes_mention(event.get("prompt") or "")
             ):
                 # Any Josh-owned or newly authorized topic remains Josh-owned
                 # unless JAIMES is directly tagged.
