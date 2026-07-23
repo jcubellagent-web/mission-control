@@ -2306,6 +2306,11 @@ def topic_objective(lowered: str) -> str:
 def summarize_objective(text: str) -> str:
     clean = " ".join(current_request_text(text).split())
     lowered = clean.lower()
+    if "inbox" in lowered and any(
+        marker in lowered
+        for marker in ("end-to-end", "end to end", "e2e", "production canary", "reliability verification")
+    ):
+        return "Verify Inbox end-to-end reliability"
     if "telegram" in lowered and "health" in lowered and "read-only" in lowered:
         return "Assess Telegram health read-only"
     if "objective" in lowered and any(

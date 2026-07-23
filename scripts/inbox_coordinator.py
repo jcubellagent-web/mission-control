@@ -40,6 +40,7 @@ if str(SCRIPTS_DIR) not in sys.path:
 from objective_quality import current_request_text as objective_current_request_text  # type: ignore  # noqa: E402
 RUNTIME_PROBE_SCRIPT = ROOT / "scripts" / "ecosystem_runtime_probe.py"
 JAIMES_TELEGRAM_HEALTH_SCRIPT = ROOT / "scripts" / "jaimes_telegram_health.py"
+TELEGRAM_RESPONSE_CANARY_SCRIPT = ROOT / "scripts" / "telegram_response_contract_stress.py"
 #JAIMES: Inbox cards must use the host helper beside send_josh_reply.py so live Telegram sends keep their configured Bot API lane.
 WORK_CARD_SCRIPT = WORKSPACE / "scripts" / "josh_work_card.py"
 SEND_REPLY_SCRIPT = WORK_CARD_SCRIPT.with_name("send_josh_reply.py")
@@ -256,6 +257,17 @@ TELEGRAM_RESPONSE_AUDIT_REQUEST = re.compile(
     r"\btelegram\b.{0,100}\b(?:response|reply|behavior|behaviour|contract|format|lifecycle)\b|"
     r"\btelegram\b.{0,100}\b(?:response|reply|behavior|behaviour|contract|format|lifecycle)\b"
     r".{0,100}\b(?:audit|assess|check|evaluate|inspect|review|verify)\b)",
+    re.I | re.S,
+)
+TELEGRAM_E2E_RELIABILITY_REQUEST = re.compile(
+    r"(?:\b(?:telegram|inbox|topic)\b.{0,180}\b(?:end[- ]to[- ]end|e2e|production canary|live canary|reliability verification)\b|"
+    r"\b(?:end[- ]to[- ]end|e2e|production canary|live canary|reliability verification)\b.{0,180}"
+    r"\b(?:telegram|inbox|topic|reaction|live card|structured final|cleanup)\b)",
+    re.I | re.S,
+)
+TELEGRAM_PRODUCTION_CANARY_APPROVAL = re.compile(
+    r"\b(?:explicitly\s+)?approve\b.{0,120}\b(?:production|live|temporary)\s+canary\b"
+    r".{0,180}\b(?:delet(?:e|ion)|cleanup|clean[- ]?up|remov(?:e|al))\b",
     re.I | re.S,
 )
 READ_ONLY_REQUEST = re.compile(
@@ -602,6 +614,8 @@ def classify_route(prompt: str, privacy: str) -> tuple[str, str]:
     )
     if model_routing_audit and not glm_mutation:
         return "glm", "dashboard-safe model-routing audit"
+    if TELEGRAM_E2E_RELIABILITY_REQUEST.search(lower):
+        return "terra", "trusted Telegram end-to-end reliability verification"
     if TELEGRAM_RESPONSE_AUDIT_REQUEST.search(lower) and not glm_mutation:
         return "terra", "trusted Telegram response-contract audit"
     if glm_reasoning and not glm_mutation:
@@ -619,6 +633,8 @@ def classify_route(prompt: str, privacy: str) -> tuple[str, str]:
 
 def read_only_execution_requested(prompt: str) -> bool:
     text = str(prompt or "")
+    if TELEGRAM_E2E_RELIABILITY_REQUEST.search(text):
+        return False
     mutation_text = NEGATED_MUTATION_SIGNAL.sub("", text.lower())
     mutation_requested = bool(MUTATION_SIGNAL.search(mutation_text))
     return bool(
@@ -639,10 +655,10 @@ def telegram_response_audit_host_context(prompt: str) -> dict[str, Any] | None:
     """
     prompt_text = str(prompt or "")
     mutation_text = NEGATED_MUTATION_SIGNAL.sub("", prompt_text.lower())
-    if (
-        not TELEGRAM_RESPONSE_AUDIT_REQUEST.search(prompt_text)
-        or MUTATION_SIGNAL.search(mutation_text)
-    ):
+    e2e_request = bool(TELEGRAM_E2E_RELIABILITY_REQUEST.search(prompt_text))
+    if not (TELEGRAM_RESPONSE_AUDIT_REQUEST.search(prompt_text) or e2e_request):
+        return None
+    if MUTATION_SIGNAL.search(mutation_text) and not e2e_request:
         return None
 
     def run_probe(command: list[str], timeout: int) -> dict[str, Any] | None:
@@ -714,9 +730,130 @@ def telegram_response_audit_host_context(prompt: str) -> dict[str, Any] | None:
     }
 
 
+def telegram_e2e_canary_context(
+    prompt: str,
+    origin: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    """Run one explicitly approved production canary and return safe receipt facts."""
+    prompt_text = str(prompt or "")
+    if not TELEGRAM_E2E_RELIABILITY_REQUEST.search(prompt_text):
+        return None
+    approved = bool(TELEGRAM_PRODUCTION_CANARY_APPROVAL.search(prompt_text))
+    safe: dict[str, Any] = {
+        "approvalGranted": approved,
+        "executed": False,
+        "ok": False,
+        "status": "missing-approval" if not approved else "not-run",
+        "problemCount": 0,
+        "stress": {"ok": False, "iterations": 0, "renderedCards": 0, "problemCount": 0},
+        "transport": {
+            "ok": False,
+            "status": "not-run",
+            "failureCount": 0,
+            "cleanup": {
+                "status": "not-run", "attempted": 0, "deleted": 0,
+                "failedCount": 0, "indeterminateCount": 0,
+            },
+            "final": {"attempts": 0, "successes": 0, "count": 0},
+        },
+    }
+    if not approved:
+        return safe
+    source = origin if isinstance(origin, dict) else {}
+    chat_id = str(source.get("chatId") or "")
+    thread_id = str(source.get("threadId") or "")
+    if not re.fullmatch(r"-?\d+", chat_id) or not re.fullmatch(r"\d+", thread_id):
+        safe["status"] = "invalid-origin"
+        safe["problemCount"] = 1
+        return safe
+    if not TELEGRAM_RESPONSE_CANARY_SCRIPT.exists():
+        safe["status"] = "harness-unavailable"
+        safe["problemCount"] = 1
+        return safe
+    journal_root = PRIVATE_DIR / "telegram-response-canaries"
+    journal_root.mkdir(mode=0o700, parents=True, exist_ok=True)
+    os.chmod(journal_root, 0o700)
+    journal_dir = Path(tempfile.mkdtemp(prefix="inbox-e2e-", dir=str(journal_root)))
+    os.chmod(journal_dir, 0o700)
+    command = [
+        sys.executable,
+        str(TELEGRAM_RESPONSE_CANARY_SCRIPT),
+        "--role", "josh2",
+        "--live",
+        "--iterations", "100",
+        "--chat-id", chat_id,
+        "--thread-id", thread_id,
+        "--confirm-production-canary",
+        "--canary-journal-dir", str(journal_dir),
+    ]
+    try:
+        proc = subprocess.run(
+            command,
+            cwd=ROOT,
+            stdin=subprocess.DEVNULL,
+            capture_output=True,
+            text=True,
+            timeout=180,
+            check=False,
+        )
+        payload = json.loads(proc.stdout or "")
+    except (OSError, subprocess.SubprocessError, TypeError, ValueError, json.JSONDecodeError):
+        safe["status"] = "execution-error"
+        safe["problemCount"] = 1
+        return safe
+    safe["executed"] = True
+    if not isinstance(payload, dict):
+        safe["status"] = "invalid-receipt"
+        safe["problemCount"] = 1
+        return safe
+    stress = payload.get("stress") if isinstance(payload.get("stress"), dict) else {}
+    transport = payload.get("transport") if isinstance(payload.get("transport"), dict) else {}
+    cleanup = transport.get("cleanup") if isinstance(transport.get("cleanup"), dict) else {}
+    final = transport.get("final") if isinstance(transport.get("final"), dict) else {}
+    safe["stress"] = {
+        "ok": bool(stress.get("ok")),
+        "iterations": int(stress.get("iterations") or 0),
+        "renderedCards": int(stress.get("renderedCards") or 0),
+        "problemCount": int(stress.get("problemCount") or 0),
+    }
+    safe["transport"] = {
+        "ok": bool(transport.get("ok")),
+        "status": str(transport.get("status") or "failed")[:24],
+        "failureCount": int(transport.get("failureCount") or 0),
+        "cleanup": {
+            "status": str(cleanup.get("status") or "pending")[:24],
+            "attempted": int(cleanup.get("attempted") or 0),
+            "deleted": int(cleanup.get("deleted") or 0),
+            "failedCount": int(cleanup.get("failedCount") or 0),
+            "indeterminateCount": int(cleanup.get("indeterminateCount") or 0),
+        },
+        "final": {
+            "attempts": int(final.get("attempts") or 0),
+            "successes": int(final.get("successes") or 0),
+            "count": int(final.get("count") or 0),
+        },
+    }
+    receipt_agrees = bool(
+        proc.returncode == 0
+        and payload.get("ok") is True
+        and safe["stress"]["ok"]
+        and safe["transport"]["ok"]
+        and safe["transport"]["cleanup"]["status"] == "confirmed"
+        and safe["transport"]["cleanup"]["attempted"] == safe["transport"]["cleanup"]["deleted"]
+        and safe["transport"]["cleanup"]["failedCount"] == 0
+        and safe["transport"]["cleanup"]["indeterminateCount"] == 0
+        and safe["transport"]["final"] == {"attempts": 1, "successes": 1, "count": 1}
+    )
+    safe["ok"] = receipt_agrees
+    safe["status"] = "passed" if receipt_agrees else "failed"
+    safe["problemCount"] = int(payload.get("problemCount") or 0) + int(not receipt_agrees)
+    return safe
+
+
 def telegram_response_audit_guidance(
     prompt: str,
     host_context: dict[str, Any] | None = None,
+    canary_context: dict[str, Any] | None = None,
 ) -> str:
     """Return trusted contract context for a Telegram behavior audit.
 
@@ -725,12 +862,21 @@ def telegram_response_audit_guidance(
     can incorrectly flag the required user-facing Model/Route/Why header as a
     formatter violation and then report the completed audit as incomplete.
     """
-    if not TELEGRAM_RESPONSE_AUDIT_REQUEST.search(str(prompt or "")):
+    prompt_text = str(prompt or "")
+    if not (
+        TELEGRAM_RESPONSE_AUDIT_REQUEST.search(prompt_text)
+        or TELEGRAM_E2E_RELIABILITY_REQUEST.search(prompt_text)
+    ):
         return ""
     evidence = (
         json.dumps(host_context, sort_keys=True, separators=(",", ":"))
         if isinstance(host_context, dict)
         else json.dumps({"available": False}, separators=(",", ":"))
+    )
+    canary_evidence = (
+        json.dumps(canary_context, sort_keys=True, separators=(",", ":"))
+        if isinstance(canary_context, dict)
+        else json.dumps({"executed": False, "status": "not-requested"}, separators=(",", ":"))
     )
     return (
         "\n\nAuthoritative Telegram response-contract distinction "
@@ -751,6 +897,11 @@ def telegram_response_audit_guidance(
         "credential, loopback, or SSH failures do not override it. Never claim live end-to-end "
         "delivery unless a live receipt is present in the supplied evidence.\n"
         f"{evidence}\n"
+        "- For an end-to-end reliability request, the coordinator—not the sandboxed model—owns the "
+        "single production canary. Do not run another canary. Complete may be Yes only when the "
+        "canary receipt says executed=true. Report a failed transport or cleanup receipt under Issues; "
+        "never infer cleanup success.\n"
+        f"- Sanitized production-canary receipt: {canary_evidence}\n"
     )
 
 
@@ -1095,7 +1246,11 @@ def telegram_health_host_context(prompt: str) -> dict[str, Any] | None:
     """
     prompt_text = str(prompt or "")
     mutation_text = NEGATED_MUTATION_SIGNAL.sub("", prompt_text.lower())
-    if not TELEGRAM_HEALTH_REQUEST.search(prompt_text) or MUTATION_SIGNAL.search(mutation_text):
+    if (
+        TELEGRAM_E2E_RELIABILITY_REQUEST.search(prompt_text)
+        or not TELEGRAM_HEALTH_REQUEST.search(prompt_text)
+        or MUTATION_SIGNAL.search(mutation_text)
+    ):
         return None
     unavailable = {
         "available": False,
@@ -1211,6 +1366,45 @@ def enforce_host_evidence_gate(output: str, host_context: dict[str, Any] | None)
     if host_context is not None and host_context.get("available") is True:
         return render_telegram_health_result(host_context)
     return str(output or "")
+
+
+def enforce_e2e_canary_evidence_gate(
+    output: str,
+    canary_context: dict[str, Any] | None,
+) -> str:
+    """Prevent a missing or partial canary receipt from becoming a success."""
+    if not isinstance(canary_context, dict) or canary_context.get("ok") is True:
+        return str(output or "")
+    executed = canary_context.get("executed") is True
+    approval = canary_context.get("approvalGranted") is True
+    status = clean_final_item(str(canary_context.get("status") or "unverified"), limit=40)
+    stress = canary_context.get("stress") if isinstance(canary_context.get("stress"), dict) else {}
+    transport = canary_context.get("transport") if isinstance(canary_context.get("transport"), dict) else {}
+    cleanup = transport.get("cleanup") if isinstance(transport.get("cleanup"), dict) else {}
+    final = transport.get("final") if isinstance(transport.get("final"), dict) else {}
+    complete = "Yes" if executed else "No"
+    issue = (
+        "The production canary ran but its transport, exactly-one-final, or cleanup receipts did not agree."
+        if executed
+        else "The required production canary did not run, so end-to-end delivery was not verified."
+    )
+    return "\n".join([
+        f"Complete: {complete} — the requested production verification "
+        f"{'ran with a failing receipt' if executed else 'could not be performed'}.",
+        "What was done:",
+        f"- The explicit canary approval gate was {'satisfied' if approval else 'not satisfied'}.",
+        f"- The canonical production canary execution status was {status}.",
+        f"- Renderer stress reported {int(stress.get('iterations') or 0)} iterations and "
+        f"{int(stress.get('renderedCards') or 0)} rendered cards.",
+        f"- Telegram reported {int(final.get('successes') or 0)} successful final delivery and cleanup "
+        f"deleted {int(cleanup.get('deleted') or 0)} of {int(cleanup.get('attempted') or 0)} tracked messages.",
+        "Issues:",
+        f"- {issue}",
+        "Appropriate next steps:",
+        "- Review the private canary journal and retry only after the failed or indeterminate stage is resolved.",
+        "Approval needed:",
+        "- n/a",
+    ])
 
 
 def route_requires_successful_execution(route: dict[str, Any] | None) -> bool:
@@ -2250,8 +2444,13 @@ def run_worker(job_id: str) -> dict[str, Any]:
                     "host service health from end-to-end Telegram delivery. If available is "
                     "false, report Complete: No and do not infer current health."
                 )
+            canary_context = telegram_e2e_canary_context(prompt, snapshot.get("origin"))
             audit_host_context = telegram_response_audit_host_context(prompt)
-            context_block += telegram_response_audit_guidance(prompt, audit_host_context)
+            context_block += telegram_response_audit_guidance(
+                prompt,
+                audit_host_context,
+                canary_context,
+            )
             output_contract = (
                 QUICK_WORKER_OUTPUT_CONTRACT
                 if int(snapshot.get("deliveryTier") or 3) in {1, 2}
@@ -2283,6 +2482,7 @@ def run_worker(job_id: str) -> dict[str, Any]:
             route = effective_route
             snapshot["route"] = dict(effective_route)
             output = enforce_host_evidence_gate(str(execution["output"]), host_context)
+            output = enforce_e2e_canary_evidence_gate(output, canary_context)
             write_private_text(result_path, output)
             model_executed = True
             if prompt_path is not None:

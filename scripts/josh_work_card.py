@@ -697,12 +697,24 @@ def build_task_header(*, title: str, model: str, route: str) -> str:
     return f"<pre>{html.escape(chr(10).join(lines))}</pre>"
 
 
-def worker_visibility_lines(model: str, route: str, status: str) -> list[str]:
+def worker_visibility_lines(
+    model: str,
+    route: str,
+    status: str,
+    items: list[str] | None = None,
+) -> list[str]:
     model_facts = parse_route_facts(model)
     route_facts = parse_route_facts(route)
     owner_raw = route_facts.get("owner") or "josh2"
     owner = "Josh 2.0" if owner_raw.lower() in {"josh", "josh2", "josh 2.0"} else human_worker_name(owner_raw)
-    planned = str(model or "").lstrip().lower().startswith("planned ") or str(route or "").lstrip().lower().startswith("planned ")
+    started = any(
+        "worker started" in clean_live_text(item).lower()
+        for item in (items or [])
+    )
+    planned = not started and (
+        str(model or "").lstrip().lower().startswith("planned ")
+        or str(route or "").lstrip().lower().startswith("planned ")
+    )
     state = "complete" if is_complete_status(status) else "needs attention" if status == "failed" else "planned" if planned else "active"
     lines = [f"{owner or 'Josh 2.0'} · owner/coordinator"]
     worker_raw = model_facts.get("worker") or route_facts.get("worker")
@@ -1119,6 +1131,25 @@ def semantic_milestones(items: list[str], *, limit: int = 3) -> list[str]:
     return clean[-limit:]
 
 
+def heartbeat_activity_text(items: list[str]) -> str:
+    """Aggregate heartbeat-only updates into one safe, visibly fresh row."""
+    heartbeat = re.compile(
+        r"^still working; waiting for next model/tool update(?:\s*\(([^)]+)\))?",
+        re.I,
+    )
+    latest = ""
+    count = 0
+    for item in items:
+        match = heartbeat.match(clean_live_text(item))
+        if match:
+            count += 1
+            latest = str(match.group(1) or "").strip()
+    if not count:
+        return ""
+    timing = f" at {compact(latest, limit=24)}" if latest else ""
+    return f"Worker active · heartbeat {count} confirmed{timing}."
+
+
 def compact_milestone_position(items: list[str], status: str, *, route: str = "") -> int:
     """Derive visible progress from phase signals, never trace volume."""
     if is_terminal_lifecycle_status(status):
@@ -1163,6 +1194,9 @@ def polished_now_text(status: str, now: str, items: list[str], *, route: str = "
         return "Finished; the result needs attention."
     if status == "paused":
         return "Paused until the next instruction."
+    heartbeat = heartbeat_activity_text(items)
+    if heartbeat:
+        return heartbeat
     phase, _ = compact_phase(status, items, route=route)
     return {
         "Accepted": "Task accepted.",
@@ -1669,9 +1703,12 @@ def build_rich_card(
 
     workers = "".join(
         f"<li>{html.escape(line)}</li>"
-        for line in worker_visibility_lines(model_line, route, status)
+        for line in worker_visibility_lines(model_line, route, status, live_items)
     )
     activity = semantic_milestones(live_items, limit=8)
+    heartbeat = heartbeat_activity_text(live_items)
+    if heartbeat and not activity:
+        activity = [heartbeat]
     activity_html = "".join(f"<li>{html.escape(item)}</li>" for item in activity)
     if not activity_html:
         activity_html = "<li>Waiting for the first verified update.</li>"

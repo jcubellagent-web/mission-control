@@ -384,6 +384,82 @@ class InboxCoordinatorTests(unittest.TestCase):
         self.assertEqual(route["routingReason"], "trusted Telegram response-contract audit")
         self.assertTrue(coordinator.read_only_execution_requested(prompt))
 
+    def test_approved_inbox_e2e_canary_uses_terra_and_bypasses_health_override(self):
+        coordinator = load_module()
+        prompt = (
+            "Run a full end-to-end reliability verification for this exact Inbox topic. "
+            "I explicitly approve one temporary production canary and deletion of all "
+            "canary messages afterward. Verify Telegram delivery and cleanup."
+        )
+        route = coordinator.route_prompt(
+            prompt,
+            injected_health={"terra": True, "luna": True},
+        )
+        self.assertEqual(route["routeId"], "terra")
+        self.assertEqual(
+            route["routingReason"],
+            "trusted Telegram end-to-end reliability verification",
+        )
+        self.assertFalse(coordinator.read_only_execution_requested(prompt))
+        with patch.object(coordinator.subprocess, "run") as run:
+            self.assertIsNone(coordinator.telegram_health_host_context(prompt))
+        run.assert_not_called()
+
+    def test_e2e_canary_requires_explicit_approval_and_confirmed_cleanup(self):
+        coordinator = load_module()
+        base = "Run an end-to-end reliability verification for this Inbox topic."
+        missing = coordinator.telegram_e2e_canary_context(
+            base,
+            {"chatId": "-1003589561528", "threadId": "1"},
+        )
+        self.assertEqual(missing["status"], "missing-approval")
+        self.assertFalse(missing["executed"])
+
+        prompt = (
+            base + " I explicitly approve one temporary production canary and deletion "
+            "of all canary messages afterward."
+        )
+        receipt = {
+            "ok": True,
+            "problemCount": 0,
+            "stress": {"ok": True, "iterations": 100, "renderedCards": 100, "problemCount": 0},
+            "transport": {
+                "ok": True,
+                "status": "passed",
+                "failureCount": 0,
+                "cleanup": {
+                    "status": "pending", "attempted": 3, "deleted": 2,
+                    "failedCount": 1, "indeterminateCount": 0,
+                },
+                "final": {"attempts": 1, "successes": 1, "count": 1},
+            },
+        }
+        completed = type("Result", (), {"returncode": 0, "stdout": json.dumps(receipt)})()
+        with tempfile.TemporaryDirectory() as tmp:
+            coordinator.PRIVATE_DIR = Path(tmp)
+            coordinator.TELEGRAM_RESPONSE_CANARY_SCRIPT = Path(tmp) / "canary.py"
+            coordinator.TELEGRAM_RESPONSE_CANARY_SCRIPT.write_text("", encoding="utf-8")
+            with patch.object(coordinator.subprocess, "run", return_value=completed):
+                context = coordinator.telegram_e2e_canary_context(
+                    prompt,
+                    {"chatId": "-1003589561528", "threadId": "1"},
+                )
+        self.assertTrue(context["executed"])
+        self.assertFalse(context["ok"])
+        self.assertEqual(context["status"], "failed")
+        self.assertNotIn("messageIds", json.dumps(context))
+        gated = coordinator.enforce_e2e_canary_evidence_gate(
+            "Complete: Yes\nWhat was done:\n- Everything passed.",
+            context,
+        )
+        self.assertIn("Complete: Yes", gated)
+        self.assertIn("ran but its transport", gated)
+        blocked = dict(context, executed=False, status="missing-approval")
+        self.assertIn(
+            "Complete: No",
+            coordinator.enforce_e2e_canary_evidence_gate("Complete: Yes", blocked),
+        )
+
     def test_telegram_response_audit_guidance_separates_worker_and_delivery_contracts(self):
         coordinator = load_module()
         guidance = coordinator.telegram_response_audit_guidance(

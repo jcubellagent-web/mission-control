@@ -408,6 +408,32 @@ def test_worker_visibility_exposes_owner_and_delegated_worker_cleanly():
     assert "jaimes-grok-public" not in " ".join(rows)
 
 
+def test_started_worker_is_active_and_heartbeats_are_aggregated():
+    model = "planned provider=codex; model=gpt-5.6-terra; worker=josh2-codex-terra; host=josh2"
+    route = "planned route=terra; reason=trusted execution; fallback=none"
+    items = [
+        "Asynchronous worker started",
+        "Still working; waiting for next model/tool update (21:51:20 EDT)",
+        "Still working; waiting for next model/tool update (21:51:40 EDT)",
+    ]
+    rows = card.worker_visibility_lines(model, route, "running", items)
+    assert rows[1].endswith("· active")
+    assert card.heartbeat_activity_text(items) == (
+        "Worker active · heartbeat 2 confirmed at 21:51:40 EDT."
+    )
+    rendered = card.build_rich_card(
+        title="Verify Inbox end-to-end reliability",
+        status="running",
+        model=model,
+        route=route,
+        now=items[-1],
+        done=items[:-1],
+    )
+    assert "Working through the task" not in rendered
+    assert "Recent activity (1)" in rendered
+    assert "heartbeat 2 confirmed at 21:51:40 EDT" in rendered
+
+
 def test_rich_card_uses_native_blocks_and_collapsible_activity():
     rendered = card.build_rich_card(
         title="Verify Inbox routing",
