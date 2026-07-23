@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import contextlib
+import inspect
 import json
 import sqlite3
 import stat
@@ -2412,6 +2413,51 @@ Approval needed:
         self.assertIn("configuration mismatch", normalized)
         self.assertNotIn("Retry with evidence", normalized)
         self.assertTrue(watcher.final_contract_is_canonical(rendered))
+
+    def test_topic17_self_canary_drops_only_expected_pre_delivery_state(self) -> None:
+        rendered = watcher.structured_final_text(
+            """Complete: Yes — verification performed
+What was done:
+- Topic 17 ownership resolved exclusively to JAIMES.
+- Josh 2.0 remained inactive during this request.
+- Gateway is connected; fast-ack is running.
+- Native Telegram message ID 4294 is unique.
+- Exactly one reaction and one live card were confirmed.
+- Terminal-issue count: 0.
+- Stranded-lifecycle count: 0.
+- Control Tower matches the JAIMES work/run IDs.
+Issues:
+- Active-card count is 1, not 0, during execution.
+- Lifecycle remains Working, not yet Delivered.
+- Final receipt is necessarily unconfirmed before this final is sent.
+- One current card-edit receipt is pending before this final.
+- Control Tower still marks this canary working until the final delivery adapter closes it.
+Appropriate next steps:
+- Run a post-delivery read-only receipt check.
+- Confirm the active-card count returns to 0.
+- Confirm this final advances the same card to Delivered and publishes the terminal receipt.
+Approval needed:
+- n/a""",
+            objective="Verify Topic 17 delivery and Control Tower agreement",
+            model="openai-codex/gpt-5.6-sol",
+            route="JAIMES verified execution",
+            why="heavy workhorse reasoning",
+        )
+        plain = watcher.html.unescape(rendered)
+        normalized = " ".join(plain.split())
+        self.assertIn("Complete: Yes", normalized)
+        self.assertIn("Why: heavy workhorse reasoning", normalized)
+        self.assertIn("No action needed", normalized)
+        self.assertNotIn("Active-card count is 1", normalized)
+        self.assertNotIn("Lifecycle remains Working", normalized)
+        self.assertNotIn("Final receipt is necessarily", normalized)
+        self.assertNotIn("post-delivery read-only receipt", normalized)
+        self.assertNotIn("Retry with evidence", normalized)
+        self.assertTrue(watcher.final_contract_is_canonical(rendered))
+
+    def test_terminal_prepare_passes_verified_why_to_single_formatter(self) -> None:
+        source = inspect.getsource(watcher.prepare_terminal_response)
+        self.assertIn('why=evidence["why"]', source)
 
     def test_july_11_session_history_is_downgraded_for_july_18_current_task(self) -> None:
         rendered = watcher.structured_final_text(

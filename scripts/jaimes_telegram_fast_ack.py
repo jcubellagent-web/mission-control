@@ -1426,6 +1426,18 @@ FINAL_RECOMMENDATION_RE = re.compile(
 FINAL_NO_ACTION_RE = re.compile(
     r"(?i)\b(?:no action needed|no further action|nothing else (?:is )?needed)\b"
 )
+FINAL_PRE_DELIVERY_SELF_STATE_RE = re.compile(
+    r"(?i)(?:\bactive[- ]card count is \d+.*\bduring execution\b|"
+    r"\blifecycle remains (?:working|verifying).*\bnot yet delivered\b|"
+    r"\bfinal receipt .*\b(?:before this final|before final delivery)\b|"
+    r"\b(?:one )?current card[- ]edit receipt .*\bpending\b|"
+    r"\bcontrol tower .*\b(?:awaiting closure|marks this canary)\b)"
+)
+FINAL_POST_DELIVERY_SELF_CHECK_RE = re.compile(
+    r"(?i)(?:\brun a post[- ]delivery read[- ]only receipt check\b|"
+    r"\bconfirm (?:the )?active[- ]card count (?:returns?|return) to 0\b|"
+    r"\bconfirm this final advances .*\bdelivered\b)"
+)
 FINAL_EVIDENCE_FIELD_RE = re.compile(
     r"(?i)\b(workId|runId|observedAt|mode)\s*[:=]\s*([^|\n]+)"
 )
@@ -1653,6 +1665,21 @@ def parse_final_sections(
         explicit_complete = not any(marker in failure_text for marker in (
             "couldn't", "could not", "failed", "blocked", "unavailable", "not complete", "needs attention",
         ))
+    if explicit_complete:
+        # A canary that observes its own lifecycle necessarily sees its card as
+        # active and its final receipt as pending before the adapter sends that
+        # final. Those are sequencing facts, not reliability failures or useful
+        # operator follow-ups. The post-send adapter receipt owns closure.
+        sections["issues"] = [
+            item for item in sections["issues"]
+            if not FINAL_PRE_DELIVERY_SELF_STATE_RE.search(item)
+        ]
+        sections["next"] = [
+            item for item in sections["next"]
+            if not FINAL_POST_DELIVERY_SELF_CHECK_RE.search(item)
+        ]
+        if not sections["issues"] and not sections["next"]:
+            sections["next"] = ["No action needed."]
     source_text = html.unescape(str(text or ""))
     substantive = [item for item in sections["done"] if substantive_final_item(item)]
     quick_items = [item for item in sections["done"] if quick_final_item(item)]
@@ -3540,6 +3567,7 @@ def prepare_terminal_response(
         objective=str(card.get("objective") or "JAIMES Telegram task"),
         model=evidence["model"],
         route=evidence["route"],
+        why=evidence["why"],
         work_id=str(card.get("work_id") or ""),
         run_id=str(card.get("ledger_run_id") or ""),
         task_started_at=str(card.get("task_started_at") or card.get("started_at") or ""),

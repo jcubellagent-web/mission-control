@@ -54,6 +54,17 @@ def test_bare_connectivity_canaries_get_one_shared_semantic_objective() -> None:
         assert semantic_reinterpretation(prompt) == expected
 
 
+def test_topic17_control_tower_canary_gets_an_outcome_objective() -> None:
+    prompt = """POST-FIX CANARY: topic17-human-20260723-01
+Run a host-native verification for this exact JAIMES Ops topic.
+Use host-native and Control Tower evidence. Verify the Telegram gateway,
+one live card, one structured final, delivery receipts, and Delivered state.
+"""
+    assert semantic_reinterpretation(prompt) == (
+        "Verify Topic 17 delivery and Control Tower agreement"
+    )
+
+
 def test_output_contract_cannot_override_model_routing_objective() -> None:
     prompt = (
         "Assess whether our model routing is resilient and whether private work and "

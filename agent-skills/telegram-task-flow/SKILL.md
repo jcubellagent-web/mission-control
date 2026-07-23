@@ -73,6 +73,7 @@ Always show the model route plainly: Gemini when sufficient and safe, Codex/Open
 - Raw lifecycle rows are diagnostic history, not an alternate health verdict. Effects attached to a retired card, a `recovered_by_work_id`, or a `receipt-backed-follow-up` resolution are recovered history and must not be called currently stranded when the canonical probe reports zero.
 - A Hermes CLI configuration warning is informational when the supervised gateway probe confirms Telegram is connected. Do not report it as a production Telegram outage or configuration failure unless the canonical gateway/Telegram probe also fails.
 - For audits, tests, and diagnostics, `Complete: Yes` means the requested verification was performed and reported. Put unhealthy findings under `Issues`; do not change a completed audit to `Complete: No` merely because it found a problem.
+- For a request testing its own live lifecycle, the current card being active or `Working` and its final receipt being pending before send are expected pre-delivery state. Do not list those facts as `Issues` or ask the user to verify the final afterward; the terminal delivery adapter owns final confirmation. Report a failure only when the post-delivery receipt becomes indeterminate, dead-lettered, or timed out.
 
 ## Brain Feed
 
