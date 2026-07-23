@@ -4,16 +4,16 @@
   "active": true,
   "reportedActive": true,
   "status": "active",
-  "objective": "Receiving: add a live dashboard signal for active versus stalled work",
-  "detail": "Objective confirmed; planned provider=codex; model=gpt-5.6-terra; worker=josh2-codex-terra; host=josh2; why=explicit model request; fallback=none; skill=none",
-  "updatedAt": "2026-07-23T00:13:47Z",
-  "checkedAt": "2026-07-23T00:13:47Z",
-  "currentTool": "telegram",
+  "objective": "Blocked: Control Tower source divergence prevents a safe live-indicator change",
+  "detail": "Tool execution started",
+  "updatedAt": "2026-07-23T00:14:39Z",
+  "checkedAt": "2026-07-23T00:14:39Z",
+  "currentTool": "exec",
   "steps": [
     {
-      "label": "Receiving - add a live dashboard signal for active versus stalled work",
+      "label": "Blocked - Control Tower source divergence prevents a safe live-indicator change",
       "status": "active",
-      "tool": "telegram"
+      "tool": "exec"
     }
   ],
   "source": "josh2-local-live-feed",
@@ -24,11 +24,11 @@
   "workId": "work-telegram-a84a1b790048a1830e2c1a23",
   "runId": "run-telegram-7202a7f481d96d94a1ac10ae",
   "generation": 1,
-  "sequence": 1,
+  "sequence": 10,
   "phase": "active",
   "originClaimHash": "78ec13390744e9629fb308f9044f082e35e1497ebacb27bbba2d7397d3e2ac7e",
   "modelFamily": "codex",
   "modelId": "gpt-5.6-terra",
-  "routeVerified": false,
-  "leaseUntil": "2026-07-23T00:16:32.000Z"
+  "routeVerified": true,
+  "leaseUntil": "2026-07-23T00:17:34.000Z"
 }
