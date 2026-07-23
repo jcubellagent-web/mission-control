@@ -1320,6 +1320,20 @@ def recent_prompt_events_from_state_db(session_id: str, after_message_id: int) -
     return events
 
 
+def prompt_event_id(event: dict[str, Any]) -> str:
+    """Return a collision-safe durable identity for one persisted user row."""
+    session_id = str(event.get("session_id") or "")
+    message_id = int(event.get("db_message_id") or 0)
+    if session_id and message_id > 0:
+        return f"{session_id}:db:{message_id}"
+    return f"{session_id}:{event.get('ts') or ''}"
+
+
+def legacy_prompt_event_id(event: dict[str, Any]) -> str:
+    """Return the pre-v3 timestamp identity for in-place state migration."""
+    return f"{event.get('session_id') or ''}:{event.get('ts') or ''}"
+
+
 def final_assistant_record_after(session_id: str, user_message_id: int) -> dict[str, Any]:
     """Return the delivered final record for exactly one user turn."""
     if not HERMES_STATE_DB.exists():
@@ -4747,6 +4761,67 @@ def replayed_prompt_from_other_session(event: dict[str, Any]) -> bool:
         con.close()
 
 
+def native_compaction_source(event: dict[str, Any]) -> dict[str, str]:
+    """Recover the native Telegram row that triggered a compression child.
+
+    Hermes writes the inbound turn to the parent session before compression,
+    then copies the same prompt into the child without ``platform_message_id``.
+    Copied history and the real turn can share one timestamp, so adjacency is
+    not sufficient to distinguish them. A recent native row in the immediate
+    parent is the durable ownership and reaction target for the live turn.
+    """
+    prompt = str(event.get("prompt") or "").strip()
+    session_id = str(event.get("session_id") or "")
+    if not prompt or not session_id or not HERMES_STATE_DB.exists():
+        return {}
+    con = sqlite3.connect(f"file:{HERMES_STATE_DB}?mode=ro", uri=True, timeout=2)
+    try:
+        session_columns = {
+            str(column[1])
+            for column in con.execute("PRAGMA table_info(sessions)").fetchall()
+        }
+        message_columns = {
+            str(column[1])
+            for column in con.execute("PRAGMA table_info(messages)").fetchall()
+        }
+        if not {"id", "parent_session_id", "started_at"}.issubset(session_columns):
+            return {}
+        if not {"id", "session_id", "role", "content", "timestamp", "platform_message_id"}.issubset(message_columns):
+            return {}
+        row = con.execute(
+            """
+            SELECT parent_message.id,
+                   parent_message.platform_message_id,
+                   parent_message.timestamp
+              FROM sessions AS child
+              JOIN messages AS parent_message
+                ON parent_message.session_id = child.parent_session_id
+             WHERE child.id = ?
+               AND parent_message.role = 'user'
+               AND TRIM(COALESCE(parent_message.content, '')) = ?
+               AND TRIM(COALESCE(parent_message.platform_message_id, '')) != ''
+               AND parent_message.timestamp >= child.started_at - ?
+             ORDER BY parent_message.id DESC
+             LIMIT 1
+            """,
+            (session_id, prompt, float(STALE_BOOTSTRAP_SECONDS)),
+        ).fetchone()
+    finally:
+        con.close()
+    if not row:
+        return {}
+    platform_message_id = positive_message_id(row[1])
+    if not platform_message_id:
+        return {}
+    return {
+        "db_message_id": str(row[0]),
+        "platform_message_id": platform_message_id,
+        "ts": dt.datetime.fromtimestamp(
+            float(row[2]), dt.timezone.utc
+        ).isoformat().replace("+00:00", "Z"),
+    }
+
+
 def media_only_prompt(prompt: str) -> bool:
     """Return True for attachment-only continuation rows with no user request."""
     lines = [line.strip() for line in str(prompt or "").splitlines() if line.strip()]
@@ -5052,9 +5127,19 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
         ]
         compaction_session = session_has_compaction_marker(sid)
         for event in batch:
-            event_id = f"{event['session_id']}:{event['ts']}"
+            native_source = native_compaction_source(event) if compaction_session else {}
+            if native_source:
+                event["platform_message_id"] = native_source["platform_message_id"]
+                event["native_source_db_message_id"] = native_source["db_message_id"]
+                event["native_source_ts"] = native_source["ts"]
+            event_id = prompt_event_id(event)
+            legacy_event_id = legacy_prompt_event_id(event)
             event_db_id = int(event.get("db_message_id") or 0)
             retry_record = surface_retries.get(event_id)
+            if not isinstance(retry_record, dict) and legacy_event_id != event_id:
+                retry_record = surface_retries.pop(legacy_event_id, None)
+                if isinstance(retry_record, dict):
+                    surface_retries[event_id] = retry_record
             retry_pending = isinstance(retry_record, dict)
             if retry_pending:
                 retry_after = parse_utc(retry_record.get("next_retry_at"))
@@ -5089,15 +5174,22 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
                     # while another token owner is still resolving it.
                     break
                 if handoff_decision == "consume":
-                    event_id = f"{event['session_id']}:{event['ts']}"
+                    event_id = prompt_event_id(event)
                     acked.add(event_id)
                     state[cursor_key] = max(int(state.get(cursor_key) or 0), int(event.get("db_message_id") or 0))
                     recover_accepted_handoff_card(state, event, session_meta, handoff_record)
                     continue
             age = event_age_seconds(event["ts"])
             event_ts = dt.datetime.fromisoformat(event["ts"].replace("Z", "+00:00")).timestamp()
-            replay_adjacent = any(abs(event_ts - marker_ts) <= 2.0 for marker_ts in replay_times)
-            replay_duplicate = compaction_session and replayed_prompt_from_other_session(event)
+            replay_adjacent = (
+                not native_source
+                and any(abs(event_ts - marker_ts) <= 2.0 for marker_ts in replay_times)
+            )
+            replay_duplicate = (
+                compaction_session
+                and not native_source
+                and replayed_prompt_from_other_session(event)
+            )
             if (
                 internal_replay_prompt(event.get("prompt") or "")
                 or replay_adjacent
@@ -5112,7 +5204,7 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
                 state[cursor_key] = max(int(state.get(cursor_key) or 0), event_db_id)
                 retire_surface_retry(event_id)
                 continue
-            if event_id not in acked:
+            if event_id not in acked and legacy_event_id not in acked:
                 candidates.append((event_ts, event, session_meta))
 
     # Preserve the existing anti-replay rule: if multiple genuine turns arrive
@@ -5127,14 +5219,14 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
             else None
         )
         if attached_followup:
-            attached_id = f"{newest_event['session_id']}:{newest_event['ts']}"
+            attached_id = prompt_event_id(newest_event)
             acked.add(attached_id)
             advance_event_cursor(newest_event)
             retire_surface_retry(attached_id)
             state["contextual_followups_attached"] = int(state.get("contextual_followups_attached") or 0) + 1
             candidates.pop()
         elif attached_card:
-            attached_id = f"{newest_event['session_id']}:{newest_event['ts']}"
+            attached_id = prompt_event_id(newest_event)
             acked.add(attached_id)
             advance_event_cursor(newest_event)
             retire_surface_retry(attached_id)
@@ -5160,7 +5252,7 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
                 acked.add(retry_event_id)
                 retire_surface_retry(retry_event_id)
     for _, stale_event, _ in candidates[:-1]:
-        stale_event_id = f"{stale_event['session_id']}:{stale_event['ts']}"
+        stale_event_id = prompt_event_id(stale_event)
         acked.add(stale_event_id)
         advance_event_cursor(stale_event)
         retire_surface_retry(stale_event_id)
@@ -5177,7 +5269,7 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
             dry_run=dry_run,
         )
     for event in events:
-        event_id = f"{event['session_id']}:{event['ts']}"
+        event_id = prompt_event_id(event)
         retry_record = surface_retries.get(event_id)
         reaction_already_done = bool(
             isinstance(retry_record, dict) and retry_record.get("reaction_ok")

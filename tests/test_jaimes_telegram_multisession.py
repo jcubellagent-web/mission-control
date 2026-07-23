@@ -557,7 +557,7 @@ class MultiSessionWatcherTests(unittest.TestCase):
         saved = json.loads(self.state.read_text(encoding="utf-8"))
         self.assertEqual(send.call_count, 1)
         self.assertEqual(saved["direct_db_cursor:older"], 0)
-        self.assertNotIn(f"older:{event['ts']}", saved["acked_prompt_events"])
+        self.assertNotIn(watcher.prompt_event_id(event), saved["acked_prompt_events"])
 
     def test_newer_same_session_event_supersedes_backoff_and_clears_exact_delivery_incident(self) -> None:
         now = watcher.dt.datetime.now(watcher.dt.timezone.utc).replace(microsecond=0)
@@ -626,7 +626,7 @@ class MultiSessionWatcherTests(unittest.TestCase):
             second = watcher.poll_once()
 
         saved = json.loads(self.state.read_text(encoding="utf-8"))
-        older_event_id = f"older:{older['ts']}"
+        older_event_id = watcher.prompt_event_id(older)
         operation_id = watcher.delivery_operation_id("sendMessage", older_key)
         self.assertFalse(first["sent"][0]["result"]["ok"])
         self.assertIn(older_event_id, first_saved["surface_retry_events"])
@@ -665,7 +665,7 @@ class MultiSessionWatcherTests(unittest.TestCase):
             "telegram_chat_id": "-1003589561528",
             "telegram_thread_id": "17",
         }
-        older_event_id = f"older:{older['ts']}"
+        older_event_id = watcher.prompt_event_id(older)
         older_key = "topic17-context-superseded-retry"
         operation_id = watcher.delivery_operation_id("sendMessage", older_key)
         incident = {
@@ -2600,6 +2600,49 @@ Approval needed:
         send.assert_not_called()
         saved = json.loads(self.state.read_text())
         self.assertEqual(saved["direct_db_cursor:newer"], replay)
+
+    def test_recent_native_parent_turn_survives_compaction_adjacency(self) -> None:
+        prompt = "verify the current Topic 17 delivery after compaction"
+        timestamp = time.time()
+        with sqlite3.connect(self.db) as con:
+            con.execute("ALTER TABLE sessions ADD COLUMN parent_session_id TEXT")
+            con.execute("ALTER TABLE sessions ADD COLUMN end_reason TEXT")
+            con.execute(
+                "UPDATE sessions SET ended_at = ?, end_reason = 'compression' WHERE id = 'older'",
+                (timestamp,),
+            )
+            con.execute(
+                "UPDATE sessions SET parent_session_id = 'older', started_at = ? WHERE id = 'newer'",
+                (timestamp,),
+            )
+            con.execute(
+                """INSERT INTO messages(
+                       session_id, role, content, platform_message_id, timestamp
+                   ) VALUES (?, ?, ?, ?, ?)""",
+                ("older", "user", prompt, "4297", timestamp - 1),
+            )
+            con.execute(
+                "INSERT INTO messages(session_id,role,content,timestamp) VALUES (?,?,?,?)",
+                ("newer", "user", "[CONTEXT COMPACTION — REFERENCE ONLY]", timestamp),
+            )
+            current = con.execute(
+                "INSERT INTO messages(session_id,role,content,timestamp) VALUES (?,?,?,?)",
+                ("newer", "user", prompt, timestamp),
+            ).lastrowid
+        source = watcher.native_compaction_source({
+            "session_id": "newer",
+            "prompt": prompt,
+        })
+        self.assertEqual(source["platform_message_id"], "4297")
+        with patch.object(watcher, "send_ack", side_effect=self.fake_ack) as send:
+            result = watcher.poll_once()
+        self.assertEqual(len(result["sent"]), 1)
+        self.assertEqual(result["sent"][0]["result"]["run_id"], f"telegram-message-{current}")
+        event = send.call_args.args[0]
+        self.assertEqual(event["platform_message_id"], "4297")
+        self.assertEqual(event["native_source_db_message_id"], "1")
+        saved = json.loads(self.state.read_text())
+        self.assertEqual(saved["direct_db_cursor:newer"], current)
 
     def test_media_only_continuation_attaches_to_current_card(self) -> None:
         first = self.add_user("newer", "fix the Telegram lifecycle")
