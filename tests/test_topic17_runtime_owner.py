@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import importlib.util
+import json
+import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
@@ -257,6 +259,35 @@ class Topic17RuntimeOwnerTests(unittest.TestCase):
         self.assertIn("- pre_tool_call", manifest)
         self.assertIn("- transform_llm_output", manifest)
 
+    def test_active_managed_card_selects_newest_exact_run_in_long_lived_session(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            state_path = Path(tmp) / ".openclaw" / "telegram" / "jaimes_fast_ack_state.json"
+            state_path.parent.mkdir(parents=True)
+            state_path.write_text(json.dumps({"active_cards": {
+                "telegram-message-41": {
+                    "session_id": "session-1",
+                    "status": "active",
+                    "telegram_chat_id": "group-alpha",
+                    "telegram_thread_id": "lane-jaimes-ops",
+                    "started_at": "2026-07-23T00:01:00Z",
+                    "inbound_message_id": "stale-shared-id",
+                },
+                "telegram-message-42": {
+                    "session_id": "session-1",
+                    "status": "active",
+                    "telegram_chat_id": "group-alpha",
+                    "telegram_thread_id": "lane-jaimes-ops",
+                    "started_at": "2026-07-23T00:02:00Z",
+                    "inbound_message_id": "stale-shared-id",
+                },
+            }}))
+            with patch.object(self.plugin.Path, "home", return_value=Path(tmp)), patch.object(
+                self.plugin, "_load_registry_module", return_value=self.registry
+            ):
+                recovered = self.plugin._active_managed_card("session-1")
+        self.assertEqual(recovered["_runtime_run_id"], "telegram-message-42")
+        self.assertEqual(recovered["started_at"], "2026-07-23T00:02:00Z")
+
     def test_terminal_transform_returns_only_prepared_gateway_final(self):
         completed = SimpleNamespace(
             returncode=0,
@@ -332,6 +363,7 @@ class Topic17RuntimeOwnerTests(unittest.TestCase):
         recovered = {
             "session_id": "session-1",
             "inbound_message_id": "card-bound-origin",
+            "_runtime_run_id": "telegram-message-42",
         }
         self.session["HERMES_SESSION_MESSAGE_ID"] = "adjacent-media-part"
         with self.session_patch(), patch.object(
@@ -352,6 +384,7 @@ class Topic17RuntimeOwnerTests(unittest.TestCase):
         self.assertEqual(result, "<pre>canonical</pre>")
         payload = run.call_args.kwargs["input"]
         self.assertIn('"inbound_message_id": "card-bound-origin"', payload)
+        self.assertIn('"card_run_id": "telegram-message-42"', payload)
         self.assertNotIn("adjacent-media-part", payload)
 
     def test_terminal_transform_does_not_claim_contextless_unmanaged_session(self):

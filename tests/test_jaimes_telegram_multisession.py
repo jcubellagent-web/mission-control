@@ -1790,6 +1790,41 @@ class MultiSessionWatcherTests(unittest.TestCase):
         self.assertEqual(card["final_message_id"], "3914")
         publish.assert_called_once()
 
+    def test_adapter_receipt_recovers_after_timeout_overwrites_work_card_status(self) -> None:
+        work_state = Path(self.tmp.name) / "jaimes_work_cards.json"
+        work_state.write_text(json.dumps({"cards": {
+            "card-key": {
+                "status": "failed",
+                "updated_at": "2026-07-23T00:13:27Z",
+                "work_log": ["Work completed; final delivery receipt is unavailable"],
+                "final_message_id": "4213",
+                "final_delivery_verified_by": "hermes-adapter-success",
+                "final_delivery_confirmed_at": "2026-07-23T00:11:51Z",
+                "work_id": "work-current",
+                "run_id": "run-current",
+                "task_started_at": "2026-07-23T00:10:42Z",
+            }
+        }}))
+        state = {"active_cards": {"run-9": {
+            "key": "card-key",
+            "objective": "Explain model usage",
+            "model": "openai-codex/gpt-5.6-sol",
+            "work_id": "work-current",
+            "ledger_run_id": "run-current",
+            "task_started_at": "2026-07-23T00:10:42Z",
+            "status": "done",
+            "final_contract_status": "delivery_indeterminate",
+        }}}
+        with patch.object(watcher, "JAIMES_WORK_CARD_STATE_PATH", work_state), \
+             patch.object(watcher, "publish_jaimes"):
+            confirmed = watcher.reconcile_adapter_confirmed_deliveries(state)
+        self.assertEqual(confirmed, 1)
+        card = state["active_cards"]["run-9"]
+        self.assertEqual(card["status"], "done")
+        self.assertEqual(card["final_contract_status"], "canonical")
+        self.assertEqual(card["final_message_id"], "4213")
+        self.assertEqual(card["final_delivery_verified_by"], "hermes-adapter-success")
+
     def test_adapter_confirmed_terminal_delivery_retires_live_and_final_edit_incidents(self) -> None:
         work_state = Path(self.tmp.name) / "jaimes_work_cards.json"
         work_state.write_text(json.dumps({"cards": {

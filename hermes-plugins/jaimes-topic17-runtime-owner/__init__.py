@@ -246,7 +246,8 @@ def _active_managed_card(session_id: str) -> Optional[dict[str, Any]]:
         )
     except Exception:
         return None
-    for card in (state.get("active_cards") or {}).values():
+    candidates: list[tuple[str, str, dict[str, Any]]] = []
+    for run_id, card in (state.get("active_cards") or {}).items():
         if not isinstance(card, dict):
             continue
         if str(card.get("session_id") or "") != str(session_id):
@@ -268,8 +269,19 @@ def _active_managed_card(session_id: str) -> Optional[dict[str, Any]]:
         except Exception:
             owned = False
         if owned:
-            return card
-    return None
+            candidates.append((
+                str(card.get("started_at") or card.get("task_started_at") or ""),
+                str(run_id),
+                dict(card),
+            ))
+    if not candidates:
+        return None
+    #JAIMES: terminal preparation must bind to the newest exact card in a
+    # long-lived Telegram session; returning the first dict entry can attach a
+    # final to an older still-active turn after media batching or compaction.
+    _, run_id, card = max(candidates, key=lambda item: (item[0], item[1]))
+    card["_runtime_run_id"] = run_id
+    return card
 
 
 def _is_owned_telegram_session(session_id: str = "") -> bool:
@@ -349,6 +361,7 @@ def _on_transform_llm_output(
         "response_text": str(response_text or ""),
         "session_id": str(session_id or ""),
         "model": str(model or ""),
+        "card_run_id": str((recovered_card or {}).get("_runtime_run_id") or ""),
         "inbound_message_id": (
             str((recovered_card or {}).get("inbound_message_id") or "")
             or _session_value("HERMES_SESSION_MESSAGE_ID").strip()

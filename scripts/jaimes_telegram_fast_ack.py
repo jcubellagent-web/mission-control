@@ -2371,7 +2371,12 @@ def summarize_objective(text: str) -> str:
         return "Investigate matching trade market-cap labels"
 
     for markers, summary in OBJECTIVE_RULES:
-        if any(marker in intent_lower for marker in markers):
+        if any(
+            re.search(rf"(?<![A-Za-z0-9_]){re.escape(marker)}(?![A-Za-z0-9_])", intent_lower)
+            if re.fullmatch(r"[a-z0-9']+", marker)
+            else marker in intent_lower
+            for marker in markers
+        ):
             return summary
     verification = re.match(
         r"^(?:please\s+)?(?:test|validate|verify|confirm|check|make sure)\s+(.+)$",
@@ -3607,6 +3612,7 @@ def prepare_terminal_response(
     session_id: str,
     model: str,
     inbound_message_id: str = "",
+    card_run_id: str = "",
     response_recorded_at: str = "",
 ) -> dict[str, Any]:
     """Commit the v3 terminal outbox before Hermes performs its native send."""
@@ -3616,6 +3622,8 @@ def prepare_terminal_response(
         candidates: list[tuple[str, str, dict[str, Any]]] = []
         for run_id, card in (active or {}).items():
             if not isinstance(card, dict) or card.get("status") != "active":
+                continue
+            if card_run_id and str(run_id) != card_run_id:
                 continue
             if session_id and str(card.get("session_id") or "") != session_id:
                 continue
@@ -4180,13 +4188,33 @@ def reconcile_adapter_confirmed_deliveries(
         return 0
     confirmed = 0
     for card in (state.get("active_cards") or {}).values():
-        if not isinstance(card, dict) or card.get("status") in {"done", "awaiting-final-gate", "closing-before-final"}:
+        if not isinstance(card, dict) or card.get("status") == "cancelled":
+            continue
+        if (
+            card.get("status") == "done"
+            and card.get("final_contract_status") == "canonical"
+            and card.get("final_message_id")
+        ):
             continue
         record = work_cards.get(str(card.get("key") or ""))
-        if not isinstance(record, dict) or record.get("status") != "done":
+        if not isinstance(record, dict):
             continue
         final_message_id = str(record.get("final_message_id") or "")
         if not final_message_id:
+            continue
+        work_log = " ".join(str(item) for item in (record.get("work_log") or record.get("done") or []))
+        explicit_adapter_receipt = bool(
+            str(record.get("final_delivery_verified_by") or "") == "hermes-adapter-success"
+            and str(record.get("final_delivery_confirmed_at") or "")
+        )
+        legacy_done_receipt = bool(
+            record.get("status") == "done"
+            and "Final summary delivered" in work_log
+        )
+        #JAIMES: a concrete adapter message id plus adapter confirmation outranks
+        # a later timeout card edit. The timeout path previously overwrote the
+        # work-card status before this watcher consumed the durable receipt.
+        if not (explicit_adapter_receipt or legacy_done_receipt):
             continue
         identity_pairs = (
             ("work_id", "work_id"),
@@ -4199,8 +4227,7 @@ def reconcile_adapter_confirmed_deliveries(
             for card_field, record_field in identity_pairs
         ):
             continue
-        work_log = " ".join(str(item) for item in (record.get("work_log") or record.get("done") or []))
-        if "Final summary delivered" not in work_log:
+        if not explicit_adapter_receipt and "Final summary delivered" not in work_log:
             continue
         writer_delivery = bool(card.get("lifecycle_writer_enabled"))
         shadow_delivery = bool(
@@ -5334,14 +5361,16 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
         state.pop("latest_pending_ack", None)
 
     updates: list[dict[str, Any]] = []
+    # Consume the adapter's durable Telegram message-id receipt before any
+    # progress edit or receipt-timeout path can downgrade the same card.
+    state["cards_confirmed_by_adapter"] = int(state.get("cards_confirmed_by_adapter") or 0) + reconcile_adapter_confirmed_deliveries(
+        state, dry_run=dry_run
+    )
     for sid in session_ids:
         state["cards_completed_from_final"] = int(state.get("cards_completed_from_final") or 0) + complete_cards_from_final_responses(
             state, sid, dry_run=dry_run
         )
         updates.extend(update_active_cards(state, sid, dry_run=dry_run))
-    state["cards_confirmed_by_adapter"] = int(state.get("cards_confirmed_by_adapter") or 0) + reconcile_adapter_confirmed_deliveries(
-        state, dry_run=dry_run
-    )
     if not dry_run:
         now_stamp = dt.datetime.now(dt.timezone.utc)
         last_evidence = parse_final_timestamp(state.get("completion_evidence_written_at", ""))
@@ -5404,6 +5433,7 @@ def main() -> int:
             session_id=str(payload.get("session_id") or ""),
             model=str(payload.get("model") or DEFAULT_MODEL),
             inbound_message_id=str(payload.get("inbound_message_id") or ""),
+            card_run_id=str(payload.get("card_run_id") or ""),
             response_recorded_at=str(payload.get("response_recorded_at") or ""),
         )
         print(json.dumps(result, sort_keys=True))

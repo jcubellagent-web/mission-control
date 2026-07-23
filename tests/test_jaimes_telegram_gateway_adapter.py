@@ -315,7 +315,23 @@ class JaimesGatewayAdapterTests(unittest.TestCase):
                             "lifecycle_writer_enabled": True,
                             "no_card_required": False,
                             "delivery_tier": 3,
-                        }
+                        },
+                        "telegram-message-42": {
+                            "status": "active",
+                            "session_id": "session-1",
+                            "inbound_message_id": "9001",
+                            "key": "newer-competing-card",
+                            "work_id": "newer-competing-work",
+                            "ledger_run_id": "newer-competing-run",
+                            "objective": "Different current service",
+                            "model": "provider/model",
+                            "route": "jaimes-local | Why: verified lane",
+                            "started_at": "2026-07-20T17:00:30Z",
+                            "task_started_at": "2026-07-20T17:00:30Z",
+                            "lifecycle_writer_enabled": True,
+                            "no_card_required": False,
+                            "delivery_tier": 3,
+                        },
                     }
                 }))
                 publish_observed: list[dict[str, str]] = []
@@ -338,6 +354,7 @@ class JaimesGatewayAdapterTests(unittest.TestCase):
                         session_id="session-1",
                         model="provider/model",
                         inbound_message_id="9001",
+                        card_run_id="telegram-message-41",
                         response_recorded_at="2026-07-20T17:01:00Z",
                     )
                 self.assertTrue(prepared["managed"])
@@ -351,6 +368,10 @@ class JaimesGatewayAdapterTests(unittest.TestCase):
                 self.assertTrue(card["terminal_final_effect_key"].startswith("effect-"))
                 self.assertTrue(card["terminal_card_edit_effect_key"].startswith("effect-"))
                 self.assertTrue(card["terminal_control_tower_published_at"])
+                self.assertNotIn(
+                    "terminal_delivery_state",
+                    saved["active_cards"]["telegram-message-42"],
+                )
                 self.module.finish_card_terminal_delivery(card, state="delivered")
                 self.module.finish_prepared_terminal_card_edit(card, state="delivered")
                 receipt = self.module.gateway_lifecycle().read_work(work_id)
