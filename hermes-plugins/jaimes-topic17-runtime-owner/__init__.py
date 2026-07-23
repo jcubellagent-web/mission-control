@@ -12,6 +12,7 @@ import importlib.util
 import json
 import os
 import re
+import sqlite3
 import subprocess
 import sys
 from collections.abc import Mapping
@@ -246,11 +247,31 @@ def _active_managed_card(session_id: str) -> Optional[dict[str, Any]]:
         )
     except Exception:
         return None
+    lineage = {str(session_id)}
+    state_db = Path.home() / ".hermes" / "state.db"
+    if state_db.exists():
+        try:
+            with sqlite3.connect(f"file:{state_db}?mode=ro", uri=True, timeout=2) as db:
+                current = str(session_id)
+                for _ in range(8):
+                    row = db.execute(
+                        "SELECT parent_session_id FROM sessions WHERE id = ?",
+                        (current,),
+                    ).fetchone()
+                    parent = str(row[0] or "") if row else ""
+                    if not parent or parent in lineage:
+                        break
+                    lineage.add(parent)
+                    current = parent
+        except Exception:
+            # Exact-session recovery remains available if the lineage store is
+            # temporarily unreadable; ownership still fails closed otherwise.
+            pass
     candidates: list[tuple[str, str, dict[str, Any]]] = []
     for run_id, card in (state.get("active_cards") or {}).items():
         if not isinstance(card, dict):
             continue
-        if str(card.get("session_id") or "") != str(session_id):
+        if str(card.get("session_id") or "") not in lineage:
             continue
         if str(card.get("status") or "").lower() not in {
             "active",
@@ -325,17 +346,9 @@ def _writer_rollout_required(session_id: str) -> bool:
     except Exception:
         return True
     try:
-        state = json.loads(
-            (Path.home() / ".openclaw" / "telegram" / "jaimes_fast_ack_state.json").read_text()
-        )
-        for card in (state.get("active_cards") or {}).values():
-            if (
-                isinstance(card, dict)
-                and card.get("status") == "active"
-                and str(card.get("session_id") or "") == str(session_id or "")
-                and card.get("lifecycle_writer_enabled") is True
-            ):
-                return True
+        card = _active_managed_card(session_id)
+        if card and card.get("lifecycle_writer_enabled") is True:
+            return True
     except Exception:
         pass
     return False

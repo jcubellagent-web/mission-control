@@ -46,6 +46,7 @@ def healthy_probe() -> dict:
             "surfaceIndeterminate": False,
             "activeCardCount": 1,
             "terminalIssueCount": 0,
+            "strandedLifecycleCount": 0,
             "deliveryError": {},
         },
         "sessions": {
@@ -87,6 +88,17 @@ def test_indeterminate_terminal_receipt_degrades_semantic_health_without_restart
 
     assert status == "unhealthy"
     assert issues == ["A JAIMES Telegram final response has an unresolved delivery receipt."]
+    assert recovery_targets == set()
+
+
+def test_cardless_multi_step_receipt_degrades_semantic_health_without_restart_loop():
+    probe = healthy_probe()
+    probe["fastAckState"]["strandedLifecycleCount"] = 1
+
+    status, issues, recovery_targets = health.evaluate(probe)
+
+    assert status == "unhealthy"
+    assert issues == ["A JAIMES Telegram multi-step request is stranded without a managed card."]
     assert recovery_targets == set()
 
 

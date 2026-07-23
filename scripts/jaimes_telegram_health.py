@@ -191,6 +191,7 @@ def safe_probe_snapshot(probe: dict[str, Any]) -> dict[str, Any]:
             "surfaceIndeterminate": fast_ack.get("surfaceIndeterminate") is True,
             "activeCardCount": safe_nonnegative_int(fast_ack.get("activeCardCount")),
             "terminalIssueCount": safe_nonnegative_int(fast_ack.get("terminalIssueCount")),
+            "strandedLifecycleCount": safe_nonnegative_int(fast_ack.get("strandedLifecycleCount")),
             "deliveryErrorPresent": bool(delivery_error),
         },
         "brainFeed": {
@@ -233,6 +234,23 @@ sessions = read_json(home / ".hermes" / "sessions" / "sessions.json")
 fast_ack_state = read_json(home / ".openclaw" / "telegram" / "jaimes_fast_ack_state.json")
 brain = read_json(home / ".openclaw" / "workspace" / "mission-control" / "data" / "jaimes-brain-feed.json")
 heartbeat = read_json(home / ".openclaw" / "workspace" / "mission-control" / "data" / "agent-heartbeats.json")
+stranded_lifecycle_count = 0
+try:
+    import sqlite3
+    lifecycle_db = home / ".openclaw" / "private" / "telegram-lifecycle" / "lifecycle.sqlite3"
+    with sqlite3.connect(f"file:{lifecycle_db}?mode=ro", uri=True, timeout=2) as db:
+        cutoff = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(seconds=90)).isoformat().replace("+00:00", "Z")
+        stranded_lifecycle_count = int(db.execute(
+            """SELECT COUNT(*) FROM work_receipts
+               WHERE delivery_tier = 3
+                 AND card_created = 0
+                 AND final_delivered = 0
+                 AND phase IN ('received','classified','acknowledged','working','awaiting_input','verifying')
+                 AND updated_at < ?""",
+            (cutoff,),
+        ).fetchone()[0])
+except Exception:
+    stranded_lifecycle_count = 0
 status = subprocess.run(["/bin/zsh", "-lc", "hermes status"], capture_output=True, text=True, timeout=35)
 launch = subprocess.run(["/bin/zsh", "-lc", "launchctl print gui/$(id -u)/ai.hermes.gateway 2>/dev/null | sed -n '1,80p'"], capture_output=True, text=True, timeout=10)
 fast_ack_launch = subprocess.run(["/bin/zsh", "-lc", "launchctl print gui/$(id -u)/ai.jaimes.telegram-fast-ack 2>/dev/null | sed -n '1,80p'"], capture_output=True, text=True, timeout=10)
@@ -311,6 +329,7 @@ payload = {
             1 for card in (fast_ack_state.get("active_cards") or {}).values()
             if unresolved_terminal_issue(card, fast_ack_state.get("active_cards") or {})
         ) if isinstance(fast_ack_state.get("active_cards"), dict) else 0,
+        "strandedLifecycleCount": stranded_lifecycle_count,
         "deliveryError": {
             "at": (fast_ack_state.get("last_telegram_delivery_error") or {}).get("at"),
             "method": (fast_ack_state.get("last_telegram_delivery_error") or {}).get("method"),
@@ -418,6 +437,8 @@ def evaluate(probe: dict[str, Any]) -> tuple[str, list[str], set[str]]:
         issues.append("A JAIMES Telegram card send or edit still lacks a confirmed receipt.")
     if safe_nonnegative_int(fast_ack_state.get("terminalIssueCount")):
         issues.append("A JAIMES Telegram final response has an unresolved delivery receipt.")
+    if safe_nonnegative_int(fast_ack_state.get("strandedLifecycleCount")):
+        issues.append("A JAIMES Telegram multi-step request is stranded without a managed card.")
     if not telegram_sessions:
         issues.append("No Telegram session binding is present.")
         recovery_targets.add("gateway")

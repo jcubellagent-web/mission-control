@@ -3,8 +3,12 @@
 from __future__ import annotations
 
 import importlib.util
+import json
+import sqlite3
+import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 
@@ -54,6 +58,40 @@ class Topic17RuntimeOwnerTests(unittest.TestCase):
         self.assertIn("managed by the gateway", result["message"])
         self.assertIn("Continue the substantive work normally", result["message"])
         self.assertNotIn("-1003589561528", result["message"])
+
+    def test_compression_child_recovers_parent_managed_card(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp)
+            state_path = home / ".openclaw" / "telegram" / "jaimes_fast_ack_state.json"
+            state_path.parent.mkdir(parents=True)
+            state_path.write_text(json.dumps({
+                "active_cards": {
+                    "telegram-message-41": {
+                        "status": "active",
+                        "session_id": "parent-session",
+                        "telegram_chat_id": "-1003589561528",
+                        "telegram_thread_id": "17",
+                        "started_at": "2026-07-23T05:00:00Z",
+                        "lifecycle_writer_enabled": True,
+                    }
+                }
+            }))
+            state_db = home / ".hermes" / "state.db"
+            state_db.parent.mkdir(parents=True)
+            with sqlite3.connect(state_db) as db:
+                db.execute("CREATE TABLE sessions (id TEXT PRIMARY KEY, parent_session_id TEXT)")
+                db.execute("INSERT INTO sessions VALUES (?, ?)", ("parent-session", None))
+                db.execute("INSERT INTO sessions VALUES (?, ?)", ("child-session", "parent-session"))
+
+            registry = SimpleNamespace(owner_accepts=lambda *_args, **_kwargs: True)
+            with patch.object(self.plugin.Path, "home", return_value=home), patch.object(
+                self.plugin, "_load_registry_module", return_value=registry
+            ):
+                card = self.plugin._active_managed_card("child-session")
+
+            self.assertIsNotNone(card)
+            self.assertEqual(card["session_id"], "parent-session")
+            self.assertEqual(card["_runtime_run_id"], "telegram-message-41")
 
     def test_blocks_model_telegram_send_message_surfaces(self):
         cases = [

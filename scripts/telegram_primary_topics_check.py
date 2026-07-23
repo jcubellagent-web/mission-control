@@ -166,6 +166,11 @@ def check_jaimes(home: Path) -> list[str]:
         problems,
     )
     check(notifications.get("notifications") == "important", "Hermes Telegram notifications must stay important-only", problems)
+    check(
+        notifications.get("long_running_notifications") == "off",
+        "Hermes standalone long-running Telegram notifications must stay off",
+        problems,
+    )
     try:
         gateway_args = plistlib.loads(gateway_plist.read_bytes()).get("ProgramArguments", [])
     except (OSError, plistlib.InvalidFileException):

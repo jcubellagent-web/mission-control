@@ -2727,6 +2727,7 @@ def send_ack(
 
     if objective_is_near_copy(prompt, objective):
         objective = semantic_reinterpretation(prompt)
+    objective_fallback_applied = False
     if (
         (not objective or objective_is_near_copy(prompt, objective))
         and gateway_writer
@@ -2739,7 +2740,22 @@ def send_ack(
         # internal objective preserves receipt ownership without echoing the
         # user's text onto a managed surface.
         objective = "Respond to the current Telegram message"
-    if not objective or objective_is_near_copy(prompt, objective):
+        objective_fallback_applied = True
+    if (
+        (not objective or objective_is_near_copy(prompt, objective))
+        and gateway_writer
+        and delivery_tier == 3
+    ):
+        # A valid multi-step request must never become cardless merely because
+        # deterministic summarisation could not derive a short objective.  The
+        # neutral fallback keeps private prompt text off shared surfaces while
+        # preserving the canonical one-card lifecycle; the model can refine the
+        # description through verified progress later in the turn.
+        objective = "Execute the current Telegram request"
+        objective_fallback_applied = True
+    if (
+        not objective or objective_is_near_copy(prompt, objective)
+    ) and not objective_fallback_applied:
         # #JAIMES: keep only the immediate reaction when deterministic intake
         # cannot produce a genuine interpretation; the main agent must decide
         # the objective before Telegram or Control Tower receives one.
@@ -3223,6 +3239,7 @@ def live_jaimes_terminal_runtime_evidence(
     session_id: str,
     claimed_model: str,
 ) -> dict[str, str]:
+    lineage = hermes_session_lineage(session_id) if session_id else set()
     metadata = next(
         (
             item for item in active_hermes_sessions_metadata()
@@ -3230,7 +3247,7 @@ def live_jaimes_terminal_runtime_evidence(
         ),
         {},
     )
-    if not metadata or str(card.get("session_id") or "") != str(session_id or ""):
+    if not metadata or str(card.get("session_id") or "") not in lineage:
         return {}
     provider = clean_final_item(str(metadata.get("provider") or ""))
     raw_model = clean_final_item(str(metadata.get("runtime_model") or metadata.get("model") or ""))
@@ -3441,6 +3458,7 @@ def prepare_terminal_response(
     response_recorded_at: str = "",
 ) -> dict[str, Any]:
     """Commit the v3 terminal outbox before Hermes performs its native send."""
+    lineage = hermes_session_lineage(session_id) if session_id else set()
     with fast_ack_state_lock():
         state = load_json(STATE_PATH, {})
         active = state.get("active_cards") if isinstance(state, dict) else {}
@@ -3450,7 +3468,7 @@ def prepare_terminal_response(
                 continue
             if card_run_id and str(run_id) != card_run_id:
                 continue
-            if session_id and str(card.get("session_id") or "") != session_id:
+            if session_id and str(card.get("session_id") or "") not in lineage:
                 continue
             if inbound_message_id and str(card.get("inbound_message_id") or "") not in {"", inbound_message_id}:
                 continue

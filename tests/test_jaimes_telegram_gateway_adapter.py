@@ -217,6 +217,18 @@ class JaimesGatewayAdapterTests(unittest.TestCase):
         self.assertLess(events.index("claim:reaction"), events.index("api:reaction"))
         self.assertLess(events.index("claim:card"), events.index("api:card"))
 
+    def test_writer_tier_3_near_copy_uses_private_safe_objective_and_creates_card(self):
+        result, events = self.run_writer_tier(
+            3,
+            objective=self.event["prompt"],
+            near_copy=True,
+            semantic="",
+        )
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["objective"], "Execute the current Telegram request")
+        self.assertNotEqual(result.get("status"), "awaiting-objective-interpretation")
+        self.assertIn("api:card", events)
+
     def test_no_card_active_work_never_calls_work_card_updater(self):
         state = {
             "active_cards": {
@@ -281,7 +293,7 @@ class JaimesGatewayAdapterTests(unittest.TestCase):
             ), patch.object(self.module, "STATE_PATH", state_path), patch.object(
                 self.module, "TERMINAL_VISIBILITY_OUTBOX_DIR", visibility_root
             ), patch.object(self.module, "active_hermes_sessions_metadata", return_value=[{
-                "sessionId": "session-1",
+                "sessionId": "session-child",
                 "provider": "provider",
                 "runtime_model": "model",
                 "model": "provider/model",
@@ -348,10 +360,14 @@ class JaimesGatewayAdapterTests(unittest.TestCase):
                     self.assertEqual(kwargs["work_event"], "terminal")
                     return True
 
-                with patch.object(self.module, "publish_jaimes", side_effect=publish):
+                with patch.object(
+                    self.module,
+                    "hermes_session_lineage",
+                    return_value={"session-child", "session-1"},
+                ), patch.object(self.module, "publish_jaimes", side_effect=publish):
                     prepared = self.module.prepare_terminal_response(
                         response_text=valid_final,
-                        session_id="session-1",
+                        session_id="session-child",
                         model="provider/model",
                         inbound_message_id="9001",
                         card_run_id="telegram-message-41",
