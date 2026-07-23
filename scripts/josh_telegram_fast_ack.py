@@ -135,12 +135,17 @@ except Exception:  # noqa: BLE001
     render_live_card = None  # type: ignore
 
 try:
-    from objective_quality import objective_is_near_copy, semantic_reinterpretation  # type: ignore
+    from objective_quality import (  # type: ignore
+        current_request_text,
+        objective_is_near_copy,
+        semantic_reinterpretation,
+    )
 except Exception:  # noqa: BLE001
     # Fail closed so an import problem cannot expose a prompt echo as an
     # apparent agent interpretation on Telegram or Control Tower.
     objective_is_near_copy = lambda _prompt, _objective: True
     semantic_reinterpretation = lambda _prompt: ""
+    current_request_text = lambda prompt: str(prompt or "")
 
 try:
     from telegram_ux_helpers import (  # type: ignore
@@ -2075,79 +2080,6 @@ CONTROL_TOWER_STATUS_RE = re.compile(
     r"\b(why|what'?s going on|what is going on|what'?s happening|how come|keep saying|keeps saying|stuck|been switching|switching in and out)\b",
     re.I,
 )
-
-
-def current_request_text(text: str) -> str:
-    """Select the actionable ask, never a trailing safety constraint."""
-    embedded_card_row = re.compile(
-        r"^(?:[🎯🤖📊⏱️✅⚠️➡️🔐]\s*)?"
-        r"(?:objective|model|steps?|eta|complete|what was done|issues|"
-        r"appropriate next steps|approval needed|status|progress)\s*(?::|$)",
-        re.I,
-    )
-    eligible: list[str] = []
-    skip_objective_value = False
-    output_instruction = re.compile(
-        r"^(?:return|respond(?:\s+with)?|output(?:\s+format)?|include)\b"
-        r".*\b(?:findings?|model|authentication|route|fallback|conclusion|"
-        r"format|sections?|status|complete|issues?|next steps?|approval)\b",
-        re.I,
-    )
-    for raw_line in (text or "").splitlines():
-        line = raw_line.strip()
-        if not line:
-            continue
-        if re.fullmatch(r"(?:🎯\s*)?objective\s*", line, re.I):
-            skip_objective_value = True
-            continue
-        if skip_objective_value:
-            skip_objective_value = False
-            continue
-        if (
-            embedded_card_row.match(line)
-            or output_instruction.match(line)
-            or line.startswith(("```", "- "))
-        ):
-            continue
-        eligible.append(line)
-    parts = [
-        p.strip(" ,.-")
-        for p in re.split(r"(?<=[.!?])\s+|\n+", "\n".join(eligible))
-        if p.strip()
-    ]
-    normalized_parts = [
-        re.sub(r"^read[- ]only\s+acceptance\s+check\s*:\s*", "", part, flags=re.I).strip()
-        for part in parts
-    ]
-    constraint_only = re.compile(
-        r"^(?:(?:please\s+)?(?:make|do)\s+no\s+changes|"
-        r"(?:please\s+)?do\s+not\s+(?:make|apply|change|edit)\b|"
-        r"read[- ]only(?:\s+only)?)[.!]?$",
-        re.I,
-    )
-    intent = re.compile(
-        r"\b(?:assess|audit|check|evaluate|examine|find|fix|implement|inspect|"
-        r"investigate|repair|review|run|test|validate|verify|build|add|remove|update)\b",
-        re.I,
-    )
-    leading_intent = re.compile(
-        r"^(?:(?:please\s+)?|(?:can|could|would)\s+you\s+)(?:assess|audit|check|"
-        r"evaluate|examine|find|fix|implement|inspect|investigate|repair|review|"
-        r"run|test|validate|verify|build|add|remove|update)\b",
-        re.I,
-    )
-    candidates = [part for part in normalized_parts if part and intent.search(part) and not constraint_only.fullmatch(part)]
-    if not candidates:
-        return " ".join(eligible)
-    selected = max(candidates, key=lambda part: (3 if leading_intent.search(part) else 2, len(part.split())))
-    has_no_change_constraint = any(
-        constraint_only.fullmatch(part)
-        or re.search(r"\b(?:read[- ]only|make no changes|do not make changes)\b", part, re.I)
-        for part in parts
-    )
-    if has_no_change_constraint and not re.search(r"\b(?:read[- ]only|without (?:making )?changes)\b", selected, re.I):
-        selected = f"{selected} read-only"
-    return selected
 
 
 OBJECTIVE_MAX_WORDS = 12

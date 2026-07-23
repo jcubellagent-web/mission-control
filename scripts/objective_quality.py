@@ -14,7 +14,8 @@ COURTESY_RE = re.compile(
     re.I,
 )
 CARD_ROW_RE = re.compile(
-    r"^(?:objective|model|steps?|eta|complete|what was done|issues|"
+    r"^(?:[🎯🤖📊⏱️✅⚠️➡️🔐]\s*)?"
+    r"(?:objective|model|steps?|eta|complete|what was done|issues|"
     r"appropriate next steps|approval needed|status|progress)\s*(?::|$)",
     re.I,
 )
@@ -75,8 +76,8 @@ GENERIC_CONNECTIVITY_OBJECTIVE = (
 )
 
 
-def current_request_text(prompt: str) -> str:
-    """Select the actionable request, excluding transport and output contracts."""
+def _request_lines(prompt: str) -> list[str]:
+    """Return human request rows with transport and rendered-card rows removed."""
     raw = prompt or ""
     match = CURRENT_REQUEST_RE.search(raw)
     if match:
@@ -99,10 +100,22 @@ def current_request_text(prompt: str) -> str:
             continue
         if (
             CARD_ROW_RE.match(line)
-            or line.startswith(("```", "[media attached:"))
+            or OUTPUT_INSTRUCTION_RE.match(line)
+            or line.startswith(("```", "- ", "[media attached:"))
         ):
             continue
         lines.append(line)
+    return lines
+
+
+def request_context_text(prompt: str) -> str:
+    """Return safe request context without card rows or output contracts."""
+    return " ".join(_request_lines(prompt)).strip()
+
+
+def current_request_text(prompt: str) -> str:
+    """Select the actionable request, excluding transport and output contracts."""
+    lines = _request_lines(prompt)
 
     parts = [
         part.strip(" ,.-")
@@ -119,13 +132,9 @@ def current_request_text(prompt: str) -> str:
         if part
         and INTENT_RE.search(part)
         and not CONSTRAINT_ONLY_RE.fullmatch(part)
-        and not OUTPUT_INSTRUCTION_RE.match(part)
     ]
     if not candidates:
-        return " ".join(
-            part for part in normalized_parts
-            if part and not OUTPUT_INSTRUCTION_RE.match(part)
-        ).strip()
+        return " ".join(part for part in normalized_parts if part).strip()
     # Preserve every actionable clause in source order. Choosing only the
     # longest sentence silently drops legitimate compound work such as
     # "Review Inbox ownership. Fix JAIMES Ops routing." Output-contract rows

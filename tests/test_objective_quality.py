@@ -10,6 +10,7 @@ SPEC.loader.exec_module(MODULE)
 objective_is_near_copy = MODULE.objective_is_near_copy
 semantic_reinterpretation = MODULE.semantic_reinterpretation
 current_request_text = MODULE.current_request_text
+request_context_text = MODULE.request_context_text
 
 
 def test_exact_request_after_courtesy_is_rejected() -> None:
@@ -104,3 +105,15 @@ def test_common_no_change_variants_preserve_the_read_only_constraint() -> None:
         assert current_request_text(f"Review Inbox ownership. {constraint}") == (
             "Review Inbox ownership read-only"
         )
+
+
+def test_shared_context_removes_rendered_card_and_output_contract_rows() -> None:
+    prompt = """Please fix the current task mapping.
+
+🎯 Objective
+Stale objective copied from an old card
+🤖 Model: codex/gpt-5.6-luna
+Return findings, route, issues, and approval needed.
+"""
+    assert request_context_text(prompt) == "Please fix the current task mapping."
+    assert current_request_text(prompt) == "Please fix the current task mapping"
