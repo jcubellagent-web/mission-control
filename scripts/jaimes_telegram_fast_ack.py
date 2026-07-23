@@ -1394,7 +1394,7 @@ FINAL_STATUS_ONLY_RE = re.compile(
     r"(?:is\s+|was\s+)?(?:complete|completed|done|finished|verified|prepared|closed)\.?$"
 )
 FINAL_RESULT_SIGNAL_RE = re.compile(
-    r"(?i)\b(?:confirmed|found|identified|determined|changed|fixed|added|removed|"
+    r"(?i)\b(?:confirm(?:s|ed)?|found|identified|determined|changed|fixed|added|removed|"
     r"implemented|differ(?:s|ed|ent)?|caus(?:e|es|ed)|repair(?:s|ed)?|"
     r"(?:en|dis)abl(?:e|es|ed|ing)|reconcil(?:e|es|ed)|retir(?:e|es|ed)|"
     r"replac(?:e|es|ed)|rerout(?:e|es|ed)|mov(?:e|es|ed)|prevent(?:s|ed)?|"
@@ -1402,7 +1402,7 @@ FINAL_RESULT_SIGNAL_RE = re.compile(
     r"recorded|delivered|returned|produced|passed|failed|"
     r"cannot|can't|could not|does not|"
     r"unsupported|risk|recommend(?:ed|ation)?|should|avoid|blocked|requires?|"
-    r"increased|decreased|matched|differs?|supports?|select(?:s|ed)?|"
+    r"increased|decreased|match(?:es|ed)?|differs?|supports?|select(?:s|ed)?|"
     r"reserv(?:e|es|ed)|occur(?:s|red)?|rout(?:e|es|ed|ing)|"
     r"authenticat(?:e|es|ed|ion)|fallback|quota|allowance)\b"
 )

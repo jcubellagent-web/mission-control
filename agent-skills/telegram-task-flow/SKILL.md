@@ -67,6 +67,13 @@ The primary Telegram group is `J.A.I.N Control Center` (`-1003589561528`).
 
 Always show the model route plainly: Gemini when sufficient and safe, Codex/OpenCLAW for execution or private/device work, Grok/xAI for X-native/current-events work.
 
+## Operational Health Authority
+
+- Control Tower and its checked-in health probe are the operational source of truth. For JAIMES Telegram health, use `scripts/jaimes_telegram_health.py --dry-run` and report its current `gatewayState`, `telegramState`, `fastAckState`, `activeCardCount`, `terminalIssueCount`, and `strandedLifecycleCount` fields before interpreting lower-level history.
+- Raw lifecycle rows are diagnostic history, not an alternate health verdict. Effects attached to a retired card, a `recovered_by_work_id`, or a `receipt-backed-follow-up` resolution are recovered history and must not be called currently stranded when the canonical probe reports zero.
+- A Hermes CLI configuration warning is informational when the supervised gateway probe confirms Telegram is connected. Do not report it as a production Telegram outage or configuration failure unless the canonical gateway/Telegram probe also fails.
+- For audits, tests, and diagnostics, `Complete: Yes` means the requested verification was performed and reported. Put unhealthy findings under `Issues`; do not change a completed audit to `Complete: No` merely because it found a problem.
+
 ## Brain Feed
 
 Publish under the Telegram recipient, not the helper. Josh 2.0 chat uses `--agent josh2`; JAIMES chat uses `--agent jaimes`.

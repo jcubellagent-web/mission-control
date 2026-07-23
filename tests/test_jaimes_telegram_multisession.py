@@ -2376,6 +2376,43 @@ Approval needed:
         self.assertTrue(watcher.final_contract_is_canonical(rendered))
         self.assertLessEqual(max(map(len, plain.removeprefix("<pre>").removesuffix("</pre>").splitlines())), 38)
 
+    def test_topic17_completed_health_audit_with_negative_findings_stays_complete(self) -> None:
+        rendered = watcher.structured_final_text(
+            """Complete: Yes — verification performed
+What was done:
+- Gateway is running under launchd, PID 14045.
+- Fast-ack is running, PID 14050.
+- Exact request has one native Telegram ID: 4291.
+- Lifecycle confirms reaction and card delivery.
+- Current owner is JAIMES; route evidence matches.
+- No services were restarted or modified.
+Issues:
+- Zero-stranded-receipts check failed: 2 stranded.
+- Both receipts have been pending since July 21.
+- Hermes reports its service definition as stale.
+- Hermes CLI says Telegram is not configured despite confirmed native Telegram lifecycle delivery.
+Appropriate next steps:
+- Separately reconcile the two stranded receipts.
+- Audit the Hermes Telegram configuration mismatch.
+- Refresh the stale service definition in a write window.
+Approval needed:
+- Approval required before any cleanup or service repair.""",
+            objective="Run JAIMES health check",
+            model="openai-codex/gpt-5.6-sol",
+            route="JAIMES verified execution",
+            work_id="work-current-health",
+            run_id="run-current-health",
+            task_started_at="2026-07-23T06:12:42Z",
+            response_recorded_at="2026-07-23T06:15:16Z",
+        )
+        plain = watcher.html.unescape(rendered)
+        normalized = " ".join(plain.split())
+        self.assertIn("Complete: Yes", normalized)
+        self.assertIn("2 stranded", normalized)
+        self.assertIn("configuration mismatch", normalized)
+        self.assertNotIn("Retry with evidence", normalized)
+        self.assertTrue(watcher.final_contract_is_canonical(rendered))
+
     def test_july_11_session_history_is_downgraded_for_july_18_current_task(self) -> None:
         rendered = watcher.structured_final_text(
             """Model: openai-codex/gpt-5.6-sol | Route: session-history verification | Why: prior repair record checked
