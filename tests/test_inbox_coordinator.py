@@ -1461,6 +1461,10 @@ class InboxCoordinatorTests(unittest.TestCase):
                 )
             self.assertIs(delivered, True)
             self.assertIn("--close-before-final", commands[0])
+            self.assertEqual(
+                coordinator.TELEGRAM_TERMINAL_TIMEOUT_SECONDS,
+                45,
+            )
             self.assertEqual(commands[0][commands[0].index("--terminal-status") + 1], "failed")
             plain = re.sub(r"<[^>]+>", "", html.unescape(rendered[0]))
             self.assertIn("Complete: No", plain)

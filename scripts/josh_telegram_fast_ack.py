@@ -48,7 +48,8 @@ MAX_UNACKED_PROMPT_AGE_SECONDS = 30
 HEARTBEAT_SECONDS = 20
 MAX_ACTIVE_CARD_SECONDS = 10 * 60
 INTERPRETED_CARD_ADOPTION_WINDOW_SECONDS = 3 * 60
-TERMINAL_CLOSE_LEASE_SECONDS = 30
+TERMINAL_CLOSE_LEASE_SECONDS = 40
+TERMINAL_HELPER_TIMEOUT_SECONDS = 30
 STALE_FINAL_GATE_SECONDS = 90
 TERMINAL_OUTBOX_MAX_ATTEMPTS = 12
 TERMINAL_VISIBILITY_MAX_ATTEMPTS = 12
@@ -4825,6 +4826,56 @@ def persist_terminal_card_state(
         save_json(STATE_PATH, latest)
 
 
+def persist_terminal_delivery_indeterminate(run_key: str, card_key: str) -> None:
+    """Fence heartbeats after an unreceipted terminal Telegram attempt."""
+    with fast_ack_state_lock():
+        latest = load_json(STATE_PATH, {})
+        if not isinstance(latest, dict):
+            latest = {}
+        active = latest.get("active_cards") if isinstance(latest, dict) else {}
+        card = active.get(run_key) if isinstance(active, dict) else None
+        if not isinstance(card, dict) or str(card.get("key") or "") != card_key:
+            return
+        ended_at = utc_now()
+        card.update({
+            "status": "failed",
+            "ended_at": ended_at,
+            "last_progress_at": ended_at,
+            "last_card_update_at": ended_at,
+            "final_delivery_status": "indeterminate",
+            "terminal_delivery_state": "indeterminate",
+            "terminal_delivery_incident": "telegram-terminal-receipt-missing",
+        })
+        card.pop("terminal_close_started_at", None)
+        save_json(STATE_PATH, latest)
+
+
+def publish_terminal_delivery_incident(
+    run_key: str,
+    card_key: str,
+    card: dict[str, Any],
+) -> bool:
+    """Correct canonical visibility when execution finished but delivery did not."""
+    work_id = str(card.get("work_id") or "")
+    ledger_run_id = str(card.get("ledger_run_id") or "")
+    material = f"josh2\0{work_id}\0{ledger_run_id}\0{card_key}\0delivery-indeterminate".encode("utf-8")
+    event_id = f"telegram-terminal-delivery-{hashlib.sha256(material).hexdigest()[:32]}"
+    return publish_josh(
+        str(card.get("objective") or "Josh 2.0 Telegram task"),
+        "error",
+        "Execution finished, but the Telegram terminal receipt is indeterminate; automatic retry is fenced to prevent a duplicate final.",
+        work_id=work_id,
+        run_id=ledger_run_id,
+        phase="error",
+        model_id=str(card.get("runtime_model") or card.get("model") or DEFAULT_MODEL),
+        route_verified=bool(card.get("route_verified")),
+        origin_claim_hash=str(card.get("origin_claim_hash") or ""),
+        brain_feed=True,
+        work_event="terminal",
+        event_id=event_id,
+    )
+
+
 def publish_terminal_once(
     run_key: str,
     card_key: str,
@@ -5187,6 +5238,15 @@ def close_before_final(args: argparse.Namespace) -> dict[str, Any]:
                     "terminal_status": requested_status,
                     "final_message_id": final_message_id,
                 }
+            persist_terminal_delivery_indeterminate(
+                run_key,
+                str(card.get("key") or ""),
+            )
+            publish_terminal_delivery_incident(
+                run_key,
+                str(card.get("key") or ""),
+                card,
+            )
             return {
                 "ok": True,
                 "status": "final-delivery-indeterminate",
@@ -5394,12 +5454,17 @@ def close_before_final(args: argparse.Namespace) -> dict[str, Any]:
             with private_terminal_final_file(authoritative_final) as final_path:
                 result = run_cmd(
                     terminal_work_card_command(card_key, card, meta, terminal_status, final_path),
-                    timeout=10,
+                    # The work-card helper already owns the canonical per-card
+                    # cross-process lock. Allow one normal 20-second heartbeat
+                    # holder to drain plus the terminal helper's 6-second API
+                    # budget and process overhead. The 40-second close lease and
+                    # 45-second coordinator deadline remain outside this budget.
+                    timeout=TERMINAL_HELPER_TIMEOUT_SECONDS,
                 )
         else:
             result = run_cmd(
                 terminal_work_card_command(card_key, card, meta, terminal_status),
-                timeout=10,
+                timeout=TERMINAL_HELPER_TIMEOUT_SECONDS,
             )
     except subprocess.TimeoutExpired:
         result = {"ok": False, "returncode": -1, "stderr": "terminal card edit timed out"}
@@ -5417,7 +5482,8 @@ def close_before_final(args: argparse.Namespace) -> dict[str, Any]:
     ):
         if final_summary and prepared.get("writer"):
             finish_lifecycle_terminal(prepared, state="indeterminate")
-            release_terminal_card_close(run_key, card_key)
+            persist_terminal_delivery_indeterminate(run_key, card_key)
+            publish_terminal_delivery_incident(run_key, card_key, card)
             return {
                 "ok": True,
                 "status": "final-delivery-indeterminate",

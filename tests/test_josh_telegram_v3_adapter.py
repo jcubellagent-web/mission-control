@@ -748,6 +748,48 @@ class JoshTelegramV3AdapterTests(unittest.TestCase):
             }
         self.assertEqual(states, {"card_edit": "delivered", "final": "delivered"})
 
+    def test_terminal_budget_drains_heartbeat_lock_and_indeterminate_delivery_fences_card(self) -> None:
+        lifecycle = self.lifecycle()
+        receipt = self.working_receipt(lifecycle, tier=3)
+        state = self.coordinator_card_state(receipt)
+        state["active_cards"]["run-1"]["route_verified"] = True
+        WATCHER.save_json(self.state_path, state)
+        WATCHER.save_json(self.work_cards, {"cards": {"gateway-card-1": {
+            "status": "running",
+            "message_id": "7001",
+            "header_message_id": "",
+            "surface_contract": "live-only-v2",
+        }}})
+        timeouts: list[int] = []
+        published: list[tuple[str, bool]] = []
+
+        def publish(_title, status, _detail, **kwargs):
+            published.append((status, bool(kwargs.get("brain_feed", True))))
+            return True
+
+        def helper(*_args, **kwargs):
+            timeouts.append(int(kwargs["timeout"]))
+            # The lower work-card helper owns the cross-process card lock. A
+            # missing receipt here represents a genuine post-drain ambiguity.
+            return {"ok": False, "returncode": -1}
+
+        with patch.object(WATCHER, "gateway_lifecycle", return_value=lifecycle), \
+             patch.object(WATCHER, "coordinator_job_snapshot", return_value=self.coordinator_job(work_id=receipt["workId"], verified=True)), \
+             patch.object(WATCHER, "publish_josh", side_effect=publish), \
+             patch.object(WATCHER, "run_cmd", side_effect=helper), \
+             patch.object(WATCHER.sys, "stdin", io.StringIO("<b>Verified final</b>")):
+            result = WATCHER.close_before_final(self.terminal_args())
+
+        self.assertEqual(timeouts, [WATCHER.TERMINAL_HELPER_TIMEOUT_SECONDS])
+        self.assertEqual(WATCHER.TERMINAL_HELPER_TIMEOUT_SECONDS, 30)
+        self.assertGreater(WATCHER.TERMINAL_CLOSE_LEASE_SECONDS, WATCHER.TERMINAL_HELPER_TIMEOUT_SECONDS)
+        self.assertEqual(result["status"], "final-delivery-indeterminate")
+        current = WATCHER.load_json(self.state_path, {})["active_cards"]["run-1"]
+        self.assertEqual(current["status"], "failed")
+        self.assertEqual(current["terminal_delivery_state"], "indeterminate")
+        self.assertEqual(published, [("done", False), ("error", True)])
+        self.assertEqual(lifecycle.read_work(receipt["workId"])["deliveryState"], "indeterminate")
+
     def test_fenced_terminal_attempt_releases_ui_close_lease(self) -> None:
         lifecycle = self.lifecycle()
         receipt = self.working_receipt(lifecycle, tier=3)

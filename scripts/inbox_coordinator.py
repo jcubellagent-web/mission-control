@@ -51,6 +51,7 @@ LOCK_PATH = PRIVATE_DIR / "jobs.lock"
 TELEMETRY_PATH = Path(os.environ.get("JOSH_INBOX_COORDINATOR_TELEMETRY", str(ROOT / "data" / "inbox-coordinator-telemetry.jsonl")))
 CONTROL_TOWER_AGENT = "josh2"
 DEFAULT_TIMEOUT_SECONDS = 900
+TELEGRAM_TERMINAL_TIMEOUT_SECONDS = 45
 MAX_RETRIES = 1
 STALE_CARD_SECONDS = 10 * 60
 DEDUPE_WINDOW_SECONDS = 10 * 60
@@ -2392,7 +2393,10 @@ def deliver_result(job_id: str, snapshot: dict[str, Any], route: dict[str, Any],
         input=final_html,
         capture_output=True,
         text=True,
-        timeout=30,
+        # The gateway may first drain one in-flight heartbeat under the
+        # canonical per-card lock, then spend its own bounded terminal API
+        # budget. Keep the coordinator deadline outside that inner envelope.
+        timeout=TELEGRAM_TERMINAL_TIMEOUT_SECONDS,
         check=False,
     )
     if proc.returncode != 0:
