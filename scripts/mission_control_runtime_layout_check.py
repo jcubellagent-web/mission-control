@@ -260,10 +260,29 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
       animated: auraAnimationName !== 'none' || presenceAnimationName !== 'none' || memoryAnimationName !== 'none',
     };
   });
-  const liveWorkAgents = [...document.querySelectorAll('.brain-hero.is-flight-deck .agent-hero-card')].map((element) => ({
-    agent: String(element.getAttribute('data-agent') || ''),
-    working: element.getAttribute('data-agent-working') === 'true',
-  }));
+  const liveWorkAgents = [...document.querySelectorAll('.brain-hero.is-flight-deck .agent-hero-card')].map((element) => {
+    const modelChip = element.querySelector('.agent-controller-model');
+    const workerModels = [...element.querySelectorAll('.agent-worker-model')];
+    const workerOverflow = element.querySelector('.agent-worker-overflow');
+    const header = element.querySelector('header');
+    return {
+      agent: String(element.getAttribute('data-agent') || ''),
+      working: element.getAttribute('data-agent-working') === 'true',
+      modelFamily: String(element.getAttribute('data-model-family') || ''),
+      modelVerified: element.getAttribute('data-model-verified') === 'true',
+      modelLabel: String(modelChip?.textContent || '').trim(),
+      modelChipFamily: String(modelChip?.getAttribute('data-model-family') || ''),
+      modelChipVerified: modelChip?.getAttribute('data-model-verified') === 'true',
+      workerCount: Number(element.getAttribute('data-worker-count') || 0),
+      visibleWorkerCount: workerModels.length,
+      workerFamilies: workerModels.map((worker) => String(worker.getAttribute('data-model-family') || '')),
+      workerLabels: workerModels.map((worker) => String(worker.getAttribute('aria-label') || '').trim()),
+      workerStaleStates: workerModels.map((worker) => String(worker.getAttribute('data-worker-stale') || '')),
+      workerOverflow: String(workerOverflow?.textContent || '').trim(),
+      headerOverflowX: header ? round(Math.max(0, header.scrollWidth - header.clientWidth)) : null,
+      headerOverflowY: header ? round(Math.max(0, header.scrollHeight - header.clientHeight)) : null,
+    };
+  });
   const atlasRoot = document.querySelector('#brain-atlas');
   const atlasRootRect = atlasRoot ? atlasRoot.getBoundingClientRect() : null;
   const atlasRegion = (name, graphSelector, primarySelector, secondarySelector, layerSelector = '', fillAnchorSelector = '') => {
@@ -1221,6 +1240,46 @@ def validate_control_tower_layout(
         failures.append(f"{label}: Brain Atlas exposes {len(atlas_agent_nodes)} agent presence nodes (requires 4)")
     if len(live_work_agents) != 4:
         failures.append(f"{label}: Live Work exposes {len(live_work_agents)} agent presence cards (requires 4)")
+    supported_model_families = {"codex", "antigravity", "ollama", "grok"}
+    verified_model_labels = {"GPT", "Gemini", "GLM", "Ollama", "Grok"}
+    for card in live_work_agents:
+        if not isinstance(card, dict):
+            failures.append(f"{label}: Live Work model identity is malformed")
+            continue
+        agent = str(card.get("agent") or "unknown")
+        family = str(card.get("modelFamily") or "")
+        model_label = str(card.get("modelLabel") or "")
+        if card.get("modelVerified") is True:
+            if family not in supported_model_families:
+                failures.append(f"{label}: {agent} verified model family is {family or 'missing'}")
+            if str(card.get("modelChipFamily") or "") != family or card.get("modelChipVerified") is not True:
+                failures.append(f"{label}: {agent} controller model chip disagrees with its verified route")
+            if not any(model_label.startswith(expected) for expected in verified_model_labels):
+                failures.append(f"{label}: {agent} verified model chip lacks a readable model label")
+        else:
+            if family != "unverified" or card.get("modelChipVerified") is True:
+                failures.append(f"{label}: {agent} unverified route is styled as verified")
+            if not model_label.startswith("Unverified model"):
+                failures.append(f"{label}: {agent} unverified route lacks an explicit neutral label")
+        worker_count = int(_number(card.get("workerCount"), missing=-1.0))
+        visible_worker_count = int(_number(card.get("visibleWorkerCount"), missing=-1.0))
+        worker_families = card.get("workerFamilies") if isinstance(card.get("workerFamilies"), list) else []
+        worker_labels = card.get("workerLabels") if isinstance(card.get("workerLabels"), list) else []
+        worker_stale_states = card.get("workerStaleStates") if isinstance(card.get("workerStaleStates"), list) else []
+        if worker_count < 0 or visible_worker_count < 0 or visible_worker_count > 3 or visible_worker_count > worker_count:
+            failures.append(f"{label}: {agent} worker-model count/overflow contract is invalid")
+        if len(worker_families) != visible_worker_count or any(str(value) not in supported_model_families for value in worker_families):
+            failures.append(f"{label}: {agent} worker model family is missing or unsupported")
+        if len(worker_labels) != visible_worker_count or any(not str(value).startswith("Worker · ") for value in worker_labels):
+            failures.append(f"{label}: {agent} worker model icon lacks an accessible label")
+        if len(worker_stale_states) != visible_worker_count or any(str(value) not in {"true", "false"} for value in worker_stale_states):
+            failures.append(f"{label}: {agent} worker model icon lacks heartbeat freshness state")
+        hidden_worker_count = max(0, worker_count - visible_worker_count)
+        expected_overflow = f"+{hidden_worker_count}" if hidden_worker_count else ""
+        if str(card.get("workerOverflow") or "") != expected_overflow:
+            failures.append(f"{label}: {agent} worker overflow indicator is inconsistent")
+        if _number(card.get("headerOverflowX"), missing=0.0) > 1 or _number(card.get("headerOverflowY"), missing=0.0) > 1:
+            failures.append(f"{label}: {agent} controller/model line overflows")
     atlas_working = sorted(
         str(node.get("agent") or "")
         for node in atlas_agent_nodes
@@ -1813,10 +1872,10 @@ def self_test() -> int:
                 {"agent": "jain", "layer": "memory", "working": False, "workState": "quiet", "memoryState": "idle", "workClass": False, "memoryClass": False, "memoryReceiptVisible": False, "auraAnimationName": "none", "presenceAnimationName": "none", "memoryAnimationName": "none", "workAnimated": False, "memoryAnimated": False, "animated": False},
             ],
             "liveWorkAgents": [
-                {"agent": "joshex", "working": False},
-                {"agent": "josh2", "working": True},
-                {"agent": "jaimes", "working": False},
-                {"agent": "jain", "working": False},
+                {"agent": "joshex", "working": False, "modelFamily": "unverified", "modelVerified": False, "modelLabel": "Unverified model route pending", "modelChipFamily": "unverified", "modelChipVerified": False, "workerCount": 0, "visibleWorkerCount": 0, "workerFamilies": [], "workerLabels": [], "workerStaleStates": [], "workerOverflow": "", "headerOverflowX": 0, "headerOverflowY": 0},
+                {"agent": "josh2", "working": True, "modelFamily": "codex", "modelVerified": True, "modelLabel": "GPT codex/gpt-5.6-terra", "modelChipFamily": "codex", "modelChipVerified": True, "workerCount": 1, "visibleWorkerCount": 1, "workerFamilies": ["ollama"], "workerLabels": ["Worker · GLM · glm-5.2:cloud · active"], "workerStaleStates": ["false"], "workerOverflow": "", "headerOverflowX": 0, "headerOverflowY": 0},
+                {"agent": "jaimes", "working": False, "modelFamily": "unverified", "modelVerified": False, "modelLabel": "Unverified model route pending", "modelChipFamily": "unverified", "modelChipVerified": False, "workerCount": 0, "visibleWorkerCount": 0, "workerFamilies": [], "workerLabels": [], "workerStaleStates": [], "workerOverflow": "", "headerOverflowX": 0, "headerOverflowY": 0},
+                {"agent": "jain", "working": False, "modelFamily": "unverified", "modelVerified": False, "modelLabel": "Unverified model route pending", "modelChipFamily": "unverified", "modelChipVerified": False, "workerCount": 0, "visibleWorkerCount": 0, "workerFamilies": [], "workerLabels": [], "workerStaleStates": [], "workerOverflow": "", "headerOverflowX": 0, "headerOverflowY": 0},
             ],
             "workingAgentCount": 1,
         },

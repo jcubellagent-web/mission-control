@@ -101,10 +101,10 @@ def valid_kiosk_legibility_measurements() -> dict[str, object]:
                 {"agent": "jain", "layer": "memory", "working": False, "workState": "quiet", "memoryState": "idle", "workClass": False, "memoryClass": False, "memoryReceiptVisible": False, "auraAnimationName": "none", "presenceAnimationName": "none", "memoryAnimationName": "none", "workAnimated": False, "memoryAnimated": False, "animated": False},
             ],
             "liveWorkAgents": [
-                {"agent": "joshex", "working": False},
-                {"agent": "josh2", "working": True},
-                {"agent": "jaimes", "working": False},
-                {"agent": "jain", "working": False},
+                {"agent": "joshex", "working": False, "modelFamily": "unverified", "modelVerified": False, "modelLabel": "Unverified model route pending", "modelChipFamily": "unverified", "modelChipVerified": False, "workerCount": 0, "visibleWorkerCount": 0, "workerFamilies": [], "workerLabels": [], "workerStaleStates": [], "workerOverflow": "", "headerOverflowX": 0, "headerOverflowY": 0},
+                {"agent": "josh2", "working": True, "modelFamily": "codex", "modelVerified": True, "modelLabel": "GPT codex/gpt-5.6-terra", "modelChipFamily": "codex", "modelChipVerified": True, "workerCount": 1, "visibleWorkerCount": 1, "workerFamilies": ["antigravity"], "workerLabels": ["Worker · Gemini · gemini-3.1-pro · active"], "workerStaleStates": ["false"], "workerOverflow": "", "headerOverflowX": 0, "headerOverflowY": 0},
+                {"agent": "jaimes", "working": False, "modelFamily": "unverified", "modelVerified": False, "modelLabel": "Unverified model route pending", "modelChipFamily": "unverified", "modelChipVerified": False, "workerCount": 0, "visibleWorkerCount": 0, "workerFamilies": [], "workerLabels": [], "workerStaleStates": [], "workerOverflow": "", "headerOverflowX": 0, "headerOverflowY": 0},
+                {"agent": "jain", "working": False, "modelFamily": "unverified", "modelVerified": False, "modelLabel": "Unverified model route pending", "modelChipFamily": "unverified", "modelChipVerified": False, "workerCount": 0, "visibleWorkerCount": 0, "workerFamilies": [], "workerLabels": [], "workerStaleStates": [], "workerOverflow": "", "headerOverflowX": 0, "headerOverflowY": 0},
             ],
             "workingAgentCount": 1,
         },
@@ -835,6 +835,34 @@ def test_layout_rejects_live_work_and_atlas_presence_mismatch() -> None:
     failures = runtime_layout.validate_control_tower_layout(measurements, label="reference-2048")
 
     assert any("do not match Live Work working agents" in failure for failure in failures)
+
+
+def test_layout_rejects_unverified_controller_disguised_as_verified() -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    memory = measurements["memory"]
+    assert isinstance(memory, dict)
+    board = memory["liveWorkAgents"]
+    assert isinstance(board, list)
+    card = next(row for row in board if row.get("agent") == "joshex")
+    card.update({"modelFamily": "codex", "modelLabel": "GPT gpt-5.6", "modelChipVerified": True})
+
+    failures = runtime_layout.validate_control_tower_layout(measurements, label="reference-2048")
+
+    assert any("unverified route is styled as verified" in failure for failure in failures)
+
+
+def test_layout_rejects_worker_without_accessible_model_label() -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    memory = measurements["memory"]
+    assert isinstance(memory, dict)
+    board = memory["liveWorkAgents"]
+    assert isinstance(board, list)
+    card = next(row for row in board if row.get("agent") == "josh2")
+    card["workerLabels"] = [""]
+
+    failures = runtime_layout.validate_control_tower_layout(measurements, label="reference-2048")
+
+    assert any("worker model icon lacks an accessible label" in failure for failure in failures)
 
 
 def test_layout_accepts_exact_live_path_without_animation_in_reduced_motion() -> None:

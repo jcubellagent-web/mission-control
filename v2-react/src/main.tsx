@@ -4,7 +4,7 @@ import { createRoot } from "react-dom/client";
 import { AlertTriangle, ArrowLeftRight, ArrowUp, BookOpen, Bot, Braces, CheckCircle2, CircleHelp, ClipboardList, Coins, DollarSign, Download, ExternalLink, EyeOff, Gauge, GitBranch, Moon, Radio, RefreshCw, ShieldCheck, Sparkles, Sun, Timer, TrendingDown, UserRoundCheck, WalletCards } from "lucide-react";
 import { invalidateMissionControlSidecars, loadMissionControl, subscribeMissionControlRealtime } from "./data";
 import { PRIORITY_JOB_RULES, SORARE_DAILY_GROUPS, SORARE_GENERAL_PATTERN, type PriorityJobKey, type SorareGroupKey } from "./priorityJobs";
-import { CANONICAL_ROUTE_ORDER, CANONICAL_ROUTES, routeCssProperties, routeForAgentStatus, routeForProvider, verifiedRouteForAgentStatus } from "./routeIdentity";
+import { CANONICAL_ROUTE_ORDER, CANONICAL_ROUTES, liveWorkModelLabel, routeCssProperties, routeForAgentStatus, routeForProvider, verifiedRouteForAgentStatus } from "./routeIdentity";
 import type { ActiveModelRoute, AgenticCryptoWallet, AgentId, AgentStatus, MissionControlState, SignalItem, TodayJobOccurrence, TodayJobOutcome, TodayJobsMeta } from "./types";
 import "./styles.css";
 
@@ -15,6 +15,8 @@ const AGENTS: Record<AgentId, { label: string; role: string; roleBadge: string }
   jain: { label: "J.A.I.N", role: "Support and disaster-recovery agent", roleBadge: "Support/DR" },
 };
 const HERO_AGENT_ORDER: AgentId[] = ["joshex", "josh2", "jaimes", "jain"];
+const MAX_VISIBLE_AGENT_WORKERS = 3;
+const AGENT_WORKER_STALE_MS = 90_000;
 
 type AttentionTarget = "brain-feed" | "today-jobs";
 type WorkState = "working" | "waiting" | "blocked" | "ready" | "done" | "quiet";
@@ -1432,6 +1434,7 @@ function BrainHero({
                 agent={agent}
                 liveWork={liveWork}
                 idleContext={idleContext}
+                activeModelRoutes={state.activeModelRoutes || []}
                 changed={Boolean(liveCues.rows[cueRowKey("agent", agent)])}
               />
             );
@@ -4774,11 +4777,13 @@ function AgentHeroCard({
   agent,
   liveWork,
   idleContext,
+  activeModelRoutes,
   changed,
 }: {
   agent: AgentId;
   liveWork: AgentLiveWorkPresentation;
   idleContext: AgentIdleContext;
+  activeModelRoutes: ActiveModelRoute[];
   changed?: boolean;
 }) {
   const { status, activeWork, activeFocus, visualState } = liveWork;
@@ -4787,6 +4792,30 @@ function AgentHeroCard({
   const freshness = freshnessClass(status.updated_at);
   const verifiedRoute = verifiedRouteForAgentStatus(status);
   const route = verifiedRoute || routeForAgentStatus(status);
+  const controllerModelLabel = verifiedRoute ? liveWorkModelLabel(verifiedRoute, status.model) : "Unverified model";
+  const workerRoutes = activeModelRoutes
+    .filter((candidate) => {
+      const worker = candidate as ActiveModelRoute & {
+        executionRole?: "controller" | "worker";
+        controllerWorkId?: string;
+        controllerRunId?: string;
+      };
+      return worker.ownerAgent === agent
+        && worker.routeVerified === true
+        && worker.executionRole === "worker"
+        && worker.controllerWorkId === status.work_id
+        && worker.controllerRunId === status.run_id
+        && (!worker.leaseUntil || timeValue(worker.leaseUntil) > Date.now());
+    })
+    .filter((worker, index, rows) => rows.findIndex((candidate) => (
+      candidate.workId === worker.workId
+      && candidate.runId === worker.runId
+      && candidate.modelFamily === worker.modelFamily
+      && candidate.modelId === worker.modelId
+    )) === index)
+    .sort((left, right) => timeValue(right.updatedAt) - timeValue(left.updatedAt));
+  const visibleWorkerRoutes = workerRoutes.slice(0, MAX_VISIBLE_AGENT_WORKERS);
+  const hiddenWorkerCount = Math.max(0, workerRoutes.length - visibleWorkerRoutes.length);
   const activeWorkFresh = activeWork?.state === "working" && isFreshActiveTimestamp(activeWork.updated_at);
   const activeWorkDetail = activeWorkFresh ? activeWork : undefined;
   const idleBriefRows = [
@@ -4833,6 +4862,9 @@ function AgentHeroCard({
       className={`agent-hero-card ${agentClass(agent)} ${freshness} ${statusClass(status.status)} is-state-${visualState} ${activeFocus ? "is-working-focus" : "is-up-next-focus"} ${verifiedRoute ? "has-verified-route" : "is-route-pending"}${changedRowClass(changed)}`}
       data-agent={agent}
       data-agent-working={visualState === "working" ? "true" : "false"}
+      data-model-family={verifiedRoute?.id || "unverified"}
+      data-model-verified={verifiedRoute ? "true" : "false"}
+      data-worker-count={workerRoutes.length}
       style={{
         "--agent-pulse-speed": `${pulseSpeed}s`,
         "--agent-rail-speed": `${railSpeed}s`,
@@ -4847,6 +4879,45 @@ function AgentHeroCard({
         <span className="agent-name-lockup">
           <b className="agent-role-badge">{AGENTS[agent].roleBadge}</b>
           <strong>{AGENTS[agent].label}</strong>
+          <span className="agent-model-stack">
+            <span
+              className={`agent-controller-model ${verifiedRoute ? "is-verified" : "is-unverified"}`}
+              data-model-family={verifiedRoute?.id || "unverified"}
+              data-model-verified={verifiedRoute ? "true" : "false"}
+              title={verifiedRoute ? `${controllerModelLabel} · ${status.model || route.providerLabel}` : "No launcher-verified runtime model is active."}
+            >
+              <i aria-hidden="true" />
+              <b>{controllerModelLabel}</b>
+              <span>{missionText(verifiedRoute ? (status.model || route.providerLabel) : "route pending")}</span>
+            </span>
+            {workerRoutes.length ? (
+              <span className="agent-worker-cluster" aria-label={`${AGENTS[agent].label} active model workers`}>
+                <i className="agent-worker-connector" aria-hidden="true" />
+                {visibleWorkerRoutes.map((worker) => {
+                  const workerRoute = CANONICAL_ROUTES[worker.modelFamily];
+                  const workerLabel = liveWorkModelLabel(workerRoute, worker.modelId);
+                  const stale = Date.now() - timeValue(worker.updatedAt) > AGENT_WORKER_STALE_MS;
+                  const accessibleLabel = `Worker · ${workerLabel} · ${worker.modelId} · ${stale ? "stale heartbeat" : "active"}`;
+                  return (
+                    <span
+                      key={`${worker.workId}:${worker.runId}:${worker.modelFamily}:${worker.modelId}`}
+                      className={`agent-worker-model is-${worker.modelFamily}${stale ? " is-stale" : ""}`}
+                      data-model-family={worker.modelFamily}
+                      data-worker-stale={stale ? "true" : "false"}
+                      role="img"
+                      tabIndex={0}
+                      aria-label={accessibleLabel}
+                      title={accessibleLabel}
+                      style={{ "--worker-route-color": workerRoute.color } as React.CSSProperties}
+                    >
+                      <Bot aria-hidden="true" />
+                    </span>
+                  );
+                })}
+                {hiddenWorkerCount ? <span className="agent-worker-overflow" aria-label={`${hiddenWorkerCount} more active model workers`}>+{hiddenWorkerCount}</span> : null}
+              </span>
+            ) : null}
+          </span>
         </span>
         <em title={`Source: ${status.source || "Josh 2.0 local sidecar"}`}>
           {agentOperatingState(status)} · {ageLabel(status.updated_at)}
@@ -4881,7 +4952,7 @@ function AgentHeroCard({
       <div className="agent-route-label" title={verifiedRoute ? `${route.providerLabel}: ${route.description}` : "No verified runtime route is active for this work item."}>
         <span aria-hidden="true" />
         <div>
-          <strong>{verifiedRoute ? route.label : "Route pending"}</strong>
+          <strong>{verifiedRoute ? controllerModelLabel : "Route pending"}</strong>
           <em>{missionText(verifiedRoute ? (status.model || route.providerLabel) : "Awaiting route")}</em>
         </div>
       </div>

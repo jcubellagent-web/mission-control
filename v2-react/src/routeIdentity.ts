@@ -89,6 +89,13 @@ export function verifiedRouteForAgentStatus(status: AgentStatus): CanonicalRoute
   return id ? CANONICAL_ROUTES[id] : null;
 }
 
+export function liveWorkModelLabel(route: CanonicalRoute, modelId?: string | null): string {
+  if (route.id === "codex") return "GPT";
+  if (route.id === "antigravity") return "Gemini";
+  if (route.id === "ollama") return /\bglm(?:[-_.\s]|$)/i.test(String(modelId || "")) ? "GLM" : "Ollama";
+  return "Grok";
+}
+
 export function routeForProvider(provider: Record<string, unknown>): CanonicalRoute | null {
   const providerIdentity = routeText([provider.id, provider.label, provider.provider]);
   if (/\b(?:openrouter|anthropic|claude)\b/.test(providerIdentity)) return null;

@@ -13787,6 +13787,133 @@ a:focus-visible,
   }
 }
 
+/* Control Tower v10 — verified model identity and nested worker routes. */
+.brain-hero.is-flight-deck .agent-model-stack {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.brain-hero.is-flight-deck .agent-controller-model {
+  --controller-model-color: #7892a3;
+  display: inline-grid;
+  grid-template-columns: 7px auto minmax(0, 1fr);
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  max-width: 100%;
+  height: 18px;
+  padding: 0 6px;
+  border: 1px solid color-mix(in srgb, var(--controller-model-color) 42%, transparent);
+  border-radius: 999px;
+  color: color-mix(in srgb, var(--controller-model-color) 72%, #f4fbff);
+  background: color-mix(in srgb, var(--controller-model-color) 10%, #071726);
+}
+
+.brain-hero.is-flight-deck .agent-controller-model.is-verified {
+  --controller-model-color: var(--route-color);
+}
+
+.brain-hero.is-flight-deck .agent-controller-model > i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--controller-model-color);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--controller-model-color) 62%, transparent);
+}
+
+.brain-hero.is-flight-deck .agent-controller-model > b,
+.brain-hero.is-flight-deck .agent-controller-model > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.brain-hero.is-flight-deck .agent-controller-model > b {
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.brain-hero.is-flight-deck .agent-controller-model > span {
+  font-size: 8px;
+  font-weight: 750;
+  opacity: .78;
+}
+
+.brain-hero.is-flight-deck .agent-controller-model.is-unverified {
+  color: #a9bdc9;
+}
+
+.brain-hero.is-flight-deck .agent-worker-cluster {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 4px;
+  padding-left: 10px;
+}
+
+.brain-hero.is-flight-deck .agent-worker-connector {
+  position: absolute;
+  left: 1px;
+  width: 7px;
+  height: 10px;
+  border-bottom: 1px solid rgba(158, 188, 205, .42);
+  border-left: 1px solid rgba(158, 188, 205, .42);
+  border-radius: 0 0 0 4px;
+}
+
+.brain-hero.is-flight-deck .agent-worker-model {
+  display: inline-grid;
+  width: 18px;
+  height: 18px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--worker-route-color) 55%, transparent);
+  border-radius: 50%;
+  color: var(--worker-route-color);
+  background: color-mix(in srgb, var(--worker-route-color) 13%, #071726);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--worker-route-color) 24%, transparent);
+}
+
+.brain-hero.is-flight-deck .agent-worker-model svg {
+  width: 11px;
+  height: 11px;
+  stroke-width: 2.3;
+}
+
+.brain-hero.is-flight-deck .agent-worker-model.is-stale {
+  opacity: .42;
+  box-shadow: none;
+}
+
+.brain-hero.is-flight-deck .agent-worker-model:focus-visible {
+  outline: 2px solid #f4fbff;
+  outline-offset: 2px;
+}
+
+.brain-hero.is-flight-deck .agent-worker-overflow {
+  min-width: 20px;
+  color: #b8cbd6;
+  font-size: 8px;
+  font-weight: 900;
+  text-align: center;
+}
+
+@media (min-width: 1361px) and (min-height: 850px) {
+  .brain-hero.is-flight-deck .agent-name-lockup {
+    gap: 2px !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-model-stack {
+    margin-top: 1px;
+  }
+}
+
 @media (max-width: 980px) {
   .app-shell.hero-shell {
     width: calc(100vw - 14px) !important;

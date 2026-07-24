@@ -41,6 +41,7 @@ def isolated_guard(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(GUARD, "STATE_DIR", tmp_path / "state")
     monkeypatch.setattr(GUARD, "LOCK_PATH", tmp_path / "lease.json")
     monkeypatch.setattr(GUARD, "BACKUP_ROOT", tmp_path / "backups")
+    monkeypatch.setattr(GUARD, "PUSH_POLICY_PATH", tmp_path / "push-policy.json")
     monkeypatch.setattr(GUARD, "source_changes", lambda: [])
 
 
@@ -105,6 +106,43 @@ def test_begin_records_an_immutable_source_snapshot(tmp_path: Path, monkeypatch:
         {"path": "missing.txt", "existedAtBegin": False},
     ]
     assert (Path(payload["backup"]) / "existing.txt").read_text() == "before\n"
+
+
+def test_begin_captures_narrow_standing_push_approval(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    GUARD.PUSH_POLICY_PATH.write_text(json.dumps({
+        "schemaVersion": 1,
+        "agents": {
+            "joshex": {
+                "enabled": True,
+                "authorizedBy": "Josh",
+                "authorizationRef": "user-standing-authorization-2026-07-24",
+                "scope": "validated-control-tower-origin-main",
+            }
+        },
+    }))
+    monkeypatch.setattr(GUARD, "SOURCE_PATHS", ())
+    monkeypatch.setattr(GUARD, "run", lambda *_args, **_kwargs: type("Process", (), {"stdout": "abc123\n"})())
+
+    GUARD.begin("joshex", "standing push test")
+
+    payload = json.loads(GUARD.LOCK_PATH.read_text())
+    assert payload["pushApproval"]["standing"] is True
+    assert payload["pushApproval"]["scope"] == "validated-control-tower-origin-main"
+
+
+def test_standing_push_approval_rejects_broader_or_unverified_policy() -> None:
+    GUARD.PUSH_POLICY_PATH.write_text(json.dumps({
+        "agents": {
+            "joshex": {
+                "enabled": True,
+                "authorizedBy": "Josh",
+                "authorizationRef": "too-broad",
+                "scope": "all-production-pushes",
+            }
+        },
+    }))
+
+    assert GUARD.standing_push_approval("joshex") is None
 
 
 def test_extend_snapshot_adds_only_newly_guarded_absent_paths(

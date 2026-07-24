@@ -18,6 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 STATE_DIR = Path.home() / ".openclaw" / "state"
 LOCK_PATH = STATE_DIR / "control-tower-change-lock.json"
 BACKUP_ROOT = Path.home() / ".openclaw" / "backups" / "control-tower-changes"
+PUSH_POLICY_PATH = ROOT / "config" / "control-tower-push-policy.json"
 SOURCE_PATHS = (
     "AGENTS.md",
     ".github/workflows/mission-control-regression.yml",
@@ -83,6 +84,7 @@ SOURCE_PATHS = (
     "scripts/update_mission_control.py",
     "scripts/control_tower_path_guard.py",
     "scripts/control_tower_change_guard.py",
+    "scripts/control_tower_work_store.py",
     "scripts/control_tower_foreground.py",
     "scripts/codex_remote_manual_lane.py",
     "scripts/memory_registry.py",
@@ -108,6 +110,7 @@ SOURCE_PATHS = (
 )
 PYTHON_COMPILE_PATHS = (
     "scripts/control_tower_change_guard.py",
+    "scripts/control_tower_work_store.py",
     "scripts/codex_remote_manual_lane.py",
     "scripts/ecosystem_health_sweep.py",
     "scripts/ecosystem_qa_benchmark.py",
@@ -144,6 +147,28 @@ PYTHON_COMPILE_PATHS = (
     "hermes-plugins/jaimes-topic17-runtime-owner/__init__.py",
 )
 LEASE_MINUTES = 45
+
+
+def standing_push_approval(agent: str) -> dict | None:
+    """Return a narrow, checked-in standing approval captured at lease start."""
+    try:
+        policy = json.loads(PUSH_POLICY_PATH.read_text())
+    except (FileNotFoundError, json.JSONDecodeError, OSError):
+        return None
+    entry = policy.get("agents", {}).get(agent, {}) if isinstance(policy, dict) else {}
+    if not isinstance(entry, dict) or entry.get("enabled") is not True:
+        return None
+    if entry.get("authorizedBy") != "Josh" or entry.get("scope") != "validated-control-tower-origin-main":
+        return None
+    reference = str(entry.get("authorizationRef") or "").strip()
+    if not reference:
+        return None
+    return {
+        "reference": reference,
+        "recordedAt": iso(),
+        "standing": True,
+        "scope": entry["scope"],
+    }
 
 
 def now() -> dt.datetime:
@@ -302,7 +327,7 @@ def begin(agent: str, objective: str) -> None:
         "startedAt": iso(),
         "expiresAt": iso(now() + dt.timedelta(minutes=LEASE_MINUTES)),
         "ownerPid": os.getppid(),
-        "pushApproval": None,
+        "pushApproval": standing_push_approval(agent),
         "baseCommit": run(["git", "rev-parse", "HEAD"]).stdout.strip(),
         "backup": str(backup),
         "sourceSnapshot": snapshot,
