@@ -179,6 +179,14 @@ Dedicated-host autonomy:
 - Do not ask for user approval solely because a task needs to use the dedicated host's shell, filesystem, browser, local app controls, or service manager. Execute on the proper dedicated host and keep Brain Feed current.
 - Keep explicit approval only for truly external or irreversible actions unless a standing policy already pre-approves that workflow: purchases, public posts/messages, account deletion, destructive private-account changes, production pushes, or fantasy/Sorare roster or lineup changes outside the accepted standing policy.
 - Onchain and wallet actions are always proposal-first. Base MCP, Base Account, wallet, swap, trade, bridge, mint, stake, claim, revoke, approval, transfer, or portfolio-management work may be researched, simulated, and drafted by agents, but signing/broadcasting/submitting requires Josh's explicit wallet/Base Account approval. Never store private keys, seed phrases, raw wallet secrets, raw calldata, cookies, OAuth payloads, or tokens in Control Tower surfaces.
+- All four agent lanes use `scripts/agent_wallet_signer.py` and
+  `docs/shared-wallet-signer.md` for the managed EVM wallet. The shared client
+  routes requests to JAIMES's Keychain-isolated one-shot signer; agents never
+  copy or receive the key or raw signed transaction. Status, validation, and the
+  non-broadcast canary are available to JOSHeX, Josh 2.0, JAIMES, and J.A.I.N.
+  A real signature requires a matching, short-lived Josh approval artifact, and
+  broadcasting remains a separate explicitly approved action.
+#JAIMES: agents share the signer broker rather than wallet custody, preserving one-time approval and non-broadcast defaults.
 - Crypto and portfolio-growth work is action-first execution support, not
   refusal mode. When Josh asks for crypto, wallet, profit-target, high-risk DeFi,
   or trade-strategy work, assume he understands the risk profile and wants
