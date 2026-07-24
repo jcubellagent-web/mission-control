@@ -1043,7 +1043,7 @@ def canonical_ollama_allowance_limits() -> dict[str, Any] | None:
         proc = subprocess.run(
             [
                 "ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=5",
-                os.environ.get("CONTROL_TOWER_CANONICAL_HOST", "josh2"),
+                os.environ.get("CONTROL_TOWER_CANONICAL_HOST", "josh2.0@josh2"),
                 "python3", "-c", remote_script,
             ],
             capture_output=True,

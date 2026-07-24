@@ -418,6 +418,35 @@ def test_stale_local_ollama_quota_uses_canonical_allowlisted_projection(tmp_path
     assert "error" in reason
 
 
+def test_canonical_ollama_lookup_uses_control_tower_account(monkeypatch) -> None:
+    route = load_module("agent_route_glm_canonical_host", ROOT / "scripts" / "agent_route.py")
+    monkeypatch.setattr(route.Path, "home", classmethod(lambda cls: Path("/Users/jc_agent")))
+    commands = []
+
+    class Result:
+        returncode = 0
+        stderr = ""
+        stdout = json.dumps({
+            "available": True,
+            "status": "ready",
+            "quotaTelemetryStatus": "fresh",
+            "codexbarUpdatedAt": "2026-07-24T23:05:00Z",
+            "usageWindows": [{"label": "Weekly", "remainingPercent": 98.7}],
+            "unexpectedIdentity": "drop-me",
+        })
+
+    def fake_run(command, **_kwargs):
+        commands.append(command)
+        return Result()
+
+    monkeypatch.setattr(route.subprocess, "run", fake_run)
+    limits = route.canonical_ollama_allowance_limits()
+
+    assert commands[0][commands[0].index("ConnectTimeout=5") + 1] == "josh2.0@josh2"
+    assert limits is not None
+    assert "unexpectedIdentity" not in limits
+
+
 def test_surplus_ollama_quota_expands_glm_first_stop_weighting(monkeypatch) -> None:
     route = load_module("agent_route_glm_surplus", ROOT / "scripts" / "agent_route.py")
     args = model_args()
