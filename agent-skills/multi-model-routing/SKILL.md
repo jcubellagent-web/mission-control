@@ -14,8 +14,12 @@ final answer.
 
 1. Classify privacy before routing. Cloud specialists receive only
    dashboard-safe or explicitly sanitized context.
-2. Read the current Codex allowance from `data/modelUsage.json`. Weekly remaining
-   at or below 20% means `conserve`; zero means `exhausted`.
+2. Read the current Codex allowance and `codexResetCredits.availableCount` from
+   `data/modelUsage.json`. A positive weekly balance plus at least one full reset
+   credit means `normal`; do not conserve merely because the current window is
+   below 20% or projected to run out early. Zero means `exhausted` until Josh
+   applies a reset. Once no reset credits remain, weekly remaining at or below
+   20% or a projected early exhaustion means `conserve`.
    Read Antigravity and Ollama allowance from the same CodexBar projection when
    available. A quota-cookie failure is not an inference failure: require a
    separate verified runtime health result and label exact allowance unknown.

@@ -23,8 +23,14 @@ def allowance_args() -> SimpleNamespace:
     return SimpleNamespace(codex_allowance="auto")
 
 
-def write_usage(path: Path, remaining: float, will_last_to_reset: bool | None = None) -> None:
+def write_usage(
+    path: Path,
+    remaining: float,
+    will_last_to_reset: bool | None = None,
+    reset_credits: int = 0,
+) -> None:
     limits = {
+        "codexResetCredits": {"availableCount": reset_credits},
         "usageWindows": [
             {"label": "Weekly", "remainingPercent": remaining},
             {"label": "Codex Spark Weekly", "remainingPercent": 100},
@@ -54,6 +60,36 @@ def test_exact_codexbar_allowance_drives_conservation(tmp_path, monkeypatch) -> 
     assert route.codex_allowance_mode(allowance_args()) == "exhausted"
     write_usage(usage, 80)
     assert route.codex_allowance_mode(allowance_args()) == "normal"
+
+
+def test_available_reset_credit_defers_codex_conservation(tmp_path, monkeypatch) -> None:
+    route = load_module("agent_route_reset_credit", ROOT / "scripts" / "agent_route.py")
+    usage = tmp_path / "usage.json"
+    budgets = tmp_path / "budgets.json"
+    budgets.write_text(json.dumps({"policy": {"codexAllowanceMode": "auto"}}))
+    monkeypatch.setattr(route, "MODEL_USAGE_PATH", usage)
+    monkeypatch.setattr(route, "BUDGETS_PATH", budgets)
+    monkeypatch.delenv("CODEX_ALLOWANCE_MODE", raising=False)
+
+    write_usage(usage, 13, will_last_to_reset=False, reset_credits=1)
+    assert route.codex_allowance_mode(allowance_args()) == "normal"
+    write_usage(usage, 29, will_last_to_reset=False, reset_credits=1)
+    assert route.codex_allowance_mode(allowance_args()) == "normal"
+    write_usage(usage, 29, will_last_to_reset=False, reset_credits=0)
+    assert route.codex_allowance_mode(allowance_args()) == "conserve"
+    write_usage(usage, 0, will_last_to_reset=True, reset_credits=1)
+    assert route.codex_allowance_mode(allowance_args()) == "exhausted"
+
+
+def test_explicit_allowance_overrides_reset_credit_telemetry(tmp_path, monkeypatch) -> None:
+    route = load_module("agent_route_reset_credit_override", ROOT / "scripts" / "agent_route.py")
+    usage = tmp_path / "usage.json"
+    monkeypatch.setattr(route, "MODEL_USAGE_PATH", usage)
+    write_usage(usage, 13, will_last_to_reset=False, reset_credits=1)
+
+    assert route.codex_allowance_mode(SimpleNamespace(codex_allowance="conserve")) == "conserve"
+    monkeypatch.setenv("CODEX_ALLOWANCE_MODE", "exhausted")
+    assert route.codex_allowance_mode(allowance_args()) == "exhausted"
 
 
 def test_codexbar_exhaustion_pace_conserves_before_static_threshold(tmp_path, monkeypatch) -> None:

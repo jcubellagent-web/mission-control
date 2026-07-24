@@ -263,8 +263,12 @@ Josh approved this default policy for Codex-app, Josh 2.0, and JAIMES work:
   reasoning to GPT. The current Codex conversation remains coordinator and final
   integrator; a specialist claim is valid only after an actual verified provider
   result returns.
-- Derive Codex conservation from the exact weekly allowance: at 20% or less,
-  route eligible non-execution work to Gemini, GLM, or Grok first. Never spend a
+- Derive Codex conservation from the exact weekly allowance and full-reset-credit
+  count. While the weekly balance is positive and at least one reset credit is
+  available, keep normal routing even below 20% or when pace predicts early
+  exhaustion. At zero, mark Codex exhausted until Josh applies a reset. Once no
+  reset credits remain, route eligible non-execution work to Gemini, GLM, or Grok
+  first at 20% or less or when pace predicts early exhaustion. Never spend a
   specialist call merely to create artificial balance; match it to the task.
 
 - Use `openai/gpt-5.6-terra` with medium thinking as the default trusted execution route.

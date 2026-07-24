@@ -500,6 +500,16 @@ def allowance_window_will_last(
     return projected_used <= 100.0
 
 
+def available_codex_reset_credits(limits: dict[str, Any]) -> int:
+    credits = limits.get("codexResetCredits") if isinstance(limits, dict) else {}
+    if not isinstance(credits, dict):
+        return 0
+    try:
+        return max(0, int(float(credits.get("availableCount") or 0)))
+    except (TypeError, ValueError):
+        return 0
+
+
 def codex_allowance_mode(args: argparse.Namespace) -> str:
     requested = getattr(args, "codex_allowance", "auto")
     if requested != "auto":
@@ -511,6 +521,7 @@ def codex_allowance_mode(args: argparse.Namespace) -> str:
     #JAIMES: exact CodexBar windows outrank a stale static "normal" policy.
     usage = read_json(MODEL_USAGE_PATH, {})
     limits = ((usage.get("codexbarLimits") or {}).get("codex") or {}) if isinstance(usage, dict) else {}
+    reset_credits_available = available_codex_reset_credits(limits)
     windows = limits.get("usageWindows") if isinstance(limits, dict) else []
     weekly_remaining: Optional[float] = None
     weekly_window: dict[str, Any] | None = None
@@ -529,6 +540,11 @@ def codex_allowance_mode(args: argparse.Namespace) -> str:
     if weekly_remaining is not None:
         if weekly_remaining <= 0:
             return "exhausted"
+        # A full reset credit is unused Codex capacity. Keep normal routing
+        # while the active weekly window is still positive; the credit remains
+        # user-controlled and is never applied automatically.
+        if reset_credits_available > 0:
+            return "normal"
         if weekly_remaining <= 20:
             return "conserve"
 
