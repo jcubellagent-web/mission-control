@@ -8,10 +8,13 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
 CLI = ROOT / "scripts" / "memory_registry.py"
+sys.path.insert(0, str(ROOT / "scripts"))
+import memory_registry  # noqa: E402
 
 
 class MemoryRegistryTest(unittest.TestCase):
@@ -64,6 +67,77 @@ class MemoryRegistryTest(unittest.TestCase):
             "retrieve", "--agent", agent, "--query", "Privacy fixture", "--limit", "20"
         )
         return {str(row["id"]) for row in result["results"]}
+
+    def test_deterministic_sources_keep_entities_sharp_and_trading_snapshots_historical(self) -> None:
+        data = self.folder / "source-data"
+        data.mkdir()
+        (data / "decisions.json").write_text(json.dumps({"decisions": [
+            {
+                "id": "jaimes-decision-20260619-trading-monitor",
+                "title": "Trading monitor: no trade",
+                "detail": "Point-in-time review.",
+                "agent": "jaimes",
+                "time": "2026-06-19T17:37:44Z",
+            },
+            {
+                "id": "joshex-decision-policy",
+                "title": "Keep canonical instructions authoritative",
+                "detail": "Checked-in policy wins.",
+                "agent": "joshex",
+            },
+        ]}), encoding="utf-8")
+        (data / "agent-task-queue.json").write_text('{"tasks": []}', encoding="utf-8")
+        index = data / "semantic-index.json"
+        index.write_text(json.dumps({"nodes": [
+            {"id": "agent:jaimes", "label": "JAIMES", "type": "agent"},
+            {"id": "capability:memory", "label": "memory", "type": "capability"},
+            {"id": "topic:detail", "label": "Detail", "type": "topic"},
+        ]}), encoding="utf-8")
+
+        with (
+            mock.patch.object(memory_registry, "DATA", data),
+            mock.patch.object(memory_registry, "INDEX_PATH", index),
+        ):
+            rows = list(memory_registry.source_rows())
+
+        by_subject = {row["subject"]: row for row in rows}
+        trading = by_subject["Trading monitor: no trade"]
+        self.assertEqual(trading["memory_type"], "episode")
+        self.assertEqual(trading["predicate"], "historical trading decision")
+        self.assertTrue(trading["metadata"]["historicalSnapshot"])
+        self.assertEqual(by_subject["Keep canonical instructions authoritative"]["memory_type"], "decision")
+        self.assertIn("JAIMES", by_subject)
+        self.assertIn("memory", by_subject)
+        self.assertNotIn("Detail", by_subject)
+
+    def test_retrieval_rejects_weak_single_word_tail_matches(self) -> None:
+        target = self.cli(
+            "propose", "--agent", "joshex", "--type", "procedure",
+            "--subject", "Validated agent ecosystem push authority",
+            "--predicate", "authorizes clean source pushes",
+            "--value", "JOSHeX JAIMES and Josh 2.0 may push after validation",
+            "--owner", "Josh", "--visibility", "shared", "--privacy", "dashboard-safe",
+            "--source", "test:sharp-target", "--evidence", "unit test", "--confidence", "1.0",
+        )
+        target_id = self.cli("approve", "--id", target["id"], "--reviewer", "joshex")["recordId"]
+        distractor = self.cli(
+            "propose", "--agent", "joshex", "--type", "episode",
+            "--subject", "Restore agent authorization",
+            "--predicate", "completed",
+            "--value", "Reauthorized a service account",
+            "--owner", "joshex", "--visibility", "shared", "--privacy", "dashboard-safe",
+            "--source", "test:weak-tail", "--evidence", "unit test", "--confidence", "0.92",
+        )
+        distractor_id = self.cli("approve", "--id", distractor["id"], "--reviewer", "joshex")["recordId"]
+
+        result = self.cli(
+            "retrieve", "--agent", "joshex", "--query", "Validated agent ecosystem push authority",
+            "--limit", "5",
+        )
+        ids = {row["id"] for row in result["results"]}
+        self.assertEqual(len(result["results"]), 1)
+        self.assertIn(target_id, ids)
+        self.assertNotIn(distractor_id, ids)
 
     def test_privacy_is_deny_by_default_outside_owner_and_joshex(self) -> None:
         dashboard = self.create_memory("dashboard", privacy="dashboard-safe")

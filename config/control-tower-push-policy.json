@@ -1,12 +1,38 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
+  "repository": "mission-control",
+  "remote": "origin",
+  "branch": "main",
+  "validationRequired": true,
   "agents": {
     "joshex": {
       "enabled": true,
       "authorizedBy": "Josh",
       "authorizedAt": "2026-07-24",
-      "authorizationRef": "user-standing-authorization-2026-07-24",
+      "authorizationRef": "user-standing-agent-ecosystem-push-authorization-2026-07-24",
+      "scope": "validated-control-tower-origin-main"
+    },
+    "jaimes": {
+      "enabled": true,
+      "authorizedBy": "Josh",
+      "authorizedAt": "2026-07-24",
+      "authorizationRef": "user-standing-agent-ecosystem-push-authorization-2026-07-24",
+      "scope": "validated-control-tower-origin-main"
+    },
+    "josh2": {
+      "enabled": true,
+      "authorizedBy": "Josh",
+      "authorizedAt": "2026-07-24",
+      "authorizationRef": "user-standing-agent-ecosystem-push-authorization-2026-07-24",
       "scope": "validated-control-tower-origin-main"
     }
-  }
+  },
+  "exclusions": [
+    "merge",
+    "public-release-or-post",
+    "purchase-or-account-change",
+    "wallet-or-onchain-action",
+    "destructive-external-action",
+    "other-repository-remote-or-branch"
+  ]
 }

@@ -38,6 +38,11 @@ REUSE_REASON_CODES = {
     "conflict",
     "other",
 }
+RETRIEVAL_STOPWORDS = {
+    "a", "an", "and", "are", "as", "at", "be", "by", "for", "from", "how",
+    "in", "is", "it", "of", "on", "or", "that", "the", "this", "to", "was",
+    "what", "when", "where", "which", "who", "why", "with",
+}
 PUBLIC_PRIVACY = {"dashboard-safe", "public"}
 KNOWN_OWNER_PRIVATE_PRIVACY = {
     "agent-private",
@@ -297,6 +302,42 @@ def index_fts(db: sqlite3.Connection, record_id: str, subject: str, predicate: s
     )
 
 
+def retrieval_terms(query: str) -> list[str]:
+    """Return stable, meaningful query terms for FTS and precision filtering."""
+    terms: list[str] = []
+    for token in TOKEN_RE.findall(query):
+        normalized = token.lower()
+        if normalized in RETRIEVAL_STOPWORDS or normalized in terms:
+            continue
+        terms.append(normalized)
+        if len(terms) >= 16:
+            break
+    return terms
+
+
+def retrieval_relevant(row: sqlite3.Row, terms: list[str]) -> bool:
+    """Reject weak OR matches while retaining short and exact lookups."""
+    if not terms:
+        return False
+    searchable = " ".join(
+        str(row[field] or "")
+        for field in ("subject", "predicate", "object_text", "evidence")
+    )
+    tokens = {token.lower() for token in TOKEN_RE.findall(searchable)}
+
+    def matched(term: str) -> bool:
+        if term in tokens:
+            return True
+        return len(term) >= 5 and any(
+            len(token) >= 5 and token[:5] == term[:5]
+            for token in tokens
+        )
+
+    overlap = sum(matched(term) for term in terms)
+    required = 1 if len(terms) == 1 else 2 if len(terms) <= 4 else 3
+    return overlap >= required
+
+
 def upsert_record(
     db: sqlite3.Connection,
     *,
@@ -345,12 +386,21 @@ def upsert_record(
 def source_rows() -> Iterable[dict[str, Any]]:
     decisions = load_json(DATA / "decisions.json", {}).get("decisions", [])
     for row in decisions:
+        title = row.get("title") or "Ecosystem decision"
+        historical_trading_snapshot = bool(
+            re.match(r"^trad(?:e|ing)\s+monitor\b", str(title).strip(), re.IGNORECASE)
+        )
         yield {
-            "memory_type": "decision", "subject": row.get("title") or "Ecosystem decision",
-            "predicate": "decision", "value": row.get("detail") or row.get("status") or "Recorded decision",
+            "memory_type": "episode" if historical_trading_snapshot else "decision",
+            "subject": title,
+            "predicate": "historical trading decision" if historical_trading_snapshot else "decision",
+            "value": row.get("detail") or row.get("status") or "Recorded decision",
             "owner": row.get("agent") or "ecosystem", "visibility": "shared", "privacy": row.get("privacy") or "dashboard-safe",
             "source_path": "data/decisions.json", "source_ref": row.get("id") or "", "confidence": 0.98,
-            "valid_from": row.get("time") or "", "metadata": {"decisionStatus": row.get("status")},
+            "valid_from": row.get("time") or "", "metadata": {
+                "decisionStatus": row.get("status"),
+                "historicalSnapshot": historical_trading_snapshot,
+            },
         }
     tasks = load_json(DATA / "agent-task-queue.json", {}).get("tasks", [])
     for row in tasks:
@@ -365,7 +415,10 @@ def source_rows() -> Iterable[dict[str, Any]]:
         }
     graph = load_json(INDEX_PATH, {})
     for row in graph.get("nodes", []):
-        if row.get("type") not in {"agent", "capability", "topic"}:
+        # Document headings are navigation aids, not durable memories. Index only
+        # concrete agents and capabilities; substantive policies enter through
+        # governed facts, decisions, preferences, and procedures.
+        if row.get("type") not in {"agent", "capability"}:
             continue
         label = row.get("label") or row.get("id")
         yield {
@@ -613,7 +666,7 @@ def forget_source(db: sqlite3.Connection, args: argparse.Namespace) -> dict[str,
 
 def retrieve(db: sqlite3.Connection, args: argparse.Namespace, *, preflight: bool = False) -> dict[str, Any]:
     started = time.perf_counter()
-    terms = [token.lower() for token in TOKEN_RE.findall(args.query)][:16]
+    terms = retrieval_terms(args.query)
     match = " OR ".join(f'"{term}"' for term in terms) if terms else '"__none__"'
     try:
         rows = db.execute(
@@ -627,9 +680,15 @@ def retrieve(db: sqlite3.Connection, args: argparse.Namespace, *, preflight: boo
         if preflight:
             raise
         rows = []
-    visible = [
+    exact_subject_rows = [
         row for row in rows
-        if visibility_allowed(args.agent, row["visibility"], row["privacy"], row["owner"])
+        if retrieval_terms(str(row["subject"] or "")) == terms
+    ]
+    candidate_rows = exact_subject_rows or rows
+    visible = [
+        row for row in candidate_rows
+        if retrieval_relevant(row, terms)
+        and visibility_allowed(args.agent, row["visibility"], row["privacy"], row["owner"])
     ][: args.limit]
     latency = round((time.perf_counter() - started) * 1000, 2)
     ids = [row["id"] for row in visible]

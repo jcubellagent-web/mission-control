@@ -68,7 +68,7 @@ python3 scripts/control_tower_change_guard.py finish --token <token>
 
 This performs the canonical build, data regeneration, regression checks, and host-local kiosk layout screenshot before releasing the lease. If validation fails, keep the lease, repair the issue, and verify again. Use `abort --token <token>` to restore the pre-edit source backup. Production pushes and merges still require Josh approval unless the task explicitly includes that approval.
 
-Standing JOSHeX push authorization (Josh, 2026-07-24): JOSHeX may automatically push a validated Control Tower source commit to `origin/main` after the change guard passes and the source commit is clean. `config/control-tower-push-policy.json` records this narrow authorization so a new JOSHeX lease captures it before edits begin. This does not authorize merges, public releases or posts, purchases, account changes, wallet actions, destructive external actions, or pushes outside this repository and branch.
+Standing validated ecosystem push authorization (Josh, 2026-07-24): JOSHeX, JAIMES, and Josh 2.0 may automatically push a validated source commit to the canonical `mission-control` repository's `origin/main` after the applicable change guard and test gates pass and the source commit is clean. `config/control-tower-push-policy.json` records this narrow authorization so each agent's new lease can capture it before edits begin. This does not authorize merges, public releases or posts, purchases, account changes, wallet actions, destructive external actions, or pushes to another repository, remote, or branch.
 
 Legacy surfaces are not the default:
 
