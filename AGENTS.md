@@ -140,6 +140,18 @@ Control Tower remains the source of truth for live execution, heartbeats, queues
 
 #JAIMES: Linear tracks durable work boundaries; Control Tower remains authoritative for live state and shared edit leases remain mandatory.
 
+## Continuous Ecosystem Maintenance
+
+Use `docs/continuous-maintenance.md` and `config/continuous-maintenance.json` for ongoing ecosystem hygiene. The hourly maintenance portfolio projects append-only proposal history, adaptive refactor discoveries, risk and aging, active WIP, and seven-run reliability readiness into Control Tower.
+
+- Keep automatic source mutation disabled. Automation may discover, classify, prepare a sandbox, run tests, and package rollback evidence; source promotion remains reviewed and lease-gated.
+- Freeze elective maintenance whenever a required reliability gate fails. Security fixes, reliability repairs, and rollbacks may continue.
+- Keep at most three maintenance items in leased, implementing, or verifying state.
+- Preserve proposal history and use one stable proposal ID across lifecycle transitions. Do not create duplicate current work rows for status changes.
+- Major dependencies, medium/high-risk refactors, architecture or contract changes, and protected paths require the review level defined by the checked-in risk policy.
+
+#JAIMES: continuous maintenance earns promotion authority through exact evidence; a clean-looking dashboard never substitutes for seven consecutive six-gate runs.
+
 ## JOSHeX Device Resource Guardrail
 
 JOSHeX runs on Josh's personal MacBook. Treat this device as the trusted coordinator and personal-device specialist, not the default execution host for the agent ecosystem.

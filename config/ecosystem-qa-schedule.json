@@ -193,6 +193,19 @@
       "skipDuringChangeLease": true
     },
     {
+      "id": "maintenance-portfolio-snapshot",
+      "owner": "josh2",
+      "team": "Continuous maintenance portfolio",
+      "activeFrom": "2026-07-24T04:29:00Z",
+      "schedule": {"intervalMinutes": 60, "offset": 8},
+      "command": ["python3", "scripts/continuous_maintenance.py"],
+      "timeoutSeconds": 60,
+      "severity": "p2",
+      "alertAfterFailures": 2,
+      "aggregateHealth": true,
+      "skipDuringChangeLease": true
+    },
+    {
       "id": "daily-refactor-discovery",
       "owner": "josh2",
       "team": "Daily refactor discovery",

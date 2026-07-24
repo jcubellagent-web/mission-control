@@ -16,7 +16,11 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 LEDGER = ROOT / "data" / "ecosystem-proposals.json"
-VALID = {"proposed", "approved", "rejected", "implemented", "superseded"}
+VALID = {
+    "proposed", "approved", "leased", "implementing", "verifying",
+    "implemented", "deferred", "rejected", "superseded",
+}
+RISK_LEVELS = {"low", "medium", "high", "unclassified"}
 
 
 def iso() -> str:
@@ -49,14 +53,30 @@ def proposal_id(title: str) -> str:
     return f"proposal-{dt.datetime.now(dt.timezone.utc):%Y%m%d}-{slug}-{uuid.uuid4().hex[:6]}"
 
 
+def current_rows(rows: list[Any]) -> list[dict[str, Any]]:
+    """Return one latest event per proposal without rewriting ledger history."""
+    grouped: dict[str, list[tuple[int, dict[str, Any]]]] = {}
+    for index, row in enumerate(rows):
+        if isinstance(row, dict) and row.get("id"):
+            grouped.setdefault(str(row["id"]), []).append((index, row))
+    latest: list[dict[str, Any]] = []
+    for events in grouped.values():
+        _index, row = max(events, key=lambda item: (str(item[1].get("updatedAt") or ""), item[0]))
+        latest.append(row)
+    return latest
+
+
 def publish_summary(document: dict[str, Any]) -> None:
-    open_rows = [row for row in document.get("proposals", []) if row.get("status") == "proposed"]
+    open_rows = [
+        row for row in current_rows(document.get("proposals", []))
+        if row.get("status") in {"proposed", "approved", "leased", "implementing", "verifying"}
+    ]
     command = [
         sys.executable, str(ROOT / "scripts" / "agent_publish.py"),
         "--agent", "josh2", "--type", "status", "--status", "info",
         "--title", "Ecosystem proposal ledger updated",
         "--tool", "proposal ledger",
-        "--detail", f"{len(open_rows)} proposal(s) await an explicit decision; publication never implies approval.",
+        "--detail", f"{len(open_rows)} current proposal(s) remain open; publication never implies approval.",
         "--privacy", "dashboard-safe", "--brain-feed",
     ]
     subprocess.run(command, cwd=ROOT, text=True, capture_output=True, timeout=30, check=False)
@@ -69,6 +89,9 @@ def main() -> int:
     parser.add_argument("--owner", default="josh2")
     parser.add_argument("--status", choices=sorted(VALID), default="proposed")
     parser.add_argument("--id")
+    parser.add_argument("--risk", choices=sorted(RISK_LEVELS))
+    parser.add_argument("--area")
+    parser.add_argument("--source-candidate-id")
     parser.add_argument("--publish", action="store_true")
     args = parser.parse_args()
     document = read_json(LEDGER, {"version": 1, "proposals": []})
@@ -76,24 +99,41 @@ def main() -> int:
     if args.title:
         if not args.summary:
             parser.error("--summary is required with --title")
+        timestamp = iso()
         row = {
             "id": args.id or proposal_id(args.title),
             "title": args.title,
             "summary": args.summary,
             "owner": args.owner,
             "status": args.status,
-            "createdAt": iso(),
-            "updatedAt": iso(),
+            "risk": args.risk or "unclassified",
+            "area": args.area or "Reliability",
+            "createdAt": timestamp,
+            "updatedAt": timestamp,
             "privacy": "dashboard-safe",
             "approvalImpliedByPublication": False,
         }
+        if args.source_candidate_id:
+            row["sourceCandidateId"] = args.source_candidate_id
         proposals.append(row)
     elif args.id:
-        matched = next((row for row in proposals if row.get("id") == args.id), None)
-        if not matched:
+        matches = [row for row in proposals if row.get("id") == args.id]
+        if not matches:
             parser.error(f"proposal not found: {args.id}")
-        matched["status"] = args.status
-        matched["updatedAt"] = iso()
+        current = max(matches, key=lambda row: str(row.get("updatedAt") or ""))
+        transition = dict(current)
+        transition["previousStatus"] = current.get("status")
+        transition["status"] = args.status
+        transition["updatedAt"] = iso()
+        if args.summary:
+            transition["summary"] = args.summary
+        if args.risk:
+            transition["risk"] = args.risk
+        if args.area:
+            transition["area"] = args.area
+        if args.source_candidate_id:
+            transition["sourceCandidateId"] = args.source_candidate_id
+        proposals.append(transition)
     document.update({"version": 1, "updatedAt": iso(), "proposals": proposals[-1000:]})
     atomic_write(LEDGER, document)
     if args.publish:

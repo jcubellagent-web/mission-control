@@ -22,6 +22,7 @@ QA_META_JOB_IDS = frozenset({
     "nightly-control-tower-suite",
     "daily-qa-rollup",
     "adaptive-quality-snapshot",
+    "maintenance-portfolio-snapshot",
     "daily-refactor-discovery",
     "weekly-quality-baseline-review",
 })

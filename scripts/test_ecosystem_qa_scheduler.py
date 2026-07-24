@@ -102,6 +102,18 @@ class SchedulerTests(unittest.TestCase):
             self.assertTrue(job["aggregateHealth"])
             self.assertNotIn("--promote-baseline", job["command"])
 
+    def test_continuous_maintenance_projection_is_scheduled_and_source_safe(self) -> None:
+        config = json.loads(subject.CONFIG_PATH.read_text(encoding="utf-8"))
+        jobs = {row["id"]: row for row in config["jobs"]}
+        maintenance = jobs["maintenance-portfolio-snapshot"]
+
+        self.assertEqual(maintenance["schedule"], {"intervalMinutes": 60, "offset": 8})
+        self.assertEqual(maintenance["owner"], "josh2")
+        self.assertEqual(maintenance["command"], ["python3", "scripts/continuous_maintenance.py"])
+        self.assertTrue(maintenance["skipDuringChangeLease"])
+        self.assertTrue(maintenance["aggregateHealth"])
+        self.assertNotIn("--promote", maintenance["command"])
+
     def test_configured_precondition_exit_maps_to_skip(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             with mock.patch.object(subject, "LOCK_DIR", Path(directory)):

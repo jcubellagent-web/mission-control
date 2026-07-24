@@ -331,6 +331,7 @@ export type MissionControlState = {
   modelUsage?: ModelUsage;
   modelRouter?: ModelRouter;
   qualityControl?: Record<string, unknown>;
+  maintenanceControl?: Record<string, unknown>;
   reliabilityUpgrades?: ReliabilityUpgrades;
   brainAtlas?: BrainAtlas;
   capabilityStack?: CapabilityStackItem[];

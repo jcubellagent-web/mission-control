@@ -94,6 +94,7 @@ ECOSYSTEM_QA_SCHEDULE_PATH = ROOT.parent / "config" / "ecosystem-qa-schedule.jso
 ECOSYSTEM_QA_STATE_PATH = DATA_DIR / "ecosystem-qa-scheduler.json"
 TELEGRAM_INBOX_QA_PATH = DATA_DIR / "telegram-inbox-qa.json"
 ADAPTIVE_QUALITY_CONTROL_PATH = DATA_DIR / "adaptive-quality-control.json"
+MAINTENANCE_PORTFOLIO_PATH = DATA_DIR / "maintenance-portfolio.json"
 
 
 def atomic_write_json(path: Path, payload: Any, *, compact: bool = False) -> None:
@@ -169,7 +170,7 @@ LIVE_DASHBOARD_KEYS = {
     "brainAtlas", "brainFeed", "capabilityInventory", "capabilityStack", "capabilityWatch", "codingVisibility",
     "codexJobs", "generatedAt", "jaimesBrainFeed", "jainBrainFeed", "joshBrainFeed",
     "lastUpdated", "liveObjectives", "machineHealth", "memoryOperations", "modelRouter", "modelUsage",
-    "qualityControl", "recentActivity", "reliabilityUpgrades", "runtimeLayout", "sharedOperatingLayer", "sourceFreshness",
+    "maintenanceControl", "qualityControl", "recentActivity", "reliabilityUpgrades", "runtimeLayout", "sharedOperatingLayer", "sourceFreshness",
     "sourceUpdatedAt", "telegramInboxQa", "trackedTasks",
     "todayJobs", "todayJobsMeta",
 }
@@ -189,6 +190,10 @@ ADAPTIVE_QUALITY_LIVE_FIELDS = frozenset({
     "schemaVersion", "checkedAt", "status", "mode", "runMode", "qualityScore",
     "summary", "objective", "ownership", "metrics", "refactorPortfolio", "baseline", "modelRoute",
     "recurringActivities", "oversight", "privacy", "nextAction",
+})
+MAINTENANCE_CONTROL_LIVE_FIELDS = frozenset({
+    "schemaVersion", "generatedAt", "status", "mode", "summary", "policy",
+    "readiness", "changePolicy", "counts", "wip", "currentProposals", "discoveries", "privacy",
 })
 CAPABILITY_NODE_IDENTITY_FIELDS = frozenset({"id", "name", "host", "agent"})
 CAPABILITY_NODE_RUNTIME_FIELDS = ("openclawCli", "hermesCli", "geminiCli", "codexCli")
@@ -1125,6 +1130,9 @@ def build_live_dashboard(dashboard: Dict[str, Any]) -> Dict[str, Any]:
     live["runtimeLayout"] = _project_mapping(dashboard.get("runtimeLayout"), RUNTIME_LAYOUT_LIVE_FIELDS)
     live["qualityControl"] = _project_mapping(
         dashboard.get("qualityControl"), ADAPTIVE_QUALITY_LIVE_FIELDS
+    )
+    live["maintenanceControl"] = _project_mapping(
+        dashboard.get("maintenanceControl"), MAINTENANCE_CONTROL_LIVE_FIELDS
     )
     live["capabilityInventory"] = _project_capability_inventory(dashboard.get("capabilityInventory"))
     live["brainAtlas"] = sanitize_brain_atlas(
@@ -6126,6 +6134,39 @@ def main() -> None:
         "oversight": {"status": "pending", "requiredForOperation": False, "summary": "JOSHeX advisory oversight has not run yet; core QA/QC remains fully operational."},
         "privacy": {"dashboardSafe": True, "sourceContentIncluded": False, "rawPromptsIncluded": False, "secretsIncluded": False},
         "nextAction": "Wait for the first scheduled quality snapshot.",
+    })
+    # #JAIMES: maintenance automation may prepare evidence and sandboxes, but
+    # this projection must keep source promotion explicitly review-gated.
+    dashboard["maintenanceControl"] = load_json_file(MAINTENANCE_PORTFOLIO_PATH, {
+        "schemaVersion": 1,
+        "generatedAt": now_iso,
+        "status": "pending",
+        "mode": "proposal-first",
+        "summary": "Continuous maintenance has not produced its first portfolio projection.",
+        "policy": {
+            "wipLimit": 3,
+            "proposalMaxAgeDays": 30,
+            "requiredConsecutiveCleanRuns": 7,
+            "automaticSourceMutation": False,
+            "reviewedPromotionRequired": True,
+        },
+        "readiness": {
+            "gatesPassed": 0,
+            "gatesRequired": 6,
+            "consecutiveCleanRuns": 0,
+            "requiredConsecutiveCleanRuns": 7,
+            "promotionReady": False,
+        },
+        "changePolicy": {
+            "electiveChangesFrozen": True,
+            "reasonGateIds": [],
+            "allowedChangeClasses": ["security-fix", "reliability-repair", "rollback"],
+        },
+        "counts": {"currentProposals": 0, "discoveries": 0, "activeWip": 0, "aging": 0},
+        "wip": {"withinLimit": True, "activeProposalIds": [], "agingProposalIds": []},
+        "currentProposals": [],
+        "discoveries": [],
+        "privacy": {"dashboardSafe": True, "sourceContentIncluded": False, "rawPromptsIncluded": False, "secretsIncluded": False},
     })
     # #JAIMES: Brain Atlas is a read-only, bounded receipt projection. Fail
     # closed instead of forwarding malformed labels, raw identifiers, or

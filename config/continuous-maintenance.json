@@ -1,0 +1,101 @@
+{
+  "version": 1,
+  "mode": "proposal-first",
+  "timezone": "America/New_York",
+  "wipLimit": 3,
+  "proposalMaxAgeDays": 30,
+  "requiredConsecutiveCleanRuns": 7,
+  "stages": [
+    "discovered",
+    "accepted",
+    "leased",
+    "implementing",
+    "verifying",
+    "completed",
+    "deferred"
+  ],
+  "activeStages": [
+    "leased",
+    "implementing",
+    "verifying"
+  ],
+  "promotionGates": {
+    "requiredReliabilityGates": [
+      "memory-privacy-reuse",
+      "handoff-receipts",
+      "completion-final-linkage",
+      "telegram-contract",
+      "recovery-proof",
+      "scorecard-semantics"
+    ],
+    "automaticSourceMutation": false,
+    "reviewedPromotionRequired": true,
+    "rollbackEvidenceRequired": true
+  },
+  "errorBudgetPolicy": {
+    "freezeElectiveChangesOnGateFailure": true,
+    "allowedWhileFrozen": [
+      "security-fix",
+      "reliability-repair",
+      "rollback"
+    ]
+  },
+  "riskTiers": {
+    "low": {
+      "automaticPreparation": [
+        "discover",
+        "classify",
+        "prepare-sandbox",
+        "run-tests",
+        "prepare-rollback",
+        "publish-evidence"
+      ],
+      "reviewRequired": [
+        "promote-source"
+      ]
+    },
+    "medium": {
+      "automaticPreparation": [
+        "discover",
+        "classify",
+        "prepare-sandbox",
+        "run-tests",
+        "prepare-rollback"
+      ],
+      "reviewRequired": [
+        "approve-design",
+        "independent-diff-review",
+        "promote-source"
+      ]
+    },
+    "high": {
+      "automaticPreparation": [
+        "discover",
+        "classify",
+        "run-read-only-analysis"
+      ],
+      "reviewRequired": [
+        "explicit-human-approval",
+        "approve-design",
+        "independent-diff-review",
+        "promote-source"
+      ]
+    },
+    "unclassified": {
+      "automaticPreparation": [
+        "discover",
+        "classify"
+      ],
+      "reviewRequired": [
+        "assign-risk",
+        "promote-source"
+      ]
+    }
+  },
+  "dependencyPolicy": {
+    "securityUpdates": "immediate-proposal",
+    "patchAndMinorUpdates": "weekly-grouped-proposal",
+    "majorUpdates": "individual-reviewed-proposal",
+    "dependencyReviewRequired": true
+  }
+}

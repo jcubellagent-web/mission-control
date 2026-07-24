@@ -28,10 +28,12 @@ jobs:
       - name: Compile QA and health checks
         run: |
           python3 -m py_compile \
+            scripts/continuous_maintenance.py \
             scripts/ecosystem_health_sweep.py \
             scripts/ecosystem_qa_benchmark.py \
             scripts/mission_control_runtime_layout_check.py
           python3 scripts/mission_control_runtime_layout_check.py --self-test
+          python3 scripts/continuous_maintenance.py --no-write
           if python3 scripts/ecosystem_health_sweep.py --help | grep -q -- '--ci'; then
             python3 scripts/ecosystem_health_sweep.py --ci
           else

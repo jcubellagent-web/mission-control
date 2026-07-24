@@ -48,6 +48,22 @@ def test_live_projection_keeps_only_rendered_hot_path_fields() -> None:
             "summary": "fits",
             "measurements": {"large": "not rendered"},
         },
+        "maintenanceControl": {
+            "schemaVersion": 1,
+            "generatedAt": "2026-07-18T16:00:00Z",
+            "status": "watch",
+            "mode": "proposal-first",
+            "summary": "Promotion gates are still accumulating.",
+            "policy": {"automaticSourceMutation": False},
+            "readiness": {"promotionReady": False},
+            "changePolicy": {"electiveChangesFrozen": True},
+            "counts": {"activeWip": 1},
+            "wip": {"withinLimit": True},
+            "currentProposals": [],
+            "discoveries": [],
+            "privacy": {"dashboardSafe": True},
+            "auditBlob": "full maintenance history remains in dashboard-data.json",
+        },
         "capabilityInventory": {
             "updatedAt": "2026-07-18T16:00:00Z",
             "nodes": [{
@@ -70,6 +86,8 @@ def test_live_projection_keeps_only_rendered_hot_path_fields() -> None:
     assert set(live["todayJobs"][0]) == set(subject.TODAY_JOB_LIVE_FIELDS)
     assert set(live["sharedOperatingLayer"]) == set(subject.SHARED_OPERATING_LAYER_LIVE_FIELDS)
     assert set(live["runtimeLayout"]) == set(subject.RUNTIME_LAYOUT_LIVE_FIELDS)
+    assert set(live["maintenanceControl"]) == set(subject.MAINTENANCE_CONTROL_LIVE_FIELDS)
+    assert "auditBlob" not in live["maintenanceControl"]
     assert set(live["capabilityInventory"]["nodes"][0]) == set(subject.CAPABILITY_NODE_IDENTITY_FIELDS) | set(subject.CAPABILITY_NODE_RUNTIME_FIELDS)
     assert live["capabilityInventory"]["nodes"][0]["openclawCli"] == {"available": True}
     assert live["capabilityInventory"]["nodes"][0]["hermesCli"] == {"available": False}

@@ -1481,6 +1481,11 @@ function EcosystemOperationsPanel({ state, workItems }: { state: MissionControlS
   const qualityPortfolio = recordRow(quality.refactorPortfolio);
   const qualityOwnership = recordRow(quality.ownership);
   const qualityOversight = recordRow(quality.oversight);
+  const maintenance = recordRow(state.maintenanceControl);
+  const maintenanceReadiness = recordRow(maintenance.readiness);
+  const maintenanceChangePolicy = recordRow(maintenance.changePolicy);
+  const maintenanceCounts = recordRow(maintenance.counts);
+  const maintenancePolicy = recordRow(maintenance.policy);
   const activeTasks = workItems.filter((item) => ["working", "waiting", "blocked"].includes(item.state)).slice(0, 4);
   const openHandoffs = objectRows(shared.openHandoffs).slice(0, 3);
   const busRows = objectRows(state.agentBus).filter((row) => ["queued", "accepted", "active", "running", "blocked"].includes(String(row.status || "").toLowerCase())).slice(0, 3);
@@ -1523,6 +1528,16 @@ function EcosystemOperationsPanel({ state, workItems }: { state: MissionControlS
       status: quality.status || "pending",
       detail: `${Number(quality.qualityScore || 0)}% quality · ${Number(qualityPortfolio.candidates || 0)} refactor candidates`,
       meta: `${missionText(qualityOwnership.dispatcher || "JOSH 2.0")} + ${missionText(qualityOwnership.analysisAndBaselineOwner || "JAIMES")} operate · JOSHeX ${missionText(qualityOversight.status || "pending")} advisory`,
+    },
+    {
+      label: "Continuous maintenance",
+      status: maintenance.status || "pending",
+      detail: `${Number(maintenanceCounts.activeWip || 0)}/${Number(maintenancePolicy.wipLimit || 3)} WIP · ${Number(maintenanceReadiness.consecutiveCleanRuns || 0)}/${Number(maintenanceReadiness.requiredConsecutiveCleanRuns || 7)} clean runs`,
+      meta: maintenanceChangePolicy.electiveChangesFrozen === true
+        ? "Reliability budget spent · only repair, security, and rollback work may advance"
+        : maintenanceReadiness.promotionReady === true
+        ? "Reviewed promotion gates earned"
+        : "Proposal-first · source promotion remains review-gated",
     },
     {
       label: "Shared work bus",
