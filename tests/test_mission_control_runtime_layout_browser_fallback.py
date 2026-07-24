@@ -9,6 +9,7 @@ import pytest
 
 MODULE_PATH = Path(__file__).resolve().parents[1] / "scripts" / "mission_control_runtime_layout_check.py"
 FIXTURE_PATH = Path(__file__).parent / "fixtures" / "control-tower-live.ci.json"
+REGRESSION_FIXTURE_PATH = Path(__file__).parent / "fixtures" / "dashboard-data.ci.json"
 WORKFLOW_PATH = Path(__file__).resolve().parents[1] / ".github" / "workflows" / "mission-control-regression.yml"
 SPEC = importlib.util.spec_from_file_location("mission_control_runtime_layout_check", MODULE_PATH)
 assert SPEC and SPEC.loader
@@ -224,6 +225,20 @@ def test_release_workflow_stages_and_validates_same_live_data_fixture() -> None:
 
     assert "cp tests/fixtures/control-tower-live.ci.json data/control-tower-live.json" in workflow
     assert "--data data/control-tower-live.json" in workflow
+
+
+def test_release_workflow_uses_deterministic_dashboard_fixture() -> None:
+    workflow = WORKFLOW_PATH.read_text()
+    payload = json.loads(REGRESSION_FIXTURE_PATH.read_text())
+
+    assert "--dashboard-data tests/fixtures/dashboard-data.ci.json" in workflow
+    assert isinstance(payload["todayJobs"], list)
+    assert payload["todayJobsMeta"]["counts"] == {
+        "complete": 1,
+        "skipped": 1,
+        "broken": 1,
+        "pending": 1,
+    }
 
 
 @pytest.mark.parametrize("missing_field", ["runtimeLayout", "sourceUpdatedAt"])

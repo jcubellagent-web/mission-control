@@ -1,0 +1,36 @@
+{
+  "lastUpdated": "2026-01-01T00:00:00Z",
+  "actionRequired": [],
+  "agentBrainFeeds": {
+    "josh": [],
+    "jaimes": [],
+    "jain": []
+  },
+  "crons": [
+    {"name": "Sorare roster monitor", "lane": "sorare"},
+    {"name": "Gmail priority review", "lane": "gmail"},
+    {"name": "Continuous maintenance sweep", "lane": "maintenance"},
+    {"name": "Breaking news monitor", "lane": "breaking"},
+    {"name": "Control Tower projection", "lane": "operations"},
+    {"name": "Agent heartbeat check", "lane": "reliability"},
+    {"name": "Route allowance refresh", "lane": "routing"},
+    {"name": "Completion linkage audit", "lane": "governance"}
+  ],
+  "sharedEvents": [],
+  "sharedOperatingLayer": {},
+  "modelRouter": {},
+  "todayJobs": [
+    {"name": "Completed fixture job", "outcome": "complete"},
+    {"name": "Skipped fixture job", "outcome": "skipped"},
+    {"name": "Broken fixture job", "outcome": "broken"},
+    {"name": "Pending fixture job", "outcome": "pending"}
+  ],
+  "todayJobsMeta": {
+    "counts": {
+      "complete": 1,
+      "skipped": 1,
+      "broken": 1,
+      "pending": 1
+    }
+  }
+}

@@ -129,8 +129,7 @@ def check_react_surface() -> None:
         require(command in package_scripts, f"package.json missing change-control command: {command}")
 
 
-def check_dashboard_shape() -> None:
-    dashboard_path = DATA_DIR / "dashboard-data.json"
+def check_dashboard_shape(dashboard_path: Path) -> None:
     require(dashboard_path.exists(), "missing dashboard-data.json")
     dashboard = load_json(dashboard_path)
     require(isinstance(dashboard, dict), "dashboard-data.json must be an object")
@@ -262,6 +261,12 @@ def check_roadmap_freshness(max_age_min: int, write_status: Path | None = None) 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--dashboard-data",
+        type=Path,
+        default=DATA_DIR / "dashboard-data.json",
+        help="Dashboard payload to validate (defaults to the live generated sidecar)",
+    )
     parser.add_argument("--check-roadmap-freshness", action="store_true")
     parser.add_argument("--max-roadmap-age-min", type=int, default=20)
     parser.add_argument("--write-status", type=Path)
@@ -270,7 +275,7 @@ def main() -> int:
     ensure_ci_runtime_sidecars()
     check_json()
     check_react_surface()
-    check_dashboard_shape()
+    check_dashboard_shape(args.dashboard_data)
     check_model_routes()
     if args.check_roadmap_freshness:
         check_roadmap_freshness(args.max_roadmap_age_min, args.write_status)
