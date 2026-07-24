@@ -449,6 +449,9 @@ def publish_canonical_work(
             origin_claim_hash=args.origin_claim_hash,
             model_family=args.model_family,
             model_id=args.model_id,
+            execution_role=args.execution_role,
+            controller_work_id=args.controller_work_id,
+            controller_run_id=args.controller_run_id,
             route_verified=args.route_verified,
             clear_route=args.clear_route,
             lease_seconds=args.lease_seconds,
@@ -773,6 +776,9 @@ def main() -> int:
     origin_group.add_argument("--origin-claim-hash", default="", help="Pre-hashed lowercase SHA-256 origin claim.")
     parser.add_argument("--model-family", default=None, help="codex, antigravity, ollama, or grok")
     parser.add_argument("--model-id", default=None, help="Verified runtime model id, not a requested route.")
+    parser.add_argument("--execution-role", choices=["controller", "worker"], default=None, help="Launcher-verified route role.")
+    parser.add_argument("--controller-work-id", default=None, help="Stable controlling work id for a worker route.")
+    parser.add_argument("--controller-run-id", default=None, help="Exact controlling run id for a worker route.")
     route_group = parser.add_mutually_exclusive_group()
     route_group.add_argument("--route-verified", action="store_true", default=None)
     route_group.add_argument("--route-unverified", action="store_false", dest="route_verified")

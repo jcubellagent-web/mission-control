@@ -102,6 +102,9 @@ function normalizeHotWork(row: unknown): ActiveWork | null {
     modelFamily: normalizeModelFamily(row.modelFamily),
     modelId: stringValue(row.modelId) || null,
     routeVerified: booleanValue(row.routeVerified),
+    executionRole: row.executionRole === "worker" ? "worker" : "controller",
+    controllerWorkId: stringValue(row.controllerWorkId) || null,
+    controllerRunId: stringValue(row.controllerRunId) || null,
     leaseUntil: stringValue(row.leaseUntil),
     createdAt: stringValue(row.createdAt),
     updatedAt: stringValue(row.updatedAt),
@@ -131,6 +134,9 @@ function normalizeHotProjection(value: unknown): ControlTowerHot | undefined {
         modelFamily,
         modelId,
         routeVerified: true,
+        executionRole: row.executionRole === "worker" ? "worker" : "controller",
+        controllerWorkId: stringValue(row.controllerWorkId),
+        controllerRunId: stringValue(row.controllerRunId),
         activatedAt: stringValue(row.activatedAt),
         updatedAt: stringValue(row.updatedAt),
         leaseUntil: stringValue(row.leaseUntil),
@@ -198,6 +204,7 @@ function overlayHotStatuses(hot: ControlTowerHot | undefined, fallback: AgentSta
   }));
   const newestByAgent = new Map<AgentId, ActiveWork>();
   for (const work of hot?.activeWorks || []) {
+    if (work.executionRole === "worker") continue;
     const current = newestByAgent.get(work.ownerAgent);
     if (!current || timestampValue(work.updatedAt) > timestampValue(current.updatedAt)) newestByAgent.set(work.ownerAgent, work);
   }

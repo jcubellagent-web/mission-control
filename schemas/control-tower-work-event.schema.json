@@ -47,6 +47,9 @@
     },
     "modelId": {"type": ["string", "null"], "maxLength": 120},
     "routeVerified": {"type": "boolean"},
+    "executionRole": {"type": "string", "enum": ["controller", "worker"]},
+    "controllerWorkId": {"type": ["string", "null"], "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$"},
+    "controllerRunId": {"type": ["string", "null"], "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,159}$"},
     "leaseUntil": {"type": ["string", "null"], "format": "date-time"},
     "occurredAt": {"type": "string", "format": "date-time"}
   }

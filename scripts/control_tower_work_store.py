@@ -39,6 +39,7 @@ TERMINAL_STATUSES = {"done", "blocked", "error", "cancelled"}
 STATUSES = ACTIVE_STATUSES | TERMINAL_STATUSES
 EVENT_KINDS = {"start", "update", "heartbeat", "terminal"}
 MODEL_FAMILIES = {"codex", "antigravity", "ollama", "grok"}
+EXECUTION_ROLES = {"controller", "worker"}
 MODEL_ALIASES = {
     "openai": "codex",
     "codex/openai": "codex",
@@ -298,10 +299,23 @@ class WorkStore:
                     updated_at TEXT NOT NULL,
                     lease_until TEXT,
                     source_event_id TEXT NOT NULL,
-                    revision INTEGER NOT NULL
+                    revision INTEGER NOT NULL,
+                    execution_role TEXT NOT NULL DEFAULT 'controller',
+                    controller_work_id TEXT NOT NULL DEFAULT '',
+                    controller_run_id TEXT NOT NULL DEFAULT ''
                 );
                 """
             )
+            route_columns = {
+                str(row[1]) for row in connection.execute("PRAGMA table_info(active_model_routes)").fetchall()
+            }
+            for name, definition in (
+                ("execution_role", "TEXT NOT NULL DEFAULT 'controller'"),
+                ("controller_work_id", "TEXT NOT NULL DEFAULT ''"),
+                ("controller_run_id", "TEXT NOT NULL DEFAULT ''"),
+            ):
+                if name not in route_columns:
+                    connection.execute(f"ALTER TABLE active_model_routes ADD COLUMN {name} {definition}")
             connection.commit()
 
     def get(self, work_id: str) -> dict[str, Any] | None:
@@ -594,9 +608,50 @@ class WorkStore:
             prior_route = connection.execute(
                 "SELECT * FROM active_model_routes WHERE work_id = ?", (work_id,)
             ).fetchone()
+            requested_execution_role = payload.get("execution_role")
+            execution_role = str(
+                requested_execution_role
+                if requested_execution_role is not None
+                else (prior_route["execution_role"] if prior_route else "controller")
+            ).strip().lower()
+            if execution_role not in EXECUTION_ROLES:
+                raise WorkStoreError("execution_role must be controller or worker.")
+            controller_work_id = safe_identifier(
+                payload.get("controller_work_id")
+                if payload.get("controller_work_id") is not None
+                else (prior_route["controller_work_id"] if prior_route else ""),
+                "controller_work_id",
+                required=False,
+            )
+            controller_run_id = safe_identifier(
+                payload.get("controller_run_id")
+                if payload.get("controller_run_id") is not None
+                else (prior_route["controller_run_id"] if prior_route else ""),
+                "controller_run_id",
+                required=False,
+            )
             route_active = bool(
                 status in ACTIVE_STATUSES and route_verified and model_family and model_id
             )
+            if execution_role == "worker" and route_active:
+                if not controller_work_id or not controller_run_id:
+                    raise WorkStoreError("A worker route requires controller_work_id and controller_run_id.")
+                if controller_work_id == work_id:
+                    raise WorkStoreError("A worker route cannot control itself.")
+                controller = connection.execute(
+                    "SELECT * FROM current_works WHERE work_id = ?", (controller_work_id,)
+                ).fetchone()
+                if (
+                    not controller
+                    or controller["run_id"] != controller_run_id
+                    or controller["owner_agent"] != agent
+                    or controller["status"] not in ACTIVE_STATUSES
+                ):
+                    raise WorkStoreError("Worker route controller must be an active work run owned by the same agent.")
+            else:
+                if execution_role == "controller":
+                    controller_work_id = ""
+                    controller_run_id = ""
             if route_active:
                 activated_at = (
                     str(prior_route["activated_at"])
@@ -610,8 +665,9 @@ class WorkStore:
                     """
                     INSERT INTO active_model_routes(
                         work_id, run_id, owner_agent, model_family, model_id,
-                        activated_at, updated_at, lease_until, source_event_id, revision
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        activated_at, updated_at, lease_until, source_event_id, revision,
+                        execution_role, controller_work_id, controller_run_id
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     ON CONFLICT(work_id) DO UPDATE SET
                         run_id=excluded.run_id,
                         owner_agent=excluded.owner_agent,
@@ -621,11 +677,15 @@ class WorkStore:
                         updated_at=excluded.updated_at,
                         lease_until=excluded.lease_until,
                         source_event_id=excluded.source_event_id,
-                        revision=excluded.revision
+                        revision=excluded.revision,
+                        execution_role=excluded.execution_role,
+                        controller_work_id=excluded.controller_work_id,
+                        controller_run_id=excluded.controller_run_id
                     """,
                     (
                         work_id, run_id, agent, model_family, model_id, activated_at,
-                        occurred_at, lease_until, event_id, revision,
+                        occurred_at, lease_until, event_id, revision, execution_role,
+                        controller_work_id, controller_run_id,
                     ),
                 )
                 route_action = "activated" if not prior_route else "refreshed"
@@ -740,12 +800,23 @@ class WorkStore:
                 "modelFamily": row["model_family"],
                 "modelId": row["model_id"],
                 "routeVerified": True,
+                "executionRole": row["execution_role"],
+                "controllerWorkId": row["controller_work_id"] or None,
+                "controllerRunId": row["controller_run_id"] or None,
                 "activatedAt": row["activated_at"],
                 "updatedAt": row["updated_at"],
                 "leaseUntil": row["lease_until"],
                 "sourceEventId": row["source_event_id"],
                 "revision": int(row["revision"]),
             })
+        route_metadata = {row["workId"]: row for row in routes}
+        for work in works:
+            if not work:
+                continue
+            route = route_metadata.get(work["workId"], {})
+            work["executionRole"] = route.get("executionRole", "controller")
+            work["controllerWorkId"] = route.get("controllerWorkId")
+            work["controllerRunId"] = route.get("controllerRunId")
         by_agent = {agent: 0 for agent in AGENT_LABELS}
         for row in active:
             by_agent[row["ownerAgent"]] = by_agent.get(row["ownerAgent"], 0) + 1
@@ -833,6 +904,9 @@ def _add_common(parser: argparse.ArgumentParser, *, objective_required: bool = F
     origin.add_argument("--origin-claim-hash", default="")
     parser.add_argument("--model-family", default=None)
     parser.add_argument("--model-id", default=None)
+    parser.add_argument("--execution-role", choices=sorted(EXECUTION_ROLES), default=None)
+    parser.add_argument("--controller-work-id", default=None)
+    parser.add_argument("--controller-run-id", default=None)
     route = parser.add_mutually_exclusive_group()
     route.add_argument("--route-verified", action="store_true", default=None)
     route.add_argument("--route-unverified", action="store_false", dest="route_verified")
@@ -880,6 +954,9 @@ def main() -> int:
         "origin_claim_hash": args.origin_claim_hash,
         "model_family": args.model_family,
         "model_id": args.model_id,
+        "execution_role": args.execution_role,
+        "controller_work_id": args.controller_work_id,
+        "controller_run_id": args.controller_run_id,
         "route_verified": args.route_verified,
         "clear_route": args.clear_route,
         "lease_seconds": args.lease_seconds,

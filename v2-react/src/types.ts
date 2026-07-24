@@ -35,6 +35,9 @@ export type ActiveModelRoute = {
   modelFamily: CanonicalModelFamily;
   modelId: string;
   routeVerified: true;
+  executionRole?: "controller" | "worker";
+  controllerWorkId?: string;
+  controllerRunId?: string;
   activatedAt?: string;
   updatedAt: string;
   leaseUntil?: string;
@@ -59,6 +62,9 @@ export type ActiveWork = {
   modelFamily?: CanonicalModelFamily | null;
   modelId?: string | null;
   routeVerified: boolean;
+  executionRole?: "controller" | "worker";
+  controllerWorkId?: string | null;
+  controllerRunId?: string | null;
   leaseUntil?: string;
   createdAt: string;
   updatedAt: string;
