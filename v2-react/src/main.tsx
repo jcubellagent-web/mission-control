@@ -2834,6 +2834,7 @@ function RuntimeCapabilityPanel({ state }: { state: MissionControlState }) {
   const watch = state.capabilityWatch;
   const nodes = Array.isArray(inventory?.nodes) ? inventory.nodes : [];
   const runtimeItems = stack.filter((item) => [
+    "interaction-control",
     "runtime-inventory",
     "task-ledger",
     "capability-watch",

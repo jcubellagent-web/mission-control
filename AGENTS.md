@@ -369,6 +369,10 @@ are common to Josh 2.0 and JAIMES.
 
 ## Shared Tooling Preferences
 
+- Apply `agent-skills/remote-interaction-ops/SKILL.md` before browser,
+  Computer Use, screenshot, or vision-based UI work on Josh 2.0 or JAIMES.
+  Keep Josh 2.0 visible work lease-guarded, JAIMES headless-first, and all
+  shared interaction telemetry metadata-only.
 - Use the OpenAI developer documentation MCP server for current OpenAI API, ChatGPT Apps SDK, Codex, Responses API, or related product documentation questions.
 - Use Playwright MCP for repeatable browser automation, page inspection, screenshots, and web UI verification when a structured browser path is safer than visual/manual control.
 - Use `gog` for dashboard-safe Google Workspace automation involving the shared agent inbox, calendar, Drive, Docs, Sheets, Slides, Contacts, or Tasks. Prefer `--json`, `--no-input`, and `--gmail-no-send` unless sending mail is explicitly approved.

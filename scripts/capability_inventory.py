@@ -9,6 +9,7 @@ import json
 import platform
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -16,6 +17,11 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "data"
 OUT = DATA_DIR / "capability-inventory.json"
+
+if str(ROOT / "scripts") not in sys.path:
+    sys.path.insert(0, str(ROOT / "scripts"))
+
+from interaction_capability_probe import collect as collect_interaction_capability  # noqa: E402
 
 
 def utc_now() -> str:
@@ -289,6 +295,12 @@ def collect(args: argparse.Namespace) -> dict[str, Any]:
         "hermesCli": cli_status("hermes", ["--version"]),
         "codexMcpServers": codex_mcp_servers(),
         "services": service_hits(),
+        "interaction": collect_interaction_capability(
+            args.node,
+            args.interaction_role,
+            ROOT / "config" / "interaction-routing.json",
+            args.active_interaction_canary,
+        ),
     }
 
 
@@ -311,6 +323,8 @@ def main() -> int:
     parser.add_argument("--node", required=True)
     parser.add_argument("--agent", required=True)
     parser.add_argument("--python", default="python3")
+    parser.add_argument("--interaction-role", choices=("visible", "headless", "private", "unknown"))
+    parser.add_argument("--active-interaction-canary", action="store_true")
     parser.add_argument("--merge", action="store_true")
     args = parser.parse_args()
     record = collect(args)

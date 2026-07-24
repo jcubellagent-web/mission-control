@@ -20,7 +20,26 @@
           "crontabCount": {"type": "integer"},
           "wrappedCronLines": {"type": "integer"},
           "ollamaModels": {"type": "array", "items": {"type": "string"}},
-          "services": {"type": "array", "items": {"type": "string"}}
+          "services": {"type": "array", "items": {"type": "string"}},
+          "interaction": {
+            "type": "object",
+            "required": ["checkedAt", "host", "role", "status", "privacy"],
+            "properties": {
+              "checkedAt": {"type": "string"},
+              "host": {"type": "string"},
+              "role": {"enum": ["visible", "headless", "private", "unknown"]},
+              "status": {"enum": ["ok", "degraded", "down", "unknown"]},
+              "semanticOrder": {"type": "array", "items": {"type": "string"}},
+              "selectedSurfaces": {"type": "object"},
+              "browser": {"type": "object"},
+              "computerUse": {"type": "object"},
+              "display": {"type": "object"},
+              "displayLease": {"type": "object"},
+              "observability": {"type": "object"},
+              "privacy": {"type": "object"},
+              "requirements": {"type": "object"}
+            }
+          }
         }
       }
     }

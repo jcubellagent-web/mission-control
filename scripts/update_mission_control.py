@@ -4892,7 +4892,9 @@ def normalize_personal_codex(raw: Any, now_iso: str) -> Dict[str, Any]:
 def node_display_name(value: Any) -> str:
     text = str(value or "").strip()
     return {
+        "josh2": "Josh 2.0",
         "josh2-lan": "Josh 2.0",
+        "jaimes": "JAIMES/J.A.I.N",
         "jaimes-via-josh": "JAIMES/J.A.I.N",
         "joshex": "JOSHeX",
         "macbook-codex": "JOSHeX",
@@ -4992,6 +4994,50 @@ def build_capability_watch_capability(capability_watch: Dict[str, Any] | None) -
     }
 
 
+def build_interaction_control_capability(capability_inventory: Dict[str, Any] | None) -> Dict[str, Any] | None:
+    #JAIMES: project only host role/readiness metadata; private frames, page
+    # content, selectors, and accessibility trees stay outside Control Tower.
+    latest: Dict[str, tuple[str, Dict[str, Any]]] = {}
+    for node in inventory_nodes(capability_inventory):
+        interaction = node.get("interaction")
+        if not isinstance(interaction, dict):
+            continue
+        host = str(interaction.get("host") or node.get("node") or "").strip()
+        if not host:
+            continue
+        checked_at = str(interaction.get("checkedAt") or node.get("checkedAt") or "")
+        previous = latest.get(host)
+        if previous is None or checked_at >= previous[0]:
+            latest[host] = (checked_at, interaction)
+    if not latest:
+        return None
+
+    labels: list[str] = []
+    statuses: list[str] = []
+    visible_ready = False
+    headless_ready = False
+    for host, (_, interaction) in sorted(latest.items()):
+        role = str(interaction.get("role") or "unknown")
+        status = str(interaction.get("status") or "unknown")
+        statuses.append(status)
+        labels.append(f"{node_display_name(host)} {role} {status}")
+        visible_ready = visible_ready or (role == "visible" and status == "ok")
+        headless_ready = headless_ready or (role == "headless" and status == "ok")
+
+    overall = "ok"
+    if any(status == "down" for status in statuses):
+        overall = "attention"
+    elif any(status in {"degraded", "unknown"} for status in statuses):
+        overall = "watch"
+    return {
+        "id": "interaction-control",
+        "name": "Interaction Control",
+        "status": overall,
+        "summary": f"Visible {'ready' if visible_ready else 'watch'} · headless {'ready' if headless_ready else 'watch'}",
+        "detail": " · ".join(labels[:3]) + " · semantic-first; private frames stay on-host",
+    }
+
+
 def build_capability_stack(
     visual_canaries: Dict[str, Any],
     sorare_ml: Dict[str, Any],
@@ -5062,6 +5108,7 @@ def build_capability_stack(
             "detail": personal_codex.get("objective") or "Local Control Tower contribution lane",
         })
     for item in (
+        build_interaction_control_capability(capability_inventory),
         build_runtime_inventory_capability(capability_inventory),
         build_task_ledger_capability(capability_inventory),
         build_capability_watch_capability(capability_watch),

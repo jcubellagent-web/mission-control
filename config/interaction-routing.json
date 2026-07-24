@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "semanticOrder": [
+    "connector-or-api",
+    "browser-dom",
+    "accessibility",
+    "vision",
+    "coordinates"
+  ],
+  "hosts": {
+    "josh2": {
+      "role": "visible",
+      "label": "Josh 2.0",
+      "browserSurface": "codex-browser",
+      "desktopSurface": "codex-computer-use",
+      "displayLeaseRequired": true,
+      "headlessCdpRequired": false
+    },
+    "jaimes": {
+      "role": "headless",
+      "label": "JAIMES",
+      "browserSurface": "cdp-playwright",
+      "desktopSurface": "cua-driver",
+      "displayLeaseRequired": false,
+      "headlessCdpRequired": true
+    },
+    "joshex": {
+      "role": "private",
+      "label": "JOSHeX",
+      "browserSurface": "codex-browser",
+      "desktopSurface": "codex-computer-use",
+      "displayLeaseRequired": false,
+      "headlessCdpRequired": false
+    }
+  },
+  "privacy": {
+    "dashboardSafeOnly": true,
+    "screenshotsInSharedTelemetry": false,
+    "pageTextInSharedTelemetry": false,
+    "urlsInSharedTelemetry": false,
+    "selectorsInSharedTelemetry": false,
+    "accessibilityTreesInSharedTelemetry": false,
+    "credentialsInSharedTelemetry": false
+  }
+}
