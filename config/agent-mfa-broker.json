@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "accounts": {
+    "alpaca-paper": {
+      "enabled": true,
+      "purpose": "paper-trading and market-data access only",
+      "keychainService": "com.josh.agent-mfa.alpaca-paper",
+      "allowedOrigins": [
+        "https://app.alpaca.markets"
+      ],
+      "allowedPathPrefixes": [
+        "/brokerage/",
+        "/dashboard",
+        "/login",
+        "/mfa",
+        "/paper/"
+      ],
+      "enrollmentButtonName": "Enter code manually",
+      "setupHeading": "Set up authenticator app",
+      "challengeTextPatterns": [
+        "authenticator",
+        "verification code",
+        "security code",
+        "two-factor",
+        "2fa"
+      ],
+      "submitButtonNames": [
+        "Verify",
+        "Next",
+        "Continue",
+        "Activate",
+        "Submit"
+      ]
+    }
+  }
+}

@@ -31,6 +31,7 @@ SOURCE_PATHS = (
     "docs/agent-runbooks.md",
     "docs/brain-topic-intake.md",
     "docs/continuous-maintenance.md",
+    "docs/agent-mfa-broker.md",
     "data/agent-route-benchmark-suite.json",
     "data/agent-routing-policy.json",
     "data/model-provider-budgets.json",
@@ -45,6 +46,7 @@ SOURCE_PATHS = (
     "launchd",
     "tests",
     "scripts/agent_task.py",
+    "scripts/agent_mfa_broker.py",
     "scripts/agent_delegate.py",
     "scripts/linear_work_intent.py",
     "scripts/agent_route.py",
@@ -115,6 +117,7 @@ SOURCE_PATHS = (
     "scripts/todays_jobs_consistency_watchdog.py",
 )
 PYTHON_COMPILE_PATHS = (
+    "scripts/agent_mfa_broker.py",
     "scripts/continuous_maintenance.py",
     "scripts/control_tower_change_guard.py",
     "scripts/control_tower_work_store.py",
