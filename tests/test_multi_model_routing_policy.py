@@ -340,6 +340,46 @@ def test_technical_analysis_uses_glm_with_explicit_runtime_fallbacks(monkeypatch
     assert "99% remaining" in selected["reason"]
 
 
+def test_dashboard_safe_sorare_analytics_and_reports_use_specialists(monkeypatch) -> None:
+    route = load_module("agent_route_sorare_specialists", ROOT / "scripts" / "agent_route.py")
+    args = model_args()
+    args.requester = "jaimes"
+    args.priority = "normal"
+    args.complexity = "auto"
+    args.blast_radius = "auto"
+    monkeypatch.setattr(route, "codex_allowance_mode", lambda _args: "normal")
+    monkeypatch.setattr(route, "explicit_route_unavailable", lambda provider, model="": "")
+    monkeypatch.setattr(route, "ollama_live_allowance_status", lambda: (True, "98.8% remaining"))
+
+    args.task_type = "sorare-report"
+    report = route.choose_model_route(args, "jaimes", False)
+    assert report["provider"] == "gemini"
+    assert report["model"] == "gemini-3.6-flash-medium"
+
+    args.task_type = "sorare-analytics"
+    analytics = route.choose_model_route(args, "jaimes", False)
+    assert analytics["provider"] == "ollama"
+    assert analytics["model"] == "glm-5.2:cloud"
+
+
+def test_sorare_mutations_and_private_analytics_remain_codex_owned(monkeypatch) -> None:
+    route = load_module("agent_route_sorare_execution", ROOT / "scripts" / "agent_route.py")
+    args = model_args()
+    args.requester = "jaimes"
+    args.priority = "normal"
+    args.complexity = "auto"
+    args.blast_radius = "auto"
+    monkeypatch.setattr(route, "codex_allowance_mode", lambda _args: "normal")
+    monkeypatch.setattr(route, "ollama_live_allowance_status", lambda: (True, "98.8% remaining"))
+
+    args.task_type = "sorare-lineup"
+    assert route.choose_model_route(args, "jaimes", False)["provider"] == "codex"
+
+    args.task_type = "sorare-analytics"
+    args.privacy = "agent-private"
+    assert route.choose_model_route(args, "jaimes", False)["provider"] == "codex"
+
+
 def test_ollama_quota_is_a_fresh_soft_signal_and_exhaustion_falls_back(tmp_path, monkeypatch) -> None:
     route = load_module("agent_route_glm_quota", ROOT / "scripts" / "agent_route.py")
     usage = tmp_path / "modelUsage.json"
@@ -620,8 +660,65 @@ def test_jaimes_lane_visibility_publishes_to_canonical_control_tower(monkeypatch
 
     monkeypatch.setattr(lane.subprocess, "run", fake_run)
     lane.run_lane_publish(["python3", "/repo/scripts/agent_publish.py", "--agent", "jaimes"])
-    assert seen["command"][:2] == ["ssh", "josh2"]
+    assert seen["command"][:2] == ["ssh", "josh2.0@josh2"]
     assert "scripts/agent_publish.py --agent jaimes" in seen["command"][2]
+
+
+def test_ollama_cloud_pass_verifies_returned_model_identity(monkeypatch) -> None:
+    helper = load_module("ollama_cloud_pass_identity", ROOT / "scripts" / "ollama_cloud_pass.py")
+
+    class Response:
+        def __init__(self, model: str):
+            self.model = model
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return False
+
+        def read(self):
+            return json.dumps({"model": self.model, "response": "GLM_OK"}).encode()
+
+    monkeypatch.setattr(
+        helper.urllib.request,
+        "urlopen",
+        lambda _request, timeout: Response("glm-5.2"),
+    )
+    assert helper.run("glm-5.2:cloud", "safe prompt", 30) == "GLM_OK"
+
+
+def test_ollama_cloud_pass_rejects_unexpected_or_missing_model(monkeypatch) -> None:
+    helper = load_module("ollama_cloud_pass_mismatch", ROOT / "scripts" / "ollama_cloud_pass.py")
+
+    class Response:
+        def __init__(self, payload: dict):
+            self.payload = payload
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return False
+
+        def read(self):
+            return json.dumps(self.payload).encode()
+
+    monkeypatch.setattr(
+        helper.urllib.request,
+        "urlopen",
+        lambda _request, timeout: Response({"model": "qwen2.5:7b", "response": "wrong"}),
+    )
+    with pytest.raises(RuntimeError, match="unexpected model"):
+        helper.run("glm-5.2:cloud", "safe prompt", 30)
+
+    monkeypatch.setattr(
+        helper.urllib.request,
+        "urlopen",
+        lambda _request, timeout: Response({"response": "missing"}),
+    )
+    with pytest.raises(RuntimeError, match="omitted model identity"):
+        helper.run("glm-5.2:cloud", "safe prompt", 30)
 
 
 def test_lane_visibility_tracks_disclosed_fallback_model(monkeypatch) -> None:

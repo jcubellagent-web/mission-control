@@ -53,6 +53,8 @@ GEMINI_FIRST_TASK_TYPES = {
     "gemini-research",
     "gemini-evaluation",
     "gemini-scheduled-summary",
+    "sorare-report",
+    "sorare-research",
 }
 
 GEMINI_FIRST_CAPABILITIES = {
@@ -81,6 +83,9 @@ GLM_FIRST_TASK_TYPES = {
     "parallel-technical-reasoning",
     "structured-code-review",
     "technical-second-opinion",
+    "sorare-analytics",
+    "sorare-strategy",
+    "sorare-review",
 }
 
 GLM_FIRST_CAPABILITIES = {
@@ -234,8 +239,18 @@ CONTROL_TOWER_TYPES = {
 
 SORARE_TYPES = {
     "sorare",
+    "sorare-analytics",
     "sorare-lineup",
+    "sorare-report",
     "sorare-research",
+    "sorare-review",
+    "sorare-strategy",
+    "sorare-monitor",
+}
+
+SORARE_EXECUTION_TYPES = {
+    "sorare",
+    "sorare-lineup",
     "sorare-monitor",
 }
 
@@ -1113,7 +1128,7 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
         task_type in CODEX_ONLY_TASK_TYPES
         or task_type in INBOX_FRONTDOOR_TYPES
         or task_type in CONTROL_TOWER_TYPES
-        or task_type in SORARE_TYPES
+        or task_type in SORARE_EXECUTION_TYPES
     )
     gemini_hint = task_type in GEMINI_FIRST_TASK_TYPES or bool(caps & GEMINI_FIRST_CAPABILITIES)
     glm_hint = task_type in GLM_FIRST_TASK_TYPES or bool(caps & GLM_FIRST_CAPABILITIES)

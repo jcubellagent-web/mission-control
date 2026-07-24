@@ -9,6 +9,15 @@ import urllib.error
 import urllib.request
 
 
+def normalize_model_identity(value: str) -> str:
+    normalized = str(value or "").strip().lower()
+    if normalized.startswith("ollama/"):
+        normalized = normalized.removeprefix("ollama/")
+    if normalized.endswith(":cloud"):
+        normalized = normalized.removesuffix(":cloud")
+    return normalized
+
+
 def run(model: str, prompt: str, timeout: int) -> str:
     #JAIMES: use the API so thinking traces/terminal control codes never enter integration output.
     payload = json.dumps({
@@ -29,6 +38,14 @@ def run(model: str, prompt: str, timeout: int) -> str:
         if exc.code == 401:
             raise RuntimeError("Ollama Cloud authentication failed") from exc
         raise
+    requested_model = normalize_model_identity(model)
+    actual_model = normalize_model_identity(result.get("model") or "")
+    if not actual_model:
+        raise RuntimeError("Ollama Cloud response omitted model identity")
+    if actual_model != requested_model:
+        raise RuntimeError(
+            f"Ollama Cloud returned unexpected model {result.get('model')}"
+        )
     output = str(result.get("response") or "").strip()
     if not output:
         raise RuntimeError("Ollama Cloud returned empty output")

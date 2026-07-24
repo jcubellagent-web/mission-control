@@ -23,7 +23,7 @@ AGENT_ROUTE = ROOT / "scripts" / "agent_route.py"
 AGENT_PUBLISH = ROOT / "scripts" / "agent_publish.py"
 JAIMES_SSH_HOST = os.environ.get("MODEL_LANE_JAIMES_HOST", "jaimes")
 JAIMES_REPO = "~/.openclaw/workspace/mission-control"
-CONTROL_TOWER_HOST = os.environ.get("MODEL_LANE_CONTROL_TOWER_HOST", "josh2")
+CONTROL_TOWER_HOST = os.environ.get("MODEL_LANE_CONTROL_TOWER_HOST", "josh2.0@josh2")
 CONTROL_TOWER_REPO = "/Users/josh2.0/.openclaw/workspace/mission-control"
 LANE_HEARTBEAT_SECONDS = 30
 
