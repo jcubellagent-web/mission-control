@@ -131,7 +131,12 @@ def run_case(case: dict[str, Any], *, emit_telemetry: bool = False) -> dict[str,
     for field, expected in expectations.items():
         if expected is not None and actual.get(field) != expected:
             errors.append(f"{field}: expected {expected!r}, got {actual.get(field)!r}")
-    for field, fixture_key in (("owner", "expectedOwnerAny"), ("provider", "expectedProviderAny"), ("model", "expectedModelAny")):
+    for field, fixture_key in (
+        ("owner", "expectedOwnerAny"),
+        ("provider", "expectedProviderAny"),
+        ("model", "expectedModelAny"),
+        ("role", "expectedRoleAny"),
+    ):
         allowed = case.get(fixture_key)
         if allowed and actual.get(field) not in allowed:
             errors.append(f"{field}: expected one of {allowed!r}, got {actual.get(field)!r}")

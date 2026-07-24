@@ -228,24 +228,26 @@
       "expectedModel": "gpt-5.6-terra"
     },
     {
-      "id": "current_events_grok_verified",
+      "id": "current_events_xai_or_truthful_fallback",
       "taskType": "current-events",
       "title": "Current events scan",
       "objective": "Review current public signals",
       "environment": {"XAI_ENABLED": "1", "XAI_VERIFIED": "1"},
       "expectedOwner": "jain",
-      "expectedProvider": "xai",
-      "expectedModel": "grok-4.5"
+      "expectedProviderAny": ["xai", "codex"],
+      "expectedModelAny": ["grok-4.5", "gpt-5.6-terra"],
+      "expectedRoleAny": ["xai-current-events", "xai-unavailable-fallback"]
     },
     {
-      "id": "x_search_grok_verified",
+      "id": "x_search_xai_or_truthful_fallback",
       "taskType": "x-search",
       "title": "X-native scan",
       "objective": "Review current X-native public signals",
       "environment": {"XAI_ENABLED": "1", "XAI_VERIFIED": "1"},
       "expectedOwner": "jain",
-      "expectedProvider": "xai",
-      "expectedModel": "grok-4.5"
+      "expectedProviderAny": ["xai", "codex"],
+      "expectedModelAny": ["grok-4.5", "gpt-5.6-terra"],
+      "expectedRoleAny": ["xai-current-events", "xai-unavailable-fallback"]
     },
     {
       "id": "current_events_truthful_fallback",

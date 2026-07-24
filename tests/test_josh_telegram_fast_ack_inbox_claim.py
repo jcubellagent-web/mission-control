@@ -673,6 +673,7 @@ import importlib.util
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(sys.argv[1]).resolve().parent))
 spec = importlib.util.spec_from_file_location("fast_ack_writer", sys.argv[1])
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
