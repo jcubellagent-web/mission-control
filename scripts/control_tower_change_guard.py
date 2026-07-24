@@ -46,6 +46,8 @@ SOURCE_PATHS = (
     "scripts/linear_work_intent.py",
     "scripts/agent_route.py",
     "scripts/agent_publish.py",
+    "scripts/model_lane.py",
+    "scripts/gemini_agent.py",
     "scripts/ecosystem_health_sweep.py",
     "scripts/ecosystem_qa_benchmark.py",
     "scripts/ecosystem_qa_scheduler.py",
@@ -143,6 +145,8 @@ PYTHON_COMPILE_PATHS = (
     "scripts/update_mission_control.py",
     "scripts/agent_task.py",
     "scripts/agent_delegate.py",
+    "scripts/model_lane.py",
+    "scripts/gemini_agent.py",
     "scripts/linear_work_intent.py",
     "hermes-plugins/jaimes-topic17-runtime-owner/__init__.py",
 )
@@ -352,13 +356,13 @@ def renew(token: str) -> None:
 
 
 def extend_snapshot(token: str) -> None:
-    """Add newly guarded, still-absent paths to an active immutable lease.
+    """Add newly guarded paths to an active immutable lease.
 
     A long-running governed change can add a new source path to SOURCE_PATHS
-    after the lease begins.  Rollback may cover that path only while the live
-    target is still absent, which proves it was also absent when this clean
-    lease started.  Existing paths are deliberately rejected because their
-    begin-state cannot be reconstructed after the fact.
+    after the lease begins. An absent target proves it did not exist at begin.
+    An existing tracked file is accepted only when its exact begin-state can be
+    reconstructed from the lease's immutable base commit and copied into the
+    lease backup. Untracked files and directories still fail closed.
     """
     payload = require_token(token)
     if lease_expired(payload):
@@ -372,14 +376,33 @@ def extend_snapshot(token: str) -> None:
         if isinstance(entry, dict)
     }
     additions = [relative for relative in SOURCE_PATHS if relative not in seen]
-    unsafe = [relative for relative in additions if (ROOT / relative).exists()]
+    backup = Path(str(payload.get("backup") or ""))
+    base_commit = str(payload.get("baseCommit") or "").strip()
+    entries: list[dict[str, object]] = []
+    unsafe: list[str] = []
+    for relative in additions:
+        target = ROOT / relative
+        if not target.exists():
+            entries.append({"path": relative, "existedAtBegin": False})
+            continue
+        if not target.is_file() or not base_commit:
+            unsafe.append(relative)
+            continue
+        prior = run(["git", "show", f"{base_commit}:{relative}"], check=False)
+        if getattr(prior, "returncode", 1) != 0:
+            unsafe.append(relative)
+            continue
+        backup_target = backup / relative
+        backup_target.parent.mkdir(parents=True, exist_ok=True)
+        backup_target.write_text(prior.stdout)
+        entries.append({"path": relative, "existedAtBegin": True})
     if unsafe:
         raise SystemExit(json.dumps({
             "ok": False,
-            "reason": "newly guarded path already exists; begin-state cannot be proven",
+            "reason": "newly guarded path begin-state cannot be proven from the lease base commit",
             "paths": unsafe,
         }, indent=2))
-    snapshot.extend({"path": relative, "existedAtBegin": False} for relative in additions)
+    snapshot.extend(entries)
     payload["sourceSnapshot"] = snapshot
     LOCK_PATH.write_text(json.dumps(payload, indent=2) + "\n")
     print(json.dumps({

@@ -99,12 +99,17 @@ fresh-lane launcher on Josh 2.0; it forwards authenticated specialist execution
 to JAIMES:
 
 ```bash
-ssh josh2 'cd ~/.openclaw/workspace/mission-control && python3 scripts/model_lane.py --task-type <type> --title <safe-title> --objective <safe-objective> --prompt <sanitized-prompt> --privacy dashboard-safe --requester joshex --execute'
+ssh josh2 'cd ~/.openclaw/workspace/mission-control && python3 scripts/model_lane.py --task-type <type> --title <safe-title> --objective <safe-objective> --prompt <sanitized-prompt> --privacy dashboard-safe --requester joshex --controller-work-id <owning-work-id> --controller-run-id <owning-run-id> --execute'
 ```
 
 Use explicit `--requested-provider` and `--requested-model` only when Josh asks
 for one or when the automatic task classification is ambiguous. Capture the
 returned output and integrate it; do not hand the conversation to the worker.
+Every real execution requires the exact controlling work/run pair. The launcher
+publishes the fresh lane as a nested worker, refreshes its heartbeat, updates a
+disclosed fallback model, and terminal-cleans it. `parent-owned` is reserved for
+the remote child transport and `diagnostic` for bounded provider probes; neither
+may be used to hide substantive agentic work.
 
 ## Guardrails
 

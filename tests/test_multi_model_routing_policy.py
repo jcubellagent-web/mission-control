@@ -5,6 +5,8 @@ import json
 from pathlib import Path
 from types import SimpleNamespace
 
+import pytest
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -147,6 +149,10 @@ def model_args(*, transport: str = "auto") -> SimpleNamespace:
         requested_model="",
         requested_reason="",
         codex_allowance="auto",
+        controller_work_id="controller-work",
+        controller_run_id="controller-run",
+        lane_id="test-model-lane",
+        lane_visibility="required",
     )
 
 
@@ -161,6 +167,7 @@ def test_codex_app_specialists_forward_to_jaimes_with_redacted_preview(monkeypat
     command = lane.command_for(args, route)
     assert command[:2] == ["ssh", "jaimes"]
     assert "--transport hermes" in command[2]
+    assert "--lane-visibility parent-owned" in command[2]
     assert "--codex-allowance conserve" in command[2]
     preview = lane.command_preview(command)
     assert "prompt redacted" in preview
@@ -274,6 +281,95 @@ def test_automatic_model_lane_discloses_and_executes_declared_fallback(monkeypat
     assert result == 0
     assert attempts == [["gemini", "primary"], ["ollama", "glm-5.2:cloud"]]
     assert "Fallback disclosure" in capsys.readouterr().err
+
+
+def test_real_model_lane_requires_exact_controller_provenance() -> None:
+    lane = load_module("model_lane_parent_contract", ROOT / "scripts" / "model_lane.py")
+    args = model_args()
+    args.controller_work_id = ""
+    with pytest.raises(SystemExit, match="requires --controller-work-id"):
+        lane.validate_lane_visibility(args)
+    args.lane_visibility = "diagnostic"
+    lane.validate_lane_visibility(args)
+
+
+def test_model_lane_publish_is_a_verified_nested_worker() -> None:
+    lane = load_module("model_lane_worker_publish", ROOT / "scripts" / "model_lane.py")
+    args = model_args()
+    route = {"agent": "joshex", "modelRoute": {
+        "provider": "ollama", "model": "glm-5.2:cloud",
+    }}
+    command = lane.lane_publish_command(
+        args,
+        route,
+        work_id="lane-work",
+        run_id="lane-run",
+        work_event="start",
+        status="active",
+        phase="working",
+        detail="Separate lane is active.",
+    )
+    rendered = " ".join(command)
+    assert "--execution-role worker" in rendered
+    assert "--controller-work-id controller-work" in rendered
+    assert "--controller-run-id controller-run" in rendered
+    assert "--model-family ollama" in rendered
+    assert "--model-id glm-5.2:cloud" in rendered
+    assert "--route-verified" in command
+
+
+def test_jaimes_lane_visibility_publishes_to_canonical_control_tower(monkeypatch) -> None:
+    lane = load_module("model_lane_canonical_publish", ROOT / "scripts" / "model_lane.py")
+    monkeypatch.setattr(lane.Path, "home", classmethod(lambda cls: Path("/Users/jc_agent")))
+    seen = {}
+
+    class Result:
+        returncode = 0
+        stdout = ""
+        stderr = ""
+
+    def fake_run(command, **_kwargs):
+        seen["command"] = command
+        return Result()
+
+    monkeypatch.setattr(lane.subprocess, "run", fake_run)
+    lane.run_lane_publish(["python3", "/repo/scripts/agent_publish.py", "--agent", "jaimes"])
+    assert seen["command"][:2] == ["ssh", "josh2"]
+    assert "scripts/agent_publish.py --agent jaimes" in seen["command"][2]
+
+
+def test_lane_visibility_tracks_disclosed_fallback_model(monkeypatch) -> None:
+    lane = load_module("model_lane_fallback_visibility", ROOT / "scripts" / "model_lane.py")
+    args = model_args(transport="hermes")
+    attempts = []
+    route_changes = []
+
+    monkeypatch.setattr(lane, "command_for", lambda _args, route: [route["modelRoute"]["model"]])
+
+    def fake_execute(command, _route):
+        attempts.append(command)
+        return 3 if len(attempts) == 1 else 0
+
+    monkeypatch.setattr(lane, "execute_verified", fake_execute)
+    route = {"modelRoute": {
+        "provider": "gemini",
+        "model": "gemini-3.6-flash-medium",
+        "fallbackRoutes": [{"provider": "ollama", "model": "glm-5.2:cloud"}],
+    }}
+    result = lane.execute_with_disclosed_fallbacks(
+        args,
+        ["primary"],
+        route,
+        on_route_change=route_changes.append,
+    )
+    assert result == 0
+    assert route_changes[0]["modelRoute"]["model"] == "glm-5.2:cloud"
+
+
+def test_gemini_smoke_is_explicitly_diagnostic() -> None:
+    source = (ROOT / "scripts" / "gemini_agent.py").read_text()
+    assert '"--lane-visibility",' in source
+    assert '"diagnostic",' in source
 
 
 def test_specialist_catalog_covers_reviewed_ollama_families() -> None:

@@ -59,6 +59,8 @@ def test_host_runtime_helpers_are_guarded_source() -> None:
         "scripts/agent_task.py",
         "scripts/agent_delegate.py",
         "scripts/linear_work_intent.py",
+        "scripts/model_lane.py",
+        "scripts/gemini_agent.py",
     }
     assert bridge.issubset(set(GUARD.SOURCE_PATHS))
     assert bridge.issubset(set(GUARD.PYTHON_COMPILE_PATHS))
@@ -186,6 +188,33 @@ def test_extend_snapshot_rejects_a_newly_guarded_path_that_already_exists(
         GUARD.extend_snapshot("own-token")
 
     assert json.loads(GUARD.LOCK_PATH.read_text())["sourceSnapshot"] == []
+
+
+def test_extend_snapshot_reconstructs_newly_guarded_tracked_file_from_base_commit(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    payload = lease(tmp_path)
+    payload["sourceSnapshot"] = []
+    payload["baseCommit"] = "abc123"
+    GUARD.LOCK_PATH.write_text(json.dumps(payload))
+    tracked = GUARD.ROOT / "scripts" / "tracked.py"
+    tracked.parent.mkdir(parents=True)
+    tracked.write_text("edited during lease\n")
+    monkeypatch.setattr(GUARD, "SOURCE_PATHS", ("scripts/tracked.py",))
+
+    def fake_show(args, **_kwargs):
+        assert args == ["git", "show", "abc123:scripts/tracked.py"]
+        return type("Process", (), {"returncode": 0, "stdout": "original at begin\n"})()
+
+    monkeypatch.setattr(GUARD, "run", fake_show)
+    GUARD.extend_snapshot("own-token")
+
+    extended = json.loads(GUARD.LOCK_PATH.read_text())
+    assert extended["sourceSnapshot"] == [
+        {"path": "scripts/tracked.py", "existedAtBegin": True},
+    ]
+    assert (Path(payload["backup"]) / "scripts" / "tracked.py").read_text() == "original at begin\n"
 
 
 def test_successful_completion_verifies_and_releases_own_lease(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

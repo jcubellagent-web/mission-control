@@ -276,6 +276,15 @@ Josh approved this default policy for Codex-app, Josh 2.0, and JAIMES work:
   disclose `ollama/glm-5.2:cloud` before substantive work. If the model is
   unavailable or the context is unsafe for cloud processing, explain the block
   and fall back to the appropriate Codex or local Ollama lane.
+- Every separately executing agentic lane—including a model lane, sub-agent,
+  delegated worker, parallel worker, or future launcher—must publish with the
+  exact controlling `workId` and `runId` as `executionRole=worker`. The launcher
+  keeps its verified model route and heartbeat current, records disclosed route
+  changes, and terminal-cleans it. Never infer lane parentage from owner, title,
+  objective text, provider name, or model name. `model_lane.py` enforces this for
+  fresh model lanes; other launchers must use the same canonical `agent_publish`
+  worker contract. Diagnostic probes must opt out explicitly and must not conceal
+  substantive work.
 
 ## Cookie And Keychain Disambiguation
 

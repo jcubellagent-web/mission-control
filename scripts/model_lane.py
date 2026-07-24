@@ -13,13 +13,26 @@ import os
 import shlex
 import subprocess
 import sys
+import threading
+import uuid
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 ROOT = Path(__file__).resolve().parents[1]
 AGENT_ROUTE = ROOT / "scripts" / "agent_route.py"
+AGENT_PUBLISH = ROOT / "scripts" / "agent_publish.py"
 JAIMES_SSH_HOST = os.environ.get("MODEL_LANE_JAIMES_HOST", "jaimes")
 JAIMES_REPO = "~/.openclaw/workspace/mission-control"
+CONTROL_TOWER_HOST = os.environ.get("MODEL_LANE_CONTROL_TOWER_HOST", "josh2")
+CONTROL_TOWER_REPO = "/Users/josh2.0/.openclaw/workspace/mission-control"
+LANE_HEARTBEAT_SECONDS = 30
+
+PROVIDER_MODEL_FAMILIES = {
+    "codex": "codex",
+    "gemini": "antigravity",
+    "ollama": "ollama",
+    "xai": "grok",
+}
 
 
 def utc_stamp() -> str:
@@ -29,6 +42,175 @@ def utc_stamp() -> str:
 def compact(text: str, limit: int = 240) -> str:
     value = " ".join(str(text or "").split())
     return value if len(value) <= limit else value[: limit - 1].rstrip() + "…"
+
+
+def lane_work_id(args: argparse.Namespace) -> str:
+    explicit = str(getattr(args, "lane_id", "") or "").strip()
+    if explicit:
+        return explicit
+    return f"model-lane-{utc_stamp().lower()}-{uuid.uuid4().hex[:10]}"
+
+
+def validate_lane_visibility(args: argparse.Namespace) -> None:
+    mode = str(getattr(args, "lane_visibility", "required") or "required")
+    if mode != "required":
+        return
+    if not str(getattr(args, "controller_work_id", "") or "").strip() or not str(
+        getattr(args, "controller_run_id", "") or ""
+    ).strip():
+        raise SystemExit(
+            "Executing a model lane requires --controller-work-id and --controller-run-id so "
+            "Control Tower can render the separate worker without inferring its parent."
+        )
+
+
+def model_route_identity(route: dict[str, Any]) -> tuple[str, str]:
+    selected = route.get("modelRoute") or {}
+    provider = str(selected.get("provider") or "").strip().lower()
+    model = str(selected.get("model") or "").strip()
+    family = PROVIDER_MODEL_FAMILIES.get(provider, provider)
+    if not family or not model:
+        raise SystemExit("Verified model-lane visibility requires an exact provider and model.")
+    return family, model
+
+
+def lane_publish_command(
+    args: argparse.Namespace,
+    route: dict[str, Any],
+    *,
+    work_id: str,
+    run_id: str,
+    work_event: str,
+    status: str,
+    phase: str,
+    detail: str,
+) -> list[str]:
+    family, model = model_route_identity(route)
+    owner = str(route.get("agent") or args.requester).strip()
+    return [
+        sys.executable,
+        str(AGENT_PUBLISH),
+        "--agent", owner,
+        "--title", compact(f"Model lane: {args.title}", 180),
+        "--status", status,
+        "--phase", phase,
+        "--tool", "model_lane.py",
+        "--detail", compact(detail, 460),
+        "--origin", "model-lane",
+        "--work-id", work_id,
+        "--run-id", run_id,
+        "--work-event", work_event,
+        "--model-family", family,
+        "--model-id", model,
+        "--route-verified",
+        "--execution-role", "worker",
+        "--controller-work-id", str(args.controller_work_id),
+        "--controller-run-id", str(args.controller_run_id),
+        "--lease-seconds", str(max(LANE_HEARTBEAT_SECONDS * 3, 120)),
+    ]
+
+
+def run_lane_publish(command: list[str]) -> None:
+    if Path.home().name == "jc_agent":
+        canonical = ["python3", "scripts/agent_publish.py", *command[2:]]
+        command = [
+            "ssh",
+            CONTROL_TOWER_HOST,
+            f"cd {shlex.quote(CONTROL_TOWER_REPO)} && {shlex.join(canonical)}",
+        ]
+    proc = subprocess.run(command, cwd=ROOT, capture_output=True, text=True, check=False)
+    if proc.returncode != 0:
+        raise RuntimeError(
+            proc.stderr.strip() or proc.stdout.strip() or "model-lane visibility publish failed"
+        )
+
+
+class LaneVisibility:
+    """Publish one exact nested worker lifecycle for a separately executing lane."""
+
+    def __init__(self, args: argparse.Namespace, route: dict[str, Any]) -> None:
+        self.args = args
+        self.route = route
+        self.work_id = lane_work_id(args)
+        self.run_id = f"{self.work_id}-run"
+        self._stop = threading.Event()
+        self._lock = threading.Lock()
+        self._thread: threading.Thread | None = None
+        self.heartbeat_error = ""
+
+    def _publish(self, *, work_event: str, status: str, phase: str, detail: str) -> None:
+        with self._lock:
+            route = self.route
+            run_lane_publish(lane_publish_command(
+                self.args,
+                route,
+                work_id=self.work_id,
+                run_id=self.run_id,
+                work_event=work_event,
+                status=status,
+                phase=phase,
+                detail=detail,
+            ))
+
+    def start(self) -> None:
+        family, model = model_route_identity(self.route)
+        self._publish(
+            work_event="start",
+            status="active",
+            phase="working",
+            detail=f"Separate verified {family} lane is executing with {model}.",
+        )
+        self._thread = threading.Thread(target=self._heartbeat_loop, daemon=True)
+        self._thread.start()
+
+    def _heartbeat_loop(self) -> None:
+        while not self._stop.wait(LANE_HEARTBEAT_SECONDS):
+            try:
+                self._publish(
+                    work_event="heartbeat",
+                    status="active",
+                    phase="working",
+                    detail="Separate model lane is still executing.",
+                )
+            except Exception as exc:  # terminal cleanup still gets a final attempt
+                self.heartbeat_error = compact(str(exc), 300)
+
+    def update_route(self, route: dict[str, Any]) -> None:
+        with self._lock:
+            self.route = route
+        family, model = model_route_identity(route)
+        self._publish(
+            work_event="update",
+            status="active",
+            phase="routed",
+            detail=f"Disclosed fallback lane is now executing with {family}/{model}.",
+        )
+
+    def finish(self, result: int) -> bool:
+        self._stop.set()
+        if self._thread:
+            self._thread.join(timeout=2)
+        try:
+            self._publish(
+                work_event="terminal",
+                status="done" if result == 0 else "error",
+                phase="delivered" if result == 0 else "failed",
+                detail=(
+                    "Separate model lane completed and returned to its controller."
+                    if result == 0
+                    else f"Separate model lane stopped with exit code {result}."
+                ),
+            )
+            if self.heartbeat_error:
+                print(
+                    f"Model-lane heartbeat warning: {self.heartbeat_error}",
+                    file=sys.stderr,
+                )
+                return False
+            return True
+        except Exception as exc:
+            print(f"Model-lane visibility cleanup failed: {compact(str(exc), 300)}", file=sys.stderr)
+            return False
 
 
 def run_json(cmd: list[str]) -> dict[str, Any]:
@@ -124,6 +306,7 @@ def command_for(args: argparse.Namespace, route: dict[str, Any]) -> list[str]:
             "--requested-reason", str(model_route.get("reason") or "usage-aware specialist route"),
             "--codex-allowance", str(model_route.get("codexAllowanceMode") or args.codex_allowance),
             "--transport", "hermes",
+            "--lane-visibility", "parent-owned",
             "--execute",
         ]
         for cap in args.capability or []:
@@ -247,6 +430,7 @@ def execute_with_disclosed_fallbacks(
     args: argparse.Namespace,
     primary_cmd: list[str],
     route: dict[str, Any],
+    on_route_change: Callable[[dict[str, Any]], None] | None = None,
 ) -> int:
     """Run a selected lane, then only policy-declared dashboard-safe fallbacks.
 
@@ -291,11 +475,40 @@ def execute_with_disclosed_fallbacks(
             "verifyBeforeWork": True,
         })
         fallback_route["modelRoute"] = fallback_model_route
+        if on_route_change:
+            on_route_change(fallback_route)
         result = execute_verified(command_for(args, fallback_route), fallback_route)
         if result == 0:
             return 0
         primary_label = f"{provider}/{model}"
     return result
+
+
+def execute_with_lane_visibility(
+    args: argparse.Namespace,
+    command: list[str],
+    route: dict[str, Any],
+) -> int:
+    if args.lane_visibility != "required":
+        return execute_with_disclosed_fallbacks(args, command, route)
+    visibility = LaneVisibility(args, route)
+    try:
+        visibility.start()
+    except Exception as exc:
+        visibility.finish(1)
+        raise SystemExit(f"Model lane did not start because visibility could not be proven: {compact(str(exc), 300)}") from exc
+    result = 1
+    try:
+        result = execute_with_disclosed_fallbacks(
+            args,
+            command,
+            route,
+            on_route_change=visibility.update_route,
+        )
+        return result if visibility.finish(result) else (result or 4)
+    except BaseException:
+        visibility.finish(result)
+        raise
 
 
 def main() -> int:
@@ -312,6 +525,15 @@ def main() -> int:
     parser.add_argument("--requested-reason", default="requested by Josh")
     parser.add_argument("--codex-allowance", default="auto", choices=["auto", "normal", "conserve", "exhausted"])
     parser.add_argument("--transport", default="auto", choices=["auto", "hermes", "codex", "openclaw"])
+    parser.add_argument("--controller-work-id", default="", help="Exact controlling Live Work id for this separate lane.")
+    parser.add_argument("--controller-run-id", default="", help="Exact controlling Live Work run id for this separate lane.")
+    parser.add_argument("--lane-id", default="", help="Optional idempotent lane id; generated when omitted.")
+    parser.add_argument(
+        "--lane-visibility",
+        default="required",
+        choices=["required", "parent-owned", "diagnostic"],
+        help="Real lanes require a parent; remote child transport and bounded diagnostics opt out explicitly.",
+    )
     parser.add_argument("--execute", action="store_true", help="Actually launch the fresh lane. Default prints the verified command plan only.")
     args = parser.parse_args()
 
@@ -331,7 +553,8 @@ def main() -> int:
         print(json.dumps(plan, indent=2))
         return 0
 
-    return execute_with_disclosed_fallbacks(args, cmd, route)
+    validate_lane_visibility(args)
+    return execute_with_lane_visibility(args, cmd, route)
 
 
 if __name__ == "__main__":

@@ -239,6 +239,8 @@ def cmd_smoke(args: argparse.Namespace) -> int:
         model,
         "--requested-reason",
         "Explicit broker smoke test",
+        "--lane-visibility",
+        "diagnostic",
         "--execute",
     ]
     code, out, err = run(cmd, timeout=args.timeout)
