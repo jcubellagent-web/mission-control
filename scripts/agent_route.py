@@ -987,14 +987,11 @@ def xai_live_allowance_status(now: dt.datetime | None = None) -> tuple[bool | No
     return None, "live SuperGrok allowance is not reported"
 
 
-def ollama_live_allowance_status(now: dt.datetime | None = None) -> tuple[bool | None, str]:
-    """Return a soft GLM routing signal from fresh quota-only telemetry.
-
-    Missing or stale personal-Mac telemetry is unknown rather than unhealthy.
-    Independently reported runtime failures and exact exhaustion fail closed.
-    """
-    usage = read_json(MODEL_USAGE_PATH, {})
-    limits = ((usage.get("codexbarLimits") or {}).get("ollama") or {}) if isinstance(usage, dict) else {}
+def evaluate_ollama_allowance_limits(
+    limits: dict[str, Any],
+    now: dt.datetime | None = None,
+) -> tuple[bool | None, str]:
+    """Validate one allowlisted Ollama quota projection."""
     if not isinstance(limits, dict) or not limits:
         return None, "live Ollama allowance is not reported"
     telemetry = str(limits.get("quotaTelemetryStatus") or "").strip().lower()
@@ -1029,6 +1026,63 @@ def ollama_live_allowance_status(now: dt.datetime | None = None) -> tuple[bool |
             return False, "Ollama live allowance is exhausted"
         return True, f"Ollama live allowance has {minimum:g}% remaining"
     return None, "Ollama runtime is reported but exact allowance is unknown"
+
+
+def canonical_ollama_allowance_limits() -> dict[str, Any] | None:
+    """Read only allowlisted Ollama quota fields from canonical Control Tower."""
+    if Path.home().name == "josh2.0":
+        return None
+    remote_script = (
+        "import json; from pathlib import Path; "
+        "d=json.loads((Path.home()/'.openclaw/workspace/mission-control/data/modelUsage.json').read_text()); "
+        "o=((d.get('codexbarLimits') or {}).get('ollama') or {}); "
+        "keys=('available','status','quotaTelemetryStatus','codexbarUpdatedAt','usageWindows'); "
+        "print(json.dumps({k:o.get(k) for k in keys}))"
+    )
+    try:
+        proc = subprocess.run(
+            [
+                "ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=5",
+                os.environ.get("CONTROL_TOWER_CANONICAL_HOST", "josh2"),
+                "python3", "-c", remote_script,
+            ],
+            capture_output=True,
+            text=True,
+            timeout=8,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    if proc.returncode != 0 or not proc.stdout.strip() or len(proc.stdout) > 32768:
+        return None
+    try:
+        payload = json.loads(proc.stdout)
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(payload, dict):
+        return None
+    allowed = {"available", "status", "quotaTelemetryStatus", "codexbarUpdatedAt", "usageWindows"}
+    return {key: payload.get(key) for key in allowed}
+
+
+def ollama_live_allowance_status(now: dt.datetime | None = None) -> tuple[bool | None, str]:
+    """Return a soft GLM routing signal from fresh quota-only telemetry.
+
+    Missing or stale local telemetry is unknown rather than unhealthy. A
+    non-canonical host may then consult Control Tower's allowlisted projection.
+    Independently reported runtime failures and exact exhaustion fail closed.
+    """
+    usage = read_json(MODEL_USAGE_PATH, {})
+    limits = ((usage.get("codexbarLimits") or {}).get("ollama") or {}) if isinstance(usage, dict) else {}
+    local_status, local_reason = evaluate_ollama_allowance_limits(limits, now)
+    if local_status is not None:
+        return local_status, local_reason
+    canonical_limits = canonical_ollama_allowance_limits()
+    if canonical_limits:
+        canonical_status, canonical_reason = evaluate_ollama_allowance_limits(canonical_limits, now)
+        if canonical_status is not None:
+            return canonical_status, f"Control Tower {canonical_reason}"
+    return local_status, local_reason
 
 
 def ollama_surplus_capacity_available(

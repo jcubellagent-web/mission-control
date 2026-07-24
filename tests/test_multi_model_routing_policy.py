@@ -374,6 +374,50 @@ def test_ollama_quota_is_a_fresh_soft_signal_and_exhaustion_falls_back(tmp_path,
     assert [row["provider"] for row in selected["fallbackRoutes"]] == ["codex"]
 
 
+def test_stale_local_ollama_quota_uses_canonical_allowlisted_projection(tmp_path, monkeypatch) -> None:
+    route = load_module("agent_route_glm_canonical_quota", ROOT / "scripts" / "agent_route.py")
+    usage = tmp_path / "modelUsage.json"
+    usage.write_text(json.dumps({"codexbarLimits": {"ollama": {
+        "available": True,
+        "status": "ready",
+        "codexbarUpdatedAt": "2026-07-24T19:30:00Z",
+        "usageWindows": [{"label": "Weekly", "remainingPercent": 98.8}],
+    }}}))
+    monkeypatch.setattr(route, "MODEL_USAGE_PATH", usage)
+    monkeypatch.setattr(route, "canonical_ollama_allowance_limits", lambda: {
+        "available": True,
+        "status": "ready",
+        "quotaTelemetryStatus": "fresh",
+        "codexbarUpdatedAt": "2026-07-24T23:05:00Z",
+        "usageWindows": [
+            {"label": "Session", "remainingPercent": 99.5},
+            {"label": "Weekly", "remainingPercent": 98.7},
+        ],
+    })
+
+    healthy, reason = route.ollama_live_allowance_status(
+        route.dt.datetime(2026, 7, 24, 23, 6, tzinfo=route.dt.timezone.utc)
+    )
+    assert healthy is True
+    assert "Control Tower" in reason
+    assert "98.7% remaining" in reason
+
+    payload = json.loads(usage.read_text())
+    payload["codexbarLimits"]["ollama"].update({"available": False, "status": "error"})
+    payload["codexbarLimits"]["ollama"]["codexbarUpdatedAt"] = "2026-07-24T23:05:00Z"
+    usage.write_text(json.dumps(payload))
+    monkeypatch.setattr(
+        route,
+        "canonical_ollama_allowance_limits",
+        lambda: (_ for _ in ()).throw(AssertionError("explicit local failure must not use remote quota")),
+    )
+    healthy, reason = route.ollama_live_allowance_status(
+        route.dt.datetime(2026, 7, 24, 23, 6, tzinfo=route.dt.timezone.utc)
+    )
+    assert healthy is False
+    assert "error" in reason
+
+
 def test_surplus_ollama_quota_expands_glm_first_stop_weighting(monkeypatch) -> None:
     route = load_module("agent_route_glm_surplus", ROOT / "scripts" / "agent_route.py")
     args = model_args()
