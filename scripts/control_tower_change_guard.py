@@ -21,6 +21,8 @@ BACKUP_ROOT = Path.home() / ".openclaw" / "backups" / "control-tower-changes"
 PUSH_POLICY_PATH = ROOT / "config" / "control-tower-push-policy.json"
 SOURCE_PATHS = (
     "AGENTS.md",
+    ".github/dependabot.yml",
+    ".github/workflows/dependency-hygiene.yml",
     ".github/workflows/mission-control-regression.yml",
     ".gitignore",
     "agent-skills",
@@ -28,6 +30,7 @@ SOURCE_PATHS = (
     "schemas",
     "docs/agent-runbooks.md",
     "docs/brain-topic-intake.md",
+    "docs/continuous-maintenance.md",
     "data/agent-route-benchmark-suite.json",
     "data/agent-routing-policy.json",
     "data/model-provider-budgets.json",
@@ -53,6 +56,7 @@ SOURCE_PATHS = (
     "scripts/ecosystem_qa_scheduler.py",
     "scripts/ecosystem_qa_supervisor.py",
     "scripts/ecosystem_proposal_ledger.py",
+    "scripts/continuous_maintenance.py",
     "scripts/ecosystem_retention.py",
     "scripts/ecosystem_runtime_probe.py",
     "scripts/ecosystem_state_reconciler.py",
@@ -111,6 +115,7 @@ SOURCE_PATHS = (
     "scripts/todays_jobs_consistency_watchdog.py",
 )
 PYTHON_COMPILE_PATHS = (
+    "scripts/continuous_maintenance.py",
     "scripts/control_tower_change_guard.py",
     "scripts/control_tower_work_store.py",
     "scripts/codex_remote_manual_lane.py",
