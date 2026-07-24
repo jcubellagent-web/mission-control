@@ -76,6 +76,7 @@ def test_cli_has_no_show_code_or_seed_operation() -> None:
     assert "show-code" not in source
     assert "show-seed" not in source
     assert "clipboard" not in source.lower()
+    assert 'scope.evaluate(\n                r"""' in source
 
 
 def test_keychain_ffi_declares_argument_types() -> None:

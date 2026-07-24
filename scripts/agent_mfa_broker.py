@@ -390,7 +390,7 @@ class BrowserSession(AbstractContextManager["BrowserSession"]):
         while True:
             scope = self._scope()
             material = scope.evaluate(
-                """root => {
+                r"""root => {
                 const chunks = [root?.innerText || ""];
                 for (const el of root.querySelectorAll(
                     'input,code,pre,[href*="otpauth"],[src*="otpauth"],[data-otp-secret]'
