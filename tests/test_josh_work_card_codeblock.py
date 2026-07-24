@@ -26,7 +26,7 @@ spec.loader.exec_module(card)
 def plain_html(value: str) -> str:
     value = re.sub(r"<br\s*/?>", "\n", value, flags=re.I)
     value = re.sub(r"<[^>]+>", "", value)
-    return card.html.unescape(value)
+    return " ".join(card.html.unescape(value).split())
 
 
 def test_card_state_writes_are_private(tmp_path, monkeypatch):
@@ -171,7 +171,7 @@ def test_live_card_is_html_preformatted_and_bounded():
     assert "fixed-width renderer" not in body
 
 
-def test_final_summary_is_polished_proportional_html():
+def test_final_summary_is_one_mobile_safe_codeblock():
     rendered = card.build_completion_summary(
         title="Render final response summaries in fixed-width Telegram code blocks",
         status="done",
@@ -180,12 +180,15 @@ def test_final_summary_is_polished_proportional_html():
         next_step="No action needed.",
         blocker="None",
     )
-    assert rendered.startswith("<b>JOSH 2.0 ·")
-    assert not rendered.startswith("<pre>")
+    assert rendered.startswith("<pre>JOSH 2.0 ·")
+    assert rendered.endswith("</pre>")
     body = plain_html(rendered)
     assert "What was done:" in body
     assert "Approval needed:" in body
-    assert "• " in rendered
+    assert "- " in rendered
+    raw = card.html.unescape(rendered.removeprefix("<pre>").removesuffix("</pre>"))
+    assert max(map(card.display_width, raw.splitlines())) <= 38
+    assert "<blockquote>" not in rendered
 
 
 def test_weak_generated_success_is_downgraded_without_inventing_results():
@@ -1106,7 +1109,9 @@ Appropriate next steps:
 Approval needed:
 - n/a</pre>"""
         path.write_text(value, encoding="utf-8")
-        assert card.load_final_text_file(str(path)) == value
+        rendered = card.load_final_text_file(str(path))
+        assert rendered.startswith("<pre>JOSH 2.0 · COMPLETE")
+        assert "\nModel: codex/gpt-5.6-luna\nRoute: Josh 2.0 Inbox\nWhy: verified assessment\n" in rendered
 
 
 def test_final_text_file_accepts_polished_proportional_html():
@@ -1131,7 +1136,10 @@ def test_final_text_file_accepts_polished_proportional_html():
 <b>Approval needed:</b>
 • None"""
         path.write_text(value, encoding="utf-8")
-        assert card.load_final_text_file(str(path)) == value
+        rendered = card.load_final_text_file(str(path))
+        assert rendered.startswith("<pre>JOSH 2.0 · COMPLETE")
+        assert "<blockquote>" not in rendered
+        assert "\nModel: codex/gpt-5.6-terra\nRoute: Josh 2.0 Inbox\nWhy: verified Telegram assessment\n" in rendered
 
 
 def test_final_text_file_rejects_weak_agent_rh_completion_card():
@@ -1189,7 +1197,9 @@ Appropriate next steps:
 Approval needed:
 - n/a</pre>"""
         path.write_text(value, encoding="utf-8")
-        assert card.load_final_text_file(str(path)) == value
+        rendered = card.load_final_text_file(str(path))
+        assert rendered.startswith("<pre>JOSH 2.0 · COMPLETE")
+        assert "\nModel: codex/gpt-5.6-sol\nRoute: JAIMES execution\nWhy: origin-route repair\n" in rendered
 
 
 def test_final_text_file_rejects_duplicate_why_header():

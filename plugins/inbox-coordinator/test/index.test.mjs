@@ -1208,8 +1208,9 @@ test("normalizes a malformed final into the canonical mobile contract", () => {
   const parsed = parseCanonicalFinalSummary(recovered, { expectedModel: "openai/gpt-5.6" });
   assert.equal(parsed.ok, true);
   assert.equal(parsed.terminalStatus, "done");
-  assert.equal(recovered.startsWith("<b>JOSH 2.0 · COMPLETE</b>"), true);
-  assert.equal(recovered.startsWith("<pre>"), false);
+  assert.equal(recovered.startsWith("<pre>JOSH 2.0 · COMPLETE"), true);
+  assert.equal(recovered.includes("\nModel: openai/gpt-5.6\nRoute: Josh 2.0 Inbox\nWhy: format recovery\n"), true);
+  assert.equal(recovered.includes("<blockquote>"), false);
 });
 
 test("weak malformed recovery is truthful and never invents success padding", () => {

@@ -556,8 +556,8 @@ def _no_action(value: str) -> bool:
 def validate(text: str, module=None) -> list[str]:
     problems: list[str] = []
     legacy_pre = bool(re.fullmatch(r"\s*<pre>[\s\S]*</pre>\s*", text, flags=re.I))
-    if not legacy_pre and not text.startswith("<b>JOSH 2.0 ·"):
-        problems.append("final summary must use the polished proportional contract or its pre fallback")
+    if not legacy_pre:
+        problems.append("final summary must use one mobile-safe pre code block")
     plain = pre_text(text) if legacy_pre else final_plain_text(text)
     positions = [plain.find(label) for label in LABELS]
     if any(pos < 0 for pos in positions):
@@ -584,13 +584,32 @@ def validate(text: str, module=None) -> list[str]:
         if line.strip()
     ]
     model_index = next((index for index, line in enumerate(header_lines) if line.startswith("Model:")), -1)
-    header = " ".join(header_lines[model_index:]) if model_index >= 0 else ""
-    header_match = re.fullmatch(
+    selected_header_lines = header_lines[model_index:] if model_index >= 0 else []
+    header = " ".join(selected_header_lines)
+    exact_header_fields = all(
+        len(re.findall(rf"(?i)\b{name}:", header)) == 1
+        for name in ("Model", "Route", "Why")
+    )
+    combined_header_match = re.fullmatch(
         r"Model:\s*([^|]+?)\s*\|\s*Route:\s*([^|]+?)\s*\|\s*Why:\s*([^|]+)",
         header,
         flags=re.I,
     )
-    if not header_match:
+    fields: dict[str, str] = {}
+    current_field = ""
+    for line in selected_header_lines:
+        field_match = re.match(r"^(Model|Route|Why):\s*(.*)$", line, flags=re.I)
+        if field_match:
+            current_field = field_match.group(1).lower()
+            fields[current_field] = field_match.group(2).strip()
+        elif current_field:
+            fields[current_field] = f"{fields[current_field]} {line.strip()}".strip()
+    header_values = (
+        list(combined_header_match.groups())
+        if combined_header_match
+        else [fields.get("model", ""), fields.get("route", ""), fields.get("why", "")]
+    )
+    if not exact_header_fields or any(not value.strip() for value in header_values):
         problems.append("final summary header must contain exactly one Model, Route, and Why field")
     done_start = plain.find("What was done:")
     issues_start = plain.find("Issues:")
@@ -603,7 +622,7 @@ def validate(text: str, module=None) -> list[str]:
     issues = _section_body(plain, "Issues:", "Appropriate next steps:")
     next_steps = _section_body(plain, "Appropriate next steps:", "Approval needed:")
     if complete_yes:
-        if not header_match or any(UNVERIFIED_HEADER_PATTERN.search(value.strip()) for value in header_match.groups()):
+        if not exact_header_fields or any(not value.strip() or UNVERIFIED_HEADER_PATTERN.search(value.strip()) for value in header_values):
             problems.append("Complete Yes requires verified model, route, and why values")
         normalized = [_normalized_item(item) for item in done_items]
         substantive = [item for item in done_items if _substantive(item)]

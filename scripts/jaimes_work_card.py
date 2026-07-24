@@ -22,6 +22,11 @@ import urllib.request
 
 ROOT = Path(__file__).resolve().parents[1]
 HOME = Path.home()
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from telegram_final_format import render_final_codeblock  # type: ignore  # noqa: E402
 #JAIMES: Telegram <pre> cards use fixed-width glyph cells. Three spaces
 # visually match the emoji/check prefix there; six spaces only matched
 # proportional text and pushed continuation rows too far right.
@@ -999,29 +1004,19 @@ def build_completion_summary(
         next_steps = ["Approve the next safe step."] if issues else []
     model_line = model or os.environ.get("JAIMES_WORK_CARD_MODEL") or "JAIMES Telegram task card"
 
-    def final_lines(items: list[str], fallback: str) -> list[str]:
-        clean = [compact(item, limit=180) for item in items if compact(item, limit=180)]
-        return [hanging_wrap(f"- {item}") for item in clean[:5]] or [hanging_wrap(f"- {fallback}")]
-
     approval_needed = next_steps if issues else []
-    lines = [
-        hanging_wrap(f"Model: {friendly_model_line(model_line)} | Route: Hermes workhorse | Why: verified task execution"),
-        "",
-        hanging_wrap(f"Complete: {'Yes' if complete else 'No'} - {compact(title, limit=120)}"),
-        "",
-        "What was done:",
-        *final_lines(unique_steps[-5:], f"Closed out: {title}"),
-        "",
-        "Issues:",
-        *final_lines(issues, "n/a"),
-        "",
-        "Appropriate next steps:",
-        *final_lines(next_steps, "No action needed."),
-        "",
-        "Approval needed:",
-        *final_lines(approval_needed, "n/a"),
-    ]
-    return f"<pre>{html.escape(chr(10).join(lines))}</pre>"
+    return render_final_codeblock(
+        owner="JAIMES",
+        complete=complete,
+        model=friendly_model_line(model_line),
+        route="Hermes workhorse",
+        why="verified task execution",
+        complete_detail=compact(title, limit=120),
+        done=unique_steps[-5:] or [f"Closed out: {title}"],
+        issues=issues,
+        next_steps=next_steps,
+        approvals=approval_needed,
+    )
 
 
 def live_phase(status: str, current: str) -> str:

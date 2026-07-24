@@ -473,7 +473,7 @@ class InboxCoordinatorTests(unittest.TestCase):
         )
         self.assertIn("worker returns only Complete", guidance)
         self.assertIn("delivery formatter must prepend", guidance)
-        self.assertIn("Model: <verified provider/model> | Route: <actual lane> | Why:", guidance)
+        self.assertIn("separate Model: <verified provider/model>, Route: <actual lane>, and Why:", guidance)
         self.assertIn("missing optional test runner", guidance)
         self.assertIn("completed audit with negative findings uses Complete: Yes", guidance)
         self.assertIn("render-state count, never a Telegram message count", guidance)
@@ -734,7 +734,7 @@ class InboxCoordinatorTests(unittest.TestCase):
         self.assertEqual(route["preflightError"], "privacy-policy")
         self.assertEqual(route["fallback"], "")
 
-    def test_final_summary_is_deterministic_proportional_html(self):
+    def test_final_summary_is_deterministic_mobile_codeblock(self):
         coordinator = load_module()
 
         class Args:
@@ -748,16 +748,17 @@ class InboxCoordinatorTests(unittest.TestCase):
             approval = []
 
         text = coordinator.format_final(Args)
-        self.assertTrue(text.startswith("<b>JOSH 2.0 · COMPLETE</b>"))
-        self.assertFalse(text.startswith("<pre>"))
+        self.assertTrue(text.startswith("<pre>JOSH 2.0 · COMPLETE"))
+        self.assertTrue(text.endswith("</pre>"))
         decoded = html.unescape(text)
         plain = re.sub(r"<[^>]+>", "", decoded)
-        self.assertIn("Model: codex/gpt-5.6-luna | Route:", decoded)
-        self.assertIn("Josh 2.0 Inbox coordinator | Why:", decoded)
+        self.assertIn("Model: codex/gpt-5.6-luna\nRoute:", decoded)
+        self.assertIn("Route: Josh 2.0 Inbox coordinator\nWhy:", decoded)
         self.assertIn("fast coordination", decoded)
         self.assertIn("Complete: Yes", plain)
-        self.assertIn("• None", decoded)
-        self.assertIn("<blockquote>", decoded)
+        self.assertIn("- None", decoded)
+        self.assertNotIn("<blockquote>", decoded)
+        self.assertLessEqual(max(map(len, plain.splitlines())), 38)
 
     def test_telemetry_excludes_prompt_and_output(self):
         coordinator = load_module()
@@ -920,11 +921,10 @@ class InboxCoordinatorTests(unittest.TestCase):
         decoded = html.unescape(text)
         body = re.sub(r"<[^>]+>", "", decoded)
         flat = " ".join(body.split())
-        self.assertTrue(text.startswith("<b>JOSH 2.0 · COMPLETE</b>"))
-        self.assertFalse(text.startswith("<pre>"))
-        self.assertIn("Model: xai/grok-test | Route:", body)
-        self.assertIn("auth=Grok CLI authentication", body)
-        self.assertIn("fallback=gemini execution failed; selected grok", body)
+        self.assertTrue(text.startswith("<pre>JOSH 2.0 · COMPLETE"))
+        self.assertIn("Model: xai/grok-test\nRoute:", body)
+        self.assertIn("auth=Grok CLI", flat)
+        self.assertIn("fallback=gemini execution failed;", flat)
         self.assertIn("Complete: Yes", body)
         self.assertIn("What was done:", body)
         self.assertIn("Issues:", body)
@@ -936,7 +936,7 @@ class InboxCoordinatorTests(unittest.TestCase):
         self.assertNotIn("**", decoded)
         self.assertNotIn("abcdefghijklmnop", decoded)
         self.assertIn("[redacted]", decoded)
-        self.assertIn("• ", text)
+        self.assertIn("- ", text)
 
     def test_final_auth_is_unverified_without_an_executor_checkpoint(self):
         coordinator = load_module()
@@ -1125,9 +1125,9 @@ class InboxCoordinatorTests(unittest.TestCase):
             "executionVerified": True,
         }
         rendered = html.unescape(coordinator.render_final_html(route, execution, output))
-        self.assertTrue(rendered.startswith("<b>JOSH 2.0 · COMPLETE</b>"))
-        self.assertIn("Model: ollama/glm-5.2:cloud | Route: glm", rendered)
-        self.assertIn("<b>Complete:</b> Yes", rendered)
+        self.assertTrue(rendered.startswith("<pre>JOSH 2.0 · COMPLETE"))
+        self.assertIn("Model: ollama/glm-5.2:cloud\nRoute: glm", rendered)
+        self.assertIn("Complete: Yes", rendered)
 
     def test_nonzero_failed_evidence_still_requires_an_issue(self):
         coordinator = load_module()

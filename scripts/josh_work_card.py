@@ -35,6 +35,8 @@ DIRECT_SESSION_KEY = "agent:main:telegram:direct:6218150306"
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
+from telegram_final_format import render_final_codeblock  # type: ignore  # noqa: E402
+
 try:
     from send_josh_reply import API_BASE, TARGET, build_payload  # type: ignore
 except Exception:  # noqa: BLE001 - dry-run and local validation can run without Josh helper
@@ -1604,30 +1606,18 @@ def build_completion_summary(
     )
     approval_needed = [*next_steps, "Adjust the plan", "Cancel this task"] if issues else ["None"]
 
-    def rich_bullets(items: list[str], fallback: str) -> list[str]:
-        clean = [compact(item, limit=180) for item in items if compact(item, limit=180)]
-        return [f"• {html.escape(item)}" for item in (clean[:5] or [fallback])]
-
-    status_heading = "COMPLETE" if complete == "Yes" else "NEEDS ATTENTION"
-    lines = [
-        f"<b>JOSH 2.0 · {status_heading}</b>",
-        f"<code>{html.escape(f'Model: {friendly_model_line(model_line)} | Route: {route_label} | Why: {why}')}</code>",
-        "",
-        f"<blockquote><b>Complete:</b> {html.escape(complete)} - {html.escape(complete_detail)}</blockquote>",
-        "",
-        "<b>What was done:</b>",
-        *rich_bullets(steps, "Detailed findings were not captured."),
-        "",
-        "<b>Issues:</b>",
-        *rich_bullets(issues, "None"),
-        "",
-        "<b>Appropriate next steps:</b>",
-        *rich_bullets(next_steps, "No action needed."),
-        "",
-        "<b>Approval needed:</b>",
-        *rich_bullets(approval_needed, "None"),
-    ]
-    return "\n".join(lines)
+    return render_final_codeblock(
+        owner="JOSH 2.0",
+        complete=complete == "Yes",
+        model=friendly_model_line(model_line),
+        route=route_label,
+        why=why,
+        complete_detail=complete_detail,
+        done=steps,
+        issues=issues,
+        next_steps=next_steps,
+        approvals=approval_needed,
+    )
 
 
 def build_card(
@@ -2080,14 +2070,30 @@ def load_final_text_file(path: str) -> str:
     model_index = next((index for index, line in enumerate(all_header_lines) if line.startswith("Model:")), -1)
     header_lines = all_header_lines[model_index:] if model_index >= 0 else []
     header = " ".join(line.strip() for line in header_lines)
-    header_valid = bool(re.fullmatch(
+    exact_header_fields = all(
+        len(re.findall(rf"(?i)\b{name}:", header)) == 1
+        for name in ("Model", "Route", "Why")
+    )
+    combined_header_match = re.fullmatch(
         r"Model:\s*[^|]+?\s*\|\s*Route:\s*[^|]+?\s*\|\s*Why:\s*[^|]+",
         header,
         flags=re.I,
-    ))
-    header_wrap_valid = bool(header_lines) and (
-        not legacy_pre or all(line.startswith("   ") for line in header_lines[1:])
     )
+    header_fields: dict[str, str] = {}
+    current_header_field = ""
+    separate_header_valid = bool(header_lines)
+    for line in header_lines:
+        field_match = re.match(r"^(Model|Route|Why):\s*(.*)$", line.strip(), flags=re.I)
+        if field_match:
+            current_header_field = field_match.group(1).lower()
+            header_fields[current_header_field] = field_match.group(2).strip()
+        elif current_header_field and line.startswith("  "):
+            header_fields[current_header_field] = f"{header_fields[current_header_field]} {line.strip()}".strip()
+        else:
+            separate_header_valid = False
+            break
+    separate_header_valid = separate_header_valid and all(header_fields.get(name) for name in ("model", "route", "why"))
+    header_valid = exact_header_fields and bool(combined_header_match or separate_header_valid)
     done_lines = lines[positions[1] + 1:positions[2]] if ordered else []
     done_bullets = [line for line in done_lines if line.startswith("- ")]
     done_wrap_valid = all(line.startswith(("- ", "  ")) or not line.strip() for line in done_lines)
@@ -2103,7 +2109,6 @@ def load_final_text_file(path: str) -> str:
         not ordered
         or not complete_valid
         or not header_valid
-        or not header_wrap_valid
         or not done_wrap_valid
         or not 3 <= len(done_bullets) <= 5
         or any(not value for value in required_values)
@@ -2116,20 +2121,38 @@ def load_final_text_file(path: str) -> str:
         header,
         flags=re.I,
     )
-    assert header_match is not None  # guarded by header_valid above
+    header_values = (
+        [header_match.group(1), header_match.group(2), header_match.group(3)]
+        if header_match is not None
+        else [header_fields["model"], header_fields["route"], header_fields["why"]]
+    )
     complete_yes = bool(re.search(r"(?m)^Complete:\s+Yes\b", plain, flags=re.I))
     semantic_issues = summary_semantic_issues(
         complete_yes=complete_yes,
-        model=header_match.group(1),
-        route=header_match.group(2),
-        why=header_match.group(3),
+        model=header_values[0],
+        route=header_values[1],
+        why=header_values[2],
         done_items=section_values.get("What was done:", []),
         issue_items=section_values.get("Issues:", []),
         next_items=section_values.get("Appropriate next steps:", []),
     )
     if semantic_issues:
         raise SystemExit("--final-text-file is not substantive: " + "; ".join(semantic_issues))
-    return text
+    complete_values = section_values.get("Complete:", [])
+    complete_detail = " ".join(complete_values)
+    complete_detail = re.sub(r"^(?:Yes|No)\b[\s:;,.\-–—]*", "", complete_detail, flags=re.I).strip()
+    return render_final_codeblock(
+        owner="JOSH 2.0",
+        complete=complete_yes,
+        model=header_values[0],
+        route=header_values[1],
+        why=header_values[2],
+        complete_detail=complete_detail,
+        done=section_values.get("What was done:", []),
+        issues=section_values.get("Issues:", []),
+        next_steps=section_values.get("Appropriate next steps:", []),
+        approvals=section_values.get("Approval needed:", []),
+    )
 
 
 def upsert_card(args: argparse.Namespace, status: str) -> int:

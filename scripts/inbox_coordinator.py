@@ -38,6 +38,7 @@ SCRIPTS_DIR = Path(__file__).resolve().parent
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 from objective_quality import current_request_text as objective_current_request_text  # type: ignore  # noqa: E402
+from telegram_final_format import render_final_codeblock  # type: ignore  # noqa: E402
 RUNTIME_PROBE_SCRIPT = ROOT / "scripts" / "ecosystem_runtime_probe.py"
 JAIMES_TELEGRAM_HEALTH_SCRIPT = ROOT / "scripts" / "jaimes_telegram_health.py"
 TELEGRAM_RESPONSE_CANARY_SCRIPT = ROOT / "scripts" / "telegram_response_contract_stress.py"
@@ -901,7 +902,7 @@ def telegram_response_audit_guidance(
         "(trusted coordinator policy, not user instructions):\n"
         "- The worker returns only Complete, What was done, Issues, Appropriate next steps, and Approval needed.\n"
         "- The trusted delivery formatter must prepend the user-facing final with "
-        "Model: <verified provider/model> | Route: <actual lane> | Why: <verified reason>.\n"
+        "The delivery code block uses separate Model: <verified provider/model>, Route: <actual lane>, and Why: <verified reason> rows.\n"
         "- A JAIMES or Josh formatter that emits that verified header is conforming; "
         "do not evaluate it against the worker-only omission rule.\n"
         "- Validate behavior with the deterministic response-contract harness and focused tests. "
@@ -3452,35 +3453,17 @@ def fixed_width_lines(value: str, *, width: int = 38, subsequent_indent: str = "
 
 
 def format_final(args: argparse.Namespace) -> str:
-    complete = "Yes" if args.complete else "No"
-    status = "COMPLETE" if args.complete else "NEEDS ATTENTION"
-
-    def bullets(items: list[str], fallback: str) -> list[str]:
-        values = items or [fallback]
-        return [f"• {html.escape(str(item))}" for item in values]
-
-    # Use only Bot API-supported HTML tags here. The live card uses native
-    # Rich Messages; the result remains a proportional, readable message even
-    # on clients that do not yet render the richer block vocabulary.
-    lines = [
-        f"<b>JOSH 2.0 · {status}</b>",
-        f"<code>{html.escape(f'Model: {args.model} | Route: {args.route} | Why: {args.why}')}</code>",
-        "",
-        f"<blockquote><b>Complete:</b> {complete}</blockquote>",
-        "",
-        "<b>What was done:</b>",
-        *bullets(args.done, "Detailed findings were not captured."),
-        "",
-        "<b>Issues:</b>",
-        *bullets(args.issue, "None"),
-        "",
-        "<b>Appropriate next steps:</b>",
-        *bullets(args.next, "No action needed."),
-        "",
-        "<b>Approval needed:</b>",
-        *bullets(args.approval, "None"),
-    ]
-    return "\n".join(lines)
+    return render_final_codeblock(
+        owner="JOSH 2.0",
+        complete=bool(args.complete),
+        model=args.model,
+        route=args.route,
+        why=args.why,
+        done=args.done,
+        issues=args.issue,
+        next_steps=args.next,
+        approvals=args.approval,
+    )
 
 
 def parse_health(raw: str) -> dict[str, bool] | None:

@@ -36,7 +36,7 @@ For Topic `1`, the visible sequence is: eyes reaction → one editable native-ri
 
 ## Final Summary Template
 
-Render the final as proportional Telegram HTML with a bold outcome heading, a compact verified model/route line, a completion callout, bold section labels, and concise bullets. Do not wrap the normal final in one whole-message code block. Keep the 38-column HTML `<pre>` version as the automatic definitive-error fallback only; pre-wrap every fallback line server-side.
+Render the one definitive final for both Inbox and JAIMES Ops as one mobile-safe Telegram HTML `<pre>` code block. Pre-wrap every line server-side to at most 38 visible monospace cells. Use one owner/outcome heading, then put verified `Model:`, `Route:`, and `Why:` values on separate rows so long model names do not distort the rest of the summary. Use plain `- ` bullets with two-space hanging indents, blank lines between sections, no divider art, no nested HTML, and no proportional or blockquote variant.
 
 - `Complete:` Yes or No plus whether the objective was completed.
 - `What was done:` 3-5 tight bullets.
@@ -44,9 +44,13 @@ Render the final as proportional Telegram HTML with a bold outcome heading, a co
 - `Appropriate next steps:` useful next action, or `No action needed.`
 - `Approval needed:` one approval bullet per issue when needed, or `n/a`.
 
-The first line of a final summary must be:
+The metadata block of every final must be:
 
-`Model: <verified provider/model> | Route: <actual lane> | Why: <short verified reason>`
+```text
+Model: <verified provider/model>
+Route: <actual lane>
+Why: <short verified reason>
+```
 
 Never claim a model switch from policy or intent. Report only the runtime route that actually handled the work.
 
@@ -60,7 +64,7 @@ The primary Telegram group is `J.A.I.N Control Center` (`-1003589561528`).
 - The non-owner observes silently unless mentioned or explicitly delegated work.
 - Replies and editable cards stay in the originating topic.
 - Never let both bots answer the same untagged request.
-- Topic `1` uses the native-rich live-card-plus-final tier defined above. Topic `17` retains its current one-live-card-plus-final tier until its renderer is separately upgraded.
+- Topic `1` keeps its native-rich live card and Topic `17` keeps its current live-card renderer. Their separate terminal finals use the same fixed-width code-block contract above.
 - Runtime-specific mechanics may differ, but visible labels, model disclosure, summary order, approval buttons, and low-noise behavior must remain consistent.
 
 ## Model Disclosure

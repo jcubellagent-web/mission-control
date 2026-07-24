@@ -21,10 +21,17 @@ import re
 import secrets
 import sqlite3
 import stat
+import sys
 import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterator, Mapping, Sequence
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from telegram_final_format import render_final_codeblock  # type: ignore  # noqa: E402
 
 
 SCHEMA_VERSION = 3
@@ -1558,18 +1565,22 @@ def render_final(
     next_steps: Sequence[str],
     approvals: Sequence[str],
 ) -> str:
-    def section(name: str, values: Sequence[str]) -> str:
-        rows = [clean_plain_text(value, 500) for value in values if clean_plain_text(value, 500)] or ["n/a"]
-        return f"<b>{name}</b>\n" + "\n".join(f"• {safe_html_text(value, 500)}" for value in rows[:6])
-
-    return "\n\n".join([
-        f"Model: {safe_html_text(model, 120)} | Route: {safe_html_text(route, 140)} | Why: {safe_html_text(why, 180)}",
-        f"<b>Complete:</b> {safe_html_text(complete, 120)}",
-        section("What was done:", done),
-        section("Issues:", issues),
-        section("Appropriate next steps:", next_steps),
-        section("Approval needed:", approvals),
-    ])
+    complete_text = clean_plain_text(complete, 120)
+    complete_match = re.match(r"^(yes|no)\b[\s:;,.\-–—]*(.*)$", complete_text, flags=re.I)
+    complete_value = bool(complete_match and complete_match.group(1).lower() == "yes")
+    complete_detail = complete_match.group(2) if complete_match else complete_text
+    return render_final_codeblock(
+        owner="JOSH 2.0",
+        complete=complete_value,
+        model=clean_plain_text(model, 120),
+        route=clean_plain_text(route, 140),
+        why=clean_plain_text(why, 180),
+        complete_detail=complete_detail,
+        done=done,
+        issues=issues,
+        next_steps=next_steps,
+        approvals=approvals,
+    )
 
 
 def retry_delay_seconds(attempt: int, *, retry_after: float | None = None, seed: str = "") -> float:

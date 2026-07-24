@@ -22,6 +22,7 @@ def load(name: str, path: Path):
 
 
 stress = load("telegram_response_contract_stress_under_test", ROOT / "scripts" / "telegram_response_contract_stress.py")
+final_format = load("telegram_final_format_under_test", ROOT / "scripts" / "telegram_final_format.py")
 work_card_path = ROOT / "scripts" / "josh_work_card.py"
 work_card = load("josh_work_card_for_stress", work_card_path) if work_card_path.exists() else None
 
@@ -95,24 +96,30 @@ class FakeLiveModule:
         )
 
     def build_completion_summary(self, **_kwargs) -> str:
-        return """<b>JOSH 2.0 · COMPLETE</b>
-<code>Model: system/test | Route: qa | Why: transport test</code>
+        return """<pre>JOSH 2.0 · COMPLETE
 
-<blockquote><b>Complete:</b> Yes - QA complete</blockquote>
+Model: system/test
+Route: qa
+Why: transport test
 
-<b>What was done:</b>
-• Confirmed the eyes reaction reached the exact Telegram topic.
-• Verified the native live card closed at all six stages.
-• Confirmed exactly one final delivery passed with no remaining work.
+Complete: Yes - QA complete
 
-<b>Issues:</b>
-• None
+What was done:
+- Confirmed the eyes reaction reached
+  the exact Telegram topic.
+- Verified the native live card closed
+  at all six stages.
+- Confirmed exactly one final delivery
+  passed with no remaining work.
 
-<b>Appropriate next steps:</b>
-• No action needed.
+Issues:
+- None
 
-<b>Approval needed:</b>
-• None"""
+Appropriate next steps:
+- No action needed.
+
+Approval needed:
+- None</pre>"""
 
     def send_card(self, text, *_args, **_kwargs) -> dict:
         stage = "header" if "Objective" in text else "anchor"
@@ -241,7 +248,7 @@ def test_validate_accepts_polished_final_and_rejects_unformatted_plain_text() ->
 
     assert stress.validate(text, FakeLiveModule()) == []
     plain = stress.final_plain_text(text)
-    assert "final summary must use the polished proportional contract or its pre fallback" in stress.validate(
+    assert "final summary must use one mobile-safe pre code block" in stress.validate(
         plain,
         FakeLiveModule(),
     )
@@ -309,24 +316,22 @@ Approval needed:
 
 
 def test_validate_accepts_negative_telegram_health_findings() -> None:
-    text = """<b>JOSH 2.0 · COMPLETE</b>
-<code>Model: openai/gpt-5.6-luna | Route: Josh 2.0 Inbox | Why: read-only host assessment</code>
-
-<blockquote><b>Complete:</b> Yes - Telegram health assessed.</blockquote>
-
-<b>What was done:</b>
-• The local gateway is running and listening on port 18790, but the sandbox could not probe loopback.
-• The inspected launchd domain has no registered Telegram fast-ack entry.
-• The available Telegram logs are empty and last modified May 5.
-
-<b>Issues:</b>
-• Sandbox-local service checks are unverified.
-
-<b>Appropriate next steps:</b>
-• Use the host-native read-only probe for current service state.
-
-<b>Approval needed:</b>
-• None"""
+    text = final_format.render_final_codeblock(
+        owner="JOSH 2.0",
+        complete=True,
+        model="openai/gpt-5.6-luna",
+        route="Josh 2.0 Inbox",
+        why="read-only host assessment",
+        complete_detail="Telegram health assessed.",
+        done=[
+            "The local gateway is running and listening on port 18790, but the sandbox could not probe loopback.",
+            "The inspected launchd domain has no registered Telegram fast-ack entry.",
+            "The available Telegram logs are empty and last modified May 5.",
+        ],
+        issues=["Sandbox-local service checks are unverified."],
+        next_steps=["Use the host-native read-only probe for current service state."],
+        approvals=["None"],
+    )
 
     assert stress.validate(text, FakeLiveModule()) == []
 
@@ -368,19 +373,22 @@ def test_validate_rejects_generic_state_words_as_concrete_findings() -> None:
 
 
 def test_validate_no_missing_helpers_as_a_positive_finding() -> None:
-    text = """<b>JOSH 2.0 · COMPLETE</b>
-<code>Model: openai/gpt-5.6-luna | Route: Josh 2.0 Inbox | Why: read-only host assessment</code>
-<blockquote><b>Complete:</b> Yes - Telegram health assessed.</blockquote>
-<b>What was done:</b>
-• The gateway service has no remaining issues after its current health check.
-• The runtime has no missing helpers in the canonical Telegram delivery path.
-• There are no service failures in the current host snapshot.
-<b>Issues:</b>
-• None
-<b>Appropriate next steps:</b>
-• No action needed.
-<b>Approval needed:</b>
-• None"""
+    text = final_format.render_final_codeblock(
+        owner="JOSH 2.0",
+        complete=True,
+        model="openai/gpt-5.6-luna",
+        route="Josh 2.0 Inbox",
+        why="read-only host assessment",
+        complete_detail="Telegram health assessed.",
+        done=[
+            "The gateway service has no remaining issues after its current health check.",
+            "The runtime has no missing helpers in the canonical Telegram delivery path.",
+            "There are no service failures in the current host snapshot.",
+        ],
+        issues=["None"],
+        next_steps=["No action needed."],
+        approvals=["None"],
+    )
     assert stress.validate(text, FakeLiveModule()) == []
 
 

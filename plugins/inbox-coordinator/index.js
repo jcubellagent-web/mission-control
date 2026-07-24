@@ -489,14 +489,30 @@ export function parseCanonicalFinalSummary(content, options = {}) {
   const modelIndex = allHeaderLines.findIndex((line) => line.startsWith("Model:"));
   const headerLines = modelIndex >= 0 ? allHeaderLines.slice(modelIndex) : [];
   if (!headerLines.length) return finalFailure("missing-model-route-line");
-  if (legacyPre && headerLines.slice(1).some((line) => !line.startsWith("   "))) {
-    return finalFailure("invalid-header-wrap");
-  }
   const header = headerLines.map((line) => line.trim()).join(" ").replace(/\s+/g, " ");
-  const headerMatch = /^Model:\s*([^|]+?)\s*\|\s*Route:\s*([^|]+?)\s*\|\s*Why:\s*([^|]+)$/i.exec(header);
-  if (!headerMatch || headerMatch.slice(1).some((value) => !value.trim())) return finalFailure("invalid-model-route-line");
+  const exactHeaderFields = ["Model", "Route", "Why"].every((name) => (
+    (header.match(new RegExp(`\\b${name}:`, "gi")) || []).length === 1
+  ));
+  const combinedMatch = /^Model:\s*([^|]+?)\s*\|\s*Route:\s*([^|]+?)\s*\|\s*Why:\s*([^|]+)$/i.exec(header);
+  const fields = {};
+  let activeField = "";
+  for (const line of headerLines) {
+    const match = /^(Model|Route|Why):\s*(.*)$/i.exec(line.trim());
+    if (match) {
+      activeField = match[1].toLowerCase();
+      fields[activeField] = match[2].trim();
+    } else if (activeField && /^\s{2,}\S/.test(line)) {
+      fields[activeField] = `${fields[activeField]} ${line.trim()}`.trim();
+    } else {
+      return finalFailure("invalid-header-wrap");
+    }
+  }
+  const headerValues = combinedMatch
+    ? combinedMatch.slice(1).map((value) => value.trim())
+    : [fields.model, fields.route, fields.why].map((value) => String(value || "").trim());
+  if (!exactHeaderFields || headerValues.some((value) => !value)) return finalFailure("invalid-model-route-line");
   const expectedModel = stringValue(options.expectedModel).toLowerCase();
-  if (expectedModel && headerMatch[1].trim().toLowerCase() !== expectedModel) {
+  if (expectedModel && headerValues[0].toLowerCase() !== expectedModel) {
     return finalFailure("unverified-model-line");
   }
 
@@ -520,7 +536,7 @@ export function parseCanonicalFinalSummary(content, options = {}) {
   const completeYes = /^yes\b/i.test(complete) && !/\b(?:not|partial|blocked|failed)\b/i.test(complete);
   const doneItems = bulletItems(blocks["What was done"]);
   if (completeYes) {
-    if (headerMatch.slice(1).some((value) => UNVERIFIED_HEADER_PATTERN.test(value.trim()))) {
+    if (headerValues.some((value) => UNVERIFIED_HEADER_PATTERN.test(value))) {
       return finalFailure("unverified-header-line", sections);
     }
     const qualityFailure = summaryQualityFailure(doneItems);
@@ -546,9 +562,9 @@ export function parseCanonicalFinalSummary(content, options = {}) {
     ok: true,
     reason: "canonical",
     terminalStatus,
-    model: headerMatch[1].trim(),
-    route: headerMatch[2].trim(),
-    why: headerMatch[3].trim(),
+    model: headerValues[0],
+    route: headerValues[1],
+    why: headerValues[2],
     sections,
   };
 }
@@ -592,6 +608,41 @@ function escapeTelegramHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
+}
+
+function codeblockFinalSummary({ owner, complete, model, route, why, detail = "", done, issues, nextSteps, approvals }) {
+  const field = (label, value) => fixedWidthLines(
+    String(value || "unverified"),
+    `${label}: `,
+    " ".repeat(label.length + 2),
+  );
+  const bullets = (items, fallback) => {
+    const values = (Array.isArray(items) ? items : []).filter(Boolean).slice(0, 5);
+    return (values.length ? values : [fallback]).flatMap((item) => fixedWidthLines(item, "- ", "  "));
+  };
+  const completion = `${complete ? "Yes" : "No"}${detail ? ` - ${detail}` : ""}`;
+  const lines = [
+    ...fixedWidthLines(`${owner} · ${complete ? "COMPLETE" : "NEEDS ATTENTION"}`),
+    "",
+    ...field("Model", model),
+    ...field("Route", route),
+    ...field("Why", why),
+    "",
+    ...fixedWidthLines(completion, "Complete: ", "  "),
+    "",
+    "What was done:",
+    ...bullets(done, "Detailed findings were not captured."),
+    "",
+    "Issues:",
+    ...bullets(issues, "None"),
+    "",
+    "Appropriate next steps:",
+    ...bullets(nextSteps, "No action needed."),
+    "",
+    "Approval needed:",
+    ...bullets(approvals, "None"),
+  ];
+  return `<pre>${escapeTelegramHtml(lines.join("\n"))}</pre>`;
 }
 
 export function buildRecoveryFinalSummary(content, expectedModel = "") {
@@ -667,26 +718,19 @@ export function buildRecoveryFinalSummary(content, expectedModel = "") {
   const approvals = approvalNeeded
     ? ["Review and approve the requested next step."]
     : ["None"];
-  const bulletLines = (items) => items.map((item) => `• ${escapeTelegramHtml(item)}`);
-  const lines = [
-    `<b>JOSH 2.0 · ${complete ? "COMPLETE" : "NEEDS ATTENTION"}</b>`,
-    `<code>${escapeTelegramHtml(`Model: ${model} | Route: Josh 2.0 Inbox | Why: format recovery`)}</code>`,
-    "",
-    `<blockquote><b>Complete:</b> ${escapeTelegramHtml(completeText)}</blockquote>`,
-    "",
-    "<b>What was done:</b>",
-    ...bulletLines(recoveryItems.slice(0, 5)),
-    "",
-    "<b>Issues:</b>",
-    ...bulletLines(issues),
-    "",
-    "<b>Appropriate next steps:</b>",
-    ...bulletLines([nextStep]),
-    "",
-    "<b>Approval needed:</b>",
-    ...bulletLines(approvals),
-  ];
-  return lines.join("\n");
+  const completeParts = /^(?:Yes|No)\s*-\s*(.*)$/i.exec(completeText);
+  return codeblockFinalSummary({
+    owner: "JOSH 2.0",
+    complete,
+    model,
+    route: "Josh 2.0 Inbox",
+    why: "format recovery",
+    detail: completeParts?.[1] || "",
+    done: recoveryItems.slice(0, 5),
+    issues,
+    nextSteps: [nextStep],
+    approvals,
+  });
 }
 
 export function terminalHelperArgs(event = {}, ctx = {}, config = {}) {
@@ -846,7 +890,7 @@ export async function gateTelegramFinalization(event = {}, ctx = {}, config = {}
       action: "revise",
       reason: "The Telegram final response must be one concise structured summary before it can be delivered.",
       retry: {
-        instruction: `Rewrite the same result as one polished Telegram HTML response. Start with a bold JOSH 2.0 completion heading and a code-formatted Model: ${expectedModel || "<verified provider/model>"} | Route: <actual lane> | Why: <verified reason> line. Then use Complete: Yes/No, What was done: with 3-5 unique, concrete findings, outcomes, or changes from the actual work (never task-status, delivery, card, or formatting filler), Issues:, Appropriate next steps:, and Approval needed: in that exact order. Use proportional text, bold section labels, and bullet characters; do not wrap the whole response in <pre>. Do not claim No action needed when the result identifies a risk, limitation, issue, or recommendation. Keep the whole response under 3,500 bytes and do not add another live card.`,
+        instruction: `Rewrite the same result as one mobile-safe Telegram <pre> code block with every line pre-wrapped to 38 columns. Start with JOSH 2.0 · COMPLETE or NEEDS ATTENTION, then put Model: ${expectedModel || "<verified provider/model>"}, Route: <actual lane>, and Why: <verified reason> on separate rows. Then use Complete: Yes/No, What was done: with 3-5 unique, concrete findings, outcomes, or changes from the actual work (never task-status, delivery, card, or formatting filler), Issues:, Appropriate next steps:, and Approval needed: in that exact order. Use plain - bullets with two-space hanging indents and no nested HTML. Do not claim No action needed when the result identifies a risk, limitation, issue, or recommendation. Keep the whole response under 3,500 bytes and do not add another live card.`,
         idempotencyKey: `telegram-final-format:${identity}`,
         maxAttempts: 2,
       },

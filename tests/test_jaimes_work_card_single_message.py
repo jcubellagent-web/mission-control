@@ -160,11 +160,11 @@ import importlib.util
 import sys
 from pathlib import Path
 
+Path(sys.argv[3]).write_text("ready", encoding="utf-8")
 spec = importlib.util.spec_from_file_location("jaimes_card_claimant", sys.argv[1])
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 module.ACK_STATE_PATH = Path(sys.argv[2])
-Path(sys.argv[3]).write_text("ready", encoding="utf-8")
 print(module.claim_pending_ack("current-card", "-1003589561528", "1"))
 """
 

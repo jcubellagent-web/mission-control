@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from jaimes_completion_evidence import write_completion_evidence
+from telegram_final_format import render_final_codeblock
 
 
 HOME = Path.home()
@@ -1485,11 +1486,13 @@ def final_evidence_fields(text: str) -> dict[str, str]:
 
 
 def final_source_uses_session_history(text: str) -> bool:
-    header = re.search(
+    combined = re.search(
         r"(?im)^Model:\s*[^|\n]+\s*\|\s*Route:\s*([^|\n]+)",
         str(text or ""),
     )
-    return bool(header and FINAL_SESSION_HISTORY_RE.search(header.group(1)))
+    separate = re.search(r"(?im)^Route:\s*([^\n]+)", str(text or ""))
+    route = combined.group(1) if combined else (separate.group(1) if separate else "")
+    return bool(route and FINAL_SESSION_HISTORY_RE.search(route))
 
 
 def final_evidence_problems(
@@ -1796,22 +1799,6 @@ def structured_final_text(
     if evidence_problems:
         complete, sections = stale_evidence_sections(evidence_problems)
 
-    def wrap(value: str, *, indent: str = "") -> list[str]:
-        return textwrap.wrap(
-            value,
-            width=38,
-            subsequent_indent=indent,
-            break_long_words=True,
-            break_on_hyphens=False,
-        ) or [""]
-
-    def bullets(items: list[str], fallback: str) -> list[str]:
-        chosen = [clean_final_item(item) for item in items if clean_final_item(item)][:5] or [fallback]
-        rows: list[str] = []
-        for item in chosen:
-            rows.extend(wrap(f"- {item}", indent="  "))
-        return rows
-
     model_label = clean_final_item(model) or "unverified"
     route_label = clean_final_item(route) or "unverified"
     why_label = clean_final_item(why) or "verified JAIMES execution"
@@ -1827,27 +1814,18 @@ def structured_final_text(
     objective_label = clean_final_item(objective) or "Complete the current Telegram task"
     next_items = sections["next"]
     approval_items = sections["approval"]
-    lines = [
-        *wrap(
-            f"Model: {model_label} | Route: {route_label} | Why: {why_label}",
-            indent="   ",
-        ),
-        "",
-        *wrap(f"Complete: {'Yes' if complete else 'No'} - {objective_label}", indent="   "),
-        "",
-        "What was done:",
-        *bullets(sections["done"], "Completed the request."),
-        "",
-        "Issues:",
-        *bullets(sections["issues"], "n/a"),
-        "",
-        "Appropriate next steps:",
-        *bullets(next_items, "Review the issue and choose the next safe step." if not complete else "No action needed."),
-        "",
-        "Approval needed:",
-        *bullets(approval_items, "n/a"),
-    ]
-    return f"<pre>{html.escape(chr(10).join(lines))}</pre>"
+    return render_final_codeblock(
+        owner="JAIMES",
+        complete=complete,
+        model=model_label,
+        route=route_label,
+        why=why_label,
+        complete_detail=objective_label,
+        done=sections["done"] or ["Completed the request."],
+        issues=sections["issues"],
+        next_steps=next_items or (["No action needed."] if complete else ["Review the issue and choose the next safe step."]),
+        approvals=approval_items,
+    )
 
 
 def final_contract_is_canonical(value: str) -> bool:
@@ -1855,16 +1833,21 @@ def final_contract_is_canonical(value: str) -> bool:
     labels = ["Complete:", "What was done:", "Issues:", "Appropriate next steps:", "Approval needed:"]
     positions = [plain.find(label) for label in labels]
     complete_at = plain.find("Complete:")
-    header = " ".join(
-        line.strip()
-        for line in plain[:complete_at].splitlines()
-        if line.strip()
+    header = plain[:complete_at]
+    combined_header = " ".join(line.strip() for line in header.splitlines() if line.strip())
+    exact_fields = all(
+        len(re.findall(rf"(?i)\b{name}:", header)) == 1
+        for name in ("Model", "Route", "Why")
     )
-    header_ok = bool(re.fullmatch(
-        r"Model:\s*[^|]+?\s*\|\s*Route:\s*[^|]+?\s*\|\s*Why:\s*[^|]+",
-        header,
-        flags=re.I,
-    ))
+    header_ok = exact_fields and bool(re.search(r"(?m)^Model:\s*\S", header)) and bool(
+        re.search(r"(?m)^Route:\s*\S", header)
+    ) and bool(re.search(r"(?m)^Why:\s*\S", header))
+    if not header_ok:
+        header_ok = exact_fields and bool(re.search(
+            r"Model:\s*[^|]+?\s*\|\s*Route:\s*[^|]+?\s*\|\s*Why:\s*[^|]+",
+            combined_header,
+            flags=re.I,
+        ))
     return (
         header_ok
         and all(position >= 0 for position in positions)
