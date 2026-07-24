@@ -19,6 +19,7 @@ def config() -> dict:
         "mode": "proposal-first",
         "wipLimit": 1,
         "proposalMaxAgeDays": 30,
+        "reliabilityMaxAgeMinutes": 120,
         "requiredConsecutiveCleanRuns": 7,
         "activeStages": ["leased", "implementing", "verifying"],
         "promotionGates": {
@@ -124,6 +125,31 @@ def test_failed_gate_resets_readiness_and_wip_limit_fails_closed() -> None:
     assert "handoff-receipts" in portfolio["changePolicy"]["reasonGateIds"]
     assert portfolio["wip"]["withinLimit"] is False
     assert portfolio["counts"]["activeWip"] == 2
+
+
+def test_missing_or_replayed_current_snapshot_never_inherits_prior_readiness() -> None:
+    history = {
+        "runs": [
+            {"checkedAt": f"2026-07-{day:02d}T11:00:00Z", "clean": True, "gatesPassed": 6, "gatesRequired": 6}
+            for day in range(18, 25)
+        ]
+    }
+
+    missing, _ = subject.build_portfolio(config(), {"proposals": []}, {}, {}, history, now=NOW)
+    replayed, _ = subject.build_portfolio(
+        config(),
+        {"proposals": []},
+        {},
+        reliability(clean=True, checked_at="2026-07-18T11:00:00Z"),
+        history,
+        now=NOW,
+    )
+
+    for portfolio in (missing, replayed):
+        assert portfolio["status"] == "watch"
+        assert portfolio["readiness"]["promotionReady"] is False
+        assert portfolio["readiness"]["snapshotFresh"] is False
+        assert portfolio["changePolicy"]["electiveChangesFrozen"] is True
 
 
 def test_old_open_proposals_are_flagged_without_deleting_history() -> None:

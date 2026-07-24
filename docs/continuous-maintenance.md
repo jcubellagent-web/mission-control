@@ -22,7 +22,7 @@ The hourly `maintenance-portfolio-snapshot` job regenerates the projection. Cont
 - Medium-risk work additionally requires design approval and an independent exact-diff review.
 - High-risk work additionally requires explicit human approval.
 - Every source promotion remains reviewed and must use the exclusive Control Tower change lease.
-- Reviewed promotion readiness requires all six reliability gates to pass for seven consecutive distinct evaluations.
+- Reviewed promotion readiness requires all six reliability gates to pass for seven consecutive distinct evaluations and the current evaluation to be valid and no more than two hours old.
 - A failed required gate freezes elective changes. Only security fixes, reliability repairs, and rollbacks may advance until the gates recover.
 - Active maintenance WIP is capped at three items. Open proposals aging past 30 days are surfaced for a decision; history is never deleted.
 
@@ -47,7 +47,7 @@ python3 scripts/ecosystem_proposal_ledger.py \
   --publish
 ```
 
-The ledger retains every event. The maintenance projection selects one latest current row per stable proposal ID and reports its history-event count.
+Transitions are ordered and fail closed: active work must remain inside the WIP cap, elective work cannot advance while reliability is frozen, medium/high-risk leases require design evidence, and completion requires the configured review and rollback evidence. Use `--change-class reliability-repair`, `security-fix`, or `rollback` only for the corresponding exception. The ledger retains every event. The maintenance projection selects one latest current row per stable proposal ID and reports its history-event count.
 
 ## Dependency Hygiene
 

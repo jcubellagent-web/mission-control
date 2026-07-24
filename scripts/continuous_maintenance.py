@@ -221,13 +221,26 @@ def build_portfolio(
     history_rows = readiness_history(history_payload, snapshot)
     clean_runs = consecutive_clean_runs(history_rows)
     required_clean_runs = max(1, int(config.get("requiredConsecutiveCleanRuns") or 7))
+    reliability_max_age = max(1, int(config.get("reliabilityMaxAgeMinutes") or 120))
+    snapshot_time = parse_time(snapshot.get("checkedAt"))
+    snapshot_fresh = bool(
+        snapshot_time
+        and snapshot_time <= current + dt.timedelta(minutes=5)
+        and current - snapshot_time <= dt.timedelta(minutes=reliability_max_age)
+    )
+    current_snapshot_ready = bool(snapshot["clean"] and snapshot_fresh)
     linked_ids = {
         str(row.get("sourceCandidateId")) for row in proposals if row.get("sourceCandidateId")
     }
     discoveries = candidate_rows(candidates_payload, linked_ids)
     error_budget = config.get("errorBudgetPolicy") if isinstance(config.get("errorBudgetPolicy"), dict) else {}
-    elective_frozen = bool(error_budget.get("freezeElectiveChangesOnGateFailure", True) and not snapshot["clean"])
-    status = "ready" if clean_runs >= required_clean_runs and len(wip) <= wip_limit else "watch"
+    elective_frozen = bool(
+        error_budget.get("freezeElectiveChangesOnGateFailure", True) and not current_snapshot_ready
+    )
+    promotion_ready = bool(
+        current_snapshot_ready and clean_runs >= required_clean_runs and len(wip) <= wip_limit
+    )
+    status = "ready" if promotion_ready else "watch"
     payload = {
         "schemaVersion": 1,
         "generatedAt": iso(current),
@@ -240,6 +253,7 @@ def build_portfolio(
         "policy": {
             "wipLimit": wip_limit,
             "proposalMaxAgeDays": maximum_age,
+            "reliabilityMaxAgeMinutes": reliability_max_age,
             "requiredConsecutiveCleanRuns": required_clean_runs,
             "automaticSourceMutation": False,
             "reviewedPromotionRequired": True,
@@ -249,9 +263,10 @@ def build_portfolio(
         },
         "readiness": {
             **snapshot,
+            "snapshotFresh": snapshot_fresh,
             "consecutiveCleanRuns": clean_runs,
             "requiredConsecutiveCleanRuns": required_clean_runs,
-            "promotionReady": clean_runs >= required_clean_runs and len(wip) <= wip_limit,
+            "promotionReady": promotion_ready,
         },
         "changePolicy": {
             "electiveChangesFrozen": elective_frozen,
