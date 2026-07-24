@@ -75,6 +75,7 @@ GLM_FIRST_TASK_TYPES = {
     "architecture-analysis",
     "repository-analysis",
     "debugging-analysis",
+    "technical-analysis",
     "large-context-technical-analysis",
     "multi-file-planning",
     "parallel-technical-reasoning",
@@ -460,6 +461,45 @@ def provider_budget_guard(provider_id: str) -> tuple[bool, str]:
     return True, "budget available"
 
 
+def allowance_window_will_last(
+    window: dict[str, Any] | None,
+    at: dt.datetime | None = None,
+) -> Optional[bool]:
+    """Project whether the current burn rate will last to an exact reset.
+
+    CodexBar exposes an explicit pace object on some hosts. Others expose only
+    the exact rate window, so derive the same conservative signal without
+    guessing when the reset or window length is missing or stale.
+    """
+    if not isinstance(window, dict):
+        return None
+    try:
+        used = float(window.get("usedPercent"))
+        window_minutes = float(window.get("windowMinutes"))
+        reset_text = str(window.get("resetsAt") or "").strip()
+        if not reset_text or window_minutes <= 0:
+            return None
+        resets_at = dt.datetime.fromisoformat(reset_text.replace("Z", "+00:00"))
+        if resets_at.tzinfo is None:
+            resets_at = resets_at.replace(tzinfo=dt.timezone.utc)
+        current = at or dt.datetime.now(dt.timezone.utc)
+        current = current.astimezone(dt.timezone.utc)
+        resets_at = resets_at.astimezone(dt.timezone.utc)
+    except (TypeError, ValueError):
+        return None
+    if used <= 0:
+        return True
+    if used >= 100:
+        return False
+    window_seconds = window_minutes * 60.0
+    started_at = resets_at - dt.timedelta(seconds=window_seconds)
+    elapsed_seconds = (current - started_at).total_seconds()
+    if current >= resets_at or elapsed_seconds <= max(300.0, window_seconds * 0.05):
+        return None
+    projected_used = used * window_seconds / elapsed_seconds
+    return projected_used <= 100.0
+
+
 def codex_allowance_mode(args: argparse.Namespace) -> str:
     requested = getattr(args, "codex_allowance", "auto")
     if requested != "auto":
@@ -473,12 +513,14 @@ def codex_allowance_mode(args: argparse.Namespace) -> str:
     limits = ((usage.get("codexbarLimits") or {}).get("codex") or {}) if isinstance(usage, dict) else {}
     windows = limits.get("usageWindows") if isinstance(limits, dict) else []
     weekly_remaining: Optional[float] = None
+    weekly_window: dict[str, Any] | None = None
     for window in windows if isinstance(windows, list) else []:
         if not isinstance(window, dict):
             continue
         label = str(window.get("label") or "").strip().lower()
         if label != "weekly":
             continue
+        weekly_window = window
         try:
             weekly_remaining = float(window.get("remainingPercent"))
         except (TypeError, ValueError):
@@ -488,6 +530,28 @@ def codex_allowance_mode(args: argparse.Namespace) -> str:
         if weekly_remaining <= 0:
             return "exhausted"
         if weekly_remaining <= 20:
+            return "conserve"
+
+    # CodexBar's exact pace projection can detect exhaustion before the static
+    # 20% reserve threshold. Conserve early when the current weekly burn rate
+    # will not last to reset, while still reserving Codex for execution and
+    # private integration in choose_model_route().
+    pace = limits.get("pace") if isinstance(limits, dict) else {}
+    weekly_pace = None
+    if isinstance(pace, dict):
+        for key in ("weekly", "secondary"):
+            candidate = pace.get(key)
+            if isinstance(candidate, dict):
+                weekly_pace = candidate
+                break
+    if weekly_remaining is not None and weekly_remaining > 0 and isinstance(weekly_pace, dict):
+        will_last = weekly_pace.get("willLastToReset")
+        if will_last is False:
+            return "conserve"
+        if will_last is True:
+            weekly_window = None
+    if weekly_remaining is not None and weekly_remaining > 0:
+        if allowance_window_will_last(weekly_window) is False:
             return "conserve"
 
     codexbar = (((usage.get("codingVisibility") or {}).get("codexbar") or {}) if isinstance(usage, dict) else {})

@@ -5364,6 +5364,23 @@ def fetch_codexbar_limits(provider: str = "codex") -> Dict[str, Any]:
             return empty
         usage = entry.get("usage") if isinstance(entry.get("usage"), dict) else {}
         identity = usage.get("identity") if isinstance(usage.get("identity"), dict) else {}
+        raw_pace = entry.get("pace") if isinstance(entry.get("pace"), dict) else {}
+        pace: Dict[str, Dict[str, Any]] = {}
+        for pace_key in ("primary", "secondary", "weekly", "tertiary"):
+            payload = raw_pace.get(pace_key)
+            if not isinstance(payload, dict):
+                continue
+            pace[pace_key] = {
+                key: payload.get(key)
+                for key in (
+                    "expectedUsedPercent",
+                    "deltaPercent",
+                    "stage",
+                    "willLastToReset",
+                    "etaSeconds",
+                )
+                if payload.get(key) is not None
+            }
 
         windows: List[Dict[str, Any]] = []
 
@@ -5417,6 +5434,7 @@ def fetch_codexbar_limits(provider: str = "codex") -> Dict[str, Any]:
             "codexbarVersion": entry.get("version"),
             "codexbarUpdatedAt": usage.get("updatedAt") or entry.get("updatedAt") or utc_iso(),
             "usageWindows": windows,
+            "pace": pace,
             "dataConfidence": usage.get("dataConfidence"),
             "creditsRemaining": credits.get("remaining"),
             "codexResetCredits": reset_credits,

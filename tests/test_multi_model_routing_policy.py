@@ -23,15 +23,18 @@ def allowance_args() -> SimpleNamespace:
     return SimpleNamespace(codex_allowance="auto")
 
 
-def write_usage(path: Path, remaining: float) -> None:
+def write_usage(path: Path, remaining: float, will_last_to_reset: bool | None = None) -> None:
+    limits = {
+        "usageWindows": [
+            {"label": "Weekly", "remainingPercent": remaining},
+            {"label": "Codex Spark Weekly", "remainingPercent": 100},
+        ]
+    }
+    if will_last_to_reset is not None:
+        limits["pace"] = {"secondary": {"willLastToReset": will_last_to_reset}}
     path.write_text(json.dumps({
         "codexbarLimits": {
-            "codex": {
-                "usageWindows": [
-                    {"label": "Weekly", "remainingPercent": remaining},
-                    {"label": "Codex Spark Weekly", "remainingPercent": 100},
-                ]
-            }
+            "codex": limits
         }
     }))
 
@@ -51,6 +54,85 @@ def test_exact_codexbar_allowance_drives_conservation(tmp_path, monkeypatch) -> 
     assert route.codex_allowance_mode(allowance_args()) == "exhausted"
     write_usage(usage, 80)
     assert route.codex_allowance_mode(allowance_args()) == "normal"
+
+
+def test_codexbar_exhaustion_pace_conserves_before_static_threshold(tmp_path, monkeypatch) -> None:
+    route = load_module("agent_route_pace", ROOT / "scripts" / "agent_route.py")
+    usage = tmp_path / "usage.json"
+    budgets = tmp_path / "budgets.json"
+    budgets.write_text(json.dumps({"policy": {"codexAllowanceMode": "auto"}}))
+    monkeypatch.setattr(route, "MODEL_USAGE_PATH", usage)
+    monkeypatch.setattr(route, "BUDGETS_PATH", budgets)
+    monkeypatch.delenv("CODEX_ALLOWANCE_MODE", raising=False)
+
+    write_usage(usage, 29, will_last_to_reset=False)
+    assert route.codex_allowance_mode(allowance_args()) == "conserve"
+    write_usage(usage, 29, will_last_to_reset=True)
+    assert route.codex_allowance_mode(allowance_args()) == "normal"
+    write_usage(usage, 29)
+    assert route.codex_allowance_mode(allowance_args()) == "normal"
+    write_usage(usage, 20, will_last_to_reset=True)
+    assert route.codex_allowance_mode(allowance_args()) == "conserve"
+    write_usage(usage, 0, will_last_to_reset=True)
+    assert route.codex_allowance_mode(allowance_args()) == "exhausted"
+
+
+def test_exact_weekly_window_derives_conservation_when_pace_is_missing(tmp_path, monkeypatch) -> None:
+    route = load_module("agent_route_derived_pace", ROOT / "scripts" / "agent_route.py")
+    usage = tmp_path / "usage.json"
+    budgets = tmp_path / "budgets.json"
+    budgets.write_text(json.dumps({"policy": {"codexAllowanceMode": "auto"}}))
+    monkeypatch.setattr(route, "MODEL_USAGE_PATH", usage)
+    monkeypatch.setattr(route, "BUDGETS_PATH", budgets)
+    monkeypatch.delenv("CODEX_ALLOWANCE_MODE", raising=False)
+    now = route.dt.datetime.now(route.dt.timezone.utc)
+    reset = (now + route.dt.timedelta(days=4)).isoformat().replace("+00:00", "Z")
+
+    def write_window(used: float) -> None:
+        usage.write_text(json.dumps({"codexbarLimits": {"codex": {"usageWindows": [{
+            "label": "Weekly",
+            "usedPercent": used,
+            "remainingPercent": 100 - used,
+            "windowMinutes": 10080,
+            "resetsAt": reset,
+        }]}}}))
+
+    write_window(72)
+    assert route.codex_allowance_mode(allowance_args()) == "conserve"
+    write_window(30)
+    assert route.codex_allowance_mode(allowance_args()) == "normal"
+
+
+def test_codexbar_pace_projection_is_preserved(monkeypatch) -> None:
+    update = load_module("update_mission_control_pace", ROOT / "scripts" / "update_mission_control.py")
+
+    class Result:
+        returncode = 0
+        stderr = ""
+        stdout = json.dumps([{
+            "source": "oauth",
+            "pace": {"secondary": {
+                "expectedUsedPercent": 43,
+                "deltaPercent": 28,
+                "stage": "farAhead",
+                "willLastToReset": False,
+                "etaSeconds": 105108,
+                "privateUnexpectedField": "drop-me",
+            }},
+            "usage": {
+                "updatedAt": "2026-07-24T16:52:40Z",
+                "loginMethod": "pro",
+                "identity": {"providerID": "codex"},
+                "secondary": {"usedPercent": 71, "windowMinutes": 10080},
+            },
+        }])
+
+    monkeypatch.setattr(update.subprocess, "run", lambda *_args, **_kwargs: Result())
+    limits = update.fetch_codexbar_limits("codex")
+
+    assert limits["pace"]["secondary"]["willLastToReset"] is False
+    assert limits["pace"]["secondary"]["deltaPercent"] == 28
+    assert "privateUnexpectedField" not in limits["pace"]["secondary"]
 
 
 def test_verified_grok_is_auto_enabled_unless_explicitly_disabled(monkeypatch) -> None:
@@ -198,10 +280,11 @@ def test_direct_specialist_commands_cannot_silently_use_gpt(monkeypatch) -> None
     assert "SENSITIVE_SENTINEL" not in lane.command_preview(glm)
 
 
-def test_architecture_uses_glm_with_explicit_runtime_fallbacks(monkeypatch) -> None:
+@pytest.mark.parametrize("task_type", ["architecture", "technical-analysis"])
+def test_technical_analysis_uses_glm_with_explicit_runtime_fallbacks(monkeypatch, task_type) -> None:
     route = load_module("agent_route_glm_architecture", ROOT / "scripts" / "agent_route.py")
     args = model_args()
-    args.task_type = "architecture"
+    args.task_type = task_type
     args.priority = "normal"
     args.complexity = "auto"
     args.blast_radius = "auto"
@@ -242,7 +325,7 @@ def test_ollama_quota_is_a_fresh_soft_signal_and_exhaustion_falls_back(tmp_path,
     assert "99.3% remaining" in reason
 
     args = model_args()
-    args.task_type = "architecture"
+    args.task_type = "technical-analysis"
     args.priority = "normal"
     args.complexity = "auto"
     args.blast_radius = "auto"
