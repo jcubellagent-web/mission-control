@@ -1,5 +1,8 @@
 {
+  "generatedAt": "2026-01-01T00:00:00Z",
   "lastUpdated": "2026-01-01T00:00:00Z",
+  "sourceUpdatedAt": "2026-01-01T00:00:00Z",
+  "brainFeed": {},
   "actionRequired": [],
   "agentBrainFeeds": {
     "josh": [],
@@ -19,18 +22,45 @@
   "sharedEvents": [],
   "sharedOperatingLayer": {},
   "modelRouter": {},
+  "runtimeLayout": {
+    "ok": true,
+    "status": "ok",
+    "checkedAt": "2026-01-01T00:00:00Z",
+    "summary": "Synthetic Control Tower release QA fixture"
+  },
+  "codexJobs": [],
   "todayJobs": [
-    {"name": "Completed fixture job", "outcome": "complete"},
-    {"name": "Skipped fixture job", "outcome": "skipped"},
-    {"name": "Broken fixture job", "outcome": "broken"},
-    {"name": "Pending fixture job", "outcome": "pending"}
+    {"occurrenceId": "ci-job-00", "name": "Midnight fixture check", "scheduledTime": "12:00 AM", "outcome": "complete"},
+    {"occurrenceId": "ci-job-01", "name": "One AM fixture check", "scheduledTime": "1:00 AM", "outcome": "complete"},
+    {"occurrenceId": "ci-job-02", "name": "Two AM fixture check", "scheduledTime": "2:00 AM", "outcome": "complete"},
+    {"occurrenceId": "ci-job-03", "name": "Three AM fixture check", "scheduledTime": "3:00 AM", "outcome": "skipped"},
+    {"occurrenceId": "ci-job-04", "name": "Four AM fixture check", "scheduledTime": "4:00 AM", "outcome": "skipped"},
+    {"occurrenceId": "ci-job-05", "name": "Five AM fixture check", "scheduledTime": "5:00 AM", "outcome": "broken", "runStatus": "failed"},
+    {"occurrenceId": "ci-job-06", "name": "Six AM fixture check", "scheduledTime": "6:00 AM", "outcome": "broken", "runStatus": "overdue"},
+    {"occurrenceId": "ci-job-07", "name": "Seven AM fixture check", "scheduledTime": "7:00 AM", "outcome": "pending", "runStatus": "unverified"},
+    {"occurrenceId": "ci-job-08", "name": "Eight AM fixture check", "scheduledTime": "8:00 AM", "outcome": "pending", "runStatus": "unverified"},
+    {"occurrenceId": "ci-job-09", "name": "Nine AM fixture check", "scheduledTime": "9:00 AM", "outcome": "pending", "runStatus": "active"},
+    {"occurrenceId": "ci-job-10", "name": "Ten AM fixture check", "scheduledTime": "10:00 AM", "outcome": "pending"},
+    {"occurrenceId": "ci-job-11", "name": "Eleven AM fixture check", "scheduledTime": "11:00 AM", "outcome": "pending"},
+    {"occurrenceId": "ci-job-12", "name": "Noon fixture check", "scheduledTime": "12:00 PM", "outcome": "pending"},
+    {"occurrenceId": "ci-job-13", "name": "One PM fixture check", "scheduledTime": "1:00 PM", "outcome": "pending"},
+    {"occurrenceId": "ci-job-14", "name": "Two PM fixture check", "scheduledTime": "2:00 PM", "outcome": "pending"},
+    {"occurrenceId": "ci-job-15", "name": "Three PM fixture check", "scheduledTime": "3:00 PM", "outcome": "pending"},
+    {"occurrenceId": "ci-job-16", "name": "Four PM fixture check", "scheduledTime": "4:00 PM", "outcome": "pending"},
+    {"occurrenceId": "ci-job-17", "name": "Five PM fixture check", "scheduledTime": "5:00 PM", "outcome": "pending"},
+    {"occurrenceId": "ci-job-18", "name": "Six PM fixture check", "scheduledTime": "6:00 PM", "outcome": "pending"},
+    {"occurrenceId": "ci-job-19", "name": "Seven PM fixture check", "scheduledTime": "7:00 PM", "outcome": "pending"},
+    {"occurrenceId": "ci-job-20", "name": "Eight PM fixture check", "scheduledTime": "8:00 PM", "outcome": "pending"},
+    {"occurrenceId": "ci-job-21", "name": "Nine PM fixture check", "scheduledTime": "9:00 PM", "outcome": "pending"},
+    {"occurrenceId": "ci-job-22", "name": "Ten PM fixture check", "scheduledTime": "10:00 PM", "outcome": "pending"},
+    {"occurrenceId": "ci-job-23", "name": "Eleven PM fixture check", "scheduledTime": "11:00 PM", "outcome": "pending"}
   ],
   "todayJobsMeta": {
     "counts": {
-      "complete": 1,
-      "skipped": 1,
-      "broken": 1,
-      "pending": 1
+      "complete": 3,
+      "skipped": 2,
+      "broken": 2,
+      "pending": 17
     }
   }
 }

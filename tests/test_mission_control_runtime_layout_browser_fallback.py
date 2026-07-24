@@ -223,7 +223,8 @@ def test_ci_live_data_fixture_satisfies_canonical_contract() -> None:
 def test_release_workflow_stages_and_validates_same_live_data_fixture() -> None:
     workflow = WORKFLOW_PATH.read_text()
 
-    assert "cp tests/fixtures/control-tower-live.ci.json data/control-tower-live.json" in workflow
+    assert "cp tests/fixtures/dashboard-data.ci.json data/control-tower-live.json" in workflow
+    assert "cp tests/fixtures/control-tower-hot.ci.json data/control-tower-hot.json" in workflow
     assert "--data data/control-tower-live.json" in workflow
 
 
@@ -234,10 +235,10 @@ def test_release_workflow_uses_deterministic_dashboard_fixture() -> None:
     assert "--dashboard-data tests/fixtures/dashboard-data.ci.json" in workflow
     assert isinstance(payload["todayJobs"], list)
     assert payload["todayJobsMeta"]["counts"] == {
-        "complete": 1,
-        "skipped": 1,
-        "broken": 1,
-        "pending": 1,
+        "complete": 3,
+        "skipped": 2,
+        "broken": 2,
+        "pending": 17,
     }
 
 

@@ -52,7 +52,9 @@ jobs:
           python3 scripts/ecosystem_qa_benchmark.py --route-only --no-write
           python3 scripts/ecosystem_qa_benchmark.py --fault-injection --no-write
       - name: Stage deterministic Control Tower live-data fixture
-        run: cp tests/fixtures/control-tower-live.ci.json data/control-tower-live.json
+        run: |
+          cp tests/fixtures/dashboard-data.ci.json data/control-tower-live.json
+          cp tests/fixtures/control-tower-hot.ci.json data/control-tower-hot.json
       - name: Start built Control Tower preview
         run: |
           npm run preview:ci > /tmp/control-tower-preview.log 2>&1 &
