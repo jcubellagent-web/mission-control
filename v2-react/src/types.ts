@@ -94,6 +94,13 @@ export type AgentEvent = {
   tool: string;
   privacy?: string;
   created_at: string;
+  work_id?: string;
+  run_id?: string;
+  phase?: string;
+  origin?: string;
+  model_family?: CanonicalModelFamily;
+  model_id?: string;
+  route_verified?: boolean;
   metadata?: Record<string, unknown>;
 };
 

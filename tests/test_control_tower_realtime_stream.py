@@ -37,6 +37,30 @@ def test_server_stream_watches_rendered_snapshot_and_support_sidecars() -> None:
     assert 'res.write("retry: 2000\\n\\n")' in source
 
 
+def test_live_work_uses_canonical_plain_english_events() -> None:
+    server = (ROOT / "vite.config.ts").read_text(encoding="utf-8")
+    data = (ROOT / "v2-react" / "src" / "data.ts").read_text(encoding="utf-8")
+    main = (ROOT / "v2-react" / "src" / "main.tsx").read_text(encoding="utf-8")
+
+    assert 'pathname === "/api/live-events"' in server
+    assert 'join(dataRoot, "shared-events.json")' in server
+    assert "function normalizeSharedEvent" in data
+    assert "loadLiveEventProjection()" in data
+    assert "latestMeaningfulAgentEvent" in main
+    for label in ("Decision", "Handoff", "Blocked", "Completed", "Update"):
+        assert f'"{label}"' in main
+
+
+def test_agent_task_updates_proxy_to_canonical_control_tower() -> None:
+    source = (ROOT / "scripts" / "agent_task.py").read_text(encoding="utf-8")
+
+    assert "def should_proxy_to_canonical" in source
+    assert "def canonical_task_command" in source
+    assert 'CONTROL_TOWER_TASK_LOCAL' in source
+    assert '"josh2"' in source
+    assert "shlex.join" in source
+
+
 def test_today_jobs_fallback_preserves_scheduled_rows_without_duplicates() -> None:
     script = textwrap.dedent(
         """
