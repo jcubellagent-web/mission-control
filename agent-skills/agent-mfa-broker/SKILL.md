@@ -13,7 +13,11 @@ Use `scripts/agent_mfa_broker.py` only on Josh 2.0 for an enabled account in
 1. Confirm the persistent `agent-auth` Chrome route is alive.
 2. Run `status --account <alias>` and require `enrolled: true`.
 3. Navigate the existing browser session to the legitimate service challenge.
-4. Run `complete --account <alias>`.
+4. Run `complete --account <alias>` in the logged-in Josh 2.0 GUI audit
+   session. For SSH orchestration, enter the console-user bootstrap with
+   `sudo -n launchctl asuser <console-uid>`, immediately drop back to the
+   `josh2.0` user, and invoke the broker. Never unlock the Keychain or pass a
+   login password in a command.
 5. Trust only `ok`, `browserInjected`, `submitted`, and the metadata receipt.
    Never inspect the DOM for the filled code.
 

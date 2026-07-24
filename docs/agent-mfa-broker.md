@@ -22,6 +22,13 @@ python3 scripts/agent_mfa_broker.py complete --account alpaca-paper
 
 There is deliberately no command that displays a seed, recovery code, or TOTP.
 
+Security.framework calls must run in Josh 2.0's logged-in GUI audit session.
+LaunchAgents already inherit that session. An operator invoking the broker over
+SSH must enter the console user's bootstrap/audit session with `launchctl
+asuser` and then drop back to the `josh2.0` user. A direct SSH Keychain call is
+expected to fail closed with `errSecInteractionNotAllowed`; never work around it
+by unlocking the Keychain or passing a login password through a command.
+
 ## Authorization boundary
 
 Routine `complete` calls are standing-authorized only for enabled entries in

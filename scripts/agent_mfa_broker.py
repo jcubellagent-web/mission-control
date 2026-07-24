@@ -477,6 +477,13 @@ class BrowserSession(AbstractContextManager["BrowserSession"]):
         elif len(inputs) >= len(code) and all((item.get_attribute("maxlength") or "") == "1" for item in inputs[: len(code)]):
             for item, digit in zip(inputs, code):
                 item.fill(digit)
+        elif len(inputs) == len(code) and all(
+            (item.get_attribute("autocomplete") or "").lower() == "one-time-code"
+            and (item.get_attribute("inputmode") or "").lower() in {"numeric", "decimal"}
+            for item in inputs
+        ):
+            for item, digit in zip(inputs, code):
+                item.fill(digit)
         else:
             raise BrokerError("allowlisted MFA input was not found")
         for name in self.account.get("submitButtonNames", ["Verify", "Next", "Continue"]):
