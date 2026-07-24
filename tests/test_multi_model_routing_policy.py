@@ -437,6 +437,64 @@ def test_model_lane_publish_is_a_verified_nested_worker() -> None:
     assert "--route-verified" in command
 
 
+def test_model_lane_worker_preserves_controller_owner_across_remote_host() -> None:
+    lane = load_module("model_lane_cross_host_owner", ROOT / "scripts" / "model_lane.py")
+    args = model_args()
+    route = {"agent": "jaimes", "modelRoute": {
+        "provider": "xai", "model": "grok-4.5",
+    }}
+    command = lane.lane_publish_command(
+        args,
+        route,
+        work_id="lane-work",
+        run_id="lane-run",
+        work_event="start",
+        status="active",
+        phase="working",
+        detail="Separate lane is active.",
+    )
+    assert command[command.index("--agent") + 1] == "joshex"
+
+
+def test_xai_subscription_defaults_and_prefixes_use_current_cli_model() -> None:
+    route = load_module("agent_route_grok_model", ROOT / "scripts" / "agent_route.py")
+    assert route.PROVIDER_DEFAULT_MODELS["xai"] == "grok-4.5"
+    assert route.normalize_requested_model("xai", "xai/grok-4.5") == "grok-4.5"
+
+
+def test_parent_owned_child_preserves_controller_verified_grok_route() -> None:
+    lane = load_module("model_lane_parent_route", ROOT / "scripts" / "model_lane.py")
+    args = model_args(transport="hermes")
+    args.lane_visibility = "parent-owned"
+    args.requested_provider = "xai"
+    args.requested_model = "grok-4.5"
+    args.requested_reason = "fresh parent allowance and runtime verification"
+    stale_child_route = {"agent": "jaimes", "modelRoute": {
+        "provider": "codex", "model": "gpt-5.6-terra", "role": "xai-unavailable-fallback",
+    }}
+    preserved = lane.preserve_parent_owned_route(args, stale_child_route)
+    assert preserved["modelRoute"]["provider"] == "xai"
+    assert preserved["modelRoute"]["model"] == "grok-4.5"
+    assert preserved["modelRoute"]["role"] == "parent-verified-specialist"
+
+
+def test_remote_child_model_mismatch_is_rejected(monkeypatch, capsys) -> None:
+    lane = load_module("model_lane_remote_identity", ROOT / "scripts" / "model_lane.py")
+
+    class Result:
+        returncode = 0
+        stdout = "Active Model/Auth: gpt-5.6-terra (OpenAI Codex OAuth/subscription)\nOK\n"
+        stderr = ""
+
+    monkeypatch.setattr(lane.subprocess, "run", lambda *_args, **_kwargs: Result())
+    result = lane.execute_verified(
+        ["ssh", "jaimes", "<redacted>"],
+        {"modelRoute": {"provider": "xai", "model": "grok-4.5"}},
+    )
+    assert result == 3
+    assert "expected model grok-4.5" in capsys.readouterr().err
+
+
 def test_jaimes_lane_visibility_publishes_to_canonical_control_tower(monkeypatch) -> None:
     lane = load_module("model_lane_canonical_publish", ROOT / "scripts" / "model_lane.py")
     monkeypatch.setattr(lane.Path, "home", classmethod(lambda cls: Path("/Users/jc_agent")))

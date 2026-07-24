@@ -270,7 +270,7 @@ PROVIDER_DEFAULT_MODELS = {
     "codex": "gpt-5.6-terra",
     "gemini": "gemini-3.6-flash-medium",
     "ollama": "qwen2.5:7b",
-    "xai": "grok-4.20-reasoning",
+    "xai": "grok-4.5",
     "openrouter": "openrouter/auto",
 }
 
@@ -665,7 +665,15 @@ def normalize_requested_provider(value: str = "", model: str = "") -> str:
 def normalize_requested_model(provider: str, value: str = "") -> str:
     """Map retired Antigravity labels to executable subscription model ids."""
     text = str(value or "").strip()
-    if provider != "gemini" or not text:
+    if not text:
+        return text
+    if provider == "xai":
+        normalized = text.lower()
+        for prefix in ("xai/", "grok/"):
+            if normalized.startswith(prefix):
+                return normalized.removeprefix(prefix)
+        return normalized
+    if provider != "gemini":
         return text
     normalized = text.lower()
     if normalized.startswith("agy-gemini-"):
@@ -716,7 +724,11 @@ def remote_specialist_available(provider: str, model: str = "") -> bool:
             f"-H 'Content-Type: application/json' -d {shlex.quote(payload)} >/dev/null"
         )
     elif provider == "xai":
-        command = "test -x ~/.local/bin/grok && ~/.local/bin/grok models >/dev/null 2>&1"
+        requested = normalize_requested_model(provider, model or PROVIDER_DEFAULT_MODELS[provider])
+        command = (
+            "test -x ~/.local/bin/grok && "
+            f"~/.local/bin/grok models 2>/dev/null | grep -Fq -- {shlex.quote(requested)}"
+        )
     else:
         return False
     try:
@@ -758,6 +770,25 @@ def explicit_route_unavailable(provider: str, model: str = "") -> str:
         auth = str(row.get("authStatus") or "").lower()
         if "pending" in auth or "missing" in auth:
             return f"xAI/Grok auth is {row.get('authStatus')}"
+        requested = normalize_requested_model(provider, model or PROVIDER_DEFAULT_MODELS[provider])
+        if Path.home().name == "jc_agent":
+            grok = Path.home() / ".local" / "bin" / "grok"
+            try:
+                proc = subprocess.run(
+                    [str(grok), "models"],
+                    stdin=subprocess.DEVNULL,
+                    capture_output=True,
+                    text=True,
+                    timeout=15,
+                    check=False,
+                )
+                available = proc.returncode == 0 and requested in proc.stdout.lower()
+            except Exception:
+                available = False
+        else:
+            available = remote_specialist_available(provider, requested)
+        if not available:
+            return f"Grok subscription model {requested} is unavailable on JAIMES"
     if provider == "ollama":
         allowance_ok, allowance_reason = ollama_live_allowance_status()
         if allowance_ok is False:
@@ -1107,7 +1138,12 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
             return {
                 "firstStop": "xai",
                 "provider": "xai",
-                "model": provider_budget("xai").get("apiModelUsed") or provider_budget("xai").get("lastModelUsed") or "grok-4.20-reasoning",
+                "model": normalize_requested_model(
+                    "xai",
+                    provider_budget("xai").get("apiModelUsed")
+                    or provider_budget("xai").get("lastModelUsed")
+                    or PROVIDER_DEFAULT_MODELS["xai"],
+                ),
                 "auth": PROVIDER_AUTH_LABELS.get("xai", "xai"),
                 "role": role,
                 "owner": owner,

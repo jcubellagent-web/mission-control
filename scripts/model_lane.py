@@ -34,6 +34,21 @@ PROVIDER_MODEL_FAMILIES = {
     "xai": "grok",
 }
 
+PROVIDER_ALIASES = {
+    "grok": "xai",
+    "x": "xai",
+    "google": "gemini",
+    "antigravity": "gemini",
+}
+
+PROVIDER_AUTH_LABELS = {
+    "codex": "OpenAI Codex OAuth/subscription",
+    "gemini": "Antigravity-authenticated Gemini subscription",
+    "ollama": "Ollama runtime",
+    "xai": "SuperGrok CLI OAuth/subscription",
+    "openrouter": "OpenRouter metered API",
+}
+
 
 def utc_stamp() -> str:
     return dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
@@ -86,7 +101,10 @@ def lane_publish_command(
     detail: str,
 ) -> list[str]:
     family, model = model_route_identity(route)
-    owner = str(route.get("agent") or args.requester).strip()
+    # The requester is the controlling agent and remains the owner even when
+    # JAIMES hosts the specialist process. Publishing under the execution host
+    # would make the canonical work store reject the worker as cross-owner.
+    owner = str(args.requester or route.get("agent")).strip()
     return [
         sys.executable,
         str(AGENT_PUBLISH),
@@ -245,7 +263,44 @@ def route_for(args: argparse.Namespace) -> dict[str, Any]:
         cmd += ["--requested-model", args.requested_model]
     if args.requested_reason:
         cmd += ["--requested-reason", args.requested_reason]
-    return run_json(cmd)
+    return preserve_parent_owned_route(args, run_json(cmd))
+
+
+def preserve_parent_owned_route(args: argparse.Namespace, route: dict[str, Any]) -> dict[str, Any]:
+    """Keep the controller-verified route exact on the remote execution host.
+
+    Josh 2.0 owns fresh quota telemetry and verifies JAIMES runtime/model
+    availability before forwarding. The parent-owned child must not replace
+    that route from an older host-local allowance cache.
+    """
+    if args.lane_visibility != "parent-owned":
+        return route
+    provider = PROVIDER_ALIASES.get(
+        str(args.requested_provider or "").strip().lower(),
+        str(args.requested_provider or "").strip().lower(),
+    )
+    model = str(args.requested_model or "").strip()
+    if not provider or not model:
+        raise SystemExit("A parent-owned model lane requires an exact provider and model.")
+    for prefix in (f"{provider}/", "xai/" if provider == "xai" else ""):
+        if prefix and model.lower().startswith(prefix):
+            model = model[len(prefix):]
+            break
+    preserved = dict(route)
+    selected = {
+        "firstStop": "grok" if provider == "xai" else provider,
+        "provider": provider,
+        "model": model,
+        "auth": PROVIDER_AUTH_LABELS.get(provider, provider),
+        "role": "parent-verified-specialist",
+        "owner": str(args.requester or route.get("agent")),
+        "enforced": True,
+        "freshLaneRequired": True,
+        "verifyBeforeWork": True,
+        "reason": str(args.requested_reason or "parent-verified specialist route"),
+    }
+    preserved["modelRoute"] = selected
+    return preserved
 
 
 def checkpoint_text(args: argparse.Namespace, route: dict[str, Any]) -> str:
@@ -412,8 +467,21 @@ def execute_verified(cmd: list[str], route: dict[str, Any]) -> int:
     if any(marker in combined for marker in fallback_markers):
         print("Verified model lane failed: provider fallback or authentication failure detected.", file=sys.stderr)
         return 3
-    if not (cmd and cmd[0] == "ssh"):
-        model_route = route.get("modelRoute") or {}
+    model_route = route.get("modelRoute") or {}
+    if cmd and cmd[0] == "ssh":
+        expected_model = str(model_route.get("model") or "").strip().lower()
+        active_lines = [
+            line.strip().lower()
+            for line in f"{proc.stdout}\n{proc.stderr}".splitlines()
+            if line.strip().lower().startswith("active model/auth:")
+        ]
+        if not expected_model or not active_lines or not any(expected_model in line for line in active_lines):
+            print(
+                f"Verified model lane failed: child did not report expected model {expected_model or '<missing>'}.",
+                file=sys.stderr,
+            )
+            return 3
+    else:
         print(
             f"Active Model/Auth: {model_route.get('model') or model_route.get('provider')} "
             f"({model_route.get('auth') or model_route.get('provider')})"
