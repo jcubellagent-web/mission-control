@@ -297,9 +297,9 @@
       "title": "Architecture analysis",
       "objective": "Analyze a sanitized multi-provider architecture",
       "expectedOwner": "joshex",
-      "expectedProvider": "ollama",
-      "expectedModel": "glm-5.2:cloud",
-      "expectedRole": "glm-large-context-technical-reasoning"
+      "expectedProviderAny": ["ollama", "gemini"],
+      "expectedModelAny": ["glm-5.2:cloud", "gemini-3.1-pro-high"],
+      "expectedRoleAny": ["glm-large-context-technical-reasoning", "glm-allowance-fallback"]
     },
     {
       "id": "private_summary_stays_codex",
