@@ -427,11 +427,11 @@ def test_canonical_ollama_lookup_uses_control_tower_account(monkeypatch) -> None
         returncode = 0
         stderr = ""
         stdout = json.dumps({
-            "available": True,
-            "status": "ready",
-            "quotaTelemetryStatus": "fresh",
-            "codexbarUpdatedAt": "2026-07-24T23:05:00Z",
-            "usageWindows": [{"label": "Weekly", "remainingPercent": 98.7}],
+            "schemaVersion": 1,
+            "provider": "ollama",
+            "observedAt": "2026-07-24T23:05:00Z",
+            "exportedAt": "2026-07-24T23:05:10Z",
+            "windows": [{"label": "Weekly", "remainingPercent": 98.7}],
             "unexpectedIdentity": "drop-me",
         })
 
@@ -443,6 +443,10 @@ def test_canonical_ollama_lookup_uses_control_tower_account(monkeypatch) -> None
     limits = route.canonical_ollama_allowance_limits()
 
     assert commands[0][commands[0].index("ConnectTimeout=5") + 1] == "josh2.0@josh2"
+    assert commands[0][-2:] == [
+        "cat",
+        "/Users/josh2.0/.openclaw/workspace/mission-control/data/codexbar-quota-ollama.json",
+    ]
     assert limits is not None
     assert "unexpectedIdentity" not in limits
 

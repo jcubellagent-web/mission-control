@@ -1032,19 +1032,16 @@ def canonical_ollama_allowance_limits() -> dict[str, Any] | None:
     """Read only allowlisted Ollama quota fields from canonical Control Tower."""
     if Path.home().name == "josh2.0":
         return None
-    remote_script = (
-        "import json; from pathlib import Path; "
-        "d=json.loads((Path.home()/'.openclaw/workspace/mission-control/data/modelUsage.json').read_text()); "
-        "o=((d.get('codexbarLimits') or {}).get('ollama') or {}); "
-        "keys=('available','status','quotaTelemetryStatus','codexbarUpdatedAt','usageWindows'); "
-        "print(json.dumps({k:o.get(k) for k in keys}))"
+    canonical_path = os.environ.get(
+        "CONTROL_TOWER_OLLAMA_QUOTA_PATH",
+        "/Users/josh2.0/.openclaw/workspace/mission-control/data/codexbar-quota-ollama.json",
     )
     try:
         proc = subprocess.run(
             [
                 "ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=5",
                 os.environ.get("CONTROL_TOWER_CANONICAL_HOST", "josh2.0@josh2"),
-                "python3", "-c", remote_script,
+                "cat", canonical_path,
             ],
             capture_output=True,
             text=True,
@@ -1059,10 +1056,19 @@ def canonical_ollama_allowance_limits() -> dict[str, Any] | None:
         payload = json.loads(proc.stdout)
     except json.JSONDecodeError:
         return None
-    if not isinstance(payload, dict):
+    if (
+        not isinstance(payload, dict)
+        or payload.get("schemaVersion") != 1
+        or payload.get("provider") != "ollama"
+        or not isinstance(payload.get("observedAt"), str)
+        or not isinstance(payload.get("windows"), list)
+    ):
         return None
-    allowed = {"available", "status", "quotaTelemetryStatus", "codexbarUpdatedAt", "usageWindows"}
-    return {key: payload.get(key) for key in allowed}
+    return {
+        "quotaTelemetryStatus": "fresh",
+        "codexbarUpdatedAt": payload["observedAt"],
+        "usageWindows": payload["windows"],
+    }
 
 
 def ollama_live_allowance_status(now: dt.datetime | None = None) -> tuple[bool | None, str]:
