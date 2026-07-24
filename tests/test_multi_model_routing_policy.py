@@ -374,6 +374,38 @@ def test_ollama_quota_is_a_fresh_soft_signal_and_exhaustion_falls_back(tmp_path,
     assert [row["provider"] for row in selected["fallbackRoutes"]] == ["codex"]
 
 
+def test_surplus_ollama_quota_expands_glm_first_stop_weighting(monkeypatch) -> None:
+    route = load_module("agent_route_glm_surplus", ROOT / "scripts" / "agent_route.py")
+    args = model_args()
+    args.task_type = "deep-review"
+    args.priority = "normal"
+    args.complexity = "auto"
+    args.blast_radius = "auto"
+    monkeypatch.setattr(route, "codex_allowance_mode", lambda _args: "normal")
+    monkeypatch.setattr(route, "explicit_route_unavailable", lambda provider, model="": "")
+
+    monkeypatch.setattr(route, "ollama_live_allowance_status", lambda: (True, "Ollama live allowance has 80% remaining"))
+    selected = route.choose_model_route(args, "joshex", False)
+    assert selected["provider"] == "ollama"
+    assert selected["role"] == "glm-surplus-capacity-reasoning"
+    assert selected["spendClass"] == "surplus-quota-favored-cloud-specialist"
+
+    monkeypatch.setattr(route, "ollama_live_allowance_status", lambda: (True, "Ollama live allowance has 79.9% remaining"))
+    assert route.choose_model_route(args, "joshex", False)["provider"] == "codex"
+
+    monkeypatch.setattr(route, "ollama_live_allowance_status", lambda: (None, "Ollama quota telemetry is stale"))
+    assert route.choose_model_route(args, "joshex", False)["provider"] == "codex"
+
+    monkeypatch.setattr(route, "ollama_live_allowance_status", lambda: (True, "Ollama live allowance has 99% remaining"))
+    args.task_type = "summary"
+    assert route.choose_model_route(args, "joshex", False)["provider"] == "gemini"
+    args.task_type = "repo-patch"
+    assert route.choose_model_route(args, "joshex", False)["provider"] == "codex"
+    args.task_type = "deep-review"
+    args.privacy = "agent-private"
+    assert route.choose_model_route(args, "joshex", False)["provider"] == "codex"
+
+
 def test_automatic_model_lane_discloses_and_executes_declared_fallback(monkeypatch, capsys) -> None:
     lane = load_module("model_lane_runtime_fallback", ROOT / "scripts" / "model_lane.py")
     args = model_args(transport="hermes")

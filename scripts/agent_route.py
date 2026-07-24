@@ -90,6 +90,33 @@ GLM_FIRST_CAPABILITIES = {
     "structured-code-review",
 }
 
+# Expand GLM into adjacent read-only reasoning only while fresh Ollama quota is
+# genuinely abundant. Exact specialist task types above remain GLM-first at any
+# usable allowance; this set is a reversible surplus-capacity weighting boost.
+GLM_SURPLUS_THRESHOLD_PERCENT = 80.0
+GLM_SURPLUS_TASK_TYPES = {
+    "deep-review",
+    "code-review",
+    "repository-review",
+    "strategy",
+    "technical-strategy",
+    "planning",
+    "implementation-plan",
+    "technical-plan",
+    "debugging-review",
+    "diagnostic-analysis",
+    "quality-review",
+    "risk-review",
+    "second-opinion",
+}
+
+GLM_SURPLUS_CAPABILITIES = {
+    "technical-review",
+    "strategy-analysis",
+    "diagnostic-review",
+    "implementation-planning",
+}
+
 CODEX_ONLY_TASK_TYPES = {
     "code",
     "repair",
@@ -1004,6 +1031,18 @@ def ollama_live_allowance_status(now: dt.datetime | None = None) -> tuple[bool |
     return None, "Ollama runtime is reported but exact allowance is unknown"
 
 
+def ollama_surplus_capacity_available(
+    allowance_ok: bool | None,
+    allowance_reason: str,
+    threshold: float = GLM_SURPLUS_THRESHOLD_PERCENT,
+) -> bool:
+    """Enable adjacent GLM routes only from fresh, exact, high allowance."""
+    if allowance_ok is not True:
+        return False
+    match = re.search(r"\b(\d+(?:\.\d+)?)%\s+remaining\b", str(allowance_reason).lower())
+    return bool(match and float(match.group(1)) >= threshold)
+
+
 def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: bool) -> dict[str, Any]:
     caps = set(args.capability or [])
     task_type = args.task_type
@@ -1022,7 +1061,15 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
     openrouter_hint = task_type in OPENROUTER_FALLBACK_TASK_TYPES or bool(caps & OPENROUTER_FALLBACK_CAPABILITIES)
     gemini_first = bool(gemini_hint and not codex_only and not unsafe_privacy and not needs_approval)
     ollama_allowance_ok, ollama_allowance_reason = ollama_live_allowance_status()
-    glm_first = bool(glm_hint and not codex_only and not unsafe_privacy and not needs_approval)
+    glm_surplus_candidate = task_type in GLM_SURPLUS_TASK_TYPES or bool(caps & GLM_SURPLUS_CAPABILITIES)
+    glm_surplus_boost = bool(
+        glm_surplus_candidate
+        and ollama_surplus_capacity_available(ollama_allowance_ok, ollama_allowance_reason)
+        and not codex_only
+        and not unsafe_privacy
+        and not needs_approval
+    )
+    glm_first = bool((glm_hint or glm_surplus_boost) and not codex_only and not unsafe_privacy and not needs_approval)
     glm_quota_fallback = bool(glm_first and ollama_allowance_ok is False)
     if glm_quota_fallback:
         glm_first = False
@@ -1084,18 +1131,23 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
         return payload
 
     if glm_first:
+        surplus_selected = bool(glm_surplus_boost and not glm_hint)
         return {
                 "firstStop": "ollama",
                 "provider": "ollama",
                 "model": "glm-5.2:cloud",
                 "auth": provider_auth_label("ollama", "glm-5.2:cloud"),
-                "role": "glm-large-context-technical-reasoning",
+                "role": "glm-surplus-capacity-reasoning" if surplus_selected else "glm-large-context-technical-reasoning",
                 "owner": owner,
                 "enforced": True,
                 "freshLaneRequired": True,
                 "verifyBeforeWork": True,
                 "codexAllowanceMode": allowance_mode,
-                "spendClass": "quota-favored-cloud-specialist" if ollama_allowance_ok is True else "cloud-specialist",
+                "spendClass": (
+                    "surplus-quota-favored-cloud-specialist"
+                    if surplus_selected
+                    else "quota-favored-cloud-specialist" if ollama_allowance_ok is True else "cloud-specialist"
+                ),
                 "privacy": "dashboard-safe",
                 "fallbackLadder": [
                     "ollama/glm-5.2:cloud",
@@ -1119,7 +1171,9 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
                     },
                 ],
                 "reason": compact(
-                    f"{task_type} benefits from GLM 5.2's large-context, tool-capable technical reasoning before owner integration; {ollama_allowance_reason}."
+                    f"Fresh surplus Ollama capacity expands GLM 5.2 first-stop routing to eligible {task_type} work; {ollama_allowance_reason}."
+                    if surplus_selected
+                    else f"{task_type} benefits from GLM 5.2's large-context, tool-capable technical reasoning before owner integration; {ollama_allowance_reason}."
                 ),
                 "guardrails": [
                     "Send sanitized technical context only; Ollama GLM 5.2 is a cloud model, not a private local lane.",

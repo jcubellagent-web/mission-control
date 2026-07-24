@@ -60,6 +60,12 @@ reasoning out first and reserve GPT for orchestration, execution, and synthesis.
 - GLM 5.2 Cloud: architecture, repository analysis, debugging hypotheses,
   multi-file planning, structured code review, long-context technical analysis,
   and parallel technical second opinions. It does not edit or execute.
+- GLM surplus boost: when fresh Ollama session and weekly allowance both leave at
+  least 80% remaining, also route substantive dashboard-safe deep/code/repository
+  review, strategy, planning, implementation-plan, diagnostic, quality/risk
+  review, and second-opinion work to GLM first. Disable this expansion when quota
+  is below 80%, stale, unknown, or exhausted. Generic/UI review and summaries
+  remain Gemini work; private context and mutations remain Codex work.
 - Local Ollama: private/offline bounded drafting and extraction only. On the
   current 16 GB hosts, keep Qwen 2.5 7B as the verified general fallback and use
   GLM-OCR only for local OCR after its dedicated canary passes.
@@ -78,6 +84,8 @@ reasoning out first and reserve GPT for orchestration, execution, and synthesis.
 - Keep provider health and quota separate. Health controls whether a lane may
   execute; quota controls preference and conservation. Unknown quota with
   verified health is usable, while exhausted quota or failed health is not.
+- Treat the 80% GLM surplus rule as a weighting boost for real, task-matched
+  work, not permission to manufacture calls merely to consume credit.
 
 ## Ollama Catalog Decisions
 

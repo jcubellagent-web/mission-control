@@ -292,6 +292,14 @@ Josh approved this default policy for Codex-app, Josh 2.0, and JAIMES work:
   analysis, multi-file planning, structured code review, and parallel technical
   second opinions. GLM may reason, plan, and review; the owning Codex lane keeps
   repo edits, terminal execution, permissions, approvals, and final verification.
+- When fresh Ollama session and weekly allowance both have at least 80% remaining,
+  increase GLM's routing weight by making it first-stop for substantive
+  dashboard-safe deep/code/repository review, strategy, planning,
+  implementation-plan, diagnostic, quality/risk review, and second-opinion work.
+  Turn this surplus expansion off when quota is below 80%, stale, unknown, or
+  exhausted. Do not move generic/UI review, summaries, private context, mutations,
+  tools, approvals, or final integration away from their existing owners, and do
+  not invent specialist calls solely to consume credit.
 - GLM 5.2 is Ollama Cloud, not an offline/private model. Never send it secrets,
   OAuth payloads, cookies, raw emails, raw connector or account contents, wallet
   data, credentials, or other private context. Use local Qwen/Llama for offline
