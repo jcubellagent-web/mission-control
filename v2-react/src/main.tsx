@@ -5,7 +5,7 @@ import { AlertTriangle, ArrowLeftRight, ArrowUp, BookOpen, Bot, Braces, CheckCir
 import { invalidateMissionControlSidecars, loadMissionControl, subscribeMissionControlRealtime } from "./data";
 import { PRIORITY_JOB_RULES, SORARE_DAILY_GROUPS, SORARE_GENERAL_PATTERN, type PriorityJobKey, type SorareGroupKey } from "./priorityJobs";
 import { CANONICAL_ROUTE_ORDER, CANONICAL_ROUTES, liveWorkModelLabel, routeCssProperties, routeForAgentStatus, routeForProvider, verifiedRouteForAgentStatus } from "./routeIdentity";
-import type { ActiveModelRoute, AgenticCryptoWallet, AgentId, AgentStatus, MissionControlState, SignalItem, TodayJobOccurrence, TodayJobOutcome, TodayJobsMeta } from "./types";
+import type { ActiveModelRoute, AgentEvent, AgenticCryptoWallet, AgentId, AgentStatus, MissionControlState, SignalItem, TodayJobOccurrence, TodayJobOutcome, TodayJobsMeta } from "./types";
 import "./styles.css";
 
 const AGENTS: Record<AgentId, { label: string; role: string; roleBadge: string }> = {
@@ -792,6 +792,50 @@ function buildHandoffBeams(state: MissionControlState): HandoffBeam[] {
   return beams;
 }
 
+function agentEventPriority(event: AgentEvent, status?: AgentStatus) {
+  const kind = `${event.event_type} ${event.status}`.toLowerCase();
+  const text = `${event.title} ${event.detail} ${event.tool}`.toLowerCase();
+  const ageMinutes = Math.max(0, (Date.now() - timeValue(event.created_at)) / 60_000);
+  let score = Math.max(0, 30 - ageMinutes);
+  if (status?.work_id && event.work_id === status.work_id) score += 120;
+  if (/decision/.test(kind)) score += 90;
+  if (/handoff/.test(kind) || /requesting|delegat|instruction received|task queued/.test(text)) score += 80;
+  if (/blocked|error/.test(kind)) score += 75;
+  if (/complete|done|ready/.test(kind)) score += 55;
+  if (/active|verifying/.test(kind)) score += 45;
+  if (/online and ready|status check|heartbeat/.test(text) || event.origin === "legacy-agent-publish") score -= 140;
+  return score;
+}
+
+function latestMeaningfulAgentEvent(events: AgentEvent[], agent: AgentId, status?: AgentStatus) {
+  const cutoff = Date.now() - 12 * 60 * 60 * 1000;
+  return events
+    .filter((event) => event.agent_id === agent && timeValue(event.created_at) >= cutoff)
+    .sort((left, right) => {
+      const priority = agentEventPriority(right, status) - agentEventPriority(left, status);
+      return priority || timeValue(right.created_at) - timeValue(left.created_at);
+    })[0];
+}
+
+function agentEventReadout(event?: AgentEvent) {
+  if (!event) return "";
+  const kind = `${event.event_type} ${event.status}`.toLowerCase();
+  const text = `${event.title} ${event.detail}`.toLowerCase();
+  const label = /decision/.test(kind)
+    ? "Decision"
+    : /handoff/.test(kind) || /requesting|delegat|instruction received|task queued/.test(text)
+      ? "Handoff"
+      : /blocked|error/.test(kind)
+        ? "Blocked"
+        : /complete|done|ready/.test(kind)
+          ? "Completed"
+          : "Update";
+  const message = ["Decision", "Handoff"].includes(label)
+    ? event.title || event.detail
+    : event.detail || event.title;
+  return `${label}: ${readoutSummary(message, event.title || "Agent update", 78)}`;
+}
+
 function cueRowKey(kind: string, id?: string | number | null) {
   return `${kind}:${id || "unknown"}`;
 }
@@ -1428,6 +1472,7 @@ function BrainHero({
           {heroAgents.map((agent) => {
             const liveWork = liveWorkPresentationForAgent(agent, statuses.get(agent), workItems);
             const idleContext = buildAgentIdleContext(agent, state, nowMs);
+            const recentEvent = latestMeaningfulAgentEvent(events, agent, liveWork.status);
             return (
               <AgentHeroCard
                 key={agent}
@@ -1435,6 +1480,7 @@ function BrainHero({
                 liveWork={liveWork}
                 idleContext={idleContext}
                 activeModelRoutes={state.activeModelRoutes || []}
+                recentEvent={recentEvent}
                 changed={Boolean(liveCues.rows[cueRowKey("agent", agent)])}
               />
             );
@@ -4793,12 +4839,14 @@ function AgentHeroCard({
   liveWork,
   idleContext,
   activeModelRoutes,
+  recentEvent,
   changed,
 }: {
   agent: AgentId;
   liveWork: AgentLiveWorkPresentation;
   idleContext: AgentIdleContext;
   activeModelRoutes: ActiveModelRoute[];
+  recentEvent?: AgentEvent;
   changed?: boolean;
 }) {
   const { status, activeWork, activeFocus, visualState } = liveWork;
@@ -4840,9 +4888,10 @@ function AgentHeroCard({
   ];
   const activeReadout = activeAgentReadout(status, activeWorkDetail);
   const headline = agentHeadline(activeFocus, activeReadout, idleContext, idleBriefRows);
-  const supportNote = activeFocus
+  const eventNote = agentEventReadout(recentEvent);
+  const supportNote = eventNote || (activeFocus
     ? `Output: ${readoutFit(activeReadout.expectedOutput, 78)}`
-    : `Complete: ${readoutSummary(idleContext.complete, "No recent completion reported.", 78)}`;
+    : `Complete: ${readoutSummary(idleContext.complete, "No recent completion reported.", 78)}`);
   const stepTrail = stepTrailForAgent(status, activeFocus, activeWork);
   const showStepTrail = activeFocus || visualState === "waiting" || visualState === "blocked";
   const updateAgeMs = Math.max(0, Date.now() - timeValue(status.updated_at));

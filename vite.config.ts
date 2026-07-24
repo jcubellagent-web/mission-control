@@ -97,6 +97,17 @@ function activeHotProjection() {
   });
 }
 
+function liveEventsProjection() {
+  const shared = JSON.parse(readFileSync(join(dataRoot, "shared-events.json"), "utf8"));
+  const events = (Array.isArray(shared?.events) ? shared.events : [])
+    .filter((event: any) => !event?.privacy || event.privacy === "dashboard-safe")
+    .slice(0, 96);
+  return JSON.stringify({
+    source: "Control Tower shared event ledger",
+    events,
+  });
+}
+
 function runWalletRefresh(): Promise<WalletRefreshResult> {
   if (walletRefreshInFlight) return walletRefreshInFlight;
   //JAIMES: Keep wallet refresh single-flight and asynchronous so scheduled refreshes never freeze Control Tower HTTP/SSE.
@@ -195,6 +206,18 @@ function writeLocalLiveEvent(res: any) {
 
 function serveMissionControlFiles(req: any, res: any, next: any) {
   const pathname = String(req.url || "").split("?")[0];
+  if (pathname === "/api/live-events") {
+    try {
+      writePrivateJson(req, res, liveEventsProjection());
+    } catch {
+      res.statusCode = 503;
+      res.setHeader("Content-Type", "application/json; charset=utf-8");
+      res.setHeader("Cache-Control", "no-store");
+      res.end(JSON.stringify({ ok: false, error: "live event projection unavailable" }));
+    }
+    return;
+  }
+
   if (pathname === "/api/control-tower-hot") {
     try {
       writePrivateJson(req, res, activeHotProjection());

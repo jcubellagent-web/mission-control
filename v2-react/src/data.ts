@@ -261,6 +261,59 @@ async function loadActiveWorkProjection(): Promise<unknown> {
   }
 }
 
+async function loadLiveEventProjection(): Promise<unknown> {
+  try {
+    const snapshot = await fetchJson<unknown>("/api/live-events");
+    if (!isRecord(snapshot)) throw new Error("live event projection is not an object");
+    return snapshot;
+  } catch {
+    return fetchJson<unknown>("/data/shared-events.json").catch(() => null);
+  }
+}
+
+function normalizeSharedEvent(row: unknown): AgentEvent | null {
+  if (!isRecord(row)) return null;
+  const privacy = stringValue(row.privacy, "dashboard-safe");
+  if (privacy !== "dashboard-safe") return null;
+  const id = stringValue(row.id);
+  const created_at = stringValue(row.time, stringValue(row.created_at));
+  if (!id || !created_at) return null;
+  const model_family = normalizeModelFamily(row.modelFamily || row.model_family);
+  const work_id = stringValue(row.workId, stringValue(row.work_id));
+  const run_id = stringValue(row.runId, stringValue(row.run_id));
+  const phase = stringValue(row.phase);
+  const origin = stringValue(row.origin);
+  const model_id = stringValue(row.modelId, stringValue(row.model_id));
+  const route_verified = booleanValue(row.routeVerified ?? row.route_verified);
+  return {
+    id,
+    agent_id: canonicalAgentId(row.agent || row.agent_id),
+    event_type: stringValue(row.type, stringValue(row.event_type, "status")),
+    status: stringValue(row.status, "info"),
+    title: stringValue(row.title, "Agent update"),
+    detail: stringValue(row.detail),
+    tool: stringValue(row.tool, "Control Tower"),
+    privacy,
+    created_at,
+    work_id: work_id || undefined,
+    run_id: run_id || undefined,
+    phase: phase || undefined,
+    origin: origin || undefined,
+    model_family,
+    model_id: model_id || undefined,
+    route_verified,
+    metadata: {
+      workId: work_id || undefined,
+      runId: run_id || undefined,
+      phase: phase || undefined,
+      origin: origin || undefined,
+      modelFamily: model_family,
+      modelId: model_id || undefined,
+      routeVerified: route_verified,
+    },
+  };
+}
+
 function dedupeStatus(rows: Array<AgentStatus | null>): AgentStatus[] {
   const byAgent = new Map<AgentId, AgentStatus>();
   for (const row of rows) {
@@ -517,7 +570,7 @@ function normalizeTodayJobsProjection(dashboard: any): { todayJobs: TodayJobOccu
 }
 
 async function loadFallback(): Promise<MissionControlState> {
-  const [brain, personal, dashboard, sidecars, joshexFeed, jaimesFeed, jainFeed, rawWorkHot] = await Promise.all([
+  const [brain, personal, dashboard, sidecars, joshexFeed, jaimesFeed, jainFeed, rawWorkHot, rawSharedEvents] = await Promise.all([
     fetchJson<any>("/data/brain-feed.json").catch(() => null),
     fetchJson<any>("/data/personal-codex.json").catch(() => null),
     loadDashboardSnapshot(),
@@ -526,6 +579,7 @@ async function loadFallback(): Promise<MissionControlState> {
     fetchJson<any>("/data/jaimes-brain-feed.json").catch(() => null),
     fetchJson<any>("/data/jain-brain-feed.json").catch(() => null),
     loadActiveWorkProjection(),
+    loadLiveEventProjection(),
   ]);
   const codexJobs = Array.isArray(dashboard?.codexJobs)
     ? null
@@ -586,9 +640,16 @@ async function loadFallback(): Promise<MissionControlState> {
     tool: "Control Tower live snapshot",
     created_at: event.time || dashboard?.generatedAt || "",
   }));
-  const events = [...statusEvents, ...dashboardEvents]
+  const sharedEvents = arrayValue(recordValue(rawSharedEvents).events)
+    .map(normalizeSharedEvent)
+    .filter((event): event is AgentEvent => Boolean(event));
+  const eventsById = new Map<string, AgentEvent>();
+  [...sharedEvents, ...statusEvents, ...dashboardEvents].forEach((event) => {
+    if (!eventsById.has(event.id)) eventsById.set(event.id, event as AgentEvent);
+  });
+  const events = [...eventsById.values()]
     .sort((a, b) => timestampValue(b.created_at) - timestampValue(a.created_at))
-    .slice(0, 16);
+    .slice(0, 96);
   const actionItems = Array.isArray(dashboard?.actionRequired) ? dashboard.actionRequired : [];
   const approvals = actionItems.filter(actionItemRequiresApproval).slice(0, 8).map((item: any, index: number) => ({
     id: `fallback-approval-${index}`,

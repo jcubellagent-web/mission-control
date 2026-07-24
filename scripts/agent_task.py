@@ -9,6 +9,7 @@ import hashlib
 import json
 import os
 import re
+import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -50,6 +51,36 @@ PRIVACY_TIERS = {"dashboard-safe", "agent-private", "josh-approval", "sensitive-
 APPROVALS = {"none", "required", "approved", "rejected"}
 REQUIRES_APPROVAL = {"josh-approval", "sensitive-account", "destructive"}
 DEFAULT_ACTIVE_TASK_LEASE_SECONDS = 900
+CANONICAL_TASK_HOST = os.environ.get("CONTROL_TOWER_CANONICAL_HOST", "josh2.0@josh2")
+CANONICAL_TASK_ROOT = os.environ.get(
+    "CONTROL_TOWER_CANONICAL_ROOT",
+    "/Users/josh2.0/.openclaw/workspace/mission-control",
+)
+
+
+def should_proxy_to_canonical(
+    home: Path | None = None,
+    environ: dict[str, str] | None = None,
+) -> bool:
+    env = os.environ if environ is None else environ
+    if env.get("CONTROL_TOWER_DATA_DIR") or env.get("CONTROL_TOWER_TASK_LOCAL") == "1":
+        return False
+    return (home or Path.home()).name != "josh2.0"
+
+
+def canonical_task_command(argv: list[str]) -> list[str]:
+    remote = shlex.join(["python3", "scripts/agent_task.py", *argv])
+    return [
+        "ssh",
+        "-o", "BatchMode=yes",
+        "-o", "ConnectTimeout=5",
+        CANONICAL_TASK_HOST,
+        f"cd {shlex.quote(CANONICAL_TASK_ROOT)} && {remote}",
+    ]
+
+
+def proxy_to_canonical(argv: list[str]) -> int:
+    return subprocess.run(canonical_task_command(argv), check=False).returncode
 
 
 def utc_now() -> str:
@@ -812,4 +843,6 @@ def main() -> int:
 
 
 if __name__ == "__main__":
+    if should_proxy_to_canonical():
+        raise SystemExit(proxy_to_canonical(sys.argv[1:]))
     raise SystemExit(main())
