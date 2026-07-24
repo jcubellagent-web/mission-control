@@ -166,10 +166,19 @@ def normalize_seed(value: str) -> str:
     compact = re.sub(r"[\s-]+", "", value or "").upper().rstrip("=")
     if not 16 <= len(compact) <= 256 or re.fullmatch(r"[A-Z2-7]+", compact) is None:
         raise BrokerError("invalid TOTP enrollment material")
+    try:
+        base64.b32decode(compact + "=" * ((8 - len(compact) % 8) % 8), casefold=False)
+    except Exception as exc:
+        raise BrokerError("invalid TOTP enrollment material") from exc
     return compact
 
 
-def seed_from_material(material: str) -> str:
+def seed_from_material(
+    material: str,
+    *,
+    allow_standalone: bool = False,
+    standalone_requires_digit: bool = True,
+) -> str:
     if len(material.encode(errors="ignore")) > MAX_TEXT_BYTES:
         raise BrokerError("enrollment material is too large")
     candidates = [material]
@@ -192,6 +201,18 @@ def seed_from_material(material: str) -> str:
     match = contextual.search(material)
     if match:
         return normalize_seed(match.group(1))
+    if allow_standalone:
+        for line in material.splitlines():
+            raw = line.strip()
+            if not raw or re.search(r"[a-z]", raw):
+                continue
+            compact = re.sub(r"[\s-]+", "", raw).rstrip("=")
+            if standalone_requires_digit and re.search(r"[2-7]", compact) is None:
+                continue
+            try:
+                return normalize_seed(compact)
+            except BrokerError:
+                continue
     raise BrokerError("no supported TOTP enrollment material found")
 
 
@@ -403,7 +424,13 @@ class BrowserSession(AbstractContextManager["BrowserSession"]):
             }"""
             )
             try:
-                return seed_from_material(str(material or ""))
+                return seed_from_material(
+                    str(material or ""),
+                    allow_standalone=bool(self.account.get("allowStandaloneSeed")),
+                    standalone_requires_digit=bool(
+                        self.account.get("standaloneSeedRequiresDigit", True)
+                    ),
+                )
             except BrokerError:
                 if time.monotonic() >= deadline:
                     raise

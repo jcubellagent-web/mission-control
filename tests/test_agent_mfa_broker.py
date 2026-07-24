@@ -24,6 +24,27 @@ def test_seed_extraction_supports_uri_and_manual_grouping() -> None:
     assert MODULE.seed_from_material(
         "otpauth://totp/Agent?secret=JBSWY3DPEHPK3PXP&issuer=Example"
     ) == "JBSWY3DPEHPK3PXP"
+
+
+def test_standalone_seed_requires_explicit_safe_shape_opt_in() -> None:
+    standalone = "ABCD2345" * 6 + "ABCD"
+    try:
+        MODULE.seed_from_material(standalone)
+    except MODULE.BrokerError:
+        pass
+    else:
+        raise AssertionError("standalone seed unexpectedly accepted without opt-in")
+    assert MODULE.seed_from_material(
+        standalone,
+        allow_standalone=True,
+        standalone_requires_digit=True,
+    ) == standalone
+    try:
+        MODULE.seed_from_material("Mixed case prose line", allow_standalone=True)
+    except MODULE.BrokerError:
+        pass
+    else:
+        raise AssertionError("mixed-case prose unexpectedly accepted as a seed")
     assert MODULE.seed_from_material(
         "Manual setup key: JBSW Y3DP EHPK 3PXP"
     ) == "JBSWY3DPEHPK3PXP"
@@ -116,6 +137,7 @@ def test_checked_in_alpaca_scope_is_paper_only() -> None:
 if __name__ == "__main__":
     test_rfc_6238_sha1_vector()
     test_seed_extraction_supports_uri_and_manual_grouping()
+    test_standalone_seed_requires_explicit_safe_shape_opt_in()
     test_origin_and_path_are_both_required()
     test_disabled_or_unknown_accounts_fail_closed()
     with tempfile.TemporaryDirectory() as directory:
