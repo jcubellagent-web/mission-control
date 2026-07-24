@@ -114,6 +114,15 @@ def test_objective_copy_complaint_maps_to_interpreted_intent():
     assert watcher.objective_from_prompt(prompt) == "Make agent task objectives reflect interpreted intent"
 
 
+def test_health_canary_live_card_language_keeps_health_objective():
+    watcher = load_module()
+    prompt = (
+        "Run the canonical read-only JAIMES Telegram health check and verify "
+        "one managed live card, heartbeat progression, and one structured final."
+    )
+    assert watcher.objective_from_prompt(prompt) == "Run JAIMES Telegram health check"
+
+
 def test_near_copy_gate_defers_telegram_and_control_tower(monkeypatch):
     watcher = load_module()
     prompt = "Please stabilize the live card"

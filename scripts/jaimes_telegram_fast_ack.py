@@ -1413,7 +1413,8 @@ FINAL_RESULT_SIGNAL_RE = re.compile(
     r"(?:en|dis)abl(?:e|es|ed|ing)|reconcil(?:e|es|ed)|retir(?:e|es|ed)|"
     r"replac(?:e|es|ed)|rerout(?:e|es|ed)|mov(?:e|es|ed)|prevent(?:s|ed)?|"
     r"preserv(?:e|es|ed)|verified|completed|executed|ran|processed|measured|"
-    r"recorded|delivered|returned|produced|passed|failed|"
+    r"recorded|delivered|returned|produced|passed|failed|healthy|"
+    r"resolv(?:e|es|ed|ing)|advanc(?:e|es|ed|ing)|agree(?:s|d|ing)?|"
     r"cannot|can't|could not|does not|"
     r"unsupported|risk|recommend(?:ed|ation)?|should|avoid|blocked|requires?|"
     r"increased|decreased|match(?:es|ed)?|differs?|supports?|select(?:s|ed)?|"
@@ -2262,6 +2263,14 @@ def summarize_objective(text: str) -> str:
         return "Format final summaries as code blocks"
     if "alert" in intent_lower and any(word in intent_lower for word in ("hard to read", "format", "section")):
         return "Reformat alerts into clear sections"
+    if (
+        "health check" in intent_lower
+        and any(marker in intent_lower for marker in ("jaimes", "telegram"))
+    ):
+        # A reliability canary often mentions the live card it is observing.
+        # Classify the requested check before the generic Telegram-UX marker so
+        # the new card cannot inherit a misleading "Tune ... UX" objective.
+        return "Run JAIMES Telegram health check"
     if "market cap" in intent_lower and any(word in intent_lower for word in ("bought", "buy", "sold", "sell")):
         return "Investigate matching trade market-cap labels"
 

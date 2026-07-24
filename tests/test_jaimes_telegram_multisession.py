@@ -2455,6 +2455,37 @@ Approval needed:
         self.assertNotIn("Retry with evidence", normalized)
         self.assertTrue(watcher.final_contract_is_canonical(rendered))
 
+    def test_topic17_health_canary_concrete_runtime_results_stay_complete(self) -> None:
+        rendered = watcher.structured_final_text(
+            """Complete: Yes — verification performed
+What was done:
+- Health checks passed at 01:42:10Z and 01:42:43Z, 33 seconds apart.
+- Topic 17 ownership resolved exclusively to JAIMES.
+- Gateway, Telegram, and fast-ack were healthy.
+- Request 4322 had one reaction and one managed card: 4323.
+- Heartbeat progression advanced on the same card.
+- Telegram, card, lifecycle, and Control Tower work/run IDs agreed.
+- This response is the single structured final.
+Issues:
+- n/a
+Appropriate next steps:
+- No action needed.
+Approval needed:
+- n/a""",
+            objective="Run JAIMES Telegram health check",
+            model="openai-codex/gpt-5.6-sol",
+            route="JAIMES verified execution",
+            why="heavy workhorse reasoning",
+        )
+        plain = watcher.html.unescape(rendered)
+        normalized = " ".join(plain.split())
+        self.assertIn("Complete: Yes", normalized)
+        self.assertIn("Health checks passed", normalized)
+        self.assertIn("ownership resolved", normalized)
+        self.assertNotIn("Detailed findings were not captured", normalized)
+        self.assertNotIn("Retry with evidence", normalized)
+        self.assertTrue(watcher.final_contract_is_canonical(rendered))
+
     def test_terminal_prepare_passes_verified_why_to_single_formatter(self) -> None:
         source = inspect.getsource(watcher.prepare_terminal_response)
         self.assertIn('why=evidence["why"]', source)
