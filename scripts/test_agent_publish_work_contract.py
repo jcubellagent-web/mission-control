@@ -148,6 +148,43 @@ class AgentPublishWorkContractTests(unittest.TestCase):
         with self.assertRaises(SystemExit):
             agent_publish.ensure_safe("harmless", privacy="agent-private")
 
+    def test_v2_flag_is_a_local_retired_noop(self) -> None:
+        root = Path(agent_publish.ROOT)
+        with tempfile.TemporaryDirectory() as raw:
+            data = Path(raw) / "data"
+            environment = {
+                **os.environ,
+                "CONTROL_TOWER_DATA_DIR": str(data),
+                "CONTROL_TOWER_WORK_DB": str(data / "work.db"),
+                "CONTROL_TOWER_HOT_JSON": str(data / "hot.json"),
+                "CONTROL_TOWER_HANDOFF_DIR": str(data / "handoffs"),
+                "PYTHONDONTWRITEBYTECODE": "1",
+            }
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    "-B",
+                    str(root / "scripts" / "agent_publish.py"),
+                    "--agent",
+                    "joshex",
+                    "--title",
+                    "Verify retired compatibility flag",
+                    "--status",
+                    "done",
+                    "--v2",
+                ],
+                cwd=root,
+                env=environment,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+        payload = json.loads(completed.stdout)
+        self.assertEqual(payload["v2"]["reason"], "retired-local-sidecar-path")
+        self.assertTrue(payload["v2"]["skipped"])
+        self.assertFalse(hasattr(agent_publish, "publish_v2"))
+        self.assertNotIn("mc_v2_publish.py", Path(agent_publish.__file__).read_text())
+
     def test_dashboard_text_redacts_internal_stack_details(self) -> None:
         traceback = 'Traceback (most recent call last):\n  File "/Users/operator/private.py", line 14'
         self.assertEqual(

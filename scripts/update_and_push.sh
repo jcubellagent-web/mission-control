@@ -45,7 +45,7 @@ python3 scripts/update_mission_control.py
 python3 scripts/mission_control_visual_canaries.py || true
 python3 scripts/update_mission_control.py
 # Commit dashboard data — brain-feed.json is intentionally excluded.
-# Brain feed active state is managed by Supabase Realtime (bf_push.sh).
+# Brain Feed active state is managed by Josh 2.0's local sidecars and agent_publish.py.
 # Pushing brain-feed.json to GH Pages would overwrite live active state every 5min.
 ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 git add --sparse data/dashboard-data.json data/modelUsage.json data/jain-brain-feed.json data/jaimes-brain-feed.json data/agent-comms.json data/x-progress.json data/jain-api-costs.json data/eight-sleep-data.json data/moltworld-data.json data/moltworld-state.json data/jain-breaking-highlights.json data/jain-daily-signals.json data/mission-control-canaries.json

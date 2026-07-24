@@ -8,11 +8,6 @@ import fcntl
 import json
 import os
 import re
-import subprocess
-import sys
-import urllib.error
-import urllib.parse
-import urllib.request
 import uuid
 from pathlib import Path
 from typing import Any
@@ -28,7 +23,6 @@ from handoff_receipt_bridge import write_new_handoff
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = Path(os.environ.get("CONTROL_TOWER_DATA_DIR", ROOT / "data"))
-INDEX = ROOT / "index.html"
 EVENTS_PATH = DATA_DIR / "shared-events.json"
 CODEX_JOBS_PATH = DATA_DIR / "codex-jobs.json"
 DECISIONS_PATH = DATA_DIR / "decisions.json"
@@ -592,97 +586,6 @@ def dashboard_handoff_path(path: Path | None) -> str:
         return path.name
 
 
-def frontend_supabase_config() -> tuple[str, str] | None:
-    if not INDEX.exists():
-        return None
-    html = INDEX.read_text(errors="replace")
-    url_match = re.search(r"SUPABASE_URL:\s*['\"]([^'\"]+)['\"]", html)
-    key_match = re.search(r"SUPABASE_KEY:\s*['\"]([^'\"]+)['\"]", html)
-    if not url_match or not key_match:
-        return None
-    return url_match.group(1).rstrip("/"), key_match.group(1)
-
-
-def request_json(url: str, key: str, method: str = "GET", body: Any | None = None, prefer: str | None = None) -> Any:
-    headers = {
-        "apikey": key,
-        "Authorization": f"Bearer {key}",
-        "Content-Type": "application/json",
-    }
-    if prefer:
-        headers["Prefer"] = prefer
-    data = None if body is None else json.dumps(body).encode()
-    req = urllib.request.Request(url, data=data, headers=headers, method=method)
-    with urllib.request.urlopen(req, timeout=8) as resp:  # nosec B310 - configured dashboard endpoint
-        raw = resp.read().decode("utf-8", "replace")
-        return json.loads(raw) if raw else None
-
-
-def fetch_existing_feed(url: str, key: str, row_id: str) -> dict[str, Any]:
-    encoded = urllib.parse.quote(row_id, safe="")
-    rows = request_json(f"{url}/rest/v1/brain_feed?id=eq.{encoded}&select=data", key) or []
-    if rows and isinstance(rows[0].get("data"), dict):
-        return rows[0]["data"]
-    return {}
-
-
-def publish_brain_feed(event: dict[str, Any]) -> None:
-    config = frontend_supabase_config()
-    if not config:
-        raise SystemExit("Missing Supabase config in index.html; event was logged locally only.")
-    url, key = config
-    agent = event["agent"]
-    row_id = agent
-    existing = fetch_existing_feed(url, key, row_id)
-    active = event["status"] in STATUS_TO_ACTIVE
-    step = {
-        "label": agent_dashboard_text(agent, event["title"], 180),
-        "status": "active" if active else event["status"],
-        "tool": agent_dashboard_text(agent, event.get("tool") or "agent_publish.py", 44),
-        "kind": event["type"],
-    }
-    preserve_top = (
-        recent_live_agent_push(existing)
-        or preserve_top_level_brain_feed(event)
-        or preserve_active_telegram_task(existing, event)
-    ) and isinstance(existing, dict) and bool(existing.get("objective"))
-    payload = {
-        **existing,
-        "agentId": agent,
-        "agent": agent_label(agent),
-        "active": existing.get("active") if preserve_top else active,
-        "reportedActive": existing.get("reportedActive") if preserve_top else active,
-        "status": existing.get("status") if preserve_top else ("active" if active else event["status"]),
-        "objective": agent_dashboard_text(agent, existing.get("objective") if preserve_top else event["title"], 220),
-        "detail": agent_dashboard_text(agent, existing.get("detail") if preserve_top else (event.get("detail") or event["title"]), 260),
-        "updatedAt": existing.get("updatedAt") if preserve_top else event["time"],
-        "checkedAt": event["time"],
-        "currentTool": agent_dashboard_text(agent, existing.get("currentTool") if preserve_top else (event.get("tool") or "agent_publish.py"), 44),
-        "steps": merge_brain_feed_steps(agent, [step] + brain_feed_step_history(existing.get("steps"), event, preserve_active=preserve_top)),
-        "source": "shared-agent-event-ledger",
-        "workId": event["workId"],
-        "runId": event["runId"],
-        "generation": event["generation"],
-        "sequence": event["sequence"],
-        "phase": event.get("phase") or event["status"],
-        "originClaimHash": event["originClaimHash"],
-        "modelFamily": event.get("modelFamily"),
-        "modelId": event.get("modelId"),
-        "routeVerified": bool(event.get("routeVerified")),
-        "leaseUntil": event.get("leaseUntil"),
-        "supabaseBacked": True,
-    }
-    payload = scrub_blocked_public_x_payload(agent, payload)
-    row = {"id": row_id, "data": payload, "updated_at": event["time"]}
-    request_json(
-        f"{url}/rest/v1/brain_feed",
-        key,
-        method="POST",
-        body=[row],
-        prefer="resolution=merge-duplicates,return=minimal",
-    )
-
-
 def publish_local_brain_feed(event: dict[str, Any]) -> None:
     path = BRAIN_FEED_PATHS.get(event["agent"])
     if event["agent"] in {"josh", "josh2"} and Path.home().name != "josh2.0":
@@ -768,10 +671,6 @@ def mirror_publish_heartbeat(event: dict[str, Any]) -> None:
         fcntl.flock(lock, fcntl.LOCK_UN)
 
 
-def should_mirror_supabase_brain_feed() -> bool:
-    return False
-
-
 def should_publish_v2(args: argparse.Namespace) -> bool:
     return bool(
         args.v2
@@ -786,37 +685,6 @@ def retired_v2_result() -> dict[str, Any]:
         "reason": "retired-local-sidecar-path",
         "detail": "Control Tower uses local Brain Feed and JSON sidecars; Supabase/v2 mirroring is no longer a dependency.",
     }
-
-
-def publish_v2(event: dict[str, Any], job: bool, handoff_to: str = "") -> dict[str, Any]:
-    status = event["status"]
-    if event["type"] == "complete":
-        status = "done"
-    cmd = [
-        sys.executable,
-        str(ROOT / "scripts" / "mc_v2_publish.py"),
-        "--agent", event["agent"],
-        "--type", event["type"],
-        "--status", status,
-        "--title", event["title"],
-        "--tool", event.get("tool") or "agent_publish.py",
-        "--detail", event.get("detail") or event["title"],
-    ]
-    if job:
-        cmd.append("--job")
-    if handoff_to:
-        cmd.extend(["--handoff-to", handoff_to])
-    result = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, check=False)
-    if result.returncode != 0:
-        return {
-            "ok": False,
-            "error": compact(result.stderr.strip() or result.stdout.strip() or f"exit {result.returncode}", 500),
-        }
-    try:
-        payload = json.loads(result.stdout)
-    except json.JSONDecodeError:
-        payload = {"raw": compact(result.stdout, 500)}
-    return {"ok": True, "result": payload}
 
 
 def write_handoff(event: dict[str, Any], target: str) -> Path:

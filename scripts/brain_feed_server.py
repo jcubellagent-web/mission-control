@@ -23,7 +23,7 @@ Endpoints:
   PUT  /eightsleep/both     — set both sides temp (?level=-54)
   POST /eightsleep/off      — turn off (set both sides to 0)
 """
-import http.server, json, mimetypes, os, subprocess, sys, threading, urllib.error, urllib.request
+import http.server, json, mimetypes, os, subprocess, sys, threading, urllib.request
 from pathlib import Path
 
 # ── Eight Sleep proxy config ───────────────────────────────────────────────────
@@ -375,115 +375,6 @@ def _poll_jain_brain_feed():
             pass
         time.sleep(30)
 
-
-
-def supabase_command_polling_enabled() -> bool:
-    return os.environ.get("MISSION_CONTROL_SUPABASE_COMMANDS", "").lower() in {"1", "true", "yes", "on"}
-
-
-def _poll_supabase_commands():
-    """Poll Supabase agent_comms for phone commands (refresh, nightmode).
-    Server-side polling — works even when Safari is backgrounded.
-    """
-    import time
-    SUPABASE_URL = "https://cdzaeptrggczynijegls.supabase.co"
-    SUPABASE_KEY = "sb_publishable_S6K05dWzCylIOjEOM1TcEQ_FUG1DAJ6"
-    seen_ids = set()
-    ready = False
-
-    while True:
-        try:
-            url = SUPABASE_URL + "/rest/v1/agent_comms?agent=eq.phone&status=eq.pending&order=id.desc&limit=10"
-            req = urllib.request.Request(url, headers={
-                "apikey": SUPABASE_KEY,
-                "Authorization": "Bearer " + SUPABASE_KEY,
-            })
-            with urllib.request.urlopen(req, timeout=8) as r:
-                rows = json.load(r)
-
-            if not ready:
-                for row in rows:
-                    seen_ids.add(row["id"])
-                ready = True
-                time.sleep(3)
-                continue
-
-            for row in rows:
-                rid = row["id"]
-                if rid in seen_ids:
-                    continue
-                seen_ids.add(rid)
-                cmd = row.get("tool") or ""
-
-                if cmd in ("refresh", "hard-refresh"):
-                    # hard-refresh: full page reload; refresh: forceUpdate() data refresh
-                    js = "location.reload(true)" if cmd == "hard-refresh" else "typeof forceUpdate==='function' && forceUpdate()"
-                    run_applescript(
-                        'tell application "Safari"\n'
-                        f'    set jsCmd to "{js}"\n'
-                        '    repeat with w in windows\n'
-                        '        repeat with t in tabs of w\n'
-                        '            set u to URL of t\n'
-                        '            if u contains "mission-control" or u contains "localhost:8765" or u contains "jcubellagent-web.github.io" then\n'
-                        '                do JavaScript jsCmd in t\n'
-                        '            end if\n'
-                        '        end repeat\n'
-                        '    end repeat\n'
-                        'end tell'
-                    )
-                    print(f"[remote] {cmd} via Supabase id=" + str(rid), flush=True)
-
-                elif cmd == "nightmode":
-                    state = get_state()
-                    state["nightMode"] = True
-                    set_state(state)
-                    (DATA_DIR / "night-mode.flag").write_text("on")
-                    run_applescript(
-                        'tell application "Safari"\n'
-                        '    set frontDoc to document 1\n'
-                        '    do JavaScript "typeof enterNightMode===\'function\' && enterNightMode()" in frontDoc\n'
-                        'end tell'
-                    )
-                    print("[remote] nightmode ON via Supabase id=" + str(rid), flush=True)
-
-                elif cmd == "nightmode-off":
-                    state = get_state()
-                    state["nightMode"] = False
-                    set_state(state)
-                    flag = DATA_DIR / "night-mode.flag"
-                    if flag.exists():
-                        flag.unlink()
-                    run_applescript(
-                        'tell application "Safari"\n'
-                        '    set frontDoc to document 1\n'
-                        '    do JavaScript "typeof exitNightMode===\'function\' && exitNightMode()" in frontDoc\n'
-                        'end tell'
-                    )
-                    print("[remote] nightmode OFF via Supabase id=" + str(rid), flush=True)
-
-                # Mark done
-                try:
-                    patch_url = SUPABASE_URL + "/rest/v1/agent_comms?id=eq." + str(rid)
-                    patch_req = urllib.request.Request(
-                        patch_url,
-                        data=json.dumps({"status": "done"}).encode(),
-                        headers={
-                            "apikey": SUPABASE_KEY,
-                            "Authorization": "Bearer " + SUPABASE_KEY,
-                            "Content-Type": "application/json",
-                            "Prefer": "return=minimal",
-                        },
-                        method="PATCH"
-                    )
-                    urllib.request.urlopen(patch_req, timeout=5)
-                except Exception:
-                    pass
-
-        except Exception:
-            pass
-        time.sleep(3)
-
-
 if __name__ == "__main__":
     # Start JAIN brain feed poller in background (real-time, independent of dashboard cron)
     t = threading.Thread(target=_poll_jain_brain_feed, daemon=True)
@@ -493,12 +384,7 @@ if __name__ == "__main__":
     t2.start()
     print("J.A.I.N x-progress poller started (60s interval)", flush=True)
 
-    if supabase_command_polling_enabled():
-        t3 = threading.Thread(target=_poll_supabase_commands, daemon=True)
-        t3.start()
-        print("Supabase remote command poller started (3s interval)", flush=True)
-    else:
-        print("Supabase remote command poller disabled; local-first Brain Feed is active", flush=True)
+    print("Local-first Brain Feed is active", flush=True)
 
     class BrainFeedThreadingServer(http.server.ThreadingHTTPServer):
         daemon_threads = True
