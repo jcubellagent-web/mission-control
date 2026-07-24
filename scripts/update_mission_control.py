@@ -54,6 +54,8 @@ DASHBOARD_PATH = DATA_DIR / "dashboard-data.json"
 LIVE_DASHBOARD_PATH = DATA_DIR / "control-tower-live.json"
 WRITER_LOCK_PATH = DATA_DIR / ".control-tower-writer.lock"
 MODEL_USAGE_PATH = DATA_DIR / "modelUsage.json"
+CODEXBAR_QUOTA_OLLAMA_PATH = DATA_DIR / "codexbar-quota-ollama.json"
+CODEXBAR_QUOTA_FRESH_FOR = dt.timedelta(minutes=10)
 EIGHT_SLEEP_PATH = ROOT.parent / "data" / "eight-sleep-data.json"
 AGENT_COMMS_PATH = ROOT.parent / "data" / "agent-comms.json"
 PERSONAL_CODEX_PATH = ROOT.parent / "data" / "personal-codex.json"
@@ -5142,6 +5144,159 @@ def fetch_context_watchdog_status() -> Dict[str, Any]:
     return status
 
 
+def read_projected_codexbar_quota(
+    provider: str,
+    *,
+    now: dt.datetime | None = None,
+) -> Dict[str, Any]:
+    """Read the quota-only personal-Mac projection without trusting identity data."""
+    result: Dict[str, Any] = {
+        "quotaTelemetryStatus": "missing",
+        "usageWindows": [],
+        "codexbarSource": "personal-mac-projection",
+    }
+    if provider != "ollama" or not CODEXBAR_QUOTA_OLLAMA_PATH.exists():
+        return result
+    try:
+        if CODEXBAR_QUOTA_OLLAMA_PATH.is_symlink() or not CODEXBAR_QUOTA_OLLAMA_PATH.is_file():
+            raise ValueError("path")
+        if CODEXBAR_QUOTA_OLLAMA_PATH.stat().st_mode & 0o077:
+            raise ValueError("permissions")
+        payload = json.loads(CODEXBAR_QUOTA_OLLAMA_PATH.read_text(encoding="utf-8"))
+        allowed_top = {"schemaVersion", "provider", "observedAt", "exportedAt", "receivedAt", "windows"}
+        allowed_window = {"id", "label", "usedPercent", "remainingPercent", "resetsAt", "windowMinutes"}
+        if not isinstance(payload, dict) or set(payload) != allowed_top:
+            raise ValueError("schema")
+        if payload.get("schemaVersion") != 1 or payload.get("provider") != provider:
+            raise ValueError("provider")
+        observed = dt.datetime.fromisoformat(str(payload.get("observedAt") or "").replace("Z", "+00:00"))
+        exported = dt.datetime.fromisoformat(str(payload.get("exportedAt") or "").replace("Z", "+00:00"))
+        received = dt.datetime.fromisoformat(str(payload.get("receivedAt") or "").replace("Z", "+00:00"))
+        if observed.tzinfo is None or exported.tzinfo is None or received.tzinfo is None:
+            raise ValueError("timestamps")
+        observed = observed.astimezone(dt.timezone.utc)
+        current = (now or dt.datetime.now(dt.timezone.utc)).astimezone(dt.timezone.utc)
+        age = current - observed
+        age_seconds = max(0, round(age.total_seconds()))
+        result.update({
+            "codexbarUpdatedAt": observed.replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+            "quotaTelemetryReceivedAt": received.astimezone(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+            "quotaTelemetryAgeSeconds": age_seconds,
+        })
+        if observed - current > dt.timedelta(minutes=2):
+            result["quotaTelemetryStatus"] = "invalid"
+            return result
+        if age > CODEXBAR_QUOTA_FRESH_FOR:
+            result["quotaTelemetryStatus"] = "stale"
+            return result
+        raw_windows = payload.get("windows")
+        if not isinstance(raw_windows, list) or len(raw_windows) != 2:
+            raise ValueError("windows")
+        windows: List[Dict[str, Any]] = []
+        seen: set[str] = set()
+        for window in raw_windows:
+            if not isinstance(window, dict) or set(window) != allowed_window:
+                raise ValueError("window-schema")
+            window_id = str(window.get("id") or "")
+            label = str(window.get("label") or "")
+            if (window_id, label) not in {
+                ("ollama-primary", "Session"),
+                ("ollama-secondary", "Weekly"),
+            } or window_id in seen:
+                raise ValueError("window-identity")
+            seen.add(window_id)
+            used = float(window.get("usedPercent"))
+            remaining = float(window.get("remainingPercent"))
+            window_minutes_raw = window.get("windowMinutes")
+            if (
+                isinstance(window.get("usedPercent"), bool)
+                or isinstance(window.get("remainingPercent"), bool)
+                or isinstance(window_minutes_raw, bool)
+                or not isinstance(window_minutes_raw, int)
+            ):
+                raise ValueError("window-types")
+            window_minutes = window_minutes_raw
+            resets_at = dt.datetime.fromisoformat(str(window.get("resetsAt") or "").replace("Z", "+00:00"))
+            if not 0 <= used <= 100 or not 0 <= remaining <= 100 or abs(used + remaining - 100) > 0.02:
+                raise ValueError("percentages")
+            if not 1 <= window_minutes <= 20160 or resets_at.tzinfo is None:
+                raise ValueError("window-values")
+            windows.append({
+                "id": window_id,
+                "label": label,
+                "usedPercent": round(used, 2),
+                "remainingPercent": round(remaining, 2),
+                "resetDescription": None,
+                "resetsAt": resets_at.astimezone(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+                "windowMinutes": window_minutes,
+                "status": "limited" if remaining <= 0 else "ok",
+            })
+        windows.sort(key=lambda row: 0 if row["id"] == "ollama-primary" else 1)
+        result.update({"quotaTelemetryStatus": "fresh", "usageWindows": windows})
+        return result
+    except Exception:
+        result["quotaTelemetryStatus"] = "invalid"
+        result["usageWindows"] = []
+        return result
+
+
+def verify_ollama_cloud_runtime() -> bool:
+    """Check inference independently; quota telemetry must never imply runtime health."""
+    probe_object = {
+        "model": "glm-5.2:cloud",
+        "prompt": "",
+        "stream": False,
+        "options": {"num_predict": 0},
+    }
+    try:
+        probe_request = urllib.request.Request(
+            "http://127.0.0.1:11434/api/generate",
+            data=json.dumps(probe_object).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+        )
+        with urllib.request.urlopen(probe_request, timeout=8) as probe:
+            if 200 <= probe.status < 300:
+                return True
+    except Exception:
+        pass
+    remote_command = (
+        "curl -fsS --max-time 8 http://127.0.0.1:11434/api/generate "
+        "-H 'Content-Type: application/json' "
+        f"-d {shlex.quote(json.dumps(probe_object))} >/dev/null"
+    )
+    try:
+        remote_probe = subprocess.run(
+            ["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=4", "jaimes", remote_command],
+            capture_output=True, text=True, timeout=12,
+        )
+        return remote_probe.returncode == 0
+    except Exception:
+        return False
+
+
+def projected_ollama_limits(projection: Dict[str, Any], *, runtime_verified: bool) -> Dict[str, Any]:
+    windows = projection.get("usageWindows") if isinstance(projection.get("usageWindows"), list) else []
+    remaining = [float(row.get("remainingPercent")) for row in windows if isinstance(row, dict)]
+    exhausted = bool(remaining) and min(remaining) <= 0
+    watch = bool(remaining) and min(remaining) <= 3
+    status = "unavailable" if not runtime_verified else "limited" if exhausted else "watch" if watch else "ready"
+    return {
+        "available": runtime_verified,
+        "provider": "ollama",
+        "status": status,
+        "authStatus": "ok" if runtime_verified else "error",
+        "usageWindows": windows,
+        "codexbarSource": "personal-mac-projection",
+        "codexbarUpdatedAt": projection.get("codexbarUpdatedAt"),
+        "accountLabel": "ollama",
+        "plan": "cloud subscription",
+        "dataConfidence": "quota-projected; runtime-verified" if runtime_verified else "quota-projected; runtime-unavailable",
+        "quotaTelemetryStatus": projection.get("quotaTelemetryStatus"),
+        "quotaTelemetryAgeSeconds": projection.get("quotaTelemetryAgeSeconds"),
+        "quotaTelemetryReceivedAt": projection.get("quotaTelemetryReceivedAt"),
+    }
+
+
 def fetch_codexbar_limits(provider: str = "codex") -> Dict[str, Any]:
     empty: Dict[str, Any] = {
         "available": False,
@@ -5173,39 +5328,10 @@ def fetch_codexbar_limits(provider: str = "codex") -> Dict[str, Any]:
             # signed-in inference runtime. Report the distinction instead of
             # falsely marking a verified cloud route unavailable.
             if provider == "ollama":
-                verified = False
-                try:
-                    probe_object = {
-                        "model": "glm-5.2:cloud",
-                        "prompt": "",
-                        "stream": False,
-                        "options": {"num_predict": 0},
-                    }
-                    probe_payload = json.dumps(probe_object).encode("utf-8")
-                    probe_request = urllib.request.Request(
-                        "http://127.0.0.1:11434/api/generate",
-                        data=probe_payload,
-                        headers={"Content-Type": "application/json"},
-                    )
-                    with urllib.request.urlopen(probe_request, timeout=8) as probe:
-                        verified = 200 <= probe.status < 300
-                except Exception:
-                    pass
-                if not verified:
-                    remote_payload = json.dumps(probe_object)
-                    remote_command = (
-                        "curl -fsS --max-time 8 http://127.0.0.1:11434/api/generate "
-                        "-H 'Content-Type: application/json' "
-                        f"-d {shlex.quote(remote_payload)} >/dev/null"
-                    )
-                    try:
-                        remote_probe = subprocess.run(
-                            ["ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=4", "jaimes", remote_command],
-                            capture_output=True, text=True, timeout=12,
-                        )
-                        verified = remote_probe.returncode == 0
-                    except Exception:
-                        pass
+                projection = read_projected_codexbar_quota(provider)
+                verified = verify_ollama_cloud_runtime()
+                if projection.get("quotaTelemetryStatus") == "fresh":
+                    return projected_ollama_limits(projection, runtime_verified=verified)
                 if verified:
                     empty.update({
                         "available": True,
@@ -5215,6 +5341,9 @@ def fetch_codexbar_limits(provider: str = "codex") -> Dict[str, Any]:
                         "plan": "cloud subscription",
                         "dataConfidence": "runtime-verified; exact quota unavailable on this host",
                         "lastError": "CodexBar quota cookie unavailable; Ollama Cloud inference verified",
+                        "quotaTelemetryStatus": projection.get("quotaTelemetryStatus"),
+                        "quotaTelemetryAgeSeconds": projection.get("quotaTelemetryAgeSeconds"),
+                        "quotaTelemetryReceivedAt": projection.get("quotaTelemetryReceivedAt"),
                     })
                     return empty
             empty["lastError"] = " ".join(

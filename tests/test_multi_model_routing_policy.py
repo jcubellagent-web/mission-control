@@ -200,6 +200,7 @@ def test_architecture_uses_glm_with_explicit_runtime_fallbacks(monkeypatch) -> N
     args.blast_radius = "auto"
     monkeypatch.setattr(route, "codex_allowance_mode", lambda _args: "normal")
     monkeypatch.setattr(route, "explicit_route_unavailable", lambda provider, model="": "")
+    monkeypatch.setattr(route, "ollama_live_allowance_status", lambda: (True, "99% remaining"))
 
     selected = route.choose_model_route(args, "jaimes", False)
 
@@ -209,6 +210,42 @@ def test_architecture_uses_glm_with_explicit_runtime_fallbacks(monkeypatch) -> N
         "ollama/glm-5.2:cloud", "gemini/gemini-3.1-pro-high", "codex/gpt-5.6-terra"
     ]
     assert [row["provider"] for row in selected["fallbackRoutes"]] == ["gemini", "codex"]
+    assert selected["spendClass"] == "quota-favored-cloud-specialist"
+    assert "99% remaining" in selected["reason"]
+
+
+def test_ollama_quota_is_a_fresh_soft_signal_and_exhaustion_falls_back(tmp_path, monkeypatch) -> None:
+    route = load_module("agent_route_glm_quota", ROOT / "scripts" / "agent_route.py")
+    usage = tmp_path / "modelUsage.json"
+    usage.write_text(json.dumps({"codexbarLimits": {"ollama": {
+        "available": True,
+        "status": "ready",
+        "quotaTelemetryStatus": "fresh",
+        "codexbarUpdatedAt": "2026-07-24T03:55:00Z",
+        "usageWindows": [
+            {"label": "Session", "remainingPercent": 100},
+            {"label": "Weekly", "remainingPercent": 99.3},
+        ],
+    }}}))
+    monkeypatch.setattr(route, "MODEL_USAGE_PATH", usage)
+    healthy, reason = route.ollama_live_allowance_status(
+        route.dt.datetime(2026, 7, 24, 4, 0, tzinfo=route.dt.timezone.utc)
+    )
+    assert healthy is True
+    assert "99.3% remaining" in reason
+
+    args = model_args()
+    args.task_type = "architecture"
+    args.priority = "normal"
+    args.complexity = "auto"
+    args.blast_radius = "auto"
+    monkeypatch.setattr(route, "codex_allowance_mode", lambda _args: "normal")
+    monkeypatch.setattr(route, "ollama_live_allowance_status", lambda: (False, "Ollama live allowance is exhausted"))
+    selected = route.choose_model_route(args, "jaimes", False)
+    assert selected["provider"] == "gemini"
+    assert selected["role"] == "glm-allowance-fallback"
+    assert selected["fallbackFrom"] == "ollama"
+    assert [row["provider"] for row in selected["fallbackRoutes"]] == ["codex"]
 
 
 def test_automatic_model_lane_discloses_and_executes_declared_fallback(monkeypatch, capsys) -> None:

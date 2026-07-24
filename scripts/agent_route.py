@@ -679,6 +679,9 @@ def explicit_route_unavailable(provider: str, model: str = "") -> str:
         if "pending" in auth or "missing" in auth:
             return f"xAI/Grok auth is {row.get('authStatus')}"
     if provider == "ollama":
+        allowance_ok, allowance_reason = ollama_live_allowance_status()
+        if allowance_ok is False:
+            return allowance_reason
         try:
             with urllib.request.urlopen("http://127.0.0.1:11434/api/tags", timeout=2) as response:
                 tags = json.loads(response.read())
@@ -845,6 +848,51 @@ def xai_live_allowance_status(now: dt.datetime | None = None) -> tuple[bool | No
         return True, "SuperGrok is live but its exact remaining allowance is unknown"
     return None, "live SuperGrok allowance is not reported"
 
+
+def ollama_live_allowance_status(now: dt.datetime | None = None) -> tuple[bool | None, str]:
+    """Return a soft GLM routing signal from fresh quota-only telemetry.
+
+    Missing or stale personal-Mac telemetry is unknown rather than unhealthy.
+    Independently reported runtime failures and exact exhaustion fail closed.
+    """
+    usage = read_json(MODEL_USAGE_PATH, {})
+    limits = ((usage.get("codexbarLimits") or {}).get("ollama") or {}) if isinstance(usage, dict) else {}
+    if not isinstance(limits, dict) or not limits:
+        return None, "live Ollama allowance is not reported"
+    telemetry = str(limits.get("quotaTelemetryStatus") or "").strip().lower()
+    if telemetry and telemetry != "fresh":
+        return None, f"Ollama quota telemetry is {telemetry}; treat allowance as unknown"
+    updated_at = str(limits.get("codexbarUpdatedAt") or "")
+    if updated_at:
+        try:
+            observed = dt.datetime.fromisoformat(updated_at.replace("Z", "+00:00")).astimezone(dt.timezone.utc)
+            current = (now or dt.datetime.now(dt.timezone.utc)).astimezone(dt.timezone.utc)
+            if current - observed > dt.timedelta(minutes=10):
+                return None, "Ollama quota telemetry is stale; treat allowance as unknown"
+            if observed - current > dt.timedelta(minutes=2):
+                return None, "Ollama quota telemetry timestamp is invalid; treat allowance as unknown"
+        except ValueError:
+            return None, "Ollama quota telemetry timestamp is invalid; treat allowance as unknown"
+    status = str(limits.get("status") or "").strip().lower()
+    if limits.get("available") is False or status in {"blocked", "error", "exhausted", "limited", "unavailable"}:
+        return False, f"Ollama runtime or allowance is {status or 'unavailable'}"
+    windows = limits.get("usageWindows") if isinstance(limits.get("usageWindows"), list) else []
+    try:
+        remaining = [
+            float(row.get("remainingPercent"))
+            for row in windows
+            if isinstance(row, dict) and row.get("remainingPercent") is not None
+        ]
+    except (TypeError, ValueError):
+        return None, "Ollama quota telemetry is invalid; treat allowance as unknown"
+    if remaining:
+        minimum = min(remaining)
+        if minimum <= 0:
+            return False, "Ollama live allowance is exhausted"
+        return True, f"Ollama live allowance has {minimum:g}% remaining"
+    return None, "Ollama runtime is reported but exact allowance is unknown"
+
+
 def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: bool) -> dict[str, Any]:
     caps = set(args.capability or [])
     task_type = args.task_type
@@ -862,6 +910,12 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
     xai_hint = task_type in XAI_FIRST_TASK_TYPES or bool(caps & XAI_FIRST_CAPABILITIES)
     openrouter_hint = task_type in OPENROUTER_FALLBACK_TASK_TYPES or bool(caps & OPENROUTER_FALLBACK_CAPABILITIES)
     gemini_first = bool(gemini_hint and not codex_only and not unsafe_privacy and not needs_approval)
+    ollama_allowance_ok, ollama_allowance_reason = ollama_live_allowance_status()
+    glm_first = bool(glm_hint and not codex_only and not unsafe_privacy and not needs_approval)
+    glm_quota_fallback = bool(glm_first and ollama_allowance_ok is False)
+    if glm_quota_fallback:
+        glm_first = False
+        gemini_first = True
     xai_available, xai_availability_reason = xai_verified_available()
     xai_first = bool(xai_hint and xai_available and not codex_only and not unsafe_privacy and not needs_approval)
     openrouter_fallback = bool(openrouter_hint and not codex_only and not unsafe_privacy and not needs_approval)
@@ -918,7 +972,7 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
             })
         return payload
 
-    if glm_hint and not unsafe_privacy and not needs_approval and not codex_only:
+    if glm_first:
         return {
                 "firstStop": "ollama",
                 "provider": "ollama",
@@ -930,7 +984,7 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
                 "freshLaneRequired": True,
                 "verifyBeforeWork": True,
                 "codexAllowanceMode": allowance_mode,
-                "spendClass": "cloud-specialist",
+                "spendClass": "quota-favored-cloud-specialist" if ollama_allowance_ok is True else "cloud-specialist",
                 "privacy": "dashboard-safe",
                 "fallbackLadder": [
                     "ollama/glm-5.2:cloud",
@@ -954,7 +1008,7 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
                     },
                 ],
                 "reason": compact(
-                    f"{task_type} benefits from GLM 5.2's large-context, tool-capable technical reasoning before owner integration."
+                    f"{task_type} benefits from GLM 5.2's large-context, tool-capable technical reasoning before owner integration; {ollama_allowance_reason}."
                 ),
                 "guardrails": [
                     "Send sanitized technical context only; Ollama GLM 5.2 is a cloud model, not a private local lane.",
@@ -1071,7 +1125,10 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
             ],
         }
 
-    if task_type in {"gemini-evaluation", "model-analysis"}:
+    if glm_quota_fallback:
+        role = "glm-allowance-fallback"
+        model = gemini_model("deep")
+    elif task_type in {"gemini-evaluation", "model-analysis"}:
         role = "gemini-evaluation"
         model = gemini_model("deep")
     elif task_type in {"gemini-long-context", "gemini-research"}:
@@ -1129,6 +1186,21 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
             "The selected owner still owns execution, approvals, repo edits, and final integration.",
         ],
     }
+    if glm_quota_fallback:
+        result.update({
+            "fallbackFrom": "ollama",
+            "fallbackLadder": [f"gemini/{model}", "codex/gpt-5.6-terra"],
+            "fallbackRoutes": [
+                {
+                    "provider": "codex",
+                    "model": "gpt-5.6-terra",
+                    "auth": provider_auth_label("codex", "gpt-5.6-terra"),
+                    "role": "specialist-runtime-fallback",
+                    "reason": "GLM allowance/runtime is unavailable and Gemini failed; use Codex for the bounded fallback and disclose it.",
+                }
+            ],
+            "reason": compact(f"{ollama_allowance_reason}; use the verified Gemini Pro technical fallback before Codex."),
+        })
     return result
 
 
