@@ -120,6 +120,7 @@ def validate_transition(
         if active_others + 1 > limit:
             return f"active maintenance WIP limit exceeded ({active_others + 1}/{limit})"
 
+    if target in ACTIVE_STATUSES or target == "implemented":
         error_budget = config.get("errorBudgetPolicy") if isinstance(config.get("errorBudgetPolicy"), dict) else {}
         allowed_while_frozen = {str(value) for value in error_budget.get("allowedWhileFrozen", [])}
         if (

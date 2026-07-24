@@ -116,7 +116,10 @@ def test_wip_and_completion_evidence_are_enforced() -> None:
     config = {
         "wipLimit": 1,
         "promotionGates": {"requiredReliabilityGates": GATE_IDS},
-        "errorBudgetPolicy": {"freezeElectiveChangesOnGateFailure": True},
+        "errorBudgetPolicy": {
+            "freezeElectiveChangesOnGateFailure": True,
+            "allowedWhileFrozen": ["security-fix", "reliability-repair", "rollback"],
+        },
     }
     reliability = {"ok": True, "gates": [{"id": gate_id, "state": "pass"} for gate_id in GATE_IDS]}
     args = type("Args", (), {
@@ -139,6 +142,12 @@ def test_wip_and_completion_evidence_are_enforced() -> None:
     assert "independent-review" in str(subject.validate_transition(verifying, "implemented", [verifying], config, reliability, args))
     args.independent_review = True
     assert subject.validate_transition(verifying, "implemented", [verifying], config, reliability, args) is None
+
+    frozen = {"ok": False, "gates": [{"id": gate_id, "state": "fail"} for gate_id in GATE_IDS]}
+    args.change_class = "reviewed-maintenance"
+    assert "not clean" in str(subject.validate_transition(verifying, "implemented", [verifying], config, frozen, args))
+    args.change_class = "reliability-repair"
+    assert subject.validate_transition(verifying, "implemented", [verifying], config, frozen, args) is None
 
 
 def test_ledger_write_does_not_truncate_history(tmp_path: Path) -> None:
