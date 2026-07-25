@@ -105,10 +105,32 @@ class MemoryRegistryTest(unittest.TestCase):
         self.assertEqual(trading["memory_type"], "episode")
         self.assertEqual(trading["predicate"], "historical trading decision")
         self.assertTrue(trading["metadata"]["historicalSnapshot"])
+        self.assertEqual(trading["valid_until"], "2026-07-19T17:37:44Z")
         self.assertEqual(by_subject["Keep canonical instructions authoritative"]["memory_type"], "decision")
         self.assertIn("JAIMES", by_subject)
         self.assertIn("memory", by_subject)
         self.assertNotIn("Detail", by_subject)
+
+    def test_completed_episode_retention_refreshes_existing_source_records(self) -> None:
+        with mock.patch.object(memory_registry, "DB_PATH", self.database):
+            db = memory_registry.connect()
+            record_id, created = memory_registry.upsert_record(
+                db, memory_type="episode", subject="Completed task", predicate="completed",
+                value="Result", owner="joshex", visibility="shared", privacy="dashboard-safe",
+                source_path="data/agent-task-queue.json", valid_from="2026-06-01T00:00:00Z",
+            )
+            self.assertTrue(created)
+            _, created = memory_registry.upsert_record(
+                db, memory_type="episode", subject="Completed task", predicate="completed",
+                value="Result", owner="joshex", visibility="shared", privacy="dashboard-safe",
+                source_path="data/agent-task-queue.json", valid_from="2026-06-01T00:00:00Z",
+                valid_until="2026-07-01T00:00:00Z",
+            )
+            self.assertFalse(created)
+            memory_registry.review(db, apply_safe=False)
+            status = db.execute("SELECT status FROM memory_records WHERE id=?", (record_id,)).fetchone()["status"]
+            self.assertEqual(status, "expired")
+            db.close()
 
     def test_retrieval_rejects_weak_single_word_tail_matches(self) -> None:
         target = self.cli(

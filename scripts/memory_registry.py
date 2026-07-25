@@ -70,6 +70,7 @@ TOKEN_RE = re.compile(r"[a-z0-9][a-z0-9_.-]{2,}", re.I)
 MEMORY_ACTIVITY_WINDOW_MINUTES = 30
 MEMORY_ACTIVITY_MOTION_SECONDS = 90
 MEMORY_ACTIVITY_AGENTS = ("joshex", "josh2", "jaimes", "jain")
+EPISODE_RETENTION_DAYS = 30
 
 
 def utc_now() -> dt.datetime:
@@ -78,6 +79,20 @@ def utc_now() -> dt.datetime:
 
 def iso(value: dt.datetime | None = None) -> str:
     return (value or utc_now()).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def episode_retention_deadline(value: Any) -> str:
+    """Return the bounded lifetime for a completed historical episode."""
+    text = clean_text(value, 80)
+    if not text:
+        return ""
+    try:
+        parsed = dt.datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        return ""
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=dt.timezone.utc)
+    return iso(parsed + dt.timedelta(days=EPISODE_RETENTION_DAYS))
 
 
 def load_json(path: Path, default: Any) -> Any:
@@ -364,8 +379,20 @@ def upsert_record(
     status = status if status in ALLOWED_STATUS else "active"
     subject, predicate, value = clean_text(subject, 240), clean_text(predicate, 160), clean_text(value)
     digest = stable_hash(memory_type, subject, predicate, value, owner, source_path)
-    existing = db.execute("SELECT id FROM memory_records WHERE content_hash = ?", (digest,)).fetchone()
+    existing = db.execute("SELECT id,metadata_json FROM memory_records WHERE content_hash = ?", (digest,)).fetchone()
     if existing:
+        # Deterministic source records may acquire a retention policy after their
+        # initial import. Refresh the deadline without changing a deliberately
+        # pinned historical record or overwriting its audited content.
+        try:
+            existing_metadata = json.loads(existing["metadata_json"] or "{}")
+        except (json.JSONDecodeError, TypeError):
+            existing_metadata = {}
+        if valid_until and not bool(existing_metadata.get("pinned")):
+            db.execute(
+                "UPDATE memory_records SET valid_from=COALESCE(?, valid_from), valid_until=? WHERE id=?",
+                (valid_from or None, valid_until, existing["id"]),
+            )
         return str(existing["id"]), False
     record_id = f"mem-{uuid.uuid4().hex[:16]}"
     db.execute(
@@ -399,7 +426,7 @@ def source_rows() -> Iterable[dict[str, Any]]:
             "value": row.get("detail") or row.get("status") or "Recorded decision",
             "owner": row.get("agent") or "ecosystem", "visibility": "shared", "privacy": row.get("privacy") or "dashboard-safe",
             "source_path": "data/decisions.json", "source_ref": row.get("id") or "", "confidence": 0.98,
-            "valid_from": row.get("time") or "", "metadata": {
+            "valid_from": row.get("time") or "", "valid_until": episode_retention_deadline(row.get("time") or "") if historical_trading_snapshot else "", "metadata": {
                 "decisionStatus": row.get("status"),
                 "historicalSnapshot": historical_trading_snapshot,
             },
@@ -408,12 +435,14 @@ def source_rows() -> Iterable[dict[str, Any]]:
     for row in tasks:
         if str(row.get("status") or "").lower() not in {"done", "complete", "completed", "closed"}:
             continue
+        completed_at = row.get("completedAt") or row.get("updatedAt") or ""
         yield {
             "memory_type": "episode", "subject": row.get("title") or "Completed ecosystem task",
             "predicate": "completed", "value": row.get("result") or row.get("objective") or "Task completed",
             "owner": row.get("owner") or "ecosystem", "visibility": "shared", "privacy": row.get("privacy") or "dashboard-safe",
             "source_path": "data/agent-task-queue.json", "source_ref": row.get("id") or "", "confidence": 0.92,
-            "valid_from": row.get("completedAt") or row.get("updatedAt") or "",
+            "valid_from": completed_at, "valid_until": episode_retention_deadline(completed_at),
+            "metadata": {"retention": f"expire-after-{EPISODE_RETENTION_DAYS}d"},
         }
     graph = load_json(INDEX_PATH, {})
     for row in graph.get("nodes", []):
