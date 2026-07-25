@@ -92,6 +92,7 @@ CODEX_AUTOMATION_STATUS_PATH = DATA_DIR / "codex-automation-status.json"
 JOSH_OPS_GMAIL_STATUS_PATH = DATA_DIR / "josh2-ops-gmail-status.json"
 ECOSYSTEM_QA_SCHEDULE_PATH = ROOT.parent / "config" / "ecosystem-qa-schedule.json"
 ECOSYSTEM_QA_STATE_PATH = DATA_DIR / "ecosystem-qa-scheduler.json"
+HERMES_RECEIPT_CACHE_PATH = DATA_DIR / "hermes-execution-receipts.json"
 TELEGRAM_INBOX_QA_PATH = DATA_DIR / "telegram-inbox-qa.json"
 ADAPTIVE_QUALITY_CONTROL_PATH = DATA_DIR / "adaptive-quality-control.json"
 MAINTENANCE_PORTFOLIO_PATH = DATA_DIR / "maintenance-portfolio.json"
@@ -3962,6 +3963,8 @@ def fetch_crons() -> List[Dict[str, Any]]:
     x_log_hours: dict[str, list[int]] = {}
     _jain_replies_today_from_log: list[int] = []
     hermes_jobs: dict[str, dict[str, Any]] = {}
+    hermes_run_receipts: dict[str, list[dict[str, Any]]] = {}
+    jain_cron_receipts: dict[str, list[dict[str, Any]]] = {}
     jain_verified_runs: dict[str, dict[str, Any]] = {}
     josh_verified_runs: dict[str, dict[str, Any]] = {}
     try:
@@ -4000,6 +4003,142 @@ PY"""
             josh_verified_runs = json.loads(jv.stdout.strip() or "{}")
     except Exception:
         pass
+
+    # #JAIMES: definition-level lastRun cannot prove each occurrence. Pull
+    # metadata-only receipts from Hermes and from cron logs whose success line
+    # is written only after the underlying command exits cleanly.
+    try:
+        receipt_cmd = rf"""python3 - <<'PY'
+import datetime as dt
+import json
+import pathlib
+import re
+import sqlite3
+from zoneinfo import ZoneInfo
+
+today = {today_str!r}
+et = ZoneInfo('America/New_York')
+hermes = {{}}
+db_path = pathlib.Path.home() / '.hermes' / 'cron' / 'executions.db'
+if db_path.exists():
+    with sqlite3.connect(db_path) as connection:
+        for job_id, status, claimed_at, started_at, finished_at in connection.execute(
+            "SELECT job_id,status,claimed_at,started_at,finished_at FROM executions WHERE claimed_at LIKE ? ORDER BY claimed_at",
+            (today + '%',),
+        ):
+            hermes.setdefault(str(job_id), []).append({{
+                'status': status,
+                'claimedAt': claimed_at,
+                'startedAt': started_at,
+                'finishedAt': finished_at,
+            }})
+
+def successful_log_receipts(path: str, pattern: str):
+    try:
+        text = pathlib.Path(path).read_text(errors='ignore')
+    except Exception:
+        return []
+    rows = []
+    for stamp in re.findall(pattern, text):
+        try:
+            parsed = dt.datetime.strptime(stamp.rsplit(' ', 1)[0], '%Y-%m-%d %H:%M:%S').replace(tzinfo=et)
+        except ValueError:
+            continue
+        rows.append({{
+            'status': 'completed',
+            'claimedAt': parsed.isoformat(),
+            'startedAt': parsed.isoformat(),
+            'finishedAt': parsed.isoformat(),
+        }})
+    return rows
+
+cron = {{
+    'jain_intelligence_feed_live.sh': successful_log_receipts(
+        '/Users/jc_agent/.openclaw/workspace/logs/intelligence_feed.log',
+        r'\[({today_str} [0-9]{{2}}:[0-9]{{2}}:[0-9]{{2}} [A-Z]+)\] intelligence run',
+    ),
+    'jain_breaking_news_live.sh': successful_log_receipts(
+        '/Users/jc_agent/.openclaw/workspace/logs/breaking_news.log',
+        r'\[({today_str} [0-9]{{2}}:[0-9]{{2}}:[0-9]{{2}} [A-Z]+)\] breaking run',
+    ),
+}}
+try:
+    agentops_text = pathlib.Path('/Users/jc_agent/scripts/logs/jaimes_agentops_handoff.log').read_text(errors='ignore')
+except Exception:
+    agentops_text = ''
+cron['jaimes_agentops_handoff.sh'] = []
+for stamp in re.findall(r'handoff_sync_ok ([0-9]{{4}}-[0-9]{{2}}-[0-9]{{2}}T[0-9]{{2}}:[0-9]{{2}}:[0-9]{{2}}Z)', agentops_text):
+    try:
+        parsed = dt.datetime.fromisoformat(stamp.replace('Z', '+00:00'))
+    except ValueError:
+        continue
+    if parsed.astimezone(et).strftime('%Y-%m-%d') != today:
+        continue
+    cron['jaimes_agentops_handoff.sh'].append(
+        {{'status': 'completed', 'claimedAt': stamp, 'startedAt': stamp, 'finishedAt': stamp}}
+    )
+print(json.dumps({{'hermes': hermes, 'cron': cron}}))
+PY"""
+        receipt_errors: list[str] = []
+        for host in ("jaimes-via-josh", "jc_agent@100.121.89.84"):
+            receipt_result = subprocess.run(
+                ["ssh", "-o", "ConnectTimeout=5", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=no", host, receipt_cmd],
+                capture_output=True, text=True, timeout=15,
+            )
+            if receipt_result.returncode != 0:
+                receipt_errors.append(f"{host}: {' '.join(receipt_result.stderr.split())[:180]}")
+                continue
+            receipt_payload = json.loads(receipt_result.stdout.strip() or "{}")
+            raw_hermes = receipt_payload.get("hermes") if isinstance(receipt_payload, dict) else {}
+            raw_cron = receipt_payload.get("cron") if isinstance(receipt_payload, dict) else {}
+            if isinstance(raw_hermes, dict):
+                hermes_run_receipts = {
+                    str(job_id): [dict(row) for row in rows[-64:] if isinstance(row, dict)]
+                    for job_id, rows in raw_hermes.items() if isinstance(rows, list)
+                }
+            if isinstance(raw_cron, dict):
+                jain_cron_receipts = {
+                    str(pattern): [dict(row) for row in rows[-300:] if isinstance(row, dict)]
+                    for pattern, rows in raw_cron.items() if isinstance(rows, list)
+                }
+            break
+        if not hermes_run_receipts and not jain_cron_receipts and receipt_errors:
+            print(f"[warn] occurrence receipt fetch failed: {' | '.join(receipt_errors)}", file=sys.stderr)
+    except Exception as exc:
+        print(f"[warn] occurrence receipt fetch failed: {type(exc).__name__}: {exc}", file=sys.stderr)
+
+    # Hermes prunes its global executions table under high-frequency load.
+    # Merge each refresh into a day-scoped Control Tower cache so low-frequency
+    # job receipts remain available for the full Daily Execution Ledger.
+    if hermes_run_receipts:
+        cache = load_json_file(HERMES_RECEIPT_CACHE_PATH, {})
+        cached_rows = cache.get("receipts") if isinstance(cache, dict) and cache.get("date") == today_str else {}
+        cached_rows = cached_rows if isinstance(cached_rows, dict) else {}
+        merged_receipts: dict[str, list[dict[str, Any]]] = {}
+        for job_id in set(cached_rows) | set(hermes_run_receipts):
+            combined = []
+            seen = set()
+            for receipt in [*cached_rows.get(job_id, []), *hermes_run_receipts.get(job_id, [])]:
+                if not isinstance(receipt, dict):
+                    continue
+                key = (
+                    str(receipt.get("claimedAt") or receipt.get("startedAt") or ""),
+                    str(receipt.get("finishedAt") or ""),
+                    str(receipt.get("status") or ""),
+                )
+                if key in seen:
+                    continue
+                seen.add(key)
+                combined.append(dict(receipt))
+            combined.sort(key=lambda row: str(row.get("claimedAt") or row.get("startedAt") or ""))
+            merged_receipts[str(job_id)] = combined[-512:]
+        hermes_run_receipts = merged_receipts
+        atomic_write_json(HERMES_RECEIPT_CACHE_PATH, {
+            "version": 1,
+            "date": today_str,
+            "updatedAt": _dt.datetime.now(_dt.timezone.utc).isoformat(),
+            "receipts": merged_receipts,
+        })
     if not josh_verified_runs:
         try:
             et = ZoneInfo("America/New_York")
@@ -4349,6 +4488,15 @@ PY"""
         for line in josh_launch_listing.splitlines()
         if line.split()
     }
+    launch_exit_status: dict[str, int] = {}
+    for line in josh_launch_listing.splitlines():
+        parts = line.split(None, 2)
+        if len(parts) != 3:
+            continue
+        try:
+            launch_exit_status[parts[2]] = int(parts[1])
+        except ValueError:
+            continue
     codex_status = load_json_file(CODEX_AUTOMATION_STATUS_PATH, {"automations": {}})
     discovered_targets: List[Dict[str, Any]] = []
     discovered_targets.extend(parse_crontab_definitions(
@@ -4383,6 +4531,11 @@ PY"""
         is_jain = target.get('ownerKey') == 'jain'
         listing = jain_listing if is_jain else josh_listing
         source = target.get('source', 'cron')
+        native_receipts: list[dict[str, Any]] = []
+        if source == 'hermes':
+            native_receipts = hermes_run_receipts.get(str(target.get('pattern') or ''), [])
+        elif source == 'cron' and is_jain:
+            native_receipts = jain_cron_receipts.get(str(target.get('pattern') or ''), [])
         codex_state = codex_automation_state(target) if source == 'codex_automation' else None
         hermes_job = hermes_jobs.get(target.get('hermesName', '')) if source == 'hermes' else None
         jain_verified = jain_verified_runs.get(target['name']) if is_jain else None
@@ -4415,6 +4568,21 @@ PY"""
             last_run = jain_verified.get('lastRun')
         if not last_run and josh_verified and josh_verified.get('lastRun'):
             last_run = josh_verified.get('lastRun')
+        if not last_run and native_receipts:
+            last_run = next((
+                receipt.get('finishedAt') or receipt.get('startedAt') or receipt.get('claimedAt')
+                for receipt in reversed(native_receipts)
+                if receipt.get('finishedAt') or receipt.get('startedAt') or receipt.get('claimedAt')
+            ), None)
+        if not last_run and source == 'launchd' and launch_exit_status.get(str(target.get('pattern') or '')) == 0:
+            try:
+                launch_log = Path(str(target.get('logPath') or ''))
+                if launch_log.is_file():
+                    last_run = _dt.datetime.fromtimestamp(
+                        launch_log.stat().st_mtime, tz=_dt.timezone.utc
+                    ).isoformat()
+            except (OSError, ValueError):
+                pass
         last_run_today = False
         if last_run:
             try:
@@ -4544,7 +4712,10 @@ PY"""
             'enabled': bool(target.get('enabled', True)),
             'present': present,
             'canVerifyRun': can_verify_run,
+            'todayJobsEligible': target.get('todayJobsEligible'),
         }
+        if native_receipts:
+            row['runReceipts'] = native_receipts
         if hermes_last_failed and not hermes_error_is_current and hermes_job:
             row['lastHistoricalError'] = hermes_job.get('last_error')
             row['lastHistoricalErrorAt'] = hermes_job.get('last_run_at')

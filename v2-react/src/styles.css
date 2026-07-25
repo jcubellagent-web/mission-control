@@ -14847,7 +14847,7 @@ body,
 
 .today-jobs-summary {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 6px;
 }
 
@@ -14932,7 +14932,8 @@ body,
 .today-jobs-summary .is-complete { color: #72d69a; border-color: rgba(114, 214, 154, 0.35); }
 .today-jobs-summary .is-skipped { color: #a8abb3; border-color: rgba(168, 171, 179, 0.28); }
 .today-jobs-summary .is-broken { color: #ff645f; border-color: rgba(255, 100, 95, 0.42); }
-.today-jobs-summary .is-pending { color: #419cff; border-color: rgba(65, 156, 255, 0.4); }
+.today-jobs-summary .is-unverified { color: #f3b85a; border-color: rgba(243, 184, 90, 0.42); }
+.today-jobs-summary .is-scheduled { color: #419cff; border-color: rgba(65, 156, 255, 0.4); }
 
 .today-jobs-table {
   display: grid;

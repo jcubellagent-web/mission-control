@@ -575,7 +575,10 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
       reasonTriggerCount: reasonTriggers.length,
       missingReasonCount: reasonText.filter((value) => !value).length,
       objectReasonCount: reasonText.filter((value) => /\[object Object\]|undefined/i.test(value)).length,
-      pendingSummaryReason: document.querySelector('#today-jobs [data-summary="pending"]')?.getAttribute('data-reason') || '',
+      pendingSummaryReason: [
+        document.querySelector('#today-jobs [data-summary="unverified"]')?.getAttribute('data-reason') || '',
+        document.querySelector('#today-jobs [data-summary="scheduled"]')?.getAttribute('data-reason') || '',
+      ].join(' ').trim(),
       nowMarkerPresent: Boolean(nowMarker),
       nowMarkerLabel: nowMarker?.getAttribute('aria-label') || '',
       scrollOverflowY: jobsScroller ? round(Math.max(0, jobsScroller.scrollHeight - jobsScroller.clientHeight)) : null,
@@ -1501,7 +1504,7 @@ def validate_kiosk_legibility(measurements: Any) -> list[str]:
     non_green_rows = int(_number(today_jobs.get("nonGreenRowCount"), missing=-1.0))
     non_green_summaries = int(_number(today_jobs.get("nonGreenSummaryCount"), missing=-1.0))
     reason_triggers = int(_number(today_jobs.get("reasonTriggerCount"), missing=-1.0))
-    if non_green_rows < 0 or non_green_summaries != 3:
+    if non_green_rows < 0 or non_green_summaries != 4:
         failures.append(f"{KIOSK_PROBE_LABEL}: Today's Jobs non-green reason targets are incomplete")
     if reason_triggers != non_green_rows + non_green_summaries:
         failures.append(
@@ -1513,7 +1516,7 @@ def validate_kiosk_legibility(measurements: Any) -> list[str]:
     if int(_number(today_jobs.get("objectReasonCount"), missing=-1.0)) != 0:
         failures.append(f"{KIOSK_PROBE_LABEL}: Today's Jobs exposes an invalid object/undefined explanation")
     pending_reason = str(today_jobs.get("pendingSummaryReason") or "").lower()
-    if "scheduled later today" not in pending_reason or "does not mean failed" not in pending_reason:
+    if "future work" not in pending_reason or "past occurrences" not in pending_reason:
         failures.append(f"{KIOSK_PROBE_LABEL}: Today's Jobs pending summary does not explain future versus failed")
     if not today_jobs.get("nowMarkerPresent") or "current time" not in str(today_jobs.get("nowMarkerLabel") or "").lower():
         failures.append(f"{KIOSK_PROBE_LABEL}: Today's Jobs current-time marker is missing or unlabeled")
@@ -1967,11 +1970,11 @@ def self_test() -> int:
             "rowCount": 113,
             "declaredRowCount": 113,
             "nonGreenRowCount": 64,
-            "nonGreenSummaryCount": 3,
-            "reasonTriggerCount": 67,
+            "nonGreenSummaryCount": 4,
+            "reasonTriggerCount": 68,
             "missingReasonCount": 0,
             "objectReasonCount": 0,
-            "pendingSummaryReason": "23 scheduled later today · 0 running or active · 28 outcome unverified · 0 inside the grace window awaiting evidence. Open means no terminal result yet; it does not mean failed.",
+            "pendingSummaryReason": "28 past outcomes lack a terminal receipt. These are past occurrences, never future scheduled work. 23 occurrences are scheduled later today. They are future work, not open or overdue work.",
             "nowMarkerPresent": True,
             "nowMarkerLabel": "Current time, 11:03 AM Eastern Time",
             "scrollOverflowY": 3277,

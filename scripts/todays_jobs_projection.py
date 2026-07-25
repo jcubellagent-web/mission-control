@@ -407,8 +407,13 @@ def discover_launchd_definitions(
             "enabled": enabled,
             "present": True,
             "active": label in active,
+            # #JAIMES: interval/daemon LaunchAgents are services, not jobs that
+            # finish once per projected slot. Keep them in inventory/health,
+            # but out of the Daily Execution Ledger.
+            "todayJobsEligible": str(spec.get("kind") or "") == "launchd_calendar",
             "status": "ok" if enabled else "paused",
             "pattern": label,
+            "logPath": payload.get("StandardOutPath") or payload.get("StandardErrorPath"),
             "_matchText": f"{label} {command}",
         }
         definitions.append(apply_metadata_override(definition, overrides))
@@ -430,6 +435,7 @@ def discover_launchd_definitions(
             "enabled": True,
             "present": True,
             "active": True,
+            "todayJobsEligible": False,
             "status": "ok",
             "pattern": label,
             "_matchText": label,
@@ -530,6 +536,8 @@ def discover_qa_definitions(
 ) -> list[dict[str, Any]]:
     runs = (state or {}).get("jobs", {})
     runs = runs if isinstance(runs, Mapping) else {}
+    history = (state or {}).get("history", {})
+    history = history if isinstance(history, Mapping) else {}
     definitions: list[dict[str, Any]] = []
     owner_labels = {"josh2": "JOSH 2.0", "jaimes": "JAIMES", "jain": "J.A.I.N", "joshex": "JOSHeX"}
     for job in config.get("jobs", []):
@@ -549,6 +557,7 @@ def discover_qa_definitions(
             projected_run_status = "missed"
         else:
             projected_run_status = "done" if state_name == "ok" else "upcoming"
+        receipts = history.get(job_id) if isinstance(history.get(job_id), list) else []
         definitions.append({
             "definitionId": _stable_id("ecosystem_qa_scheduler", owner, job_id),
             "qaJobId": job_id,
@@ -574,6 +583,7 @@ def discover_qa_definitions(
             "lastRun": run.get("completedAt") or run.get("startedAt"),
             "durationMs": run.get("durationMs"),
             "failureStreak": failure_streak,
+            "runReceipts": [dict(row) for row in receipts if isinstance(row, Mapping)],
         })
     return definitions
 
@@ -894,6 +904,79 @@ def _multi_run_evidence(definition: Mapping[str, Any], scheduled: dt.datetime) -
     return None
 
 
+def _receipt_evidence(
+    definition: Mapping[str, Any], scheduled: dt.datetime
+) -> tuple[str, str, Mapping[str, Any]] | None:
+    """Return exact per-occurrence evidence without extrapolating lastRun.
+
+    Adapters may provide either the scheduled slot explicitly or a claimed/start
+    timestamp close to it. A terminal receipt is the only path to success here;
+    absence remains unverified.
+    """
+    receipts = definition.get("runReceipts")
+    if not isinstance(receipts, list):
+        return None
+    tolerance = _occurrence_tolerance(definition)
+    matches: list[tuple[dt.datetime, Mapping[str, Any]]] = []
+    for receipt in receipts:
+        if not isinstance(receipt, Mapping):
+            continue
+        observed = _parse_timestamp(
+            receipt.get("scheduledAt")
+            or receipt.get("claimedAt")
+            or receipt.get("startedAt")
+        )
+        if observed is None:
+            continue
+        exact_slot = bool(receipt.get("scheduledAt"))
+        if exact_slot:
+            if observed.hour != scheduled.hour or observed.minute != scheduled.minute or observed.date() != scheduled.date():
+                continue
+        elif not (scheduled - dt.timedelta(minutes=1) <= observed <= scheduled + tolerance):
+            continue
+        matches.append((observed, receipt))
+    if not matches:
+        return None
+    _observed, receipt = max(matches, key=lambda item: item[0])
+    status = str(receipt.get("status") or "").lower()
+    if status in {"ok", "success", "completed", "complete", "done"} and receipt.get("finishedAt"):
+        return "complete", "done", receipt
+    if status in {"skipped", "skipped_change_lease", "skipped_precondition", "skipped_locked"}:
+        return "skipped", status, receipt
+    if status in {"failed", "error", "timeout", "missed", "blocked"}:
+        receipt_end = _parse_timestamp(
+            receipt.get("finishedAt") or receipt.get("startedAt") or receipt.get("claimedAt")
+        ) or scheduled
+        later_slots = [
+            slot for slot in occurrence_times(definition, scheduled.date())
+            if slot > scheduled
+        ]
+        next_slot = min(later_slots) if later_slots else None
+        for candidate in receipts:
+            if not isinstance(candidate, Mapping):
+                continue
+            candidate_status = str(candidate.get("status") or "").lower()
+            candidate_finished = _parse_timestamp(candidate.get("finishedAt"))
+            if candidate_status not in {"ok", "success", "completed", "complete", "done"} or candidate_finished is None:
+                continue
+            if candidate_finished <= receipt_end or (next_slot is not None and candidate_finished >= next_slot):
+                continue
+            return "complete", "recovered", candidate
+        for candidate in receipts:
+            if not isinstance(candidate, Mapping):
+                continue
+            candidate_status = str(candidate.get("status") or "").lower()
+            candidate_finished = _parse_timestamp(candidate.get("finishedAt"))
+            if candidate_status not in {"ok", "success", "completed", "complete", "done"} or candidate_finished is None:
+                continue
+            if candidate_finished > receipt_end and candidate_finished.date() == scheduled.date():
+                return "complete", "recovered-later", candidate
+        return "broken", status, receipt
+    if status in {"claimed", "running", "working"}:
+        return "pending", "running", receipt
+    return "pending", "unverified", receipt
+
+
 def _occurrence_outcome(
     definition: Mapping[str, Any],
     scheduled: dt.datetime,
@@ -908,6 +991,9 @@ def _occurrence_outcome(
         return fixed, run_status
     if scheduled > now:
         return "pending", "scheduled"
+    receipt = _receipt_evidence(definition, scheduled)
+    if receipt is not None:
+        return receipt[0], receipt[1]
     multi_done = _multi_run_evidence(definition, scheduled)
     if multi_done is True:
         return "complete", "done"
@@ -953,6 +1039,8 @@ def materialize_today_jobs(
 
     for definition in definitions:
         if definition.get("todayRelevant") is False:
+            continue
+        if definition.get("todayJobsEligible") is False:
             continue
         times = occurrence_times(definition, day)
         active_from = _parse_timestamp(definition.get("activeFrom"))
@@ -1048,6 +1136,10 @@ def materialize_today_jobs(
                 evidence_summary = "The service is loaded, but no fresh completion or heartbeat timestamp is available."
             elif run_status == "unverified":
                 evidence_summary = "The scheduler publishes this job but does not provide per-run outcome evidence."
+            elif run_status == "recovered":
+                evidence_summary = "The scheduled attempt failed, then a later retry completed successfully before the next occurrence."
+            elif run_status == "recovered-later":
+                evidence_summary = "This occurrence failed, but the same job completed successfully later today."
             row = {
                 "occurrenceId": f"{definition_id}@{suffix}",
                 "definitionId": definition_id,

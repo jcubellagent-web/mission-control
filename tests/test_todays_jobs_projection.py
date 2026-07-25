@@ -109,6 +109,7 @@ def test_launchd_and_launchctl_discovery_uses_definition_schedule(tmp_path: Path
     assert rows[0]["definitionId"].startswith("launchd:josh2:")
     assert rows[0]["schedule"] == "6:05 AM ET"
     assert rows[0]["active"] is True
+    assert rows[0]["todayJobsEligible"] is True
 
 
 def test_hermes_and_qa_definitions_keep_stable_ids_and_run_evidence() -> None:
@@ -131,7 +132,12 @@ def test_hermes_and_qa_definitions_keep_stable_ids_and_run_evidence() -> None:
         "status": "ok",
         "completedAt": "2026-07-17T10:08:00Z",
         "durationMs": 2400,
-    }}})
+    }}, "history": {"layout-check": [{
+        "scheduledAt": "2026-07-17T06:07",
+        "status": "ok",
+        "startedAt": "2026-07-17T10:07:00Z",
+        "finishedAt": "2026-07-17T10:08:00Z",
+    }]}})
 
     assert hermes[0]["definitionId"].startswith("hermes:jaimes:")
     assert hermes[0]["lastRun"] == "2026-07-17T10:59:00Z"
@@ -139,6 +145,7 @@ def test_hermes_and_qa_definitions_keep_stable_ids_and_run_evidence() -> None:
     assert qa[0]["qaJobId"] == "layout-check"
     assert qa[0]["qaMeta"] is True
     assert qa[0]["runStatus"] == "done"
+    assert qa[0]["runReceipts"][0]["status"] == "ok"
 
 
 def test_failed_qa_execution_is_labeled_failed_instead_of_missed() -> None:
@@ -311,7 +318,7 @@ def test_bounded_recurring_window_stays_complete_after_its_final_run() -> None:
     assert rows[0]["runStatus"] == "coverage-complete"
 
 
-def test_loaded_coverage_without_fresh_evidence_is_not_green() -> None:
+def test_continuous_launchd_service_is_not_a_finishable_daily_job() -> None:
     rows, _ = materialize_today_jobs([{
         "definitionId": "launchd:josh2:loaded",
         "name": "Loaded service",
@@ -325,12 +332,10 @@ def test_loaded_coverage_without_fresh_evidence_is_not_green() -> None:
         "present": True,
         "enabled": True,
         "canVerifyRun": False,
+        "todayJobsEligible": False,
     }], now=dt.datetime(2026, 7, 17, 10, 20, tzinfo=ET))
 
-    assert len(rows) == 1
-    assert rows[0]["outcome"] == "pending"
-    assert rows[0]["runStatus"] == "coverage-loaded"
-    assert rows[0]["completedRuns"] == 0
+    assert rows == []
 
 
 def test_blocked_status_wins_over_matching_timestamp() -> None:
@@ -367,6 +372,65 @@ def test_exact_multi_run_success_wins_over_latest_definition_miss() -> None:
         ("8:00 AM", "complete", "done"),
         ("9:00 AM", "complete", "done"),
         ("10:00 AM", "broken", "missed"),
+    ]
+
+
+def test_exact_receipts_preserve_each_terminal_occurrence() -> None:
+    definition = {
+        **_definition("Receipt ledger", 8, run_status="done", can_verify_run=True),
+        "scheduleSpec": {"kind": "cron", "expression": "0 8,10,12 * * *"},
+        "runReceipts": [
+            {"claimedAt": "2026-07-17T08:00:01-04:00", "finishedAt": "2026-07-17T08:02:00-04:00", "status": "completed"},
+            {"claimedAt": "2026-07-17T10:00:01-04:00", "finishedAt": "2026-07-17T10:02:00-04:00", "status": "failed"},
+        ],
+    }
+    rows, _ = materialize_today_jobs(
+        [definition], now=dt.datetime(2026, 7, 17, 10, 20, tzinfo=ET)
+    )
+
+    assert [(row["scheduledTime"], row["outcome"], row["runStatus"]) for row in rows] == [
+        ("8:00 AM", "complete", "done"),
+        ("10:00 AM", "broken", "failed"),
+        ("12:00 PM", "pending", "scheduled"),
+    ]
+
+
+def test_failed_occurrence_is_recovered_only_by_retry_before_next_slot() -> None:
+    definition = {
+        **_definition("Retry ledger", 8, run_status="done", can_verify_run=True),
+        "scheduleSpec": {"kind": "cron", "expression": "0 8,12 * * *"},
+        "runReceipts": [
+            {"scheduledAt": "2026-07-17T08:00:00-04:00", "finishedAt": "2026-07-17T08:01:00-04:00", "status": "failed"},
+            {"scheduledAt": "2026-07-17T08:20:00-04:00", "finishedAt": "2026-07-17T08:21:00-04:00", "status": "completed"},
+            {"scheduledAt": "2026-07-17T12:00:00-04:00", "finishedAt": "2026-07-17T12:01:00-04:00", "status": "failed"},
+        ],
+    }
+    rows, _ = materialize_today_jobs(
+        [definition], now=dt.datetime(2026, 7, 17, 12, 20, tzinfo=ET)
+    )
+
+    assert [(row["scheduledTime"], row["outcome"], row["runStatus"]) for row in rows] == [
+        ("8:00 AM", "complete", "recovered"),
+        ("12:00 PM", "broken", "failed"),
+    ]
+
+
+def test_earlier_failure_is_labeled_recovered_after_later_scheduled_success() -> None:
+    definition = {
+        **_definition("Later recovery", 8, run_status="done", can_verify_run=True),
+        "scheduleSpec": {"kind": "cron", "expression": "0 8,12 * * *"},
+        "runReceipts": [
+            {"scheduledAt": "2026-07-17T08:00:00-04:00", "finishedAt": "2026-07-17T08:01:00-04:00", "status": "failed"},
+            {"scheduledAt": "2026-07-17T12:00:00-04:00", "finishedAt": "2026-07-17T12:01:00-04:00", "status": "completed"},
+        ],
+    }
+    rows, _ = materialize_today_jobs(
+        [definition], now=dt.datetime(2026, 7, 17, 12, 20, tzinfo=ET)
+    )
+
+    assert [(row["scheduledTime"], row["outcome"], row["runStatus"]) for row in rows] == [
+        ("8:00 AM", "complete", "recovered-later"),
+        ("12:00 PM", "complete", "done"),
     ]
 
 

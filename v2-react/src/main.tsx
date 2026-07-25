@@ -5826,6 +5826,13 @@ function todayJobReason(job: TodayJobOccurrence, nowMs: number): TodayJobReason 
   const expected = Math.max(0, Number(job.expectedRuns || 0));
 
   if (job.outcome === "complete") {
+    if (/^recovered/.test(runStatus)) {
+      return {
+        kind: "complete",
+        label: "Recovered",
+        detail: evidence.summary || "The job failed at this checkpoint but completed successfully later today.",
+      };
+    }
     return job.rolledUp
       ? { kind: "complete", label: "Coverage current", detail: "A fresh successful signal was recorded within this job's expected cadence." }
       : { kind: "complete", label: "Complete", detail: "A successful run was recorded for this occurrence today." };
@@ -5940,7 +5947,10 @@ function todayJobReason(job: TodayJobOccurrence, nowMs: number): TodayJobReason 
 }
 
 function todayJobStatusLabel(job: TodayJobOccurrence, reason: TodayJobReason): string {
-  if (job.outcome === "complete") return job.rolledUp && job.runStatus === "coverage-current" ? "Live" : "Complete";
+  if (job.outcome === "complete") {
+    if (/^recovered/.test(String(job.runStatus || "").toLowerCase())) return "Recovered";
+    return job.rolledUp && job.runStatus === "coverage-current" ? "Live" : "Complete";
+  }
   if (job.outcome === "broken") {
     const failureState = `${String(job.runStatus || "").toLowerCase()} ${todayJobEvidence(job).status.toLowerCase()}`;
     if (/stale/.test(failureState)) return "Stale";
@@ -6046,6 +6056,7 @@ function JobsRail({
     totals[job.outcome] += 1;
     return totals;
   }, { complete: 0, skipped: 0, broken: 0, pending: 0 });
+  const recoveredCount = rows.filter((job) => job.outcome === "complete" && /^recovered/.test(String(job.runStatus || "").toLowerCase())).length;
   const computedNowIndex = rows.findIndex((job) => isFutureTodayJob(job, nowMs));
   const metaNowIndex = Number(todayJobsMeta?.nowIndex);
   const nowIndex = computedNowIndex >= 0
@@ -6070,32 +6081,47 @@ function JobsRail({
       && !/coverage-loaded/.test(String(job.runStatus || "").toLowerCase());
   }).length;
   const pendingAwaiting = Math.max(0, pendingRows.length - pendingLater - pendingUnverified - pendingActive);
-  const summaryReason = (outcome: TodayJobOutcome): string => {
-    if (outcome === "skipped") {
+  const pendingPast = Math.max(0, pendingRows.length - pendingLater);
+  type JobsSummaryKey = "complete" | "skipped" | "broken" | "unverified" | "scheduled";
+  const summaryCount = (key: JobsSummaryKey): number => {
+    if (key === "unverified") return pendingPast;
+    if (key === "scheduled") return pendingLater;
+    return counts[key];
+  };
+  const summaryReason = (key: JobsSummaryKey): string => {
+    if (key === "skipped") {
       return `${pluralOccurrences(counts.skipped)} intentionally paused, disabled, or skipped at the source. No failure is implied.`;
     }
-    if (outcome === "broken") {
+    if (key === "broken") {
       return counts.broken
         ? `${pluralOccurrences(counts.broken)} have a source-reported failure or miss, or an overdue/stale signal from a scheduler capable of reporting outcomes.`
         : "No failed, missed, overdue, stale, timed-out, or blocked occurrences.";
     }
-    if (!counts.pending) return "No occurrences are waiting for a terminal result.";
-    return `${pendingLater} scheduled later today · ${pendingActive} running or active · ${pendingUnverified} outcome unverified · ${pendingAwaiting} inside the grace window awaiting evidence. Open means no terminal result yet; it does not mean failed.`;
+    if (key === "scheduled") {
+      return pendingLater
+        ? `${pluralOccurrences(pendingLater)} are scheduled later today. They are future work, not open or overdue work.`
+        : "No future occurrences remain today.";
+    }
+    if (key === "unverified") {
+      if (!pendingPast) return "No past occurrences are waiting for a terminal result.";
+      return `${pendingUnverified} past outcomes lack a terminal receipt · ${pendingActive} running or active · ${pendingAwaiting} inside the grace window awaiting evidence. These are past occurrences, never future scheduled work.`;
+    }
+    return "Completed occurrences have terminal success evidence from their owning scheduler.";
   };
-  const summarySublabel = (outcome: TodayJobOutcome): string => {
-    if (outcome === "complete") return "verified";
-    if (outcome === "skipped") return "intentional";
-    if (outcome === "broken") return counts.broken ? "needs attention" : "none";
-    if (!counts.pending) return "none";
+  const summarySublabel = (key: JobsSummaryKey): string => {
+    if (key === "complete") return recoveredCount ? `${recoveredCount} recovered` : "verified";
+    if (key === "skipped") return "intentional";
+    if (key === "broken") return counts.broken ? "needs attention" : "none";
+    if (key === "scheduled") return pendingLater ? "future" : "none";
+    if (!pendingPast) return "none";
     const openParts = [
-      pendingLater ? `${pendingLater} scheduled` : "",
       pendingActive ? `${pendingActive} active` : "",
       pendingUnverified ? `${pendingUnverified} unverified` : "",
       pendingAwaiting ? `${pendingAwaiting} awaiting` : "",
     ].filter(Boolean);
     return openParts.join(" · ");
   };
-  const summaryLabel = (outcome: TodayJobOutcome): string => outcome === "pending" ? "open" : outcome;
+  const summaryLabel = (key: JobsSummaryKey): string => key;
   const rolledUpProgress = (job: TodayJobOccurrence): string => {
     if (job.runStatus === "coverage-current") return "coverage live";
     if (job.runStatus === "coverage-loaded") return "loaded · unverified";
@@ -6197,24 +6223,26 @@ function JobsRail({
         </div>
       </header>
       <div className="today-jobs-summary" aria-label={`${rows.length} job occurrences today`}>
-        {(["complete", "skipped", "broken", "pending"] as TodayJobOutcome[]).map((outcome) => {
-          const interactive = outcome !== "complete";
-          const tooltipKey = `summary-${outcome}`;
-          const reason = interactive ? summaryReason(outcome) : "";
+        {(["complete", "skipped", "broken", "unverified", "scheduled"] as JobsSummaryKey[]).map((summaryKey) => {
+          const interactive = summaryKey !== "complete";
+          const tooltipKey = `summary-${summaryKey}`;
+          const reason = interactive ? summaryReason(summaryKey) : "";
+          const count = summaryCount(summaryKey);
+          const tone: TodayJobOutcome = summaryKey === "unverified" || summaryKey === "scheduled" ? "pending" : summaryKey;
           return (
             <article
-              key={outcome}
-              className={`is-${outcome}${interactive ? " has-reason" : ""}`}
-              data-summary={outcome}
-              data-outcome={outcome}
+              key={summaryKey}
+              className={`is-${summaryKey}${interactive ? " has-reason" : ""}`}
+              data-summary={summaryKey}
+              data-outcome={tone}
               data-reason={interactive ? reason : undefined}
               data-reason-trigger={interactive ? "true" : undefined}
               tabIndex={interactive ? 0 : undefined}
-              aria-label={`${summaryLabel(outcome)}, ${pluralOccurrences(counts[outcome])}${interactive ? `. ${reason}` : ""}`}
+              aria-label={`${summaryLabel(summaryKey)}, ${pluralOccurrences(count)}${interactive ? `. ${reason}` : ""}`}
               aria-describedby={tooltip?.anchorKey === tooltipKey ? "today-jobs-tooltip" : undefined}
-              onMouseEnter={interactive ? (event) => revealTooltip(event.currentTarget, tooltipKey, `${summaryLabel(outcome)} status`, pluralOccurrences(counts[outcome]), reason, outcome) : undefined}
+              onMouseEnter={interactive ? (event) => revealTooltip(event.currentTarget, tooltipKey, `${summaryLabel(summaryKey)} status`, pluralOccurrences(count), reason, tone) : undefined}
               onMouseLeave={interactive ? () => dismissTooltip(tooltipKey) : undefined}
-              onFocus={interactive ? (event) => revealTooltip(event.currentTarget, tooltipKey, `${summaryLabel(outcome)} status`, pluralOccurrences(counts[outcome]), reason, outcome) : undefined}
+              onFocus={interactive ? (event) => revealTooltip(event.currentTarget, tooltipKey, `${summaryLabel(summaryKey)} status`, pluralOccurrences(count), reason, tone) : undefined}
               onBlur={interactive ? () => dismissTooltip(tooltipKey) : undefined}
               onKeyDown={interactive ? (event) => {
                 if (event.key === "Escape") dismissTooltip(tooltipKey);
@@ -6222,9 +6250,9 @@ function JobsRail({
             >
               <span aria-hidden="true" />
               <div>
-                <em>{summaryLabel(outcome)}{interactive ? <CircleHelp aria-hidden="true" /> : null}</em>
-                <strong>{counts[outcome]}</strong>
-                <small>{summarySublabel(outcome)}</small>
+                <em>{summaryLabel(summaryKey)}{interactive ? <CircleHelp aria-hidden="true" /> : null}</em>
+                <strong>{count}</strong>
+                <small>{summarySublabel(summaryKey)}</small>
               </div>
             </article>
           );

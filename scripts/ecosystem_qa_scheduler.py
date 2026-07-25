@@ -24,6 +24,7 @@ TICK_LOCK = LOCK_DIR / "scheduler.lock"
 CHANGE_LOCK = Path.home() / ".openclaw" / "state" / "control-tower-change-lock.json"
 HOST_TOOL_PATHS = ("/opt/homebrew/bin", "/usr/local/bin", "/usr/bin", "/bin")
 DEFAULT_CATCH_UP_MINUTES = 15
+MAX_RECEIPTS_PER_JOB = 128
 
 
 def iso(value: dt.datetime | None = None) -> str:
@@ -243,6 +244,12 @@ def tick(
     state = read_json(STATE_PATH, {"jobs": {}})
     prior_jobs = state.get("jobs") if isinstance(state.get("jobs"), dict) else {}
     new_jobs = dict(prior_jobs)
+    prior_history = state.get("history") if isinstance(state.get("history"), dict) else {}
+    new_history = {
+        str(job_id): list(rows)[-MAX_RECEIPTS_PER_JOB:]
+        for job_id, rows in prior_history.items()
+        if isinstance(rows, list)
+    }
     results = []
     current_slot = slot(local_now)
 
@@ -266,6 +273,7 @@ def tick(
             "timezone": str(timezone),
             "shadow": False,
             "jobs": running_jobs,
+            "history": new_history,
             "ran": [str(job["id"])],
             "status": "running",
         })
@@ -312,6 +320,23 @@ def tick(
             result["incidentOpen"] = bool(previous.get("incidentOpen"))
         result["lastSlot"] = scheduled_slot
         new_jobs[job_id] = result
+        # #JAIMES: preserve a bounded metadata-only receipt ledger so Today's
+        # Jobs can report each scheduled outcome instead of repainting the day
+        # from the definition's latest state.
+        receipt = {
+            "scheduledAt": scheduled_slot,
+            "status": result.get("status"),
+            "startedAt": result.get("startedAt"),
+            "finishedAt": result.get("completedAt") or result.get("startedAt"),
+            "durationMs": result.get("durationMs"),
+            "returncode": result.get("returncode"),
+        }
+        receipts = [
+            row for row in new_history.get(job_id, [])
+            if isinstance(row, dict) and row.get("scheduledAt") != scheduled_slot
+        ]
+        receipts.append(receipt)
+        new_history[job_id] = receipts[-MAX_RECEIPTS_PER_JOB:]
         results.append(result)
         if not shadow:
             publish_transition(job, result, previous)
@@ -322,6 +347,7 @@ def tick(
         "timezone": str(timezone),
         "shadow": shadow,
         "jobs": new_jobs,
+        "history": new_history,
         "ran": [row["id"] for row in results],
         "status": "attention" if any(row["status"] in {"failed", "timeout"} for row in results) else "ok",
     }

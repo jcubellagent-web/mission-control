@@ -49,7 +49,14 @@ class SchedulerTests(unittest.TestCase):
             state.write_text(json.dumps({
                 "jobs": {"daily": {"status": "ok", "lastSlot": "2026-07-23T05:17"}},
             }))
-            completed = {"id": "daily", "status": "ok", "returncode": 0, "durationMs": 1}
+            completed = {
+                "id": "daily",
+                "status": "ok",
+                "returncode": 0,
+                "startedAt": "2026-07-24T05:18:02Z",
+                "completedAt": "2026-07-24T05:18:03Z",
+                "durationMs": 1,
+            }
             with mock.patch.object(subject, "STATE_PATH", state), \
                     mock.patch.object(subject, "run_job", return_value=completed) as run, \
                     mock.patch.object(subject, "publish_transition"):
@@ -60,6 +67,14 @@ class SchedulerTests(unittest.TestCase):
 
         run.assert_called_once()
         self.assertEqual(result["jobs"]["daily"]["lastSlot"], "2026-07-24T05:17")
+        self.assertEqual(result["history"]["daily"], [{
+            "scheduledAt": "2026-07-24T05:17",
+            "status": "ok",
+            "startedAt": "2026-07-24T05:18:02Z",
+            "finishedAt": "2026-07-24T05:18:03Z",
+            "durationMs": 1,
+            "returncode": 0,
+        }])
 
     def test_newer_operator_run_prevents_older_slot_catch_up(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
