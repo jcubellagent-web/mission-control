@@ -906,6 +906,12 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertIn('"scripts/open_mission_control_kiosk.sh"', guard)
         self.assertIn('"scripts/control_tower_foreground.py"', guard)
 
+    def test_active_objective_guard_is_shared_by_live_board_and_atlas(self) -> None:
+        main = (MISSION_CONTROL / "v2-react" / "src" / "main.tsx").read_text(encoding="utf-8")
+        self.assertIn("function hasPublishedActiveObjective", main)
+        self.assertIn("if (!hasPublishedActiveObjective(status, activeWork)) return false;", main)
+        self.assertIn("value === \"queued\" && hasPublishedActiveObjective(status, activeWork)", main)
+
     def test_handoff_receipt_bridge_support_is_preserved(self) -> None:
         source = UPDATE_SCRIPT.read_text(encoding="utf-8")
         self.assertIn("from handoff_receipt_bridge import receipt_state, terminal_result_receipt", source)

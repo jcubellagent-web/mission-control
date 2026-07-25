@@ -2631,10 +2631,21 @@ def normalize_agent_brain_feed(feed: Dict[str, Any] | None, fallback_agent: str)
     raw = feed if isinstance(feed, dict) else {}
     updated_at = raw.get("updatedAt")
     ready_heartbeat = agent_feed_is_ready_heartbeat(raw)
-    reported_active = bool(raw.get("active")) and not ready_heartbeat
-    stale = bool(updated_at) and not is_recent_ts(updated_at, hours=AGENT_BRAIN_FEED_STALE_HOURS)
     raw_status = str(raw.get("status") or "idle")
-    status = "ready" if ready_heartbeat and raw_status.lower() in {"active", "working", "running", "queued"} else raw_status
+    raw_status_key = raw_status.lower().strip()
+    claimed_active = bool(raw.get("active")) or raw_status_key in {"active", "working", "running"}
+    objective = plain_dashboard_text(raw.get("objective") or "", 220)
+    detail = plain_dashboard_text(raw.get("detail") or raw.get("summary") or "", 260)
+    missing_objective = claimed_active and not ready_heartbeat and not objective
+    reported_active = claimed_active and not ready_heartbeat and not missing_objective
+    stale = bool(updated_at) and not is_recent_ts(updated_at, hours=AGENT_BRAIN_FEED_STALE_HOURS)
+    status = "ready" if ready_heartbeat and raw_status_key in {"active", "working", "running", "queued"} else raw_status
+    if missing_objective:
+        # A partial heartbeat must never make one dashboard claim active work while
+        # another can only show a missing objective. Require a safe public objective.
+        status = "blocked"
+        objective = "Visibility objective required"
+        detail = "Active heartbeat rejected until a dashboard-safe objective is published."
     raw_steps = raw.get("steps") if isinstance(raw.get("steps"), list) else []
     visible_steps = []
     for step in raw_steps:
@@ -2648,8 +2659,8 @@ def normalize_agent_brain_feed(feed: Dict[str, Any] | None, fallback_agent: str)
         "agent": plain_dashboard_text(raw.get("agent") or fallback_agent, 80),
         "active": reported_active and not stale,
         "reportedActive": reported_active,
-        "objective": plain_dashboard_text(raw.get("objective") or "", 220),
-        "detail": plain_dashboard_text(raw.get("detail") or raw.get("summary") or "", 260) or None,
+        "objective": objective,
+        "detail": detail or None,
         "status": "stale" if stale and reported_active else status,
         "stale": stale,
         "updatedAt": updated_at,

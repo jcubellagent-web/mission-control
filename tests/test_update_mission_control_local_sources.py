@@ -81,3 +81,19 @@ def test_telegram_qa_dashboard_boundary_drops_unknown_and_private_fields() -> No
     assert '"rawPrompt":' not in encoded
     assert '"messageIds":' not in encoded
     assert safe["coverage"]["recurringProductionWrites"] is False
+
+
+def test_active_agent_feed_requires_dashboard_safe_objective() -> None:
+    for agent in ("JOSHeX", "JOSH 2.0", "JAIMES", "J.A.I.N"):
+        normalized = module.normalize_agent_brain_feed({
+            "agent": agent,
+            "active": True,
+            "status": "active",
+            "updatedAt": module.utc_iso(),
+            "detail": "Partial heartbeat only",
+        }, agent)
+        assert normalized["active"] is False
+        assert normalized["reportedActive"] is False
+        assert normalized["status"] == "blocked"
+        assert normalized["objective"] == "Visibility objective required"
+        assert normalized["detail"] == "Active heartbeat rejected until a dashboard-safe objective is published."

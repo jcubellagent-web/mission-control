@@ -53,19 +53,21 @@ def test_worker_projection_requires_exact_active_controller(tmp_path: Path) -> N
     assert active_worker["controllerWorkId"] == "controller-work"
 
 
-def test_worker_route_rejects_missing_or_cross_owner_controller(tmp_path: Path) -> None:
+def test_worker_route_allows_cross_owner_controller_but_requires_parent(tmp_path: Path) -> None:
     store = WORK_STORE.WorkStore(tmp_path / "work.sqlite3", tmp_path / "hot.json")
     publish(store, work_id="controller-work", run_id="controller-run", agent="josh2")
+    publish(
+        store,
+        work_id="worker-work",
+        run_id="worker-run",
+        execution_role="worker",
+        controller_work_id="controller-work",
+        controller_run_id="controller-run",
+    )
 
-    with pytest.raises(WORK_STORE.WorkStoreError, match="same agent"):
-        publish(
-            store,
-            work_id="worker-work",
-            run_id="worker-run",
-            execution_role="worker",
-            controller_work_id="controller-work",
-            controller_run_id="controller-run",
-        )
+    worker = next(row for row in store.projection()["activeWorks"] if row["workId"] == "worker-work")
+    assert worker["ownerAgent"] == "joshex"
+    assert worker["controllerWorkId"] == "controller-work"
 
     with pytest.raises(WORK_STORE.WorkStoreError, match="requires controller"):
         publish(

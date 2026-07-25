@@ -608,7 +608,7 @@ def test_model_lane_publish_is_a_verified_nested_worker() -> None:
     assert "--route-verified" in command
 
 
-def test_model_lane_worker_preserves_controller_owner_across_remote_host() -> None:
+def test_model_lane_worker_uses_actual_remote_execution_host() -> None:
     lane = load_module("model_lane_cross_host_owner", ROOT / "scripts" / "model_lane.py")
     args = model_args()
     route = {"agent": "jaimes", "modelRoute": {
@@ -624,7 +624,7 @@ def test_model_lane_worker_preserves_controller_owner_across_remote_host() -> No
         phase="working",
         detail="Separate lane is active.",
     )
-    assert command[command.index("--agent") + 1] == "joshex"
+    assert command[command.index("--agent") + 1] == "jaimes"
 
 
 def test_xai_subscription_defaults_and_prefixes_use_current_cli_model() -> None:

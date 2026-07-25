@@ -744,7 +744,7 @@ function agentVisualState(status: AgentStatus, activeFocus: boolean, activeWork?
   // signal, including when an optional host has not published a status row yet.
   // Resolve it before the offline fallback so the board and Atlas cannot
   // disagree about a visibly working agent.
-  if (activeFocus || value === "queued" || (value === "active" && isFreshActiveTimestamp(status.updated_at)) || (status.active && isFreshActiveTimestamp(status.updated_at))) return "working";
+  if (activeFocus || (value === "queued" && hasPublishedActiveObjective(status, activeWork))) return "working";
   if (isOptionalJoshexOffline(status)) return "offline";
   if (freshnessClass(status.updated_at) === "is-stale") return "stale";
   return "ready";
@@ -756,6 +756,7 @@ function activeWorkForAgent(agent: AgentId, workItems: WorkItem[]) {
 }
 
 function agentHasFreshWorkFocus(status: AgentStatus, activeWork?: WorkItem) {
+  if (!hasPublishedActiveObjective(status, activeWork)) return false;
   const activeWorkFresh = activeWork?.state === "working" && isFreshActiveTimestamp(activeWork.updated_at);
   const statusWorkingFresh = ["active", "working"].includes(String(status.status || "").toLowerCase())
     && isFreshActiveTimestamp(status.updated_at);
@@ -4836,6 +4837,10 @@ function descriptiveActiveText(values: Array<string | null | undefined>, fallbac
     if (clean && !activeWorkPlaceholder(clean)) return clean;
   }
   return fallback;
+}
+
+function hasPublishedActiveObjective(status: AgentStatus, activeWork?: WorkItem) {
+  return Boolean(descriptiveActiveText([activeWork?.title, status.objective], ""));
 }
 
 function activePhaseLabel(status: AgentStatus) {
