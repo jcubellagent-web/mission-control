@@ -1135,8 +1135,11 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
     xai_hint = task_type in XAI_FIRST_TASK_TYPES or bool(caps & XAI_FIRST_CAPABILITIES)
     openrouter_hint = task_type in OPENROUTER_FALLBACK_TASK_TYPES or bool(caps & OPENROUTER_FALLBACK_CAPABILITIES)
     gemini_first = bool(gemini_hint and not codex_only and not unsafe_privacy and not needs_approval)
-    ollama_allowance_ok, ollama_allowance_reason = ollama_live_allowance_status()
     glm_surplus_candidate = task_type in GLM_SURPLUS_TASK_TYPES or bool(caps & GLM_SURPLUS_CAPABILITIES)
+    if glm_hint or glm_surplus_candidate:
+        ollama_allowance_ok, ollama_allowance_reason = ollama_live_allowance_status()
+    else:
+        ollama_allowance_ok, ollama_allowance_reason = None, "Ollama allowance not needed for this route"
     glm_surplus_boost = bool(
         glm_surplus_candidate
         and ollama_surplus_capacity_available(ollama_allowance_ok, ollama_allowance_reason)
@@ -1149,7 +1152,10 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
     if glm_quota_fallback:
         glm_first = False
         gemini_first = True
-    xai_available, xai_availability_reason = xai_verified_available()
+    if xai_hint:
+        xai_available, xai_availability_reason = xai_verified_available()
+    else:
+        xai_available, xai_availability_reason = False, "xAI availability not needed for this route"
     xai_first = bool(xai_hint and xai_available and not codex_only and not unsafe_privacy and not needs_approval)
     openrouter_fallback = bool(openrouter_hint and not codex_only and not unsafe_privacy and not needs_approval)
 

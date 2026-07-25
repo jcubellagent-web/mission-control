@@ -380,6 +380,28 @@ def test_sorare_mutations_and_private_analytics_remain_codex_owned(monkeypatch) 
     assert route.choose_model_route(args, "jaimes", False)["provider"] == "codex"
 
 
+def test_sorare_codex_and_gemini_routes_skip_unneeded_provider_probes(monkeypatch) -> None:
+    route = load_module("agent_route_sorare_probe_scope", ROOT / "scripts" / "agent_route.py")
+    args = model_args()
+    args.requester = "jaimes"
+    args.priority = "normal"
+    args.complexity = "auto"
+    args.blast_radius = "auto"
+    monkeypatch.setattr(route, "codex_allowance_mode", lambda _args: "normal")
+
+    def unexpected_probe():
+        raise AssertionError("unrelated provider availability was probed")
+
+    monkeypatch.setattr(route, "ollama_live_allowance_status", unexpected_probe)
+    monkeypatch.setattr(route, "xai_verified_available", unexpected_probe)
+
+    args.task_type = "sorare-report"
+    assert route.choose_model_route(args, "jaimes", False)["provider"] == "gemini"
+
+    args.task_type = "sorare-lineup"
+    assert route.choose_model_route(args, "jaimes", False)["provider"] == "codex"
+
+
 def test_ollama_quota_is_a_fresh_soft_signal_and_exhaustion_falls_back(tmp_path, monkeypatch) -> None:
     route = load_module("agent_route_glm_quota", ROOT / "scripts" / "agent_route.py")
     usage = tmp_path / "modelUsage.json"
