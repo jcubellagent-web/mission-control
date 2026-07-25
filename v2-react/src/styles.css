@@ -17436,7 +17436,11 @@ body,
   opacity: 0.66;
 }
 
-#brain-atlas .brain-atlas-proof-state {
+#brain-atlas .brain-atlas-proof-state,
+#brain-atlas .brain-atlas-proof-health {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   overflow: hidden;
   border: 1px solid rgba(101, 205, 245, 0.26);
   border-radius: 999px;
@@ -17452,6 +17456,73 @@ body,
 #brain-atlas .brain-atlas-proof-state.is-ready {
   border-color: rgba(88, 238, 154, 0.35);
   color: #9cefc6;
+}
+
+#brain-atlas .brain-atlas-proof-health b {
+  font-size: 10px;
+  line-height: 1;
+}
+
+#brain-atlas .brain-atlas-proof-health strong {
+  color: inherit;
+  font-size: inherit;
+}
+
+#brain-atlas .brain-atlas-proof-health em {
+  color: var(--muted);
+  font-size: inherit;
+  font-style: normal;
+  font-weight: 720;
+}
+
+#brain-atlas .brain-atlas-proof-health.is-clear {
+  border-color: rgba(88, 238, 154, 0.42);
+  color: #9cefc6;
+}
+
+#brain-atlas .brain-atlas-proof-health.is-watch {
+  border-color: rgba(255, 209, 102, 0.46);
+  color: #ffe091;
+}
+
+#brain-atlas .brain-atlas-proof-health.is-risk {
+  border-color: rgba(255, 118, 118, 0.48);
+  color: #ffaaaa;
+}
+
+#brain-atlas .brain-atlas-proof-audit {
+  border: 1px solid rgba(101, 205, 245, 0.2);
+  border-radius: 6px;
+  background: rgba(4, 20, 35, 0.68);
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+#brain-atlas .brain-atlas-proof-audit summary {
+  padding: 6px 8px;
+  color: #a8c3cf;
+  cursor: pointer;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+#brain-atlas .brain-atlas-proof-audit summary:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: -2px;
+}
+
+#brain-atlas .brain-atlas-proof-audit p,
+#brain-atlas .brain-atlas-proof-audit ol {
+  margin: 0 8px 7px;
+}
+
+#brain-atlas .brain-atlas-proof-audit ol {
+  padding-left: 17px;
+}
+
+#brain-atlas .brain-atlas-proof-audit li + li {
+  margin-top: 2px;
 }
 
 .memory-flow-map {
@@ -17586,6 +17657,10 @@ body,
   fill: #718c9a;
   font-size: 9px;
   font-weight: 650;
+}
+
+#brain-atlas .brain-atlas-proof-layer {
+  display: none;
 }
 
 .memory-flow-edge {
@@ -17856,7 +17931,7 @@ body,
     max-width: none;
   }
 
-  #brain-atlas .brain-atlas-proof-state {
+  #brain-atlas .brain-atlas-proof-health em {
     display: none;
   }
 

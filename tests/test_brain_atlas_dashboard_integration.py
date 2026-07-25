@@ -662,7 +662,7 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertTrue(all(edge["kind"] in {"owns", "emitted", "verified-route"} for edge in clean["edges"]))
         self.assertEqual(clean, written["brainAtlas"])
 
-    def test_ui_contract_is_one_unified_observable_graph_with_exact_static_proof(self) -> None:
+    def test_ui_contract_is_memory_first_with_on_demand_exact_proof(self) -> None:
         main = (MISSION_CONTROL / "v2-react" / "src" / "main.tsx").read_text(encoding="utf-8")
         styles = (MISSION_CONTROL / "v2-react" / "src" / "styles.css").read_text(encoding="utf-8")
         component = main[main.index("const BRAIN_ATLAS_LAYER_ORDER"):main.index("function AgentWorkBoard")]
@@ -687,14 +687,19 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertIn('data-proof-animated="false"', unified_svg)
         self.assertGreaterEqual(unified_svg.count('data-proof-animated="false"'), 2)
         self.assertIn('data-atlas-view-tone={selectedTone}', component)
-        self.assertIn("Live activity + exact proof", component)
-        self.assertIn("Governed memory receipts and static proof show live work—not private reasoning", component)
+        self.assertIn("Governed memory activity", component)
+        self.assertIn("The main view shows how shared memory is recalled, applied, assessed, and promoted—not private reasoning", component)
         self.assertIn("This visualization shows observable operations and evidence, not private model reasoning or memory contents", component)
-        self.assertIn('aria-label="Brain Atlas unified observable agent activity and exact execution evidence"', component)
+        self.assertIn('aria-label="Brain Atlas governed memory activity and proof health"', component)
         self.assertIn("Only governed memory receipt paths move when a recent exact registry timestamp exists", component)
-        self.assertIn("static, exact agent to named work to timestamped receipt to verified model paths", component)
+        self.assertIn("Exact execution proof is available on demand above this graph", component)
         self.assertIn("LIVE AGENTS + GOVERNED MEMORY", component)
         self.assertIn("EXACT EXECUTION PROOF · STATIC AUDIT PATHS", component)
+        self.assertIn('className="brain-atlas-proof-audit"', component)
+        self.assertIn("Inspect exact execution proof", component)
+        self.assertIn('className={`brain-atlas-proof-health is-${proofHealthTone}`}', component)
+        self.assertIn("Proof {proofHealthLabel}", component)
+        self.assertIn('transform="scale(1 1.62)"', component)
         self.assertIn("sanitizedMemoryActivity(memoryOperations?.activity)", component)
         self.assertIn("memorySignalIsRecent", component)
         self.assertIn("ageMs >= -5_000", component)
@@ -830,6 +835,12 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertIn("#brain-atlas.has-active-work .brain-atlas-state", reduced_motion)
         self.assertIn("--atlas-panel-glow: 0px;", reduced_motion)
         self.assertIn("animation: none !important;", reduced_motion)
+        self.assertIn("#brain-atlas .brain-atlas-proof-layer {", styles)
+        self.assertIn("display: none;", styles[styles.index("#brain-atlas .brain-atlas-proof-layer {"):])
+        self.assertIn("#brain-atlas .brain-atlas-proof-audit {", styles)
+        self.assertIn("#brain-atlas .brain-atlas-proof-health.is-clear", styles)
+        self.assertIn("#brain-atlas .brain-atlas-proof-health.is-watch", styles)
+        self.assertIn("#brain-atlas .brain-atlas-proof-health.is-risk", styles)
 
     def test_atlas_and_finops_are_always_visible_in_matched_grid_cells(self) -> None:
         main = (MISSION_CONTROL / "v2-react" / "src" / "main.tsx").read_text(encoding="utf-8")

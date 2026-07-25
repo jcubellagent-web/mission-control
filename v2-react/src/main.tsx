@@ -3982,6 +3982,16 @@ function BrainAtlasPanel({
   const proofState = atlas?.status === "ready"
     ? recentProofRows.length ? "ready" : "empty"
     : atlas?.status || "unavailable";
+  const proofHealthTone = proofState === "ready"
+    ? "clear"
+    : proofState === "unavailable"
+      ? "risk"
+      : "watch";
+  const proofHealthLabel = proofHealthTone === "clear"
+    ? "Verified"
+    : proofHealthTone === "risk"
+      ? "Unavailable"
+      : "Needs attention";
   const candidateObservedAt = newestMemoryTimestamp(
     activity?.lastObservedAt.proposed,
     activity?.lastObservedAt.corrected,
@@ -4001,7 +4011,7 @@ function BrainAtlasPanel({
       data-working-agent-count={workingAgentCount}
       data-load-tier={systemLoad.tier}
       data-load-score={systemLoad.score}
-      aria-label="Brain Atlas unified observable agent activity and exact execution evidence"
+      aria-label="Brain Atlas governed memory activity and proof health"
     >
       <header className="brain-atlas-header">
         <div>
@@ -4032,8 +4042,8 @@ function BrainAtlasPanel({
       >
         <header className="brain-atlas-section-header">
           <div>
-            <h3 id="brain-atlas-unified-heading">Live activity + exact proof</h3>
-            <p id="brain-atlas-unified-description">Governed memory receipts and static proof show live work—not private reasoning.</p>
+            <h3 id="brain-atlas-unified-heading">Governed memory activity</h3>
+            <p id="brain-atlas-unified-description">The main view shows how shared memory is recalled, applied, assessed, and promoted—not private reasoning.</p>
           </div>
           <div className="brain-atlas-context">
             <div className="brain-atlas-scope" aria-label="Brain Atlas scope and evidence policy">
@@ -4057,25 +4067,39 @@ function BrainAtlasPanel({
 
         <div className="brain-atlas-unified-controls">
           <label className="brain-atlas-focus" htmlFor="brain-atlas-focus-node">
-            <span>Inspect verified work</span>
+            <span>Proof audit focus</span>
             <select
               id="brain-atlas-focus-node"
               value={focusId}
               disabled={atlas?.status !== "ready" || !proofWorkOptions.length}
               onChange={(event) => setFocusId(event.target.value)}
             >
-              <option value="all">Most recent exact proof</option>
+              <option value="all">Most recent verified path</option>
               {proofWorkOptions.map((node) => (
                 <option key={node.id} value={node.id}>{brainAtlasNodeOption(node)}</option>
               ))}
             </select>
           </label>
-          <span className={`brain-atlas-proof-state is-${proofState === "ready" ? "ready" : "watch"}`}>
-            {evidenceStateLabel}
+          <span className={`brain-atlas-proof-health is-${proofHealthTone}`} role="status" aria-label={`Execution proof ${proofHealthLabel}. ${evidenceStateLabel}`}>
+            <b aria-hidden="true">{proofHealthTone === "clear" ? "●" : proofHealthTone === "watch" ? "▲" : "■"}</b>
+            <strong>Proof {proofHealthLabel}</strong>
+            <em>{evidenceStateLabel}</em>
           </span>
         </div>
 
-        <div className="memory-flow-map is-unified" tabIndex={0} aria-label="Unified observable agent, governed memory, and exact execution proof graph. Scroll horizontally on narrow screens.">
+        <details className="brain-atlas-proof-audit">
+          <summary>Inspect exact execution proof · {evidenceSummary}</summary>
+          <p>{evidencePolicyDetail}</p>
+          {proofRows.length ? (
+            <ol>
+              {proofRows.map((row) => (
+                <li key={row.id}>{row.workLabel} · {row.receipt.label || "Receipt"} · {row.model.label}</li>
+              ))}
+            </ol>
+          ) : <p>{brainAtlasEmptyMessage(atlas?.emptyReason)}</p>}
+        </details>
+
+        <div className="memory-flow-map is-unified" tabIndex={0} aria-label="Governed memory activity graph. Scroll horizontally on narrow screens.">
           <svg
             viewBox={`0 0 ${BRAIN_ATLAS_WIDE_VIEWBOX_WIDTH} 376`}
             role="img"
@@ -4084,9 +4108,9 @@ function BrainAtlasPanel({
             data-memory-source="governed-memory-registry"
             data-proof-source="exact-receipt-ledger"
           >
-            <title id="brain-atlas-title">Unified observable agent activity, governed memory, and exact execution proof</title>
+            <title id="brain-atlas-title">Governed memory activity</title>
             <desc id="brain-atlas-description">
-              Shared agent nodes show {workingAgentCount} agents working from the same current state as the Live Work Board. Verified claimed-work priority and fresh step or tool signals set the {systemLoad.label.toLowerCase()} halo intensity. Only governed memory receipt paths move when a recent exact registry timestamp exists. The lower lane shows {proofRows.length} static, exact agent to named work to timestamped receipt to verified model paths. This visualization shows observable operations and evidence, not private model reasoning or memory contents.
+              Shared agent nodes show {workingAgentCount} agents working from the same current state as the Live Work Board. Verified claimed-work priority and fresh step or tool signals set the {systemLoad.label.toLowerCase()} halo intensity. Only governed memory receipt paths move when a recent exact registry timestamp exists. Exact execution proof is available on demand above this graph. This visualization shows observable operations and evidence, not private model reasoning or memory contents.
             </desc>
             <defs>
               {flowAgents.map((row, index) => {
@@ -4129,7 +4153,7 @@ function BrainAtlasPanel({
                 );
               })}
             </defs>
-            <g className="brain-atlas-memory-layer" data-atlas-layer="memory">
+            <g className="brain-atlas-memory-layer" data-atlas-layer="memory" transform="scale(1 1.62)">
             <text className="brain-atlas-lane-label is-memory" x={brainAtlasWideX(18)} y="14">LIVE AGENTS + GOVERNED MEMORY</text>
             <g className="memory-flow-edges" aria-hidden="true">
             {reuseLinks.map((link) => {
