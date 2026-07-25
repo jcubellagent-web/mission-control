@@ -16680,6 +16680,221 @@ body,
   box-shadow: 0 0 0 2px rgba(88, 238, 154, 0.17);
 }
 
+.brain-atlas-view-switch {
+  display: inline-flex;
+  gap: 2px;
+  border: 1px solid rgba(85, 215, 255, 0.2);
+  border-radius: 999px;
+  background: rgba(3, 15, 27, 0.82);
+  padding: 2px;
+}
+
+.brain-atlas-view-switch button {
+  min-height: 24px;
+  border: 0;
+  border-radius: 999px;
+  color: var(--muted);
+  background: transparent;
+  padding: 3px 9px;
+  font: inherit;
+  font-size: 9px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.brain-atlas-view-switch button.selected {
+  color: var(--green);
+  background: rgba(88, 238, 154, 0.12);
+}
+
+.brain-atlas-view-switch button:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 1px;
+}
+
+.ownership-graph-view {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: 8px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.ownership-graph-header,
+.ownership-graph-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+}
+
+.ownership-graph-header h3 {
+  color: var(--text);
+  font-size: var(--fs-md);
+}
+
+.ownership-graph-header p,
+.ownership-graph-footer {
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.ownership-graph-header > span {
+  flex: 0 0 auto;
+  border: 1px solid var(--line-green);
+  border-radius: 999px;
+  color: var(--green);
+  background: rgba(88, 238, 154, 0.07);
+  padding: 3px 8px;
+  font-size: 9px;
+  font-weight: 850;
+}
+
+.ownership-graph-header > span.is-attention {
+  border-color: color-mix(in srgb, var(--watch) 48%, transparent);
+  color: var(--watch);
+  background: color-mix(in srgb, var(--watch) 9%, transparent);
+}
+
+.ownership-finding-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.ownership-finding-strip article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  border: 1px solid var(--line-soft);
+  border-radius: 7px;
+  color: var(--muted);
+  background: rgba(7, 24, 37, 0.68);
+  padding: 5px 7px;
+  font-size: 9px;
+}
+
+.ownership-finding-strip article strong { color: var(--soft); font-size: 13px; }
+.ownership-finding-strip article.has-risk { border-color: color-mix(in srgb, var(--watch) 35%, transparent); color: var(--watch); }
+.ownership-finding-strip article.has-risk strong { color: var(--watch); }
+
+.ownership-flow-map {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid rgba(85, 215, 255, 0.13);
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, rgba(85, 215, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(rgba(85, 215, 255, 0.025) 1px, transparent 1px),
+    rgba(3, 15, 28, 0.72);
+  background-size: 26px 26px;
+  padding: 8px;
+}
+
+.ownership-flow-row {
+  display: grid;
+  grid-template-columns: minmax(92px, 0.7fr) 16px minmax(180px, 1.5fr) 16px minmax(82px, 0.7fr) 16px minmax(92px, 0.7fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 4px;
+  min-width: 760px;
+  border: 1px solid rgba(85, 215, 255, 0.08);
+  border-radius: 8px;
+  background: rgba(4, 19, 33, 0.88);
+  padding: 5px;
+}
+
+.ownership-flow-row.has-finding {
+  border-color: color-mix(in srgb, var(--watch) 36%, transparent);
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--watch) 70%, transparent);
+}
+
+.ownership-node {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 5px;
+  min-width: 0;
+  border: 1px solid rgba(85, 215, 255, 0.32);
+  border-radius: 6px;
+  color: var(--cyan);
+  background: rgba(7, 28, 46, 0.98);
+  padding: 5px 6px;
+}
+
+.ownership-node strong,
+.ownership-node em {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ownership-node strong { color: var(--text); font-size: 10px; }
+.ownership-node em { grid-column: 2; color: var(--muted); font-size: 8px; font-style: normal; text-transform: uppercase; }
+.ownership-node.is-work { border-color: rgba(94, 154, 255, 0.5); color: var(--blue); }
+.ownership-node.is-handoff { border-color: rgba(255, 191, 94, 0.5); color: var(--watch); }
+.ownership-node.is-receipt { border-color: rgba(88, 238, 154, 0.5); color: var(--green); }
+.ownership-node.is-target { border-color: rgba(109, 232, 210, 0.5); color: var(--aqua); }
+
+.ownership-edge {
+  color: rgba(140, 195, 219, 0.72);
+  font-size: 15px;
+  font-style: normal;
+  text-align: center;
+}
+
+.ownership-edge.is-handoff { color: var(--watch); }
+.ownership-edge.is-terminal { color: var(--green); }
+.ownership-path-state { color: var(--muted); font-size: 8px; text-align: center; text-transform: uppercase; }
+
+.ownership-flow-findings {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 3px;
+  min-width: 0;
+}
+
+.ownership-flow-findings em {
+  border: 1px solid color-mix(in srgb, var(--watch) 32%, transparent);
+  border-radius: 999px;
+  color: var(--watch);
+  background: color-mix(in srgb, var(--watch) 7%, transparent);
+  padding: 2px 5px;
+  font-size: 7px;
+  font-style: normal;
+  font-weight: 800;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.ownership-graph-empty {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 5px;
+  min-height: 160px;
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  background: rgba(3, 15, 28, 0.62);
+  text-align: center;
+}
+
+.ownership-graph-empty strong { color: var(--soft); font-size: var(--fs-md); }
+.ownership-graph-empty p { max-width: 48ch; font-size: var(--fs-xs); }
+.ownership-graph-footer em { color: var(--soft); font-style: normal; }
+
+@media (max-width: 900px) {
+  .ownership-finding-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .brain-atlas-view-switch { order: 3; }
+}
+
 .brain-atlas-plot {
   min-width: 0;
   min-height: 172px;

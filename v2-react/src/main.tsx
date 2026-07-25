@@ -96,6 +96,7 @@ type LiveCueState = {
   focus: SectionCueKey | null;
 };
 type BrainAtlas = NonNullable<MissionControlState["brainAtlas"]>;
+type TaskOwnershipGraph = NonNullable<MissionControlState["taskOwnershipGraph"]>;
 type BrainAtlasNode = BrainAtlas["nodes"][number];
 type BrainAtlasEdge = BrainAtlas["edges"][number];
 type MemoryActivity = NonNullable<NonNullable<MissionControlState["memoryOperations"]>["activity"]>;
@@ -895,6 +896,9 @@ function sectionSignatures(state: MissionControlState): Record<SectionCueKey, st
       brainAtlas: state.brainAtlas
         ? [state.brainAtlas.generatedAt, state.brainAtlas.status, state.brainAtlas.counts.nodes, state.brainAtlas.counts.edges]
         : null,
+      taskOwnershipGraph: state.taskOwnershipGraph
+        ? [state.taskOwnershipGraph.generatedAt, state.taskOwnershipGraph.status, state.taskOwnershipGraph.counts.flows, state.taskOwnershipGraph.counts.findings]
+        : null,
       operationalAlerts: (state.operationalAlerts || []).map((row) => [row.id, row.priority, row.title, row.detail, row.created_at]),
       source: state.source,
     }),
@@ -1424,6 +1428,7 @@ function App() {
         </div>
         <BrainAtlasPanel
           atlas={state.brainAtlas}
+          ownershipGraph={state.taskOwnershipGraph}
           memoryOperations={state.memoryOperations}
           statuses={state.statuses}
           workItems={liveWorkItems}
@@ -3791,18 +3796,96 @@ function brainAtlasSystemLoad(loads: BrainAtlasLoad[]): BrainAtlasLoad {
   };
 }
 
+function OwnershipGraphView({ graph }: { graph?: TaskOwnershipGraph }) {
+  if (!graph || graph.status === "unavailable") {
+    return (
+      <section className="ownership-graph-view is-unavailable" role="status">
+        <div className="ownership-graph-empty">
+          <strong>Ownership graph unavailable</strong>
+          <p>The canonical work, task, and handoff projections could not be reconciled safely.</p>
+        </div>
+      </section>
+    );
+  }
+
+  const findingCounts = graph.counts.byFinding;
+  return (
+    <section className="ownership-graph-view" aria-labelledby="ownership-graph-heading">
+      <header className="ownership-graph-header">
+        <div>
+          <h3 id="ownership-graph-heading">Ownership + handoffs</h3>
+          <p>Exact work/run matching · hashed IDs · no prompts or private contents</p>
+        </div>
+        <span className={graph.status === "attention" ? "is-attention" : "is-ready"}>
+          {graph.counts.findings ? `${graph.counts.findings} finding${graph.counts.findings === 1 ? "" : "s"}` : "Ownership clean"}
+        </span>
+      </header>
+
+      <div className="ownership-finding-strip" aria-label="Ownership finding counts">
+        <article className={findingCounts["duplicate-active-owner"] ? "has-risk" : ""}><span>Duplicate owners</span><strong>{findingCounts["duplicate-active-owner"]}</strong></article>
+        <article className={findingCounts["orphaned-work"] ? "has-risk" : ""}><span>Orphaned</span><strong>{findingCounts["orphaned-work"]}</strong></article>
+        <article className={findingCounts["stale-execution"] ? "has-risk" : ""}><span>Stale</span><strong>{findingCounts["stale-execution"]}</strong></article>
+        <article className={findingCounts["missing-terminal-receipt"] ? "has-risk" : ""}><span>Missing receipt</span><strong>{findingCounts["missing-terminal-receipt"]}</strong></article>
+      </div>
+
+      {graph.flows.length ? (
+        <div className="ownership-flow-map" role="list" aria-label="Task ownership and handoff paths">
+          {graph.flows.map((flow) => {
+            const risky = flow.findingTypes.length > 0;
+            return (
+              <article key={flow.id} className={`ownership-flow-row${risky ? " has-finding" : ""}`} role="listitem">
+                <span className="ownership-node is-agent"><Bot size={13} /><strong>{AGENTS[flow.ownerAgent]?.label || flow.ownerAgent}</strong><em>owner</em></span>
+                <i className="ownership-edge" aria-hidden="true">→</i>
+                <span className="ownership-node is-work"><GitBranch size={13} /><strong>{compactText(flow.label, 42)}</strong><em>{flow.status}</em></span>
+                {flow.toAgent ? (
+                  <>
+                    <i className="ownership-edge is-handoff" aria-hidden="true">→</i>
+                    <span className="ownership-node is-handoff"><ArrowLeftRight size={13} /><strong>Handoff</strong><em>{flow.handoffStatus || "open"}</em></span>
+                    <i className="ownership-edge" aria-hidden="true">→</i>
+                    <span className="ownership-node is-agent is-target"><Bot size={13} /><strong>{AGENTS[flow.toAgent]?.label || flow.toAgent}</strong><em>receiver</em></span>
+                  </>
+                ) : flow.terminalReceipt ? (
+                  <>
+                    <i className="ownership-edge is-terminal" aria-hidden="true">→</i>
+                    <span className="ownership-node is-receipt"><CheckCircle2 size={13} /><strong>Receipt</strong><em>terminal</em></span>
+                  </>
+                ) : (
+                  <span className="ownership-path-state">No handoff</span>
+                )}
+                <span className="ownership-flow-findings">
+                  {flow.findingTypes.map((finding) => <em key={finding}>{finding.replace(/-/g, " ")}</em>)}
+                </span>
+              </article>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="ownership-graph-empty" role="status"><strong>No current ownership paths</strong><p>The queues and live ledger are reconciled with no displayable work.</p></div>
+      )}
+
+      <footer className="ownership-graph-footer">
+        <span>{graph.counts.activeWork} active · {graph.counts.openHandoffs} open handoff{graph.counts.openHandoffs === 1 ? "" : "s"}</span>
+        <em>Canonical live ledger + durable queues · {ageLabel(graph.generatedAt)}</em>
+      </footer>
+    </section>
+  );
+}
+
 function BrainAtlasPanel({
   atlas,
+  ownershipGraph,
   memoryOperations,
   statuses,
   workItems,
 }: {
   atlas?: BrainAtlas;
+  ownershipGraph?: TaskOwnershipGraph;
   memoryOperations?: MissionControlState["memoryOperations"];
   statuses: AgentStatus[];
   workItems: WorkItem[];
 }) {
   const [focusId, setFocusId] = useState("all");
+  const [atlasMode, setAtlasMode] = useState<"evidence" | "ownership">("evidence");
   useEffect(() => {
     if (focusId !== "all" && !atlas?.nodes.some((node) => node.id === focusId)) setFocusId("all");
   }, [atlas?.generatedAt, atlas?.nodes, focusId]);
@@ -3870,6 +3953,11 @@ function BrainAtlasPanel({
     : !activity || unavailable || stale || atlas?.status === "empty"
       ? "watch"
       : "clear";
+  const displayTone = atlasMode === "ownership"
+    ? !ownershipGraph || ownershipGraph.status === "unavailable"
+      ? "risk"
+      : ownershipGraph.status === "attention" ? "watch" : "clear"
+    : selectedTone;
   const sourceExcluded = atlas
     ? atlas.counts.excluded.capacityReceipts + atlas.counts.excluded.capacityRoutes
     : 0;
@@ -3903,9 +3991,11 @@ function BrainAtlasPanel({
   return (
     <section
       id="brain-atlas"
-      className={`brain-atlas-panel is-${selectedTone}${workingAgentCount ? " has-active-work" : ""}${latestSignalRecent ? " has-live-memory-flow" : ""}`}
+      className={`brain-atlas-panel is-${displayTone}${workingAgentCount ? " has-active-work" : ""}${latestSignalRecent ? " has-live-memory-flow" : ""}`}
       data-atlas-view="unified"
+      data-atlas-mode={atlasMode}
       data-atlas-view-tone={selectedTone}
+      data-atlas-mode-tone={displayTone}
       data-memory-flow-state={latestSignalRecent ? "live" : activity ? "idle" : "unavailable"}
       data-exact-proof-state={proofState}
       data-working-agent-count={workingAgentCount}
@@ -3918,20 +4008,20 @@ function BrainAtlasPanel({
           <p><GitBranch size={13} />Observable agent activity</p>
           <h2>Brain Atlas</h2>
         </div>
-        <div className="brain-atlas-legend" aria-label="Brain Atlas visual legend">
-          <span className="is-work"><i aria-hidden="true" />Live work halo</span>
-          <span className="is-memory"><i aria-hidden="true" />Moving memory receipt</span>
-          <span className="is-proof"><i aria-hidden="true" />Static exact proof</span>
+        <div className="brain-atlas-view-switch" role="group" aria-label="Brain Atlas view">
+          <button type="button" className={atlasMode === "evidence" ? "selected" : ""} aria-pressed={atlasMode === "evidence"} onClick={() => setAtlasMode("evidence")}>Memory + proof</button>
+          <button type="button" className={atlasMode === "ownership" ? "selected" : ""} aria-pressed={atlasMode === "ownership"} onClick={() => setAtlasMode("ownership")}>Ownership</button>
         </div>
-        <span className={`brain-atlas-state is-${selectedTone}${latestSignalRecent ? " is-live" : ""}`} title={loadDisclosure} aria-live="polite">
+        <span className={`brain-atlas-state is-${displayTone}${latestSignalRecent && atlasMode === "evidence" ? " is-live" : ""}`} title={atlasMode === "ownership" ? "Exact ownership and handoff reconciliation" : loadDisclosure} aria-live="polite">
           <span className="brain-atlas-load-meter" role="img" aria-label={`${systemLoad.label} ecosystem load, ${systemLoad.score} of 4`}>
             {Array.from({ length: 4 }, (_, index) => <i key={index} className={index < systemLoad.score ? "is-lit" : ""} />)}
           </span>
-          <strong>{systemLoad.label.toUpperCase()} · {workingAgentCount ? `${workingAgentCount} WORKING` : "NONE WORKING"}</strong>
-          <em>· {headerActivityStateLabel} · {evidenceStateLabel}</em>
+          <strong>{atlasMode === "ownership" ? `${ownershipGraph?.counts.flows || 0} PATHS` : `${systemLoad.label.toUpperCase()} · ${workingAgentCount ? `${workingAgentCount} WORKING` : "NONE WORKING"}`}</strong>
+          <em>· {atlasMode === "ownership" ? `${ownershipGraph?.counts.findings || 0} findings` : `${headerActivityStateLabel} · ${evidenceStateLabel}`}</em>
         </span>
       </header>
 
+      {atlasMode === "ownership" ? <OwnershipGraphView graph={ownershipGraph} /> : (
       <section
         id="brain-atlas-unified-panel"
         className="brain-atlas-section is-unified"
@@ -4229,6 +4319,7 @@ function BrainAtlasPanel({
           </svg>
         </div>
       </section>
+      )}
     </section>
   );
 }

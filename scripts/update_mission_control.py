@@ -33,6 +33,9 @@ from todays_jobs_projection import (  # noqa: E402
 )
 from handoff_receipt_bridge import receipt_state, terminal_result_receipt  # noqa: E402
 from brain_atlas_contract import work_label_is_safe  # noqa: E402
+from task_ownership_graph import build_from_paths as build_task_ownership_graph  # noqa: E402
+from task_ownership_graph import sanitize_graph as sanitize_task_ownership_graph  # noqa: E402
+from task_ownership_graph import unavailable_graph as unavailable_task_ownership_graph  # noqa: E402
 try:  # Keep the dashboard boundary aligned when the shared contract provides it.
     from brain_atlas_contract import model_id_is_safe as _shared_model_id_is_safe  # type: ignore[attr-defined] # noqa: E402
 except ImportError:  # Backward-compatible with an older generator contract.
@@ -172,7 +175,7 @@ LIVE_DASHBOARD_KEYS = {
     "codexJobs", "generatedAt", "jaimesBrainFeed", "jainBrainFeed", "joshBrainFeed",
     "lastUpdated", "liveObjectives", "machineHealth", "memoryOperations", "modelRouter", "modelUsage",
     "maintenanceControl", "qualityControl", "recentActivity", "reliabilityUpgrades", "runtimeLayout", "sharedOperatingLayer", "sourceFreshness",
-    "sourceUpdatedAt", "telegramInboxQa", "trackedTasks",
+    "sourceUpdatedAt", "taskOwnershipGraph", "telegramInboxQa", "trackedTasks",
     "todayJobs", "todayJobsMeta",
 }
 
@@ -1139,6 +1142,10 @@ def build_live_dashboard(dashboard: Dict[str, Any]) -> Dict[str, Any]:
     live["brainAtlas"] = sanitize_brain_atlas(
         dashboard.get("brainAtlas"),
         str(dashboard.get("lastUpdated") or utc_iso()),
+    )
+    live["taskOwnershipGraph"] = sanitize_task_ownership_graph(
+        dashboard.get("taskOwnershipGraph"),
+        now=dt.datetime.fromisoformat(str(dashboard.get("lastUpdated") or utc_iso()).replace("Z", "+00:00")),
     )
     live["memoryOperations"] = sanitize_memory_operations(
         dashboard.get("memoryOperations"),
@@ -6429,6 +6436,19 @@ def main() -> None:
         load_json_file(BRAIN_ATLAS_PATH, {}),
         now_iso,
     )
+    # The ownership graph reconciles exact IDs internally, then exposes only
+    # hashed graph nodes and dashboard-safe labels. A source failure is a
+    # visible unavailable state, never a partial or inferred relationship.
+    try:
+        graph_now = dt.datetime.fromisoformat(now_iso.replace("Z", "+00:00"))
+        dashboard["taskOwnershipGraph"] = sanitize_task_ownership_graph(
+            build_task_ownership_graph(root=ROOT.parent, now=graph_now),
+            now=graph_now,
+        )
+    except Exception:
+        dashboard["taskOwnershipGraph"] = unavailable_task_ownership_graph(
+            now=dt.datetime.fromisoformat(now_iso.replace("Z", "+00:00")),
+        )
     dashboard["agentTraceSummary"] = load_json_file(AGENT_TRACE_SUMMARY_PATH, {
         "generatedAt": now_iso,
         "status": "not-configured",

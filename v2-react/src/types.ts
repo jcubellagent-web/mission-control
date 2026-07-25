@@ -250,6 +250,69 @@ export type BrainAtlas = {
   edges: BrainAtlasEdge[];
 };
 
+export type TaskOwnershipGraph = {
+  schemaVersion: 1;
+  generatedAt: string;
+  status: "ready" | "attention" | "unavailable";
+  source: {
+    liveWork: "control-tower-hot";
+    tasks: "agent-task-queue";
+    handoffs: "handoff-queue";
+    verified: boolean;
+  };
+  privacy: {
+    dashboardSafe: true;
+    rawIdentifiersIncluded: false;
+    promptsIncluded: false;
+    detailsIncluded: false;
+    privateContentIncluded: false;
+  };
+  counts: {
+    nodes: number;
+    edges: number;
+    flows: number;
+    findings: number;
+    activeWork: number;
+    openHandoffs: number;
+    byFinding: Record<"duplicate-active-owner" | "orphaned-work" | "stale-execution" | "missing-terminal-receipt", number>;
+  };
+  findings: Array<{
+    id: string;
+    type: "duplicate-active-owner" | "orphaned-work" | "stale-execution" | "missing-terminal-receipt";
+    severity: "critical" | "high";
+    label: string;
+    workNode: string;
+    observedAt: string;
+  }>;
+  nodes: Array<{
+    id: string;
+    kind: "agent" | "work" | "handoff" | "receipt";
+    label: string;
+    agent?: AgentId;
+    status?: string;
+    observedAt: string;
+    stale?: boolean;
+  }>;
+  edges: Array<{
+    id: string;
+    kind: "owns" | "delegates" | "receives" | "terminates";
+    source: string;
+    target: string;
+    observedAt: string;
+  }>;
+  flows: Array<{
+    id: string;
+    label: string;
+    status: string;
+    ownerAgent: AgentId;
+    toAgent: AgentId | null;
+    handoffStatus: string | null;
+    terminalReceipt: boolean;
+    observedAt: string;
+    findingTypes: Array<"duplicate-active-owner" | "orphaned-work" | "stale-execution" | "missing-terminal-receipt">;
+  }>;
+};
+
 export type MemoryActivityAgent = {
   agent: AgentId;
   retrievals: number;
@@ -341,6 +404,7 @@ export type MissionControlState = {
   maintenanceControl?: Record<string, unknown>;
   reliabilityUpgrades?: ReliabilityUpgrades;
   brainAtlas?: BrainAtlas;
+  taskOwnershipGraph?: TaskOwnershipGraph;
   capabilityStack?: CapabilityStackItem[];
   capabilityInventory?: CapabilityInventory;
   capabilityWatch?: CapabilityWatch;
