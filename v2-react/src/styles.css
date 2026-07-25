@@ -17267,7 +17267,7 @@ body,
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  flex: 0 0 48px;
+  flex: 0 0 38px;
   min-width: 0;
   overflow: hidden;
 }
@@ -17722,7 +17722,8 @@ body,
   stroke-width: 4.4;
   stroke-dasharray: 20 12;
   stroke-opacity: 1;
-  animation: memory-flow-travel 1.05s linear infinite;
+  filter: drop-shadow(0 0 3px currentColor);
+  animation: memory-flow-travel 1.05s linear infinite, memory-flow-receipt-glow 1.4s ease-in-out infinite;
 }
 
 .memory-flow-node rect {
@@ -17743,6 +17744,20 @@ body,
   fill: rgba(12, 42, 58, 0.98);
   stroke-width: 2.3;
   filter: drop-shadow(0 0 4px rgba(88, 238, 154, 0.52)) drop-shadow(0 0 10px rgba(88, 238, 154, 0.34));
+}
+
+.memory-flow-node-receipt-ring {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.memory-flow-node.is-live .memory-flow-node-receipt-ring {
+  opacity: 0.76;
+  animation: memory-node-receipt-ring 1.45s ease-out infinite;
 }
 
 .memory-flow-node .memory-flow-node-aura {
@@ -17769,6 +17784,8 @@ body,
 
 .memory-flow-node.is-memory-live .memory-flow-memory-receipt-dot {
   opacity: 1;
+  filter: drop-shadow(0 0 4px rgba(88, 238, 154, 0.9));
+  animation: memory-agent-receipt-dot 1.05s ease-in-out infinite;
 }
 
 .memory-flow-node.is-work-active > rect:not(.memory-flow-node-aura) {
@@ -17847,6 +17864,22 @@ body,
 
 @keyframes memory-flow-travel {
   to { stroke-dashoffset: -64; }
+}
+
+@keyframes memory-flow-receipt-glow {
+  0%, 100% { stroke-opacity: 0.72; }
+  50% { stroke-opacity: 1; }
+}
+
+@keyframes memory-node-receipt-ring {
+  0% { opacity: 0.78; transform: scale(0.82); }
+  70% { opacity: 0.18; transform: scale(1.18); }
+  100% { opacity: 0; transform: scale(1.28); }
+}
+
+@keyframes memory-agent-receipt-dot {
+  0%, 100% { opacity: 0.62; transform: scale(0.78); }
+  50% { opacity: 1; transform: scale(1.32); }
 }
 
 @keyframes memory-agent-presence-halo {
@@ -18180,6 +18213,8 @@ body,
   #brain-atlas.has-live-memory-flow .memory-flow-map,
   #brain-atlas.has-active-work .brain-atlas-state,
   .memory-flow-node:not(.is-agent).is-live > rect:not(.memory-flow-node-aura),
+  .memory-flow-node.is-live .memory-flow-node-receipt-ring,
+  .memory-flow-node.is-memory-live .memory-flow-memory-receipt-dot,
   .memory-flow-node.is-work-active .memory-flow-node-aura,
   .memory-flow-node.is-work-active .memory-flow-presence-dot {
     animation: none !important;

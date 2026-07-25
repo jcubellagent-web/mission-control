@@ -475,8 +475,10 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
     };
   });
   const proofEmpty = document.querySelector('#brain-atlas .brain-atlas-proof-empty');
-  const proofAudit = document.querySelector('#brain-atlas .brain-atlas-proof-audit');
-  const proofHealth = document.querySelector('#brain-atlas .brain-atlas-proof-health');
+  const utilityClutter = document.querySelectorAll(
+    '#brain-atlas .brain-atlas-context, #brain-atlas .brain-atlas-proof-utility, '
+    + '#brain-atlas .brain-atlas-proof-audit, #brain-atlas .brain-atlas-proof-health'
+  );
   const proofEdges = [...document.querySelectorAll('#brain-atlas .brain-atlas-proof-edge')].map((element) => {
     const style = getComputedStyle(element);
     return {
@@ -528,8 +530,7 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
       legacyViewControlCount: document.querySelectorAll('#brain-atlas [data-atlas-view-option]').length,
       layerCounts: atlasLayerCounts,
       proofState: String(atlasRoot?.getAttribute('data-exact-proof-state') || ''),
-      proofAuditVisible: Boolean(proofAudit && visible(proofAudit)),
-      proofHealthVisible: Boolean(proofHealth && visible(proofHealth)),
+      utilityClutterVisible: [...utilityClutter].filter(visible).length,
       proofEmptyText: String(proofEmpty?.textContent || '').trim(),
       proofRows,
       proofEdges,
@@ -1028,10 +1029,8 @@ def validate_control_tower_layout(
         failures.append(f"{label}: Brain Atlas must expose exactly one visible memory layer")
     if int(_number(layer_counts.get("proof"), missing=-1.0)) != 0:
         failures.append(f"{label}: Brain Atlas must keep exact proof out of the always-visible graph")
-    if atlas_view.get("proofHealthVisible") is not True:
-        failures.append(f"{label}: Brain Atlas proof health is not visibly summarized")
-    if atlas_view.get("proofAuditVisible") is not True:
-        failures.append(f"{label}: Brain Atlas exact proof audit is not available on demand")
+    if int(_number(atlas_view.get("utilityClutterVisible"), missing=-1.0)) != 0:
+        failures.append(f"{label}: Brain Atlas utility clutter is still visible")
 
     atlas_sections = measurements.get("brainAtlasSections") if isinstance(measurements.get("brainAtlasSections"), dict) else {}
     region = atlas_sections.get("unified")
@@ -1899,8 +1898,7 @@ def self_test() -> int:
             "legacyViewControlCount": 0,
             "layerCounts": {"memory": 1, "proof": 0},
             "proofState": "ready",
-            "proofAuditVisible": True,
-            "proofHealthVisible": True,
+            "utilityClutterVisible": 0,
             "proofEmptyText": "",
             "proofRows": [
                 {"agent": "josh2", "workLabel": "Refresh Control Tower health", "visibleWorkLabel": "Refresh Control Tower health", "receipt": "receipt-1", "receiptStatus": "done", "model": "codex/gpt-5.6-terra", "routeVerified": True, "declaredAnimated": False, "opaqueLabel": False, "clipped": False},

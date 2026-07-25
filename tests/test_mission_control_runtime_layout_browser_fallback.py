@@ -117,8 +117,7 @@ def valid_kiosk_legibility_measurements() -> dict[str, object]:
             "legacyViewControlCount": 0,
             "layerCounts": {"memory": 1, "proof": 0},
             "proofState": "ready",
-            "proofAuditVisible": True,
-            "proofHealthVisible": True,
+            "utilityClutterVisible": 0,
             "proofEmptyText": "",
             "proofRows": [
                 {"agent": "josh2", "workLabel": "Refresh Control Tower health", "visibleWorkLabel": "Refresh Control Tower health", "receipt": "receipt-1", "receiptStatus": "done", "model": "codex/gpt-5.6-terra", "routeVerified": True, "declaredAnimated": False, "opaqueLabel": False, "clipped": False},

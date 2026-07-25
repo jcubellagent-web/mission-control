@@ -3893,18 +3893,10 @@ function BrainAtlasPanel({
   const proofRows = useMemo(() => brainAtlasProofRows(view), [view]);
   const recentProofView = useMemo(() => brainAtlasView(atlas, "all"), [atlas]);
   const recentProofRows = useMemo(() => brainAtlasProofRows(recentProofView), [recentProofView]);
-  const proofWorkOptions = useMemo(() => (
-    Array.from(new Map(recentProofRows.map((row) => [row.work.id, row.work])).values())
-  ), [recentProofRows]);
   const activity = useMemo(() => sanitizedMemoryActivity(memoryOperations?.activity), [memoryOperations?.activity]);
   const durableMemoryCount = sanitizedNestedMemoryCount(memoryOperations, "registry", "active");
   const supersededMemoryCount = sanitizedNestedMemoryCount(memoryOperations, "registry", "superseded");
   const registrySourceCount = sanitizedNestedMemoryCount(memoryOperations, "registry", "sources");
-  const reviewPendingCount = sanitizedNestedMemoryCount(memoryOperations, "review", "pending");
-  const reviewDisputedCount = sanitizedNestedMemoryCount(memoryOperations, "review", "disputed");
-  const activePublicMemoryCount = sanitizedNestedMemoryCount(memoryOperations, "privacy", "activePublic");
-  const activeOwnerPrivateMemoryCount = sanitizedNestedMemoryCount(memoryOperations, "privacy", "activeOwnerPrivate");
-  const crossOwnerPrivateLeaks = sanitizedNestedMemoryCount(memoryOperations, "privacy", "crossOwnerPrivateLeaks");
   const queries7d = sanitizedNestedMemoryCount(memoryOperations, "retrieval", "queries7d");
   const hits7d = sanitizedNestedMemoryCount(memoryOperations, "retrieval", "hits7d");
   const avgRecallLatencyMs = sanitizedNestedMemoryMetric(memoryOperations, "retrieval", "avgLatencyMs", 60_000);
@@ -3920,8 +3912,6 @@ function BrainAtlasPanel({
   const recent = (key: MemorySignalKey) => memorySignalIsRecent(activity?.lastObservedAt[key], motionWindowSeconds);
   const latestSignal = latestMemorySignal(activity);
   const latestSignalRecent = latestSignal ? memorySignalIsRecent(latestSignal[1], motionWindowSeconds) : false;
-  const privacySentinelTone = !activity ? "unavailable" : crossOwnerPrivateLeaks ? "risk" : "clear";
-  const reviewQueueTone = !activity ? "unavailable" : reviewDisputedCount ? "risk" : reviewPendingCount ? "watch" : "clear";
   const activityStateLabel = !activity
     ? "Memory telemetry unavailable"
     : latestSignal
@@ -3974,22 +3964,6 @@ function BrainAtlasPanel({
       ? "risk"
       : ownershipGraph.status === "attention" ? "watch" : "clear"
     : selectedTone;
-  const sourceExcluded = atlas
-    ? atlas.counts.excluded.capacityReceipts + atlas.counts.excluded.capacityRoutes
-    : 0;
-  const viewLimited = view.candidateReceipts > view.shownReceipts;
-  const selectedNode = focusId === "all" ? undefined : atlas?.nodes.find((node) => node.id === focusId);
-  const evidenceSummary = atlas?.status === "ready"
-    ? `${proofRows.length}/${Math.min(view.candidateReceipts, BRAIN_ATLAS_VISIBLE_RECEIPTS)} recent exact path${proofRows.length === 1 ? "" : "s"}${selectedNode?.kind === "work" ? ` · ${brainAtlasSafeWorkLabel(selectedNode.label)}` : ""}`
-    : "Source unavailable";
-  const evidencePolicyDetail = [
-    sourceExcluded
-      ? `Source cap excluded ${sourceExcluded} path element${sourceExcluded === 1 ? "" : "s"}.`
-      : "No source-cap exclusions.",
-    viewLimited
-      ? `View limited to ${view.shownReceipts}/${view.candidateReceipts} newest exact receipts.`
-      : "All qualifying exact receipts are shown.",
-  ].join(" ");
   const evidenceStateLabel = atlas?.status === "ready"
     ? `${atlas.counts.receipts} receipt${atlas.counts.receipts === 1 ? "" : "s"} · ${recentProofRows.length} verified path${recentProofRows.length === 1 ? "" : "s"}`
     : atlas?.status === "empty"
@@ -3998,16 +3972,6 @@ function BrainAtlasPanel({
   const proofState = atlas?.status === "ready"
     ? recentProofRows.length ? "ready" : "empty"
     : atlas?.status || "unavailable";
-  const proofHealthTone = proofState === "ready"
-    ? "clear"
-    : proofState === "unavailable"
-      ? "risk"
-      : "watch";
-  const proofHealthLabel = proofHealthTone === "clear"
-    ? "Verified"
-    : proofHealthTone === "risk"
-      ? "Unavailable"
-      : "Needs attention";
   const candidateObservedAt = newestMemoryTimestamp(
     activity?.lastObservedAt.proposed,
     activity?.lastObservedAt.corrected,
@@ -4061,54 +4025,7 @@ function BrainAtlasPanel({
             <h3 id="brain-atlas-unified-heading">Governed memory activity</h3>
             <p id="brain-atlas-unified-description">The main view shows how shared memory is recalled, applied, assessed, and promoted—not private reasoning.</p>
           </div>
-          <div className="brain-atlas-context">
-            <div className="brain-atlas-scope" aria-label="Brain Atlas scope and evidence policy">
-              <span className={workingAgentCount ? "is-working" : ""}>Live Work linked · {workingAgentCount} working</span>
-              <span>{activity ? `${activity.windowMinutes}m memory window` : "Memory window unavailable"}</span>
-              <span
-                className={`is-governance is-privacy-${privacySentinelTone}`}
-                title={activity ? `Cross-owner private leaks: ${crossOwnerPrivateLeaks}. ${activePublicMemoryCount} active public and ${activeOwnerPrivateMemoryCount} active owner-private records.` : "Privacy telemetry unavailable"}
-              >
-                {activity ? `Privacy · ${crossOwnerPrivateLeaks ? `${crossOwnerPrivateLeaks} leak${crossOwnerPrivateLeaks === 1 ? "" : "s"}` : "boundary clean"}` : "Privacy unavailable"}
-              </span>
-              <span
-                className={`is-governance is-review-${reviewQueueTone}`}
-                title={activity ? `${reviewPendingCount} pending review candidate${reviewPendingCount === 1 ? "" : "s"}; ${reviewDisputedCount} disputed.` : "Review telemetry unavailable"}
-              >
-                {activity ? `Review · ${reviewPendingCount} pending${reviewDisputedCount ? ` · ${reviewDisputedCount} disputed` : ""}` : "Review unavailable"}
-              </span>
-            </div>
-            <output className="brain-atlas-evidence-summary" title={evidencePolicyDetail} aria-live="polite">
-              {evidenceSummary}
-            </output>
-          </div>
         </header>
-
-        <div className="brain-atlas-proof-utility">
-          <span className={`brain-atlas-proof-health is-${proofHealthTone}`} role="status" aria-label={`Execution proof ${proofHealthLabel}. ${evidenceStateLabel}`}>
-            <b aria-hidden="true">{proofHealthTone === "clear" ? "●" : proofHealthTone === "watch" ? "▲" : "■"}</b>
-            <strong>Proof {proofHealthLabel}</strong>
-            <em>{evidenceStateLabel}</em>
-          </span>
-          <details className="brain-atlas-proof-audit">
-            <summary>Inspect proof · {evidenceSummary}</summary>
-            <label className="brain-atlas-focus" htmlFor="brain-atlas-focus-node">
-              <span>Audit focus</span>
-              <select id="brain-atlas-focus-node" value={focusId} disabled={atlas?.status !== "ready" || !proofWorkOptions.length} onChange={(event) => setFocusId(event.target.value)}>
-                <option value="all">Most recent verified path</option>
-                {proofWorkOptions.map((node) => <option key={node.id} value={node.id}>{brainAtlasNodeOption(node)}</option>)}
-              </select>
-            </label>
-            <p>{evidencePolicyDetail}</p>
-            {proofRows.length ? (
-              <ol>
-                {proofRows.map((row) => (
-                  <li key={row.id}>{row.workLabel} · {row.receipt.label || "Receipt"} · {row.model.label}</li>
-                ))}
-              </ol>
-            ) : <p>{brainAtlasEmptyMessage(atlas?.emptyReason)}</p>}
-          </details>
-        </div>
 
         <div className="memory-flow-map is-unified" tabIndex={0} aria-label="Governed memory activity graph. Scroll horizontally on narrow screens.">
           <svg
@@ -4121,7 +4038,7 @@ function BrainAtlasPanel({
           >
             <title id="brain-atlas-title">Governed memory activity</title>
             <desc id="brain-atlas-description">
-              Shared agent nodes show {workingAgentCount} agents working from the same current state as the Live Work Board. Verified claimed-work priority and fresh step or tool signals set the {systemLoad.label.toLowerCase()} halo intensity. Only governed memory receipt paths move when a recent exact registry timestamp exists. Exact execution proof is available on demand above this graph. This visualization shows observable operations and evidence, not private model reasoning or memory contents.
+              Shared agent nodes show {workingAgentCount} agents working from the same current state as the Live Work Board. Verified claimed-work priority and fresh step or tool signals set the {systemLoad.label.toLowerCase()} halo intensity. Only governed memory receipt paths and receipt rings move when a recent exact registry timestamp exists. This visualization shows observable operations and evidence, not private model reasoning or memory contents.
             </desc>
             <defs>
               {flowAgents.map((row, index) => {
@@ -4247,6 +4164,7 @@ function BrainAtlasPanel({
               );
             })}
             <g className={`memory-flow-node is-recall${recent("retrieval") ? " is-live" : ""}`}>
+              <circle className="memory-flow-node-receipt-ring" cx={brainAtlasWideX(302)} cy="119" r="35" />
               <rect x={brainAtlasWideX(232)} y="92" width={brainAtlasWideWidth(232, 140)} height="54" rx="9" />
               <g className="memory-flow-node-copy" clipPath="url(#brain-atlas-recall-copy)">
               <text className="memory-flow-node-title" x={brainAtlasWideX(302)} y="115" textAnchor="middle">Recall</text>
@@ -4255,6 +4173,7 @@ function BrainAtlasPanel({
             </g>
             <g className={`memory-flow-node is-registry${recent("hit") || recent("promoted") ? " is-live" : ""}`} aria-label={activity ? `Memory registry: ${durableMemoryCount} active records, ${supersededMemoryCount} superseded, ${registrySourceCount} sources` : "Memory registry telemetry unavailable"}>
               <title>{activity ? `${durableMemoryCount} active records · ${supersededMemoryCount} superseded · ${registrySourceCount} sources` : "Registry telemetry unavailable"}</title>
+              <circle className="memory-flow-node-receipt-ring" cx={brainAtlasWideX(503)} cy="119" r="37" />
               <rect x={brainAtlasWideX(430)} y="92" width={brainAtlasWideWidth(430, 146)} height="54" rx="9" />
               <g className="memory-flow-node-copy" clipPath="url(#brain-atlas-registry-copy)">
               <text className="memory-flow-node-title" x={brainAtlasWideX(503)} y="115" textAnchor="middle">Memory registry</text>
@@ -4262,6 +4181,7 @@ function BrainAtlasPanel({
               </g>
             </g>
             <g className={`memory-flow-node is-applied${recent("used") ? " is-live" : ""}`}>
+              <circle className="memory-flow-node-receipt-ring" cx={brainAtlasWideX(712)} cy="58" r="37" />
               <rect x={brainAtlasWideX(640)} y="31" width={brainAtlasWideWidth(640, 144)} height="54" rx="9" />
               <g className="memory-flow-node-copy" clipPath="url(#brain-atlas-applied-copy)">
               <text className="memory-flow-node-title" x={brainAtlasWideX(712)} y="54" textAnchor="middle">Applied</text>
@@ -4269,6 +4189,7 @@ function BrainAtlasPanel({
               </g>
             </g>
             <g className={`memory-flow-node is-feedback${recent("feedback") ? " is-live" : ""}`}>
+              <circle className="memory-flow-node-receipt-ring" cx={brainAtlasWideX(712)} cy="181" r="37" />
               <rect x={brainAtlasWideX(640)} y="154" width={brainAtlasWideWidth(640, 144)} height="54" rx="9" />
               <g className="memory-flow-node-copy" clipPath="url(#brain-atlas-outcome-copy)">
               <text className="memory-flow-node-title" x={brainAtlasWideX(712)} y="177" textAnchor="middle">Outcome</text>
@@ -4276,6 +4197,7 @@ function BrainAtlasPanel({
               </g>
             </g>
             <g className={`memory-flow-node is-candidate${candidateIsRecent ? " is-live" : ""}`} data-observed-at={candidateObservedAt || undefined}>
+              <circle className="memory-flow-node-receipt-ring" cx={brainAtlasWideX(902)} cy="181" r="37" />
               <rect x={brainAtlasWideX(830)} y="154" width={brainAtlasWideWidth(830, 144)} height="54" rx="9" />
               <g className="memory-flow-node-copy" clipPath="url(#brain-atlas-candidate-copy)">
               <text className="memory-flow-node-title" x={brainAtlasWideX(902)} y="177" textAnchor="middle">Candidate</text>
@@ -4283,6 +4205,7 @@ function BrainAtlasPanel({
               </g>
             </g>
             <g className={`memory-flow-node is-durable${recent("promoted") ? " is-live" : ""}`}>
+              <circle className="memory-flow-node-receipt-ring" cx={brainAtlasWideX(902)} cy="58" r="37" />
               <rect x={brainAtlasWideX(830)} y="31" width={brainAtlasWideWidth(830, 144)} height="54" rx="9" />
               <g className="memory-flow-node-copy" clipPath="url(#brain-atlas-durable-copy)">
               <text className="memory-flow-node-title" x={brainAtlasWideX(902)} y="54" textAnchor="middle">Durable</text>
