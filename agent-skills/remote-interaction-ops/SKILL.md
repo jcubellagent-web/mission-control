@@ -27,6 +27,20 @@ Host ownership:
 - JOSHeX owns private-account, keychain, OAuth, cookie, and personal-Mac-only
   sessions.
 
+Before any browser or desktop surface is assigned, run the fail-closed route
+guard:
+
+```bash
+python3 scripts/interaction_route_guard.py \
+  --target-host <josh2|jaimes|joshex> \
+  --surface <browser-dom|browser-visual|desktop-ui|computer-use|semantic-operation>
+```
+
+Visible work targeting JOSHeX is rerouted to Josh 2.0 unless a canonical
+private-context reason is supplied. Even a valid exception exits for an
+explicit personal-device acknowledgement before use. Never silently use the
+personal Mac as a fallback.
+
 ## Preflight
 
 Before a meaningful interaction task, run the metadata-only host probe:

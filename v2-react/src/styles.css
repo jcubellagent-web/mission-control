@@ -226,6 +226,53 @@ p {
   padding: 18px 0 24px;
 }
 
+.display-lease-banner {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+  min-height: 42px;
+  padding: 8px 14px;
+  border: 1px solid rgba(85, 215, 255, 0.42);
+  border-radius: 12px;
+  background: linear-gradient(90deg, rgba(7, 46, 76, 0.98), rgba(4, 27, 52, 0.98));
+  box-shadow: 0 0 24px rgba(85, 215, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  color: rgba(232, 248, 255, 0.94);
+  font-size: 12px;
+}
+
+.display-lease-banner strong {
+  color: #71e6ff;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.display-lease-banner time {
+  color: #9df8ce;
+  font-variant-numeric: tabular-nums;
+  font-weight: 850;
+}
+
+.display-lease-pulse {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #55d7ff;
+  box-shadow: 0 0 0 5px rgba(85, 215, 255, 0.12), 0 0 16px rgba(85, 215, 255, 0.48);
+  animation: lease-breathe 1.8s ease-in-out infinite;
+}
+
+@keyframes lease-breathe {
+  50% { opacity: 0.48; transform: scale(0.82); }
+}
+
+@media (max-width: 760px) {
+  .display-lease-banner { grid-template-columns: auto 1fr auto; }
+  .display-lease-banner > span:not(.display-lease-pulse) { display: none; }
+}
+
 .topbar {
   display: flex;
   align-items: center;

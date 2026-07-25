@@ -24,6 +24,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = ROOT / "config" / "interaction-routing.json"
+DEFAULT_CANARY_STATE = Path.home() / ".openclaw" / "state" / "interaction-active-canary.json"
 STATUSES = {"ok", "degraded", "down", "unknown", "not-required"}
 FORBIDDEN_KEYS = {
     "accessibilitytree",
@@ -82,6 +83,18 @@ def natural_key(value: str) -> tuple[Any, ...]:
 
 
 def latest_plugin_version(name: str) -> str:
+    codex = shutil.which("codex")
+    if codex:
+        code, output = run([codex, "plugin", "list", "--json"], timeout=15)
+        try:
+            installed = json.loads(output).get("installed", []) if code == 0 else []
+        except (AttributeError, json.JSONDecodeError):
+            installed = []
+        for row in installed if isinstance(installed, list) else []:
+            if isinstance(row, dict) and str(row.get("pluginId") or "").startswith(f"{name}@"):
+                version = compact_version(row.get("version"))
+                if version:
+                    return version
     base = Path.home() / ".codex" / "plugins" / "cache" / "openai-bundled" / name
     if not base.is_dir():
         return ""
@@ -109,6 +122,18 @@ def codex_mcp_enabled(name: str) -> bool:
     if code != 0:
         return False
     return any(name in line and "enabled" in line.lower() for line in output.splitlines())
+
+
+def codex_control_bridge() -> dict[str, Any]:
+    """Report the effective desktop bridge across old and new Codex builds."""
+    legacy = codex_mcp_enabled("computer-use")
+    node_bridge = codex_mcp_enabled("node_repl")
+    return {
+        "enabled": legacy or node_bridge,
+        "mode": "node-repl" if node_bridge else "legacy-mcp" if legacy else "unavailable",
+        "legacyMcpEnabled": legacy,
+        "nodeReplEnabled": node_bridge,
+    }
 
 
 def probe_cdp(port: int = 9222) -> dict[str, Any]:
@@ -176,11 +201,15 @@ def probe_cua_driver() -> dict[str, Any]:
 
 def probe_codex_computer_use() -> dict[str, Any]:
     version = latest_plugin_version("computer-use")
-    enabled = codex_mcp_enabled("computer-use")
+    bridge = codex_control_bridge()
+    enabled = bridge["enabled"]
     return {
         "status": "ok" if version and enabled else "degraded" if version else "down",
         "version": version,
-        "mcpEnabled": bool(enabled),
+        "controlBridgeEnabled": bool(enabled),
+        "bridgeMode": bridge["mode"],
+        "legacyMcpEnabled": bridge["legacyMcpEnabled"],
+        "nodeReplEnabled": bridge["nodeReplEnabled"],
     }
 
 
@@ -215,7 +244,43 @@ def display_online() -> dict[str, Any]:
     }
 
 
-def active_display_canary() -> dict[str, Any]:
+def _capture_dimensions(path: Path) -> tuple[int, int]:
+    code, output = run(["/usr/bin/sips", "-g", "pixelWidth", "-g", "pixelHeight", str(path)], timeout=8)
+    if code != 0:
+        return 0, 0
+    width_match = re.search(r"pixelWidth:\s*(\d+)", output)
+    height_match = re.search(r"pixelHeight:\s*(\d+)", output)
+    return (
+        int(width_match.group(1)) if width_match else 0,
+        int(height_match.group(1)) if height_match else 0,
+    )
+
+
+def _atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+            json.dump(payload, handle, indent=2, sort_keys=True)
+            handle.write("\n")
+        os.replace(temporary, path)
+        os.chmod(path, 0o600)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def load_canary_state(path: Path = DEFAULT_CANARY_STATE) -> dict[str, Any]:
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (FileNotFoundError, OSError, json.JSONDecodeError):
+        return {"status": "unknown", "latencyMs": 0, "width": 0, "height": 0, "consecutiveFailures": 0, "alert": False}
+    if not isinstance(payload, dict):
+        return {"status": "unknown", "latencyMs": 0, "width": 0, "height": 0, "consecutiveFailures": 0, "alert": False}
+    return sanitize(payload)
+
+
+def active_display_canary(role: str = "visible", state_path: Path = DEFAULT_CANARY_STATE) -> dict[str, Any]:
     if platform_name() != "macos":
         return {"status": "not-required", "latencyMs": 0, "width": 0, "height": 0}
     started = time.monotonic()
@@ -223,24 +288,66 @@ def active_display_canary() -> dict[str, Any]:
     path = Path(handle.name)
     handle.close()
     try:
-        code, _ = run(["/usr/sbin/screencapture", "-x", str(path)], timeout=10)
+        if role == "headless" and (Path.home() / ".local" / "bin" / "cua-driver").exists():
+            backend = "cua-driver"
+            code, _ = run([
+                str(Path.home() / ".local" / "bin" / "cua-driver"),
+                "call",
+                "get_desktop_state",
+                json.dumps({"screenshot_out_file": str(path)}),
+            ], timeout=15)
+        else:
+            backend = "screen-capture"
+            code, _ = run(["/usr/sbin/screencapture", "-x", str(path)], timeout=10)
         width = height = 0
         if code == 0 and path.exists() and path.stat().st_size > 0:
-            sips_code, sips_output = run(["/usr/bin/sips", "-g", "pixelWidth", "-g", "pixelHeight", str(path)], timeout=8)
-            if sips_code == 0:
-                width_match = re.search(r"pixelWidth:\s*(\d+)", sips_output)
-                height_match = re.search(r"pixelHeight:\s*(\d+)", sips_output)
-                width = int(width_match.group(1)) if width_match else 0
-                height = int(height_match.group(1)) if height_match else 0
+            width, height = _capture_dimensions(path)
         ok = code == 0 and width > 0 and height > 0
-        return {
-            "status": "ok" if ok else "down",
+        previous = load_canary_state(state_path)
+        failures = 0 if ok else int(previous.get("consecutiveFailures") or 0) + 1
+        payload = {
+            "checkedAt": utc_now(),
+            "status": "ok" if ok else "down" if failures >= 2 else "degraded",
             "latencyMs": max(0, round((time.monotonic() - started) * 1000)),
             "width": width,
             "height": height,
+            "backend": backend,
+            "consecutiveFailures": failures,
+            "alert": failures >= 2,
         }
+        _atomic_write_json(state_path, payload)
+        return payload
     finally:
         path.unlink(missing_ok=True)
+
+
+def display_lease(host: str) -> dict[str, Any]:
+    if host != "josh2":
+        return {"required": False, "active": False}
+    lease_path = Path.home() / ".openclaw" / "state" / "control-tower-foreground-work.json"
+    try:
+        payload = json.loads(lease_path.read_text(encoding="utf-8"))
+    except (FileNotFoundError, OSError, json.JSONDecodeError):
+        return {"required": True, "active": False}
+    expires = str(payload.get("expiresAt") or "")
+    owner = str(payload.get("owner") or "")
+    purpose = str(payload.get("purpose") or "")
+    try:
+        expiry = dt.datetime.fromisoformat(expires.replace("Z", "+00:00"))
+        if expiry.tzinfo is None:
+            expiry = expiry.replace(tzinfo=dt.timezone.utc)
+        unexpired = expiry.astimezone(dt.timezone.utc) > dt.datetime.now(dt.timezone.utc)
+    except ValueError:
+        unexpired = False
+    active = bool(unexpired and owner and purpose in {"browser", "computer-use", "local-ui"})
+    return {
+        "required": True,
+        "active": active,
+        "owner": owner if active else "",
+        "purpose": purpose if active else "",
+        "startedAt": payload.get("startedAt") if active else None,
+        "expiresAt": expires if active else None,
+    }
 
 
 def platform_name() -> str:
@@ -290,16 +397,20 @@ def collect(host: str, role: str | None, config_path: Path, active_canary: bool 
     cua = probe_cua_driver()
     codex_cu = probe_codex_computer_use()
     display = display_online()
-    canary = active_display_canary() if active_canary else {"status": "unknown", "latencyMs": 0, "width": 0, "height": 0}
+    canary = active_display_canary(resolved_role) if active_canary else load_canary_state()
     browser_required = True
     if resolved_role == "headless":
         browser_ready = browser.get("cdp", {}).get("status") == "ok"
         computer_ready = cua.get("status") == "ok"
+        if active_canary:
+            computer_ready = computer_ready and canary.get("status") == "ok"
     else:
         browser_ready = browser.get("status") == "ok"
         computer_ready = codex_cu.get("status") == "ok" and display.get("online") is True
         if active_canary:
             computer_ready = computer_ready and canary.get("status") == "ok"
+    if canary.get("alert") is True:
+        computer_ready = False
     overall = "ok" if browser_ready and computer_ready else "degraded" if browser_ready or computer_ready else "down"
     payload = {
         "checkedAt": utc_now(),
@@ -322,6 +433,7 @@ def collect(host: str, role: str | None, config_path: Path, active_canary: bool 
         },
         "display": display,
         "displayLease": {
+            **display_lease(host),
             "required": host_config.get("displayLeaseRequired") is True,
             "headlessCdpRequired": host_config.get("headlessCdpRequired") is True,
         },

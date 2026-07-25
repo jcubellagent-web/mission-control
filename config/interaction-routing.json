@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "semanticOrder": [
     "connector-or-api",
     "browser-dom",
@@ -32,6 +32,20 @@
       "displayLeaseRequired": false,
       "headlessCdpRequired": false
     }
+  },
+  "personalMacFallback": {
+    "personalHost": "joshex",
+    "defaultVisibleHost": "josh2",
+    "backgroundHost": "jaimes",
+    "requireExplicitAcknowledgement": true,
+    "allowedReasons": [
+      "private-browser-session",
+      "personal-account",
+      "keychain",
+      "oauth",
+      "local-file",
+      "macbook-only-app"
+    ]
   },
   "privacy": {
     "dashboardSafeOnly": true,

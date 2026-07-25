@@ -188,6 +188,24 @@ def test_lease_renew_and_release_require_matching_id(tmp_path: Path) -> None:
     assert not lease_path.exists()
 
 
+def test_display_projection_is_public_and_preserves_existing_mode(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    display_path = tmp_path / "control-tower-display.json"
+    display_path.write_text(json.dumps({"nightMode": True, "reason": "quiet-hours"}))
+    monkeypatch.setattr(MODULE, "DISPLAY_STATE_PATH", display_path)
+    MODULE.publish_display_lease({
+        "active": True,
+        "owner": "joshex",
+        "purpose": "computer-use",
+        "startedAt": "2026-07-16T03:30:00Z",
+        "expiresAt": "2026-07-16T03:33:00Z",
+        "leaseId": "must-not-project",
+    })
+    projected = json.loads(display_path.read_text())
+    assert projected["nightMode"] is True
+    assert projected["displayLease"]["owner"] == "joshex"
+    assert "leaseId" not in json.dumps(projected)
+
+
 def test_malformed_or_excessive_lease_does_not_suppress(tmp_path: Path) -> None:
     lease_path = tmp_path / "foreground-work.json"
     lease_path.write_text(

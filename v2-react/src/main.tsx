@@ -36,6 +36,13 @@ type ControlTowerDisplayState = {
   updatedAt?: string;
   updatedBy?: string;
   reason?: string;
+  displayLease?: {
+    active?: boolean;
+    owner?: string;
+    purpose?: string;
+    startedAt?: string;
+    expiresAt?: string;
+  };
 };
 type AgentIdleContext = {
   complete: string;
@@ -1122,6 +1129,33 @@ function KioskPulseStrip({ pulse, liveMode, dataError }: { pulse: KioskPulse; li
   );
 }
 
+function JoshDisplayLeaseBanner({ state, displayState }: { state: MissionControlState; displayState: ControlTowerDisplayState }) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 1_000);
+    return () => window.clearInterval(timer);
+  }, []);
+  const nodes = Array.isArray(state.capabilityInventory?.nodes) ? state.capabilityInventory.nodes : [];
+  const joshNode = nodes.find((node: any) => String(node?.node || node?.interaction?.host) === "josh2") as any;
+  const lease = displayState.displayLease?.active ? displayState.displayLease : joshNode?.interaction?.displayLease;
+  const expiresAt = Date.parse(String(lease?.expiresAt || ""));
+  const remainingSeconds = Number.isFinite(expiresAt) ? Math.max(0, Math.ceil((expiresAt - now) / 1_000)) : 0;
+  if (lease?.active !== true || remainingSeconds <= 0) return null;
+  const owner = AGENTS[String(lease.owner || "") as AgentId]?.label || missionText(lease.owner || "Agent");
+  const purpose = String(lease.purpose || "visible work").replaceAll("-", " ");
+  const minutes = Math.floor(remainingSeconds / 60);
+  const seconds = String(remainingSeconds % 60).padStart(2, "0");
+  return (
+    <section className="display-lease-banner" role="status" aria-live="polite">
+      <span className="display-lease-pulse" aria-hidden="true" />
+      <strong>Josh 2.0 screen in use</strong>
+      <span>{owner} · {purpose}</span>
+      <time dateTime={String(lease.expiresAt)}>{minutes}:{seconds} remaining</time>
+    </section>
+  );
+}
+
+
 function App() {
   const [state, setState] = useState<MissionControlState>(EMPTY_STATE);
   const [loading, setLoading] = useState(true);
@@ -1363,6 +1397,7 @@ function App() {
         </div>
       </header>
 
+      <JoshDisplayLeaseBanner state={state} displayState={displayState} />
       <KioskPulseStrip pulse={pulse} liveMode={liveMode} dataError={dataError} />
 
       <section className="kiosk-grid">

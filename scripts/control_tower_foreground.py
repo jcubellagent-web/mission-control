@@ -38,6 +38,12 @@ LEASE_PATH = Path(
         str(Path.home() / ".openclaw" / "state" / "control-tower-foreground-work.json"),
     )
 )
+DISPLAY_STATE_PATH = Path(
+    os.environ.get(
+        "CONTROL_TOWER_DISPLAY_STATE_PATH",
+        str(ROOT / "data" / "control-tower-display.json"),
+    )
+)
 DEFAULT_LEASE_SECONDS = 180
 MAX_LEASE_SECONDS = 600
 RECENT_INPUT_SECONDS = 90.0
@@ -92,6 +98,26 @@ def atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
         os.chmod(path, 0o600)
     finally:
         temporary.unlink(missing_ok=True)
+
+
+def publish_display_lease(state: Optional[dict[str, Any]]) -> None:
+    """Project only public lease fields into the five-second kiosk sidecar."""
+    try:
+        payload = json.loads(DISPLAY_STATE_PATH.read_text(encoding="utf-8"))
+    except (FileNotFoundError, OSError, json.JSONDecodeError):
+        payload = {}
+    if not isinstance(payload, dict):
+        payload = {}
+    active = bool(state and state.get("active"))
+    payload["displayLease"] = {
+        "active": active,
+        "owner": state.get("owner") if active else None,
+        "purpose": state.get("purpose") if active else None,
+        "startedAt": state.get("startedAt") if active else None,
+        "expiresAt": state.get("expiresAt") if active else None,
+    }
+    payload["leaseUpdatedAt"] = iso_z(utc_now())
+    atomic_write_json(DISPLAY_STATE_PATH, payload)
 
 
 def process_start_fingerprint(pid: int) -> Optional[str]:
@@ -436,6 +462,8 @@ def ensure_foreground(
         return {"ok": True, "status": "deferred", "reason": "session-locked"}
 
     active_lease = lease_state(path=lease_path, now=now)
+    if lease_path is None or lease_path == LEASE_PATH:
+        publish_display_lease(active_lease)
     if active_lease.get("active") and not force:
         return {
             "ok": True,
@@ -575,14 +603,17 @@ def main() -> int:
                 ttl_seconds=args.ttl_seconds,
                 pid=args.pid,
             )
+            publish_display_lease({"active": True, **public_lease_payload(payload)})
             print_json({"ok": True, "leaseId": payload["leaseId"], **public_lease_payload(payload)})
             return 0
         if args.command == "renew":
             payload = renew_lease(lease_id=args.lease_id, ttl_seconds=args.ttl_seconds)
+            publish_display_lease({"active": True, **public_lease_payload(payload)})
             print_json({"ok": True, **public_lease_payload(payload)})
             return 0
         if args.command == "end":
             result = end_lease(lease_id=args.lease_id)
+            publish_display_lease(None)
             if not args.no_restore:
                 result["foreground"] = ensure_foreground(force=True, repair=True)
             print_json({"ok": True, **result})
@@ -590,6 +621,7 @@ def main() -> int:
         if args.command == "status":
             state = lease_state()
             state.pop("leaseId", None)
+            publish_display_lease(state)
             print_json({"ok": True, **state})
             return 0
         result = ensure_foreground(force=args.force, repair=args.repair)

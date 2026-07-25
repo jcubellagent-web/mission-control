@@ -22,6 +22,7 @@ if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 
 import capability_inventory  # noqa: E402
+import control_tower_foreground  # noqa: E402
 
 
 def run(cmd: list[str], timeout: int = 60) -> subprocess.CompletedProcess[str]:
@@ -83,14 +84,28 @@ def remote_record(target: str, active: bool) -> dict[str, Any]:
     return nodes[0]
 
 
+def local_active_canary_allowed() -> tuple[bool, str]:
+    if control_tower_foreground.session_is_locked():
+        return False, "session-locked"
+    lease = control_tower_foreground.lease_state()
+    if lease.get("active"):
+        return False, "active-visible-work"
+    return True, "idle"
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Refresh metadata-only interaction capabilities.")
     parser.add_argument("--remote-target", default=os.environ.get("JAIMES_SSH_ALIAS", "jc_agent@100.121.89.84"))
     parser.add_argument("--active-canary", action="store_true")
+    parser.add_argument("--idle-only", action="store_true", help="Skip Josh 2.0 capture while its display is leased or locked.")
     parser.add_argument("--refresh-dashboard", action="store_true")
     args = parser.parse_args()
 
-    local = capability_inventory.collect(make_args("josh2", "josh2", "visible", args.active_canary))
+    local_active = args.active_canary
+    local_reason = "requested" if local_active else "passive"
+    if args.active_canary and args.idle_only:
+        local_active, local_reason = local_active_canary_allowed()
+    local = capability_inventory.collect(make_args("josh2", "josh2", "visible", local_active))
     capability_inventory.merge(local)
     remote = remote_record(args.remote_target, args.active_canary)
     merged = capability_inventory.merge(remote)
@@ -113,6 +128,16 @@ def main() -> int:
             for row in (local, remote)
         ],
         "privacy": "dashboard-safe metadata only",
+        "activeCanary": {
+            "requested": args.active_canary,
+            "josh2": "ran" if local_active else f"skipped:{local_reason}" if args.active_canary else "passive",
+            "jaimes": "ran" if args.active_canary else "passive",
+            "alerts": [
+                str(row.get("node"))
+                for row in (local, remote)
+                if ((row.get("interaction") or {}).get("computerUse") or {}).get("activeDisplayCanary", {}).get("alert") is True
+            ],
+        },
     }
     print(json.dumps(summary, indent=2))
     return 0 if summary["ok"] else 2
