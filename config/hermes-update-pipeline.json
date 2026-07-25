@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "owner": "jaimes",
+  "watchSchedule": "Monday 09:00 America/New_York",
+  "sourceRepository": "/Users/jc_agent/.hermes/hermes-agent",
+  "productionInstall": "/Users/jc_agent/.hermes",
+  "canaryProfile": "trust-sandbox",
+  "ignoredDirtyPaths": [
+    ".install_method"
+  ],
+  "requiredGates": [
+    "source-clean",
+    "candidate-worktree",
+    "static-compile",
+    "git-diff-check",
+    "canary-command",
+    "observation-evidence",
+    "rollback-manifest"
+  ],
+  "observationMinutes": 1440,
+  "productionMutation": "manual-only",
+  "automaticPromotion": false
+}

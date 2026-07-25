@@ -78,6 +78,20 @@ def fetch_json(url: str, timeout: int = 12) -> dict[str, Any]:
         return {"ok": False, "status": "attention", "detail": compact(exc, 300)}
 
 
+def release_summary(result: dict[str, Any]) -> dict[str, Any]:
+    """Keep public release discovery bounded before it reaches sidecars/logs."""
+    data = result.get("data") if isinstance(result.get("data"), dict) else {}
+    return {
+        "ok": bool(result.get("ok")),
+        "status": result.get("status"),
+        "tag": data.get("tag_name"),
+        "name": compact(data.get("name"), 120),
+        "publishedAt": data.get("published_at"),
+        "url": data.get("html_url"),
+        "detail": result.get("detail"),
+    }
+
+
 def npm_dist_tags(package: str) -> dict[str, Any]:
     result = run(["npm", "view", package, "dist-tags", "--json"], timeout=30)
     payload = result.get("json")
@@ -199,8 +213,8 @@ def main() -> int:
     }
     if not args.no_network:
         sources["openclawNpm"] = npm_dist_tags("openclaw")
-        sources["openclawLatestRelease"] = fetch_json("https://api.github.com/repos/openclaw/openclaw/releases/latest")
-        sources["hermesLatestRelease"] = fetch_json("https://api.github.com/repos/NousResearch/Hermes-Agent/releases/latest")
+        sources["openclawLatestRelease"] = release_summary(fetch_json("https://api.github.com/repos/openclaw/openclaw/releases/latest"))
+        sources["hermesLatestRelease"] = release_summary(fetch_json("https://api.github.com/repos/NousResearch/Hermes-Agent/releases/latest"))
     recommendations = build_recommendations(sources)
     payload = {
         "updatedAt": now,
