@@ -51,11 +51,29 @@ def test_acknowledged_canonical_exception_allows_personal_mac() -> None:
 
 def test_dedicated_host_is_allowed_without_personal_alert() -> None:
     result = evaluate(target_host="josh2", surface="browser-visual")
-    assert result == {
-        "ok": True,
-        "decision": "allow",
-        "targetHost": "josh2",
-        "surface": "browser-visual",
-        "personalDevice": False,
-        "alert": False,
-    }
+    assert result["ok"] is True
+    assert result["decision"] == "allow"
+    assert result["targetHost"] == "josh2"
+    assert result["personalDevice"] is False
+    assert result["verificationRequired"] is True
+    assert result["maxAttempts"] == 3
+
+
+def test_jaimes_visible_work_promotes_to_josh2() -> None:
+    result = evaluate(target_host="jaimes", surface="computer-use")
+    assert result["ok"] is True
+    assert result["decision"] == "promote"
+    assert result["fromHost"] == "jaimes"
+    assert result["targetHost"] == "josh2"
+
+
+def test_jaimes_headless_dom_work_stays_on_jaimes() -> None:
+    result = evaluate(target_host="jaimes", surface="browser-dom")
+    assert result["decision"] == "allow"
+    assert result["targetHost"] == "jaimes"
+
+
+def test_retry_budget_is_hard_capped_at_three() -> None:
+    config = {**CONFIG, "sessionEngine": {"enabled": True, "maxAttempts": 5}}
+    result = evaluate(target_host="jaimes", surface="browser-dom", config=config)
+    assert result["maxAttempts"] == 3

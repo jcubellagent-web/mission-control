@@ -23,4 +23,14 @@ def test_installer_manages_passive_and_daily_canary_agents() -> None:
     source = (ROOT / "scripts" / "install_interaction_capability_watch.sh").read_text()
     assert "ai.control-tower.interaction-capabilities" in source
     assert "ai.control-tower.interaction-active-canary" in source
+    assert "ai.control-tower.interaction-promotion-broker" in source
     assert "BACKUP_ROOT" in source
+
+
+def test_promotion_broker_is_pull_only_and_short_interval() -> None:
+    path = ROOT / "launchd" / "ai.control-tower.interaction-promotion-broker.plist"
+    with path.open("rb") as handle:
+        payload = plistlib.load(handle)
+    assert payload["StartInterval"] == 5
+    assert payload["RunAtLoad"] is True
+    assert payload["ProgramArguments"][-1].endswith("interaction_promotion_broker.py")

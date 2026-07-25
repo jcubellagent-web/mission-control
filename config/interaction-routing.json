@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "semanticOrder": [
     "connector-or-api",
     "browser-dom",
@@ -46,6 +46,43 @@
       "local-file",
       "macbook-only-app"
     ]
+  },
+  "sessionEngine": {
+    "enabled": true,
+    "maxAttempts": 3,
+    "commandTimeoutSeconds": 45,
+    "operatorPollMilliseconds": 100,
+    "terminateGraceSeconds": 2,
+    "verificationRequired": true,
+    "defaultExpectation": "changed",
+    "autoPromoteHeadlessFailure": true,
+    "promotionHost": "josh2",
+    "promotionTransport": "pull-broker",
+    "promotionPollSeconds": 5,
+    "promotionRequestTtlSeconds": 120,
+    "promotionReasons": [
+      "driver-down",
+      "semantic-miss",
+      "verification-failed",
+      "visual-state-required"
+    ],
+    "targetResolution": {
+      "minimumConfidence": 0.62,
+      "ambiguityMargin": 0.03,
+      "coordinateFallback": true,
+      "sourceOrder": [
+        "browser-dom",
+        "accessibility",
+        "vision",
+        "coordinates"
+      ]
+    },
+    "receipts": {
+      "metadataOnly": true,
+      "stateTokensShared": false,
+      "commandOutputShared": false,
+      "contentFieldsShared": false
+    }
   },
   "privacy": {
     "dashboardSafeOnly": true,

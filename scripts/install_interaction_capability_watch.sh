@@ -8,6 +8,9 @@ LABEL="ai.control-tower.interaction-capabilities"
 CANARY_SOURCE="$ROOT/launchd/ai.control-tower.interaction-active-canary.plist"
 CANARY_TARGET="$HOME/Library/LaunchAgents/ai.control-tower.interaction-active-canary.plist"
 CANARY_LABEL="ai.control-tower.interaction-active-canary"
+BROKER_SOURCE="$ROOT/launchd/ai.control-tower.interaction-promotion-broker.plist"
+BROKER_TARGET="$HOME/Library/LaunchAgents/ai.control-tower.interaction-promotion-broker.plist"
+BROKER_LABEL="ai.control-tower.interaction-promotion-broker"
 DOMAIN="gui/$(id -u)"
 BACKUP_ROOT="$HOME/.openclaw/backups/interaction-capabilities"
 
@@ -23,17 +26,26 @@ fi
 if [[ -f "$CANARY_TARGET" ]]; then
   cp -p "$CANARY_TARGET" "$BACKUP_ROOT/$(date -u +%Y%m%dT%H%M%SZ)-interaction-active-canary.plist"
 fi
+if [[ -f "$BROKER_TARGET" ]]; then
+  cp -p "$BROKER_TARGET" "$BACKUP_ROOT/$(date -u +%Y%m%dT%H%M%SZ)-interaction-promotion-broker.plist"
+fi
 cp -p "$SOURCE" "$TARGET"
 cp -p "$CANARY_SOURCE" "$CANARY_TARGET"
+cp -p "$BROKER_SOURCE" "$BROKER_TARGET"
 plutil -lint "$TARGET" >/dev/null
 plutil -lint "$CANARY_TARGET" >/dev/null
+plutil -lint "$BROKER_TARGET" >/dev/null
 launchctl bootout "$DOMAIN/$LABEL" >/dev/null 2>&1 || true
 launchctl bootout "$DOMAIN/$CANARY_LABEL" >/dev/null 2>&1 || true
+launchctl bootout "$DOMAIN/$BROKER_LABEL" >/dev/null 2>&1 || true
 launchctl bootstrap "$DOMAIN" "$TARGET"
 launchctl bootstrap "$DOMAIN" "$CANARY_TARGET"
+launchctl bootstrap "$DOMAIN" "$BROKER_TARGET"
 launchctl kickstart -k "$DOMAIN/$LABEL"
+launchctl kickstart -k "$DOMAIN/$BROKER_LABEL"
 launchctl print "$DOMAIN/$LABEL" | sed -n '1,45p'
 launchctl print "$DOMAIN/$CANARY_LABEL" | sed -n '1,45p'
+launchctl print "$DOMAIN/$BROKER_LABEL" | sed -n '1,45p'
 
 #JAIMES: the interaction watch publishes only version, readiness, route, and
 # latency metadata; screenshots and page/account content remain on-host.

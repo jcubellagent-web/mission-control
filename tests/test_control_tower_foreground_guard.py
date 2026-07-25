@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import stat
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -186,6 +187,33 @@ def test_lease_renew_and_release_require_matching_id(tmp_path: Path) -> None:
         MODULE.end_lease(lease_id="wrong", path=lease_path)
     assert MODULE.end_lease(lease_id=payload["leaseId"], path=lease_path)["ended"] is True
     assert not lease_path.exists()
+
+
+def test_concurrent_lease_acquisition_has_exactly_one_winner(tmp_path: Path) -> None:
+    lease_path = tmp_path / "foreground-work.json"
+
+    def acquire(owner: str):
+        try:
+            return MODULE.begin_lease(owner=owner, purpose="browser", path=lease_path, now=NOW)["leaseId"]
+        except RuntimeError:
+            return None
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        results = list(executor.map(acquire, ("agent-one", "agent-two")))
+    assert sum(value is not None for value in results) == 1
+    assert MODULE.lease_state(path=lease_path, now=NOW)["active"] is True
+    assert stat.S_IMODE(tmp_path.stat().st_mode) == 0o700
+
+
+def test_restore_after_release_never_overrides_replacement_lease(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    lease_path = tmp_path / "foreground-work.json"
+    old = MODULE.begin_lease(owner="old-owner", purpose="browser", path=lease_path, now=NOW)
+    MODULE.end_lease(lease_id=old["leaseId"], path=lease_path)
+    MODULE.begin_lease(owner="replacement", purpose="computer-use", path=lease_path, now=NOW)
+    monkeypatch.setattr(MODULE, "ensure_foreground", lambda **_kwargs: pytest.fail("must not restore over replacement"))
+    result = MODULE.restore_after_release(path=lease_path, now=NOW)
+    assert result["status"] == "deferred"
+    assert result["reason"] == "replacement-visible-work"
 
 
 def test_display_projection_is_public_and_preserves_existing_mode(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

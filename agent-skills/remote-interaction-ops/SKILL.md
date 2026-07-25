@@ -41,6 +41,36 @@ private-context reason is supplied. Even a valid exception exits for an
 explicit personal-device acknowledgement before use. Never silently use the
 personal Mac as a fallback.
 
+## Reliable Session Envelope
+
+Wrap each meaningful browser-visual or desktop action in the host-local session
+engine. It provides a single lifecycle for route selection, display leasing,
+before/after verification, bounded recovery, JAIMES-to-Josh-2.0 promotion, and
+operator pause/stop controls:
+
+```bash
+python3 scripts/interaction_session_engine.py start \
+  --owner <agent> --target-host <josh2|jaimes|joshex> \
+  --surface <surface> --intent <click|type|select|navigate|inspect|upload|other>
+```
+
+- Observe local state before the action, call `attempt`, perform the action, and
+  call `verify` with a fresh local state file. The engine persists only opaque
+  state tokens; its receipts expose only success, change, timing, host, surface,
+  retry count, and reason codes.
+- Prefer `run-command` for CLI-backed actions. It suppresses command output from
+  receipts, polls the operator control while the child runs, terminates on pause
+  or stop, verifies the post-action state, and runs at most the configured retry
+  budget.
+- On a semantic miss, driver failure, or required visual state from a JAIMES
+  headless session, use `fail --promote`. Promotion acquires a Josh 2.0 visible
+  lease but never moves private account context, cookies, or credentials.
+- `control --mode paused|stopped` is fail-closed. A paused session releases its
+  visible lease and must be explicitly resumed. A stopped session is terminal.
+- Use `interaction_target_resolver.py` only with host-local target/candidate
+  files. Its selected IDs, bounds, names, and candidate data are private driver
+  material and must not enter Brain Feed or shared logs.
+
 ## Preflight
 
 Before a meaningful interaction task, run the metadata-only host probe:
@@ -77,6 +107,8 @@ cookies, credentials, OTPs, account content, or raw tool output.
 ## After Work
 
 - Fetch fresh app/browser state after each material action.
+- End or abort the interaction session; terminal cleanup releases its display
+  lease and restores Control Tower.
 - Release the Josh 2.0 display lease and verify Control Tower was restored.
 - Refresh interaction capability metadata when a driver, plugin, permission,
   or browser service changed.

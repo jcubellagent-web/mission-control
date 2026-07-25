@@ -5014,12 +5014,23 @@ def build_interaction_control_capability(capability_inventory: Dict[str, Any] | 
 
     labels: list[str] = []
     statuses: list[str] = []
+    reliability_statuses: list[str] = []
+    operator_modes: set[str] = set()
+    verified_actions = False
+    promotion_ready = False
     visible_ready = False
     headless_ready = False
     for host, (_, interaction) in sorted(latest.items()):
         role = str(interaction.get("role") or "unknown")
         status = str(interaction.get("status") or "unknown")
         statuses.append(status)
+        reliability = interaction.get("reliability") if isinstance(interaction.get("reliability"), dict) else {}
+        reliability_statuses.append(str(reliability.get("status") or "unknown"))
+        operator_modes.add(str(reliability.get("operatorControl") or "running"))
+        verified_actions = verified_actions or reliability.get("verifiedActions") is True
+        promotion_ready = promotion_ready or (
+            reliability.get("headlessPromotion") is True and reliability.get("promotionBrokerReady") is True
+        )
         labels.append(f"{node_display_name(host)} {role} {status}")
         visible_ready = visible_ready or (role == "visible" and status == "ok")
         headless_ready = headless_ready or (role == "headless" and status == "ok")
@@ -5029,12 +5040,19 @@ def build_interaction_control_capability(capability_inventory: Dict[str, Any] | 
         overall = "attention"
     elif any(status in {"degraded", "unknown"} for status in statuses):
         overall = "watch"
+    if any(status in {"down", "degraded", "unknown"} for status in reliability_statuses):
+        overall = "watch" if overall == "ok" else overall
+    control_label = "stopped" if "stopped" in operator_modes else "paused" if "paused" in operator_modes else "running"
     return {
         "id": "interaction-control",
         "name": "Interaction Control",
         "status": overall,
         "summary": f"Visible {'ready' if visible_ready else 'watch'} · headless {'ready' if headless_ready else 'watch'}",
-        "detail": " · ".join(labels[:3]) + " · semantic-first; private frames stay on-host",
+        "detail": " · ".join(labels[:3])
+        + f" · verified actions {'ready' if verified_actions else 'watch'}"
+        + f" · promotion {'ready' if promotion_ready else 'watch'}"
+        + f" · control {control_label}"
+        + " · private frames stay on-host",
     }
 
 

@@ -8,6 +8,8 @@ account data.
 from __future__ import annotations
 
 import argparse
+import contextlib
+import fcntl
 import json
 import os
 import plistlib
@@ -98,6 +100,21 @@ def atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
         os.chmod(path, 0o600)
     finally:
         temporary.unlink(missing_ok=True)
+
+
+@contextlib.contextmanager
+def lease_lock(path: Path):
+    lock_path = path.with_name(f".{path.name}.lock")
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    os.chmod(lock_path.parent, 0o700)
+    descriptor = os.open(lock_path, os.O_RDWR | os.O_CREAT, 0o600)
+    try:
+        os.chmod(lock_path, 0o600)
+        fcntl.flock(descriptor, fcntl.LOCK_EX)
+        yield
+    finally:
+        fcntl.flock(descriptor, fcntl.LOCK_UN)
+        os.close(descriptor)
 
 
 def publish_display_lease(state: Optional[dict[str, Any]]) -> None:
@@ -215,33 +232,34 @@ def begin_lease(
         raise ValueError(f"ttl-seconds must be between 30 and {MAX_LEASE_SECONDS}")
 
     lease_path = path or LEASE_PATH
-    existing = lease_state(path=lease_path, now=now)
-    if existing.get("active"):
-        raise RuntimeError(
-            f"visible work is already leased by {existing.get('owner')} until {existing.get('expiresAt')}"
-        )
+    with lease_lock(lease_path):
+        existing = lease_state(path=lease_path, now=now)
+        if existing.get("active"):
+            raise RuntimeError(
+                f"visible work is already leased by {existing.get('owner')} until {existing.get('expiresAt')}"
+            )
 
-    process_start = None
-    if pid is not None:
-        process_start = process_start_fingerprint(pid)
-        if not process_start:
-            raise ValueError(f"pid {pid} is not running")
+        process_start = None
+        if pid is not None:
+            process_start = process_start_fingerprint(pid)
+            if not process_start:
+                raise ValueError(f"pid {pid} is not running")
 
-    moment = now or utc_now()
-    payload: dict[str, Any] = {
-        "schema": 1,
-        "leaseId": secrets.token_urlsafe(24),
-        "owner": owner,
-        "purpose": purpose,
-        "startedAt": iso_z(moment),
-        "heartbeatAt": iso_z(moment),
-        "expiresAt": iso_z(moment + timedelta(seconds=ttl_seconds)),
-    }
-    if pid is not None:
-        payload["pid"] = pid
-        payload["processStart"] = process_start
-    atomic_write_json(lease_path, payload)
-    return payload
+        moment = now or utc_now()
+        payload: dict[str, Any] = {
+            "schema": 1,
+            "leaseId": secrets.token_urlsafe(24),
+            "owner": owner,
+            "purpose": purpose,
+            "startedAt": iso_z(moment),
+            "heartbeatAt": iso_z(moment),
+            "expiresAt": iso_z(moment + timedelta(seconds=ttl_seconds)),
+        }
+        if pid is not None:
+            payload["pid"] = pid
+            payload["processStart"] = process_start
+        atomic_write_json(lease_path, payload)
+        return payload
 
 
 def renew_lease(
@@ -254,29 +272,45 @@ def renew_lease(
     if not 30 <= ttl_seconds <= MAX_LEASE_SECONDS:
         raise ValueError(f"ttl-seconds must be between 30 and {MAX_LEASE_SECONDS}")
     lease_path = path or LEASE_PATH
-    state = lease_state(path=lease_path, now=now, cleanup=False)
-    if not state.get("active"):
-        raise RuntimeError("no active visible-work lease to renew")
-    payload = json.loads(lease_path.read_text(encoding="utf-8"))
-    if not secrets.compare_digest(str(payload.get("leaseId") or ""), lease_id):
-        raise PermissionError("lease id does not match")
-    moment = now or utc_now()
-    payload["heartbeatAt"] = iso_z(moment)
-    payload["expiresAt"] = iso_z(moment + timedelta(seconds=ttl_seconds))
-    atomic_write_json(lease_path, payload)
-    return payload
+    with lease_lock(lease_path):
+        state = lease_state(path=lease_path, now=now, cleanup=False)
+        if not state.get("active"):
+            raise RuntimeError("no active visible-work lease to renew")
+        payload = json.loads(lease_path.read_text(encoding="utf-8"))
+        if not secrets.compare_digest(str(payload.get("leaseId") or ""), lease_id):
+            raise PermissionError("lease id does not match")
+        moment = now or utc_now()
+        payload["heartbeatAt"] = iso_z(moment)
+        payload["expiresAt"] = iso_z(moment + timedelta(seconds=ttl_seconds))
+        atomic_write_json(lease_path, payload)
+        return payload
 
 
 def end_lease(*, lease_id: str, path: Optional[Path] = None) -> dict[str, Any]:
     lease_path = path or LEASE_PATH
-    try:
-        payload = json.loads(lease_path.read_text(encoding="utf-8"))
-    except FileNotFoundError:
-        return {"ended": False, "reason": "no-lease"}
-    if not secrets.compare_digest(str(payload.get("leaseId") or ""), lease_id):
-        raise PermissionError("lease id does not match")
-    _safe_unlink(lease_path)
-    return {"ended": True, "reason": "released"}
+    with lease_lock(lease_path):
+        try:
+            payload = json.loads(lease_path.read_text(encoding="utf-8"))
+        except FileNotFoundError:
+            return {"ended": False, "reason": "no-lease"}
+        if not secrets.compare_digest(str(payload.get("leaseId") or ""), lease_id):
+            raise PermissionError("lease id does not match")
+        _safe_unlink(lease_path)
+        return {"ended": True, "reason": "released"}
+
+
+def restore_after_release(*, path: Optional[Path] = None, now: Optional[datetime] = None) -> dict[str, Any]:
+    lease_path = path or LEASE_PATH
+    with lease_lock(lease_path):
+        replacement = lease_state(path=lease_path, now=now, cleanup=False)
+        if replacement.get("active"):
+            return {
+                "ok": True,
+                "status": "deferred",
+                "reason": "replacement-visible-work",
+                "work": {key: replacement.get(key) for key in ("owner", "purpose", "expiresAt")},
+            }
+        return ensure_foreground(force=False, repair=True, lease_path=lease_path, now=now)
 
 
 def session_is_locked() -> bool:
@@ -615,7 +649,7 @@ def main() -> int:
             result = end_lease(lease_id=args.lease_id)
             publish_display_lease(None)
             if not args.no_restore:
-                result["foreground"] = ensure_foreground(force=True, repair=True)
+                result["foreground"] = restore_after_release()
             print_json({"ok": True, **result})
             return 0
         if args.command == "status":

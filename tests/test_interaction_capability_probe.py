@@ -86,11 +86,35 @@ def test_control_tower_builds_latest_interaction_health_item() -> None:
         "nodes": [
             {
                 "node": "josh2",
-                "interaction": {"host": "josh2", "role": "visible", "status": "ok", "checkedAt": "2026-07-24T20:00:00Z"},
+                "interaction": {
+                    "host": "josh2",
+                    "role": "visible",
+                    "status": "ok",
+                    "checkedAt": "2026-07-24T20:00:00Z",
+                    "reliability": {
+                        "status": "ok",
+                        "verifiedActions": True,
+                        "headlessPromotion": True,
+                        "promotionBrokerReady": True,
+                        "operatorControl": "running",
+                    },
+                },
             },
             {
                 "node": "jaimes",
-                "interaction": {"host": "jaimes", "role": "headless", "status": "ok", "checkedAt": "2026-07-24T20:00:00Z"},
+                "interaction": {
+                    "host": "jaimes",
+                    "role": "headless",
+                    "status": "ok",
+                    "checkedAt": "2026-07-24T20:00:00Z",
+                    "reliability": {
+                        "status": "ok",
+                        "verifiedActions": True,
+                        "headlessPromotion": True,
+                        "promotionBrokerReady": True,
+                        "operatorControl": "running",
+                    },
+                },
             },
         ]
     }
@@ -99,6 +123,8 @@ def test_control_tower_builds_latest_interaction_health_item() -> None:
     assert item["id"] == "interaction-control"
     assert item["status"] == "ok"
     assert item["summary"] == "Visible ready · headless ready"
+    assert "verified actions ready" in item["detail"]
+    assert "promotion ready" in item["detail"]
     assert "private frames stay on-host" in item["detail"]
 
 

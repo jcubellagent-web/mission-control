@@ -25,6 +25,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = ROOT / "config" / "interaction-routing.json"
 DEFAULT_CANARY_STATE = Path.home() / ".openclaw" / "state" / "interaction-active-canary.json"
+DEFAULT_CONTROL_STATE = Path.home() / ".openclaw" / "state" / "interaction-control.json"
 STATUSES = {"ok", "degraded", "down", "unknown", "not-required"}
 FORBIDDEN_KEYS = {
     "accessibilitytree",
@@ -350,6 +351,42 @@ def display_lease(host: str) -> dict[str, Any]:
     }
 
 
+def interaction_engine(config: dict[str, Any], control_path: Path = DEFAULT_CONTROL_STATE) -> dict[str, Any]:
+    engine = config.get("sessionEngine") if isinstance(config.get("sessionEngine"), dict) else {}
+    script_ready = (ROOT / "scripts" / "interaction_session_engine.py").is_file()
+    resolver_ready = (ROOT / "scripts" / "interaction_target_resolver.py").is_file()
+    broker_ready = (ROOT / "scripts" / "interaction_promotion_broker.py").is_file()
+    control = load_json_file(control_path)
+    mode = str(control.get("mode") or "running") if isinstance(control, dict) else "running"
+    if mode not in {"running", "paused", "stopped"}:
+        mode = "running"
+    enabled = engine.get("enabled") is True
+    try:
+        attempts = max(1, min(5, int(engine.get("maxAttempts") or 3)))
+    except (TypeError, ValueError):
+        attempts = 3
+    return {
+        "status": "ok" if enabled and script_ready and resolver_ready and broker_ready else "degraded",
+        "enabled": enabled,
+        "verifiedActions": engine.get("verificationRequired") is not False,
+        "boundedRecovery": enabled,
+        "maxAttempts": attempts,
+        "headlessPromotion": engine.get("autoPromoteHeadlessFailure") is True,
+        "promotionTransport": str(engine.get("promotionTransport") or "unavailable")[:32],
+        "promotionBrokerReady": broker_ready,
+        "operatorControl": mode,
+        "metadataOnlyReceipts": True,
+    }
+
+
+def load_json_file(path: Path) -> dict[str, Any]:
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (FileNotFoundError, OSError, json.JSONDecodeError):
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
 def platform_name() -> str:
     return "macos" if os.uname().sysname.lower() == "darwin" else os.uname().sysname.lower()
 
@@ -398,6 +435,7 @@ def collect(host: str, role: str | None, config_path: Path, active_canary: bool 
     codex_cu = probe_codex_computer_use()
     display = display_online()
     canary = active_display_canary(resolved_role) if active_canary else load_canary_state()
+    reliability = interaction_engine(config)
     browser_required = True
     if resolved_role == "headless":
         browser_ready = browser.get("cdp", {}).get("status") == "ok"
@@ -444,6 +482,7 @@ def collect(host: str, role: str | None, config_path: Path, active_canary: bool 
             "sharedContentTelemetry": False,
             "onHostOnly": True,
         },
+        "reliability": reliability,
         "privacy": {
             "dashboardSafeOnly": True,
             "contentCaptured": False,

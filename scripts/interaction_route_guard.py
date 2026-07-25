@@ -15,6 +15,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = ROOT / "config" / "interaction-routing.json"
 VISIBLE_SURFACES = {"browser-dom", "browser-visual", "desktop-ui", "computer-use"}
+JAIMES_VISIBLE_SURFACES = {"browser-visual", "desktop-ui", "computer-use"}
 
 
 def load_config(path: Path) -> dict[str, Any]:
@@ -40,6 +41,29 @@ def evaluate(
     background_host = str(policy.get("backgroundHost") or "jaimes")
     allowed_reasons = {str(value) for value in policy.get("allowedReasons", []) if isinstance(value, str)}
     visible = surface in VISIBLE_SURFACES
+    engine = config.get("sessionEngine") if isinstance(config.get("sessionEngine"), dict) else {}
+    max_attempts = max(1, min(3, int(engine.get("maxAttempts") or 3)))
+
+    reliability = {
+        "sessionRequired": engine.get("enabled") is True,
+        "verificationRequired": engine.get("verificationRequired") is not False,
+        "maxAttempts": max_attempts,
+        "operatorControl": engine.get("enabled") is True,
+        "metadataOnlyReceipts": True,
+    }
+
+    if target_host == background_host and surface in JAIMES_VISIBLE_SURFACES:
+        return {
+            "ok": True,
+            "decision": "promote",
+            "targetHost": default_host,
+            "fromHost": background_host,
+            "surface": surface,
+            "personalDevice": False,
+            "alert": False,
+            "reason": "dedicated-visible-host",
+            **reliability,
+        }
 
     if target_host != personal_host or not visible:
         return {
@@ -49,6 +73,7 @@ def evaluate(
             "surface": surface,
             "personalDevice": False,
             "alert": False,
+            **reliability,
         }
 
     valid_exception = private_context and reason in allowed_reasons
@@ -61,6 +86,7 @@ def evaluate(
             "personalDevice": True,
             "alert": True,
             "reason": "personal-device-not-required",
+            **reliability,
         }
 
     if policy.get("requireExplicitAcknowledgement") is True and not acknowledged:
@@ -72,6 +98,7 @@ def evaluate(
             "personalDevice": True,
             "alert": True,
             "reason": reason,
+            **reliability,
         }
 
     return {
@@ -82,6 +109,7 @@ def evaluate(
         "personalDevice": True,
         "alert": True,
         "reason": reason,
+        **reliability,
     }
 
 
