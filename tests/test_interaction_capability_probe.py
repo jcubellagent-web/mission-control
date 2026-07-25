@@ -148,3 +148,18 @@ def test_display_lease_projection_never_exposes_lease_id(monkeypatch, tmp_path: 
     assert projected["owner"] == "joshex"
     assert "leaseId" not in projected
     assert "private-opaque-id" not in json.dumps(projected)
+
+
+def test_successful_active_capture_overrides_transient_display_profiler_miss(monkeypatch, tmp_path: Path) -> None:
+    config = tmp_path / "routing.json"
+    config.write_text(json.dumps({"hosts": {"josh2": {"role": "visible"}}}))
+    monkeypatch.setattr(probe, "probe_browser", lambda: {"status": "ok", "cdp": {"status": "down"}})
+    monkeypatch.setattr(probe, "probe_cua_driver", lambda: {"status": "not-required"})
+    monkeypatch.setattr(probe, "probe_codex_computer_use", lambda: {"status": "ok", "version": "1.0"})
+    monkeypatch.setattr(probe, "display_online", lambda: {"status": "degraded", "online": False, "width": 0, "height": 0})
+    monkeypatch.setattr(probe, "active_display_canary", lambda _role: {
+        "status": "ok", "width": 1920, "height": 1080, "latencyMs": 100, "alert": False,
+    })
+    payload = probe.collect("josh2", "visible", config, active_canary=True)
+    assert payload["status"] == "ok"
+    assert payload["computerUse"]["activeDisplayCanary"]["status"] == "ok"

@@ -406,7 +406,8 @@ def collect(host: str, role: str | None, config_path: Path, active_canary: bool 
             computer_ready = computer_ready and canary.get("status") == "ok"
     else:
         browser_ready = browser.get("status") == "ok"
-        computer_ready = codex_cu.get("status") == "ok" and display.get("online") is True
+        display_ready = display.get("online") is True or (active_canary and canary.get("status") == "ok")
+        computer_ready = codex_cu.get("status") == "ok" and display_ready
         if active_canary:
             computer_ready = computer_ready and canary.get("status") == "ok"
     if canary.get("alert") is True:
