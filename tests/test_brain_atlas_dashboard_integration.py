@@ -773,6 +773,10 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertIn('is-linked', component)
         self.assertIn('fresh Live Work lifeline active', component)
         self.assertIn('active Live Work link, awaiting fresh heartbeat', component)
+        self.assertIn('BRAIN_ATLAS_NODE_HELP', component)
+        self.assertIn('brain-atlas-node-help', component)
+        self.assertIn('aria-label="Explain Recall"', component)
+        self.assertIn('aria-label="Explain Memory registry"', component)
         self.assertIn("const BRAIN_ATLAS_VISIBLE_RECEIPTS = 3", main)
         self.assertIn("const BRAIN_ATLAS_WIDE_VIEWBOX_WIDTH = 1464", component)
         self.assertIn('viewBox={`0 0 ${BRAIN_ATLAS_WIDE_VIEWBOX_WIDTH} 376`}', component)
@@ -787,10 +791,12 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertIn(".memory-flow-edge.is-cross-agent", styles)
         self.assertIn(".memory-flow-edge.is-work-lifeline", styles)
         self.assertIn(".memory-flow-edge.is-work-lifeline.is-linked", styles)
+        self.assertIn(".brain-atlas-node-help", styles)
+        self.assertIn(".memory-flow-node.is-explainable", styles)
         self.assertIn(".memory-flow-edge.is-work-lifeline.is-live", styles)
         self.assertIn("@keyframes work-lifeline-travel", styles)
         self.assertIn("stroke: rgba(101, 217, 255, 0.96);", styles)
-        self.assertIn("animation: memory-flow-travel 1.05s linear infinite, memory-flow-receipt-glow 1.4s ease-in-out infinite;", styles)
+        self.assertIn("animation: memory-flow-travel 1.05s linear infinite;", styles)
         self.assertIn("@keyframes memory-flow-travel", styles)
         self.assertIn("@keyframes memory-node-receipt-ring", styles)
         self.assertIn("@keyframes memory-agent-receipt-dot", styles)
@@ -816,8 +822,8 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
             styles.index(".memory-flow-edge.is-live {"):
             styles.index(".memory-flow-node rect")
         ]
-        self.assertIn("animation: memory-flow-travel 1.05s linear infinite, memory-flow-receipt-glow 1.4s ease-in-out infinite;", live_edge_css)
-        self.assertIn("filter: drop-shadow", live_edge_css)
+        self.assertIn("animation: memory-flow-travel 1.05s linear infinite;", live_edge_css)
+        self.assertIn("filter: none;", live_edge_css)
         live_node_css = styles[
             styles.index(".memory-flow-node:not(.is-agent).is-live > rect:not(.memory-flow-node-aura) {"):
             styles.index(".memory-flow-node .memory-flow-node-aura")

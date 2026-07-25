@@ -98,6 +98,40 @@ type LiveCueState = {
 type BrainAtlas = NonNullable<MissionControlState["brainAtlas"]>;
 type TaskOwnershipGraph = NonNullable<MissionControlState["taskOwnershipGraph"]>;
 type BrainAtlasNode = BrainAtlas["nodes"][number];
+type BrainAtlasHelpNodeId = "recall" | "registry" | "applied" | "outcome" | "candidate" | "durable";
+
+const BRAIN_ATLAS_NODE_HELP: Record<BrainAtlasHelpNodeId, { title: string; happening: string; used: string }> = {
+  recall: {
+    title: "Recall",
+    happening: "An agent queries governed shared memory for relevant prior decisions, lessons, or context.",
+    used: "The hit rate and latency summarize recent retrieval quality. A moving receipt path appears only when a verified retrieval is fresh.",
+  },
+  registry: {
+    title: "Memory registry",
+    happening: "This is the governed store of active shared-memory records and their source coverage.",
+    used: "It is the verified source behind the graph. Counts show record health, never memory contents or private prompts.",
+  },
+  applied: {
+    title: "Applied",
+    happening: "A previously selected memory was recorded as used in the work that followed.",
+    used: "The percentage compares selected memories with explicit use receipts. It does not assume that every retrieval changed an outcome.",
+  },
+  outcome: {
+    title: "Outcome",
+    happening: "The work records whether a used memory produced a helpful, ignored, corrected, or other governed outcome.",
+    used: "The percentage is helpful outcomes among recorded feedback. It is evidence of usefulness, not private reasoning quality.",
+  },
+  candidate: {
+    title: "Candidate",
+    happening: "A possible durable lesson has been proposed but has not been accepted into shared memory.",
+    used: "Candidates remain review-gated. The graph never treats a proposal as learned policy.",
+  },
+  durable: {
+    title: "Durable",
+    happening: "A candidate passed the applicable governance review and was promoted to a durable memory record.",
+    used: "Promotion receipts show the verified path into shared memory; the count does not expose the underlying content.",
+  },
+};
 type BrainAtlasEdge = BrainAtlas["edges"][number];
 type MemoryActivity = NonNullable<NonNullable<MissionControlState["memoryOperations"]>["activity"]>;
 type BrainAtlasView = {
@@ -3886,6 +3920,7 @@ function BrainAtlasPanel({
 }) {
   const [focusId, setFocusId] = useState("all");
   const [atlasMode, setAtlasMode] = useState<"evidence" | "ownership">("evidence");
+  const [helpNodeId, setHelpNodeId] = useState<BrainAtlasHelpNodeId | null>(null);
   useEffect(() => {
     if (focusId !== "all" && !atlas?.nodes.some((node) => node.id === focusId)) setFocusId("all");
   }, [atlas?.generatedAt, atlas?.nodes, focusId]);
@@ -3982,6 +4017,13 @@ function BrainAtlasPanel({
     activity?.lastObservedAt.corrected,
   );
   const candidateIsRecent = memorySignalIsRecent(candidateObservedAt, motionWindowSeconds);
+  const helpNode = helpNodeId ? BRAIN_ATLAS_NODE_HELP[helpNodeId] : null;
+  const toggleNodeHelp = (nodeId: BrainAtlasHelpNodeId) => setHelpNodeId((current) => current === nodeId ? null : nodeId);
+  const nodeHelpKeyDown = (event: React.KeyboardEvent<SVGGElement>, nodeId: BrainAtlasHelpNodeId) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    toggleNodeHelp(nodeId);
+  };
 
   return (
     <section
@@ -4185,7 +4227,7 @@ function BrainAtlasPanel({
                 </g>
               );
             })}
-            <g className={`memory-flow-node is-recall${recent("retrieval") ? " is-live" : ""}`}>
+            <g className={`memory-flow-node is-recall is-explainable${helpNodeId === "recall" ? " is-help-open" : ""}${recent("retrieval") ? " is-live" : ""}`} role="button" tabIndex={0} aria-label="Explain Recall" aria-expanded={helpNodeId === "recall"} aria-controls="brain-atlas-node-help" onClick={() => toggleNodeHelp("recall")} onKeyDown={(event) => nodeHelpKeyDown(event, "recall")}>
               <circle className="memory-flow-node-receipt-ring" cx={brainAtlasWideX(302)} cy="119" r="35" />
               <rect x={brainAtlasWideX(232)} y="92" width={brainAtlasWideWidth(232, 140)} height="54" rx="9" />
               <g className="memory-flow-node-copy" clipPath="url(#brain-atlas-recall-copy)">
@@ -4193,7 +4235,7 @@ function BrainAtlasPanel({
               <text className="memory-flow-node-detail" x={brainAtlasWideX(302)} y="132" textAnchor="middle">{recallEfficiency != null ? [recallEfficiency, "% hit · ", avgRecallLatencyMs == null ? "latency unavailable" : [avgRecallLatencyMs, " ms"].join("")].join("") : activity ? [retrievals, " queried · ", count("misses"), " miss"].join("") : "telemetry unavailable"}</text>
               </g>
             </g>
-            <g className={`memory-flow-node is-registry${recent("hit") || recent("promoted") ? " is-live" : ""}`} aria-label={activity ? `Memory registry: ${durableMemoryCount} active records, ${supersededMemoryCount} superseded, ${registrySourceCount} sources` : "Memory registry telemetry unavailable"}>
+            <g className={`memory-flow-node is-registry is-explainable${helpNodeId === "registry" ? " is-help-open" : ""}${recent("hit") || recent("promoted") ? " is-live" : ""}`} role="button" tabIndex={0} aria-label="Explain Memory registry" aria-expanded={helpNodeId === "registry"} aria-controls="brain-atlas-node-help" onClick={() => toggleNodeHelp("registry")} onKeyDown={(event) => nodeHelpKeyDown(event, "registry")}>
               <title>{activity ? `${durableMemoryCount} active records · ${supersededMemoryCount} superseded · ${registrySourceCount} sources` : "Registry telemetry unavailable"}</title>
               <circle className="memory-flow-node-receipt-ring" cx={brainAtlasWideX(503)} cy="119" r="37" />
               <rect x={brainAtlasWideX(430)} y="92" width={brainAtlasWideWidth(430, 146)} height="54" rx="9" />
@@ -4202,7 +4244,7 @@ function BrainAtlasPanel({
               <text className="memory-flow-node-detail" x={brainAtlasWideX(503)} y="132" textAnchor="middle">{activity ? `${durableMemoryCount} active · ${registrySourceCount} sources` : "telemetry unavailable"}</text>
               </g>
             </g>
-            <g className={`memory-flow-node is-applied${recent("used") ? " is-live" : ""}`}>
+            <g className={`memory-flow-node is-applied is-explainable${helpNodeId === "applied" ? " is-help-open" : ""}${recent("used") ? " is-live" : ""}`} role="button" tabIndex={0} aria-label="Explain Applied" aria-expanded={helpNodeId === "applied"} aria-controls="brain-atlas-node-help" onClick={() => toggleNodeHelp("applied")} onKeyDown={(event) => nodeHelpKeyDown(event, "applied")}>
               <circle className="memory-flow-node-receipt-ring" cx={brainAtlasWideX(712)} cy="58" r="37" />
               <rect x={brainAtlasWideX(640)} y="31" width={brainAtlasWideWidth(640, 144)} height="54" rx="9" />
               <g className="memory-flow-node-copy" clipPath="url(#brain-atlas-applied-copy)">
@@ -4210,7 +4252,7 @@ function BrainAtlasPanel({
               <text className="memory-flow-node-detail" x={brainAtlasWideX(712)} y="71" textAnchor="middle">{selectionUseRate != null ? [selectionUseRate, "% selected -> used"].join("") : activity ? [uses, " explicit use receipt", uses === 1 ? "" : "s"].join("") : "telemetry unavailable"}</text>
               </g>
             </g>
-            <g className={`memory-flow-node is-feedback${recent("feedback") ? " is-live" : ""}`}>
+            <g className={`memory-flow-node is-feedback is-explainable${helpNodeId === "outcome" ? " is-help-open" : ""}${recent("feedback") ? " is-live" : ""}`} role="button" tabIndex={0} aria-label="Explain Outcome" aria-expanded={helpNodeId === "outcome"} aria-controls="brain-atlas-node-help" onClick={() => toggleNodeHelp("outcome")} onKeyDown={(event) => nodeHelpKeyDown(event, "outcome")}>
               <circle className="memory-flow-node-receipt-ring" cx={brainAtlasWideX(712)} cy="181" r="37" />
               <rect x={brainAtlasWideX(640)} y="154" width={brainAtlasWideWidth(640, 144)} height="54" rx="9" />
               <g className="memory-flow-node-copy" clipPath="url(#brain-atlas-outcome-copy)">
@@ -4218,7 +4260,7 @@ function BrainAtlasPanel({
               <text className="memory-flow-node-detail" x={brainAtlasWideX(712)} y="194" textAnchor="middle">{feedbackQuality != null ? [feedbackQuality, "% helpful outcomes"].join("") : activity ? [count("feedback"), " feedback receipt", count("feedback") === 1 ? "" : "s"].join("") : "telemetry unavailable"}</text>
               </g>
             </g>
-            <g className={`memory-flow-node is-candidate${candidateIsRecent ? " is-live" : ""}`} data-observed-at={candidateObservedAt || undefined}>
+            <g className={`memory-flow-node is-candidate is-explainable${helpNodeId === "candidate" ? " is-help-open" : ""}${candidateIsRecent ? " is-live" : ""}`} role="button" tabIndex={0} aria-label="Explain Candidate" aria-expanded={helpNodeId === "candidate"} aria-controls="brain-atlas-node-help" onClick={() => toggleNodeHelp("candidate")} onKeyDown={(event) => nodeHelpKeyDown(event, "candidate")} data-observed-at={candidateObservedAt || undefined}>
               <circle className="memory-flow-node-receipt-ring" cx={brainAtlasWideX(902)} cy="181" r="37" />
               <rect x={brainAtlasWideX(830)} y="154" width={brainAtlasWideWidth(830, 144)} height="54" rx="9" />
               <g className="memory-flow-node-copy" clipPath="url(#brain-atlas-candidate-copy)">
@@ -4226,7 +4268,7 @@ function BrainAtlasPanel({
               <text className="memory-flow-node-detail" x={brainAtlasWideX(902)} y="194" textAnchor="middle">{activity ? `${count("proposed")} proposed · not learned` : "telemetry unavailable"}</text>
               </g>
             </g>
-            <g className={`memory-flow-node is-durable${recent("promoted") ? " is-live" : ""}`}>
+            <g className={`memory-flow-node is-durable is-explainable${helpNodeId === "durable" ? " is-help-open" : ""}${recent("promoted") ? " is-live" : ""}`} role="button" tabIndex={0} aria-label="Explain Durable" aria-expanded={helpNodeId === "durable"} aria-controls="brain-atlas-node-help" onClick={() => toggleNodeHelp("durable")} onKeyDown={(event) => nodeHelpKeyDown(event, "durable")}>
               <circle className="memory-flow-node-receipt-ring" cx={brainAtlasWideX(902)} cy="58" r="37" />
               <rect x={brainAtlasWideX(830)} y="31" width={brainAtlasWideWidth(830, 144)} height="54" rx="9" />
               <g className="memory-flow-node-copy" clipPath="url(#brain-atlas-durable-copy)">
@@ -4298,6 +4340,14 @@ function BrainAtlasPanel({
               )}
             </g>
           </svg>
+          {helpNode ? (
+            <aside id="brain-atlas-node-help" className="brain-atlas-node-help" aria-live="polite">
+              <button type="button" onClick={() => setHelpNodeId(null)} aria-label="Close Brain Atlas explanation">×</button>
+              <strong>{helpNode.title}</strong>
+              <p><span>Happening</span>{helpNode.happening}</p>
+              <p><span>Used</span>{helpNode.used}</p>
+            </aside>
+          ) : null}
         </div>
       </section>
       )}

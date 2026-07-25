@@ -17814,8 +17814,8 @@ body,
   stroke-width: 4.4;
   stroke-dasharray: 20 12;
   stroke-opacity: 1;
-  filter: drop-shadow(0 0 3px currentColor);
-  animation: memory-flow-travel 1.05s linear infinite, memory-flow-receipt-glow 1.4s ease-in-out infinite;
+  filter: none;
+  animation: memory-flow-travel 1.05s linear infinite;
 }
 
 .memory-flow-edge.is-work-lifeline.is-live {
@@ -17968,6 +17968,63 @@ body,
   font-size: 13px;
   pointer-events: none;
 }
+
+.memory-flow-node.is-explainable {
+  cursor: pointer;
+}
+
+.memory-flow-node.is-explainable > rect:not(.memory-flow-node-aura) {
+  transition: stroke-width 140ms ease, filter 140ms ease;
+}
+
+.memory-flow-node.is-explainable:hover > rect:not(.memory-flow-node-aura),
+.memory-flow-node.is-explainable.is-help-open > rect:not(.memory-flow-node-aura) {
+  stroke-width: 2.25;
+  filter: drop-shadow(0 0 7px color-mix(in srgb, currentColor 64%, transparent));
+}
+
+.memory-flow-node.is-explainable:focus-visible > rect:not(.memory-flow-node-aura) {
+  stroke: #fff;
+  stroke-width: 2.6;
+  outline: none;
+}
+
+.brain-atlas-node-help {
+  position: absolute;
+  z-index: 4;
+  right: clamp(12px, 2vw, 28px);
+  bottom: clamp(10px, 2vh, 24px);
+  width: min(330px, calc(100% - 28px));
+  padding: 12px 34px 12px 14px;
+  border: 1px solid rgba(101, 217, 255, 0.56);
+  border-radius: 10px;
+  background: rgba(4, 21, 34, 0.94);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.38), 0 0 18px rgba(85, 215, 255, 0.12);
+  color: #d9f4fb;
+  backdrop-filter: blur(10px);
+}
+
+.brain-atlas-node-help > button {
+  position: absolute;
+  top: 7px;
+  right: 9px;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #8dc4d3;
+  font-size: 19px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.brain-atlas-node-help > button:hover,
+.brain-atlas-node-help > button:focus-visible { color: #fff; background: rgba(101, 217, 255, 0.14); }
+.brain-atlas-node-help > strong { display: block; margin-bottom: 7px; color: #fff; font-size: 14px; }
+.brain-atlas-node-help > p { margin: 5px 0 0; color: #a9c7d0; font-size: 12px; line-height: 1.35; }
+.brain-atlas-node-help > p > span { display: block; margin-bottom: 1px; color: #65d9ff; font-size: 9px; font-weight: 850; letter-spacing: 0.1em; text-transform: uppercase; }
 
 @keyframes memory-flow-travel {
   to { stroke-dashoffset: -64; }
