@@ -4112,11 +4112,12 @@ function BrainAtlasPanel({
               const live = memorySignalIsRecent(row.lastRetrievalAt, motionWindowSeconds);
               const liveWork = liveWorkByAgent.get(row.agent);
               const workObservedAt = liveWork?.activeWork?.updated_at || liveWork?.status.updated_at;
-              const workLinked = Boolean(liveWork?.working && memorySignalIsRecent(workObservedAt, motionWindowSeconds));
+              const workActive = Boolean(liveWork?.working);
+              const workLinked = Boolean(workActive && memorySignalIsRecent(workObservedAt, motionWindowSeconds));
               return (
                 <React.Fragment key={`agent-flow-${row.agent}`}>
                   <path
-                    className={`memory-flow-edge is-work-lifeline agent-${row.agent}${workLinked ? " is-live" : ""}`}
+                    className={`memory-flow-edge is-work-lifeline agent-${row.agent}${workActive ? " is-linked" : ""}${workLinked ? " is-live" : ""}`}
                     data-agent={row.agent}
                     data-operation="live-work"
                     data-work-id={workLinked ? liveWork?.activeWork?.id || undefined : undefined}
@@ -4148,7 +4149,8 @@ function BrainAtlasPanel({
               const agentLoad = loadByAgent.get(row.agent)!;
               const liveWork = liveWorkByAgent.get(row.agent);
               const workObservedAt = liveWork?.activeWork?.updated_at || liveWork?.status.updated_at;
-              const workLinked = Boolean(working && memorySignalIsRecent(workObservedAt, motionWindowSeconds));
+              const workActive = Boolean(working);
+              const workLinked = Boolean(workActive && memorySignalIsRecent(workObservedAt, motionWindowSeconds));
               return (
                 <g
                   key={row.agent}
@@ -4161,7 +4163,7 @@ function BrainAtlasPanel({
                   data-agent-load-score={agentLoad.score}
                   style={{ "--atlas-agent-phase": `${index * -0.18}s` } as React.CSSProperties}
                 >
-                  <title>{`${AGENTS[row.agent].label}: ${working ? `${agentLoad.label.toLowerCase()} verified work load (${agentLoad.score}/4)` : "not working"}; ${workLinked ? "fresh Live Work lifeline active" : "no fresh Live Work lifeline"}; ${!activity ? "memory telemetry unavailable" : live ? "verified retrieval receipt only" : "memory quiet"}`}</title>
+                  <title>{`${AGENTS[row.agent].label}: ${working ? `${agentLoad.label.toLowerCase()} verified work load (${agentLoad.score}/4)` : "not working"}; ${workLinked ? "fresh Live Work lifeline active" : workActive ? "active Live Work link, awaiting fresh heartbeat" : "no active Live Work link"}; ${!activity ? "memory telemetry unavailable" : live ? "verified retrieval receipt only" : "memory quiet"}`}</title>
                   <rect className="memory-flow-node-aura" x={brainAtlasWideX(13)} y={y - 5} width={brainAtlasWideWidth(13, 160)} height="48" rx="12" />
                   <rect x={brainAtlasWideX(18)} y={y} width={brainAtlasWideWidth(18, 150)} height="38" rx="7" />
                   <g className="memory-flow-node-copy" clipPath={`url(#brain-atlas-agent-copy-${row.agent})`}>
