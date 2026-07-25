@@ -3898,6 +3898,13 @@ function BrainAtlasPanel({
   ), [recentProofRows]);
   const activity = useMemo(() => sanitizedMemoryActivity(memoryOperations?.activity), [memoryOperations?.activity]);
   const durableMemoryCount = sanitizedNestedMemoryCount(memoryOperations, "registry", "active");
+  const supersededMemoryCount = sanitizedNestedMemoryCount(memoryOperations, "registry", "superseded");
+  const registrySourceCount = sanitizedNestedMemoryCount(memoryOperations, "registry", "sources");
+  const reviewPendingCount = sanitizedNestedMemoryCount(memoryOperations, "review", "pending");
+  const reviewDisputedCount = sanitizedNestedMemoryCount(memoryOperations, "review", "disputed");
+  const activePublicMemoryCount = sanitizedNestedMemoryCount(memoryOperations, "privacy", "activePublic");
+  const activeOwnerPrivateMemoryCount = sanitizedNestedMemoryCount(memoryOperations, "privacy", "activeOwnerPrivate");
+  const crossOwnerPrivateLeaks = sanitizedNestedMemoryCount(memoryOperations, "privacy", "crossOwnerPrivateLeaks");
   const queries7d = sanitizedNestedMemoryCount(memoryOperations, "retrieval", "queries7d");
   const hits7d = sanitizedNestedMemoryCount(memoryOperations, "retrieval", "hits7d");
   const avgRecallLatencyMs = sanitizedNestedMemoryMetric(memoryOperations, "retrieval", "avgLatencyMs", 60_000);
@@ -3913,6 +3920,8 @@ function BrainAtlasPanel({
   const recent = (key: MemorySignalKey) => memorySignalIsRecent(activity?.lastObservedAt[key], motionWindowSeconds);
   const latestSignal = latestMemorySignal(activity);
   const latestSignalRecent = latestSignal ? memorySignalIsRecent(latestSignal[1], motionWindowSeconds) : false;
+  const privacySentinelTone = !activity ? "unavailable" : crossOwnerPrivateLeaks ? "risk" : "clear";
+  const reviewQueueTone = !activity ? "unavailable" : reviewDisputedCount ? "risk" : reviewPendingCount ? "watch" : "clear";
   const activityStateLabel = !activity
     ? "Memory telemetry unavailable"
     : latestSignal
@@ -4058,6 +4067,24 @@ function BrainAtlasPanel({
               <span className={workingAgentCount ? "is-working" : ""} title={loadDisclosure}>Load {systemLoad.label.toLowerCase()} · {systemLoad.score}/4</span>
               <span>{activity ? `${activity.windowMinutes}m memory window` : "Memory window unavailable"}</span>
               <span>Counts only · no contents</span>
+              <span
+                className={`is-governance is-privacy-${privacySentinelTone}`}
+                title={activity ? `Cross-owner private leaks: ${crossOwnerPrivateLeaks}. ${activePublicMemoryCount} active public and ${activeOwnerPrivateMemoryCount} active owner-private records.` : "Privacy telemetry unavailable"}
+              >
+                {activity ? `Privacy · ${crossOwnerPrivateLeaks ? `${crossOwnerPrivateLeaks} leak${crossOwnerPrivateLeaks === 1 ? "" : "s"}` : "boundary clean"}` : "Privacy unavailable"}
+              </span>
+              <span
+                className={`is-governance is-review-${reviewQueueTone}`}
+                title={activity ? `${reviewPendingCount} pending review candidate${reviewPendingCount === 1 ? "" : "s"}; ${reviewDisputedCount} disputed.` : "Review telemetry unavailable"}
+              >
+                {activity ? `Review · ${reviewPendingCount} pending${reviewDisputedCount ? ` · ${reviewDisputedCount} disputed` : ""}` : "Review unavailable"}
+              </span>
+              <span
+                className="is-governance is-provenance"
+                title={activity ? `${durableMemoryCount} active governed records, ${supersededMemoryCount} superseded, from ${registrySourceCount} sources.` : "Registry provenance unavailable"}
+              >
+                {activity ? `Registry · ${durableMemoryCount} active · ${supersededMemoryCount} superseded · ${registrySourceCount} sources` : "Registry unavailable"}
+              </span>
             </div>
             <output className="brain-atlas-evidence-summary" title={evidencePolicyDetail} aria-live="polite">
               {evidenceSummary}

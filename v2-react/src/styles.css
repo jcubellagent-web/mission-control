@@ -17346,6 +17346,37 @@ body,
   box-shadow: 0 0 10px rgba(85, 215, 255, 0.1);
 }
 
+#brain-atlas .brain-atlas-scope span.is-governance {
+  border-color: rgba(142, 168, 183, 0.3);
+  color: #b5c8d2;
+  background: rgba(7, 29, 46, 0.74);
+}
+
+#brain-atlas .brain-atlas-scope span.is-privacy-clear {
+  border-color: rgba(88, 238, 154, 0.34);
+  color: #9cefc6;
+  background: rgba(44, 194, 118, 0.09);
+}
+
+#brain-atlas .brain-atlas-scope span.is-privacy-risk,
+#brain-atlas .brain-atlas-scope span.is-review-risk {
+  border-color: rgba(255, 118, 118, 0.5);
+  color: #ffb3b3;
+  background: rgba(215, 74, 74, 0.1);
+}
+
+#brain-atlas .brain-atlas-scope span.is-review-watch {
+  border-color: rgba(255, 209, 102, 0.44);
+  color: #ffe091;
+  background: rgba(191, 137, 42, 0.09);
+}
+
+#brain-atlas .brain-atlas-scope span.is-provenance {
+  border-color: rgba(180, 140, 255, 0.32);
+  color: #d1bcff;
+  background: rgba(111, 72, 179, 0.08);
+}
+
 #brain-atlas .brain-atlas-evidence-summary {
   flex: 0 1 auto;
   max-width: 45%;
