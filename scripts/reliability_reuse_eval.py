@@ -50,6 +50,7 @@ STATE_RANK = {"pass": 0, "watch": 1, "fail": 2}
 MAX_FUTURE_SECONDS = 120
 MEMORY_MAX_AGE_MINUTES = 1_500
 HANDOFF_MAX_AGE_MINUTES = 65
+HANDOFF_EVIDENCE_WINDOW_MINUTES = 24 * 60
 COMPLETION_MAX_AGE_MINUTES = 65
 TELEGRAM_MAX_AGE_MINUTES = 65
 RECOVERY_PROBE_MAX_AGE_MINUTES = 12
@@ -315,7 +316,10 @@ def memory_gate(data_dir: Path, now: dt.datetime) -> dict[str, Any]:
 def handoff_gate(data_dir: Path, now: dt.datetime) -> dict[str, Any]:
     source = "data/handoff-queue.json"
     payload, error = read_json(data_dir / "handoff-queue.json")
-    count_names = ("rows", "modern", "receiptComplete", "terminalModern", "terminalLinked", "legacy", "malformed")
+    count_names = (
+        "rows", "currentRows", "historicalRows", "modern", "receiptComplete",
+        "terminalModern", "terminalLinked", "legacy", "malformed",
+    )
     if error or not isinstance(payload, dict):
         return source_error_gate("handoff-receipts", "Handoff receipts", source, error or "malformed", count_names)
     states: list[str] = []
@@ -332,10 +336,17 @@ def handoff_gate(data_dir: Path, now: dt.datetime) -> dict[str, Any]:
             {name: 0 for name in count_names}, observed,
         )
     modern = complete = terminal_modern = terminal_linked = legacy = malformed = 0
+    current_rows = historical_rows = 0
+    cutoff = now - dt.timedelta(minutes=HANDOFF_EVIDENCE_WINDOW_MINUTES)
     for row in rows:
         if not isinstance(row, dict):
             malformed += 1
             continue
+        row_time = parse_time(first_nonempty(row, ("updatedAt", "createdAt", "time", "recordedAt")))
+        if row_time is not None and row_time < cutoff:
+            historical_rows += 1
+            continue
+        current_rows += 1
         receipt = row.get("receipt") if isinstance(row.get("receipt"), dict) else {}
         work_id = first_nonempty(row, ("workId", "work_id"))
         run_id = first_nonempty(row, ("runId", "run_id"))
@@ -374,6 +385,9 @@ def handoff_gate(data_dir: Path, now: dt.datetime) -> dict[str, Any]:
     if not rows:
         states.append("watch")
         reasons.append("handoff-evidence-missing")
+    elif current_rows == 0:
+        states.append("watch")
+        reasons.append("current-handoff-evidence-missing")
     elif modern == 0:
         states.append("watch")
         reasons.append("modern-receipts-not-observed")
@@ -387,6 +401,8 @@ def handoff_gate(data_dir: Path, now: dt.datetime) -> dict[str, Any]:
         "handoff-receipts", "Handoff receipts", source, states, reasons,
         {
             "rows": len(rows),
+            "currentRows": current_rows,
+            "historicalRows": historical_rows,
             "modern": modern,
             "receiptComplete": complete,
             "terminalModern": terminal_modern,
