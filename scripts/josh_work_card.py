@@ -34,6 +34,12 @@ SESSIONS_PATH = Path.home() / ".openclaw" / "agents" / "main" / "sessions" / "se
 DIRECT_SESSION_KEY = "agent:main:telegram:direct:6218150306"
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
+# The shared Telegram sender is owned by the OpenClaw workspace, while this
+# renderer lives under mission-control/scripts.  Keep both import roots so the
+# final sender uses the same authenticated Bot API lane as the live card.
+WORKSPACE_SCRIPTS = WORKSPACE / "scripts"
+if str(WORKSPACE_SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(WORKSPACE_SCRIPTS))
 
 from telegram_final_format import render_final_codeblock  # type: ignore  # noqa: E402
 
@@ -76,7 +82,9 @@ DEFAULT_BUTTONS = [
 SECTION_SPACER = "⠀"
 #JAIMES: every ecosystem live card uses the same Telegram <pre> geometry.
 # Proportional-text spacing is not visually equivalent in fixed-width blocks.
-CARD_WRAP_WIDTH = max(32, int(os.environ.get("JOSH_CARD_WRAP_WIDTH", "38")))
+# Keep final-codeblock validation aligned with telegram_final_format.py. Live
+# cards may remain compact, but finals use the more readable 50-column layout.
+CARD_WRAP_WIDTH = max(32, int(os.environ.get("JOSH_CARD_WRAP_WIDTH", "50")))
 CARD_CONTINUATION_INDENT = "   "
 CARD_BULLET_INDENT = "  "
 CONTROL_CENTER_CHAT_ID = "-1003589561528"
@@ -2061,7 +2069,9 @@ def load_final_text_file(path: str) -> str:
     lines = [re.sub(r"^\s*•\s+", "- ", line) for line in plain.splitlines()]
     plain = "\n".join(lines)
     if not lines or (legacy_pre and any(len(line) > CARD_WRAP_WIDTH for line in lines)):
-        raise SystemExit("--final-text-file must pre-wrap every line to the canonical 38-column geometry")
+        raise SystemExit(
+            f"--final-text-file must pre-wrap every line to the canonical {CARD_WRAP_WIDTH}-column geometry"
+        )
     labels = ["Complete:", "What was done:", "Issues:", "Appropriate next steps:", "Approval needed:"]
     positions = [next((index for index, line in enumerate(lines) if line.startswith(label)), -1) for label in labels]
     complete_valid = bool(re.search(r"(?m)^Complete:\s+(?:Yes|No)\b", plain))

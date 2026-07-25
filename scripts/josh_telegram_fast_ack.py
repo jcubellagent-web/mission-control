@@ -2216,11 +2216,26 @@ def summarize_objective(text: str) -> str:
     return clean[:80] or "Handle Telegram task"
 
 
+def is_telegram_canary_prompt(prompt: str) -> bool:
+    """Recognize an explicit delivery check after Hermes transport wrapping."""
+    text = clean_prompt(prompt).lower().strip()
+    text = re.sub(r"^\[j\|\d+\]\s*", "", text, flags=re.I)
+    return bool(re.fullmatch(r"(?:test|canary|ping|check)(?:[.!?\s]*)", text))
+
+
 def objective_from_prompt(prompt: str) -> str:
     text = clean_prompt(prompt)
     lowered = text.lower().strip()
+    # Hermes preserves Telegram sender attribution in stored prompts. Strip
+    # that transport wrapper before classifying short operational requests.
+    lowered = re.sub(r"^\[j\|\d+\]\s*", "", lowered, flags=re.I)
     if is_hold_request(prompt):
         return "Hold / no action"
+    # A bare test/canary is an intentional delivery check, not an ambiguous
+    # request. Give it a real objective so the fast-ack path can create and
+    # complete the normal Inbox lifecycle instead of waiting forever.
+    if re.fullmatch(r"(?:test|canary|ping|check)(?:[.!?\s]*)", lowered):
+        return "Verify Telegram response"
     if lowered.startswith("/overview"):
         return "Run Control Tower overview"
     if lowered.startswith("/steer"):
@@ -2684,8 +2699,42 @@ def send_ack(
                 "last_card_update_at": utc_now(),
                 **gateway_public_fields(gateway),
             }
-    # The visible acknowledgement must be first. Route and skill probes may
-    # involve remote health checks and must never delay the eyes reaction.
+    # The visible acknowledgement must be first. An explicit canary is a
+    # delivery check, not agent work: answer it locally so a model outage can
+    # never leave Telegram typing or a stuck card after the eyes reaction.
+    if is_telegram_canary_prompt(prompt):
+        if dry_run:
+            canary_message_id = "dry-run-canary"
+        else:
+            canary_message_id = send_initial_ack(
+                "✅ Test received — Josh 2.0 Telegram intake and reply delivery are working.",
+                meta=meta,
+            )
+        if canary_message_id:
+            return {
+                "ok": True,
+                "status": "canary-delivered",
+                "reaction_ok": bool(dry_run or ack_sent),
+                "ack_message_id": canary_message_id,
+                "key": key,
+                "objective": "Verify Telegram response",
+                "no_card_required": True,
+                "last_card_update_at": utc_now(),
+                **gateway_public_fields(gateway),
+            }
+        return {
+            "ok": False,
+            "status": "canary-delivery-failed",
+            "error": "telegram_send_failed",
+            "reaction_ok": bool(dry_run or ack_sent),
+            "ack_message_id": "",
+            "key": key,
+            "objective": "Verify Telegram response",
+            "last_card_update_at": utc_now(),
+            **gateway_public_fields(gateway),
+        }
+    # Route and skill probes may involve remote health checks and must never
+    # delay the eyes reaction for normal work.
     objective = objective_from_prompt(prompt)
     if objective_is_near_copy(prompt, objective):
         objective = semantic_reinterpretation(prompt)

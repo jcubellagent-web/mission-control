@@ -28,7 +28,7 @@ def test_shared_final_codeblock_has_separate_metadata_and_bounded_rows() -> None
     assert "\nModel: openai-codex/gpt-5.6-sol\nRoute: JAIMES verified execution\nWhy: heavy workhorse reasoning\n" in rendered
     assert "<blockquote>" not in rendered
     body = html.unescape(rendered.removeprefix("<pre>").removesuffix("</pre>"))
-    assert max(map(len, body.splitlines())) <= 38
+    assert max(map(len, body.splitlines())) <= 50
     assert body.count("What was done:") == 1
     assert body.count("Approval needed:") == 1
 
@@ -47,4 +47,4 @@ def test_shared_final_codeblock_uses_hanging_indents() -> None:
     )
     body = html.unescape(rendered.removeprefix("<pre>").removesuffix("</pre>"))
     assert any(line.startswith("  ") for line in body.splitlines())
-    assert all(len(line) <= 38 for line in body.splitlines())
+    assert all(len(line) <= 50 for line in body.splitlines())

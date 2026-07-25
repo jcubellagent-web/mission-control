@@ -7,7 +7,7 @@ import unicodedata
 from collections.abc import Sequence
 
 
-FINAL_WRAP_WIDTH = 38
+FINAL_WRAP_WIDTH = 50
 
 
 def _clean(value: object) -> str:
@@ -73,6 +73,16 @@ def wrap_prefixed(
     return rows
 
 
+def _user_facing_why(value: object) -> str:
+    """Keep internal auth/fallback diagnostics out of the compact final header."""
+    parts = [part.strip() for part in _clean(value).split(";") if part.strip()]
+    for part in parts:
+        lowered = part.lower()
+        if not lowered.startswith(("auth=", "fallback=", "provider=", "model=")):
+            return part
+    return parts[0] if parts else "unverified"
+
+
 def _bullet_rows(values: Sequence[object], fallback: str, *, width: int) -> list[str]:
     chosen = [_clean(value) for value in values if _clean(value)][:5] or [fallback]
     rows: list[str] = []
@@ -105,7 +115,7 @@ def render_final_codeblock(
         "",
         *wrap_prefixed(model or "unverified", first_prefix="Model: ", continuation="       ", width=width),
         *wrap_prefixed(route or "unverified", first_prefix="Route: ", continuation="       ", width=width),
-        *wrap_prefixed(why or "unverified", first_prefix="Why: ", continuation="     ", width=width),
+        *wrap_prefixed(_user_facing_why(why), first_prefix="Why: ", continuation="     ", width=width),
         "",
         *wrap_prefixed(complete_value, first_prefix="Complete: ", continuation="  ", width=width),
         "",
