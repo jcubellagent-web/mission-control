@@ -1899,8 +1899,10 @@ def self_test() -> int:
             "statusText": "1 working · Memory live · 2 exact receipts",
             "visiblePanelCount": 1,
             "legacyViewControlCount": 0,
-            "layerCounts": {"memory": 1, "proof": 1},
+            "layerCounts": {"memory": 1, "proof": 0},
             "proofState": "ready",
+            "proofAuditVisible": True,
+            "proofHealthVisible": True,
             "proofEmptyText": "",
             "proofRows": [
                 {"agent": "josh2", "workLabel": "Refresh Control Tower health", "visibleWorkLabel": "Refresh Control Tower health", "receipt": "receipt-1", "receiptStatus": "done", "model": "codex/gpt-5.6-terra", "routeVerified": True, "declaredAnimated": False, "opaqueLabel": False, "clipped": False},
@@ -1914,8 +1916,8 @@ def self_test() -> int:
         "brainAtlasSections": {
             "unified": {
                 "contained": True,
-                "heading": "Live activity + exact proof",
-                "description": "Governed memory moves on exact receipts; static proof is audit evidence, not private reasoning.",
+                "heading": "Governed memory activity",
+                "description": "Shared memory is recalled, applied, assessed, and promoted—not private reasoning.",
                 "headingFontSize": 12,
                 "descriptionFontSize": 9.5,
                 "headingClipped": False,
