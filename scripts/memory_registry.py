@@ -45,6 +45,7 @@ RETRIEVAL_STOPWORDS = {
 }
 PUBLIC_PRIVACY = {"dashboard-safe", "public"}
 KNOWN_OWNER_PRIVATE_PRIVACY = {
+    "personal-account-access",
     "agent-private",
     "sensitive-account",
     "sensitive",
@@ -125,8 +126,9 @@ def privacy_class(value: Any) -> str:
 
     Privacy is deliberately deny-by-default. Only the explicit
     ``dashboard-safe`` and ``public`` labels may cross an owner boundary;
-    agent-private, sensitive-account, legacy private labels, blanks, and
-    unknown labels remain owner/JOSHeX scoped.
+    personal-account-access, legacy private labels, blanks, and unknown labels
+    remain owner/JOSHeX scoped. Normal ecosystem and personal-context memories
+    are shared by default; account access and raw account content are not.
     """
 
     label = normalize_privacy_label(value)
@@ -1176,7 +1178,7 @@ def status_payload(db: sqlite3.Connection) -> dict[str, Any]:
             "sourceOfTruth": "Checked-in AGENTS.md, MEMORY.md, and skills",
             "autoPromote": "Verified low-risk facts, lessons, entities, and relationships only",
             "manualReview": "Preferences, procedures, policy, sensitive facts, and conflicts",
-            "privacy": "Only dashboard-safe/public memory may cross owners; all other and unknown labels are owner/JOSHeX scoped",
+            "privacy": "Normal ecosystem and personal-context memories are shared by default; only personal-account access, authentication/session material, raw account content, and unknown labels stay owner/JOSHeX scoped",
         },
         "agentAccess": {
             "josh2": "local CLI", "jaimes": "shared SSH client", "jain": "shared SSH client", "joshex": "oversight SSH client",
@@ -1223,7 +1225,7 @@ def main() -> int:
     propose_cmd.add_argument("--value", required=True)
     propose_cmd.add_argument("--owner", default="ecosystem")
     propose_cmd.add_argument("--visibility", default="shared")
-    propose_cmd.add_argument("--privacy", default="agent-private")
+    propose_cmd.add_argument("--privacy", default="dashboard-safe")
     propose_cmd.add_argument("--source", required=True)
     propose_cmd.add_argument("--evidence", default="")
     propose_cmd.add_argument("--confidence", type=float, default=0.8)

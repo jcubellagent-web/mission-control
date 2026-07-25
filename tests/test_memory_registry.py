@@ -171,6 +171,19 @@ class MemoryRegistryTest(unittest.TestCase):
         self.assertEqual(review["promoted"], 0)
         self.assertEqual(review["pending"], 1)
 
+    def test_default_proposals_are_shared_while_personal_account_access_stays_private(self) -> None:
+        shared = self.cli(
+            "propose", "--agent", "jaimes", "--type", "fact",
+            "--subject", "Privacy fixture shared-by-default", "--predicate", "has state", "--value", "ready",
+            "--owner", "jaimes", "--visibility", "shared", "--source", "test:default", "--confidence", "0.99",
+        )
+        shared_id = self.cli("approve", "--id", shared["id"], "--reviewer", "joshex")["recordId"]
+        personal = self.create_memory("personal account access", privacy="personal-account-access")
+
+        self.assertIn(shared_id, self.retrieve_ids("jain"))
+        self.assertNotIn(personal, self.retrieve_ids("jain"))
+        self.assertIn(personal, self.retrieve_ids("joshex"))
+
     def test_preflight_hashes_context_and_tracks_selected_then_used(self) -> None:
         memory_id = self.create_memory("preflight", privacy="dashboard-safe")
         work_id = "work-private-marker"

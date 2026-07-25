@@ -120,6 +120,8 @@ Checked-in `AGENTS.md`, `MEMORY.md`, and `agent-skills` remain authoritative. Th
   `python3 scripts/memory_registry.py retrieve --agent <agent> --query "<specific question>"`
 - Cite the returned source and confidence when memory materially changes a decision.
 - Propose durable learning with `memory_registry.py propose`; do not directly convert model inference into policy.
+- Shared memory is the default for normal ecosystem procedures, decisions, lessons, and Josh's non-account personal context. Use `dashboard-safe` with shared visibility unless a record contains personal-account access, authentication/session material, or raw account content.
+- `personal-account-access` is owner/JOSHeX scoped for access to Josh's personal accounts (including `jcubell16@gmail.com`): credentials, cookies, OAuth, passkeys, OTP/recovery material, browser sessions, and raw account/email content. Do not store secrets in the registry at any privacy level.
 - Preferences, procedures, policy, sensitive facts, and conflicts always require review. Only verified low-risk facts, lessons, entities, and relationships may be auto-promoted by the nightly review.
 - Never send raw private prompts or private memory contents to Control Tower. `data/memory-operations.json` contains health, counts, latency, and provenance coverage only.
 - Josh 2.0 owns the registry and nightly review. JAIMES, J.A.I.N, and JOSHeX use `scripts/ecosystem_memory_client.py` (or SSH to the same CLI) so all agents share one governed memory surface.
