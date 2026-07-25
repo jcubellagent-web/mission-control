@@ -1168,6 +1168,7 @@ function App() {
   const [quietMode, setQuietMode] = useState(true);
   const [displayState, setDisplayState] = useState<ControlTowerDisplayState>({});
   const [nightModeOverride, setNightModeOverride] = useState<boolean | null>(null);
+  const [atlasSelectedAgent, setAtlasSelectedAgent] = useState<AgentId | null>(null);
   const [clockNow, setClockNow] = useState(() => new Date());
   const liveCues = useLiveCues(state);
   const refreshInFlightRef = useRef<Promise<void> | null>(null);
@@ -1414,6 +1415,8 @@ function App() {
             quietMode={quietMode}
             onNavigate={navigateToPanel}
             liveCues={liveCues}
+            selectedAgent={atlasSelectedAgent}
+            onSelectAgent={setAtlasSelectedAgent}
           />
         </section>
         <div className="right-rail">
@@ -1432,6 +1435,8 @@ function App() {
           memoryOperations={state.memoryOperations}
           statuses={state.statuses}
           workItems={liveWorkItems}
+          selectedAgent={atlasSelectedAgent}
+          onSelectAgent={setAtlasSelectedAgent}
         />
         <MemoizedFinOpsDashboard
           wallet={state.agenticCrypto}
@@ -1454,6 +1459,8 @@ function BrainHero({
   quietMode,
   onNavigate,
   liveCues,
+  selectedAgent,
+  onSelectAgent,
 }: {
   state: MissionControlState;
   statuses: Map<AgentId, AgentStatus>;
@@ -1461,6 +1468,8 @@ function BrainHero({
   quietMode: boolean;
   onNavigate: (target: AttentionTarget) => void;
   liveCues: LiveCueState;
+  selectedAgent: AgentId | null;
+  onSelectAgent: (agent: AgentId | null) => void;
 }) {
   const { events, approvals } = state;
   const heroAgents = HERO_AGENT_ORDER;
@@ -1522,6 +1531,8 @@ function BrainHero({
                 activeModelRoutes={state.activeModelRoutes || []}
                 recentEvent={recentEvent}
                 changed={Boolean(liveCues.rows[cueRowKey("agent", agent)])}
+                selected={selectedAgent === agent}
+                onSelect={() => onSelectAgent(selectedAgent === agent ? null : agent)}
               />
             );
           })}
@@ -3050,6 +3061,8 @@ function MissionHealthPanel({ state }: { state: MissionControlState }) {
 function BrainOperationsSummary({
   state,
   workItems,
+  selectedAgent,
+  onSelectAgent,
   quietMode,
   onNavigate,
   liveCues,
@@ -3883,6 +3896,8 @@ function BrainAtlasPanel({
   memoryOperations?: MissionControlState["memoryOperations"];
   statuses: AgentStatus[];
   workItems: WorkItem[];
+  selectedAgent: AgentId | null;
+  onSelectAgent: (agent: AgentId | null) => void;
 }) {
   const [focusId, setFocusId] = useState("all");
   const [atlasMode, setAtlasMode] = useState<"evidence" | "ownership">("evidence");
@@ -3981,7 +3996,7 @@ function BrainAtlasPanel({
   return (
     <section
       id="brain-atlas"
-      className={`brain-atlas-panel is-${displayTone}${workingAgentCount ? " has-active-work" : ""}${latestSignalRecent ? " has-live-memory-flow" : ""}`}
+      className={`brain-atlas-panel is-${displayTone}${workingAgentCount ? " has-active-work" : ""}${latestSignalRecent ? " has-live-memory-flow" : ""}${selectedAgent ? " has-board-selection" : ""}`}
       data-atlas-view="unified"
       data-atlas-mode={atlasMode}
       data-atlas-view-tone={selectedTone}
@@ -4132,7 +4147,7 @@ function BrainAtlasPanel({
               return (
                 <g
                   key={row.agent}
-                  className={`memory-flow-node is-agent${working ? " is-work-active" : ""}${live ? " is-memory-live" : ""}`}
+                  className={`memory-flow-node is-agent${working ? " is-work-active" : ""}${live ? " is-memory-live" : ""}${selectedAgent === row.agent ? " is-board-selected" : ""}`}
                   data-agent={row.agent}
                   data-agent-working={working ? "true" : "false"}
                   data-work-state={working ? "working" : "quiet"}
@@ -4140,6 +4155,10 @@ function BrainAtlasPanel({
                   data-agent-load-tier={agentLoad.tier}
                   data-agent-load-score={agentLoad.score}
                   style={{ "--atlas-agent-phase": `${index * -0.18}s` } as React.CSSProperties}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => onSelectAgent(selectedAgent === row.agent ? null : row.agent)}
+                  onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onSelectAgent(selectedAgent === row.agent ? null : row.agent); } }}
                 >
                   <title>{`${AGENTS[row.agent].label}: ${working ? `${agentLoad.label.toLowerCase()} verified work load (${agentLoad.score}/4)` : "not working"}; ${!activity ? "memory telemetry unavailable" : live ? "verified retrieval receipt only" : "memory quiet"}`}</title>
                   <rect className="memory-flow-node-aura" x={brainAtlasWideX(13)} y={y - 5} width={brainAtlasWideWidth(13, 160)} height="48" rx="12" />
@@ -4927,6 +4946,8 @@ function AgentHeroCard({
   activeModelRoutes,
   recentEvent,
   changed,
+  selected,
+  onSelect,
 }: {
   agent: AgentId;
   liveWork: AgentLiveWorkPresentation;
@@ -4934,6 +4955,8 @@ function AgentHeroCard({
   activeModelRoutes: ActiveModelRoute[];
   recentEvent?: AgentEvent;
   changed?: boolean;
+  selected: boolean;
+  onSelect: () => void;
 }) {
   const { status, activeWork, activeFocus, visualState } = liveWork;
   const objectiveRef = useRef<HTMLHeadingElement | null>(null);
@@ -5009,12 +5032,16 @@ function AgentHeroCard({
   }, [headline.title, headline.description]);
   return (
     <article
-      className={`agent-hero-card ${agentClass(agent)} ${freshness} ${statusClass(status.status)} is-state-${visualState} ${activeFocus ? "is-working-focus" : "is-up-next-focus"} ${verifiedRoute ? "has-verified-route" : "is-route-pending"}${changedRowClass(changed)}`}
+      className={`agent-hero-card ${agentClass(agent)} ${freshness} ${statusClass(status.status)} is-state-${visualState} ${activeFocus ? "is-working-focus" : "is-up-next-focus"} ${verifiedRoute ? "has-verified-route" : "is-route-pending"}${selected ? " is-atlas-selected" : ""}${changedRowClass(changed)}`}
       data-agent={agent}
       data-agent-working={visualState === "working" ? "true" : "false"}
       data-model-family={verifiedRoute?.id || "unverified"}
       data-model-verified={verifiedRoute ? "true" : "false"}
       data-worker-count={workerRoutes.length}
+      onClick={onSelect}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onSelect(); } }}
       style={{
         "--agent-pulse-speed": `${pulseSpeed}s`,
         "--agent-rail-speed": `${railSpeed}s`,
