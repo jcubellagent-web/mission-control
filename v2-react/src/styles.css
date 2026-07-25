@@ -7980,6 +7980,69 @@ body {
     linear-gradient(180deg, rgba(5, 24, 28, 0.96), rgba(3, 13, 20, 0.98));
 }
 
+/* Live Work Board: readable execution narrative with one controller model label. */
+.brain-hero.is-flight-deck .agent-hero-card .agent-support-note {
+  color: #c5d9e2 !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  line-height: 1.22 !important;
+}
+
+.agent-workflow-lane {
+  display: grid;
+  grid-template-columns: 8px minmax(0, 1fr);
+  grid-column: 3;
+  grid-row: 1;
+  align-self: stretch;
+  gap: 8px;
+  min-width: 0;
+  border-left: 1px solid rgba(103, 177, 218, 0.18);
+  padding: 9px 4px 7px 12px;
+}
+
+.agent-workflow-lane > span {
+  width: 8px;
+  height: 8px;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: var(--agent-state-color);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--agent-state-color) 65%, transparent);
+}
+
+.agent-workflow-lane > div { min-width: 0; }
+.agent-workflow-lane strong,
+.agent-workflow-lane em {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.agent-workflow-lane strong {
+  color: #e8f7ff;
+  font-size: 12.5px;
+  font-weight: 900;
+  line-height: 1.1;
+}
+.agent-workflow-lane em {
+  margin-top: 5px;
+  color: #a9c0cc;
+  font-size: 10.5px;
+  font-style: normal;
+  font-weight: 780;
+  line-height: 1.1;
+}
+
+@media (min-width: 1361px) and (min-height: 850px) {
+  .brain-hero.is-flight-deck .agent-hero-card .agent-objective-description {
+    font-size: 15px !important;
+    line-height: 1.15 !important;
+    max-height: 19px !important;
+  }
+
+  .brain-hero.is-flight-deck .agent-workflow-lane strong { font-size: 12.5px !important; }
+  .brain-hero.is-flight-deck .agent-workflow-lane em { font-size: 10.5px !important; }
+}
+
 .agent-pulse-ring {
   display: none;
 }

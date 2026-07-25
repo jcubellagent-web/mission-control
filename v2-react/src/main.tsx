@@ -5098,12 +5098,16 @@ function AgentHeroCard({
           <span className="agent-objective-description">{headline.description}</span>
         </span>
       </h3>
-      <p title={supportNote}>{supportNote}</p>
-      <div className="agent-route-label" title={verifiedRoute ? `${route.providerLabel}: ${route.description}` : "No verified runtime route is active for this work item."}>
+      <p className="agent-support-note" title={supportNote}>{supportNote}</p>
+      <div className="agent-workflow-lane" title={workerRoutes.length ? "Verified active specialist workers attached to this controller work" : activeFocus ? "Current verified workflow phase" : "Next known work state"}>
         <span aria-hidden="true" />
         <div>
-          <strong>{verifiedRoute ? controllerModelLabel : "Route pending"}</strong>
-          <em>{missionText(verifiedRoute ? (status.model || route.providerLabel) : "Awaiting route")}</em>
+          <strong>{workerRoutes.length ? `${workerRoutes.length} specialist${workerRoutes.length === 1 ? "" : "s"} attached` : activeFocus ? "Primary workflow" : "Next workflow"}</strong>
+          <em>{workerRoutes.length
+            ? visibleWorkerRoutes.map((worker) => liveWorkModelLabel(CANONICAL_ROUTES[worker.modelFamily], worker.modelId)).join(" · ")
+            : activeFocus
+              ? stepTrail.find((step) => step.state === "current")?.label || "Current step"
+              : compactText(idleContext.nextTitle, 36)}</em>
         </div>
       </div>
     </article>
