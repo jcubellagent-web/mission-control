@@ -6326,6 +6326,7 @@ function JobsRail({
               className={`is-${summaryKey}${interactive ? " has-reason" : ""}`}
               data-summary={summaryKey}
               data-outcome={tone}
+              data-empty={count === 0 ? "true" : undefined}
               data-reason={interactive ? reason : undefined}
               data-reason-trigger={interactive ? "true" : undefined}
               tabIndex={interactive ? 0 : undefined}
