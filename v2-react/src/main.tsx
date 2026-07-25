@@ -4064,9 +4064,7 @@ function BrainAtlasPanel({
           <div className="brain-atlas-context">
             <div className="brain-atlas-scope" aria-label="Brain Atlas scope and evidence policy">
               <span className={workingAgentCount ? "is-working" : ""}>Live Work linked · {workingAgentCount} working</span>
-              <span className={workingAgentCount ? "is-working" : ""} title={loadDisclosure}>Load {systemLoad.label.toLowerCase()} · {systemLoad.score}/4</span>
               <span>{activity ? `${activity.windowMinutes}m memory window` : "Memory window unavailable"}</span>
-              <span>Counts only · no contents</span>
               <span
                 className={`is-governance is-privacy-${privacySentinelTone}`}
                 title={activity ? `Cross-owner private leaks: ${crossOwnerPrivateLeaks}. ${activePublicMemoryCount} active public and ${activeOwnerPrivateMemoryCount} active owner-private records.` : "Privacy telemetry unavailable"}
@@ -4079,12 +4077,6 @@ function BrainAtlasPanel({
               >
                 {activity ? `Review · ${reviewPendingCount} pending${reviewDisputedCount ? ` · ${reviewDisputedCount} disputed` : ""}` : "Review unavailable"}
               </span>
-              <span
-                className="is-governance is-provenance"
-                title={activity ? `${durableMemoryCount} active governed records, ${supersededMemoryCount} superseded, from ${registrySourceCount} sources.` : "Registry provenance unavailable"}
-              >
-                {activity ? `Registry · ${durableMemoryCount} active · ${supersededMemoryCount} superseded · ${registrySourceCount} sources` : "Registry unavailable"}
-              </span>
             </div>
             <output className="brain-atlas-evidence-summary" title={evidencePolicyDetail} aria-live="polite">
               {evidenceSummary}
@@ -4092,35 +4084,21 @@ function BrainAtlasPanel({
           </div>
         </header>
 
-        <div className="memory-flow-metrics" aria-label="Memory capability summary">
-          <article><span>Retrievals</span><strong>{activity ? retrievals : "--"}</strong><em>{activity ? ["last ", activity.windowMinutes, "m"].join("") : "telemetry unavailable"}</em></article>
-          <article className={recallEfficiency != null ? "is-verified" : "is-idle"}><span>Recall efficiency</span><strong>{recallEfficiency == null ? "--" : [recallEfficiency, "%"].join("")}</strong><em>{recallEfficiency != null ? [queries7d, " queries · ", avgRecallLatencyMs == null ? "latency unavailable" : [avgRecallLatencyMs, " ms"].join("")].join("") : "7d telemetry unavailable"}</em></article>
-          <article className={selectionUseRate != null ? "is-verified" : "is-idle"}><span>Selection to use</span><strong>{selectionUseRate == null ? "--" : [selectionUseRate, "%"].join("")}</strong><em>{selectionUseRate != null ? [used30d, "/", selected30d, " verified uses"].join("") : "no selected memory yet"}</em></article>
-          <article className={feedbackQuality != null ? "is-verified" : "is-idle"}><span>Feedback quality</span><strong>{feedbackQuality == null ? "--" : [feedbackQuality, "%"].join("")}</strong><em>{feedbackQuality != null ? [helpful30d, "/", feedback30d, " helpful outcomes"].join("") : "no feedback outcomes yet"}</em></article>
-        </div>
-
-        <div className="brain-atlas-unified-controls">
-          <label className="brain-atlas-focus" htmlFor="brain-atlas-focus-node">
-            <span>Proof audit focus</span>
-            <select
-              id="brain-atlas-focus-node"
-              value={focusId}
-              disabled={atlas?.status !== "ready" || !proofWorkOptions.length}
-              onChange={(event) => setFocusId(event.target.value)}
-            >
-              <option value="all">Most recent verified path</option>
-              {proofWorkOptions.map((node) => (
-                <option key={node.id} value={node.id}>{brainAtlasNodeOption(node)}</option>
-              ))}
-            </select>
-          </label>
+        <div className="brain-atlas-proof-utility">
           <span className={`brain-atlas-proof-health is-${proofHealthTone}`} role="status" aria-label={`Execution proof ${proofHealthLabel}. ${evidenceStateLabel}`}>
             <b aria-hidden="true">{proofHealthTone === "clear" ? "●" : proofHealthTone === "watch" ? "▲" : "■"}</b>
             <strong>Proof {proofHealthLabel}</strong>
             <em>{evidenceStateLabel}</em>
           </span>
           <details className="brain-atlas-proof-audit">
-            <summary>Inspect exact execution proof · {evidenceSummary}</summary>
+            <summary>Inspect proof · {evidenceSummary}</summary>
+            <label className="brain-atlas-focus" htmlFor="brain-atlas-focus-node">
+              <span>Audit focus</span>
+              <select id="brain-atlas-focus-node" value={focusId} disabled={atlas?.status !== "ready" || !proofWorkOptions.length} onChange={(event) => setFocusId(event.target.value)}>
+                <option value="all">Most recent verified path</option>
+                {proofWorkOptions.map((node) => <option key={node.id} value={node.id}>{brainAtlasNodeOption(node)}</option>)}
+              </select>
+            </label>
             <p>{evidencePolicyDetail}</p>
             {proofRows.length ? (
               <ol>
@@ -4275,11 +4253,12 @@ function BrainAtlasPanel({
               <text className="memory-flow-node-detail" x={brainAtlasWideX(302)} y="132" textAnchor="middle">{recallEfficiency != null ? [recallEfficiency, "% hit · ", avgRecallLatencyMs == null ? "latency unavailable" : [avgRecallLatencyMs, " ms"].join("")].join("") : activity ? [retrievals, " queried · ", count("misses"), " miss"].join("") : "telemetry unavailable"}</text>
               </g>
             </g>
-            <g className={`memory-flow-node is-registry${recent("hit") || recent("promoted") ? " is-live" : ""}`}>
+            <g className={`memory-flow-node is-registry${recent("hit") || recent("promoted") ? " is-live" : ""}`} aria-label={activity ? `Memory registry: ${durableMemoryCount} active records, ${supersededMemoryCount} superseded, ${registrySourceCount} sources` : "Memory registry telemetry unavailable"}>
+              <title>{activity ? `${durableMemoryCount} active records · ${supersededMemoryCount} superseded · ${registrySourceCount} sources` : "Registry telemetry unavailable"}</title>
               <rect x={brainAtlasWideX(430)} y="92" width={brainAtlasWideWidth(430, 146)} height="54" rx="9" />
               <g className="memory-flow-node-copy" clipPath="url(#brain-atlas-registry-copy)">
               <text className="memory-flow-node-title" x={brainAtlasWideX(503)} y="115" textAnchor="middle">Memory registry</text>
-              <text className="memory-flow-node-detail" x={brainAtlasWideX(503)} y="132" textAnchor="middle">{durableMemoryCount} governed records</text>
+              <text className="memory-flow-node-detail" x={brainAtlasWideX(503)} y="132" textAnchor="middle">{activity ? `${durableMemoryCount} active · ${registrySourceCount} sources` : "telemetry unavailable"}</text>
               </g>
             </g>
             <g className={`memory-flow-node is-applied${recent("used") ? " is-live" : ""}`}>

@@ -17439,29 +17439,32 @@ body,
 .memory-flow-metrics article.is-verified strong { color: var(--green); }
 .memory-flow-metrics article.is-idle strong { color: var(--soft); }
 
-#brain-atlas .brain-atlas-unified-controls {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+#brain-atlas .brain-atlas-proof-utility {
+  display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 8px;
-  flex: 0 0 27px;
+  flex: 0 0 25px;
   min-width: 0;
   overflow: hidden;
 }
 
-#brain-atlas .brain-atlas-unified-controls .brain-atlas-focus {
-  grid-template-columns: auto minmax(150px, 1fr);
-  max-width: 620px;
+#brain-atlas .brain-atlas-proof-audit[open] .brain-atlas-focus {
+  display: grid;
+  grid-template-columns: auto minmax(180px, 1fr);
+  gap: 6px;
+  align-items: center;
+  margin: 0 8px 7px;
 }
 
-#brain-atlas .brain-atlas-unified-controls .brain-atlas-focus select {
+#brain-atlas .brain-atlas-proof-audit .brain-atlas-focus select {
   height: 25px;
   border-color: rgba(101, 205, 245, 0.28);
   background: rgba(4, 20, 35, 0.96);
   font-size: 9px;
 }
 
-#brain-atlas .brain-atlas-unified-controls .brain-atlas-focus select:disabled {
+#brain-atlas .brain-atlas-proof-audit .brain-atlas-focus select:disabled {
   color: var(--muted);
   cursor: not-allowed;
   opacity: 0.66;
@@ -17953,13 +17956,13 @@ body,
     max-width: 100%;
   }
 
-  #brain-atlas .brain-atlas-unified-controls {
-    grid-template-columns: minmax(0, 1fr);
+  #brain-atlas .brain-atlas-proof-utility {
+    justify-content: flex-start;
     flex-basis: auto;
     overflow: visible;
   }
 
-  #brain-atlas .brain-atlas-unified-controls .brain-atlas-focus {
+  #brain-atlas .brain-atlas-proof-audit[open] .brain-atlas-focus {
     max-width: none;
   }
 
