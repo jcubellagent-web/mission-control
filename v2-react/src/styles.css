@@ -18573,3 +18573,14 @@ body,
     display: none;
   }
 }
+
+/* Idle cards are availability signals, not live route activity. Keep their copy neutral. */
+.brain-hero.is-flight-deck .agent-hero-card.is-up-next-focus.has-verified-route .agent-objective-main {
+  color: #f4fbff !important;
+  text-shadow: none !important;
+}
+
+.brain-hero.is-flight-deck .agent-hero-card.is-up-next-focus.has-verified-route .agent-objective-description {
+  color: #d8e6eb !important;
+  opacity: 1 !important;
+}

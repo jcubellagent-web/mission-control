@@ -906,6 +906,18 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertIn('"scripts/open_mission_control_kiosk.sh"', guard)
         self.assertIn('"scripts/control_tower_foreground.py"', guard)
 
+    def test_idle_live_work_cards_use_neutral_text_not_route_color(self) -> None:
+        styles = (MISSION_CONTROL / "v2-react" / "src" / "styles.css").read_text(encoding="utf-8")
+        selector = ".agent-hero-card.is-up-next-focus.has-verified-route .agent-objective-main"
+        start = styles.rindex(selector)
+        idle_rule = styles[start:styles.index("}", start) + 1]
+        self.assertIn("color: #f4fbff !important;", idle_rule)
+        self.assertIn("text-shadow: none !important;", idle_rule)
+        description_selector = ".agent-hero-card.is-up-next-focus.has-verified-route .agent-objective-description"
+        description_start = styles.rindex(description_selector)
+        description_rule = styles[description_start:styles.index("}", description_start) + 1]
+        self.assertIn("color: #d8e6eb !important;", description_rule)
+
     def test_active_objective_guard_is_shared_by_live_board_and_atlas(self) -> None:
         main = (MISSION_CONTROL / "v2-react" / "src" / "main.tsx").read_text(encoding="utf-8")
         self.assertIn("function hasPublishedActiveObjective", main)
