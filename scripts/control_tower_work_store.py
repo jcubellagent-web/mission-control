@@ -644,10 +644,9 @@ class WorkStore:
                 if (
                     not controller
                     or controller["run_id"] != controller_run_id
-                    or controller["owner_agent"] != agent
                     or controller["status"] not in ACTIVE_STATUSES
                 ):
-                    raise WorkStoreError("Worker route controller must be an active work run owned by the same agent.")
+                    raise WorkStoreError("Worker route controller must be an active work run.")
             else:
                 if execution_role == "controller":
                     controller_work_id = ""

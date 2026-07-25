@@ -231,6 +231,35 @@ class WorkStoreTests(unittest.TestCase):
             hot = json.loads((root / "control-tower-hot.json").read_text())
             self.assertEqual(hot["activeModelRoutes"], [])
 
+    def test_cross_agent_worker_route_is_visible_and_linked_to_active_parent(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            store = self.make_store(root)
+            self.start(
+                store,
+                event_id="event-controller",
+                work_id="work-parent",
+                run_id="run-parent",
+                agent="joshex",
+            )
+            worker = self.start(
+                store,
+                event_id="event-worker",
+                work_id="work-worker",
+                run_id="run-worker",
+                agent="jaimes",
+                origin_claim="separate-worker-origin",
+                execution_role="worker",
+                controller_work_id="work-parent",
+                controller_run_id="run-parent",
+            )
+            self.assertEqual(worker["work"]["ownerAgent"], "jaimes")
+            hot = json.loads((root / "control-tower-hot.json").read_text())
+            worker_route = next(route for route in hot["activeModelRoutes"] if route["workId"] == "work-worker")
+            self.assertEqual(worker_route["ownerAgent"], "jaimes")
+            self.assertEqual(worker_route["controllerWorkId"], "work-parent")
+            self.assertEqual(worker_route["controllerRunId"], "run-parent")
+
     def test_concurrent_auto_sequence_allocation_has_no_lost_updates(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             root = Path(raw)

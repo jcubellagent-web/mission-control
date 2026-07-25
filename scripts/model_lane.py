@@ -89,6 +89,23 @@ def model_route_identity(route: dict[str, Any]) -> tuple[str, str]:
     return family, model
 
 
+def execution_agent(args: argparse.Namespace, route: dict[str, Any]) -> str:
+    """Return the agent that actually executes a visible model lane.
+
+    Specialist providers launched from another host are executed on JAIMES. The
+    parent remains linked through the work-store worker contract, but Live Work
+    Board and Brain Atlas must attribute the active worker to its real host.
+    """
+    provider = str((route.get("modelRoute") or {}).get("provider") or "").strip()
+    if (
+        args.transport == "auto"
+        and provider in {"gemini", "ollama", "xai"}
+        and Path.home().name != "jc_agent"
+    ):
+        return "jaimes"
+    return str(args.requester or route.get("agent") or "joshex").strip()
+
+
 def lane_publish_command(
     args: argparse.Namespace,
     route: dict[str, Any],
@@ -101,10 +118,7 @@ def lane_publish_command(
     detail: str,
 ) -> list[str]:
     family, model = model_route_identity(route)
-    # The requester is the controlling agent and remains the owner even when
-    # JAIMES hosts the specialist process. Publishing under the execution host
-    # would make the canonical work store reject the worker as cross-owner.
-    owner = str(args.requester or route.get("agent")).strip()
+    owner = execution_agent(args, route)
     return [
         sys.executable,
         str(AGENT_PUBLISH),
