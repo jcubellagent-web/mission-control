@@ -24,6 +24,69 @@ class SchedulerTests(unittest.TestCase):
         self.assertTrue(subject.is_due(job, monday))
         self.assertFalse(subject.is_due(job, monday.replace(hour=5)))
 
+    def test_due_slot_catches_a_minute_skipped_by_dispatcher_drift(self) -> None:
+        job = {"schedule": {"minutes": [17], "hours": [5]}}
+
+        self.assertEqual(
+            subject.due_slot(job, dt.datetime(2026, 7, 24, 5, 18, 2)),
+            "2026-07-24T05:17",
+        )
+        self.assertIsNone(subject.due_slot(job, dt.datetime(2026, 7, 24, 5, 33, 2)))
+
+    def test_tick_runs_the_latest_unhandled_slot_within_catch_up_window(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            config = root / "schedule.json"
+            config.write_text(json.dumps({
+                "timezone": "UTC",
+                "jobs": [{
+                    "id": "daily",
+                    "schedule": {"minutes": [17], "hours": [5]},
+                    "command": ["noop"],
+                }],
+            }))
+            state = root / "state.json"
+            state.write_text(json.dumps({
+                "jobs": {"daily": {"status": "ok", "lastSlot": "2026-07-23T05:17"}},
+            }))
+            completed = {"id": "daily", "status": "ok", "returncode": 0, "durationMs": 1}
+            with mock.patch.object(subject, "STATE_PATH", state), \
+                    mock.patch.object(subject, "run_job", return_value=completed) as run, \
+                    mock.patch.object(subject, "publish_transition"):
+                result = subject.tick(
+                    config,
+                    dt.datetime(2026, 7, 24, 5, 18, 2, tzinfo=dt.timezone.utc),
+                )
+
+        run.assert_called_once()
+        self.assertEqual(result["jobs"]["daily"]["lastSlot"], "2026-07-24T05:17")
+
+    def test_newer_operator_run_prevents_older_slot_catch_up(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            config = root / "schedule.json"
+            config.write_text(json.dumps({
+                "timezone": "UTC",
+                "jobs": [{
+                    "id": "daily",
+                    "schedule": {"minutes": [17], "hours": [5]},
+                    "command": ["noop"],
+                }],
+            }))
+            state = root / "state.json"
+            state.write_text(json.dumps({
+                "jobs": {"daily": {"status": "ok", "lastSlot": "2026-07-24T05:18"}},
+            }))
+            with mock.patch.object(subject, "STATE_PATH", state), \
+                    mock.patch.object(subject, "run_job") as run, \
+                    mock.patch.object(subject, "publish_transition"):
+                subject.tick(
+                    config,
+                    dt.datetime(2026, 7, 24, 5, 18, 2, tzinfo=dt.timezone.utc),
+                )
+
+        run.assert_not_called()
+
     def test_inbox_cleanup_is_a_safe_daily_terminal_retention_job(self) -> None:
         config = json.loads(subject.CONFIG_PATH.read_text(encoding="utf-8"))
         job = next(row for row in config["jobs"] if row.get("id") == "inbox-coordinator-retention")

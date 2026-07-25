@@ -23,6 +23,7 @@ LOCK_DIR = DATA_DIR / ".ecosystem-qa-locks"
 TICK_LOCK = LOCK_DIR / "scheduler.lock"
 CHANGE_LOCK = Path.home() / ".openclaw" / "state" / "control-tower-change-lock.json"
 HOST_TOOL_PATHS = ("/opt/homebrew/bin", "/usr/local/bin", "/usr/bin", "/bin")
+DEFAULT_CATCH_UP_MINUTES = 15
 
 
 def iso(value: dt.datetime | None = None) -> str:
@@ -67,6 +68,29 @@ def is_due(job: dict[str, Any], now: dt.datetime) -> bool:
         and (not hours or now.hour in hours)
         and (not weekdays or now.weekday() in weekdays)
     )
+
+
+def due_slot(job: dict[str, Any], now: dt.datetime) -> str | None:
+    """Return the newest scheduled minute within the bounded catch-up window."""
+    try:
+        catch_up_minutes = max(0, int(job.get("catchUpMinutes", DEFAULT_CATCH_UP_MINUTES)))
+    except (TypeError, ValueError):
+        catch_up_minutes = DEFAULT_CATCH_UP_MINUTES
+    for minutes_ago in range(catch_up_minutes + 1):
+        candidate = now - dt.timedelta(minutes=minutes_ago)
+        if is_due(job, candidate):
+            return slot(candidate)
+    return None
+
+
+def slot_at_or_after(value: Any, target: str) -> bool:
+    """Compare canonical minute slots without treating legacy text as ordered."""
+    try:
+        observed = dt.datetime.strptime(str(value), "%Y-%m-%dT%H:%M")
+        scheduled = dt.datetime.strptime(target, "%Y-%m-%dT%H:%M")
+    except (TypeError, ValueError):
+        return str(value or "") == target
+    return observed >= scheduled
 
 
 def compact(value: Any, limit: int = 1600) -> str:
@@ -222,7 +246,7 @@ def tick(
     results = []
     current_slot = slot(local_now)
 
-    def publish_running(job: dict[str, Any], previous: dict[str, Any]) -> None:
+    def publish_running(job: dict[str, Any], previous: dict[str, Any], scheduled_slot: str) -> None:
         running_jobs = dict(new_jobs)
         running_jobs[str(job["id"])] = {
             "id": str(job["id"]),
@@ -233,7 +257,7 @@ def tick(
             "startedAt": iso(now),
             "failureStreak": int(previous.get("failureStreak") or 0),
             "incidentOpen": bool(previous.get("incidentOpen")),
-            "lastSlot": current_slot,
+            "lastSlot": scheduled_slot,
         }
         atomic_write(STATE_PATH, {
             "version": 1,
@@ -254,7 +278,8 @@ def tick(
             continue
         previous = prior_jobs.get(job_id, {}) if isinstance(prior_jobs.get(job_id), dict) else {}
         forced = bool(only)
-        if not forced and (not is_due(job, local_now) or previous.get("lastSlot") == current_slot):
+        scheduled_slot = current_slot if forced else due_slot(job, local_now)
+        if not scheduled_slot or (not forced and slot_at_or_after(previous.get("lastSlot"), scheduled_slot)):
             continue
         if job.get("skipDuringChangeLease") and change_lease_active(now) and not allow_change_lease:
             result = {"id": job_id, "status": "skipped_change_lease", "startedAt": iso(now), "durationMs": 0}
@@ -262,7 +287,7 @@ def tick(
             if not shadow:
                 # #JAIMES: publish in-flight truth before long QA so health
                 # checks do not mistake the previous terminal state for now.
-                publish_running(job, previous)
+                publish_running(job, previous, scheduled_slot)
             result = run_job(job, shadow=shadow)
         if defer_debounced_failure_for_change_lease(
             job,
@@ -285,7 +310,7 @@ def tick(
         else:
             result["failureStreak"] = int(previous.get("failureStreak") or 0)
             result["incidentOpen"] = bool(previous.get("incidentOpen"))
-        result["lastSlot"] = current_slot
+        result["lastSlot"] = scheduled_slot
         new_jobs[job_id] = result
         results.append(result)
         if not shadow:

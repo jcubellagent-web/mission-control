@@ -543,6 +543,12 @@ def discover_qa_definitions(
         state_name = str(run.get("status") or "scheduled")
         failure_streak = int(run.get("failureStreak") or 0)
         failed = state_name in {"failed", "timeout"} or (state_name.startswith("skipped_") and failure_streak > 0)
+        if state_name in {"failed", "timeout"} or state_name.startswith("skipped_"):
+            projected_run_status = state_name
+        elif failed:
+            projected_run_status = "missed"
+        else:
+            projected_run_status = "done" if state_name == "ok" else "upcoming"
         definitions.append({
             "definitionId": _stable_id("ecosystem_qa_scheduler", owner, job_id),
             "qaJobId": job_id,
@@ -561,7 +567,7 @@ def discover_qa_definitions(
             "activeFrom": job.get("activeFrom"),
             "todayRelevant": not weekdays or dt.datetime.now(ET).weekday() in weekdays,
             "status": "error" if failed else "ok",
-            "runStatus": "missed" if failed else ("done" if state_name == "ok" else "upcoming"),
+            "runStatus": projected_run_status,
             "rawRunStatus": state_name,
             "errors": 1 if failed else 0,
             "lastError": "Latest QA run needs attention." if failed else None,
@@ -975,7 +981,15 @@ def materialize_today_jobs(
                 outcome, run_status = "pending", "running"
             elif completed and last_run:
                 freshness = _coverage_freshness(definition)
-                if now_et - last_run <= freshness:
+                final_scheduled = times[-1]
+                final_tolerance = _occurrence_tolerance(definition)
+                operating_window_complete = (
+                    now_et > final_scheduled + final_tolerance
+                    and last_run >= final_scheduled - final_tolerance
+                )
+                if operating_window_complete:
+                    outcome, run_status = "complete", "coverage-complete"
+                elif now_et - last_run <= freshness:
                     outcome, run_status = "complete", "coverage-current"
                 else:
                     outcome, run_status = "broken", "stale"
@@ -1028,6 +1042,8 @@ def materialize_today_jobs(
                 evidence_summary = "No completion signal arrived within the schedule grace window."
             elif run_status == "stale":
                 evidence_summary = "The latest completion signal is older than the expected coverage cadence."
+            elif run_status == "coverage-complete":
+                evidence_summary = "The schedule's operating window completed with fresh final-run evidence."
             elif run_status == "coverage-loaded":
                 evidence_summary = "The service is loaded, but no fresh completion or heartbeat timestamp is available."
             elif run_status == "unverified":

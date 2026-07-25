@@ -141,6 +141,23 @@ def test_hermes_and_qa_definitions_keep_stable_ids_and_run_evidence() -> None:
     assert qa[0]["runStatus"] == "done"
 
 
+def test_failed_qa_execution_is_labeled_failed_instead_of_missed() -> None:
+    definition = discover_qa_definitions({"jobs": [{
+        "id": "deep-release",
+        "owner": "josh2",
+        "team": "Deep release QA",
+        "schedule": {"minutes": [47], "hours": [2]},
+    }]}, {"jobs": {"deep-release": {
+        "status": "failed",
+        "startedAt": "2026-07-17T06:47:00Z",
+        "completedAt": "2026-07-17T06:50:00Z",
+        "failureStreak": 1,
+    }}})[0]
+
+    assert definition["status"] == "error"
+    assert definition["runStatus"] == "failed"
+
+
 def test_new_qa_job_does_not_invent_failures_before_activation() -> None:
     definitions = discover_qa_definitions({"jobs": [{
         "id": "new-daily-quality",
@@ -270,6 +287,28 @@ def test_rolled_coverage_uses_cadence_freshness_instead_of_one_daily_success() -
     assert by_name["Stale coverage"]["runStatus"] == "stale"
     assert by_name["Missing coverage"]["outcome"] == "broken"
     assert by_name["Missing coverage"]["runStatus"] == "overdue"
+
+
+def test_bounded_recurring_window_stays_complete_after_its_final_run() -> None:
+    rows, _ = materialize_today_jobs([{
+        "definitionId": "hermes:jaimes:sorare-window",
+        "name": "Sorare bounded window",
+        "agent": "JAIMES",
+        "source": "hermes",
+        "sourceLabel": "Hermes",
+        "schedule": "Cron */30 8-18 * * 5 ET",
+        "scheduleSpec": {"kind": "cron", "expression": "*/30 8-18 * * 5"},
+        "status": "ok",
+        "runStatus": "done",
+        "lastRun": "2026-07-17T18:41:00-04:00",
+        "enabled": True,
+        "canVerifyRun": True,
+    }], now=dt.datetime(2026, 7, 17, 21, 30, tzinfo=ET))
+
+    assert len(rows) == 1
+    assert rows[0]["rolledUp"] is True
+    assert rows[0]["outcome"] == "complete"
+    assert rows[0]["runStatus"] == "coverage-complete"
 
 
 def test_loaded_coverage_without_fresh_evidence_is_not_green() -> None:
