@@ -4132,7 +4132,7 @@ function BrainAtlasPanel({
               return (
                 <g
                   key={row.agent}
-                  className={`memory-flow-node is-agent${working ? " is-work-active" : ""}${live ? " is-memory-live" : ""}`}
+                  className={`memory-flow-node is-agent agent-${row.agent}${working ? " is-work-active" : ""}${live ? " is-memory-live" : ""}`}
                   data-agent={row.agent}
                   data-agent-working={working ? "true" : "false"}
                   data-work-state={working ? "working" : "quiet"}

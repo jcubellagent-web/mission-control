@@ -2352,19 +2352,19 @@ p {
 }
 
 .brain-hero .agent-hero-card.agent-joshex {
-  --agent-tone: var(--green);
+  --agent-tone: var(--agent-joshex);
 }
 
 .brain-hero .agent-hero-card.agent-josh {
-  --agent-tone: var(--cyan);
+  --agent-tone: var(--agent-josh2);
 }
 
 .brain-hero .agent-hero-card.agent-jaimes {
-  --agent-tone: #54d6c7;
+  --agent-tone: var(--agent-jaimes);
 }
 
 .brain-hero .agent-hero-card.agent-jain {
-  --agent-tone: var(--watch);
+  --agent-tone: var(--agent-jain);
 }
 
 .brain-hero .agent-hero-card header strong,
@@ -8030,6 +8030,18 @@ body {
   font-style: normal;
   font-weight: 780;
   line-height: 1.1;
+}
+
+/* One canonical agent identity palette across Live Work Board and Brain Atlas. */
+.memory-flow-node.is-agent.is-work-active > rect:not(.memory-flow-node-aura) {
+  stroke: var(--agent-tone, var(--cyan));
+  filter:
+    drop-shadow(0 0 var(--atlas-agent-glow-near, 4px) color-mix(in srgb, var(--agent-tone, var(--cyan)) 60%, transparent))
+    drop-shadow(0 0 var(--atlas-agent-glow-far, 8px) color-mix(in srgb, var(--agent-tone, var(--cyan)) 24%, transparent));
+}
+
+.memory-flow-node.is-agent.is-work-active .memory-flow-node-aura {
+  stroke: var(--agent-tone, var(--cyan));
 }
 
 @media (min-width: 1361px) and (min-height: 850px) {
@@ -17796,7 +17808,13 @@ body,
   vector-effect: non-scaling-stroke;
 }
 
-.memory-flow-node.is-agent > rect:not(.memory-flow-node-aura) { stroke: rgba(101, 205, 245, 0.44); }
+.memory-flow-node.is-agent > rect:not(.memory-flow-node-aura) { stroke: color-mix(in srgb, var(--agent-tone, var(--cyan)) 68%, transparent); }
+.memory-flow-node.is-agent.agent-joshex { --agent-tone: var(--agent-joshex); }
+.memory-flow-node.is-agent.agent-josh2 { --agent-tone: var(--agent-josh2); }
+.memory-flow-node.is-agent.agent-jaimes { --agent-tone: var(--agent-jaimes); }
+.memory-flow-node.is-agent.agent-jain { --agent-tone: var(--agent-jain); }
+.memory-flow-node.is-agent.is-work-active > rect:not(.memory-flow-node-aura) { stroke: var(--agent-tone, var(--cyan)); }
+.memory-flow-node.is-agent .memory-flow-presence-dot { fill: var(--agent-tone, var(--cyan)); filter: drop-shadow(0 0 4px color-mix(in srgb, var(--agent-tone, var(--cyan)) 90%, transparent)); }
 .memory-flow-node.is-registry > rect,
 .memory-flow-node.is-durable > rect { stroke: rgba(88, 238, 154, 0.48); }
 .memory-flow-node.is-feedback > rect,
