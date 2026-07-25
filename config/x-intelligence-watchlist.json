@@ -56,9 +56,17 @@
     {
       "id": "ecosystem_tools",
       "label": "OpenClaw, Hermes, Codex, Gemini, and Ollama",
-      "accounts": ["NousResearch", "OpenAI", "GoogleAI", "ollama"],
+      "accounts": ["NousResearch", "OpenAI", "GoogleAI", "ollama", "witcheer"],
       "search_phrases": ["Hermes Agent release", "OpenClaw gateway", "Codex CLI release", "Gemini CLI release", "Ollama release"],
-      "topic": 17
+      "topic": 17,
+      "community_sources": {
+        "witcheer": {
+          "cadence": "biweekly",
+          "synthesis_minutes": "15-20",
+          "retained_topics": ["Hermes", "persistent memory", "profile isolation", "model routing", "security", "deployment reliability"],
+          "require_primary_corroboration_before_policy": true
+        }
+      }
     },
     {
       "id": "crypto_chains",

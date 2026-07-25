@@ -15,7 +15,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
-WATCHLIST = ROOT / "config" / "x_intelligence_watchlist.json"
+WATCHLIST = ROOT / "config" / "x-intelligence-watchlist.json"
 DEFAULT_STATE = ROOT / "data" / "x-intelligence-recent.json"
 X_RE = re.compile(r"https?://(?:www\.)?(?:x\.com|twitter\.com)/([A-Za-z0-9_]{1,15})/status/(\d+)", re.I)
 PRIMARY_DOMAINS = {
