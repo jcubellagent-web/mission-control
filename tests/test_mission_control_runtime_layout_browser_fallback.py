@@ -115,8 +115,10 @@ def valid_kiosk_legibility_measurements() -> dict[str, object]:
             "statusText": "1 working · Memory live · 2 exact receipts",
             "visiblePanelCount": 1,
             "legacyViewControlCount": 0,
-            "layerCounts": {"memory": 1, "proof": 1},
+            "layerCounts": {"memory": 1, "proof": 0},
             "proofState": "ready",
+            "proofAuditVisible": True,
+            "proofHealthVisible": True,
             "proofEmptyText": "",
             "proofRows": [
                 {"agent": "josh2", "workLabel": "Refresh Control Tower health", "visibleWorkLabel": "Refresh Control Tower health", "receipt": "receipt-1", "receiptStatus": "done", "model": "codex/gpt-5.6-terra", "routeVerified": True, "declaredAnimated": False, "opaqueLabel": False, "clipped": False},
@@ -130,8 +132,8 @@ def valid_kiosk_legibility_measurements() -> dict[str, object]:
         "brainAtlasSections": {
             "unified": {
                 "contained": True,
-                "heading": "Live activity + exact proof",
-                "description": "Governed memory moves on exact receipts; static proof is audit evidence, not private reasoning.",
+                "heading": "Governed memory activity",
+                "description": "Shared memory is recalled, applied, assessed, and promoted—not private reasoning.",
                 "headingFontSize": 12,
                 "descriptionFontSize": 9.5,
                 "headingClipped": False,
@@ -441,14 +443,14 @@ def test_layout_rejects_legacy_tabs_or_missing_simultaneous_layers() -> None:
     view["active"] = "evidence"
     view["visiblePanelCount"] = 2
     view["legacyViewControlCount"] = 2
-    view["layerCounts"] = {"memory": 1, "proof": 0}
+    view["layerCounts"] = {"memory": 1, "proof": 1}
 
     failures = runtime_layout.validate_control_tower_layout(measurements, label="kiosk-1920")
 
     assert any("active view is evidence (requires unified)" in failure for failure in failures)
     assert any("exactly one visible unified region" in failure for failure in failures)
     assert any("legacy Activity / Evidence view controls" in failure for failure in failures)
-    assert any("exactly one visible proof layer" in failure for failure in failures)
+    assert any("keep exact proof out of the always-visible graph" in failure for failure in failures)
 
 
 def test_layout_rejects_broken_unified_atlas_status_contract() -> None:
@@ -519,8 +521,8 @@ def test_layout_rejects_reversed_or_overflowing_brain_atlas_sections() -> None:
     unified["overflowY"] = 12
     failures = runtime_layout.validate_control_tower_layout(measurements, label="kiosk-1920")
 
-    assert any("Live activity + exact proof region escapes its panel" in failure for failure in failures)
-    assert any("Live activity + exact proof overflows vertically by 12px" in failure for failure in failures)
+    assert any("Governed memory activity region escapes its panel" in failure for failure in failures)
+    assert any("Governed memory activity overflows vertically by 12px" in failure for failure in failures)
 
 
 def test_layout_rejects_horizontally_letterboxed_brain_atlas_graph() -> None:
@@ -568,7 +570,7 @@ def test_layout_rejects_missing_section_overflow_measurement() -> None:
 
     failures = runtime_layout.validate_control_tower_layout(measurements, label="kiosk-1920")
 
-    assert any("Live activity + exact proof overflow measurement is missing" in failure for failure in failures)
+    assert any("Governed memory activity overflow measurement is missing" in failure for failure in failures)
 
 
 def test_layout_rejects_unreadable_or_unverified_proof_rows() -> None:

@@ -4085,19 +4085,18 @@ function BrainAtlasPanel({
             <strong>Proof {proofHealthLabel}</strong>
             <em>{evidenceStateLabel}</em>
           </span>
+          <details className="brain-atlas-proof-audit">
+            <summary>Inspect exact execution proof · {evidenceSummary}</summary>
+            <p>{evidencePolicyDetail}</p>
+            {proofRows.length ? (
+              <ol>
+                {proofRows.map((row) => (
+                  <li key={row.id}>{row.workLabel} · {row.receipt.label || "Receipt"} · {row.model.label}</li>
+                ))}
+              </ol>
+            ) : <p>{brainAtlasEmptyMessage(atlas?.emptyReason)}</p>}
+          </details>
         </div>
-
-        <details className="brain-atlas-proof-audit">
-          <summary>Inspect exact execution proof · {evidenceSummary}</summary>
-          <p>{evidencePolicyDetail}</p>
-          {proofRows.length ? (
-            <ol>
-              {proofRows.map((row) => (
-                <li key={row.id}>{row.workLabel} · {row.receipt.label || "Receipt"} · {row.model.label}</li>
-              ))}
-            </ol>
-          ) : <p>{brainAtlasEmptyMessage(atlas?.emptyReason)}</p>}
-        </details>
 
         <div className="memory-flow-map is-unified" tabIndex={0} aria-label="Governed memory activity graph. Scroll horizontally on narrow screens.">
           <svg

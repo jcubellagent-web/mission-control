@@ -17410,7 +17410,7 @@ body,
 
 #brain-atlas .brain-atlas-unified-controls {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 8px;
   flex: 0 0 27px;
@@ -17491,6 +17491,7 @@ body,
 }
 
 #brain-atlas .brain-atlas-proof-audit {
+  min-width: 0;
   border: 1px solid rgba(101, 205, 245, 0.2);
   border-radius: 6px;
   background: rgba(4, 20, 35, 0.68);
@@ -17500,7 +17501,7 @@ body,
 }
 
 #brain-atlas .brain-atlas-proof-audit summary {
-  padding: 6px 8px;
+  padding: 4px 7px;
   color: #a8c3cf;
   cursor: pointer;
   font-weight: 800;

@@ -449,7 +449,9 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
       visibleAtlasLayers.filter((element) => element.getAttribute('data-atlas-layer') === name).length,
     ])
   );
-  const proofRows = [...document.querySelectorAll('#brain-atlas [data-proof-row]')].filter(visible).map((element) => {
+  // Exact proof remains in the bounded SVG data model for audit integrity, but
+  // the memory-first screen keeps it out of the always-visible layout.
+  const proofRows = [...document.querySelectorAll('#brain-atlas [data-proof-row]')].map((element) => {
     const rect = element.getBoundingClientRect();
     const svg = element.closest('svg');
     const svgRect = svg ? svg.getBoundingClientRect() : null;
@@ -472,7 +474,9 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
         || rect.bottom > svgRect.bottom + 1,
     };
   });
-  const proofEmpty = [...document.querySelectorAll('#brain-atlas .brain-atlas-proof-empty')].find(visible);
+  const proofEmpty = document.querySelector('#brain-atlas .brain-atlas-proof-empty');
+  const proofAudit = document.querySelector('#brain-atlas .brain-atlas-proof-audit');
+  const proofHealth = document.querySelector('#brain-atlas .brain-atlas-proof-health');
   const proofEdges = [...document.querySelectorAll('#brain-atlas .brain-atlas-proof-edge')].map((element) => {
     const style = getComputedStyle(element);
     return {
@@ -524,6 +528,8 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
       legacyViewControlCount: document.querySelectorAll('#brain-atlas [data-atlas-view-option]').length,
       layerCounts: atlasLayerCounts,
       proofState: String(atlasRoot?.getAttribute('data-exact-proof-state') || ''),
+      proofAuditVisible: Boolean(proofAudit && visible(proofAudit)),
+      proofHealthVisible: Boolean(proofHealth && visible(proofHealth)),
       proofEmptyText: String(proofEmpty?.textContent || '').trim(),
       proofRows,
       proofEdges,
@@ -1018,13 +1024,18 @@ def validate_control_tower_layout(
         failures.append(f"{label}: Brain Atlas still exposes legacy Activity / Evidence view controls")
 
     layer_counts = atlas_view.get("layerCounts") if isinstance(atlas_view.get("layerCounts"), dict) else {}
-    for layer_name in ("memory", "proof"):
-        if int(_number(layer_counts.get(layer_name), missing=-1.0)) != 1:
-            failures.append(f"{label}: Brain Atlas must expose exactly one visible {layer_name} layer")
+    if int(_number(layer_counts.get("memory"), missing=-1.0)) != 1:
+        failures.append(f"{label}: Brain Atlas must expose exactly one visible memory layer")
+    if int(_number(layer_counts.get("proof"), missing=-1.0)) != 0:
+        failures.append(f"{label}: Brain Atlas must keep exact proof out of the always-visible graph")
+    if atlas_view.get("proofHealthVisible") is not True:
+        failures.append(f"{label}: Brain Atlas proof health is not visibly summarized")
+    if atlas_view.get("proofAuditVisible") is not True:
+        failures.append(f"{label}: Brain Atlas exact proof audit is not available on demand")
 
     atlas_sections = measurements.get("brainAtlasSections") if isinstance(measurements.get("brainAtlasSections"), dict) else {}
     region = atlas_sections.get("unified")
-    expected_heading = "Live activity + exact proof"
+    expected_heading = "Governed memory activity"
     region_label = "unified"
     minimum_graph_height = KIOSK_LEGIBILITY_THRESHOLDS["atlasUnifiedMapHeight"]
     if not isinstance(region, dict):
@@ -1035,7 +1046,7 @@ def validate_control_tower_layout(
         if str(region.get("heading") or "") != expected_heading:
             failures.append(f"{label}: Brain Atlas {expected_heading} visible heading is missing")
         description = str(region.get("description") or "").lower()
-        description_tokens = ("governed memory", "receipt", "static proof", "not private reasoning")
+        description_tokens = ("shared memory", "recalled", "applied", "promoted", "not private reasoning")
         if not all(token in description for token in description_tokens):
             failures.append(f"{label}: Brain Atlas {expected_heading} purpose text is missing")
         if not str(region.get("labelledBy") or "") or region.get("labelledByTargetPresent") is not True:
