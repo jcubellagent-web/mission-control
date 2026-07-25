@@ -17788,6 +17788,19 @@ body,
 .memory-flow-edge.is-feedback,
 .memory-flow-edge.is-proposed { color: #b48cff; stroke: rgba(180, 140, 255, 0.45); }
 
+/* Active-work lifelines come from fresh Live Work Board state, not memory receipts. */
+.memory-flow-edge.is-work-lifeline {
+  stroke: color-mix(in srgb, var(--agent-tone, var(--cyan)) 78%, transparent);
+  stroke-width: 2.15;
+  stroke-dasharray: 8 11;
+  opacity: 0;
+}
+
+.memory-flow-edge.is-work-lifeline.agent-joshex { --agent-tone: var(--agent-joshex); }
+.memory-flow-edge.is-work-lifeline.agent-josh2 { --agent-tone: var(--agent-josh2); }
+.memory-flow-edge.is-work-lifeline.agent-jaimes { --agent-tone: var(--agent-jaimes); }
+.memory-flow-edge.is-work-lifeline.agent-jain { --agent-tone: var(--agent-jain); }
+
 .memory-flow-edge.is-retrieval.is-live {
   color: #65d9ff;
   stroke: rgba(101, 217, 255, 0.96);
@@ -17799,6 +17812,15 @@ body,
   stroke-opacity: 1;
   filter: drop-shadow(0 0 3px currentColor);
   animation: memory-flow-travel 1.05s linear infinite, memory-flow-receipt-glow 1.4s ease-in-out infinite;
+}
+
+.memory-flow-edge.is-work-lifeline.is-live {
+  stroke: color-mix(in srgb, var(--agent-tone, var(--cyan)) 78%, transparent);
+  stroke-width: 4.4;
+  stroke-dasharray: 8 11;
+  opacity: 0.94;
+  filter: none;
+  animation: work-lifeline-travel 1.55s linear infinite, work-lifeline-glow 2.5s ease-in-out infinite;
 }
 
 .memory-flow-node rect {
@@ -17950,6 +17972,15 @@ body,
 @keyframes memory-flow-receipt-glow {
   0%, 100% { stroke-opacity: 0.72; }
   50% { stroke-opacity: 1; }
+}
+
+@keyframes work-lifeline-travel {
+  to { stroke-dashoffset: -57; }
+}
+
+@keyframes work-lifeline-glow {
+  0%, 100% { opacity: 0.56; }
+  50% { opacity: 1; }
 }
 
 @keyframes memory-node-receipt-ring {
@@ -18289,6 +18320,12 @@ body,
   .memory-flow-edge.is-live {
     animation: none !important;
     stroke-dasharray: none;
+  }
+
+  .memory-flow-edge.is-work-lifeline.is-live {
+    animation: none !important;
+    stroke-dasharray: none;
+    opacity: 0.92;
   }
 
   #brain-atlas.has-live-memory-flow .memory-flow-map,

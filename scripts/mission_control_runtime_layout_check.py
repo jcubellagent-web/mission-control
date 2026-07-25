@@ -1202,12 +1202,12 @@ def validate_control_tower_layout(
             f"(requires {expect_reduced_motion!r})"
         )
     flow_state = str(memory.get("flowState") or "")
-    if flow_state not in {"live", "idle", "unavailable"}:
+    if flow_state not in {"live", "work-live", "idle", "unavailable"}:
         failures.append(f"{label}: Brain Atlas memory flow state is missing or invalid")
     if memory.get("mapAnimated") is True or str(memory.get("mapAnimationName") or "none") != "none":
         failures.append(f"{label}: Brain Atlas map shell uses an expensive paint animation")
     #JAIMES: Idle maps intentionally omit the activity glow; require it only for exact live flow.
-    if flow_state == "live" and str(memory.get("mapBoxShadow") or "none") == "none":
+    if flow_state in {"live", "work-live"} and str(memory.get("mapBoxShadow") or "none") == "none":
         failures.append(f"{label}: Brain Atlas map shell lacks its static activity glow")
     edges = memory.get("edges") if isinstance(memory.get("edges"), list) else []
     if not edges:
@@ -1240,9 +1240,9 @@ def validate_control_tower_layout(
                 failures.append(f"{label}: live {operation} path lacks a visible moving dash")
     if int(_number(memory.get("animatedInactiveCount"), missing=-1.0)) != 0:
         failures.append(f"{label}: an unevidenced Brain Atlas path is animated")
-    if flow_state == "live" and not live_edges:
+    if flow_state in {"live", "work-live"} and not live_edges:
         failures.append(f"{label}: Brain Atlas reports live activity without an exact live path")
-    if flow_state != "live" and live_edges:
+    if flow_state in {"idle", "unavailable"} and live_edges:
         failures.append(f"{label}: Brain Atlas exposes live paths while its state is {flow_state}")
 
     atlas_agent_nodes = memory.get("atlasAgentNodes") if isinstance(memory.get("atlasAgentNodes"), list) else []
@@ -1357,7 +1357,11 @@ def validate_control_tower_layout(
     else:
         animation_mismatches = [
             edge for edge in live_edges
-            if str(edge.get("animationName") or "") != "memory-flow-travel"
+            if str(edge.get("animationName") or "") != (
+                "work-lifeline-travel, work-lifeline-glow"
+                if str(edge.get("operation") or "") == "live-work"
+                else "memory-flow-travel"
+            )
         ]
         if animation_mismatches:
             failures.append(f"{label}: {len(animation_mismatches)} exact live Brain Atlas path(s) are not animated")

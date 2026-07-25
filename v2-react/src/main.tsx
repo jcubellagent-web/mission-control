@@ -3928,6 +3928,11 @@ function BrainAtlasPanel({
   ]));
   const workingAgentIds = new Set(HERO_AGENT_ORDER.filter((agent) => liveWorkByAgent.get(agent)?.working));
   const workingAgentCount = workingAgentIds.size;
+  const liveWorkLifelineCount = HERO_AGENT_ORDER.filter((agent) => {
+    const liveWork = liveWorkByAgent.get(agent);
+    const observedAt = liveWork?.activeWork?.updated_at || liveWork?.status.updated_at;
+    return Boolean(liveWork?.working && memorySignalIsRecent(observedAt, motionWindowSeconds));
+  }).length;
   const loadByAgent = new Map(HERO_AGENT_ORDER.map((agent) => [
     agent,
     brainAtlasAgentLoad(agent, liveWorkByAgent.get(agent)!, workItems),
@@ -3981,12 +3986,12 @@ function BrainAtlasPanel({
   return (
     <section
       id="brain-atlas"
-      className={`brain-atlas-panel is-${displayTone}${workingAgentCount ? " has-active-work" : ""}${latestSignalRecent ? " has-live-memory-flow" : ""}`}
+      className={`brain-atlas-panel is-${displayTone}${workingAgentCount ? " has-active-work" : ""}${latestSignalRecent ? " has-live-memory-flow" : ""}${liveWorkLifelineCount ? " has-live-work-flow" : ""}`}
       data-atlas-view="unified"
       data-atlas-mode={atlasMode}
       data-atlas-view-tone={selectedTone}
       data-atlas-mode-tone={displayTone}
-      data-memory-flow-state={latestSignalRecent ? "live" : activity ? "idle" : "unavailable"}
+      data-memory-flow-state={latestSignalRecent ? "live" : liveWorkLifelineCount ? "work-live" : activity ? "idle" : "unavailable"}
       data-exact-proof-state={proofState}
       data-working-agent-count={workingAgentCount}
       data-load-tier={systemLoad.tier}
@@ -4105,15 +4110,27 @@ function BrainAtlasPanel({
             {flowAgents.map((row, index) => {
               const y = 22 + index * 52;
               const live = memorySignalIsRecent(row.lastRetrievalAt, motionWindowSeconds);
+              const liveWork = liveWorkByAgent.get(row.agent);
+              const workObservedAt = liveWork?.activeWork?.updated_at || liveWork?.status.updated_at;
+              const workLinked = Boolean(liveWork?.working && memorySignalIsRecent(workObservedAt, motionWindowSeconds));
               return (
-                <path
-                  key={`agent-flow-${row.agent}`}
-                  className={`memory-flow-edge is-retrieval${live ? " is-live" : ""}`}
-                  data-agent={row.agent}
-                  data-operation="retrieval"
-                  data-observed-at={row.lastRetrievalAt || undefined}
-                  d={`M ${brainAtlasWideX(168)} ${y + 19} C ${brainAtlasWideX(198)} ${y + 19}, ${brainAtlasWideX(202)} 119, ${brainAtlasWideX(232)} 119`}
-                />
+                <React.Fragment key={`agent-flow-${row.agent}`}>
+                  <path
+                    className={`memory-flow-edge is-work-lifeline agent-${row.agent}${workLinked ? " is-live" : ""}`}
+                    data-agent={row.agent}
+                    data-operation="live-work"
+                    data-work-id={workLinked ? liveWork?.activeWork?.id || undefined : undefined}
+                    data-observed-at={workLinked ? workObservedAt : undefined}
+                    d={`M ${brainAtlasWideX(168)} ${y + 29} C ${brainAtlasWideX(196)} ${y + 29}, ${brainAtlasWideX(204)} 137, ${brainAtlasWideX(232)} 137`}
+                  />
+                  <path
+                    className={`memory-flow-edge is-retrieval${live ? " is-live" : ""}`}
+                    data-agent={row.agent}
+                    data-operation="retrieval"
+                    data-observed-at={row.lastRetrievalAt || undefined}
+                    d={`M ${brainAtlasWideX(168)} ${y + 19} C ${brainAtlasWideX(198)} ${y + 19}, ${brainAtlasWideX(202)} 119, ${brainAtlasWideX(232)} 119`}
+                  />
+                </React.Fragment>
               );
             })}
             <path className={`memory-flow-edge is-hit${recent("hit") ? " is-live" : ""}`} data-operation="hit" data-observed-at={activity?.lastObservedAt.hit || undefined} d={`M ${brainAtlasWideX(372)} 119 C ${brainAtlasWideX(392)} 119, ${brainAtlasWideX(408)} 119, ${brainAtlasWideX(430)} 119`} />
@@ -4129,6 +4146,9 @@ function BrainAtlasPanel({
               const live = memorySignalIsRecent(row.lastRetrievalAt, motionWindowSeconds);
               const working = workingAgentIds.has(row.agent);
               const agentLoad = loadByAgent.get(row.agent)!;
+              const liveWork = liveWorkByAgent.get(row.agent);
+              const workObservedAt = liveWork?.activeWork?.updated_at || liveWork?.status.updated_at;
+              const workLinked = Boolean(working && memorySignalIsRecent(workObservedAt, motionWindowSeconds));
               return (
                 <g
                   key={row.agent}
@@ -4141,7 +4161,7 @@ function BrainAtlasPanel({
                   data-agent-load-score={agentLoad.score}
                   style={{ "--atlas-agent-phase": `${index * -0.18}s` } as React.CSSProperties}
                 >
-                  <title>{`${AGENTS[row.agent].label}: ${working ? `${agentLoad.label.toLowerCase()} verified work load (${agentLoad.score}/4)` : "not working"}; ${!activity ? "memory telemetry unavailable" : live ? "verified retrieval receipt only" : "memory quiet"}`}</title>
+                  <title>{`${AGENTS[row.agent].label}: ${working ? `${agentLoad.label.toLowerCase()} verified work load (${agentLoad.score}/4)` : "not working"}; ${workLinked ? "fresh Live Work lifeline active" : "no fresh Live Work lifeline"}; ${!activity ? "memory telemetry unavailable" : live ? "verified retrieval receipt only" : "memory quiet"}`}</title>
                   <rect className="memory-flow-node-aura" x={brainAtlasWideX(13)} y={y - 5} width={brainAtlasWideWidth(13, 160)} height="48" rx="12" />
                   <rect x={brainAtlasWideX(18)} y={y} width={brainAtlasWideWidth(18, 150)} height="38" rx="7" />
                   <g className="memory-flow-node-copy" clipPath={`url(#brain-atlas-agent-copy-${row.agent})`}>
