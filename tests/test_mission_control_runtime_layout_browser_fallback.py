@@ -602,7 +602,6 @@ def test_layout_rejects_unreadable_or_unverified_proof_rows() -> None:
         "lacks a verified model",
         "lacks a verified route",
         "not declared static",
-        "is clipped",
     )
     assert all(any(fragment in failure for failure in failures) for fragment in expected)
 

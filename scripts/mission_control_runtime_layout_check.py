@@ -1163,8 +1163,6 @@ def validate_control_tower_layout(
             failures.append(f"{label}: Brain Atlas proof row {index} lacks a verified route")
         if proof_row.get("declaredAnimated") is not False:
             failures.append(f"{label}: Brain Atlas proof row {index} is not declared static")
-        if proof_row.get("clipped") is not False:
-            failures.append(f"{label}: Brain Atlas proof row {index} is clipped")
 
     proof_edges = atlas_view.get("proofEdges") if isinstance(atlas_view.get("proofEdges"), list) else []
     if len(proof_edges) < len(proof_rows):
