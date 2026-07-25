@@ -17788,20 +17788,6 @@ body,
   animation: memory-agent-receipt-dot 1.05s ease-in-out infinite;
 }
 
-.memory-flow-node.is-board-selected > rect:not(.memory-flow-node-aura) {
-  stroke: #ffe091;
-  stroke-width: 3.2;
-  filter: drop-shadow(0 0 7px rgba(255, 209, 102, 0.72));
-}
-
-.memory-flow-node.is-agent[role="button"] { cursor: pointer; }
-
-.agent-hero-card.is-atlas-selected {
-  outline: 2px solid rgba(255, 209, 102, 0.85);
-  outline-offset: -2px;
-  box-shadow: inset 0 0 28px rgba(255, 209, 102, 0.1), 0 0 14px rgba(255, 209, 102, 0.18);
-}
-
 .memory-flow-node.is-work-active > rect:not(.memory-flow-node-aura) {
   fill: rgba(8, 38, 57, 0.98);
   stroke: #65d9ff;
