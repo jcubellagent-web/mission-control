@@ -16712,6 +16712,15 @@ body,
   outline-offset: 1px;
 }
 
+/* The generic Brain Atlas header rule makes direct div children grids. Keep
+   this compact mode switch on one row so the evidence graph retains its
+   required kiosk height. */
+#brain-atlas .brain-atlas-view-switch {
+  display: inline-flex;
+  justify-self: center;
+  width: max-content;
+}
+
 .ownership-graph-view {
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr) auto;
