@@ -3898,7 +3898,16 @@ function BrainAtlasPanel({
   ), [recentProofRows]);
   const activity = useMemo(() => sanitizedMemoryActivity(memoryOperations?.activity), [memoryOperations?.activity]);
   const durableMemoryCount = sanitizedNestedMemoryCount(memoryOperations, "registry", "active");
-  const pendingMemoryCount = sanitizedNestedMemoryCount(memoryOperations, "review", "pending");
+  const queries7d = sanitizedNestedMemoryCount(memoryOperations, "retrieval", "queries7d");
+  const hits7d = sanitizedNestedMemoryCount(memoryOperations, "retrieval", "hits7d");
+  const avgRecallLatencyMs = sanitizedNestedMemoryMetric(memoryOperations, "retrieval", "avgLatencyMs", 60_000);
+  const selected30d = sanitizedNestedMemoryCount(memoryOperations, "retrieval", "selected30d");
+  const used30d = sanitizedNestedMemoryCount(memoryOperations, "retrieval", "used30d");
+  const feedback30d = sanitizedNestedMemoryCount(memoryOperations, "retrieval", "feedback30d");
+  const helpful30d = sanitizedNestedMemoryCount(memoryOperations, "retrieval", "helpful30d");
+  const recallEfficiency = queries7d && hits7d <= queries7d ? Math.round((hits7d / queries7d) * 100) : null;
+  const selectionUseRate = selected30d && used30d <= selected30d ? Math.round((used30d / selected30d) * 100) : null;
+  const feedbackQuality = feedback30d && helpful30d <= feedback30d ? Math.round((helpful30d / feedback30d) * 100) : null;
   const motionWindowSeconds = Math.min(100, Math.max(15, Number(activity?.motionWindowSeconds || 90)));
   const count = (key: keyof MemoryActivity["counts"]) => Number(activity?.counts[key] || 0);
   const recent = (key: MemorySignalKey) => memorySignalIsRecent(activity?.lastObservedAt[key], motionWindowSeconds);
@@ -3912,8 +3921,6 @@ function BrainAtlasPanel({
   const retrievals = count("retrievals");
   const hits = count("hits");
   const uses = count("used");
-  const crossAgentUses = count("crossAgentUsed");
-  const hitRate = retrievals ? `${Math.round((hits / retrievals) * 100)}%` : "--";
   const byAgent = new Map((activity?.agents || []).map((row) => [row.agent, row]));
   const statusByAgent = new Map(statuses.map((row) => [row.agent_id, row]));
   const liveWorkByAgent = new Map(HERO_AGENT_ORDER.map((agent) => [
@@ -4058,11 +4065,11 @@ function BrainAtlasPanel({
           </div>
         </header>
 
-        <div className="memory-flow-metrics" aria-label="Memory activity summary">
-          <article><span>Retrievals</span><strong>{activity ? retrievals : "--"}</strong><em>{activity ? `last ${activity.windowMinutes}m` : "telemetry unavailable"}</em></article>
-          <article><span>Recall hit rate</span><strong>{hitRate}</strong><em>{activity ? `${hits} exact hit${hits === 1 ? "" : "s"}` : "telemetry unavailable"}</em></article>
-          <article className={activity && uses ? "is-verified" : "is-idle"}><span>Explicit uses</span><strong>{activity ? uses : "--"}</strong><em>{activity ? (crossAgentUses ? `${crossAgentUses} cross-agent` : uses ? "selected + used" : "no use receipt") : "telemetry unavailable"}</em></article>
-          <article><span>Durable memory</span><strong>{durableMemoryCount}</strong><em>{pendingMemoryCount} candidate{pendingMemoryCount === 1 ? "" : "s"}</em></article>
+        <div className="memory-flow-metrics" aria-label="Memory capability summary">
+          <article><span>Retrievals</span><strong>{activity ? retrievals : "--"}</strong><em>{activity ? ["last ", activity.windowMinutes, "m"].join("") : "telemetry unavailable"}</em></article>
+          <article className={recallEfficiency != null ? "is-verified" : "is-idle"}><span>Recall efficiency</span><strong>{recallEfficiency == null ? "--" : [recallEfficiency, "%"].join("")}</strong><em>{recallEfficiency != null ? [queries7d, " queries · ", avgRecallLatencyMs == null ? "latency unavailable" : [avgRecallLatencyMs, " ms"].join("")].join("") : "7d telemetry unavailable"}</em></article>
+          <article className={selectionUseRate != null ? "is-verified" : "is-idle"}><span>Selection to use</span><strong>{selectionUseRate == null ? "--" : [selectionUseRate, "%"].join("")}</strong><em>{selectionUseRate != null ? [used30d, "/", selected30d, " verified uses"].join("") : "no selected memory yet"}</em></article>
+          <article className={feedbackQuality != null ? "is-verified" : "is-idle"}><span>Feedback quality</span><strong>{feedbackQuality == null ? "--" : [feedbackQuality, "%"].join("")}</strong><em>{feedbackQuality != null ? [helpful30d, "/", feedback30d, " helpful outcomes"].join("") : "no feedback outcomes yet"}</em></article>
         </div>
 
         <div className="brain-atlas-unified-controls">
@@ -4238,7 +4245,7 @@ function BrainAtlasPanel({
               <rect x={brainAtlasWideX(232)} y="92" width={brainAtlasWideWidth(232, 140)} height="54" rx="9" />
               <g className="memory-flow-node-copy" clipPath="url(#brain-atlas-recall-copy)">
               <text className="memory-flow-node-title" x={brainAtlasWideX(302)} y="115" textAnchor="middle">Recall</text>
-              <text className="memory-flow-node-detail" x={brainAtlasWideX(302)} y="132" textAnchor="middle">{activity ? `${retrievals} queried · ${count("misses")} miss` : "telemetry unavailable"}</text>
+              <text className="memory-flow-node-detail" x={brainAtlasWideX(302)} y="132" textAnchor="middle">{recallEfficiency != null ? [recallEfficiency, "% hit · ", avgRecallLatencyMs == null ? "latency unavailable" : [avgRecallLatencyMs, " ms"].join("")].join("") : activity ? [retrievals, " queried · ", count("misses"), " miss"].join("") : "telemetry unavailable"}</text>
               </g>
             </g>
             <g className={`memory-flow-node is-registry${recent("hit") || recent("promoted") ? " is-live" : ""}`}>
@@ -4252,14 +4259,14 @@ function BrainAtlasPanel({
               <rect x={brainAtlasWideX(640)} y="31" width={brainAtlasWideWidth(640, 144)} height="54" rx="9" />
               <g className="memory-flow-node-copy" clipPath="url(#brain-atlas-applied-copy)">
               <text className="memory-flow-node-title" x={brainAtlasWideX(712)} y="54" textAnchor="middle">Applied</text>
-              <text className="memory-flow-node-detail" x={brainAtlasWideX(712)} y="71" textAnchor="middle">{activity ? `${uses} explicit use receipt${uses === 1 ? "" : "s"}` : "telemetry unavailable"}</text>
+              <text className="memory-flow-node-detail" x={brainAtlasWideX(712)} y="71" textAnchor="middle">{selectionUseRate != null ? [selectionUseRate, "% selected -> used"].join("") : activity ? [uses, " explicit use receipt", uses === 1 ? "" : "s"].join("") : "telemetry unavailable"}</text>
               </g>
             </g>
             <g className={`memory-flow-node is-feedback${recent("feedback") ? " is-live" : ""}`}>
               <rect x={brainAtlasWideX(640)} y="154" width={brainAtlasWideWidth(640, 144)} height="54" rx="9" />
               <g className="memory-flow-node-copy" clipPath="url(#brain-atlas-outcome-copy)">
               <text className="memory-flow-node-title" x={brainAtlasWideX(712)} y="177" textAnchor="middle">Outcome</text>
-              <text className="memory-flow-node-detail" x={brainAtlasWideX(712)} y="194" textAnchor="middle">{activity ? `${count("feedback")} feedback receipt${count("feedback") === 1 ? "" : "s"}` : "telemetry unavailable"}</text>
+              <text className="memory-flow-node-detail" x={brainAtlasWideX(712)} y="194" textAnchor="middle">{feedbackQuality != null ? [feedbackQuality, "% helpful outcomes"].join("") : activity ? [count("feedback"), " feedback receipt", count("feedback") === 1 ? "" : "s"].join("") : "telemetry unavailable"}</text>
               </g>
             </g>
             <g className={`memory-flow-node is-candidate${candidateIsRecent ? " is-live" : ""}`} data-observed-at={candidateObservedAt || undefined}>
