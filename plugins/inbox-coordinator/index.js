@@ -1620,6 +1620,10 @@ export function dispatchClaim(event = {}, ctx = {}, config = {}, logger = consol
         updateClaim(reservation.path, {
           status: queued ? "queued" : partialEffects ? "indeterminate" : "failed",
           error: queued ? "" : `helper_exit_${code ?? "unknown"}`,
+          // Keep the bounded helper receipt in the owner-only claim record so
+          // a clean exit that falls through to the native responder can be
+          // diagnosed without publishing task content to shared telemetry.
+          helperReceipt: queued ? "" : stdout.slice(-4000),
         });
         // The hook may already have returned after its bounded wait. Reconcile
         // the durable claim from a late receipt without changing that decision:

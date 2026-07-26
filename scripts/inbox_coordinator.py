@@ -2400,6 +2400,24 @@ def deliver_result(job_id: str, snapshot: dict[str, Any], route: dict[str, Any],
         timeout=TELEGRAM_TERMINAL_TIMEOUT_SECONDS,
         check=False,
     )
+    # Keep terminal-bridge diagnostics private and bounded.  The visible
+    # lifecycle must never reduce a delivery failure to an opaque RuntimeError:
+    # operators need the helper's exit status to distinguish a format rejection
+    # from a receipt/state failure without exposing it in Telegram or Brain Feed.
+    write_private_text(
+        PRIVATE_DIR / f"{job_id}.delivery.json",
+        json.dumps(
+            {
+                "returncode": proc.returncode,
+                "stdout": (getattr(proc, "stdout", "") or "")[-2000:],
+                #JAIMES: test and adapter result objects may omit stderr;
+                # private diagnostics must not turn a successful delivery path
+                # into an AttributeError.
+                "stderr": (getattr(proc, "stderr", "") or "")[-2000:],
+            },
+            sort_keys=True,
+        ),
+    )
     if proc.returncode != 0:
         return False
     try:
