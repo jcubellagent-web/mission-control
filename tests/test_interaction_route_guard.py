@@ -57,6 +57,7 @@ def test_dedicated_host_is_allowed_without_personal_alert() -> None:
     assert result["personalDevice"] is False
     assert result["verificationRequired"] is True
     assert result["maxAttempts"] == 3
+    assert result["visibleSessionEnvelopeRequired"] is True
 
 
 def test_jaimes_visible_work_promotes_to_josh2() -> None:

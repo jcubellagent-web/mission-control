@@ -1188,7 +1188,7 @@ function JoshDisplayLeaseBanner({ state, displayState }: { state: MissionControl
     <section className="display-lease-banner" role="status" aria-live="polite">
       <span className="display-lease-pulse" aria-hidden="true" />
       <strong>Josh 2.0 screen in use</strong>
-      <span>{owner} · {purpose}</span>
+      <span>{owner} · {purpose} · returns to Control Tower when work ends</span>
       <time dateTime={String(lease.expiresAt)}>{minutes}:{seconds} remaining</time>
     </section>
   );

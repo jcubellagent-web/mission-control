@@ -26,6 +26,7 @@ def test_promotion_lease_is_returned_only_through_private_completion(monkeypatch
         lambda **_kwargs: {"leaseId": "private-lease", "expiresAt": "2099-01-01T00:00:00Z"},
     )
     monkeypatch.setattr(broker.control_tower_foreground, "publish_display_lease", lambda _payload: None)
+    monkeypatch.setattr(broker.control_tower_foreground, "yield_to_visible_work", lambda: {"ok": True, "status": "yielded"})
     monkeypatch.setattr(broker, "private_complete", lambda request_id, response: responses.append((request_id, response)))
     status = broker.promote_request(
         {

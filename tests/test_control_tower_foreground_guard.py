@@ -130,6 +130,35 @@ def test_fresh_visible_work_lease_defers(tmp_path: Path) -> None:
     assert stat.S_IMODE(lease_path.stat().st_mode) == 0o600
 
 
+
+def test_active_lease_yields_the_exact_kiosk_to_visible_work(tmp_path: Path) -> None:
+    lease_path = tmp_path / "foreground-work.json"
+    MODULE.begin_lease(owner="joshex", purpose="computer-use", path=lease_path, now=NOW)
+    frontmost = iter(({"pid": 101, "name": "Google Chrome"}, {"pid": 202, "name": "Agent Browser"}))
+    calls = []
+    result = MODULE.yield_to_visible_work(
+        lease_path=lease_path,
+        now=NOW,
+        kiosk_pid_fn=lambda: 101,
+        cdp_ready_fn=lambda: True,
+        frontmost_fn=lambda: next(frontmost),
+        hide_fn=lambda pid: (calls.append(pid) or True, "hidden"),
+        sleep_fn=lambda _seconds: None,
+    )
+    assert result["ok"] is True
+    assert result["status"] == "yielded"
+    assert calls == [101]
+
+
+def test_terminal_restore_forces_kiosk_despite_recent_input(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    seen = {}
+    monkeypatch.setattr(MODULE, "ensure_foreground", lambda **kwargs: (seen.update(kwargs) or {"ok": True, "status": "focused"}))
+    result = MODULE.restore_after_release(path=tmp_path / "foreground-work.json", now=NOW)
+    assert result["status"] == "focused"
+    assert seen["force"] is True
+    assert seen["repair"] is True
+
+
 def test_expired_lease_is_cleaned_and_does_not_suppress(tmp_path: Path) -> None:
     lease_path = tmp_path / "foreground-work.json"
     MODULE.begin_lease(

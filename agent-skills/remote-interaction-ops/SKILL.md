@@ -43,7 +43,7 @@ personal Mac as a fallback.
 
 ## Reliable Session Envelope
 
-Wrap each meaningful browser-visual or desktop action in the host-local session
+Wrap every browser-visual, desktop-ui, or computer-use action in the host-local session
 engine. It provides a single lifecycle for route selection, display leasing,
 before/after verification, bounded recovery, JAIMES-to-Josh-2.0 promotion, and
 operator pause/stop controls:

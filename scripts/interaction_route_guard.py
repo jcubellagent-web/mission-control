@@ -49,6 +49,7 @@ def evaluate(
         "verificationRequired": engine.get("verificationRequired") is not False,
         "maxAttempts": max_attempts,
         "operatorControl": engine.get("enabled") is True,
+        "visibleSessionEnvelopeRequired": engine.get("visibleSessionEnvelopeRequired") is not False,
         "metadataOnlyReceipts": True,
     }
 

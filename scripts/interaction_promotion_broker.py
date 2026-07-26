@@ -75,6 +75,12 @@ def promote_request(row: dict[str, Any]) -> str:
     try:
         payload = control_tower_foreground.begin_lease(owner=owner, purpose=purpose, ttl_seconds=180)
         control_tower_foreground.publish_display_lease({"active": True, **payload})
+        handoff = control_tower_foreground.yield_to_visible_work()
+        if handoff.get("ok") is not True:
+            control_tower_foreground.end_lease(lease_id=payload["leaseId"])
+            control_tower_foreground.publish_display_lease(None)
+            control_tower_foreground.restore_after_release()
+            return "deferred"
     except (ValueError, RuntimeError):
         # A current visible-work lease is a normal temporary deferral.
         return "deferred"

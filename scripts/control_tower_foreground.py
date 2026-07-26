@@ -310,7 +310,7 @@ def restore_after_release(*, path: Optional[Path] = None, now: Optional[datetime
                 "reason": "replacement-visible-work",
                 "work": {key: replacement.get(key) for key in ("owner", "purpose", "expiresAt")},
             }
-        return ensure_foreground(force=False, repair=True, lease_path=lease_path, now=now)
+        return ensure_foreground(force=True, repair=True, lease_path=lease_path, now=now)
 
 
 def session_is_locked() -> bool:
@@ -477,6 +477,49 @@ def activate_kiosk_process(kiosk_pid: int, _previous_pid: Optional[int]) -> tupl
     return False, f"Exact Control Tower target activation failed verification ({last_error or 'unknown'})."
 
 
+def hide_kiosk_process(kiosk_pid: int) -> tuple[bool, str]:
+    """Hide only the exact dedicated kiosk process; never activate a generic browser."""
+    script = (
+        "ObjC.import(\"AppKit\"); "
+        f"const app=$.NSRunningApplication.runningApplicationWithProcessIdentifier({int(kiosk_pid)}); "
+        "if (!app) throw new Error(\"kiosk-process-missing\"); app.hide(); \"hidden\""
+    )
+    proc = run(["/usr/bin/osascript", "-l", "JavaScript", "-e", script], timeout=8)
+    return (True, "exact-kiosk-hidden") if proc.returncode == 0 else (False, "exact-kiosk-hide-failed")
+
+
+def yield_to_visible_work(
+    *,
+    lease_path: Optional[Path] = None,
+    now: Optional[datetime] = None,
+    kiosk_pid_fn: Optional[Callable[[], Optional[int]]] = None,
+    cdp_ready_fn: Optional[Callable[[], bool]] = None,
+    frontmost_fn: Optional[Callable[[], Optional[dict[str, Any]]]] = None,
+    hide_fn: Optional[Callable[[int], tuple[bool, str]]] = None,
+    sleep_fn: Optional[Callable[[float], None]] = None,
+) -> dict[str, Any]:
+    """Yield from the exact kiosk without inspecting window content or titles."""
+    state = lease_state(path=lease_path, now=now, cleanup=False)
+    if not state.get("active"):
+        return {"ok": False, "status": "error", "reason": "no-active-visible-work"}
+    kiosk_pid = (kiosk_pid_fn or find_kiosk_pid)()
+    if not kiosk_pid or not (cdp_ready_fn or cdp_has_control_tower)():
+        return {"ok": False, "status": "error", "reason": "kiosk-unavailable"}
+    frontmost = (frontmost_fn or frontmost_application)()
+    if not frontmost:
+        return {"ok": False, "status": "error", "reason": "frontmost-app-unavailable"}
+    if int(frontmost.get("pid") or 0) != kiosk_pid:
+        return {"ok": True, "status": "yielded", "reason": "visible-work-already-foreground"}
+    hidden, detail = (hide_fn or hide_kiosk_process)(kiosk_pid)
+    if not hidden:
+        return {"ok": False, "status": "error", "reason": detail, "kioskPid": kiosk_pid}
+    (sleep_fn or time.sleep)(0.25)
+    after = (frontmost_fn or frontmost_application)()
+    if after and int(after.get("pid") or 0) != kiosk_pid:
+        return {"ok": True, "status": "yielded", "reason": "exact-kiosk-hidden", "kioskPid": kiosk_pid}
+    return {"ok": False, "status": "error", "reason": "kiosk-still-foreground", "kioskPid": kiosk_pid}
+
+
 def ensure_foreground(
     *,
     force: bool = False,
@@ -638,7 +681,13 @@ def main() -> int:
                 pid=args.pid,
             )
             publish_display_lease({"active": True, **public_lease_payload(payload)})
-            print_json({"ok": True, "leaseId": payload["leaseId"], **public_lease_payload(payload)})
+            handoff = yield_to_visible_work()
+            if handoff.get("ok") is not True:
+                end_lease(lease_id=payload["leaseId"])
+                publish_display_lease(None)
+                restore_after_release()
+                raise RuntimeError(f"visible-work handoff failed: {handoff.get('reason')}")
+            print_json({"ok": True, "leaseId": payload["leaseId"], **public_lease_payload(payload), "handoff": handoff["status"]})
             return 0
         if args.command == "renew":
             payload = renew_lease(lease_id=args.lease_id, ttl_seconds=args.ttl_seconds)

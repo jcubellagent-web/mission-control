@@ -435,6 +435,12 @@ def acquire_visible_lease(owner: str, purpose: str, ttl_seconds: int, local_host
         payload = control_tower_foreground.begin_lease(owner=owner, purpose=purpose, ttl_seconds=ttl_seconds)
         state = control_tower_foreground.lease_state()
         control_tower_foreground.publish_display_lease(state)
+        handoff = control_tower_foreground.yield_to_visible_work()
+        if handoff.get("ok") is not True:
+            control_tower_foreground.end_lease(lease_id=payload["leaseId"])
+            control_tower_foreground.publish_display_lease(None)
+            control_tower_foreground.restore_after_release()
+            raise InteractionError("visible display handoff failed")
         return {
             "host": "josh2",
             "leaseId": payload["leaseId"],
