@@ -368,7 +368,7 @@ def _memory_operations_unavailable(now_iso: str) -> Dict[str, Any]:
 def _valid_memory_raw_envelope(value: Dict[str, Any], updated_at: dt.datetime) -> bool:
     """Validate legacy producer-only fields before discarding them."""
 
-    if value.get("status") not in {"ok", "healthy", "ready", "watch"}:
+    if value.get("status") not in {"ok", "healthy", "ready", "watch", "attention"}:
         return False
     summary = value.get("summary")
     if not isinstance(summary, str) or len(summary) > 500 or any(ord(char) < 32 for char in summary):

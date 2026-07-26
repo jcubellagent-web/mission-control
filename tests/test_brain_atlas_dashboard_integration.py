@@ -550,6 +550,13 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         for private_field in ("summary", "governance", "agentAccess", "qualityDefinition", "publicLabels"):
             self.assertNotIn(private_field, serialized)
 
+    def test_memory_operations_accepts_verified_attention_status(self) -> None:
+        source = valid_memory_operations()
+        source["status"] = "attention"
+        clean = self.update.sanitize_memory_operations(source, "2026-07-18T16:01:00Z")
+        self.assertEqual("ready", clean["status"])
+        self.assertTrue(clean["source"]["verified"])
+
     def test_memory_operations_rejects_content_and_unknown_fields_without_echo(self) -> None:
         secret = "private-memory-content-never-publish"
         mutations = []
