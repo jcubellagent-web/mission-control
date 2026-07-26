@@ -923,8 +923,9 @@ class InboxCoordinatorTests(unittest.TestCase):
         flat = " ".join(body.split())
         self.assertTrue(text.startswith("<pre>JOSH 2.0 · COMPLETE"))
         self.assertIn("Model: xai/grok-test\nRoute:", body)
-        self.assertIn("auth=Grok CLI", flat)
-        self.assertIn("fallback=gemini execution failed;", flat)
+        self.assertIn("Why: explicit model request", flat)
+        self.assertNotIn("auth=Grok CLI", flat)
+        self.assertNotIn("fallback=gemini execution failed;", flat)
         self.assertIn("Complete: Yes", body)
         self.assertIn("What was done:", body)
         self.assertIn("Issues:", body)
@@ -938,7 +939,7 @@ class InboxCoordinatorTests(unittest.TestCase):
         self.assertIn("[redacted]", decoded)
         self.assertIn("- ", text)
 
-    def test_final_auth_is_unverified_without_an_executor_checkpoint(self):
+    def test_final_omits_internal_auth_diagnostics_without_an_executor_checkpoint(self):
         coordinator = load_module()
         route = {
             "routeId": "gemini",
@@ -966,8 +967,10 @@ class InboxCoordinatorTests(unittest.TestCase):
             {**base_execution, "actualAuth": "Antigravity session", "authVerified": False},
             output,
         ))
-        self.assertIn("auth=unverified", no_checkpoint)
-        self.assertIn("auth=unverified", unverified_checkpoint)
+        self.assertIn("Why: dashboard-safe review/summarization", no_checkpoint)
+        self.assertIn("Why: dashboard-safe review/summarization", unverified_checkpoint)
+        self.assertNotIn("auth=unverified", no_checkpoint)
+        self.assertNotIn("auth=unverified", unverified_checkpoint)
         self.assertNotIn("auth=Antigravity session", no_checkpoint)
 
     def test_weak_assessment_is_downgraded_without_invented_results(self):

@@ -810,7 +810,7 @@ def test_final_summary_is_html_preformatted_and_bounded():
     )
     assert rendered.startswith("<pre>") and rendered.endswith("</pre>")
     body = card.html.unescape(rendered.removeprefix("<pre>").removesuffix("</pre>"))
-    assert max(map(len, body.splitlines())) <= card.CARD_WRAP_WIDTH
+    assert max(map(len, body.splitlines())) <= 50
     assert "What was done:" in body
     assert "Approval needed:" in body
 

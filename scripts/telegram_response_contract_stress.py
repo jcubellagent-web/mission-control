@@ -28,6 +28,7 @@ LABELS = (
     "Approval needed:",
 )
 CARD_WIDTH = 38
+FINAL_WIDTH = 50
 PRODUCTION_CHAT_ID = "-1003589561528"
 PRODUCTION_INBOX_THREAD_ID = "1"
 PRODUCTION_JAIMES_THREAD_ID = "17"
@@ -573,8 +574,8 @@ def validate(text: str, module=None) -> list[str]:
     elif not _no_issue(approval) and not _bullet_items(approval):
         problems.append("Approval needed must be n/a or contain at least one bullet")
     width = module.display_width if module and hasattr(module, "display_width") else len
-    if legacy_pre and max((width(line) for line in plain.splitlines()), default=0) > CARD_WIDTH:
-        problems.append(f"a rendered line exceeds {CARD_WIDTH} display columns")
+    if legacy_pre and max((width(line) for line in plain.splitlines()), default=0) > FINAL_WIDTH:
+        problems.append(f"a rendered line exceeds {FINAL_WIDTH} display columns")
     if not re.search(r"^Complete: (?:Yes|No)\b", plain, flags=re.M):
         problems.append("Complete must start with Yes or No")
     complete_at = plain.find("Complete:")

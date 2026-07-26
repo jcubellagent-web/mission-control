@@ -41,7 +41,7 @@ WORKSPACE_SCRIPTS = WORKSPACE / "scripts"
 if str(WORKSPACE_SCRIPTS) not in sys.path:
     sys.path.insert(0, str(WORKSPACE_SCRIPTS))
 
-from telegram_final_format import render_final_codeblock  # type: ignore  # noqa: E402
+from telegram_final_format import FINAL_WRAP_WIDTH, render_final_codeblock  # type: ignore  # noqa: E402
 
 try:
     from send_josh_reply import API_BASE, TARGET, build_payload  # type: ignore
@@ -82,9 +82,9 @@ DEFAULT_BUTTONS = [
 SECTION_SPACER = "⠀"
 #JAIMES: every ecosystem live card uses the same Telegram <pre> geometry.
 # Proportional-text spacing is not visually equivalent in fixed-width blocks.
-# Keep final-codeblock validation aligned with telegram_final_format.py. Live
-# cards may remain compact, but finals use the more readable 50-column layout.
-CARD_WRAP_WIDTH = max(32, int(os.environ.get("JOSH_CARD_WRAP_WIDTH", "50")))
+# Live cards retain the compact 38-column geometry enforced by the stress
+# contract. Terminal summaries use telegram_final_format.FINAL_WRAP_WIDTH.
+CARD_WRAP_WIDTH = max(32, int(os.environ.get("JOSH_CARD_WRAP_WIDTH", "38")))
 CARD_CONTINUATION_INDENT = "   "
 CARD_BULLET_INDENT = "  "
 CONTROL_CENTER_CHAT_ID = "-1003589561528"
@@ -2068,9 +2068,9 @@ def load_final_text_file(path: str) -> str:
         plain = html.unescape(plain).strip("\n").replace("\r\n", "\n").replace("\r", "\n")
     lines = [re.sub(r"^\s*•\s+", "- ", line) for line in plain.splitlines()]
     plain = "\n".join(lines)
-    if not lines or (legacy_pre and any(len(line) > CARD_WRAP_WIDTH for line in lines)):
+    if not lines or (legacy_pre and any(len(line) > FINAL_WRAP_WIDTH for line in lines)):
         raise SystemExit(
-            f"--final-text-file must pre-wrap every line to the canonical {CARD_WRAP_WIDTH}-column geometry"
+            f"--final-text-file must pre-wrap every line to the canonical {FINAL_WRAP_WIDTH}-column geometry"
         )
     labels = ["Complete:", "What was done:", "Issues:", "Appropriate next steps:", "Approval needed:"]
     positions = [next((index for index, line in enumerate(lines) if line.startswith(label)), -1) for label in labels]

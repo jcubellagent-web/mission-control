@@ -238,9 +238,9 @@ Appropriate next steps:
 
 Approval needed:
 - n/a
-- this line is intentionally much wider than the thirty eight column Telegram contract permits</pre>"""
+- this line is intentionally much wider than the fifty column Telegram contract permits</pre>"""
 
-    assert "a rendered line exceeds 38 display columns" in stress.validate(text, module)
+    assert "a rendered line exceeds 50 display columns" in stress.validate(text, module)
 
 
 def test_validate_accepts_polished_final_and_rejects_unformatted_plain_text() -> None:

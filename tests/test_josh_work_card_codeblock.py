@@ -187,7 +187,7 @@ def test_final_summary_is_one_mobile_safe_codeblock():
     assert "Approval needed:" in body
     assert "- " in rendered
     raw = card.html.unescape(rendered.removeprefix("<pre>").removesuffix("</pre>"))
-    assert max(map(card.display_width, raw.splitlines())) <= 38
+    assert max(map(card.display_width, raw.splitlines())) <= 50
     assert "<blockquote>" not in rendered
 
 

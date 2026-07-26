@@ -2375,7 +2375,7 @@ Approval needed:
         self.assertNotIn("Detailed findings were not captured", normalized)
         self.assertNotIn("Retry with evidence", normalized)
         self.assertTrue(watcher.final_contract_is_canonical(rendered))
-        self.assertLessEqual(max(map(len, plain.removeprefix("<pre>").removesuffix("</pre>").splitlines())), 38)
+        self.assertLessEqual(max(map(len, plain.removeprefix("<pre>").removesuffix("</pre>").splitlines())), 50)
 
     def test_topic17_completed_health_audit_with_negative_findings_stays_complete(self) -> None:
         rendered = watcher.structured_final_text(
@@ -2524,7 +2524,7 @@ Approval needed:
         self.assertTrue(watcher.final_contract_is_canonical(rendered))
         self.assertLessEqual(
             max(map(len, plain.removeprefix("<pre>").removesuffix("</pre>").splitlines())),
-            38,
+            50,
         )
 
     def test_explicit_july_11_history_request_may_use_session_history(self) -> None:
