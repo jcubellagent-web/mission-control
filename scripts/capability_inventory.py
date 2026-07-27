@@ -18,6 +18,14 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "data"
 OUT = DATA_DIR / "capability-inventory.json"
 
+# These were early relay labels, not separate hosts.  Keep their last
+# dashboard-safe observations under ``retiredNodes`` when a direct host probe
+# succeeds so they can never be mistaken for a live routing destination.
+RETIRED_ALIASES = {
+    "josh2": {"josh2-lan"},
+    "jaimes": {"jaimes-via-josh"},
+}
+
 if str(ROOT / "scripts") not in sys.path:
     sys.path.insert(0, str(ROOT / "scripts"))
 
@@ -267,10 +275,67 @@ def service_hits() -> list[str]:
     return hits
 
 
+def disk_headroom() -> dict[str, Any]:
+    """Return only bounded local storage health, never paths or file names."""
+    try:
+        usage = shutil.disk_usage(Path.home())
+    except OSError:
+        return {"status": "unavailable"}
+    free_gib = round(usage.free / (1024 ** 3), 1)
+    capacity_percent: float | None = None
+    code, output = run(["df", "-kP", str(Path.home())], timeout=4)
+    if code == 0:
+        rows = [row.split() for row in output.splitlines()[1:] if row.split()]
+        if rows:
+            try:
+                capacity_percent = float(rows[-1][4].rstrip("%"))
+            except (IndexError, ValueError):
+                pass
+    return {
+        "status": "attention" if free_gib < 5 else "watch" if free_gib < 10 else "ok",
+        "freeGiB": free_gib,
+        "capacityPercent": capacity_percent,
+    }
+
+
+def host_contract(record: dict[str, Any]) -> dict[str, Any]:
+    """Project the practical contract an agent can safely rely on at routing time."""
+    interaction = record.get("interaction") if isinstance(record.get("interaction"), dict) else {}
+    browser = interaction.get("browser") if isinstance(interaction.get("browser"), dict) else {}
+    computer_use = interaction.get("computerUse") if isinstance(interaction.get("computerUse"), dict) else {}
+    models = {str(model) for model in record.get("ollamaModels", []) if isinstance(model, str)}
+    return {
+        "schemaVersion": 1,
+        "checkedAt": record.get("checkedAt"),
+        "role": interaction.get("role") or "unknown",
+        "ready": bool(
+            record.get("openclawGateway", {}).get("ok")
+            and interaction.get("status") == "ok"
+            and record.get("disk", {}).get("status") != "attention"
+        ),
+        "controlPlane": {
+            "openclawGateway": record.get("openclawGateway", {}).get("status"),
+            "taskLedger": record.get("openclawTaskLedger", {}).get("status"),
+        },
+        "interaction": {
+            "browser": browser.get("status"),
+            "computerUse": computer_use.get("status"),
+            "visibleLeaseRequired": interaction.get("displayLease", {}).get("required"),
+        },
+        "modelLanes": {
+            "gemini": record.get("geminiCli", {}).get("status") == "ready",
+            "glm52Cloud": "glm-5.2:cloud" in models,
+            "privateLocal": any(model.startswith(("qwen", "llama")) for model in models),
+        },
+        "storage": record.get("disk", {}).get("status"),
+        "privacy": "dashboard-safe metadata only",
+    }
+
+
 def collect(args: argparse.Namespace) -> dict[str, Any]:
     cron_ok, cron_count, wrapped = crontab_summary()
     code, py = run([args.python, "--version"], timeout=4)
-    return {
+    record = {
         "node": args.node,
         "agent": args.agent,
         "checkedAt": utc_now(),
@@ -295,6 +360,7 @@ def collect(args: argparse.Namespace) -> dict[str, Any]:
         "hermesCli": cli_status("hermes", ["--version"]),
         "codexMcpServers": codex_mcp_servers(),
         "services": service_hits(),
+        "disk": disk_headroom(),
         "interaction": collect_interaction_capability(
             args.node,
             args.interaction_role,
@@ -302,6 +368,8 @@ def collect(args: argparse.Namespace) -> dict[str, Any]:
             args.active_interaction_canary,
         ),
     }
+    record["hostContract"] = host_contract(record)
+    return record
 
 
 def merge(record: dict[str, Any]) -> dict[str, Any]:
@@ -309,9 +377,26 @@ def merge(record: dict[str, Any]) -> dict[str, Any]:
     with lock_path.open("w") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
         data = read_json(OUT, {"updatedAt": record["checkedAt"], "nodes": []})
-        nodes = [node for node in data.get("nodes", []) if node.get("node") != record["node"]]
+        nodes: list[dict[str, Any]] = []
+        retired = [row for row in data.get("retiredNodes", []) if isinstance(row, dict)]
+        aliases = RETIRED_ALIASES.get(str(record.get("agent") or ""), set())
+        for node in data.get("nodes", []):
+            if not isinstance(node, dict) or node.get("node") == record["node"]:
+                continue
+            if node.get("agent") == record.get("agent") and node.get("node") in aliases:
+                retired.insert(0, {
+                    "node": node.get("node"),
+                    "agent": node.get("agent"),
+                    "lastCheckedAt": node.get("checkedAt"),
+                    "retiredAt": record["checkedAt"],
+                    "replacedBy": record["node"],
+                    "reason": "superseded-by-direct-host-inventory",
+                })
+                continue
+            nodes.append(node)
         nodes.insert(0, record)
         data["nodes"] = nodes[:30]
+        data["retiredNodes"] = retired[:30]
         data["updatedAt"] = record["checkedAt"]
         write_json(OUT, data)
         fcntl.flock(lock, fcntl.LOCK_UN)
@@ -320,15 +405,26 @@ def merge(record: dict[str, Any]) -> dict[str, Any]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Collect dashboard-safe agent capability inventory.")
-    parser.add_argument("--node", required=True)
-    parser.add_argument("--agent", required=True)
+    parser.add_argument("--node")
+    parser.add_argument("--agent")
     parser.add_argument("--python", default="python3")
     parser.add_argument("--interaction-role", choices=("visible", "headless", "private", "unknown"))
     parser.add_argument("--active-interaction-canary", action="store_true")
     parser.add_argument("--merge", action="store_true")
+    parser.add_argument("--merge-record", type=Path, help="Merge one dashboard-safe record collected on another canonical host.")
     args = parser.parse_args()
-    record = collect(args)
-    payload = merge(record) if args.merge else {"updatedAt": record["checkedAt"], "nodes": [record]}
+    if args.merge_record:
+        record = read_json(args.merge_record, {})
+        if isinstance(record, dict) and isinstance(record.get("nodes"), list) and len(record["nodes"]) == 1:
+            record = record["nodes"][0]
+        if not isinstance(record, dict) or not all(isinstance(record.get(key), str) and record.get(key) for key in ("node", "agent", "checkedAt")):
+            raise SystemExit("--merge-record must contain one dashboard-safe capability record with node, agent, and checkedAt.")
+        payload = merge(record)
+    else:
+        if not args.node or not args.agent:
+            parser.error("--node and --agent are required unless --merge-record is supplied")
+        record = collect(args)
+        payload = merge(record) if args.merge else {"updatedAt": record["checkedAt"], "nodes": [record]}
     print(json.dumps(payload, indent=2))
     return 0
 

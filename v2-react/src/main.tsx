@@ -1471,6 +1471,7 @@ function App() {
           todayJobs={state.todayJobs}
           todayJobsMeta={state.todayJobsMeta}
           qualityControl={state.qualityControl}
+          capabilityInventory={state.capabilityInventory}
         />
         <MemoizedFinOpsDashboard
           wallet={state.agenticCrypto}
@@ -3915,11 +3916,13 @@ function BrainAtlasOperationsView({
   todayJobs = [],
   todayJobsMeta,
   qualityControl,
+  capabilityInventory,
 }: {
   activeModelRoutes?: ActiveModelRoute[];
   todayJobs?: TodayJobOccurrence[];
   todayJobsMeta?: TodayJobsMeta;
   qualityControl?: Record<string, unknown>;
+  capabilityInventory?: MissionControlState["capabilityInventory"];
 }) {
   const verifiedRoutes = activeModelRoutes.filter((route) => route.routeVerified === true && HERO_AGENT_ORDER.includes(route.ownerAgent));
   const routesByFamily = new Map<string, number>();
@@ -3944,13 +3947,22 @@ function BrainAtlasOperationsView({
     : "unavailable";
   const qualityTone = qualityStatus === "attention" || qualityStatus === "degraded" ? "watch" : qualityStatus === "unavailable" ? "muted" : "clear";
   const routeFamilies = Array.from(routesByFamily.entries()).sort(([left], [right]) => left.localeCompare(right));
+  const hostContracts = (Array.isArray(capabilityInventory?.nodes) ? capabilityInventory.nodes : [])
+    .filter((node: any) => ["josh2", "jaimes"].includes(String(node?.node || "")))
+    .map((node: any) => ({
+      node: String(node.node),
+      ready: node?.hostContract?.ready === true,
+      role: String(node?.hostContract?.role || node?.interaction?.role || "unknown"),
+      storage: String(node?.hostContract?.storage || node?.disk?.status || "unavailable"),
+    }));
+  const readyHostContracts = hostContracts.filter((host) => host.ready).length;
 
   return (
     <section className="brain-atlas-operations" aria-labelledby="brain-atlas-operations-heading">
       <header className="brain-atlas-operations-header">
         <div>
           <h3 id="brain-atlas-operations-heading">Ecosystem operations</h3>
-          <p>Verified routes, scheduled work cadence, and governed quality signals—counts only.</p>
+          <p>Verified routes, host contracts, scheduled work cadence, and governed quality signals—counts only.</p>
         </div>
         <span>{modelLaneLive || cadenceLive ? "Live evidence" : "Current snapshot"}</span>
       </header>
@@ -3984,6 +3996,14 @@ function BrainAtlasOperationsView({
           </div>
           <p>{qualityStatus === "unavailable" ? "Awaiting governed quality telemetry." : `${qualityStatus} · review-gated promotion remains enforced`}</p>
         </article>
+        <article className={`brain-atlas-ops-card is-quality is-${readyHostContracts === 2 ? "clear" : "watch"}`}>
+          <header><span>Host contracts</span><strong>{readyHostContracts}/{hostContracts.length || 2}</strong></header>
+          <div className="brain-atlas-ops-quality" role="img" aria-label={`${readyHostContracts} of ${hostContracts.length || 2} dedicated host contracts ready`}>
+            <i style={{ "--quality-score": `${hostContracts.length ? (readyHostContracts / hostContracts.length) * 100 : 0}%` } as React.CSSProperties} />
+            <b>{hostContracts.length ? `${readyHostContracts}/${hostContracts.length}` : "Awaiting"}</b>
+          </div>
+          <p>{hostContracts.length ? hostContracts.map((host) => `${host.node === "josh2" ? "Josh 2.0" : "JAIMES"}: ${host.role} · ${host.storage}`).join(" · ") : "Awaiting direct host verification."}</p>
+        </article>
       </div>
       <footer>Ownership and handoffs remain available in the Ownership view. Motion represents only fresh, verified operational evidence.</footer>
     </section>
@@ -4000,6 +4020,7 @@ function BrainAtlasPanel({
   todayJobs,
   todayJobsMeta,
   qualityControl,
+  capabilityInventory,
 }: {
   atlas?: BrainAtlas;
   ownershipGraph?: TaskOwnershipGraph;
@@ -4010,6 +4031,7 @@ function BrainAtlasPanel({
   todayJobs?: TodayJobOccurrence[];
   todayJobsMeta?: TodayJobsMeta;
   qualityControl?: Record<string, unknown>;
+  capabilityInventory?: MissionControlState["capabilityInventory"];
 }) {
   const [focusId, setFocusId] = useState("all");
   const [atlasMode, setAtlasMode] = useState<"evidence" | "ownership" | "operations">("evidence");
@@ -4157,7 +4179,7 @@ function BrainAtlasPanel({
       </header>
 
       {atlasMode === "ownership" ? <OwnershipGraphView graph={ownershipGraph} /> : atlasMode === "operations" ? (
-        <BrainAtlasOperationsView activeModelRoutes={activeModelRoutes} todayJobs={todayJobs} todayJobsMeta={todayJobsMeta} qualityControl={qualityControl} />
+        <BrainAtlasOperationsView activeModelRoutes={activeModelRoutes} todayJobs={todayJobs} todayJobsMeta={todayJobsMeta} qualityControl={qualityControl} capabilityInventory={capabilityInventory} />
       ) : (
       <section
         id="brain-atlas-unified-panel"

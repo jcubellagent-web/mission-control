@@ -110,7 +110,7 @@ Before an agent picks up work from another agent, check:
 - `data/shared-events.json`
 - `data/agent-chat-sources.json`
 
-Use `scripts/reconcile_agent_context.py` to close stale/superseded task and handoff noise without deleting history.
+Use `scripts/ecosystem_state_reconciler.py` to reconcile stale or superseded lifecycle noise without deleting history. Use `scripts/handoff_receipt_bridge.py report` first for historical receipt gaps; add a terminal receipt only when the existing terminal task and handoff identity are both verified.
 
 ## Shared Memory Control Plane
 

@@ -356,6 +356,27 @@ def tick(
     return output
 
 
+def log_summary(output: dict[str, Any]) -> dict[str, Any]:
+    """Keep the one-minute launchd log useful without reprinting full history."""
+    jobs = output.get("jobs") if isinstance(output.get("jobs"), dict) else {}
+    return {
+        "checkedAt": output.get("checkedAt"),
+        "status": output.get("status"),
+        "ran": output.get("ran", []),
+        "jobStates": {
+            str(job_id): {
+                "status": row.get("status"),
+                "failureStreak": row.get("failureStreak"),
+                "incidentOpen": row.get("incidentOpen"),
+                "lastSlot": row.get("lastSlot"),
+                "durationMs": row.get("durationMs"),
+            }
+            for job_id, row in jobs.items()
+            if isinstance(row, dict)
+        },
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, default=CONFIG_PATH)
@@ -363,6 +384,7 @@ def main() -> int:
     parser.add_argument("--allow-change-lease", action="store_true", help="Allow an explicit operator-run job during a held Control Tower lease")
     parser.add_argument("--shadow", action="store_true")
     parser.add_argument("--list", action="store_true")
+    parser.add_argument("--verbose", action="store_true", help="Print full scheduler state for an interactive diagnostic run.")
     args = parser.parse_args()
     config = read_json(args.config, {})
     if args.list:
@@ -382,7 +404,7 @@ def main() -> int:
             only=args.run_job,
             allow_change_lease=args.allow_change_lease,
         )
-    print(json.dumps(output, indent=2))
+    print(json.dumps(output if args.verbose else log_summary(output), indent=2))
     return 1 if output["status"] == "attention" else 0
 
 
