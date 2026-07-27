@@ -1,53 +1,398 @@
 {
-  "generatedAt": "2026-07-27T14:39:40.945714+00:00",
+  "generatedAt": "2026-07-27T16:02:22.748535+00:00",
   "mode": "full",
   "fear_greed": {
-    "value": 50,
-    "label": "Neutral",
-    "bar": "[\u2588\u2588\u2588\u2588\u2588\u2591\u2591\u2591\u2591\u2591]",
-    "mood": "\ud83d\udfe1 Neutral",
-    "btc_dominance": null,
-    "market_cap_change_24h": null
+    "value": 30,
+    "label": "Fear",
+    "bar": "[\u2588\u2588\u2588\u2591\u2591\u2591\u2591\u2591\u2591\u2591]",
+    "mood": "\ud83d\udd34 Fear",
+    "btc_dominance": 0,
+    "market_cap_change_24h": 0
   },
-  "market_summary": {},
+  "market_summary": {
+    "spy": {
+      "price": 737.73,
+      "change_pct": -0.16
+    },
+    "qqq": {
+      "price": 679.2,
+      "change_pct": -0.74
+    },
+    "btc": {
+      "price": 64525,
+      "change_pct": -0.31
+    }
+  },
   "signal": [],
-  "tldr": [],
-  "ai_value_chain": [],
+  "tldr": [
+    "LVMH fashion unit's growth stalls due to ongoing Iran conflict and regional instability.",
+    "Gold prices surge on pause in Middle East fighting, reducing inflation risk."
+  ],
+  "ai_value_chain": [
+    {
+      "title": "Nvidia, Microsoft launch open AI security alliance \u2014 without OpenAI, Google, or Anthropic",
+      "url": "https://www.theverge.com/ai-artificial-intelligence/971281/nvidia-open-secure-ai-alliance-cybersecurity",
+      "source": "The Verge",
+      "published": "2026-07-27T08:06:22-04:00",
+      "confirmation_only": true,
+      "score": 9.0,
+      "reason": "Highly relevant to AI models and chips, as it involves major players in the space launching an initiative that could impact the industry"
+    },
+    {
+      "title": "European start-up with SpaceX ambitions aims for a $2bn valuation",
+      "url": "https://www.ft.com/content/f91661b4-5d1d-4da0-b00d-88c1bc4fe5b0?syn-25a6b1a6=1",
+      "source": "Technology",
+      "published": "Sun, 26 Jul 2026 16:50:53 GMT",
+      "confirmation_only": true,
+      "score": 8.5,
+      "reason": "auto-qualified"
+    },
+    {
+      "title": "Claude Opus 5 \ud83e\udde0, inside OpenAI\u2019s hack \ud83d\udc68\u200d\ud83d\udcbb, NVIDIA open weights \ud83d\udd13",
+      "url": "https://tldr.tech/ai/2026-07-27",
+      "source": "TLDR AI RSS Feed",
+      "published": "Mon, 27 Jul 2026 00:00:00 GMT",
+      "confirmation_only": true,
+      "score": 8.0,
+      "reason": "auto-qualified"
+    },
+    {
+      "title": "Why SAP says enterprise AI agents need knowledge graphs and governance",
+      "url": "https://venturebeat.com/orchestration/why-sap-says-enterprise-ai-agents-need-knowledge-graphs-and-governance",
+      "source": "VentureBeat",
+      "published": "Mon, 27 Jul 2026 14:00:12 GMT",
+      "confirmation_only": true,
+      "score": 8.0,
+      "reason": "Directly relevant to AI models and chip startups"
+    },
+    {
+      "title": "Import AI 466: The bitter lesson for robotics, AIs complete week-long programming tasks; and OpenAI's accidental AI hacker",
+      "url": "https://importai.substack.com/p/import-ai-466-the-bitter-lesson-for",
+      "source": "Import AI",
+      "published": "Mon, 27 Jul 2026 13:30:53 GMT",
+      "confirmation_only": true,
+      "score": 8.0,
+      "reason": "Relevant to AI models and tech trends, with a mention of robotics and AI hacking"
+    }
+  ],
   "enterprise_ai": [],
-  "macro_geo": [],
-  "regulation": [],
+  "macro_geo": [
+    {
+      "headline": "LVMH Fashion Unit\u2019s Return to Growth Held Back by Iran War",
+      "url": "https://www.bloomberg.com/news/articles/2026-07-27/lvmh-fashion-unit-s-return-to-growth-held-back-by-iran-war",
+      "insight": "https://www.bloomberg.com/news/articles/2026-07-27/lvmh-fashion-unit-s-return-to-growth-held-back-by-iran-war",
+      "source": "Bloomberg Markets",
+      "published": "Mon, 27 Jul 2026 15:45:31 GMT",
+      "score": 8.0,
+      "mood": "BULLISH"
+    },
+    {
+      "headline": "Gold Climbs as Pause in Mideast Fighting Curbs Inflation Risk",
+      "url": "https://www.bloomberg.com/news/articles/2026-07-26/gold-climbs-after-pause-in-mideast-fighting-cuts-inflation-fears",
+      "insight": "https://www.bloomberg.com/news/articles/2026-07-26/gold-climbs-after-pause-in-mideast-fighting-cuts-inflation-fears",
+      "source": "Bloomberg Markets",
+      "published": "Sun, 26 Jul 2026 22:46:32 GMT",
+      "score": 8.0,
+      "mood": "BULLISH"
+    },
+    {
+      "headline": "Citi Traders Are Betting Fed Will Keep Rates on Hold This Week",
+      "url": "https://www.bloomberg.com/news/articles/2026-07-27/citi-traders-are-betting-fed-will-keep-rates-on-hold-this-week",
+      "insight": "https://www.bloomberg.com/news/articles/2026-07-27/citi-traders-are-betting-fed-will-keep-rates-on-hold-this-week",
+      "source": "Bloomberg Markets",
+      "published": "Mon, 27 Jul 2026 13:45:07 GMT",
+      "score": 8.0,
+      "mood": "BULLISH"
+    }
+  ],
+  "regulation": [
+    {
+      "headline": "A bipartisan House duo\u2019s final pitch for pre-midterm AI action",
+      "url": "https://www.politico.com/news/2026/07/27/ai-house-bill-obernolte-trahan-01012080",
+      "insight": "https://www.politico.com/news/2026/07/27/ai-house-bill-obernolte-trahan-01012080",
+      "source": "Congress",
+      "published": "Mon, 27 Jul 2026 03:45:00 EST",
+      "score": 9.0
+    },
+    {
+      "headline": "Trump tells Thune to keep Senate in session to pass SAVE America Act",
+      "url": "https://www.politico.com/live-updates/2026/07/27/congress/trump-thune-senate-recess-01012561",
+      "insight": "https://www.politico.com/live-updates/2026/07/27/congress/trump-thune-senate-recess-01012561",
+      "source": "Congress",
+      "published": "Mon, 27 Jul 2026 08:49:54 EST",
+      "score": 8.0
+    }
+  ],
   "nasdaq_movers": {
-    "gainers": [],
-    "losers": []
+    "gainers": [
+      {
+        "ticker": "CRM",
+        "price": 173.99,
+        "change_pct": 6.31,
+        "change_pct_1w": 0.12,
+        "change_pct_1m": 15.85,
+        "score": 6.9,
+        "published": "2026-07-27T16:02:14Z"
+      },
+      {
+        "ticker": "ADBE",
+        "price": 238.31,
+        "change_pct": 5.86,
+        "change_pct_1w": 1.52,
+        "change_pct_1m": 23.21,
+        "score": 6.8,
+        "published": "2026-07-27T16:02:14Z"
+      },
+      {
+        "ticker": "SNPS",
+        "price": 389.91,
+        "change_pct": 4.4,
+        "change_pct_1w": 3.03,
+        "change_pct_1m": -14.31,
+        "score": 6.3,
+        "published": "2026-07-27T16:02:14Z"
+      }
+    ],
+    "losers": [
+      {
+        "ticker": "AMD",
+        "price": 483.35,
+        "change_pct": -7.4,
+        "change_pct_1w": -4.02,
+        "change_pct_1m": -9.24,
+        "score": 7.2,
+        "published": "2026-07-27T16:02:14Z"
+      },
+      {
+        "ticker": "MU",
+        "price": 875.39,
+        "change_pct": -4.95,
+        "change_pct_1w": 1.15,
+        "change_pct_1m": -27.85,
+        "score": 6.5,
+        "published": "2026-07-27T16:02:14Z"
+      },
+      {
+        "ticker": "NVDA",
+        "price": 197.66,
+        "change_pct": -4.44,
+        "change_pct_1w": -2.76,
+        "change_pct_1m": 0.98,
+        "score": 6.3,
+        "published": "2026-07-27T16:02:14Z"
+      }
+    ]
   },
-  "crypto_movers": [],
+  "crypto_movers": [
+    {
+      "symbol": "BTW",
+      "name": "Bitway",
+      "price": 0.096851,
+      "change_pct": 32.3,
+      "change_pct_1w": 46.6,
+      "change_pct_1m": 21.6,
+      "market_cap_rank": 156,
+      "score": 10.0,
+      "published": "2026-07-27T16:02:18Z"
+    },
+    {
+      "symbol": "BEAT",
+      "name": "Audiera",
+      "price": 4.5,
+      "change_pct": 25.91,
+      "change_pct_1w": 79.8,
+      "change_pct_1m": 80.82,
+      "market_cap_rank": 53,
+      "score": 10.0,
+      "published": "2026-07-27T16:02:18Z"
+    },
+    {
+      "symbol": "TAG",
+      "name": "TAGGER",
+      "price": 0.00137567,
+      "change_pct": 20.8,
+      "change_pct_1w": 13.0,
+      "change_pct_1m": 47.7,
+      "market_cap_rank": 193,
+      "score": 9.2,
+      "published": "2026-07-27T16:02:18Z"
+    },
+    {
+      "symbol": "PEANUT",
+      "name": "Peanut",
+      "price": 0.00059528,
+      "change_pct": -14.9,
+      "change_pct_1w": -14.9,
+      "change_pct_1m": -17.3,
+      "market_cap_rank": 146,
+      "score": 8.0,
+      "published": "2026-07-27T16:02:18Z"
+    },
+    {
+      "symbol": "VELVET",
+      "name": "Velvet",
+      "price": 0.404028,
+      "change_pct": -14.1,
+      "change_pct_1w": -25.2,
+      "change_pct_1m": -70.9,
+      "market_cap_rank": 176,
+      "score": 7.8,
+      "published": "2026-07-27T16:02:18Z"
+    },
+    {
+      "symbol": "HASH",
+      "name": "Provenance Blockchain",
+      "price": 0.00818752,
+      "change_pct": -11.79,
+      "change_pct_1w": 1.86,
+      "change_pct_1m": -13.69,
+      "market_cap_rank": 103,
+      "score": 7.4,
+      "published": "2026-07-27T16:02:18Z"
+    }
+  ],
   "hot_takes": [],
-  "product_intel": [],
-  "prediction_markets": [],
+  "product_intel": [
+    {
+      "title": "Kimi-K3 Technical Report [pdf]",
+      "url": "https://github.com/MoonshotAI/Kimi-K3/blob/main/k3_tech_report.pdf",
+      "source": "Hacker News",
+      "score": 2.2
+    },
+    {
+      "title": "Removing React.js from the codebase and adapting Htmx for UI interactivity (2023)",
+      "url": "https://misago-project.org/t/removing-reactjs-from-the-codebase-and-adapting-htmx-for-ui-interactivity/1267/",
+      "source": "Hacker News",
+      "score": 2.3
+    },
+    {
+      "title": "Apple Will 'Watch Everything Burn' When the AI Bubble Bursts",
+      "url": "https://www.macrumors.com/2026/07/27/ed-zitron-apple-watch-it-burn-ai-bubble-bursts/",
+      "source": "Hacker News",
+      "score": 2.1
+    },
+    {
+      "title": "How is the Bun Rewrite in Rust going?",
+      "url": "https://lockwood.dev/ai/2026/07/27/how-is-the-bun-rewrite-in-rust-going.html",
+      "source": "Hacker News",
+      "score": 5.8
+    },
+    {
+      "title": "Should you wash your solar panels?",
+      "url": "https://incoherency.co.uk/blog/stories/should-you-wash-your-solar-panels.html",
+      "source": "Hacker News",
+      "score": 2.2
+    },
+    {
+      "title": "Magnolias Are So Old That They're Pollinated by Beetles, Not Bees",
+      "url": "https://mymodernmet.com/magnolia-ancient-flowers-beetles/",
+      "source": "Hacker News",
+      "score": 3.8
+    },
+    {
+      "title": "vllm-project/vllm release: v0.26.0",
+      "url": "https://github.com/vllm-project/vllm/releases/tag/v0.26.0",
+      "source": "GitHub Releases",
+      "score": 7.8,
+      "published": ""
+    }
+  ],
+  "prediction_markets": [
+    {
+      "question": "New Rihanna Album before GTA VI?",
+      "probability": null,
+      "source": "Polymarket"
+    },
+    {
+      "question": "New Playboi Carti Album before GTA VI?",
+      "probability": null,
+      "source": "Polymarket"
+    },
+    {
+      "question": "Will Jesus Christ return before GTA VI?",
+      "probability": null,
+      "source": "Polymarket"
+    },
+    {
+      "question": "Trump out as President before GTA VI?",
+      "probability": null,
+      "source": "Polymarket"
+    },
+    {
+      "question": "Will China invades Taiwan before GTA VI?",
+      "probability": null,
+      "source": "Polymarket"
+    },
+    {
+      "question": "Will bitcoin hit $1m before GTA VI?",
+      "probability": null,
+      "source": "Polymarket"
+    },
+    {
+      "question": "Will Harvey Weinstein be sentenced to no prison time?",
+      "probability": null,
+      "source": "Polymarket"
+    },
+    {
+      "question": "Will Harvey Weinstein be sentenced to less than 5 years in prison?",
+      "probability": null,
+      "source": "Polymarket"
+    },
+    {
+      "question": "is europe a country?",
+      "probability": 0.4098360655737705,
+      "source": "Manifold"
+    },
+    {
+      "question": "Are you a robot?",
+      "probability": 0.4391936404760859,
+      "source": "Manifold"
+    },
+    {
+      "question": "Will my Manifold Markets net worth reach 14K by August 26, 2026? (Reached 9,555 on Day 65.)",
+      "probability": 0.53,
+      "source": "Manifold"
+    },
+    {
+      "question": "Will I plad Black Ops 7 on July 28th 2026?",
+      "probability": 0.601300773100994,
+      "source": "Manifold"
+    },
+    {
+      "question": "New wave of mobilization in Russia announced",
+      "probability": null,
+      "source": "Manifold"
+    },
+    {
+      "question": "Will SSI do anything I consider interesting before 2027?",
+      "probability": 0.3717472118959108,
+      "source": "Manifold"
+    }
+  ],
   "macro_context": {
-    "vix": null,
-    "fed_funds": null,
+    "vix": 19.52,
+    "fed_funds": 3.63,
     "cpi": null,
     "t10y2y": null
   },
   "stocktwits_sentiment": {
     "NVDA": {
-      "bullish_pct": 0,
-      "bearish_pct": 0,
-      "total": 0
+      "bullish_pct": 23.3,
+      "bearish_pct": 6.7,
+      "total": 30
     },
     "SPY": {
-      "bullish_pct": 0,
-      "bearish_pct": 0,
-      "total": 0
+      "bullish_pct": 20.0,
+      "bearish_pct": 16.7,
+      "total": 30
     },
     "BTC.X": {
-      "bullish_pct": 0,
-      "bearish_pct": 0,
-      "total": 0
+      "bullish_pct": 50.0,
+      "bearish_pct": 10.0,
+      "total": 30
     }
   },
-  "quiet_macro": true,
+  "quiet_macro": false,
   "btc_alert": false,
   "btc_change": null
 }
