@@ -8,6 +8,7 @@ import gzip
 import json
 import os
 import shutil
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -17,6 +18,8 @@ OUTPUT = ROOT / "data" / "ecosystem-retention.json"
 MAX_LOG_BYTES = 10 * 1024 * 1024
 TAIL_BYTES = 2 * 1024 * 1024
 MAX_GENERATIONS = 7
+CONVERSATION_RETENTION_DAYS = 5
+CONVERSATION_KEEP_NEWEST = 20
 
 
 def atomic_write(path: Path, payload: Any) -> None:
@@ -66,10 +69,82 @@ def rotate(path: Path, dry_run: bool) -> dict[str, Any] | None:
     return record
 
 
+def open_conversation_paths(root: Path) -> set[Path]:
+    """Return only currently open Antigravity conversation files.
+
+    The result is used as a retention exclusion and is intentionally never
+    written to the dashboard-safe retention sidecar.
+    """
+    try:
+        completed = subprocess.run(
+            ["/usr/sbin/lsof", "-Fn", "+D", str(root)],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return set()
+    return {Path(line[1:]).resolve() for line in completed.stdout.splitlines() if line.startswith("n")}
+
+
+def retain_antigravity_conversations(dry_run: bool, retention_days: int, keep_newest: int) -> dict[str, Any]:
+    """Bound completed Antigravity conversation storage without touching live work.
+
+    Keep the newest recovery set, every recently modified file, and any database
+    that is open at the moment of the sweep.  The sidecar exposes counts and
+    bytes only, never filenames or conversation content.
+    """
+    root = Path.home() / ".gemini" / "antigravity-cli" / "conversations"
+    policy = {
+        "retentionDays": retention_days,
+        "keepNewest": keep_newest,
+        "preserveOpenFiles": True,
+        "contentsPublished": False,
+    }
+    if not root.exists():
+        return {"status": "absent", "policy": policy, "examined": 0, "removed": 0, "reclaimedBytes": 0}
+
+    files = sorted((item for item in root.glob("*.db") if item.is_file()), key=lambda item: item.stat().st_mtime, reverse=True)
+    protected = {item.resolve() for item in files[:keep_newest]}
+    protected.update(open_conversation_paths(root))
+    cutoff = dt.datetime.now(dt.timezone.utc).timestamp() - (retention_days * 24 * 60 * 60)
+    candidates = [item for item in files if item.resolve() not in protected and item.stat().st_mtime < cutoff]
+    reclaimed = 0
+    removed = 0
+    errors = 0
+    for path in candidates:
+        try:
+            reclaimed += path.stat().st_size
+            if not dry_run:
+                path.unlink()
+                for suffix in ("-wal", "-shm"):
+                    path.with_name(path.name + suffix).unlink(missing_ok=True)
+            removed += 1
+        except OSError:
+            errors += 1
+    return {
+        "status": "attention" if errors else "ok",
+        "policy": policy,
+        "examined": len(files),
+        "protected": len(files) - len(candidates),
+        "eligible": len(candidates),
+        "removed": removed,
+        "reclaimedBytes": reclaimed,
+        "dryRun": dry_run,
+        "errors": errors,
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--conversation-retention-days", type=int, default=CONVERSATION_RETENTION_DAYS)
+    parser.add_argument("--conversation-keep-newest", type=int, default=CONVERSATION_KEEP_NEWEST)
+    parser.add_argument("--skip-conversation-retention", action="store_true")
     args = parser.parse_args()
+    if args.conversation_retention_days < 1 or args.conversation_keep_newest < 1:
+        parser.error("conversation retention days and newest count must be positive")
     rows = []
     for root in log_roots():
         if not root.exists():
@@ -82,12 +157,27 @@ def main() -> int:
                 continue
             if result:
                 rows.append(result)
+    conversations = {"status": "skipped"}
+    if not args.skip_conversation_retention:
+        conversations = retain_antigravity_conversations(
+            args.dry_run,
+            args.conversation_retention_days,
+            args.conversation_keep_newest,
+        )
     payload = {
         "checkedAt": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
-        "status": "attention" if any("error" in row for row in rows) else "ok",
+        "status": "attention" if any("error" in row for row in rows) or conversations.get("status") == "attention" else "ok",
         "rotated": sum("error" not in row for row in rows),
         "rows": rows,
-        "policy": {"maxLogBytes": MAX_LOG_BYTES, "preservedTailBytes": TAIL_BYTES, "compressedGenerations": MAX_GENERATIONS, "hermesDatabaseTouched": False},
+        "conversations": conversations,
+        "policy": {
+            "maxLogBytes": MAX_LOG_BYTES,
+            "preservedTailBytes": TAIL_BYTES,
+            "compressedGenerations": MAX_GENERATIONS,
+            "antigravityConversationRetentionDays": args.conversation_retention_days,
+            "antigravityConversationKeepNewest": args.conversation_keep_newest,
+            "hermesDatabaseTouched": False,
+        },
     }
     if not args.dry_run:
         atomic_write(OUTPUT, payload)
