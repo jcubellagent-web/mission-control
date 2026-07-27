@@ -49,3 +49,9 @@ data/inbox-coordinator-telemetry.jsonl
 *.disabled-*
 TRANSFER_PLACEHOLDER/
 tmp-mission-control*.png
+# Host-local Telegram live-card state and generated delivery previews are
+# runtime artifacts; committing them blocks shared-source edits without adding
+# reproducible behavior.
+memory/
+tmp/
+data/jain-intelligence-preview.txt
