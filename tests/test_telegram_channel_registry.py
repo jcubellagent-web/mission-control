@@ -86,7 +86,7 @@ class TelegramChannelRegistryTests(unittest.TestCase):
         self.module.load_registry.cache_clear()
         self.assertFalse(self.module.owner_accepts("jaimes", "group-alpha", "lane-jaimes"))
 
-    def test_direct_messages_use_only_the_configured_default_owner(self):
+    def test_direct_messages_fall_back_to_the_configured_default_owner(self):
         self.assertTrue(
             self.module.owner_accepts("josh2", "direct-chat", "", direct=True)
         )
@@ -96,6 +96,22 @@ class TelegramChannelRegistryTests(unittest.TestCase):
         self.write_registry({"defaultAuthorizedOwner": "unknown", "groups": {}})
         self.assertFalse(
             self.module.owner_accepts("josh2", "direct-chat", "", direct=True)
+        )
+
+    def test_direct_messages_accept_each_configured_receiving_bot(self):
+        self.write_registry({
+            "defaultAuthorizedOwner": "josh2",
+            "directMessageOwners": ["josh2", "jaimes", "unknown"],
+            "groups": {},
+        })
+        self.assertTrue(
+            self.module.owner_accepts("josh2", "direct-chat", "", direct=True)
+        )
+        self.assertTrue(
+            self.module.owner_accepts("jaimes", "direct-chat", "", direct=True)
+        )
+        self.assertFalse(
+            self.module.owner_accepts("jain", "direct-chat", "", direct=True)
         )
 
     def test_configured_single_mention_overrides_base_owner(self):

@@ -62,6 +62,9 @@ The primary Telegram group is `J.A.I.N Control Center` (`-1003589561528`).
 - Topic `17`, JAIMES Ops: JAIMES owns untagged backend, cron, SSH, repair, and heavy-execution requests.
 - A direct mention overrides normal ownership.
 - The non-owner observes silently unless mentioned or explicitly delegated work.
+- Direct chats are owned by the bot the user contacted; JOSH 2.0 and JAIMES
+  both respond in their own direct conversations without routing through the
+  group-topic default.
 - Replies and editable cards stay in the originating topic.
 - Never let both bots answer the same untagged request.
 - Topic `1` keeps its native-rich live card and Topic `17` keeps its current live-card renderer. Their separate terminal finals use the same fixed-width code-block contract above.

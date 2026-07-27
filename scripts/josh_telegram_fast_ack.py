@@ -1555,8 +1555,14 @@ def announce_session_ready(
     *,
     previous_session_id: str = "",
     dry_run: bool = False,
+    visible: bool = True,
 ) -> dict[str, Any]:
-    """Acknowledge one OpenCLAW session rollover without stopping background jobs."""
+    """Record one session rollover without stopping background jobs.
+
+    Explicit recovery may show a session-ready message.  Automatic rollovers
+    stay internal so they cannot create a second Telegram bubble beside the
+    reply that triggered the new session.
+    """
     target = session_target_key(meta)
     session_id = str(meta.get("sessionId") or "")
     receipts = state.setdefault("session_ready_receipts", {})
@@ -1574,12 +1580,12 @@ def announce_session_ready(
     ready_at = utc_now()
     result: dict[str, Any] = {
         "ok": True,
-        "status": "dry-run" if dry_run else "session-ready",
+        "status": "dry-run" if dry_run else ("session-ready" if visible else "session-ready-internal"),
         "session_id": session_id,
         "previous_session_id": previous_session_id,
         "delivered": bool(dry_run),
     }
-    if not dry_run:
+    if not dry_run and visible:
         payload = apply_telegram_target({
             "chat_id": target_chat_id(meta),
             "text": "✅ <b>New session ready</b>\nSend your next request here.",
@@ -1601,6 +1607,16 @@ def announce_session_ready(
                 phase="ready",
                 route_verified=True,
             )
+    elif not dry_run:
+        # The rollover is still recorded and dashboard-visible, but Telegram
+        # remains a single-writer conversation surface for the triggering turn.
+        publish_josh(
+            "Josh 2.0 Telegram session rollover",
+            "ready",
+            "A Telegram session rollover was recorded; stale foreground card tracking was cleared and background jobs were preserved.",
+            phase="ready",
+            route_verified=True,
+        )
 
     receipts[target] = {
         "session_id": session_id,
@@ -5960,6 +5976,7 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
                 meta,
                 previous_session_id=previous_session_id,
                 dry_run=dry_run,
+                visible=False,
             )
         )
     first_bootstrap = not acked and not state.get("last_checked_at")

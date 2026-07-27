@@ -72,6 +72,21 @@ def direct_owner() -> str:
     return owner if owner in VALID_OWNERS else ""
 
 
+def direct_owners() -> set[str]:
+    """Return every bot identity authorized to own its own direct messages.
+
+    The gateway runs separately for each bot token, so a direct message reaches
+    only the bot the user contacted.  A single legacy default cannot safely
+    represent both JOSH 2.0 and JAIMES direct conversations.
+    """
+    configured = load_registry().get("directMessageOwners")
+    if isinstance(configured, list):
+        owners = {str(value or "").strip() for value in configured}
+        return owners & VALID_OWNERS
+    fallback = direct_owner()
+    return {fallback} if fallback else set()
+
+
 def _mentioned_owners(text: Any) -> set[str]:
     """Resolve exact configured handles without trusting partial-name matches."""
     value = str(text or "")
@@ -119,6 +134,10 @@ def owner_accepts(
 ) -> bool:
     if owner not in VALID_OWNERS:
         return False
+    if direct:
+        # Direct-message ownership is bound to the receiving bot runtime, not
+        # to a group-topic default or an in-message mention.
+        return owner in direct_owners()
     return message_owner(chat_id, thread_id, text=text, direct=direct) == owner
 
 

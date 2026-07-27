@@ -329,6 +329,36 @@ def test_session_ready_is_delivered_once_and_preserves_background_cards(monkeypa
     assert state["active_cards"]["background"]["status"] == "active"
 
 
+def test_automatic_session_rollover_stays_internal_and_preserves_background_cards(monkeypatch):
+    calls = []
+    state = {
+        "latest_pending_ack": {"message_id": "99"},
+        "active_cards": {"background": {"session_id": "session-old", "coordinator_owned": True, "status": "active"}},
+    }
+    meta = {
+        "sessionId": "session-new",
+        "telegram_chat_id": watcher.CONTROL_CENTER_CHAT_ID,
+        "telegram_thread_id": "22",
+        "telegram_session_key": "agent:main:telegram:group:-1003589561528:topic:22",
+    }
+    monkeypatch.setattr(watcher, "api_post", lambda *args, **kwargs: calls.append(args) or {"ok": True})
+    monkeypatch.setattr(watcher, "publish_josh", lambda *args, **kwargs: True)
+
+    result = watcher.announce_session_ready(
+        state,
+        meta,
+        previous_session_id="session-old",
+        visible=False,
+    )
+
+    assert result["ok"] is True
+    assert result["status"] == "session-ready-internal"
+    assert result["delivered"] is False
+    assert calls == []
+    assert "latest_pending_ack" not in state
+    assert state["active_cards"]["background"]["status"] == "active"
+
+
 def test_poll_detects_new_session_and_keeps_coordinator_job_tracking(monkeypatch):
     target = "agent:main:telegram:group:-1003589561528:topic:1"
     captured = {}
