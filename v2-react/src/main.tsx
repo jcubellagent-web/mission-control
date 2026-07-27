@@ -1467,6 +1467,10 @@ function App() {
           memoryOperations={state.memoryOperations}
           statuses={state.statuses}
           workItems={liveWorkItems}
+          activeModelRoutes={state.activeModelRoutes}
+          todayJobs={state.todayJobs}
+          todayJobsMeta={state.todayJobsMeta}
+          qualityControl={state.qualityControl}
         />
         <MemoizedFinOpsDashboard
           wallet={state.agenticCrypto}
@@ -3906,21 +3910,109 @@ function OwnershipGraphView({ graph }: { graph?: TaskOwnershipGraph }) {
   );
 }
 
+function BrainAtlasOperationsView({
+  activeModelRoutes = [],
+  todayJobs = [],
+  todayJobsMeta,
+  qualityControl,
+}: {
+  activeModelRoutes?: ActiveModelRoute[];
+  todayJobs?: TodayJobOccurrence[];
+  todayJobsMeta?: TodayJobsMeta;
+  qualityControl?: Record<string, unknown>;
+}) {
+  const verifiedRoutes = activeModelRoutes.filter((route) => route.routeVerified === true && HERO_AGENT_ORDER.includes(route.ownerAgent));
+  const routesByFamily = new Map<string, number>();
+  verifiedRoutes.forEach((route) => routesByFamily.set(route.modelFamily, (routesByFamily.get(route.modelFamily) || 0) + 1));
+  const modelLaneLive = verifiedRoutes.some((route) => ageMinutes(route.updatedAt) <= 2);
+  const derivedCadence = todayJobs.reduce<Record<TodayJobOutcome, number>>((counts, job) => {
+    counts[job.outcome] += 1;
+    return counts;
+  }, { complete: 0, skipped: 0, broken: 0, pending: 0 });
+  const cadenceCounts = {
+    complete: Math.max(0, Number(todayJobsMeta?.counts?.complete ?? derivedCadence.complete) || 0),
+    pending: Math.max(0, Number(todayJobsMeta?.counts?.pending ?? derivedCadence.pending) || 0),
+    skipped: Math.max(0, Number(todayJobsMeta?.counts?.skipped ?? derivedCadence.skipped) || 0),
+    broken: Math.max(0, Number(todayJobsMeta?.counts?.broken ?? derivedCadence.broken) || 0),
+  };
+  const cadenceTotal = Object.values(cadenceCounts).reduce((sum, value) => sum + value, 0);
+  const cadenceLive = ageMinutes(todayJobsMeta?.generatedAt) <= 2;
+  const rawQualityScore = Number(qualityControl?.qualityScore);
+  const qualityScore = Number.isFinite(rawQualityScore) && rawQualityScore >= 0 && rawQualityScore <= 100 ? Math.round(rawQualityScore) : null;
+  const qualityStatus = ["ready", "ok", "attention", "degraded", "unavailable"].includes(String(qualityControl?.status || "").toLowerCase())
+    ? String(qualityControl?.status).toLowerCase()
+    : "unavailable";
+  const qualityTone = qualityStatus === "attention" || qualityStatus === "degraded" ? "watch" : qualityStatus === "unavailable" ? "muted" : "clear";
+  const routeFamilies = Array.from(routesByFamily.entries()).sort(([left], [right]) => left.localeCompare(right));
+
+  return (
+    <section className="brain-atlas-operations" aria-labelledby="brain-atlas-operations-heading">
+      <header className="brain-atlas-operations-header">
+        <div>
+          <h3 id="brain-atlas-operations-heading">Ecosystem operations</h3>
+          <p>Verified routes, scheduled work cadence, and governed quality signals—counts only.</p>
+        </div>
+        <span>{modelLaneLive || cadenceLive ? "Live evidence" : "Current snapshot"}</span>
+      </header>
+      <div className="brain-atlas-operations-grid">
+        <article className={`brain-atlas-ops-card is-model${modelLaneLive ? " is-live" : ""}`}>
+          <header><span>Verified model lanes</span><strong>{verifiedRoutes.length}</strong></header>
+          <svg viewBox="0 0 260 72" role="img" aria-label={`${verifiedRoutes.length} verified active model lane${verifiedRoutes.length === 1 ? "" : "s"}`}>
+            <path className="brain-atlas-ops-rail" d="M 22 36 H 238" />
+            <circle className="brain-atlas-ops-source" cx="22" cy="36" r="7" />
+            {routeFamilies.length ? routeFamilies.slice(0, 4).map(([family, count], index) => {
+              const x = 78 + index * 52;
+              return <g key={family}><circle className="brain-atlas-ops-lane" cx={x} cy="36" r="9" /><text x={x} y="39" textAnchor="middle">{count}</text></g>;
+            }) : <text className="brain-atlas-ops-empty" x="136" y="41" textAnchor="middle">No verified active route</text>}
+            {modelLaneLive ? <circle className="brain-atlas-ops-packet" cx="22" cy="36" r="3" /> : null}
+          </svg>
+          <p>{routeFamilies.length ? routeFamilies.map(([family, count]) => `${count} ${family}`).join(" · ") : "A route appears only after launcher verification."}</p>
+        </article>
+        <article className={`brain-atlas-ops-card is-cadence${cadenceLive ? " is-live" : ""}`}>
+          <header><span>Autonomy cadence</span><strong>{cadenceTotal}</strong></header>
+          <div className="brain-atlas-ops-cadence" style={{ "--segment": `${cadenceTotal ? (cadenceCounts.complete / cadenceTotal) * 100 : 0}%` } as React.CSSProperties} role="img" aria-label={`${cadenceCounts.complete} complete, ${cadenceCounts.pending} pending, ${cadenceCounts.broken} blocked scheduled outcomes`}>
+            <i className="is-complete" />
+            <b>{cadenceCounts.complete}</b><em>complete</em>
+          </div>
+          <p>{cadenceCounts.pending} pending · {cadenceCounts.broken} attention · {cadenceCounts.skipped} skipped</p>
+        </article>
+        <article className={`brain-atlas-ops-card is-quality is-${qualityTone}`}>
+          <header><span>Knowledge quality gate</span><strong>{qualityScore ?? "—"}</strong></header>
+          <div className="brain-atlas-ops-quality" role="img" aria-label={qualityScore == null ? "Quality telemetry unavailable" : `Quality score ${qualityScore} out of 100`}>
+            <i style={{ "--quality-score": `${qualityScore ?? 0}%` } as React.CSSProperties} />
+            <b>{qualityScore == null ? "Unavailable" : `${qualityScore}%`}</b>
+          </div>
+          <p>{qualityStatus === "unavailable" ? "Awaiting governed quality telemetry." : `${qualityStatus} · review-gated promotion remains enforced`}</p>
+        </article>
+      </div>
+      <footer>Ownership and handoffs remain available in the Ownership view. Motion represents only fresh, verified operational evidence.</footer>
+    </section>
+  );
+}
+
 function BrainAtlasPanel({
   atlas,
   ownershipGraph,
   memoryOperations,
   statuses,
   workItems,
+  activeModelRoutes,
+  todayJobs,
+  todayJobsMeta,
+  qualityControl,
 }: {
   atlas?: BrainAtlas;
   ownershipGraph?: TaskOwnershipGraph;
   memoryOperations?: MissionControlState["memoryOperations"];
   statuses: AgentStatus[];
   workItems: WorkItem[];
+  activeModelRoutes?: ActiveModelRoute[];
+  todayJobs?: TodayJobOccurrence[];
+  todayJobsMeta?: TodayJobsMeta;
+  qualityControl?: Record<string, unknown>;
 }) {
   const [focusId, setFocusId] = useState("all");
-  const [atlasMode, setAtlasMode] = useState<"evidence" | "ownership">("evidence");
+  const [atlasMode, setAtlasMode] = useState<"evidence" | "ownership" | "operations">("evidence");
   const [helpNodeId, setHelpNodeId] = useState<BrainAtlasHelpNodeId | null>(null);
   useEffect(() => {
     if (focusId !== "all" && !atlas?.nodes.some((node) => node.id === focusId)) setFocusId("all");
@@ -4006,7 +4098,9 @@ function BrainAtlasPanel({
     ? !ownershipGraph || ownershipGraph.status === "unavailable"
       ? "risk"
       : ownershipGraph.status === "attention" ? "watch" : "clear"
-    : selectedTone;
+    : atlasMode === "operations"
+      ? "clear"
+      : selectedTone;
   const evidenceStateLabel = atlas?.status === "ready"
     ? `${atlas.counts.receipts} receipt${atlas.counts.receipts === 1 ? "" : "s"} · ${recentProofRows.length} verified path${recentProofRows.length === 1 ? "" : "s"}`
     : atlas?.status === "empty"
@@ -4051,17 +4145,20 @@ function BrainAtlasPanel({
         <div className="brain-atlas-view-switch" role="group" aria-label="Brain Atlas view">
           <button type="button" className={atlasMode === "evidence" ? "selected" : ""} aria-pressed={atlasMode === "evidence"} onClick={() => setAtlasMode("evidence")}>Memory + proof</button>
           <button type="button" className={atlasMode === "ownership" ? "selected" : ""} aria-pressed={atlasMode === "ownership"} onClick={() => setAtlasMode("ownership")}>Ownership</button>
+          <button type="button" className={atlasMode === "operations" ? "selected" : ""} aria-pressed={atlasMode === "operations"} onClick={() => setAtlasMode("operations")}>Operations</button>
         </div>
-        <span className={`brain-atlas-state is-${displayTone}${latestSignalRecent && atlasMode === "evidence" ? " is-live" : ""}`} title={atlasMode === "ownership" ? "Exact ownership and handoff reconciliation" : loadDisclosure} aria-live="polite">
+        <span className={`brain-atlas-state is-${displayTone}${latestSignalRecent && atlasMode === "evidence" ? " is-live" : ""}`} title={atlasMode === "ownership" ? "Exact ownership and handoff reconciliation" : atlasMode === "operations" ? "Verified model routes, scheduled outcomes, and governed quality telemetry" : loadDisclosure} aria-live="polite">
           <span className="brain-atlas-load-meter" role="img" aria-label={`${systemLoad.label} ecosystem load, ${systemLoad.score} of 4`}>
             {Array.from({ length: 4 }, (_, index) => <i key={index} className={index < systemLoad.score ? "is-lit" : ""} />)}
           </span>
-          <strong>{atlasMode === "ownership" ? `${ownershipGraph?.counts.flows || 0} PATHS` : `${systemLoad.label.toUpperCase()} · ${workingAgentCount ? `${workingAgentCount} WORKING` : "NONE WORKING"}`}</strong>
-          <em>· {atlasMode === "ownership" ? `${ownershipGraph?.counts.findings || 0} findings` : `${headerActivityStateLabel} · ${evidenceStateLabel}`}</em>
+          <strong>{atlasMode === "ownership" ? `${ownershipGraph?.counts.flows || 0} PATHS` : atlasMode === "operations" ? `${(activeModelRoutes || []).filter((route) => route.routeVerified).length} VERIFIED LANES` : `${systemLoad.label.toUpperCase()} · ${workingAgentCount ? `${workingAgentCount} WORKING` : "NONE WORKING"}`}</strong>
+          <em>· {atlasMode === "ownership" ? `${ownershipGraph?.counts.findings || 0} findings` : atlasMode === "operations" ? `${todayJobsMeta?.occurrenceCount || todayJobs?.length || 0} scheduled outcomes` : `${headerActivityStateLabel} · ${evidenceStateLabel}`}</em>
         </span>
       </header>
 
-      {atlasMode === "ownership" ? <OwnershipGraphView graph={ownershipGraph} /> : (
+      {atlasMode === "ownership" ? <OwnershipGraphView graph={ownershipGraph} /> : atlasMode === "operations" ? (
+        <BrainAtlasOperationsView activeModelRoutes={activeModelRoutes} todayJobs={todayJobs} todayJobsMeta={todayJobsMeta} qualityControl={qualityControl} />
+      ) : (
       <section
         id="brain-atlas-unified-panel"
         className="brain-atlas-section is-unified"

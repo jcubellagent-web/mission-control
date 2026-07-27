@@ -673,7 +673,8 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         main = (MISSION_CONTROL / "v2-react" / "src" / "main.tsx").read_text(encoding="utf-8")
         styles = (MISSION_CONTROL / "v2-react" / "src" / "styles.css").read_text(encoding="utf-8")
         component = main[main.index("const BRAIN_ATLAS_LAYER_ORDER"):main.index("function AgentWorkBoard")]
-        unified_svg = component[component.index("<svg"):component.index("</svg>")]
+        unified_start = component.index('data-atlas-region="unified"')
+        unified_svg = component[component.index("<svg", unified_start):component.index("</svg>", unified_start)]
 
         self.assertIn('["agent", "work", "receipt", "model"]', component)
         self.assertEqual(1, component.count('data-atlas-region="unified"'))
@@ -684,6 +685,12 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertNotIn('role="tablist"', component)
         self.assertNotIn('data-atlas-view-option=', component)
         self.assertNotIn("setAtlasView", component)
+        self.assertIn("BrainAtlasOperationsView", component)
+        self.assertIn("Verified model lanes", component)
+        self.assertIn("Autonomy cadence", component)
+        self.assertIn("Knowledge quality gate", component)
+        self.assertIn("route.routeVerified === true", component)
+        self.assertIn("Motion represents only fresh, verified operational evidence", component)
         self.assertIn('id="brain-atlas-unified-panel"', component)
         self.assertIn('aria-labelledby="brain-atlas-unified-heading"', component)
         self.assertIn('aria-describedby="brain-atlas-unified-description"', component)
@@ -841,7 +848,7 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertIn("animation: memory-node-receipt-ring 1.45s ease-out infinite;", styles)
         memory_receipt_css = styles[
             styles.index(".memory-flow-memory-receipt-check {"):
-            styles.index(".memory-flow-node.is-work-active > rect:not(.memory-flow-node-aura)")
+            styles.index(".brain-atlas-operations {")
         ]
         self.assertIn(".memory-flow-node.is-memory-live .memory-flow-memory-receipt-check", memory_receipt_css)
         self.assertIn("opacity: 0.94;", memory_receipt_css)
