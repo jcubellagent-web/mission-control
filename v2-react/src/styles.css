@@ -17884,15 +17884,17 @@ body,
   transform-origin: center;
 }
 
-.memory-flow-memory-receipt-dot {
-  fill: #58ee9a;
+.memory-flow-memory-receipt-check {
+  fill: none;
+  stroke: #58ee9a;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
   opacity: 0;
 }
 
-.memory-flow-node.is-memory-live .memory-flow-memory-receipt-dot {
-  opacity: 1;
-  filter: drop-shadow(0 0 4px rgba(88, 238, 154, 0.9));
-  animation: memory-agent-receipt-dot 1.05s ease-in-out infinite;
+.memory-flow-node.is-memory-live .memory-flow-memory-receipt-check {
+  opacity: 0.94;
 }
 
 .memory-flow-node.is-work-active > rect:not(.memory-flow-node-aura) {
@@ -18048,11 +18050,6 @@ body,
   0% { opacity: 0.78; transform: scale(0.82); }
   70% { opacity: 0.18; transform: scale(1.18); }
   100% { opacity: 0; transform: scale(1.28); }
-}
-
-@keyframes memory-agent-receipt-dot {
-  0%, 100% { opacity: 0.62; transform: scale(0.78); }
-  50% { opacity: 1; transform: scale(1.32); }
 }
 
 @keyframes memory-agent-presence-halo {
@@ -18393,7 +18390,6 @@ body,
   #brain-atlas.has-active-work .brain-atlas-state,
   .memory-flow-node:not(.is-agent).is-live > rect:not(.memory-flow-node-aura),
   .memory-flow-node.is-live .memory-flow-node-receipt-ring,
-  .memory-flow-node.is-memory-live .memory-flow-memory-receipt-dot,
   .memory-flow-node.is-work-active .memory-flow-node-aura,
   .memory-flow-node.is-work-active .memory-flow-presence-dot {
     animation: none !important;

@@ -4214,7 +4214,11 @@ function BrainAtlasPanel({
                   <g className="memory-flow-node-copy" clipPath={`url(#brain-atlas-agent-copy-${row.agent})`}>
                   <text className="memory-flow-node-title" x={brainAtlasWideX(30)} y={y + 18}>{AGENTS[row.agent].label}</text>
                   <circle className="memory-flow-presence-dot" cx={brainAtlasWideX(155)} cy={y + 12} r="5.5" />
-                  <circle className="memory-flow-memory-receipt-dot" cx={brainAtlasWideX(155)} cy={y + 30} r="3.2" />
+                  <path
+                    className="memory-flow-memory-receipt-check"
+                    d={`M ${brainAtlasWideX(149)} ${y + 30} l 2.5 2.5 l 5 -5.5`}
+                    aria-hidden="true"
+                  />
                   <text className="memory-flow-node-detail" x={brainAtlasWideX(30)} y={y + 35}>
                     {working
                       ? "ACTIVE · WORKING"
