@@ -114,12 +114,12 @@ const BRAIN_ATLAS_NODE_HELP: Record<BrainAtlasHelpNodeId, { title: string; happe
   applied: {
     title: "Applied",
     happening: "A previously selected memory was recorded as used in the work that followed.",
-    used: "The percentage compares selected memories with explicit use receipts. It does not assume that every retrieval changed an outcome.",
+    used: "The selected -> used rate compares selected memories with explicit use receipts. It does not assume that every retrieval changed an outcome.",
   },
   outcome: {
     title: "Outcome",
     happening: "The work records whether a used memory produced a helpful, ignored, corrected, or other governed outcome.",
-    used: "The percentage is helpful outcomes among recorded feedback. It is evidence of usefulness, not private reasoning quality.",
+    used: "The helpful-outcome rate summarizes assessed results over 30 days; a moving path appears only for a fresh feedback receipt.",
   },
   candidate: {
     title: "Candidate",
@@ -3940,6 +3940,8 @@ function BrainAtlasPanel({
   const used30d = sanitizedNestedMemoryCount(memoryOperations, "retrieval", "used30d");
   const feedback30d = sanitizedNestedMemoryCount(memoryOperations, "retrieval", "feedback30d");
   const helpful30d = sanitizedNestedMemoryCount(memoryOperations, "retrieval", "helpful30d");
+  const pendingReviewCount = sanitizedNestedMemoryCount(memoryOperations, "review", "pending");
+  const disputedReviewCount = sanitizedNestedMemoryCount(memoryOperations, "review", "disputed");
   const recallEfficiency = queries7d && hits7d <= queries7d ? Math.round((hits7d / queries7d) * 100) : null;
   const selectionUseRate = selected30d && used30d <= selected30d ? Math.round((used30d / selected30d) * 100) : null;
   const feedbackQuality = feedback30d && helpful30d <= feedback30d ? Math.round((helpful30d / feedback30d) * 100) : null;
@@ -4246,27 +4248,30 @@ function BrainAtlasPanel({
               </g>
             </g>
             <g className={`memory-flow-node is-applied is-explainable${helpNodeId === "applied" ? " is-help-open" : ""}${recent("used") ? " is-live" : ""}`} role="button" tabIndex={0} aria-label="Explain Applied" aria-expanded={helpNodeId === "applied"} aria-controls="brain-atlas-node-help" onClick={() => toggleNodeHelp("applied")} onKeyDown={(event) => nodeHelpKeyDown(event, "applied")}>
+              <title>{selectionUseRate != null ? ["The selected -> used rate is ", used30d, "/", selected30d, " over 30 days"].join("") : "Applied-memory telemetry unavailable"}</title>
               <circle className="memory-flow-node-receipt-ring" cx={brainAtlasWideX(712)} cy="58" r="37" />
               <rect x={brainAtlasWideX(640)} y="31" width={brainAtlasWideWidth(640, 144)} height="54" rx="9" />
               <g className="memory-flow-node-copy" clipPath="url(#brain-atlas-applied-copy)">
               <text className="memory-flow-node-title" x={brainAtlasWideX(712)} y="54" textAnchor="middle">Applied</text>
-              <text className="memory-flow-node-detail" x={brainAtlasWideX(712)} y="71" textAnchor="middle">{selectionUseRate != null ? [selectionUseRate, "% selected -> used"].join("") : activity ? [uses, " explicit use receipt", uses === 1 ? "" : "s"].join("") : "telemetry unavailable"}</text>
+              <text className="memory-flow-node-detail" x={brainAtlasWideX(712)} y="71" textAnchor="middle">{selectionUseRate != null ? [used30d, "/", selected30d, " used · 30d"].join("") : activity ? [uses, " recent use", uses === 1 ? "" : "s"].join("") : "telemetry unavailable"}</text>
               </g>
             </g>
             <g className={`memory-flow-node is-feedback is-explainable${helpNodeId === "outcome" ? " is-help-open" : ""}${recent("feedback") ? " is-live" : ""}`} role="button" tabIndex={0} aria-label="Explain Outcome" aria-expanded={helpNodeId === "outcome"} aria-controls="brain-atlas-node-help" onClick={() => toggleNodeHelp("outcome")} onKeyDown={(event) => nodeHelpKeyDown(event, "outcome")}>
+              <title>{feedbackQuality != null ? [helpful30d, "/", feedback30d, " helpful outcomes over 30 days"].join("") : "Outcome telemetry unavailable"}</title>
               <circle className="memory-flow-node-receipt-ring" cx={brainAtlasWideX(712)} cy="181" r="37" />
               <rect x={brainAtlasWideX(640)} y="154" width={brainAtlasWideWidth(640, 144)} height="54" rx="9" />
               <g className="memory-flow-node-copy" clipPath="url(#brain-atlas-outcome-copy)">
               <text className="memory-flow-node-title" x={brainAtlasWideX(712)} y="177" textAnchor="middle">Outcome</text>
-              <text className="memory-flow-node-detail" x={brainAtlasWideX(712)} y="194" textAnchor="middle">{feedbackQuality != null ? [feedbackQuality, "% helpful outcomes"].join("") : activity ? [count("feedback"), " feedback receipt", count("feedback") === 1 ? "" : "s"].join("") : "telemetry unavailable"}</text>
+              <text className="memory-flow-node-detail" x={brainAtlasWideX(712)} y="194" textAnchor="middle">{feedbackQuality != null ? [helpful30d, "/", feedback30d, " helpful · 30d"].join("") : activity ? [count("feedback"), " recent outcome", count("feedback") === 1 ? "" : "s"].join("") : "telemetry unavailable"}</text>
               </g>
             </g>
             <g className={`memory-flow-node is-candidate is-explainable${helpNodeId === "candidate" ? " is-help-open" : ""}${candidateIsRecent ? " is-live" : ""}`} role="button" tabIndex={0} aria-label="Explain Candidate" aria-expanded={helpNodeId === "candidate"} aria-controls="brain-atlas-node-help" onClick={() => toggleNodeHelp("candidate")} onKeyDown={(event) => nodeHelpKeyDown(event, "candidate")} data-observed-at={candidateObservedAt || undefined}>
+              <title>{activity ? [pendingReviewCount, " pending and not learned; ", disputedReviewCount, " disputed"].join("") : "Candidate telemetry unavailable"}</title>
               <circle className="memory-flow-node-receipt-ring" cx={brainAtlasWideX(902)} cy="181" r="37" />
               <rect x={brainAtlasWideX(830)} y="154" width={brainAtlasWideWidth(830, 144)} height="54" rx="9" />
               <g className="memory-flow-node-copy" clipPath="url(#brain-atlas-candidate-copy)">
               <text className="memory-flow-node-title" x={brainAtlasWideX(902)} y="177" textAnchor="middle">Candidate</text>
-              <text className="memory-flow-node-detail" x={brainAtlasWideX(902)} y="194" textAnchor="middle">{activity ? `${count("proposed")} proposed · not learned` : "telemetry unavailable"}</text>
+              <text className="memory-flow-node-detail" x={brainAtlasWideX(902)} y="194" textAnchor="middle">{activity ? [pendingReviewCount, " pending · ", disputedReviewCount, " disputed"].join("") : "telemetry unavailable"}</text>
               </g>
             </g>
             <g className={`memory-flow-node is-durable is-explainable${helpNodeId === "durable" ? " is-help-open" : ""}${recent("promoted") ? " is-live" : ""}`} role="button" tabIndex={0} aria-label="Explain Durable" aria-expanded={helpNodeId === "durable"} aria-controls="brain-atlas-node-help" onClick={() => toggleNodeHelp("durable")} onKeyDown={(event) => nodeHelpKeyDown(event, "durable")}>
@@ -4274,7 +4279,7 @@ function BrainAtlasPanel({
               <rect x={brainAtlasWideX(830)} y="31" width={brainAtlasWideWidth(830, 144)} height="54" rx="9" />
               <g className="memory-flow-node-copy" clipPath="url(#brain-atlas-durable-copy)">
               <text className="memory-flow-node-title" x={brainAtlasWideX(902)} y="54" textAnchor="middle">Durable</text>
-              <text className="memory-flow-node-detail" x={brainAtlasWideX(902)} y="71" textAnchor="middle">{activity ? `${count("promoted")} governed promotion${count("promoted") === 1 ? "" : "s"}` : "telemetry unavailable"}</text>
+              <text className="memory-flow-node-detail" x={brainAtlasWideX(902)} y="71" textAnchor="middle">{activity ? [durableMemoryCount, " active records"].join("") : "telemetry unavailable"}</text>
               </g>
             </g>
             </g>
