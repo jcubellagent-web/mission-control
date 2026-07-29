@@ -18,7 +18,9 @@ type SidecarSnapshot = {
 
 let sidecarSnapshotCache: { expiresAt: number; value: Promise<SidecarSnapshot> } | null = null;
 
-// #JAIMES: prefer the freshest visible Brain Feed row when it is current; only fall back to sidecar status when the visible lane is stale or missing.
+// #JAIMES: status surfaces can update at different cadences. Always reconcile
+// the newest canonical row for an agent; a still-recent legacy Brain Feed must
+// never keep an older blocker visible after a newer healthy heartbeat arrives.
 
 function canonicalAgentId(value: unknown, fallback: AgentId = "joshex"): AgentId {
   const text = String(value || "").toLowerCase();
@@ -448,7 +450,8 @@ function mergeStatuses(visibleBrainFeed: AgentStatus[], primary: AgentStatus[], 
     const visible = visibleByAgent.get(agent);
     const primaryRow = primaryByAgent.get(agent);
     const fallbackRow = fallbackByAgent.get(agent);
-    if (visible && (isFreshBrainFeedTruth(visible) || !primaryRow)) {
+    const visibleIsNewest = visible && (!primaryRow || timestampValue(visible.updated_at) >= timestampValue(primaryRow.updated_at));
+    if (visible && visibleIsNewest && (isFreshBrainFeedTruth(visible) || !primaryRow)) {
       rows.push(visible);
     } else if (primaryRow) {
       rows.push(primaryRow);
@@ -612,6 +615,7 @@ async function loadFallback(): Promise<MissionControlState> {
     }),
     normalizeStatus(jaimesFeed, "jaimes"),
     normalizeStatus(jainFeed, "jain"),
+    normalizeStatus(dashboard?.joshBrainFeed && { ...dashboard.joshBrainFeed, agent_id: "josh2" }, "josh2"),
     normalizeStatus(dashboard?.jaimesBrainFeed && { ...dashboard.jaimesBrainFeed, agent_id: "jaimes" }, "jaimes"),
     normalizeStatus(dashboard?.jainBrainFeed && { ...dashboard.jainBrainFeed, agent_id: "jain" }, "jain"),
   ]);
