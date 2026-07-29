@@ -231,7 +231,7 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
       filter: style.filter,
     };
   });
-  const atlasAgentNodes = [...document.querySelectorAll('#brain-atlas .memory-flow-node.is-agent')].map((element) => {
+    const atlasAgentNodes = [...document.querySelectorAll('#brain-atlas .memory-flow-node.is-agent')].map((element) => {
     const aura = element.querySelector('.memory-flow-node-aura');
     const presenceDot = element.querySelector('.memory-flow-presence-dot');
     const memoryReceiptDot = element.querySelector('.memory-flow-memory-receipt-dot');
@@ -247,6 +247,7 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
       working: element.getAttribute('data-agent-working') === 'true',
       workState: String(element.getAttribute('data-work-state') || ''),
       memoryState: String(element.getAttribute('data-memory-state') || ''),
+      memoryOperation: String(element.getAttribute('data-memory-operation') || 'none'),
       workClass: element.classList.contains('is-work-active'),
       memoryClass: element.classList.contains('is-memory-live'),
       memoryReceiptVisible: memoryReceiptOpacity > 0,
@@ -1312,10 +1313,11 @@ def validate_control_tower_layout(
             f"{label}: Brain Atlas working-agent count is {working_agent_count} "
             f"but {len(atlas_working)} working nodes are rendered"
         )
-    retrieval_edges_by_agent = {
+    memory_operations = {"retrieval", "selected", "used", "crossAgentUsed", "none"}
+    memory_edges_by_agent = {
         str(edge.get("agent") or ""): edge
         for edge in edges
-        if isinstance(edge, dict) and edge.get("operation") == "retrieval" and edge.get("agent")
+        if isinstance(edge, dict) and str(edge.get("operation") or "") in memory_operations and edge.get("agent")
     }
     for node in atlas_agent_nodes:
         if not isinstance(node, dict):
@@ -1332,11 +1334,13 @@ def validate_control_tower_layout(
             failures.append(f"{label}: Brain Atlas {agent} work-presence class disagrees with Live Work state")
         if node.get("memoryClass") is not memory_live:
             failures.append(f"{label}: Brain Atlas {agent} memory class disagrees with its memory state")
-        retrieval_edge = retrieval_edges_by_agent.get(agent)
-        if not isinstance(retrieval_edge, dict):
-            failures.append(f"{label}: Brain Atlas {agent} retrieval path is missing")
-        elif (retrieval_edge.get("live") is True) is not memory_live:
-            failures.append(f"{label}: Brain Atlas {agent} memory path motion disagrees with exact retrieval state")
+        memory_edge = memory_edges_by_agent.get(agent)
+        if not isinstance(memory_edge, dict):
+            failures.append(f"{label}: Brain Atlas {agent} governed-memory path is missing")
+        elif (memory_edge.get("live") is True) is not memory_live:
+            failures.append(f"{label}: Brain Atlas {agent} memory path motion disagrees with exact governed-memory state")
+        elif str(memory_edge.get("operation") or "none") != str(node.get("memoryOperation") or "none"):
+            failures.append(f"{label}: Brain Atlas {agent} memory operation disagrees with its governed-memory path")
         if node.get("memoryAnimated") is True or str(node.get("memoryAnimationName") or "none") != "none":
             failures.append(f"{label}: Brain Atlas {agent} node shell uses an expensive paint animation")
         if memory_live and node.get("memoryReceiptVisible") is not True:

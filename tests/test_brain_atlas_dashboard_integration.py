@@ -742,11 +742,12 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertIn("memory-flow-node-receipt-ring", component)
         self.assertIn('live ? " is-memory-live" : ""', component)
         self.assertNotIn('is-memory-live is-live', component)
-        self.assertNotIn("latestAgentMemorySignal", component)
-        self.assertGreaterEqual(
-            component.count("memorySignalIsRecent(row.lastRetrievalAt, motionWindowSeconds)"),
-            2,
-        )
+        self.assertIn("function latestAgentMemorySignal", component)
+        self.assertIn("agentMemorySignals", component)
+        self.assertIn('data-memory-operation={memorySignal?.[0] || "none"}', component)
+        self.assertIn('data-operation={memorySignal?.[0] || "none"}', component)
+        self.assertIn('is-agent-memory is-${memorySignal?.[0] || "quiet"}', component)
+        self.assertIn("${MEMORY_SIGNAL_LABELS[memorySignal[0]]} receipt verified", component)
         self.assertIn('data-operation="cross-agent-used"', component)
         self.assertIn("data-source-agent", component)
         self.assertIn("data-consumer-agent", component)
@@ -801,7 +802,9 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
 
         self.assertIn(".memory-flow-edge.is-live {", styles)
         self.assertIn("stroke-width: 4.4;", styles)
-        self.assertIn(".memory-flow-edge.is-retrieval.is-live", styles)
+        self.assertIn(".memory-flow-edge.is-agent-memory.is-retrieval.is-live", styles)
+        self.assertIn(".memory-flow-edge.is-agent-memory.is-selected.is-live", styles)
+        self.assertIn(".memory-flow-edge.is-agent-memory.is-crossAgentUsed.is-live", styles)
         self.assertIn(".memory-flow-edge.is-cross-agent", styles)
         self.assertIn(".memory-flow-edge.is-work-lifeline", styles)
         self.assertIn(".memory-flow-edge.is-work-lifeline.is-linked", styles)

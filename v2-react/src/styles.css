@@ -17805,9 +17805,20 @@ body,
   opacity: 0.34;
 }
 
-.memory-flow-edge.is-retrieval.is-live {
+.memory-flow-edge.is-agent-memory.is-retrieval.is-live {
   color: #65d9ff;
   stroke: rgba(101, 217, 255, 0.96);
+}
+
+.memory-flow-edge.is-agent-memory.is-selected.is-live,
+.memory-flow-edge.is-agent-memory.is-used.is-live {
+  color: #65cdf5;
+  stroke: rgba(101, 205, 245, 0.96);
+}
+
+.memory-flow-edge.is-agent-memory.is-crossAgentUsed.is-live {
+  color: #ffd166;
+  stroke: rgba(255, 209, 102, 0.96);
 }
 
 .memory-flow-edge.is-live {
