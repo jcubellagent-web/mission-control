@@ -425,6 +425,47 @@ def sanitize(value: Any) -> Any:
     return clean
 
 
+def effective_cua_status(role: str, codex_cu: dict[str, Any], cua: dict[str, Any], canary: dict[str, Any]) -> dict[str, Any]:
+    """Expose the verified Computer Use status without discarding legacy evidence.
+
+    Visible hosts use the Codex Computer Use bridge plus a fresh display canary.
+    Headless hosts still rely on the CUA driver directly.  Keeping both values
+    lets Control Tower report a legacy-probe disagreement without treating it as
+    a host outage when the active verification path is healthy.
+    """
+    legacy_status = str(cua.get("status") or "unknown")
+    codex_status = str(codex_cu.get("status") or "unknown")
+    canary_status = str(canary.get("status") or "unknown")
+    if role != "visible":
+        return {
+            "status": legacy_status,
+            "legacyStatus": legacy_status,
+            "disagreement": False,
+            "reason": "headless-host-uses-cua-driver",
+        }
+    if canary_status != "ok":
+        return {
+            "status": "down" if canary_status == "down" or canary.get("alert") is True else "degraded",
+            "legacyStatus": legacy_status,
+            "disagreement": False,
+            "reason": "active-display-canary-not-verified",
+        }
+    if codex_status == "ok":
+        disagreement = legacy_status not in {"ok", "unknown", "not-required"}
+        return {
+            "status": "ok",
+            "legacyStatus": legacy_status,
+            "disagreement": disagreement,
+            "reason": "verified-by-codex-bridge-and-display-canary",
+        }
+    return {
+        "status": "degraded" if legacy_status == "ok" else "down",
+        "legacyStatus": legacy_status,
+        "disagreement": False,
+        "reason": "codex-bridge-not-verified",
+    }
+
+
 def collect(host: str, role: str | None, config_path: Path, active_canary: bool = False) -> dict[str, Any]:
     config = load_config(config_path)
     host_config = (config.get("hosts") or {}).get(host) if isinstance(config.get("hosts"), dict) else {}
@@ -435,6 +476,7 @@ def collect(host: str, role: str | None, config_path: Path, active_canary: bool 
     codex_cu = probe_codex_computer_use()
     display = display_online()
     canary = active_display_canary(resolved_role) if active_canary else load_canary_state()
+    effective_cua = effective_cua_status(resolved_role, codex_cu, cua, canary)
     reliability = interaction_engine(config)
     browser_required = True
     if resolved_role == "headless":
@@ -466,6 +508,10 @@ def collect(host: str, role: str | None, config_path: Path, active_canary: bool 
         "browser": browser,
         "computerUse": {
             "status": cua.get("status") if resolved_role == "headless" else codex_cu.get("status"),
+            "effectiveStatus": effective_cua["status"],
+            "legacyStatus": effective_cua["legacyStatus"],
+            "disagreement": effective_cua["disagreement"],
+            "effectiveStatusReason": effective_cua["reason"],
             "codex": codex_cu,
             "cuaDriver": cua,
             "activeDisplayCanary": canary,
