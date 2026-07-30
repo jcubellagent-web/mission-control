@@ -188,6 +188,15 @@ class ReliabilityReuseEvalTests(unittest.TestCase):
         self.assertIn("used-exceeds-selected", row["reasonCodes"])
         self.assertIn("unsafe-shared-memory-observed", row["reasonCodes"])
 
+    def test_memory_correction_is_visible_learning_feedback_not_a_gate_failure(self) -> None:
+        self.write_happy_sources()
+        memory = json.loads((self.data_dir / "memory-operations.json").read_text())
+        memory["retrieval"].update({"helpful30d": 18, "ignored30d": 1, "corrected30d": 1})
+        self.write("memory-operations.json", memory)
+        row = self.rows(subject.build_evaluation(self.data_dir, root=ROOT, now=NOW))["memory-privacy-reuse"]
+        self.assertEqual("pass", row["state"])
+        self.assertIn("corrected-reuse-observed", row["reasonCodes"])
+
     def test_handoff_gate_preserves_legacy_and_requires_terminal_receipts(self) -> None:
         self.write_happy_sources()
         self.write(

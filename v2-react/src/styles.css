@@ -16710,6 +16710,29 @@ body,
   background: color-mix(in srgb, var(--red) 8%, transparent);
 }
 
+.brain-atlas-maturity {
+  align-self: flex-start;
+  border: 1px solid rgba(85, 215, 255, 0.26);
+  border-radius: 999px;
+  color: rgba(184, 232, 246, 0.82);
+  font: 700 10px/1 var(--font-mono);
+  letter-spacing: 0.05em;
+  margin-top: 2px;
+  padding: 6px 9px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.brain-atlas-maturity.is-clear {
+  border-color: rgba(44, 194, 118, 0.44);
+  color: var(--green);
+}
+
+.brain-atlas-maturity.is-watch {
+  border-color: rgba(246, 183, 72, 0.44);
+  color: #f6c76c;
+}
+
 .brain-atlas-scope {
   display: flex;
   flex-wrap: wrap;

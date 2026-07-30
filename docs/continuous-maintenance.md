@@ -15,6 +15,24 @@ Control Tower turns maintenance discovery into a proposal-first operating loop:
 
 The hourly `maintenance-portfolio-snapshot` job regenerates the projection. Control Tower remains the operational source of truth; Linear tracks the durable approved work.
 
+## Governed Memory Maturity Plan
+
+This is the canonical maturity plan. It replaces the legacy static roadmap in
+`index.html`; the dashboard-safe current state is derived from the sidecars
+listed above and shown as a compact Brain Atlas maturity signal.
+
+| Phase | State | Evidence / entry rule |
+| --- | --- | --- |
+| W1 — Active governed memory | Complete | Shared registry, retrieval preflight, owner boundary, and durable/candidate lifecycle are live. |
+| W2 — Hygiene and reinforcement | Complete | Nightly review, deduplication, expiry/supersession, use-or-ignore outcomes, and correction feedback are live. A correction is visible negative reinforcement, not a permanent gate failure by itself. |
+| W3 — Reliability stabilization | Active | All six dashboard-safe reliability gates must pass for seven consecutive fresh evaluations before elective expansion. Current gaps remain visible; evidence is repaired, never invented. |
+| W4 — QMD retrieval pilot | Deferred / conditional | Run only against a fixed benchmark if it improves recall quality or latency without weakening privacy, provenance, or the existing registry. |
+| W5 — Session/transcript recall | Deferred / conditional | Consider only after W4 proves material benefit and bounded retention, redaction, and operator controls are specified. |
+
+Brain Atlas remains an observer, not a second memory store: it receives counts,
+freshness, and bounded reliability state only. The graph animates genuine memory
+receipts; it never displays raw memories, prompts, or private account data.
+
 ## Promotion Rules
 
 - Automatic source mutation is disabled.

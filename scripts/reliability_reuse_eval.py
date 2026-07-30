@@ -254,8 +254,13 @@ def memory_gate(data_dir: Path, now: dt.datetime) -> dict[str, Any]:
     elif helpful_rate < MIN_HELPFUL_REUSE_PCT:
         states.append("fail")
         reasons.append("helpful-reuse-below-threshold")
+    # A correction is governed negative reinforcement: it should stop the
+    # affected memory from being treated as an unqualified success, but it is
+    # not itself a privacy or reliability violation. Corrections are expected
+    # in a learning system and are already represented in the quality rate and
+    # review workflow. Keep the signal visible without permanently failing an
+    # otherwise healthy memory plane on historical, resolved feedback.
     if corrected > 0:
-        states.append("fail")
         reasons.append("corrected-reuse-observed")
     if harmful > 0:
         states.append("fail")

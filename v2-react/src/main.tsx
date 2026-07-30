@@ -1471,6 +1471,7 @@ function App() {
           todayJobs={state.todayJobs}
           todayJobsMeta={state.todayJobsMeta}
           qualityControl={state.qualityControl}
+          maintenanceControl={state.maintenanceControl}
           capabilityInventory={state.capabilityInventory}
         />
         <MemoizedFinOpsDashboard
@@ -4035,6 +4036,7 @@ function BrainAtlasPanel({
   todayJobs,
   todayJobsMeta,
   qualityControl,
+  maintenanceControl,
   capabilityInventory,
 }: {
   atlas?: BrainAtlas;
@@ -4046,6 +4048,7 @@ function BrainAtlasPanel({
   todayJobs?: TodayJobOccurrence[];
   todayJobsMeta?: TodayJobsMeta;
   qualityControl?: Record<string, unknown>;
+  maintenanceControl?: Record<string, unknown>;
   capabilityInventory?: MissionControlState["capabilityInventory"];
 }) {
   const [focusId, setFocusId] = useState("all");
@@ -4153,6 +4156,15 @@ function BrainAtlasPanel({
   );
   const candidateIsRecent = memorySignalIsRecent(candidateObservedAt, motionWindowSeconds);
   const helpNode = helpNodeId ? BRAIN_ATLAS_NODE_HELP[helpNodeId] : null;
+  const maintenanceReadiness = maintenanceControl?.readiness && typeof maintenanceControl.readiness === "object"
+    ? maintenanceControl.readiness as Record<string, unknown>
+    : null;
+  const maturityGatesPassed = Number(maintenanceReadiness?.gatesPassed);
+  const maturityGatesRequired = Number(maintenanceReadiness?.gatesRequired);
+  const maturityGateLabel = Number.isFinite(maturityGatesPassed) && Number.isFinite(maturityGatesRequired) && maturityGatesRequired > 0
+    ? `${maturityGatesPassed}/${maturityGatesRequired} reliability gates`
+    : "reliability evidence pending";
+  const maturityTone = maturityGatesPassed === maturityGatesRequired && maturityGatesRequired > 0 ? "clear" : "watch";
   const toggleNodeHelp = (nodeId: BrainAtlasHelpNodeId) => setHelpNodeId((current) => current === nodeId ? null : nodeId);
   const nodeHelpKeyDown = (event: React.KeyboardEvent<SVGGElement>, nodeId: BrainAtlasHelpNodeId) => {
     if (event.key !== "Enter" && event.key !== " ") return;
@@ -4210,6 +4222,9 @@ function BrainAtlasPanel({
             <h3 id="brain-atlas-unified-heading">Governed memory activity</h3>
             <p id="brain-atlas-unified-description">The main view shows how shared memory is recalled, applied, assessed, and promoted—not private reasoning.</p>
           </div>
+          <span className={`brain-atlas-maturity is-${maturityTone}`} title="Memory foundation and hygiene are live. Advanced retrieval pilots remain gated until the current dashboard-safe reliability evidence is clean.">
+            Maturity · {maturityGateLabel}
+          </span>
         </header>
 
         <div className="memory-flow-map is-unified" tabIndex={0} aria-label="Governed memory activity graph. Scroll horizontally on narrow screens.">
