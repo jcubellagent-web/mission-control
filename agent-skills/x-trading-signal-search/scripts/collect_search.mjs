@@ -116,13 +116,18 @@ async function waitFor(client, expression, waitMs) {
 
 const sessionExpression = String.raw`(() => {
   const button = document.querySelector('[data-testid="SideNav_AccountSwitcher_Button"]');
+  // X does not render the account switcher in every signed-in responsive layout.
+  // The profile navigation control is an independent authenticated UI assertion.
+  const profileLink = document.querySelector('a[data-testid="AppTabBar_Profile_Link"][href="/__EXPECTED_HANDLE__"]');
   const text = button?.innerText || '';
   const body = document.body?.innerText || '';
+  const signedIn = Boolean(button || profileLink);
+  const accountMatches = text.includes('@__EXPECTED_HANDLE__') || Boolean(profileLink);
   return {
-    ready: document.readyState === 'complete' && (Boolean(button) || body.includes('Something went wrong')),
+    ready: document.readyState === 'complete' && (signedIn || body.includes('Something went wrong')),
     searchPage: location.pathname === '/search',
-    signedIn: Boolean(button),
-    accountMatches: text.includes('@__EXPECTED_HANDLE__'),
+    signedIn,
+    accountMatches,
     loadError: body.includes('Something went wrong') || body.includes('Try reloading')
   };
 })()`;

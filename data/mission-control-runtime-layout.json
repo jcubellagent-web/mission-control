@@ -1,24 +1,57 @@
 {
-  "ok": true,
-  "status": "ok",
-  "checkedAt": "2026-06-15T08:24:21Z",
-  "summary": "Kiosk endpoint, dashboard data, and screen capture checked.",
-  "issues": [],
+  "ok": false,
+  "status": "attention",
+  "checkedAt": "2026-07-30T03:54:09Z",
+  "url": "http://127.0.0.1:5174/",
+  "summary": "Chromium render failed (rc=0): Trying to load the allocator multiple times. This is *not* supported. [60102:3151757:0729/235412.317302:ERROR:google_apis/gcm/engine/registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT Created TensorFlow Lite XNNPACK delegate for CPU. [60102:3151757:0729/235425.2452",
+  "issues": [
+    "Chromium render failed (rc=0): Trying to load the allocator multiple times. This is *not* supported. [60102:3151757:0729/235412.317302:ERROR:google_apis/gcm/engine/registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT Created TensorFlow Lite XNNPACK delegate for CPU. [60102:3151757:0729/235425.2452"
+  ],
+  "degradedReasons": [],
   "checks": [
     {
-      "name": "kiosk",
+      "name": "kiosk-http",
+      "state": "pass",
       "ok": true,
-      "detail": "HTTP 200"
+      "required": true,
+      "detail": "HTTP 200; current Vite React shell present",
+      "evidence": {
+        "bytes": 708
+      }
     },
     {
-      "name": "dashboard",
+      "name": "live-data-json",
+      "state": "pass",
       "ok": true,
-      "detail": "dashboard JSON parsed"
+      "required": true,
+      "detail": "control-tower-live.json parsed with canonical live-work, runtime, jobs, and source-freshness fields",
+      "evidence": {
+        "path": "data/control-tower-live.json",
+        "brainFeed": 26,
+        "agentBrainFeeds": 4,
+        "scheduleSource": "todayJobs",
+        "scheduleRows": 89,
+        "crons": 0,
+        "todayJobs": 89,
+        "codexJobs": 10,
+        "actionRequired": 4,
+        "lastUpdated": "2026-07-30T03:53:22Z",
+        "sourceUpdatedAt": "2026-07-30T03:53:15Z"
+      }
+    },
+    {
+      "name": "rendered-react",
+      "state": "fail",
+      "ok": false,
+      "required": true,
+      "detail": "Chromium render failed (rc=0): Trying to load the allocator multiple times. This is *not* supported. [60102:3151757:0729/235412.317302:ERROR:google_apis/gcm/engine/registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT Created TensorFlow Lite XNNPACK delegate for CPU. [60102:3151757:0729/235425.2452"
     },
     {
       "name": "screenshot",
+      "state": "pass",
       "ok": true,
-      "detail": "screenshot advisory: SCREENSHOT_FAILED could not create image from display"
+      "required": false,
+      "detail": "physical kiosk screenshot captured"
     }
   ],
   "textQuality": {

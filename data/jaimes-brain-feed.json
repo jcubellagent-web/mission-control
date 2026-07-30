@@ -1,63 +1,69 @@
 {
-  "active": true,
-  "objective": "JAIMES is working now",
-  "status": "active",
-  "updatedAt": "2026-06-15T20:22:05Z",
-  "model": "gpt-5.5",
-  "auth": "subscription",
-  "modelAuth": "gpt-5.5 (subscription)",
-  "currentTool": "status check",
-  "agent": "JAIMES",
-  "checkedAt": "2026-06-15T20:22:05Z",
-  "messageReceived": "2026-06-15T20:21:33Z",
+  "active": false,
+  "objective": "Done: Sorare RP scout check",
+  "status": "idle",
+  "updatedAt": "2026-07-30T04:01:12Z",
+  "model": "gpt-5.6-sol",
+  "messageReceived": "2026-07-30T04:01:00Z",
   "steps": [
     {
-      "label": "JAIMES is working now",
-      "status": "active",
+      "label": "JAIMES is online and ready",
+      "status": "ready",
       "tool": "status check",
       "kind": "status"
     },
     {
-      "label": "Sorare missions: locating current scripts",
-      "status": "active",
-      "tool": "exec",
+      "label": "JAIMES is online and ready",
+      "status": "done",
+      "tool": "status check",
       "kind": "status"
     },
     {
-      "label": "Kintara: checking progress snapshot",
-      "status": "active",
-      "tool": "exec",
-      "kind": "status"
+      "label": "Sorare Daily Missions complete",
+      "status": "done",
+      "tool": "exec"
     },
     {
-      "label": "Sorare missions: verifying setup",
-      "status": "active",
-      "tool": "exec",
-      "kind": "status"
-    },
-    {
-      "label": "Review Sorare request",
-      "status": "active",
-      "tool": "telegram-ingress",
-      "kind": "status"
-    },
-    {
-      "label": "Done: model efficiency guard alert",
+      "label": "Self-test: JAIMES Brain Feed path healthy",
       "status": "done",
       "tool": "exec",
-      "kind": "status"
+      "time": "2026-07-30T03:56:58Z"
     },
     {
-      "label": "Ops: running model efficiency guard",
+      "label": "Sorare RP scout check",
       "status": "done",
-      "tool": "exec",
-      "kind": "status"
+      "tool": "cron",
+      "time": "2026-07-30T04:00:59Z"
+    },
+    {
+      "label": "Sorare GW auto-submit check",
+      "status": "done",
+      "tool": "sorare",
+      "time": "2026-07-30T04:01:00Z"
     }
   ],
-  "agentId": "jaimes",
-  "reportedActive": true,
-  "detail": "JAIMES live update: Sorare missions: locating current scripts.",
+  "currentTool": "cron",
+  "checkedAt": "2026-07-30T04:01:12Z",
+  "agent": "JAIMES",
   "source": "josh2-local-live-feed",
+  "detail": "Done: Sorare RP scout check",
+  "updated_at": "2026-07-30T04:01:09Z",
+  "auth": "subscription",
+  "modelAuth": "gpt-5.6-sol (subscription)",
+  "liveAgentPush": "2026-07-30T04:01:09Z",
+  "liveAgentPushAt": "2026-07-30T04:01:09Z",
+  "agentId": "jaimes",
+  "reportedActive": null,
+  "workId": "work-adhoc-ba8c7100dc194a3b88f3e29b6d20e55f",
+  "runId": "run-1d36ea11ae254c1ab782a0ad3aaf9718",
+  "generation": 1,
+  "sequence": 1,
+  "phase": "complete",
+  "originClaimHash": "fad6125b83325c960cd842927cc7d13cd6f46d23c73f136518ba10ab06f8aa2b",
+  "modelFamily": null,
+  "modelId": null,
+  "routeVerified": false,
+  "leaseUntil": null,
   "supabaseBacked": false,
   "localLiveFeed": true
 }

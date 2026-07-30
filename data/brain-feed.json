@@ -1,19 +1,56 @@
 {
   "agentId": "josh2",
   "agent": "JOSH 2.0",
-  "active": true,
-  "reportedActive": true,
-  "status": "active",
-  "objective": "Working on task",
-  "detail": "Tool execution started",
-  "updatedAt": "2026-07-23T01:20:58Z",
-  "checkedAt": "2026-07-23T01:20:58Z",
-  "currentTool": "exec",
+  "active": false,
+  "reportedActive": false,
+  "status": "info",
+  "objective": "Ecosystem proposal ledger updated",
+  "detail": "6 current proposal(s) remain open; publication never implies approval.",
+  "updatedAt": "2026-07-30T03:43:13Z",
+  "checkedAt": "2026-07-30T03:43:13Z",
+  "currentTool": "proposal ledger",
   "steps": [
     {
-      "label": "Working on task",
-      "status": "active",
-      "tool": "exec"
+      "label": "Ecosystem proposal ledger updated",
+      "status": "info",
+      "tool": "proposal ledger",
+      "kind": "status"
+    },
+    {
+      "label": "Runtime UI QA: runtime-layout-check needs attention",
+      "status": "blocked",
+      "tool": "ecosystem QA scheduler",
+      "kind": "blocked"
+    },
+    {
+      "label": "Josh 2.0 screen check needs attention",
+      "status": "blocked",
+      "tool": "Control Tower screen check",
+      "kind": "blocked"
+    },
+    {
+      "label": "Final Card Club two-week backlog build",
+      "status": "blocked",
+      "tool": "agent publish",
+      "kind": "job"
+    },
+    {
+      "label": "Final Card Club P01 scheduled",
+      "status": "ready",
+      "tool": "agent publish",
+      "kind": "job"
+    },
+    {
+      "label": "Josh 2.0 Final Card Club service account validated",
+      "status": "done",
+      "tool": "agent publish",
+      "kind": "complete"
+    },
+    {
+      "label": "Josh 2.0 screen check recovered",
+      "status": "done",
+      "tool": "Control Tower screen check",
+      "kind": "complete"
     }
   ],
   "source": "josh2-local-live-feed",
@@ -21,14 +58,14 @@
   "model": "Unknown",
   "messageReceived": "2026-07-20T03:06:59Z",
   "localLiveFeed": true,
-  "workId": "work-telegram-a84a1b790048a1830e2c1a23",
-  "runId": "run-telegram-7202a7f481d96d94a1ac10ae",
+  "workId": "work-adhoc-bc351188f1914c069e60ceb11a10f679",
+  "runId": "run-7293fba2b727475fab7efef7794a9f58",
   "generation": 1,
-  "sequence": 10,
-  "phase": "active",
-  "originClaimHash": "78ec13390744e9629fb308f9044f082e35e1497ebacb27bbba2d7397d3e2ac7e",
-  "modelFamily": "codex",
-  "modelId": "gpt-5.6-terra",
-  "routeVerified": true,
-  "leaseUntil": "2026-07-23T00:17:34.000Z"
+  "sequence": 1,
+  "phase": "complete",
+  "originClaimHash": "53d04fe0ed836917deb1285c23c2c77ec1d25a0401775e904cd75229ef71a7a8",
+  "modelFamily": null,
+  "modelId": null,
+  "routeVerified": false,
+  "leaseUntil": null
 }

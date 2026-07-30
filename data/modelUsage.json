@@ -1,152 +1,277 @@
 {
   "session": 0.0,
-  "daily": 0.064254,
-  "weekly": 905.59889,
-  "monthly": 1750.54726,
+  "daily": 0.0,
+  "weekly": 0.0,
+  "monthly": 266.66,
+  "codexbarLimits": {
+    "codex": {
+      "available": true,
+      "status": "ready",
+      "authStatus": "ok",
+      "accountLabel": "codex",
+      "plan": "pro",
+      "codexbarSource": "oauth",
+      "codexbarVersion": null,
+      "codexbarUpdatedAt": "2026-07-30T04:00:39Z",
+      "usageWindows": [
+        {
+          "id": "codex-secondary",
+          "label": "Weekly",
+          "usedPercent": 6.0,
+          "remainingPercent": 94.0,
+          "resetDescription": "Aug 5 at 12:09\u202fAM",
+          "resetsAt": "2026-08-05T04:09:46Z",
+          "windowMinutes": 10080,
+          "status": "ok"
+        },
+        {
+          "id": "codex-spark-weekly",
+          "label": "Codex Spark Weekly",
+          "usedPercent": 0.0,
+          "remainingPercent": 100.0,
+          "resetDescription": "Aug 6 at 12:00\u202fAM",
+          "resetsAt": "2026-08-06T04:00:39Z",
+          "windowMinutes": 10080,
+          "status": "ok"
+        },
+        {
+          "id": "codex-credits",
+          "label": "Credits",
+          "remainingLabel": "0 manual resets available",
+          "status": "limited"
+        }
+      ],
+      "pace": {},
+      "dataConfidence": "exact",
+      "creditsRemaining": 0,
+      "codexResetCredits": {
+        "updatedAt": "2026-07-30T04:00:39Z",
+        "availableCount": 0,
+        "credits": []
+      }
+    },
+    "gemini": {
+      "available": true,
+      "status": "ready",
+      "authStatus": "ok",
+      "accountLabel": "gemini",
+      "plan": "Paid",
+      "codexbarSource": "oauth-api",
+      "codexbarVersion": "{\"type\": \"message\", \"role\": \"assistant\", \"content\": \"\"}",
+      "codexbarUpdatedAt": "2026-07-30T04:00:40Z",
+      "usageWindows": [
+        {
+          "id": "gemini-primary",
+          "label": "Session",
+          "usedPercent": 0.0,
+          "remainingPercent": 100.0,
+          "resetDescription": "Resets in 23h 59m",
+          "resetsAt": "2026-07-31T04:00:40Z",
+          "windowMinutes": 1440,
+          "status": "ok"
+        },
+        {
+          "id": "gemini-secondary",
+          "label": "Weekly",
+          "usedPercent": 0.0,
+          "remainingPercent": 100.0,
+          "resetDescription": "Resets in 23h 59m",
+          "resetsAt": "2026-07-31T04:00:40Z",
+          "windowMinutes": 1440,
+          "status": "ok"
+        },
+        {
+          "id": "gemini-credits",
+          "label": "Credits",
+          "remainingLabel": "0 manual resets available",
+          "status": "ok"
+        }
+      ],
+      "pace": {},
+      "dataConfidence": null,
+      "creditsRemaining": null,
+      "codexResetCredits": {}
+    },
+    "ollama": {
+      "available": true,
+      "provider": "ollama",
+      "status": "ready",
+      "authStatus": "ok",
+      "usageWindows": [
+        {
+          "id": "ollama-primary",
+          "label": "Session",
+          "usedPercent": 0.1,
+          "remainingPercent": 99.9,
+          "resetDescription": null,
+          "resetsAt": "2026-07-30T04:00:00Z",
+          "windowMinutes": 300,
+          "status": "ok"
+        },
+        {
+          "id": "ollama-secondary",
+          "label": "Weekly",
+          "usedPercent": 0.2,
+          "remainingPercent": 99.8,
+          "resetDescription": null,
+          "resetsAt": "2026-08-03T00:00:00Z",
+          "windowMinutes": 10080,
+          "status": "ok"
+        }
+      ],
+      "codexbarSource": "personal-mac-projection",
+      "codexbarUpdatedAt": "2026-07-30T03:58:18Z",
+      "accountLabel": "ollama",
+      "plan": "cloud subscription",
+      "dataConfidence": "quota-projected; runtime-verified",
+      "quotaTelemetryStatus": "fresh",
+      "quotaTelemetryAgeSeconds": 143,
+      "quotaTelemetryReceivedAt": "2026-07-30T03:58:19Z"
+    },
+    "xai": {
+      "available": true,
+      "status": "ready",
+      "authStatus": "ok",
+      "accountLabel": "grok",
+      "plan": "SuperGrok",
+      "codexbarSource": "grok-web",
+      "codexbarVersion": "0.2.56",
+      "codexbarUpdatedAt": "2026-07-30T04:00:43Z",
+      "usageWindows": [
+        {
+          "id": "grok-primary",
+          "label": "Session",
+          "usedPercent": 0.0,
+          "remainingPercent": 100.0,
+          "resetDescription": null,
+          "resetsAt": "2026-08-05T05:23:20Z",
+          "windowMinutes": null,
+          "status": "ok"
+        },
+        {
+          "id": "grok-credits",
+          "label": "Credits",
+          "remainingLabel": "0 manual resets available",
+          "status": "ok"
+        }
+      ],
+      "pace": {},
+      "dataConfidence": null,
+      "creditsRemaining": null,
+      "codexResetCredits": {}
+    }
+  },
   "topModels": [
     {
-      "name": "openai/gpt-5.5",
+      "name": "gpt-5.6-terra",
       "window": "session",
-      "cost": 0.18951099999999999
+      "cost": 8.9262335
     },
     {
-      "name": "google/gemini-3.5-flash",
+      "name": "gpt-5.6-luna",
       "window": "session",
-      "cost": 0.0108933
+      "cost": 2.1501204
     },
     {
-      "name": "deepseek/deepseek-v3.2",
+      "name": "gpt-5.6-sol",
       "window": "session",
-      "cost": 0.0
+      "cost": 0.105819
     },
     {
-      "name": "google/gemini-3-flash-preview",
+      "name": "google-gemini-cli/gemini-3.5-flash",
       "window": "session",
-      "cost": 0.0
+      "cost": 0.020197799999999995
     },
     {
-      "name": "google/gemini-3.1-pro-preview",
+      "name": "openai/gpt-5.4",
       "window": "session",
       "cost": 0.0
     }
   ],
   "breakdown": [
     {
-      "name": "openai/gpt-5.5",
-      "source": "openclaw",
-      "inputTokens": 24211,
-      "outputTokens": 76,
-      "totalTokens": 24287,
-      "sessionCost": 0.18951099999999999,
-      "dailyCost": 0.060664,
-      "weeklyCost": 0.18951099999999999,
-      "sessions": 3,
-      "isGemini": false,
-      "costEstimated": false
+      "name": "gpt-5.6-terra",
+      "source": "codex",
+      "weeklyCost": 8.9262335,
+      "dailyCost": 0.0,
+      "sessionCost": 8.9262335,
+      "totalTokens": 0,
+      "costEstimated": false,
+      "billingMode": "metered",
+      "marginalCost": 8.926234
     },
     {
-      "name": "google/gemini-3.5-flash",
+      "name": "gpt-5.6-luna",
+      "source": "codex",
+      "weeklyCost": 2.1501204,
+      "dailyCost": 0.0,
+      "sessionCost": 2.1501204,
+      "totalTokens": 0,
+      "costEstimated": false,
+      "billingMode": "metered",
+      "marginalCost": 2.15012
+    },
+    {
+      "name": "gpt-5.6-sol",
+      "source": "codex",
+      "weeklyCost": 0.105819,
+      "dailyCost": 0.0,
+      "sessionCost": 0.105819,
+      "totalTokens": 0,
+      "costEstimated": false,
+      "billingMode": "metered",
+      "marginalCost": 0.105819
+    },
+    {
+      "name": "google-gemini-cli/gemini-3.5-flash",
       "source": "openclaw",
-      "inputTokens": 69662,
-      "outputTokens": 740,
-      "totalTokens": 70402,
-      "sessionCost": 0.0108933,
-      "dailyCost": 0.0035899499999999997,
-      "weeklyCost": 0.0108933,
-      "sessions": 3,
+      "inputTokens": 131040,
+      "outputTokens": 903,
+      "totalTokens": 131943,
+      "sessionCost": 0.020197799999999995,
+      "dailyCost": 0.0,
+      "weeklyCost": 0.020197799999999995,
+      "sessions": 9,
       "isGemini": true,
-      "costEstimated": true
+      "costEstimated": true,
+      "billingMode": "subscription",
+      "usageEquivalentCost": 0.020198,
+      "marginalCost": 0.0,
+      "_note": "OpenAI/Codex subscription-backed usage; shown as usage-equivalent, not incremental spend."
     },
     {
-      "name": "deepseek/deepseek-v3.2",
+      "name": "openai/gpt-5.4",
       "source": "openclaw",
-      "inputTokens": 28133,
-      "outputTokens": 28,
-      "totalTokens": 28161,
+      "inputTokens": 575,
+      "outputTokens": 151,
+      "totalTokens": 726,
       "sessionCost": 0.0,
       "dailyCost": 0.0,
       "weeklyCost": 0.0,
       "sessions": 1,
       "isGemini": false,
-      "costEstimated": false
+      "costEstimated": false,
+      "billingMode": "subscription",
+      "usageEquivalentCost": 0.0,
+      "marginalCost": 0.0,
+      "_note": "OpenAI/Codex subscription-backed usage; shown as usage-equivalent, not incremental spend."
     },
     {
-      "name": "google/gemini-3-flash-preview",
+      "name": "ollama/qwen2.5:7b",
       "source": "openclaw",
-      "inputTokens": 0,
-      "outputTokens": 0,
-      "totalTokens": 0,
-      "sessionCost": 0.0,
-      "dailyCost": 0.0,
-      "weeklyCost": 0.0,
-      "sessions": 2,
-      "isGemini": true,
-      "costEstimated": false
-    },
-    {
-      "name": "google/gemini-3.1-pro-preview",
-      "source": "openclaw",
-      "inputTokens": 0,
-      "outputTokens": 0,
-      "totalTokens": 0,
-      "sessionCost": 0.0,
-      "dailyCost": 0.0,
-      "weeklyCost": 0.0,
-      "sessions": 1,
-      "isGemini": true,
-      "costEstimated": false
-    },
-    {
-      "name": "google-gemini-cli/gemini-3-flash-preview",
-      "source": "openclaw",
-      "inputTokens": 0,
-      "outputTokens": 0,
-      "totalTokens": 0,
-      "sessionCost": 0.0,
-      "dailyCost": 0.0,
-      "weeklyCost": 0.0,
-      "sessions": 7,
-      "isGemini": true,
-      "costEstimated": false
-    },
-    {
-      "name": "google-gemini-cli/gemini-3.1-pro-preview",
-      "source": "openclaw",
-      "inputTokens": 0,
-      "outputTokens": 0,
-      "totalTokens": 0,
-      "sessionCost": 0.0,
-      "dailyCost": 0.0,
-      "weeklyCost": 0.0,
-      "sessions": 1,
-      "isGemini": true,
-      "costEstimated": false
-    },
-    {
-      "name": "ollama/glm-5.2:cloud",
-      "source": "openclaw",
-      "inputTokens": 0,
-      "outputTokens": 0,
-      "totalTokens": 0,
+      "inputTokens": 12285,
+      "outputTokens": 129,
+      "totalTokens": 12414,
       "sessionCost": 0.0,
       "dailyCost": 0.0,
       "weeklyCost": 0.0,
       "sessions": 1,
       "isGemini": false,
-      "costEstimated": false
-    },
-    {
-      "name": "openai/gpt-5.3-codex-spark",
-      "source": "openclaw",
-      "inputTokens": 53574,
-      "outputTokens": 232,
-      "totalTokens": 53806,
-      "sessionCost": 0.0,
-      "dailyCost": 0.0,
-      "weeklyCost": 0.0,
-      "sessions": 3,
-      "isGemini": false,
-      "costEstimated": false
+      "costEstimated": false,
+      "billingMode": "subscription",
+      "usageEquivalentCost": 0.0,
+      "marginalCost": 0.0,
+      "_note": "OpenAI/Codex subscription-backed usage; shown as usage-equivalent, not incremental spend."
     },
     {
       "name": "xai/grok-4.20-reasoning",
@@ -163,10 +288,12 @@
       "lastStatus": "",
       "lastRunAt": "",
       "costEstimated": false,
-      "_note": "xAI specialist broker usage; raw prompts and outputs are not stored."
+      "_note": "xAI specialist broker usage; raw prompts and outputs are not stored.",
+      "billingMode": "metered",
+      "marginalCost": 0.0
     },
     {
-      "name": "local/glm-5.2:cloud",
+      "name": "local/qwen3.5:4b",
       "source": "ollama",
       "weeklyCost": 0.0,
       "dailyCost": 0.0,
@@ -174,12 +301,17 @@
       "totalTokens": 0,
       "costEstimated": false,
       "isLocal": true,
-      "sizeGb": 0.0,
+      "isCloud": false,
+      "sizeGb": 3.39,
       "loaded": false,
-      "_note": "Local Ollama model (0.0GB). Free \u2014 runs on-device."
+      "billingMode": "local",
+      "billableCostUsd": 0.0,
+      "meteredEquivalentUsd": 0.0,
+      "_note": "Local Ollama model (3.4GB). Covered by local/Ollama Pro lane; zero incremental usage spend.",
+      "marginalCost": 0.0
     },
     {
-      "name": "local/qwen2.5-coder:7b",
+      "name": "local/qwen2.5:7b",
       "source": "ollama",
       "weeklyCost": 0.0,
       "dailyCost": 0.0,
@@ -187,9 +319,50 @@
       "totalTokens": 0,
       "costEstimated": false,
       "isLocal": true,
+      "isCloud": false,
       "sizeGb": 4.68,
       "loaded": false,
-      "_note": "Local Ollama model (4.7GB). Free \u2014 runs on-device."
+      "billingMode": "local",
+      "billableCostUsd": 0.0,
+      "meteredEquivalentUsd": 0.0,
+      "_note": "Local Ollama model (4.7GB). Covered by local/Ollama Pro lane; zero incremental usage spend.",
+      "marginalCost": 0.0
+    },
+    {
+      "name": "local/llama3.2:latest",
+      "source": "ollama",
+      "weeklyCost": 0.0,
+      "dailyCost": 0.0,
+      "sessionCost": 0.0,
+      "totalTokens": 0,
+      "costEstimated": false,
+      "isLocal": true,
+      "isCloud": false,
+      "sizeGb": 2.02,
+      "loaded": false,
+      "billingMode": "local",
+      "billableCostUsd": 0.0,
+      "meteredEquivalentUsd": 0.0,
+      "_note": "Local Ollama model (2.0GB). Covered by local/Ollama Pro lane; zero incremental usage spend.",
+      "marginalCost": 0.0
+    },
+    {
+      "name": "ollama/glm-5.2:cloud",
+      "source": "ollama",
+      "weeklyCost": 0.0,
+      "dailyCost": 0.0,
+      "sessionCost": 0.0,
+      "totalTokens": 0,
+      "costEstimated": false,
+      "isLocal": false,
+      "isCloud": true,
+      "sizeGb": 0.0,
+      "loaded": false,
+      "billingMode": "subscription",
+      "billableCostUsd": 0.0,
+      "meteredEquivalentUsd": 0.0,
+      "_note": "Ollama Cloud model covered by the Ollama Pro subscription.",
+      "marginalCost": 0.0
     },
     {
       "name": "local/nomic-embed-text:latest",
@@ -200,16 +373,267 @@
       "totalTokens": 0,
       "costEstimated": false,
       "isLocal": true,
+      "isCloud": false,
       "sizeGb": 0.27,
       "loaded": false,
-      "_note": "Local Ollama model (0.3GB). Free \u2014 runs on-device."
+      "billingMode": "local",
+      "billableCostUsd": 0.0,
+      "meteredEquivalentUsd": 0.0,
+      "_note": "Local Ollama model (0.3GB). Covered by local/Ollama Pro lane; zero incremental usage spend.",
+      "marginalCost": 0.0
     }
   ],
-  "lastUpdated": "2026-06-25T18:42:32Z",
+  "providerBreakdown": [
+    {
+      "id": "codex",
+      "label": "OpenAI",
+      "budgetLabel": "Codex / OpenAI",
+      "budgetType": "subscription",
+      "monthlyFeeUsd": 200.0,
+      "meteredDailyUsd": 0.0,
+      "meteredWeeklyUsd": 0.0,
+      "meteredMonthlyUsd": 0.0,
+      "usageEquivalentDailyUsd": 0.0,
+      "usageEquivalentWeeklyUsd": 11.182173,
+      "usageEquivalentMonthlyUsd": 47.923598,
+      "usagePct": 24.0,
+      "usageSummary": "",
+      "inferredFullCallEquivalent": null,
+      "inferredRemainingCallEquivalent": null,
+      "callsToday": 0,
+      "callsWeekly": 0,
+      "sessions": 1,
+      "totalTokens": 726,
+      "inputTokens": 575,
+      "outputTokens": 151,
+      "topModels": [
+        {
+          "name": "gpt-5.6-terra",
+          "source": "codex",
+          "weeklyCost": 8.926234,
+          "dailyCost": 0.0,
+          "usageEquivalentCost": 8.926234,
+          "marginalCost": 8.926234,
+          "sessions": 0,
+          "callsWeekly": 0,
+          "totalTokens": 0
+        },
+        {
+          "name": "gpt-5.6-luna",
+          "source": "codex",
+          "weeklyCost": 2.15012,
+          "dailyCost": 0.0,
+          "usageEquivalentCost": 2.15012,
+          "marginalCost": 2.15012,
+          "sessions": 0,
+          "callsWeekly": 0,
+          "totalTokens": 0
+        },
+        {
+          "name": "gpt-5.6-sol",
+          "source": "codex",
+          "weeklyCost": 0.105819,
+          "dailyCost": 0.0,
+          "usageEquivalentCost": 0.105819,
+          "marginalCost": 0.105819,
+          "sessions": 0,
+          "callsWeekly": 0,
+          "totalTokens": 0
+        },
+        {
+          "name": "openai/gpt-5.4",
+          "source": "openclaw",
+          "weeklyCost": 0.0,
+          "dailyCost": 0.0,
+          "usageEquivalentCost": 0.0,
+          "marginalCost": 0.0,
+          "sessions": 1,
+          "callsWeekly": 0,
+          "totalTokens": 726
+        }
+      ],
+      "fixedMonthlyUsd": 200.0,
+      "summary": "1 sessions \u00b7 726 tokens"
+    },
+    {
+      "id": "gemini",
+      "label": "Google / Gemini",
+      "budgetLabel": "Gemini",
+      "budgetType": "subscription",
+      "monthlyFeeUsd": 19.99,
+      "meteredDailyUsd": 0.0,
+      "meteredWeeklyUsd": 0.0,
+      "meteredMonthlyUsd": 0.0,
+      "usageEquivalentDailyUsd": 0.0,
+      "usageEquivalentWeeklyUsd": 0.020198,
+      "usageEquivalentMonthlyUsd": 0.086562,
+      "usagePct": 0.4,
+      "usageSummary": "",
+      "inferredFullCallEquivalent": null,
+      "inferredRemainingCallEquivalent": null,
+      "callsToday": 0,
+      "callsWeekly": 0,
+      "sessions": 9,
+      "totalTokens": 131943,
+      "inputTokens": 131040,
+      "outputTokens": 903,
+      "topModels": [
+        {
+          "name": "google-gemini-cli/gemini-3.5-flash",
+          "source": "openclaw",
+          "weeklyCost": 0.020198,
+          "dailyCost": 0.0,
+          "usageEquivalentCost": 0.020198,
+          "marginalCost": 0.0,
+          "sessions": 9,
+          "callsWeekly": 0,
+          "totalTokens": 131943
+        }
+      ],
+      "fixedMonthlyUsd": 19.99,
+      "summary": "9 sessions \u00b7 131943 tokens"
+    },
+    {
+      "id": "xai",
+      "label": "Grok / xAI",
+      "budgetLabel": "xAI / Grok",
+      "budgetType": "premium-subscription",
+      "monthlyFeeUsd": 30.0,
+      "meteredDailyUsd": 0.0,
+      "meteredWeeklyUsd": 0.0,
+      "meteredMonthlyUsd": 0.0,
+      "usageEquivalentDailyUsd": 0.0,
+      "usageEquivalentWeeklyUsd": 0.0,
+      "usageEquivalentMonthlyUsd": 0.0,
+      "usagePct": 0.0,
+      "usageSummary": "",
+      "inferredFullCallEquivalent": null,
+      "inferredRemainingCallEquivalent": null,
+      "callsToday": 0,
+      "callsWeekly": 0,
+      "sessions": 0,
+      "totalTokens": 0,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "topModels": [
+        {
+          "name": "xai/grok-4.20-reasoning",
+          "source": "xai-specialist",
+          "weeklyCost": 0.0,
+          "dailyCost": 0.0,
+          "usageEquivalentCost": 0.0,
+          "marginalCost": 0.0,
+          "sessions": 0,
+          "callsWeekly": 0,
+          "totalTokens": 0
+        }
+      ],
+      "fixedMonthlyUsd": 30.0,
+      "summary": "0 sessions \u00b7 0 tokens"
+    },
+    {
+      "id": "openrouter",
+      "label": "OpenRouter",
+      "budgetLabel": "OpenRouter",
+      "budgetType": "metered",
+      "monthlyFeeUsd": 10.0,
+      "meteredDailyUsd": 0.0,
+      "meteredWeeklyUsd": 0.0,
+      "meteredMonthlyUsd": 0.0,
+      "usageEquivalentDailyUsd": 0.0,
+      "usageEquivalentWeeklyUsd": 0.0,
+      "usageEquivalentMonthlyUsd": 0.0,
+      "usagePct": 0.0,
+      "usageSummary": "",
+      "inferredFullCallEquivalent": null,
+      "inferredRemainingCallEquivalent": null,
+      "callsToday": 0,
+      "callsWeekly": 0,
+      "sessions": 0,
+      "totalTokens": 0,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "topModels": [],
+      "fixedMonthlyUsd": 0.0,
+      "summary": "0 sessions \u00b7 0 tokens"
+    },
+    {
+      "id": "ollama",
+      "label": "Local Ollama",
+      "budgetLabel": "Ollama Pro",
+      "budgetType": "annual-subscription",
+      "monthlyFeeUsd": 16.67,
+      "meteredDailyUsd": 0.0,
+      "meteredWeeklyUsd": 0.0,
+      "meteredMonthlyUsd": 0.0,
+      "usageEquivalentDailyUsd": 0.0,
+      "usageEquivalentWeeklyUsd": 0.0,
+      "usageEquivalentMonthlyUsd": 0.0,
+      "usagePct": 0.0,
+      "usageSummary": "",
+      "inferredFullCallEquivalent": null,
+      "inferredRemainingCallEquivalent": null,
+      "callsToday": 0,
+      "callsWeekly": 0,
+      "sessions": 1,
+      "totalTokens": 12414,
+      "inputTokens": 12285,
+      "outputTokens": 129,
+      "topModels": [
+        {
+          "name": "ollama/qwen2.5:7b",
+          "source": "openclaw",
+          "weeklyCost": 0.0,
+          "dailyCost": 0.0,
+          "usageEquivalentCost": 0.0,
+          "marginalCost": 0.0,
+          "sessions": 1,
+          "callsWeekly": 0,
+          "totalTokens": 12414
+        },
+        {
+          "name": "local/qwen3.5:4b",
+          "source": "ollama",
+          "weeklyCost": 0.0,
+          "dailyCost": 0.0,
+          "usageEquivalentCost": 0.0,
+          "marginalCost": 0.0,
+          "sessions": 0,
+          "callsWeekly": 0,
+          "totalTokens": 0
+        },
+        {
+          "name": "local/qwen2.5:7b",
+          "source": "ollama",
+          "weeklyCost": 0.0,
+          "dailyCost": 0.0,
+          "usageEquivalentCost": 0.0,
+          "marginalCost": 0.0,
+          "sessions": 0,
+          "callsWeekly": 0,
+          "totalTokens": 0
+        },
+        {
+          "name": "local/llama3.2:latest",
+          "source": "ollama",
+          "weeklyCost": 0.0,
+          "dailyCost": 0.0,
+          "usageEquivalentCost": 0.0,
+          "marginalCost": 0.0,
+          "sessions": 0,
+          "callsWeekly": 0,
+          "totalTokens": 0
+        }
+      ],
+      "fixedMonthlyUsd": 16.67,
+      "summary": "1 sessions \u00b7 12414 tokens"
+    }
+  ],
+  "lastUpdated": "2026-07-30T04:00:43Z",
   "jain": {
     "daily": 0.0,
-    "session": 0.0,
-    "total": 0.0,
+    "session": 11.021901,
+    "total": 11.021901,
     "available": true
   },
   "jainApi": {
@@ -256,150 +680,68 @@
     "chars_limit": 0,
     "available": false
   },
-  "codexbarLimits": {
-    "codex": {
-      "available": true,
-      "status": "limited",
-      "authStatus": "ok",
-      "accountEmail": "jcubell16@gmail.com",
-      "accountLabel": "",
-      "plan": "pro",
-      "codexbarSource": "oauth",
-      "codexbarVersion": "",
-      "codexbarUpdatedAt": "2026-06-25T18:42:29Z",
-      "usageWindows": [
-        {
-          "id": "codex-primary",
-          "label": "Session",
-          "usedPercent": 0.0,
-          "remainingPercent": 100.0,
-          "resetDescription": "7:42\u202fPM",
-          "resetsAt": "2026-06-25T23:42:28Z",
-          "windowMinutes": 300,
-          "status": "ok"
-        },
-        {
-          "id": "codex-secondary",
-          "label": "Weekly",
-          "usedPercent": 100.0,
-          "remainingPercent": 0.0,
-          "resetDescription": "Jun 28 at 10:57\u202fAM",
-          "resetsAt": "2026-06-28T14:57:00Z",
-          "windowMinutes": 10080,
-          "status": "limited"
-        },
-        {
-          "id": "codex-codex-spark",
-          "label": "Codex Spark 5-hour",
-          "usedPercent": 0.0,
-          "remainingPercent": 100.0,
-          "resetDescription": "5:52\u202fPM",
-          "resetsAt": "2026-06-25T21:52:23Z",
-          "windowMinutes": 300,
-          "status": "ok"
-        },
-        {
-          "id": "codex-codex-spark-weekly",
-          "label": "Codex Spark Weekly",
-          "usedPercent": 0.0,
-          "remainingPercent": 100.0,
-          "resetDescription": "Jul 1 at 11:09\u202fPM",
-          "resetsAt": "2026-07-02T03:09:19Z",
-          "windowMinutes": 10080,
-          "status": "ok"
-        },
-        {
-          "id": "codex-credits",
-          "label": "Credits",
-          "remainingLabel": "0 left",
-          "status": "limited"
-        }
-      ]
-    },
-    "gemini": {
-      "available": true,
-      "status": "ready",
-      "authStatus": "ok",
-      "accountEmail": "jcubell16@gmail.com",
-      "accountLabel": "",
-      "plan": "Paid",
-      "codexbarSource": "oauth-api",
-      "codexbarVersion": "{\"type\": \"message\", \"role\": \"assistant\", \"content\": \"\"}",
-      "codexbarUpdatedAt": "2026-06-25T18:42:30Z",
-      "usageWindows": [
-        {
-          "id": "gemini-primary",
-          "label": "Pro",
-          "usedPercent": 0.0,
-          "remainingPercent": 100.0,
-          "resetDescription": "Resets in 23h 59m",
-          "resetsAt": "2026-06-26T18:42:30Z",
-          "windowMinutes": 1440,
-          "status": "ok"
-        },
-        {
-          "id": "gemini-secondary",
-          "label": "Flash",
-          "usedPercent": 0.0,
-          "remainingPercent": 100.0,
-          "resetDescription": "Resets in 23h 59m",
-          "resetsAt": "2026-06-26T18:42:30Z",
-          "windowMinutes": 1440,
-          "status": "ok"
-        },
-        {
-          "id": "gemini-tertiary",
-          "label": "Flash Lite",
-          "usedPercent": 0.0,
-          "remainingPercent": 100.0,
-          "resetDescription": "Resets in 23h 59m",
-          "resetsAt": "2026-06-26T18:42:30Z",
-          "windowMinutes": 1440,
-          "status": "ok"
-        }
-      ]
-    },
-    "xai": {
-      "available": true,
-      "status": "ready",
-      "authStatus": "ok",
-      "accountEmail": "",
-      "accountLabel": "5d8b0653-673c-43dc-b8bd-16ba32588b33",
-      "plan": "SuperGrok",
-      "codexbarSource": "grok-web",
-      "codexbarVersion": "0.2.56",
-      "codexbarUpdatedAt": "2026-06-25T18:42:31Z",
-      "usageWindows": [
-        {
-          "id": "xai-primary",
-          "label": "Credits",
-          "usedPercent": 1.0,
-          "remainingPercent": 99.0,
-          "resetsAt": "2026-07-01T00:00:00Z",
-          "status": "ok"
-        }
-      ]
-    },
-    "openrouter": {
-      "available": false,
-      "status": "watch",
-      "authStatus": "not-available",
-      "lastTestStatus": "No available fetch strategy for openrouter.",
-      "codexbarSource": "auto",
-      "codexbarUpdatedAt": "2026-06-25T18:42:31Z",
-      "usageWindows": []
+  "aggregate": {
+    "daily": 0.0,
+    "total": 0.0,
+    "monthly": 266.66
+  },
+  "subscription": {
+    "provider": "Codex / OpenAI + Gemini + xAI / Grok + Ollama Pro",
+    "monthlyFee": 266.66,
+    "billingMode": "subscription",
+    "providers": [
+      {
+        "id": "codex",
+        "label": "Codex / OpenAI",
+        "monthlyFee": 200.0,
+        "lastModelUsed": "gpt-5.6-terra"
+      },
+      {
+        "id": "gemini",
+        "label": "Gemini",
+        "monthlyFee": 19.99,
+        "lastModelUsed": "Gemini subscription"
+      },
+      {
+        "id": "xai",
+        "label": "xAI / Grok",
+        "monthlyFee": 30.0,
+        "lastModelUsed": "grok-4.5"
+      },
+      {
+        "id": "ollama",
+        "label": "Ollama Pro",
+        "monthlyFee": 16.67,
+        "lastModelUsed": "glm-5.2:cloud + local Ollama"
+      }
+    ],
+    "usageEquivalentDaily": 0.0,
+    "usageEquivalentWeekly": 11.202371,
+    "usageEquivalentMonthly": 20.402969,
+    "note": "Subscription-backed usage is capacity consumption, not incremental API spend."
+  },
+  "metered": {
+    "daily": 0.0,
+    "weekly": 0.0,
+    "monthly": 0.0,
+    "providers": {
+      "openrouter": 0.0,
+      "jainApi": 0,
+      "xai": 0.0
     }
   },
-  "aggregate": {
-    "daily": 0.064254,
-    "total": 0.200404,
-    "monthly": 1750.54726
+  "usageEquivalent": {
+    "daily": 0.0,
+    "weekly": 11.202371,
+    "monthly": 20.402969
   },
   "weeklyRunRate": {
-    "total": 905.59889,
+    "total": 0.0,
     "automation": 0.0,
-    "interactive": 905.59889,
-    "projectedMonthly": 3881.14
+    "interactive": 11.202371,
+    "projectedMonthly": 0.0,
+    "subscriptionUsageEquivalentWeekly": 11.202371,
+    "subscriptionUsageEquivalentProjectedMonthly": 48.01
   },
   "providerBudgets": [
     {
@@ -410,107 +752,54 @@
       "monthlyCapUsd": 200,
       "dailyCapUsd": 0,
       "remainingCreditUsd": null,
-      "lastModelUsed": "openai/gpt-5.5",
+      "lastModelUsed": "gpt-5.6-terra",
       "lastRouteReason": "Subscription-backed execution lane; token estimates are telemetry, not incremental billable spend.",
       "fixedMonthlyUsd": 200,
       "fixedWeeklyUsd": 50.0,
       "allowanceLabel": "Codex subscription allowance",
       "usageAllowance": "Subscription-backed; telemetry only, not usage-billed.",
-      "dailySpendUsd": 0.060664,
-      "weeklySpendUsd": 0.189511,
+      "dailySpendUsd": 0.0,
+      "weeklySpendUsd": 11.182173,
       "monthlySpendUsd": 0.0,
       "dailyUtilizationPct": 0.0,
-      "monthlyUtilizationPct": 0.1,
-      "status": "blocked",
-      "authStatus": "ok",
+      "monthlyUtilizationPct": 5.6,
+      "status": "ready",
+      "authStatus": null,
       "keyPresent": null,
       "keySuffix": null,
       "lastTestStatus": null,
-      "lastSource": "openclaw",
-      "whyChosen": "Subscription-backed execution lane; token estimates are telemetry, not incremental billable spend.",
-      "accountEmail": "jcubell16@gmail.com",
-      "accountLabel": null,
-      "plan": "pro",
-      "codexbarSource": "oauth",
-      "codexbarVersion": null,
-      "codexbarUpdatedAt": "2026-06-25T18:42:29Z",
-      "usageWindows": [
-        {
-          "id": "codex-primary",
-          "label": "Session",
-          "usedPercent": 0.0,
-          "remainingPercent": 100.0,
-          "resetDescription": "7:42\u202fPM",
-          "resetsAt": "2026-06-25T23:42:28Z",
-          "windowMinutes": 300,
-          "status": "ok"
-        },
-        {
-          "id": "codex-secondary",
-          "label": "Weekly",
-          "usedPercent": 100.0,
-          "remainingPercent": 0.0,
-          "resetDescription": "Jun 28 at 10:57\u202fAM",
-          "resetsAt": "2026-06-28T14:57:00Z",
-          "windowMinutes": 10080,
-          "status": "limited"
-        },
-        {
-          "id": "codex-codex-spark",
-          "label": "Codex Spark 5-hour",
-          "usedPercent": 0.0,
-          "remainingPercent": 100.0,
-          "resetDescription": "5:52\u202fPM",
-          "resetsAt": "2026-06-25T21:52:23Z",
-          "windowMinutes": 300,
-          "status": "ok"
-        },
-        {
-          "id": "codex-codex-spark-weekly",
-          "label": "Codex Spark Weekly",
-          "usedPercent": 0.0,
-          "remainingPercent": 100.0,
-          "resetDescription": "Jul 1 at 11:09\u202fPM",
-          "resetsAt": "2026-07-02T03:09:19Z",
-          "windowMinutes": 10080,
-          "status": "ok"
-        },
-        {
-          "id": "codex-credits",
-          "label": "Credits",
-          "remainingLabel": "0 left",
-          "status": "limited"
-        }
-      ]
+      "lastSource": "codex",
+      "whyChosen": "Subscription-backed execution lane; token estimates are telemetry, not incremental billable spend."
     },
     {
       "id": "gemini",
       "label": "Gemini",
-      "role": "Front-desk/review/judgment ladder: Flash for fast safe triage, Pro for escalation, Lite worker-only.",
+      "role": "Privacy-safe review and summarization specialist; not the shared Inbox owner.",
       "budgetType": "subscription",
-      "monthlyCapUsd": 20,
+      "monthlyCapUsd": 19.99,
       "dailyCapUsd": 0,
       "remainingCreditUsd": null,
-      "lastModelUsed": "google/gemini-3.5-flash",
-      "authStatus": "ok",
+      "lastModelUsed": "google-gemini-cli/gemini-3.5-flash",
+      "authStatus": "available-antigravity-oauth-subscription",
       "lastAuthCheck": "2026-06-20T16:40:35Z",
       "lastAuthIssue": null,
       "preferredModels": {
-        "frontdesk": "google/gemini-2.5-flash",
-        "routine": "google/gemini-2.5-flash",
-        "review": "google/gemini-2.5-pro",
-        "deep": "google/gemini-2.5-pro",
-        "longContext": "google/gemini-2.5-pro",
-        "tinyWorker": "google/gemini-2.5-flash-lite",
-        "cheapFallback": "google/gemini-2.5-flash"
+        "frontdesk": "gemini-3.6-flash-medium",
+        "routine": "gemini-3.6-flash-medium",
+        "review": "gemini-3.6-flash-high",
+        "deep": "gemini-3.1-pro-high",
+        "longContext": "gemini-3.1-pro-high",
+        "tinyWorker": "gemini-3.6-flash-low",
+        "cheapFallback": "gemini-3.6-flash-medium"
       },
       "lastRouteReason": "Subscription-backed Gemini lane; use for dashboard-safe review and summaries without showing scary token-equivalent costs.",
-      "fixedMonthlyUsd": 20,
+      "fixedMonthlyUsd": 19.99,
       "fixedWeeklyUsd": 5.0,
+      "pricingBasis": "Google AI Pro listed at US$19.99/month on the official Google One plans page, checked 2026-07-21.",
       "allowanceLabel": "Gemini subscription allowance",
       "usageAllowance": "Google/Gemini subscription-backed route for Flash/Pro/Lite.",
-      "dailySpendUsd": 0.00359,
-      "weeklySpendUsd": 0.010893,
+      "dailySpendUsd": 0.0,
+      "weeklySpendUsd": 0.020198,
       "monthlySpendUsd": 0.0,
       "dailyUtilizationPct": 0.0,
       "monthlyUtilizationPct": 0.1,
@@ -519,90 +808,39 @@
       "keySuffix": null,
       "lastTestStatus": null,
       "lastSource": "openclaw",
-      "whyChosen": "Subscription-backed Gemini lane; use for dashboard-safe review and summaries without showing scary token-equivalent costs.",
-      "accountEmail": "jcubell16@gmail.com",
-      "accountLabel": null,
-      "plan": "Paid",
-      "codexbarSource": "oauth-api",
-      "codexbarVersion": "{\"type\": \"message\", \"role\": \"assistant\", \"content\": \"\"}",
-      "codexbarUpdatedAt": "2026-06-25T18:42:30Z",
-      "usageWindows": [
-        {
-          "id": "gemini-primary",
-          "label": "Pro",
-          "usedPercent": 0.0,
-          "remainingPercent": 100.0,
-          "resetDescription": "Resets in 23h 59m",
-          "resetsAt": "2026-06-26T18:42:30Z",
-          "windowMinutes": 1440,
-          "status": "ok"
-        },
-        {
-          "id": "gemini-secondary",
-          "label": "Flash",
-          "usedPercent": 0.0,
-          "remainingPercent": 100.0,
-          "resetDescription": "Resets in 23h 59m",
-          "resetsAt": "2026-06-26T18:42:30Z",
-          "windowMinutes": 1440,
-          "status": "ok"
-        },
-        {
-          "id": "gemini-tertiary",
-          "label": "Flash Lite",
-          "usedPercent": 0.0,
-          "remainingPercent": 100.0,
-          "resetDescription": "Resets in 23h 59m",
-          "resetsAt": "2026-06-26T18:42:30Z",
-          "windowMinutes": 1440,
-          "status": "ok"
-        }
-      ]
+      "whyChosen": "Subscription-backed Gemini lane; use for dashboard-safe review and summaries without showing scary token-equivalent costs."
     },
     {
       "id": "xai",
       "label": "xAI / Grok",
       "role": "Current-events, X-native research, outside critique, and batch audit specialist",
       "budgetType": "premium-subscription",
-      "monthlyCapUsd": 8,
+      "monthlyCapUsd": 30,
       "dailyCapUsd": 0,
       "reserveUsd": 48.97,
       "remainingCreditUsd": null,
       "lastModelUsed": "xai/grok-4.20-reasoning",
-      "authStatus": "ok",
+      "apiModelUsed": "grok-4.5",
+      "authStatus": "available-verified",
+      "lastAuthCheck": "2026-07-20T00:00:00Z",
       "keyMode": "host-local-env-or-secret-file",
-      "lastRouteReason": "X Premium/Grok subscription-backed lane for current-events and X-native context; not treated as usage-metered by default.",
-      "fixedMonthlyUsd": 8,
-      "fixedWeeklyUsd": 2.0,
-      "allowanceLabel": "X Premium / Grok allowance",
-      "usageAllowance": "X Premium/Grok subscription; API calls tracked separately if used.",
+      "lastRouteReason": "SuperGrok subscription-backed lane for current-events and X-native context; not treated as usage-metered by default.",
+      "fixedMonthlyUsd": 30,
+      "fixedWeeklyUsd": 7.5,
+      "pricingBasis": "SuperGrok listed at $30/month on xAI's official pricing page, checked 2026-07-21.",
+      "allowanceLabel": "SuperGrok allowance",
+      "usageAllowance": "SuperGrok subscription; API calls tracked separately if used.",
       "dailySpendUsd": 0.0,
       "weeklySpendUsd": 0.0,
       "monthlySpendUsd": 0.0,
       "dailyUtilizationPct": 0.0,
       "monthlyUtilizationPct": 0.0,
       "status": "ready",
-      "keyPresent": null,
+      "keyPresent": true,
       "keySuffix": null,
       "lastTestStatus": null,
       "lastSource": "xai-specialist",
-      "whyChosen": "X Premium/Grok subscription-backed lane for current-events and X-native context; not treated as usage-metered by default.",
-      "accountEmail": null,
-      "accountLabel": "5d8b0653-673c-43dc-b8bd-16ba32588b33",
-      "plan": "SuperGrok",
-      "codexbarSource": "grok-web",
-      "codexbarVersion": "0.2.56",
-      "codexbarUpdatedAt": "2026-06-25T18:42:31Z",
-      "usageWindows": [
-        {
-          "id": "xai-primary",
-          "label": "Credits",
-          "usedPercent": 1.0,
-          "remainingPercent": 99.0,
-          "resetsAt": "2026-07-01T00:00:00Z",
-          "status": "ok"
-        }
-      ]
+      "whyChosen": "SuperGrok subscription-backed lane for current-events and X-native context; not treated as usage-metered by default."
     },
     {
       "id": "openrouter",
@@ -621,20 +859,13 @@
       "monthlySpendUsd": 0.0,
       "dailyUtilizationPct": 0.0,
       "monthlyUtilizationPct": 0.0,
-      "status": "watch",
-      "authStatus": "not-available",
+      "status": "ready",
+      "authStatus": null,
       "keyPresent": null,
       "keySuffix": null,
-      "lastTestStatus": "No available fetch strategy for openrouter.",
+      "lastTestStatus": null,
       "lastSource": "",
-      "whyChosen": "Fallback only; prefer Codex, Gemini, or xAI specialist lanes first.",
-      "accountEmail": null,
-      "accountLabel": null,
-      "plan": null,
-      "codexbarSource": "auto",
-      "codexbarVersion": null,
-      "codexbarUpdatedAt": "2026-06-25T18:42:31Z",
-      "usageWindows": []
+      "whyChosen": "Fallback only; prefer Codex, Gemini, or xAI specialist lanes first."
     },
     {
       "id": "ollama",
@@ -644,50 +875,44 @@
       "monthlyCapUsd": 16.67,
       "dailyCapUsd": 0,
       "remainingCreditUsd": null,
-      "lastModelUsed": "ollama/glm-5.2:cloud",
-      "authStatus": "auth-needed: Ollama Cloud sign-in required for glm-5.2:cloud",
-      "lastRouteReason": "Local Ollama models remain usable; glm-5.2:cloud is the intended GLM route after Ollama Cloud sign-in.",
+      "lastModelUsed": "ollama/qwen2.5:7b",
+      "authStatus": "ollama-pro-subscription",
+      "lastRouteReason": "$200/year amortized as $16.67/mo and $4.17/wk; local models remain zero incremental cost.",
       "fixedMonthlyUsd": 16.67,
       "fixedWeeklyUsd": 4.17,
+      "pricingBasis": "Ollama Pro listed at $20/month or $200/year on Ollama's official pricing page, checked 2026-07-21.",
       "allowanceLabel": "Ollama Pro annual allowance",
-      "usageAllowance": "Ollama Pro paid annually; local models remain available, cloud GLM requires signed-in Ollama Cloud auth.",
+      "usageAllowance": "Ollama Pro paid annually; cloud/local usage shown as subscription capacity, not scary token-equivalent spend.",
       "preferredModels": {
         "eval": "glm-5.2:cloud",
         "local": "local Ollama models"
       },
       "displayWhenIdle": true,
-      "lastTestStatus": "blocked: Ollama CLI says sign in is required for cloud models",
       "dailySpendUsd": 0.0,
       "weeklySpendUsd": 0.0,
       "monthlySpendUsd": 0.0,
       "dailyUtilizationPct": 0.0,
       "monthlyUtilizationPct": 0.0,
-      "status": "blocked",
+      "status": "ready",
       "keyPresent": null,
       "keySuffix": null,
+      "lastTestStatus": null,
       "lastSource": "openclaw",
-      "whyChosen": "Local Ollama models remain usable; glm-5.2:cloud is the intended GLM route after Ollama Cloud sign-in.",
-      "accountEmail": null,
-      "accountLabel": null,
-      "plan": null,
-      "codexbarSource": null,
-      "codexbarVersion": null,
-      "codexbarUpdatedAt": null,
-      "usageWindows": []
+      "whyChosen": "$200/year amortized as $16.67/mo and $4.17/wk; local models remain zero incremental cost."
     }
   ],
   "routerPolicy": {
-    "defaultProvider": "gemini-flash-frontdesk-plus-codex-execution",
+    "defaultProvider": "codex-luna-inbox-plus-codex-terra-execution",
     "reviewProvider": "gemini-pro-when-judgment-needed",
     "currentEventsProvider": "xai",
     "fallbackProvider": "openrouter",
-    "codexAllowanceMode": "conserve",
+    "codexAllowanceMode": "auto",
     "codexExhaustedMode": {
       "trigger": "Set codexAllowanceMode to exhausted when Codex weekly allowance is gone or Josh explicitly requests outage continuity.",
-      "rule": "Route dashboard-safe summaries, reviews, digests, stale-task compression, and non-execution synthesis to Gemini. Route public current-events, X-native research, outside critique, and batch audits to xAI. Route explicit non-sensitive fallback checks to OpenRouter. Reserve Codex, OpenAI API, or OpenRouter spend for execution, private connector work, repo edits, terminal actions, approvals, and final integration.",
+      "rule": "Route dashboard-safe summaries, reviews, digests, stale-task compression, and non-execution synthesis to Gemini. Route public current-events and X-native research to xAI only when enabled and verified; otherwise disclose the verified Codex fallback. Route explicit non-sensitive fallback checks to OpenRouter. Reserve Codex, OpenAI API, or OpenRouter spend for execution, private connector work, repo edits, terminal actions, approvals, and final integration.",
       "telegramDisclosure": "Josh 2.0 and JAIMES must state Active Model/Auth and Route reason before doing substantive work while this mode is active."
     },
-    "rule": "Deterministic ladder first: Gemini Flash is the dashboard-safe front-desk/router-assist lane, Flash Lite is bounded worker-only and never a router, Gemini Pro is judgment/escalation, JAIMES/Codex owns verified execution, J.A.I.N/OpenClaw is fallback/staging, and Josh approves irreversible external actions.",
+    "rule": "Deterministic ladder first: Josh 2.0/Codex Luna owns bounded shared Inbox coordination; Terra owns code, repairs, tools, and multi-step execution; Sol is allowed only for earned hard/high-blast work. Gemini handles privacy-safe review/summaries, verified Grok handles current-events/X work, and Josh approves irreversible external actions.",
     "tripleConstraint": "Balance speed, routing effectiveness, and token efficiency by task context: mobile/frontdesk favors speed, complex/high-risk work favors route quality, ambient background work favors local/Gemini efficiency.",
     "failoverTriggers": [
       "HTTP 429",
@@ -698,7 +923,7 @@
     ],
     "failoverRule": "Before external fallback, keep ownership on the right internal lane. If Gemini/xAI/OpenRouter fails for dashboard-safe work, preserve a bounded state package and continue through Codex/OpenAI on the selected owner lane.",
     "statePreservation": "Failover packages may include objective summary, current step, recent safe activity, route decision, task/handoff ids, AGENTS.md/shared-skill pointers, and sanitized memory refs. They must exclude secrets, OAuth payloads, cookies, passwords, tokens, raw emails, raw connector data, and private account contents.",
-    "lastModeChangeAt": "2026-06-19T00:00:00Z",
-    "lastModeChangeReason": "enable Gemini-first orchestration and conserve Codex weekly allowance"
+    "lastModeChangeAt": "2026-07-20T00:00:00Z",
+    "lastModeChangeReason": "derive conservation mode from exact CodexBar weekly allowance while preserving GPT for execution/private integration and using verified specialist subscriptions"
   }
 }
