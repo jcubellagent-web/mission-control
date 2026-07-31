@@ -57,6 +57,8 @@ DASHBOARD_PATH = DATA_DIR / "dashboard-data.json"
 LIVE_DASHBOARD_PATH = DATA_DIR / "control-tower-live.json"
 WRITER_LOCK_PATH = DATA_DIR / ".control-tower-writer.lock"
 MODEL_USAGE_PATH = DATA_DIR / "modelUsage.json"
+MODEL_LANE_RECEIPTS_PATH = DATA_DIR / "model-lane-execution-receipts.jsonl"
+AGENT_ROUTE_TELEMETRY_PATH = DATA_DIR / "agent-route-decisions.jsonl"
 CODEXBAR_QUOTA_OLLAMA_PATH = DATA_DIR / "codexbar-quota-ollama.json"
 CODEXBAR_QUOTA_FRESH_FOR = dt.timedelta(minutes=10)
 EIGHT_SLEEP_PATH = ROOT.parent / "data" / "eight-sleep-data.json"
@@ -2046,6 +2048,144 @@ def provider_from_model_name(name: str, source: str = "") -> str:
     return "other"
 
 
+def _jsonl_rows(path: Path) -> List[Dict[str, Any]]:
+    try:
+        return [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
+    except (OSError, json.JSONDecodeError):
+        return []
+
+
+def build_model_lane_receipt_summary(now: dt.datetime | None = None) -> Dict[str, Any]:
+    """Project metadata-only receipts into weekly usage and integration quality."""
+    current = (now or dt.datetime.now(dt.timezone.utc)).astimezone(dt.timezone.utc)
+    cutoff = current - dt.timedelta(days=7)
+    dispositions: Dict[str, Dict[str, Any]] = {}
+    executions: List[Dict[str, Any]] = []
+    receipt_rows = _jsonl_rows(MODEL_LANE_RECEIPTS_PATH)
+    for row in receipt_rows:
+        if row.get("event") == "disposition" and row.get("receiptId"):
+            dispositions[str(row["receiptId"])] = row
+    for row in receipt_rows:
+        if row.get("event") != "execution":
+            continue
+        try:
+            recorded = dt.datetime.fromisoformat(str(row.get("recordedAt") or "").replace("Z", "+00:00"))
+        except ValueError:
+            continue
+        if recorded >= cutoff:
+            merged = dict(row)
+            disposition = dispositions.get(str(row.get("receiptId") or ""), {})
+            for key in ("integrationDisposition", "integrationReasonCode"):
+                if disposition.get(key) is not None:
+                    merged[key] = disposition[key]
+            if disposition.get("recordedAt"):
+                merged["dispositionRecordedAt"] = disposition["recordedAt"]
+            executions.append(merged)
+    by_model: Dict[tuple[str, str], Dict[str, Any]] = {}
+    for row in executions:
+        key = (str(row.get("provider") or "unknown"), str(row.get("model") or "unknown"))
+        bucket = by_model.setdefault(key, {"calls": 0, "today": 0, "success": 0, "input": 0, "output": 0, "duration": 0})
+        bucket["calls"] += 1
+        bucket["today"] += int(str(row.get("recordedAt") or "")[:10] == current.date().isoformat())
+        bucket["success"] += int(row.get("outcome") == "success")
+        bucket["input"] += int(row.get("inputTokens") or row.get("estimatedPromptTokens") or 0)
+        bucket["output"] += int(row.get("outputTokens") or round(int(row.get("outputCharacters") or 0) / 4))
+        bucket["duration"] += int(row.get("durationMs") or 0)
+    model_rows = [{
+        "name": model,
+        "source": provider,
+        "weeklyCost": 0.0,
+        "dailyCost": 0.0,
+        "sessionCost": 0.0,
+        "callsWeekly": values["calls"],
+        "callsToday": values["today"],
+        "sessions": values["calls"],
+        "inputTokens": values["input"],
+        "outputTokens": values["output"],
+        "totalTokens": values["input"] + values["output"],
+        "successfulCalls": values["success"],
+        "failedCalls": values["calls"] - values["success"],
+        "durationMs": values["duration"],
+        "costEstimated": False,
+        "receiptBacked": True,
+        "isCloud": model.lower().endswith(":cloud"),
+    } for (provider, model), values in by_model.items()]
+    return {"executions": executions, "modelRows": model_rows}
+
+
+def build_ollama_governance(
+    receipt_summary: Dict[str, Any],
+    limits: Dict[str, Any],
+    now: dt.datetime | None = None,
+) -> Dict[str, Any]:
+    current = (now or dt.datetime.now(dt.timezone.utc)).astimezone(dt.timezone.utc)
+    cutoff = current - dt.timedelta(days=7)
+    decisions = []
+    for row in _jsonl_rows(AGENT_ROUTE_TELEMETRY_PATH):
+        try:
+            stamp = dt.datetime.fromisoformat(str(row.get("timestamp") or "").replace("Z", "+00:00"))
+        except ValueError:
+            continue
+        if stamp >= cutoff:
+            decisions.append(row)
+    eligible = [row for row in decisions if row.get("glmEligible") is True]
+    selected = [row for row in eligible if row.get("glmSelected") is True]
+    bypassed = [row for row in eligible if row.get("glmSelected") is not True]
+    executions = [row for row in receipt_summary.get("executions", []) if str(row.get("provider")) == "ollama"]
+    non_canary = [row for row in executions if not row.get("canary")]
+    successful = [row for row in non_canary if row.get("outcome") == "success"]
+    disposed = [row for row in executions if row.get("integrationDisposition") in {"integrated", "partial", "rejected"}]
+    integrated = [row for row in executions if row.get("integrationDisposition") in {"integrated", "partial"}]
+    stale_pending = []
+    for row in executions:
+        if row.get("integrationDisposition") != "pending":
+            continue
+        try:
+            recorded = dt.datetime.fromisoformat(str(row.get("recordedAt") or "").replace("Z", "+00:00"))
+        except ValueError:
+            continue
+        if current - recorded > dt.timedelta(hours=48):
+            stale_pending.append(row)
+    remaining_values = [
+        float(row.get("remainingPercent")) for row in limits.get("usageWindows", [])
+        if isinstance(row, dict) and row.get("remainingPercent") is not None
+    ] if isinstance(limits, dict) else []
+    weekly_remaining = next((
+        float(row.get("remainingPercent")) for row in limits.get("usageWindows", [])
+        if isinstance(row, dict) and str(row.get("label") or "").lower() == "weekly" and row.get("remainingPercent") is not None
+    ), min(remaining_values) if remaining_values else None)
+    coverage = round(len(selected) / len(eligible) * 100, 1) if eligible else None
+    success = round(len(successful) / len(non_canary) * 100, 1) if non_canary else None
+    canary = round(len([row for row in executions if row.get("canary")]) / len(executions) * 100, 1) if executions else None
+    disposition = round(len(disposed) / len(executions) * 100, 1) if executions else None
+    surplus_alert = bool(weekly_remaining is not None and weekly_remaining > 80 and len(bypassed) >= 5)
+    return {
+        "windowDays": 7,
+        "eligibleDecisions": len(eligible),
+        "selectedGlm": len(selected),
+        "eligibleBypasses": len(bypassed),
+        "coveragePct": coverage,
+        "nonCanaryAttempts": len(non_canary),
+        "nonCanarySuccessPct": success,
+        "canaryPct": canary,
+        "disposedReceipts": len(disposed),
+        "integratedOrPartial": len(integrated),
+        "dispositionPct": disposition,
+        "stalePendingReceipts": len(stale_pending),
+        "pendingTtlHours": 48,
+        "weeklyRemainingPct": weekly_remaining,
+        "targets": {"coveragePct": 80, "nonCanarySuccessPct": 95, "maxCanaryPct": 5, "dispositionPct": 70},
+        "surplusAlert": surplus_alert,
+        "alert": (
+            "High Ollama capacity with five or more eligible GLM bypasses; inspect bypass reasons."
+            if surplus_alert else
+            "One or more model-lane receipts have awaited integration disposition for over 48 hours."
+            if stale_pending else ""
+        ),
+        "telemetryPolicy": "metadata only; no raw prompt or output",
+    }
+
+
 def build_provider_usage_breakdown(
     breakdown: List[Dict[str, Any]],
     budgets: Dict[str, Any],
@@ -2065,7 +2205,7 @@ def build_provider_usage_breakdown(
         "gemini": "Google / Gemini",
         "xai": "Grok / xAI",
         "openrouter": "OpenRouter",
-        "ollama": "Local Ollama",
+        "ollama": "Ollama / GLM Cloud",
         "other": "Other",
     }
     order = {"codex": 0, "gemini": 1, "xai": 2, "openrouter": 3, "ollama": 4, "other": 9}
@@ -2265,11 +2405,28 @@ def build_model_router_status(model_usage: Dict[str, Any] | None, now_iso: str) 
         })
     policy = budgets.get("policy", {}) if isinstance(budgets, dict) else {}
     codex_mode = str(policy.get("codexAllowanceMode") or "normal")
+    ollama_governance = (model_usage or {}).get("ollamaGovernance", {}) if isinstance(model_usage, dict) else {}
+    route_alerts = []
+    if isinstance(ollama_governance, dict) and ollama_governance.get("surplusAlert"):
+        route_alerts.append({
+            "id": "ollama-surplus-bypass",
+            "severity": "watch",
+            "provider": "ollama",
+            "message": ollama_governance.get("alert"),
+        })
+    if isinstance(ollama_governance, dict) and ollama_governance.get("stalePendingReceipts"):
+        route_alerts.append({
+            "id": "ollama-stale-dispositions",
+            "severity": "watch",
+            "provider": "ollama",
+            "message": "Model-lane receipts have remained pending beyond the 48-hour disposition TTL.",
+        })
     return {
         "updatedAt": now_iso,
         "policy": policy,
         "codexAllowanceMode": codex_mode,
         "providers": provider_rows,
+        "routeAlerts": route_alerts,
         "guardrails": budgets.get("guardrails", []) if isinstance(budgets, dict) else [],
         "summary": (
             "Codex exhausted mode active: Gemini/xAI/OpenRouter handle safe work; Codex/API spend is reserved for execution."
@@ -3644,6 +3801,18 @@ def fetch_model_usage() -> Dict[str, Any] | None:
 
         budgets = load_json_file(MODEL_PROVIDER_BUDGETS_PATH, {})
 
+        # Model-lane receipts are the canonical provider execution evidence for
+        # specialist passes that do not appear in Codex/OpenClaw session logs.
+        lane_receipts = build_model_lane_receipt_summary()
+        existing_receipt_models = {
+            (str(row.get("source") or ""), str(row.get("name") or ""))
+            for row in breakdown if isinstance(row, dict) and row.get("receiptBacked")
+        }
+        for receipt_row in lane_receipts.get("modelRows", []):
+            key = (str(receipt_row.get("source") or ""), str(receipt_row.get("name") or ""))
+            if key not in existing_receipt_models:
+                breakdown.append(receipt_row)
+
         # Subscription-backed Codex/OpenAI usage is not marginal spend. Keep the
         # Subscription lanes: actual fixed monthly burden Josh pays.
         subscription_providers = []
@@ -3730,17 +3899,27 @@ def fetch_model_usage() -> Dict[str, Any] | None:
             "subscriptionUsageEquivalentProjectedMonthly": round(subscription_usage_equiv_weekly * (30 / 7), 2),
         }
 
+        codexbar_limits = {
+            "codex": fetch_codexbar_limits("codex"),
+            "gemini": fetch_codexbar_limits("gemini"),
+            "ollama": fetch_codexbar_limits("ollama"),
+            "xai": fetch_codexbar_limits("grok"),
+        }
+        ollama_governance = build_ollama_governance(lane_receipts, codexbar_limits["ollama"])
+        for provider_row in provider_breakdown:
+            if provider_row.get("id") == "ollama":
+                provider_row["governance"] = ollama_governance
+                provider_row["status"] = "watch" if (
+                    ollama_governance.get("surplusAlert") or ollama_governance.get("stalePendingReceipts")
+                ) else provider_row.get("status", "ready")
+
         payload = {
             "session": round(current_session_cost, 6),
             "daily":   round(metered_daily,   6),
             "weekly":  round(metered_weekly,  6),
             "monthly": round(total_monthly, 6),
-            "codexbarLimits": {
-                "codex": fetch_codexbar_limits("codex"),
-                "gemini": fetch_codexbar_limits("gemini"),
-                "ollama": fetch_codexbar_limits("ollama"),
-                "xai": fetch_codexbar_limits("grok"),
-            },
+            "codexbarLimits": codexbar_limits,
+            "ollamaGovernance": ollama_governance,
             "topModels": [{"name": r["name"], "window": "session", "cost": r.get("weeklyCost", 0)} for r in breakdown[:5]],
             "breakdown": breakdown,
             "providerBreakdown": provider_breakdown,

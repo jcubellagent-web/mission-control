@@ -2211,7 +2211,10 @@ function providerLimitRows(provider: any) {
 function providerWindowValue(window: any) {
   if (window?.remainingLabel) return missionText(String(window.remainingLabel));
   const remaining = Number(window?.remainingPercent);
-  if (Number.isFinite(remaining)) return `${Math.round(remaining)}% left`;
+  if (Number.isFinite(remaining)) {
+    const formatted = remaining > 99 && remaining < 100 ? remaining.toFixed(1) : Number.isInteger(remaining) ? String(remaining) : remaining.toFixed(1);
+    return `${formatted}% left`;
+  }
   const used = Number(window?.usedPercent);
   if (Number.isFinite(used)) return `${Math.round(used)}% used`;
   return missionText(String(window?.status || "tracked"));
@@ -2234,7 +2237,7 @@ function providerDisplayBlurb(provider: any) {
   const key = providerKey(provider);
   if (key === "codex") return "Execution lane for code, tools, auth, private connectors, and final changes.";
   if (key === "antigravity") return "Gemini reading, review, summaries, and judgment escalation.";
-  if (key === "ollama") return "Local drafts, compression, and low-risk offline utility.";
+  if (key === "ollama") return "GLM 5.2 Cloud technical analysis plus local offline helpers.";
   if (key === "grok") return "X-native current-events research, social signal discovery, and verification.";
   const raw = missionText(String(provider?.whyChosen || provider?.role || "Available when route policy selects it."));
   return raw.length > 84 ? `${raw.slice(0, 81).trim()}...` : raw;
@@ -2657,13 +2660,16 @@ function FinOpsDashboard({
                 const tone = providerTone(provider);
                 const topModel = providerTopModels(provider)[0];
                 const currentModel = providerModelLabel({ name: topModel?.name || provider.lastModelUsed || "Route ready" });
-                const stateLabel = tone === "risk" ? "BLOCKED" : active ? "ACTIVE" : key === "ollama" ? "LOCAL · IDLE" : "IDLE";
+                const stateLabel = tone === "risk" ? "BLOCKED" : active ? "ACTIVE" : key === "ollama" ? "CLOUD · IDLE" : "IDLE";
+                const ollamaGovernance = key === "ollama" ? modelUsage?.ollamaGovernance : undefined;
                 const purpose = key === "codex"
                   ? "Code, verify, and system changes"
                   : key === "antigravity"
                     ? "Planning, review, and long-context work"
                     : key === "ollama"
-                      ? "Local drafts and offline utility"
+                      ? ollamaGovernance?.coveragePct != null
+                        ? `GLM ${ollamaGovernance.coveragePct}% eligible coverage · ${ollamaGovernance.nonCanaryAttempts || 0} verified attempts`
+                        : "GLM Cloud technical analysis and offline utility"
                       : "Signals, news, and X research";
                 const ProviderIcon = key === "codex" ? Braces : key === "antigravity" ? Sparkles : key === "ollama" ? Bot : Radio;
                 return (

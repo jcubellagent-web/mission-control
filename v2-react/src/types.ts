@@ -647,6 +647,23 @@ export type ModelUsage = {
   providerBreakdown?: ProviderBudget[];
   providerBudgets?: ProviderBudget[];
   codexbarLimits?: Record<string, Partial<ProviderBudget> & { available?: boolean }>;
+  ollamaGovernance?: {
+    windowDays?: number;
+    eligibleDecisions?: number;
+    selectedGlm?: number;
+    eligibleBypasses?: number;
+    coveragePct?: number | null;
+    nonCanaryAttempts?: number;
+    nonCanarySuccessPct?: number | null;
+    canaryPct?: number | null;
+    dispositionPct?: number | null;
+    stalePendingReceipts?: number;
+    pendingTtlHours?: number;
+    weeklyRemainingPct?: number | null;
+    surplusAlert?: boolean;
+    alert?: string;
+    targets?: Record<string, number>;
+  };
   routerPolicy?: Record<string, unknown>;
 };
 
@@ -698,6 +715,9 @@ export type ProviderBudget = {
   totalTokens?: number;
   inputTokens?: number;
   outputTokens?: number;
+  successfulCalls?: number;
+  failedCalls?: number;
+  governance?: ModelUsage["ollamaGovernance"];
   topModels?: Array<{
     name: string;
     source?: string;

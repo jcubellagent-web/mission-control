@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "reviewedAt": "2026-07-21",
+  "reviewedAt": "2026-07-31",
   "policy": {
     "owner": "joshex",
     "privateExecutionProvider": "codex",
@@ -79,6 +79,13 @@
       "status": "cloud-shadow-benchmark",
       "fit": "high-volume multi-agent and IT workflow comparison",
       "hostDecision": "cloud-only"
+    },
+    {
+      "model": "gpt-oss:20b-cloud",
+      "status": "cloud-shadow-benchmark",
+      "fit": "low-cost technical reasoning comparator",
+      "hostDecision": "cloud-only",
+      "notes": "Comparator only; no automatic promotion over GLM 5.2"
     },
     {
       "model": "gemma4:e4b-or-12b",

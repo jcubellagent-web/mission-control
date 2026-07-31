@@ -8,6 +8,8 @@ import sys
 import urllib.error
 import urllib.request
 
+METRICS_PREFIX = "MODEL_LANE_METRICS:"
+
 
 def normalize_model_identity(value: str) -> str:
     normalized = str(value or "").strip().lower()
@@ -18,7 +20,7 @@ def normalize_model_identity(value: str) -> str:
     return normalized
 
 
-def run(model: str, prompt: str, timeout: int) -> str:
+def run_with_metrics(model: str, prompt: str, timeout: int) -> tuple[str, dict[str, object]]:
     #JAIMES: use the API so thinking traces/terminal control codes never enter integration output.
     payload = json.dumps({
         "model": model,
@@ -49,7 +51,20 @@ def run(model: str, prompt: str, timeout: int) -> str:
     output = str(result.get("response") or "").strip()
     if not output:
         raise RuntimeError("Ollama Cloud returned empty output")
-    return output
+    metrics = {
+        "model": str(result.get("model") or model),
+        "inputTokens": int(result.get("prompt_eval_count") or 0),
+        "outputTokens": int(result.get("eval_count") or 0),
+        "providerDurationNs": int(result.get("total_duration") or 0),
+        "loadDurationNs": int(result.get("load_duration") or 0),
+        "doneReason": str(result.get("done_reason") or ""),
+    }
+    return output, metrics
+
+
+def run(model: str, prompt: str, timeout: int) -> str:
+    """Backward-compatible text-only API used by existing callers and tests."""
+    return run_with_metrics(model, prompt, timeout)[0]
 
 
 def main() -> int:
@@ -62,7 +77,9 @@ def main() -> int:
     if not prompt.strip():
         parser.error("a prompt is required")
     try:
-        print(run(args.model, prompt, max(1, args.timeout)))
+        output, metrics = run_with_metrics(args.model, prompt, max(1, args.timeout))
+        print(output)
+        print(f"{METRICS_PREFIX}{json.dumps(metrics, sort_keys=True)}", file=sys.stderr)
     except Exception as exc:
         print(str(exc), file=sys.stderr)
         return 3

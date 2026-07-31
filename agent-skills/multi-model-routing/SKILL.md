@@ -95,7 +95,9 @@ reasoning out first and reserve GPT for orchestration, execution, and synthesis.
 - Shadow-test on 16 GB hardware before promotion: `qwen3.5:4b` or `:9b` for
   lighter private multimodal work and `ornith:9b` for bounded coding review.
 - Cloud shadow-test only: `minimax-m2.7:cloud` for skill adherence/document
-  productivity and `nemotron-3-super:cloud` for high-volume multi-agent review.
+  productivity, `nemotron-3-super:cloud` for high-volume multi-agent review,
+  and `gpt-oss:20b-cloud` as a low-cost technical comparator. Run the synthetic
+  metadata-only benchmark; never promote a candidate automatically.
 - Hold: Qwen 3.6 27B/35B, Ornith 35B, Gemma 4 26B/31B, Qwen3-Coder-Next,
   GPT-OSS 20B local, Laguna S 2.1, and Nemotron 3 Super local exceed or crowd the
   current 16 GB production envelope.

@@ -356,7 +356,7 @@ def append_route_telemetry(
     args: argparse.Namespace,
     result: dict[str, Any],
     routing_duration_ms: int,
-) -> None:
+) -> dict[str, Any]:
     """Append one dashboard-safe routing decision without storing prompt text."""
     model_route = result.get("modelRoute") if isinstance(result.get("modelRoute"), dict) else {}
     provider = str(model_route.get("provider") or model_route.get("firstStop") or "unknown")
@@ -365,7 +365,7 @@ def append_route_telemetry(
         [args.task_type, args.title, args.objective, args.privacy, result.get("agent", "")]
     )
     record = {
-        "schemaVersion": 2,
+        "schemaVersion": 3,
         "timestamp": dt.datetime.now(dt.timezone.utc).isoformat().replace("+00:00", "Z"),
         "routeDecisionId": hashlib.sha256(
             f"{signature_source}\x1f{time.time_ns()}".encode("utf-8")
@@ -380,6 +380,10 @@ def append_route_telemetry(
         "model": model,
         "firstStop": model_route.get("firstStop"),
         "role": model_route.get("role"),
+        "glmEligible": bool(model_route.get("glmEligible")),
+        "glmSelected": provider == "ollama" and model.lower().startswith("glm-"),
+        "glmBypassReason": model_route.get("glmBypassReason"),
+        "ollamaSurplusCapacity": bool(model_route.get("ollamaSurplusCapacity")),
         "approval": result.get("approval"),
         "needsApproval": bool(result.get("needsApproval")),
         "outcome": "routed",
@@ -408,6 +412,55 @@ def append_route_telemetry(
         handle.write(json.dumps(record, sort_keys=True) + "\n")
         handle.flush()
         os.fsync(handle.fileno())
+    return record
+
+
+def annotate_glm_accountability(
+    args: argparse.Namespace,
+    model_route: dict[str, Any],
+    needs_approval: bool,
+) -> dict[str, Any]:
+    """Attach a machine-auditable GLM eligibility decision to every route."""
+    caps = {str(value).strip().lower() for value in (args.capability or [])}
+    task_type = str(args.task_type or "").strip().lower()
+    codex_only = (
+        task_type in CODEX_ONLY_TASK_TYPES
+        or task_type in INBOX_FRONTDOOR_TYPES
+        or task_type in CONTROL_TOWER_TYPES
+        or task_type in SORARE_EXECUTION_TYPES
+    )
+    direct = task_type in GLM_FIRST_TASK_TYPES or bool(caps & GLM_FIRST_CAPABILITIES)
+    surplus_candidate = task_type in GLM_SURPLUS_TASK_TYPES or bool(caps & GLM_SURPLUS_CAPABILITIES)
+    allowance_ok, allowance_reason = (
+        ollama_live_allowance_status() if direct or surplus_candidate else (None, "not GLM-classified")
+    )
+    surplus = ollama_surplus_capacity_available(allowance_ok, allowance_reason)
+    eligible = bool(
+        args.privacy == "dashboard-safe"
+        and not needs_approval
+        and not codex_only
+        and (direct or (surplus_candidate and surplus))
+    )
+    selected = (
+        str(model_route.get("provider") or "").lower() == "ollama"
+        and str(model_route.get("model") or "").lower().startswith("glm-")
+    )
+    bypass_reason = ""
+    if eligible and not selected:
+        if model_route.get("explicitRequest"):
+            bypass_reason = "explicit-provider-request"
+        elif allowance_ok is False:
+            bypass_reason = "ollama-allowance-unavailable"
+        else:
+            bypass_reason = str(model_route.get("reason") or "policy-selected-another-provider")
+    model_route.update({
+        "glmEligible": eligible,
+        "glmSelected": selected,
+        "glmBypassReason": compact(bypass_reason, 180) or None,
+        "ollamaSurplusCapacity": surplus,
+        "ollamaAllowanceReason": compact(allowance_reason, 180),
+    })
+    return model_route
 
 
 def score_route(route: dict[str, Any], task_type: str, capabilities: set[str], privacy: str, requester: str = "") -> int:
@@ -1525,7 +1578,9 @@ def main() -> int:
     route_started = time.perf_counter()
     agent, route, needs_approval = choose_agent(args)
     approval = "approved" if args.approval == "approved" else "required" if needs_approval else args.approval
-    model_route = choose_model_route(args, agent, needs_approval)
+    model_route = annotate_glm_accountability(
+        args, choose_model_route(args, agent, needs_approval), needs_approval
+    )
     result: dict[str, Any] = {
         "agent": agent,
         "approval": approval,
@@ -1545,7 +1600,14 @@ def main() -> int:
         result["task"] = create_task(args, agent, approval, model_route).get("task")
     if not args.no_telemetry:
         routing_duration_ms = max(0, round((time.perf_counter() - route_started) * 1000))
-        append_route_telemetry(args, result, routing_duration_ms)
+        telemetry = append_route_telemetry(args, result, routing_duration_ms)
+        result["routeTelemetry"] = {
+            key: telemetry.get(key)
+            for key in (
+                "routeDecisionId", "requestSignature", "glmEligible", "glmSelected",
+                "glmBypassReason", "ollamaSurplusCapacity",
+            )
+        }
     print(json.dumps(result, indent=2))
     return 0
 

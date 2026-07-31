@@ -52,6 +52,9 @@ SOURCE_PATHS = (
     "scripts/agent_route.py",
     "scripts/agent_publish.py",
     "scripts/model_lane.py",
+    "scripts/model_lane_receipt.py",
+    "scripts/ollama_cloud_pass.py",
+    "scripts/ollama_cloud_shadow_benchmark.py",
     "scripts/gemini_agent.py",
     "scripts/ecosystem_health_sweep.py",
     "scripts/ecosystem_qa_benchmark.py",
@@ -117,6 +120,11 @@ SOURCE_PATHS = (
     "scripts/todays_jobs_consistency_watchdog.py",
 )
 PYTHON_COMPILE_PATHS = (
+    "scripts/agent_route.py",
+    "scripts/model_lane.py",
+    "scripts/model_lane_receipt.py",
+    "scripts/ollama_cloud_pass.py",
+    "scripts/ollama_cloud_shadow_benchmark.py",
     "scripts/agent_mfa_broker.py",
     "scripts/continuous_maintenance.py",
     "scripts/control_tower_change_guard.py",

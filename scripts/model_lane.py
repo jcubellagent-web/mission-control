@@ -8,12 +8,14 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import hashlib
 import json
 import os
 import shlex
 import subprocess
 import sys
 import threading
+import time
 import uuid
 from pathlib import Path
 from typing import Any, Callable
@@ -21,6 +23,8 @@ from typing import Any, Callable
 ROOT = Path(__file__).resolve().parents[1]
 AGENT_ROUTE = ROOT / "scripts" / "agent_route.py"
 AGENT_PUBLISH = ROOT / "scripts" / "agent_publish.py"
+MODEL_LANE_RECEIPT = ROOT / "scripts" / "model_lane_receipt.py"
+METRICS_PREFIX = "MODEL_LANE_METRICS:"
 JAIMES_SSH_HOST = os.environ.get("MODEL_LANE_JAIMES_HOST", "jaimes")
 JAIMES_REPO = "~/.openclaw/workspace/mission-control"
 CONTROL_TOWER_HOST = os.environ.get("MODEL_LANE_CONTROL_TOWER_HOST", "josh2.0@josh2")
@@ -377,6 +381,11 @@ def command_for(args: argparse.Namespace, route: dict[str, Any]) -> list[str]:
             "--codex-allowance", str(model_route.get("codexAllowanceMode") or args.codex_allowance),
             "--transport", "hermes",
             "--lane-visibility", "parent-owned",
+            "--controller-work-id", args.controller_work_id,
+            "--controller-run-id", args.controller_run_id,
+            "--lane-id", args.lane_id,
+            "--route-decision-id", str((route.get("routeTelemetry") or {}).get("routeDecisionId") or getattr(args, "route_decision_id", "")),
+            "--request-signature", str((route.get("routeTelemetry") or {}).get("requestSignature") or getattr(args, "request_signature", "")),
             "--execute",
         ]
         for cap in args.capability or []:
@@ -469,18 +478,96 @@ def command_preview(cmd: list[str]) -> str:
     return " ".join(shlex.quote(part) for part in visible)
 
 
+def record_execution_receipt(
+    args: argparse.Namespace,
+    route: dict[str, Any],
+    *,
+    return_code: int,
+    duration_ms: int,
+    stdout: str,
+    metrics: dict[str, Any],
+) -> str:
+    model_route = route.get("modelRoute") or {}
+    receipt_id = "mlr-" + hashlib.sha256(
+        f"{args.lane_id}\x1f{model_route.get('provider')}\x1f{model_route.get('model')}\x1f{time.time_ns()}".encode()
+    ).hexdigest()[:20]
+    input_tokens = int(metrics.get("inputTokens") or 0)
+    output_tokens = int(metrics.get("outputTokens") or 0)
+    prompt_chars = len(build_prompt(args, route))
+    payload = {
+        "routeDecisionId": args.route_decision_id or (route.get("routeTelemetry") or {}).get("routeDecisionId"),
+        "requestSignature": args.request_signature or (route.get("routeTelemetry") or {}).get("requestSignature"),
+        "laneWorkId": args.lane_id,
+        "laneRunId": f"{args.lane_id}-run" if args.lane_id else "",
+        "controllerWorkId": args.controller_work_id,
+        "controllerRunId": args.controller_run_id,
+        "owner": args.requester,
+        "taskType": args.task_type,
+        "privacy": args.privacy,
+        "provider": model_route.get("provider"),
+        "model": model_route.get("model"),
+        "role": model_route.get("role"),
+        "outcome": "success" if return_code == 0 else "error",
+        "exitCode": return_code,
+        "durationMs": duration_ms,
+        "providerDurationMs": round(int(metrics.get("providerDurationNs") or 0) / 1_000_000),
+        "inputTokens": input_tokens or None,
+        "outputTokens": output_tokens or None,
+        "totalTokens": input_tokens + output_tokens if input_tokens or output_tokens else None,
+        "promptCharacters": prompt_chars,
+        "estimatedPromptTokens": round(prompt_chars / 4),
+        "outputCharacters": len(stdout),
+        "tokenCountsActual": bool(input_tokens or output_tokens),
+        "canary": any(word in f"{args.task_type} {args.title}".lower() for word in ("canary", "routing-test", "smoke-test")),
+        "fallbackFrom": model_route.get("fallbackFrom"),
+        "integrationDisposition": "pending",
+        "integrationReasonCode": "awaiting-controller-review",
+        "telemetryPolicy": "metadata only; no raw prompt or output",
+    }
+    proc = subprocess.run(
+        [sys.executable, str(MODEL_LANE_RECEIPT), "append", "--receipt-id", receipt_id, "--payload", json.dumps(payload, separators=(",", ":"))],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if proc.returncode != 0:
+        print(f"Model-lane receipt warning: {compact(proc.stderr or proc.stdout, 300)}", file=sys.stderr)
+    else:
+        print(f"Model Lane Receipt: {receipt_id}", file=sys.stderr)
+    return receipt_id
+
+
 def execute_verified(cmd: list[str], route: dict[str, Any]) -> int:
+    args = route.get("_executionArgs")
+    started = time.perf_counter()
     proc = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, check=False)
+    duration_ms = max(0, round((time.perf_counter() - started) * 1000))
+    metrics: dict[str, Any] = {}
+    stderr_lines: list[str] = []
+    for line in proc.stderr.splitlines():
+        if line.startswith(METRICS_PREFIX):
+            try:
+                metrics = json.loads(line.removeprefix(METRICS_PREFIX))
+            except json.JSONDecodeError:
+                pass
+        else:
+            stderr_lines.append(line)
+    clean_stderr = "\n".join(stderr_lines)
     combined = f"{proc.stdout}\n{proc.stderr}".lower()
     fallback_markers = ("switching to fallback", "primary auth failed", "you need to be signed in")
     if proc.returncode != 0:
         if proc.stdout:
             print(proc.stdout, end="" if proc.stdout.endswith("\n") else "\n")
-        if proc.stderr:
-            print(proc.stderr, file=sys.stderr, end="" if proc.stderr.endswith("\n") else "\n")
+        if clean_stderr:
+            print(clean_stderr, file=sys.stderr)
+        if args is not None and not (cmd and cmd[0] == "ssh"):
+            record_execution_receipt(args, route, return_code=proc.returncode, duration_ms=duration_ms, stdout=proc.stdout, metrics=metrics)
         return proc.returncode
     if any(marker in combined for marker in fallback_markers):
         print("Verified model lane failed: provider fallback or authentication failure detected.", file=sys.stderr)
+        if args is not None and not (cmd and cmd[0] == "ssh"):
+            record_execution_receipt(args, route, return_code=3, duration_ms=duration_ms, stdout=proc.stdout, metrics=metrics)
         return 3
     model_route = route.get("modelRoute") or {}
     if cmd and cmd[0] == "ssh":
@@ -504,8 +591,10 @@ def execute_verified(cmd: list[str], route: dict[str, Any]) -> int:
         print(f"Route reason: {model_route.get('reason')}")
     if proc.stdout:
         print(proc.stdout, end="" if proc.stdout.endswith("\n") else "\n")
-    if proc.stderr:
-        print(proc.stderr, file=sys.stderr, end="" if proc.stderr.endswith("\n") else "\n")
+    if clean_stderr:
+        print(clean_stderr, file=sys.stderr)
+    if args is not None and not (cmd and cmd[0] == "ssh"):
+        record_execution_receipt(args, route, return_code=0, duration_ms=duration_ms, stdout=proc.stdout, metrics=metrics)
     return 0
 
 
@@ -522,6 +611,7 @@ def execute_with_disclosed_fallbacks(
     switch is printed before execution so a fallback can never be mistaken for
     the selected model.
     """
+    route["_executionArgs"] = args
     result = execute_verified(primary_cmd, route)
     model_route = route.get("modelRoute") or {}
     fallbacks = model_route.get("fallbackRoutes") or []
@@ -558,6 +648,7 @@ def execute_with_disclosed_fallbacks(
             "verifyBeforeWork": True,
         })
         fallback_route["modelRoute"] = fallback_model_route
+        fallback_route["_executionArgs"] = args
         if on_route_change:
             on_route_change(fallback_route)
         result = execute_verified(command_for(args, fallback_route), fallback_route)
@@ -611,6 +702,8 @@ def main() -> int:
     parser.add_argument("--controller-work-id", default="", help="Exact controlling Live Work id for this separate lane.")
     parser.add_argument("--controller-run-id", default="", help="Exact controlling Live Work run id for this separate lane.")
     parser.add_argument("--lane-id", default="", help="Optional idempotent lane id; generated when omitted.")
+    parser.add_argument("--route-decision-id", default="", help="Route-decision receipt joined to this execution.")
+    parser.add_argument("--request-signature", default="", help="Privacy-safe request signature from the router.")
     parser.add_argument(
         "--lane-visibility",
         default="required",
@@ -621,6 +714,12 @@ def main() -> int:
     args = parser.parse_args()
 
     route = route_for(args)
+    if not args.route_decision_id:
+        args.route_decision_id = str((route.get("routeTelemetry") or {}).get("routeDecisionId") or "")
+    if not args.request_signature:
+        args.request_signature = str((route.get("routeTelemetry") or {}).get("requestSignature") or "")
+    if args.execute and not args.lane_id:
+        args.lane_id = lane_work_id(args)
     cmd = command_for(args, route)
     plan = {
         "route": route,
