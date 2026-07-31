@@ -672,6 +672,7 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
     def test_ui_contract_is_memory_first_with_on_demand_exact_proof(self) -> None:
         main = (MISSION_CONTROL / "v2-react" / "src" / "main.tsx").read_text(encoding="utf-8")
         styles = (MISSION_CONTROL / "v2-react" / "src" / "styles.css").read_text(encoding="utf-8")
+        runtime_check = (MISSION_CONTROL / "scripts" / "mission_control_runtime_layout_check.py").read_text(encoding="utf-8")
         component = main[main.index("const BRAIN_ATLAS_LAYER_ORDER"):main.index("function AgentWorkBoard")]
         unified_start = component.index('data-atlas-region="unified"')
         unified_svg = component[component.index("<svg", unified_start):component.index("</svg>", unified_start)]
@@ -739,6 +740,8 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertIn("is-work-active", component)
         self.assertIn("is-memory-live", component)
         self.assertIn("memory-flow-memory-receipt-check", component)
+        self.assertIn("querySelector('.memory-flow-memory-receipt-check')", runtime_check)
+        self.assertNotIn("querySelector('.memory-flow-memory-receipt-dot')", runtime_check)
         self.assertIn("memory-flow-node-receipt-ring", component)
         self.assertIn('live ? " is-memory-live" : ""', component)
         self.assertNotIn('is-memory-live is-live', component)

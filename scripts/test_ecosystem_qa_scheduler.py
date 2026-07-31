@@ -158,6 +158,13 @@ class SchedulerTests(unittest.TestCase):
         for job_id in ("nightly-control-tower-suite", "daily-qa-rollup"):
             self.assertTrue(jobs[job_id]["aggregateHealth"])
             self.assertTrue(jobs[job_id]["skipDuringChangeLease"])
+        for job in jobs.values():
+            if job.get("aggregateHealth"):
+                self.assertEqual(job["observationReturnCodes"], [1])
+
+        visual = jobs["full-kiosk-visual"]
+        self.assertEqual(visual["maxAttempts"], 2)
+        self.assertEqual(visual["retryOnStatuses"], ["timeout"])
 
     def test_adaptive_quality_jobs_are_visible_recurring_and_source_safe(self) -> None:
         config = json.loads(subject.CONFIG_PATH.read_text(encoding="utf-8"))
@@ -204,6 +211,60 @@ class SchedulerTests(unittest.TestCase):
 
         self.assertEqual(result["status"], "skipped_precondition")
         self.assertEqual(result["returncode"], 75)
+
+    def test_structured_aggregate_attention_is_a_successful_observation(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            with mock.patch.object(subject, "LOCK_DIR", Path(directory)):
+                result = subject.run_job({
+                    "id": "aggregate-observer",
+                    "command": [
+                        sys.executable,
+                        "-c",
+                        "import json; print(json.dumps({'status': 'attention'})); raise SystemExit(1)",
+                    ],
+                    "observationReturnCodes": [1],
+                    "timeoutSeconds": 10,
+                })
+
+        self.assertEqual(result["status"], "ok")
+        self.assertEqual(result["observedStatus"], "attention")
+        self.assertEqual(result["returncode"], 1)
+
+    def test_unstructured_nonzero_aggregate_exit_still_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            with mock.patch.object(subject, "LOCK_DIR", Path(directory)):
+                result = subject.run_job({
+                    "id": "broken-observer",
+                    "command": [sys.executable, "-c", "raise SystemExit(1)"],
+                    "observationReturnCodes": [1],
+                    "timeoutSeconds": 10,
+                })
+
+        self.assertEqual(result["status"], "failed")
+        self.assertNotIn("observedStatus", result)
+
+    def test_configured_timeout_retry_can_recover_once(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            marker = root / "attempted"
+            script = (
+                "import pathlib,time; "
+                f"p=pathlib.Path({str(marker)!r}); "
+                "first=not p.exists(); p.touch(); time.sleep(0.15) if first else None"
+            )
+            with mock.patch.object(subject, "LOCK_DIR", root / "locks"):
+                result = subject.run_job({
+                    "id": "retry-timeout",
+                    "command": [sys.executable, "-c", script],
+                    "timeoutSeconds": 0.05,
+                    "maxAttempts": 2,
+                    "retryOnStatuses": ["timeout"],
+                })
+
+        self.assertEqual(result["status"], "ok")
+        self.assertEqual(result["attemptCount"], 2)
+        self.assertTrue(result["retryRecovered"])
+        self.assertEqual([row["status"] for row in result["attempts"]], ["timeout", "ok"])
 
     def test_skip_preserves_failure_streak_in_scheduler_state(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

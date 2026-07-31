@@ -10,6 +10,7 @@ import os
 import signal
 import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -147,6 +148,27 @@ def scheduler_environment() -> dict[str, str]:
     return env
 
 
+def structured_observation_status(job: dict[str, Any], returncode: int, stdout: str) -> str | None:
+    """Recognize a successful aggregate observation without hiding execution errors."""
+    observation_codes = {
+        int(value)
+        for value in job.get("observationReturnCodes", [])
+        if str(value).lstrip("-").isdigit()
+    }
+    if returncode not in observation_codes:
+        return None
+    try:
+        payload = json.loads(stdout)
+    except (TypeError, ValueError, json.JSONDecodeError):
+        return None
+    if not isinstance(payload, dict):
+        return None
+    observed = str(payload.get("status") or "").strip().lower()
+    if observed in {"attention", "degraded", "warning"}:
+        return observed
+    return None
+
+
 def run_job(job: dict[str, Any], shadow: bool = False) -> dict[str, Any]:
     job_id = str(job["id"])
     command = [str(item) for item in job.get("command", [])]
@@ -159,39 +181,60 @@ def run_job(job: dict[str, Any], shadow: bool = False) -> dict[str, Any]:
             fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError:
             return {"id": job_id, "status": "skipped_locked", "startedAt": iso(started), "durationMs": 0}
-        try:
-            process = subprocess.Popen(
-                command,
-                cwd=ROOT,
-                env=scheduler_environment(),
-                text=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                start_new_session=True,
-            )
-            stdout, stderr = process.communicate(timeout=int(job.get("timeoutSeconds") or 120))
-            returncode = process.returncode
-            skip_return_codes = {
-                int(value)
-                for value in job.get("skipReturnCodes", [])
-                if str(value).lstrip("-").isdigit()
-            }
-            if returncode in skip_return_codes:
-                status = "skipped_precondition"
-            else:
-                status = "ok" if returncode == 0 else "failed"
-        except subprocess.TimeoutExpired:
-            os.killpg(process.pid, signal.SIGTERM)
+        max_attempts = max(1, int(job.get("maxAttempts") or 1))
+        retry_statuses = {str(value) for value in job.get("retryOnStatuses", [])}
+        retry_delay = max(0.0, float(job.get("retryDelaySeconds") or 0))
+        attempts: list[dict[str, Any]] = []
+        observed_status: str | None = None
+        for attempt in range(1, max_attempts + 1):
+            attempt_started = dt.datetime.now(dt.timezone.utc)
             try:
-                stdout, stderr = process.communicate(timeout=5)
+                process = subprocess.Popen(
+                    command,
+                    cwd=ROOT,
+                    env=scheduler_environment(),
+                    text=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    start_new_session=True,
+                )
+                stdout, stderr = process.communicate(timeout=float(job.get("timeoutSeconds") or 120))
+                returncode = process.returncode
+                skip_return_codes = {
+                    int(value)
+                    for value in job.get("skipReturnCodes", [])
+                    if str(value).lstrip("-").isdigit()
+                }
+                observed_status = structured_observation_status(job, returncode, stdout)
+                if returncode in skip_return_codes:
+                    status = "skipped_precondition"
+                elif observed_status:
+                    status = "ok"
+                else:
+                    status = "ok" if returncode == 0 else "failed"
             except subprocess.TimeoutExpired:
-                os.killpg(process.pid, signal.SIGKILL)
-                stdout, stderr = process.communicate()
-            returncode, status = 124, "timeout"
-        except Exception as exc:
-            stdout, stderr, returncode, status = "", f"{type(exc).__name__}: {exc}", 125, "failed"
+                os.killpg(process.pid, signal.SIGTERM)
+                try:
+                    stdout, stderr = process.communicate(timeout=5)
+                except subprocess.TimeoutExpired:
+                    os.killpg(process.pid, signal.SIGKILL)
+                    stdout, stderr = process.communicate()
+                returncode, status = 124, "timeout"
+            except Exception as exc:
+                stdout, stderr, returncode, status = "", f"{type(exc).__name__}: {exc}", 125, "failed"
+            attempt_ended = dt.datetime.now(dt.timezone.utc)
+            attempts.append({
+                "attempt": attempt,
+                "status": status,
+                "returncode": returncode,
+                "durationMs": round((attempt_ended - attempt_started).total_seconds() * 1000),
+            })
+            if status not in retry_statuses or attempt >= max_attempts:
+                break
+            if retry_delay:
+                time.sleep(retry_delay)
         ended = dt.datetime.now(dt.timezone.utc)
-        return {
+        result = {
             "id": job_id,
             "owner": job.get("owner"),
             "team": job.get("team"),
@@ -203,7 +246,14 @@ def run_job(job: dict[str, Any], shadow: bool = False) -> dict[str, Any]:
             "durationMs": round((ended - started).total_seconds() * 1000),
             "stdout": compact(stdout),
             "stderr": compact(stderr),
+            "attemptCount": len(attempts),
+            "attempts": attempts,
         }
+        if observed_status:
+            result["observedStatus"] = observed_status
+        if len(attempts) > 1 and status == "ok":
+            result["retryRecovered"] = True
+        return result
 
 
 def publish_transition(job: dict[str, Any], current: dict[str, Any], previous: dict[str, Any]) -> None:
@@ -331,6 +381,9 @@ def tick(
             "durationMs": result.get("durationMs"),
             "returncode": result.get("returncode"),
         }
+        for field in ("observedStatus", "attemptCount", "retryRecovered"):
+            if result.get(field) is not None:
+                receipt[field] = result[field]
         receipts = [
             row for row in new_history.get(job_id, [])
             if isinstance(row, dict) and row.get("scheduledAt") != scheduled_slot

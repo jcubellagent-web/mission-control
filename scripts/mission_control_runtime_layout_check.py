@@ -234,11 +234,11 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
     const atlasAgentNodes = [...document.querySelectorAll('#brain-atlas .memory-flow-node.is-agent')].map((element) => {
     const aura = element.querySelector('.memory-flow-node-aura');
     const presenceDot = element.querySelector('.memory-flow-presence-dot');
-    const memoryReceiptDot = element.querySelector('.memory-flow-memory-receipt-dot');
+    const memoryReceiptCheck = element.querySelector('.memory-flow-memory-receipt-check');
     const shell = [...element.children].find((child) => child.tagName.toLowerCase() === 'rect' && !child.classList.contains('memory-flow-node-aura'));
     const auraAnimationName = aura ? getComputedStyle(aura).animationName : 'none';
     const presenceAnimationName = presenceDot ? getComputedStyle(presenceDot).animationName : 'none';
-    const memoryReceiptOpacity = memoryReceiptDot ? Number.parseFloat(getComputedStyle(memoryReceiptDot).opacity) : 0;
+    const memoryReceiptOpacity = memoryReceiptCheck ? Number.parseFloat(getComputedStyle(memoryReceiptCheck).opacity) : 0;
     const shellStyle = shell ? getComputedStyle(shell) : null;
     const memoryAnimationName = shellStyle?.animationName || 'none';
     return {

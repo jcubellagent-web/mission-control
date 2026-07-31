@@ -143,6 +143,7 @@
       "timeoutSeconds": 900,
       "severity": "p1",
       "aggregateHealth": true,
+      "observationReturnCodes": [1],
       "skipDuringChangeLease": true
     },
     {
@@ -160,6 +161,9 @@
       ],
       "timeoutSeconds": 300,
       "severity": "p1",
+      "maxAttempts": 2,
+      "retryOnStatuses": ["timeout"],
+      "retryDelaySeconds": 5,
       "skipDuringChangeLease": true
     },
     {
@@ -191,6 +195,7 @@
       "severity": "p1",
       "alertAfterFailures": 2,
       "aggregateHealth": true,
+      "observationReturnCodes": [1],
       "skipDuringChangeLease": true
     },
     {
@@ -204,6 +209,7 @@
       "severity": "p2",
       "alertAfterFailures": 2,
       "aggregateHealth": true,
+      "observationReturnCodes": [1],
       "skipDuringChangeLease": true
     },
     {
@@ -217,6 +223,7 @@
       "severity": "p2",
       "alertAfterFailures": 2,
       "aggregateHealth": true,
+      "observationReturnCodes": [1],
       "skipDuringChangeLease": true
     },
     {
@@ -228,6 +235,7 @@
       "timeoutSeconds": 120,
       "severity": "p2",
       "aggregateHealth": true,
+      "observationReturnCodes": [1],
       "skipDuringChangeLease": true
     },
     {
@@ -241,6 +249,7 @@
       "severity": "p1",
       "alertAfterFailures": 1,
       "aggregateHealth": true,
+      "observationReturnCodes": [1],
       "skipDuringChangeLease": true
     },
     {
