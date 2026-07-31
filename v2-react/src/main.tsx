@@ -4167,9 +4167,9 @@ function BrainAtlasPanel({
     : null;
   const maturityGatesPassed = Number(maintenanceReadiness?.gatesPassed);
   const maturityGatesRequired = Number(maintenanceReadiness?.gatesRequired);
-  const maturityGateLabel = Number.isFinite(maturityGatesPassed) && Number.isFinite(maturityGatesRequired) && maturityGatesRequired > 0
-    ? `${maturityGatesPassed}/${maturityGatesRequired} reliability gates`
-    : "reliability evidence pending";
+  const maturityBadgeLabel = Number.isFinite(maturityGatesPassed) && Number.isFinite(maturityGatesRequired) && maturityGatesRequired > 0
+    ? `${maturityGatesPassed}/${maturityGatesRequired}`
+    : "Pending";
   const maturityTone = maturityGatesPassed === maturityGatesRequired && maturityGatesRequired > 0 ? "clear" : "watch";
   const toggleNodeHelp = (nodeId: BrainAtlasHelpNodeId) => setHelpNodeId((current) => current === nodeId ? null : nodeId);
   const nodeHelpKeyDown = (event: React.KeyboardEvent<SVGGElement>, nodeId: BrainAtlasHelpNodeId) => {
@@ -4229,7 +4229,7 @@ function BrainAtlasPanel({
             <p id="brain-atlas-unified-description">The main view shows how shared memory is recalled, applied, assessed, and promoted—not private reasoning.</p>
           </div>
           <span className={`brain-atlas-maturity is-${maturityTone}`} title="Memory foundation and hygiene are live. Advanced retrieval pilots remain gated until the current dashboard-safe reliability evidence is clean.">
-            Maturity · {maturityGateLabel}
+            Maturity · {maturityBadgeLabel}
           </span>
         </header>
 
