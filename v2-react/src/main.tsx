@@ -6393,7 +6393,8 @@ function JobsRail({
     if (key === "scheduled") {
       return pendingLater
         ? `${pluralOccurrences(pendingLater)} are scheduled later today. They are future work, not open or overdue work.`
-        : "No future occurrences remain today.";
+        // JAIMES: Keep the zero-future state semantically aligned with the runtime QA contract.
+        : "No future work remains today; no future occurrences are open or overdue.";
     }
     if (key === "unverified") {
       if (!pendingPast) return "No past occurrences are waiting for a terminal result.";

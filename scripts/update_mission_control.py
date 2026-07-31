@@ -3827,17 +3827,23 @@ def fetch_upcoming_events(limit: int = 3) -> List[Dict[str, Any]]:
         return []
     except subprocess.CalledProcessError as exc:
         err = (exc.stderr or '').strip()
-        if 'no auth for calendar' in err.lower() or 'gog auth add' in err.lower():
+        err_lower = err.lower()
+        if 'no auth for calendar' in err_lower or 'gog auth add' in err_lower:
             fetch_upcoming_events._status = {"status": "optional", "message": "Local calendar helper not configured"}  # type: ignore[attr-defined]
             print("[info] local calendar helper not configured; plugin-backed calendar checks remain available", file=sys.stderr)
             return []
-        if 'no tty available for keyring' in err.lower() or 'gog_keyring_password' in err.lower():
+        if 'no tty available for keyring' in err_lower or 'gog_keyring_password' in err_lower:
             fetch_upcoming_events._status = {"status": "optional", "message": "Local calendar helper keyring locked"}  # type: ignore[attr-defined]
             print("[info] local calendar helper keyring locked; skipping calendar fetch", file=sys.stderr)
             return []
         if 'invalid_grant' in err or 'expired or revoked' in err:
             fetch_upcoming_events._status = {"status": "optional", "message": "Local calendar helper sign-in optional"}  # type: ignore[attr-defined]
             print("[info] local calendar helper sign-in is optional; skipping calendar fetch", file=sys.stderr)
+            return []
+        # JAIMES: Gmail-readonly can be intentionally connected without Calendar scope; it must not create a false job failure.
+        if 'insufficientpermissions' in err_lower or 'insufficient authentication scopes' in err_lower:
+            fetch_upcoming_events._status = {"status": "optional", "message": "Local calendar helper lacks calendar scope"}  # type: ignore[attr-defined]
+            print("[info] local calendar helper lacks optional calendar scope; skipping calendar fetch", file=sys.stderr)
             return []
         fetch_upcoming_events._status = {"status": "error", "message": "Calendar fetch failed"}  # type: ignore[attr-defined]
         print(f"[warn] gog calendar list failed: {err}", file=sys.stderr)

@@ -10,6 +10,7 @@ import pytest
 MODULE_PATH = Path(__file__).resolve().parents[1] / "scripts" / "mission_control_runtime_layout_check.py"
 FIXTURE_PATH = Path(__file__).parent / "fixtures" / "control-tower-live.ci.json"
 REGRESSION_FIXTURE_PATH = Path(__file__).parent / "fixtures" / "dashboard-data.ci.json"
+REACT_MAIN_PATH = Path(__file__).resolve().parents[1] / "v2-react" / "src" / "main.tsx"
 WORKFLOW_PATH = Path(__file__).resolve().parents[1] / ".github" / "workflows" / "mission-control-regression.yml"
 SPEC = importlib.util.spec_from_file_location("mission_control_runtime_layout_check", MODULE_PATH)
 assert SPEC and SPEC.loader
@@ -1115,3 +1116,7 @@ def test_kiosk_legibility_fails_closed_when_required_measurements_are_missing(
     failures = runtime_layout.validate_kiosk_legibility(measurements)
 
     assert any(expected in failure for failure in failures)
+
+
+def test_zero_future_summary_keeps_the_future_work_explanation() -> None:
+    assert "No future work remains today; no future occurrences are open or overdue." in REACT_MAIN_PATH.read_text()

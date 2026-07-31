@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import socket
+import subprocess
 import sys
 from pathlib import Path
 
@@ -97,3 +98,18 @@ def test_active_agent_feed_requires_dashboard_safe_objective() -> None:
         assert normalized["status"] == "blocked"
         assert normalized["objective"] == "Visibility objective required"
         assert normalized["detail"] == "Active heartbeat rejected until a dashboard-safe objective is published."
+
+def test_calendar_scope_error_is_optional_for_gmail_readonly_monitor(monkeypatch) -> None:
+    error = subprocess.CalledProcessError(
+        1,
+        ["gog", "calendar", "events"],
+        stderr="Google API error (403 insufficientPermissions): Request had insufficient authentication scopes.",
+    )
+
+    def fail_calendar(*_args, **_kwargs):
+        raise error
+
+    monkeypatch.setattr(module.subprocess, "run", fail_calendar)
+
+    assert module.fetch_upcoming_events() == []
+    assert module.fetch_upcoming_events._status == {"status": "optional", "message": "Local calendar helper lacks calendar scope"}
