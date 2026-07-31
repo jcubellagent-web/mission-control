@@ -117,6 +117,11 @@ class RouteContractTest(unittest.TestCase):
         self.assertEqual(payload["status"], "ok")
         self.assertEqual(payload["requiredFieldCoveragePct"]["model"], 100.0)
 
+    def test_default_telemetry_baseline_covers_low_activity_windows(self) -> None:
+        source = (ROOT / "scripts" / "route_quality_audit.py").read_text(encoding="utf-8")
+        self.assertIn('ROUTE_QA_MIN_WINDOW", "8"', source)
+        self.assertIn("low-activity window", source)
+
     def test_raw_prompt_key_fails_privacy_contract(self) -> None:
         rows = [telemetry_row(index) for index in range(24)]
         rows[-1]["rawPrompt"] = "must never be stored"

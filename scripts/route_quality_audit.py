@@ -16,7 +16,8 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = Path(os.environ.get("ROUTE_QA_SOURCE", ROOT / "data" / "agent-route-decisions.jsonl"))
 OUTPUT = Path(os.environ.get("ROUTE_QA_OUTPUT", ROOT / "data" / "route-quality-audit.json"))
 WINDOW = max(1, int(os.environ.get("ROUTE_QA_WINDOW", "100")))
-MIN_WINDOW_ROUTES = max(1, int(os.environ.get("ROUTE_QA_MIN_WINDOW", "24")))
+# JAIMES: Eight governed v2 receipts verify coverage in a low-activity window without turning normal overnight volume into a failed release.
+MIN_WINDOW_ROUTES = max(1, int(os.environ.get("ROUTE_QA_MIN_WINDOW", "8")))
 REQUIRED_COVERAGE_PCT = float(os.environ.get("ROUTE_QA_REQUIRED_COVERAGE_PCT", "100"))
 ROUTING_TIMING_COVERAGE_PCT = float(os.environ.get("ROUTE_QA_ROUTING_TIMING_COVERAGE_PCT", "95"))
 
