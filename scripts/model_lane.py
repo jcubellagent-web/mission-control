@@ -97,10 +97,11 @@ def execution_agent(args: argparse.Namespace, route: dict[str, Any]) -> str:
     Board and Brain Atlas must attribute the active worker to its real host.
     """
     provider = str((route.get("modelRoute") or {}).get("provider") or "").strip()
+    if Path.home().name == "jc_agent":
+        return "jaimes"
     if (
         args.transport == "auto"
         and provider in {"gemini", "ollama", "xai"}
-        and Path.home().name != "jc_agent"
     ):
         return "jaimes"
     return str(args.requester or route.get("agent") or "joshex").strip()

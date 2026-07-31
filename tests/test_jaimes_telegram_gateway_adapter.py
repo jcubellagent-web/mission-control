@@ -183,7 +183,7 @@ class JaimesGatewayAdapterTests(unittest.TestCase):
         self.assertTrue(result["no_card_required"])
         self.assertNotIn("api:reaction", events)
         self.assertNotIn("api:card", events)
-        self.assertIn("publish:verified=False", events)
+        self.assertNotIn("publish:verified=False", events)
 
     def test_writer_tier_2_claims_reaction_before_api_and_has_no_card(self):
         result, events = self.run_writer_tier(2)
@@ -674,8 +674,8 @@ class JaimesGatewayAdapterTests(unittest.TestCase):
             self.assertFalse(self.module.publish_jaimes("Safe", "done", "Safe", brain_feed=False))
 
         legacy_success = Mock(returncode=0, stdout="", stderr="")
-        with patch.object(self.module.subprocess, "run", return_value=legacy_success):
-            self.assertTrue(
+        with patch.object(self.module.subprocess, "run", return_value=legacy_success) as runner:
+            self.assertFalse(
                 self.module.publish_jaimes(
                     "Safe progress",
                     "active",
@@ -683,6 +683,7 @@ class JaimesGatewayAdapterTests(unittest.TestCase):
                     brain_feed=False,
                 )
             )
+            runner.assert_not_called()
             self.assertFalse(
                 self.module.publish_jaimes(
                     "Safe terminal",

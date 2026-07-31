@@ -105,9 +105,8 @@ class MultiSessionWatcherTests(unittest.TestCase):
             assert cur.lastrowid is not None
             return int(cur.lastrowid)
 
-    def test_identity_publish_targets_josh2_canonical_ledger(self) -> None:
-        completed = subprocess.CompletedProcess([], 0, stdout="", stderr="")
-        with patch.object(watcher.subprocess, "run", return_value=completed) as run:
+    def test_fast_ack_refuses_identity_publish_with_active_lease(self) -> None:
+        with patch.object(watcher.subprocess, "run") as run:
             ok = watcher.publish_jaimes(
                 "Review current market signals",
                 "active",
@@ -120,17 +119,8 @@ class MultiSessionWatcherTests(unittest.TestCase):
                 origin_claim_hash="a" * 64,
                 work_event="start",
             )
-        self.assertTrue(ok)
-        command = run.call_args.args[0]
-        self.assertEqual(command[0], "ssh")
-        self.assertEqual(watcher.CONTROL_TOWER_SSH_HOST, "josh2.0@josh2")
-        self.assertIn(watcher.CONTROL_TOWER_SSH_HOST, command)
-        remote = command[-1]
-        self.assertIn("/Users/josh2.0/.openclaw/workspace/mission-control", remote)
-        self.assertIn("--work-id work-telegram-safe", remote)
-        self.assertIn("--run-id run-telegram-safe", remote)
-        self.assertIn("--origin-claim-hash", remote)
-        self.assertIn("--route-verified", remote)
+        self.assertFalse(ok)
+        run.assert_not_called()
 
     @staticmethod
     def fake_ack(event, model, state, dry_run, meta, **_kwargs):
@@ -1627,8 +1617,7 @@ class MultiSessionWatcherTests(unittest.TestCase):
         self.assertEqual(active["current_summary"], "Checking the Telegram receipt lifecycle")
         self.assertNotEqual(active["last_card_update_at"], old)
         self.assertEqual(active["heartbeat_checked_at"], active["last_card_update_at"])
-        self.assertEqual(publish.call_args.kwargs["phase"], "heartbeat")
-        self.assertFalse(publish.call_args.kwargs["brain_feed"])
+        publish.assert_not_called()
 
     def test_old_card_with_recent_progress_does_not_expire(self) -> None:
         now = watcher.dt.datetime.now(watcher.dt.timezone.utc)

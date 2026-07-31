@@ -197,6 +197,7 @@ def begin_gateway_lifecycle(
     work_id: str,
     work_run_id: str,
     prompt: str,
+    meta: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     lifecycle = gateway_lifecycle()
     if lifecycle is None:
@@ -233,6 +234,18 @@ def begin_gateway_lifecycle(
     if not writer and not shadow:
         return {}
     try:
+        # Managed JAIMES group topics promise one live card plus a final.
+        # Do not let a short question downgrade that contract to a cardless
+        # native-final path, which cannot always return an adapter receipt.
+        managed_group_topic = (
+            str((meta or {}).get("telegram_chat_id") or "") == CONTROL_CENTER_CHAT_ID
+            and str((meta or {}).get("telegram_thread_id") or "") in JAIMES_CONTROL_CENTER_TOPICS
+        )
+        classification = (
+            (3, "managed-group-topic")
+            if managed_group_topic
+            else classify_delivery_tier(clean_prompt(prompt))
+        )
         receipt = lifecycle.start_work(
             origin_key=key,
             run_id=work_run_id,
@@ -242,7 +255,7 @@ def begin_gateway_lifecycle(
             surface_contract="telegram",
             text="",
             worker_route="pending",
-            classification=classify_delivery_tier(clean_prompt(prompt)),
+            classification=classification,
         )
         if str(receipt.get("workId") or "") != work_id:
             raise LifecycleError("work-identity-mismatch")
@@ -2488,6 +2501,11 @@ def publish_jaimes(
     event_id: str = "",
     require_accepted_ledger: bool = False,
 ) -> bool:
+    # Fast-ack owns Telegram surface responsiveness, not the underlying work.
+    # Active/start/heartbeat publications create or renew canonical work
+    # leases, so only the real worker/controller may emit them.
+    if status == "active" or work_event in {"start", "heartbeat"}:
+        return False
     publish_args = [
         "--agent",
         "jaimes",
@@ -2626,6 +2644,7 @@ def send_ack(
         work_id=work_id,
         work_run_id=work_run_id,
         prompt=prompt,
+        meta=meta,
     )
     if gateway.get("error") and gateway.get("required"):
         return {
@@ -3055,22 +3074,8 @@ def send_ack(
                     "last_card_update_at": utc_now(),
                     **gateway_public_fields(gateway),
                 }
-    if not dry_run:
-        if not gateway_writer:
-            send_chat_action(meta=meta)
-        if surface_ok:
-            publish_jaimes(
-                objective,
-                "active",
-                f"Objective confirmed; {display_model}; skill={skill.get('label') or 'none'}",
-                work_id=work_id,
-                run_id=work_run_id,
-                phase="active",
-                model_id=display_model,
-                route_verified=False,
-                origin_claim_hash=origin_claim_hash,
-                work_event="start",
-            )
+    if not dry_run and not gateway_writer:
+        send_chat_action(meta=meta)
 
     return {
         "ok": bool(
@@ -4297,18 +4302,6 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
                     "error": result.get("stderr") or result.get("error") or "",
                     "delivery_key": key,
                 })
-            if not dry_run and result.get("ok"):
-                publish_jaimes(
-                    objective,
-                    "active",
-                    "Final response prepared; awaiting confirmed Telegram delivery.",
-                    work_id=str(card.get("work_id") or ""),
-                    run_id=str(card.get("ledger_run_id") or ""),
-                    phase="delivery",
-                    model_id=str(card.get("model") or DEFAULT_MODEL),
-                    route_verified=True,
-                    origin_claim_hash=str(card.get("origin_claim_hash") or ""),
-                )
             if result.get("ok"):
                 processed.add(event_id)
                 card["status"] = "active"
@@ -4363,18 +4356,6 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
                     "error": result.get("stderr") or result.get("error") or "",
                     "delivery_key": key,
                 })
-            if not dry_run and result.get("ok"):
-                publish_jaimes(
-                    objective,
-                    "active",
-                    safe_summary,
-                    work_id=str(card.get("work_id") or ""),
-                    run_id=str(card.get("ledger_run_id") or ""),
-                    phase="active",
-                    model_id=str(card.get("model") or DEFAULT_MODEL),
-                    route_verified=True,
-                    origin_claim_hash=str(card.get("origin_claim_hash") or ""),
-                )
             if result.get("ok"):
                 processed.add(event_id)
                 card["status"] = "active"
@@ -4507,20 +4488,6 @@ def update_active_cards(state: dict[str, Any], session_id: str, dry_run: bool = 
         if result.get("ok"):
             card["last_card_update_at"] = heartbeat_at
         updates.append({"event": f"heartbeat:{run_id}:{heartbeat_at}", "result": result})
-        if not dry_run and result.get("ok"):
-            publish_jaimes(
-                objective,
-                "active",
-                current_summary,
-                work_id=str(card.get("work_id") or ""),
-                run_id=str(card.get("ledger_run_id") or ""),
-                phase="heartbeat",
-                model_id=str(card.get("model") or DEFAULT_MODEL),
-                route_verified=True,
-                origin_claim_hash=str(card.get("origin_claim_hash") or ""),
-                brain_feed=False,
-                work_event="heartbeat",
-            )
     state["processed_progress_events"] = sorted(processed)[-300:]
     state["approval_buttons_sent"] = sorted(approval_sent)[-200:]
     return updates
@@ -5048,18 +5015,63 @@ def process_ack_event(
         }
 
 
+def deliver_recent_native_finals(state: dict[str, Any], metas: list[dict[str, Any]], *, dry_run: bool = False) -> list[dict[str, Any]]:
+    """Deliver recent native Hermes finals that have no Telegram receipt."""
+    if not HERMES_STATE_DB.exists():
+        return []
+    seen = set(str(v) for v in state.get("native_final_bridge_seen") or [])
+    results: list[dict[str, Any]] = []
+    cutoff = dt.datetime.now(dt.timezone.utc).timestamp() - 900
+    for meta in metas:
+        chat_id = str(meta.get("telegram_chat_id") or "")
+        thread_id = str(meta.get("telegram_thread_id") or "")
+        if chat_id == CONTROL_CENTER_CHAT_ID and not owner_accepts("jaimes", chat_id, thread_id, direct=False):
+            continue
+        session_id = str(meta.get("sessionId") or "")
+        if not session_id:
+            continue
+        try:
+            with sqlite3.connect(f"file:{HERMES_STATE_DB}?mode=ro", uri=True, timeout=2) as con:
+                rows = con.execute(
+                    """SELECT id, content, timestamp
+                         FROM messages
+                        WHERE session_id = ? AND role = 'assistant'
+                          AND platform_message_id IS NULL
+                          AND TRIM(COALESCE(content, '')) != ''
+                          AND timestamp >= ?
+                        ORDER BY id ASC""",
+                    (session_id, cutoff),
+                ).fetchall()
+        except sqlite3.Error:
+            continue
+        for message_id, content, _timestamp in rows:
+            identity = f"{session_id}:{int(message_id)}"
+            if identity in seen:
+                continue
+            text = str(content or "").strip()
+            if not text:
+                continue
+            result = {"ok": True, "dry_run": True} if dry_run else send_initial_ack(text, meta=meta)
+            results.append({"assistant_message_id": int(message_id), "ok": bool(result.get("ok"))})
+            if result.get("ok"):
+                seen.add(identity)
+    state["native_final_bridge_seen"] = sorted(seen)[-500:]
+    return results
+
+
 def poll_once(dry_run: bool = False) -> dict[str, Any]:
     state = load_json(STATE_PATH, {})
     if not isinstance(state, dict):
         state = {}
     terminal_visibility_updates = recover_terminal_visibility_outbox(dry_run=dry_run)
+    native_final_updates = deliver_recent_native_finals(state, active_hermes_sessions_metadata(), dry_run=dry_run)
     if not dry_run and not verify_bot_identity(state):
         state["last_checked_at"] = utc_now()
         state["status"] = "telegram-identity-error"
         state["last_error_at"] = utc_now()
         state["last_error"] = "JAIMES Telegram bot identity verification failed"
         save_json(STATE_PATH, state)
-        return {"ok": False, "status": state["status"], "terminal_visibility": terminal_visibility_updates}
+        return {"ok": False, "status": state["status"], "terminal_visibility": terminal_visibility_updates, "native_final_updates": native_final_updates}
     acked = set(state.get("acked_prompt_events") or [])
     metas = active_hermes_sessions_metadata()
     if not metas:
@@ -5072,7 +5084,7 @@ def poll_once(dry_run: bool = False) -> dict[str, Any]:
         state["status"] = "no-direct-session"
         if not dry_run:
             save_json(STATE_PATH, state)
-        return {"ok": False, "status": "no-direct-session", "terminal_visibility": terminal_visibility_updates}
+        return {"ok": False, "status": "no-direct-session", "terminal_visibility": terminal_visibility_updates, "native_final_updates": native_final_updates}
 
     state.setdefault("active_cards", {})
     surface_retries = state.get("surface_retry_events")
