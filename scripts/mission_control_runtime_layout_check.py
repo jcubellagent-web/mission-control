@@ -341,9 +341,16 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
     const htmlTextOverflowRoles = htmlTextTargets.flatMap((node, index) => {
       const overflowX = Math.max(0, node.scrollWidth - node.clientWidth);
       const overflowY = Math.max(0, node.scrollHeight - node.clientHeight);
+      const style = getComputedStyle(node);
+      const labelledContainer = node.closest('[title]');
+      const safelyEllipsized = overflowX > 1
+        && overflowY <= 1
+        && style.textOverflow === 'ellipsis'
+        && ['hidden', 'clip'].includes(style.overflowX)
+        && Boolean(labelledContainer?.getAttribute('title')?.trim());
       const role = String(node.className || node.tagName || `text-${index}`)
         .trim().replace(/\s+/g, '.').slice(0, 80);
-      return overflowX > 1 || overflowY > 1 ? [role || `text-${index}`] : [];
+      return (overflowX > 1 || overflowY > 1) && !safelyEllipsized ? [role || `text-${index}`] : [];
     });
     const svgTextFit = [];
     const svgTextOverlap = [];
