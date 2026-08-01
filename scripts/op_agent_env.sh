@@ -39,7 +39,7 @@ typeset -A selected_variables resolved_variables
 selection_enabled=false
 if [[ -n "${only_csv}" ]]; then
   selection_enabled=true
-  selected_names=("${(@s:,:only_csv)}")
+  IFS=',' read -rA selected_names <<< "${only_csv}"
   for selected_name in "${selected_names[@]}"; do
     if [[ ! "${selected_name}" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
       printf 'Invalid 1Password variable selection.\n' >&2

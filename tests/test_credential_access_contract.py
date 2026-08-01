@@ -36,3 +36,9 @@ def test_launchers_do_not_use_legacy_secret_capture_paths() -> None:
         assert "ps" + " eww" not in source
         assert "/usr/bin/" + "printenv" not in source
         assert "secrets.json" not in source
+
+
+def test_broker_uses_portable_zsh_array_parsing() -> None:
+    runner = (ROOT / "scripts" / "op_agent_env.sh").read_text(encoding="utf-8")
+    assert "IFS=',' read -rA selected_names" in runner
+    assert "(@s:,:only_csv)" not in runner
