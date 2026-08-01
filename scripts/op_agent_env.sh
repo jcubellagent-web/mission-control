@@ -8,10 +8,19 @@ op_bin="${AGENT_ECOSYSTEM_OP_BIN:-/opt/homebrew/bin/op}"
 env_file="${1:-}"
 
 if [[ -z "${env_file}" || "${env_file}" == "--help" ]]; then
-  printf 'usage: op_agent_env.sh <op-env-file> -- <command> [args...]\n' >&2
+  printf 'usage: op_agent_env.sh <op-env-file> [--only NAME[,NAME...]] -- <command> [args...]\n' >&2
   exit 2
 fi
 shift || true
+only_csv=""
+if [[ "${1:-}" == "--only" ]]; then
+  only_csv="${2:-}"
+  if [[ -z "${only_csv}" ]]; then
+    printf '1Password variable selection is missing.\n' >&2
+    exit 2
+  fi
+  shift 2
+fi
 if [[ "${1:-}" == "--" ]]; then shift; fi
 if [[ $# -eq 0 || ! -f "${env_file}" || ! -x "${op_bin}" ]]; then
   printf '1Password launcher prerequisites are missing.\n' >&2
@@ -25,6 +34,20 @@ if [[ -z "${token}" ]]; then
 fi
 export OP_SERVICE_ACCOUNT_TOKEN="${token}"
 export OP_BIOMETRIC_UNLOCK_ENABLED=false
+
+typeset -A selected_variables resolved_variables
+selection_enabled=false
+if [[ -n "${only_csv}" ]]; then
+  selection_enabled=true
+  selected_names=("${(@s:,:only_csv)}")
+  for selected_name in "${selected_names[@]}"; do
+    if [[ ! "${selected_name}" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
+      printf 'Invalid 1Password variable selection.\n' >&2
+      exit 65
+    fi
+    selected_variables[${selected_name}]=1
+  done
+fi
 
 # JAIMES: op writes only to a private kernel FIFO; a separate reader owns the
 # parent capture pipe. This avoids the CLI 2.34.x launchd daemon pipe deadlock.
@@ -67,6 +90,9 @@ while IFS='=' read -r variable_name reference; do
   if [[ ! "${variable_name}" =~ ^[A-Za-z_][A-Za-z0-9_]*$ || "${reference}" != op://* ]]; then
     printf 'Invalid 1Password environment template.\n' >&2
     exit 65
+  fi
+  if [[ "${selection_enabled}" == true && -z "${selected_variables[${variable_name}]:-}" ]]; then
+    continue
   fi
 
   unset "${variable_name}"
@@ -115,8 +141,18 @@ while IFS='=' read -r variable_name reference; do
     exit 69
   fi
   export "${variable_name}=${resolved_value}"
+  resolved_variables[${variable_name}]=1
   unset resolved_value
 done < "${env_file}"
+
+if [[ "${selection_enabled}" == true ]]; then
+  for selected_name in "${(@k)selected_variables}"; do
+    if [[ -z "${resolved_variables[${selected_name}]:-}" ]]; then
+      printf 'Selected 1Password variable is absent from the environment template.\n' >&2
+      exit 65
+    fi
+  done
+fi
 
 cleanup
 trap - EXIT HUP INT TERM

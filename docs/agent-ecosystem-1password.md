@@ -21,6 +21,30 @@ As of 2026-07-14, the production launch paths are fully migrated:
 - JOSHeX uses its signed-in 1Password desktop account for intentional vault
   administration. It does not receive a background service-account token.
 
+## Ecosystem access contract
+
+Every agent may request an approved credentialed capability, but no agent is
+entitled to receive the credential value. Apply
+`agent-skills/credential-access/SKILL.md` and
+`config/agent-credential-access.json`:
+
+- JOSHeX coordinates the request and routes execution to the owning Mac mini.
+- Josh 2.0 uses its host-scoped read-only identity for Josh-owned services.
+- JAIMES uses its host-scoped read-only identity for JAIMES and J.A.I.N
+  services.
+- The broker resolves only the variables selected for the intended child.
+  Launchers must not inspect another process environment, run a reveal command,
+  capture a secret on stdout, or read protected app stores into a parent
+  process.
+- Ordinary expected 1Password CLI authorization is verified and accepted
+  immediately, with an expected wait under two seconds. Identity, account,
+  recovery, security-factor, financial, permission, public, and irreversible
+  boundaries remain explicit-approval actions.
+
+The durable shared memory stores this procedure and its provenance only. Secret
+values, item contents, OTPs, recovery material, cookies, OAuth payloads, and raw
+private account content are never memory records.
+
 ## Manual Provisioning
 
 1. Create the `Agent Ecosystem` vault.
@@ -35,6 +59,8 @@ As of 2026-07-14, the production launch paths are fully migrated:
    - JAIMES/J.A.I.N: `com.josh.agent-ecosystem.op-service-account.JC-Agents-Mac-mini`
 5. Launch shared secreted commands through:
    `scripts/op_agent_env.sh config/agent-ecosystem.op.env -- <command>`.
+   Use `--only NAME[,NAME...]` before `--` when the child needs only a
+   subset of a checked-in profile.
    Launch Hermes through the same wrapper with the Hermes-specific template.
 
 Service-account creation can be done with an already authenticated 1Password
