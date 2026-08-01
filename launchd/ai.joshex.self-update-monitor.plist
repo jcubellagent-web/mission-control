@@ -9,6 +9,10 @@
     <string>/Users/josh2.0/.openclaw/workspace/mission-control/scripts/self_update_monitor.py</string>
   </array>
   <key>WorkingDirectory</key><string>/Users/josh2.0/.openclaw/workspace/mission-control</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+  </dict>
   <key>RunAtLoad</key><true/>
   <key>StartInterval</key><integer>300</integer>
   <key>StandardOutPath</key><string>/Users/josh2.0/.openclaw/logs/self-update-monitor.log</string>
