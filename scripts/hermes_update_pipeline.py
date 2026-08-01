@@ -40,7 +40,7 @@ def compact(value: str, limit: int = 500) -> str:
     return value if len(value) <= limit else value[: limit - 1].rstrip() + "…"
 
 
-def run(command: list[str], *, cwd: Path | None = None, timeout: int = 120) -> dict[str, Any]:
+def run(command: list[str], *, cwd: Path | None = None, timeout: int = 120, preserve_lines: bool = False) -> dict[str, Any]:
     try:
         result = subprocess.run(command, cwd=cwd, text=True, capture_output=True, timeout=timeout, check=False)
     except (OSError, subprocess.TimeoutExpired) as exc:
@@ -49,12 +49,12 @@ def run(command: list[str], *, cwd: Path | None = None, timeout: int = 120) -> d
         "ok": result.returncode == 0,
         "command": command,
         "code": result.returncode,
-        "detail": compact((result.stdout or "") + (result.stderr or "")),
+        "detail": ((result.stdout or "") + (result.stderr or "")).strip() if preserve_lines else compact((result.stdout or "") + (result.stderr or "")),
     }
 
 
 def git(source: Path, *args: str) -> dict[str, Any]:
-    return run(["git", *args], cwd=source)
+    return run(["git", *args], cwd=source, preserve_lines=True)
 
 
 def source_state(config: dict[str, Any]) -> dict[str, Any]:
@@ -90,6 +90,36 @@ def manifest_path(evidence_dir: Path, target: str) -> Path:
     return evidence_dir / f"candidate-{target[:12]}.json"
 
 
+def local_patch_commits(source: Path, base_ref: str, head_ref: str) -> list[str]:
+    result = git(source, "rev-list", "--reverse", f"{base_ref}..{head_ref}")
+    if not result["ok"]:
+        raise RuntimeError(f"Could not resolve carried patches: {result['detail']}")
+    return [line.strip() for line in result["detail"].splitlines() if line.strip()]
+
+
+def replay_local_patches(source: Path, sandbox: Path, config: dict[str, Any]) -> dict[str, Any]:
+    if not config.get("replayLocalPatches", True):
+        return {"ok": True, "status": "disabled", "commitCount": 0, "commits": []}
+    commits = local_patch_commits(source, config["localPatchBaseRef"], config.get("localPatchHeadRef", "HEAD"))
+    applied: list[str] = []
+    for commit in commits:
+        result = git(sandbox, "cherry-pick", commit)
+        if not result["ok"]:
+            abort = git(sandbox, "cherry-pick", "--abort")
+            return {
+                "ok": False,
+                "status": "conflict",
+                "commitCount": len(commits),
+                "appliedCount": len(applied),
+                "failedCommit": commit,
+                "detail": compact(result["detail"]),
+                "abortOk": abort["ok"],
+                "commits": commits,
+            }
+        applied.append(commit)
+    return {"ok": True, "status": "applied", "commitCount": len(commits), "appliedCount": len(applied), "commits": commits}
+
+
 def prepare(config: dict[str, Any], target: str, evidence_dir: Path) -> dict[str, Any]:
     state = source_state(config)
     if not state["sourceAccessible"]:
@@ -105,15 +135,18 @@ def prepare(config: dict[str, Any], target: str, evidence_dir: Path) -> dict[str
     if not created["ok"]:
         shutil.rmtree(sandbox, ignore_errors=True)
         raise RuntimeError(f"Could not create candidate worktree: {created['detail']}")
+    replay = replay_local_patches(source, sandbox, config)
     manifest = {
-        "version": 1,
+        "version": 2,
         "createdAt": now(),
         "target": resolved,
         "sandbox": str(sandbox),
         "sourceState": state,
         "canaryProfile": config["canaryProfile"],
         "requiredGates": config["requiredGates"],
+        "canaryCommands": config.get("canaryCommands") or [],
         "observationMinutes": config["observationMinutes"],
+        "localPatchReplay": replay,
         "promotion": {"automatic": False, "status": "manual-review-required"},
         "rollback": {"productionInstall": config["productionInstall"], "sourceHead": state["head"], "prepared": True},
     }
@@ -122,28 +155,86 @@ def prepare(config: dict[str, Any], target: str, evidence_dir: Path) -> dict[str
     return {"manifest": str(path), **manifest}
 
 
+def run_canary_commands(manifest: dict[str, Any], sandbox: Path) -> dict[str, Any]:
+    commands = manifest.get("canaryCommands") or []
+    if not commands:
+        return {"ok": False, "detail": "No synthetic canary commands are configured.", "results": []}
+    results = []
+    for raw in commands:
+        if not isinstance(raw, list) or not raw:
+            results.append({"ok": False, "detail": "Invalid canary command; expected a non-empty argument list."})
+            break
+        command = [sys.executable if part == "{python}" else str(part) for part in raw]
+        result = run(command, cwd=sandbox, timeout=900)
+        results.append(result)
+        if not result["ok"]:
+            break
+    return {"ok": bool(results) and all(item.get("ok") for item in results), "results": results}
+
+
+def observation_check(manifest: dict[str, Any]) -> dict[str, Any]:
+    evidence = manifest.get("observationEvidence")
+    required = int(manifest.get("observationMinutes") or 0)
+    if not isinstance(evidence, dict):
+        return {"ok": False, "status": "pending", "detail": f"Requires {required} minutes of recorded canary observation."}
+    duration = int(evidence.get("durationMinutes") or 0)
+    checks = evidence.get("checks") if isinstance(evidence.get("checks"), dict) else {}
+    required_checks = {"gateway", "telegramDelivery", "cron", "modelRouting", "browser", "controlTower"}
+    failed = sorted(name for name in required_checks if checks.get(name) is not True)
+    ok = bool(evidence.get("complete")) and duration >= required and not failed
+    return {
+        "ok": ok,
+        "status": "complete" if ok else "failed" if evidence.get("complete") else "pending",
+        "durationMinutes": duration,
+        "requiredMinutes": required,
+        "failedChecks": failed,
+        "detail": "Recorded canary observation satisfies all critical-surface gates." if ok else "Canary observation is incomplete or failed.",
+    }
+
+
 def verify(manifest: dict[str, Any]) -> dict[str, Any]:
     sandbox = Path(manifest["sandbox"])
+    replay = manifest.get("localPatchReplay") if isinstance(manifest.get("localPatchReplay"), dict) else {}
     checks = {
         "candidate-worktree": {"ok": sandbox.is_dir()},
         "static-compile": run([sys.executable, "-m", "compileall", "-q", "."], cwd=sandbox, timeout=300),
         "git-diff-check": run(["git", "diff", "--check"], cwd=sandbox),
-        # The pipeline never sends traffic itself.  This marks the canary as
-        # ready for a separately configured, synthetic command on the host.
-        "canary-command": {"ok": True, "detail": f"Ready for synthetic profile: {manifest['canaryProfile']}"},
+        "local-patch-replay": {"ok": bool(replay.get("ok")), "status": replay.get("status"), "detail": replay.get("detail", "")},
+        "canary-command": run_canary_commands(manifest, sandbox) if replay.get("ok") else {"ok": False, "detail": "Skipped because carried patches did not replay cleanly."},
         "rollback-manifest": {"ok": bool(manifest.get("rollback", {}).get("prepared"))},
-        "observation-evidence": {"ok": True, "detail": f"Requires {manifest['observationMinutes']} minutes after manual canary start"},
+        "observation-evidence": observation_check(manifest),
     }
     checks["source-clean"] = {"ok": bool(manifest.get("sourceState", {}).get("sourceClean"))}
     failures = [name for name in manifest["requiredGates"] if not checks.get(name, {}).get("ok")]
-    return {"checkedAt": now(), "target": manifest["target"], "checks": checks, "readyForManualCanary": not failures, "failures": failures, "promotion": "manual-review-required"}
+    pre_observation_failures = [name for name in failures if name != "observation-evidence"]
+    return {
+        "checkedAt": now(),
+        "target": manifest["target"],
+        "checks": checks,
+        "readyForObservation": not pre_observation_failures,
+        "readyForPromotionReview": not failures,
+        "failures": failures,
+        "promotion": "manual-review-required",
+    }
+
+
+def record_observation(manifest_path_value: Path, evidence_path: Path) -> dict[str, Any]:
+    manifest = read_json(manifest_path_value)
+    evidence = read_json(evidence_path)
+    if evidence.get("target") != manifest.get("target"):
+        raise RuntimeError("Observation evidence target does not match the candidate manifest")
+    manifest["observationEvidence"] = evidence
+    manifest["observationRecordedAt"] = now()
+    write_json(manifest_path_value, manifest)
+    return observation_check(manifest)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=["status", "prepare", "verify", "promote"])
+    parser.add_argument("command", choices=["status", "prepare", "verify", "record-observation", "promote"])
     parser.add_argument("--target", help="Locally fetched candidate commit or tag (required for prepare)")
     parser.add_argument("--manifest", help="Prepared candidate manifest (required for verify)")
+    parser.add_argument("--observation-evidence", help="Dashboard-safe observation evidence JSON (required for record-observation)")
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     parser.add_argument("--evidence-dir", type=Path, default=DEFAULT_EVIDENCE)
     args = parser.parse_args()
@@ -157,6 +248,11 @@ def main() -> int:
         if not args.target:
             parser.error("--target is required for prepare")
         print(json.dumps(prepare(config, args.target, args.evidence_dir), indent=2))
+        return 0
+    if args.command == "record-observation":
+        if not args.manifest or not args.observation_evidence:
+            parser.error("--manifest and --observation-evidence are required for record-observation")
+        print(json.dumps(record_observation(Path(args.manifest), Path(args.observation_evidence)), indent=2))
         return 0
     if not args.manifest:
         parser.error("--manifest is required for verify")

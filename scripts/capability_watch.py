@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -105,16 +106,26 @@ def npm_dist_tags(package: str) -> dict[str, Any]:
 
 
 def openclaw_status() -> dict[str, Any]:
+    version = run(["openclaw", "--version"], timeout=12)
     result = run(["openclaw", "update", "status", "--json"], timeout=35)
     payload = result.get("json")
     if isinstance(payload, dict):
+        update = payload.get("update") if isinstance(payload.get("update"), dict) else {}
+        registry = update.get("registry") if isinstance(update.get("registry"), dict) else {}
+        availability = payload.get("availability") if isinstance(payload.get("availability"), dict) else {}
+        channel = payload.get("channel")
+        if isinstance(channel, dict):
+            channel_value = channel.get("value") or channel.get("label")
+        else:
+            channel_value = channel
+        version_match = re.search(r"OpenClaw\s+([^\s]+)", str(version.get("detail") or ""), re.IGNORECASE)
         return {
-            "ok": result.get("ok"),
+            "ok": bool(result.get("ok")) and bool(version.get("ok")),
             "status": "ok" if result.get("ok") else "attention",
-            "currentVersion": payload.get("currentVersion") or payload.get("current"),
-            "latestVersion": payload.get("latestVersion") or payload.get("latest"),
-            "updateAvailable": bool(payload.get("updateAvailable")),
-            "channel": payload.get("channel"),
+            "currentVersion": payload.get("currentVersion") or payload.get("current") or update.get("currentVersion") or (version_match.group(1) if version_match else None),
+            "latestVersion": payload.get("latestVersion") or payload.get("latest") or availability.get("latestVersion") or registry.get("latestVersion"),
+            "updateAvailable": bool(payload.get("updateAvailable") or availability.get("available")),
+            "channel": channel_value,
         }
     return {"ok": result.get("ok"), "status": result.get("status"), "detail": result.get("detail")}
 
@@ -130,6 +141,15 @@ def hermes_status() -> dict[str, Any]:
         "version": compact(version.get("detail"), 120) if version.get("ok") else "",
         "detail": compact(detail, 260),
     }
+
+
+def hermes_release_tag(version_text: str) -> str | None:
+    """Translate the CLI's release date into the upstream stable tag."""
+    match = re.search(r"Hermes Agent v[^\s]+\s+\((\d{4})\.(\d{1,2})\.(\d{1,2})\)", version_text or "")
+    if not match:
+        return None
+    year, month, day = (int(part) for part in match.groups())
+    return f"v{year}.{month}.{day}"
 
 
 def installed_summary(inventory: dict[str, Any]) -> dict[str, Any]:
@@ -155,26 +175,39 @@ def build_recommendations(sources: dict[str, Any]) -> list[dict[str, Any]]:
             "owner": "Josh 2.0 / J.A.I.N",
         })
     hermes = sources.get("hermesUpdate") or {}
-    if (
-        hermes.get("status") in {"watch", "attention"}
-        and hermes.get("version")
-        and "up to date" not in str(hermes.get("detail") or "").lower()
-    ):
+    hermes_release = sources.get("hermesLatestRelease") or {}
+    installed_tag = hermes_release_tag(str(hermes.get("version") or ""))
+    latest_tag = hermes_release.get("tag")
+    if installed_tag and latest_tag and installed_tag != latest_tag:
         rows.append({
-            "id": "hermes-watch",
-            "status": "attention" if hermes.get("status") == "attention" else "upgrade",
-            "title": "Hermes update watch",
-            "detail": hermes.get("detail") or "Hermes update check needs review.",
+            "id": "hermes-stable-update-available",
+            "status": "upgrade",
+            "title": "Hermes stable update available",
+            "detail": f"{installed_tag} -> {latest_tag}; prepare and verify the carried-patch candidate before promotion.",
             "owner": "JAIMES",
         })
+    elif hermes.get("status") == "attention" and hermes.get("version"):
+        rows.append({
+            "id": "hermes-update-check-failed",
+            "status": "attention",
+            "title": "Hermes update check needs attention",
+            "detail": hermes.get("detail") or "Hermes update check failed.",
+            "owner": "JAIMES",
+        })
+    return rows
+
+
+def build_previews(sources: dict[str, Any]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
     npm_tags = (sources.get("openclawNpm") or {}).get("distTags") or {}
     beta = npm_tags.get("beta")
-    if beta:
+    stable = npm_tags.get("latest")
+    if beta and beta != stable:
         rows.append({
             "id": "openclaw-beta-channel",
-            "status": "watch",
+            "status": "preview",
             "title": "OpenCLAW beta channel tracked",
-            "detail": f"npm beta tag: {beta}",
+            "detail": f"stable {stable or 'unknown'}; beta {beta}",
             "owner": "JOSHeX",
         })
     return rows
@@ -216,6 +249,7 @@ def main() -> int:
         sources["openclawLatestRelease"] = release_summary(fetch_json("https://api.github.com/repos/openclaw/openclaw/releases/latest"))
         sources["hermesLatestRelease"] = release_summary(fetch_json("https://api.github.com/repos/NousResearch/Hermes-Agent/releases/latest"))
     recommendations = build_recommendations(sources)
+    previews = build_previews(sources)
     payload = {
         "updatedAt": now,
         "checkedAt": now,
@@ -223,6 +257,7 @@ def main() -> int:
         "summary": f"{len(recommendations)} capability recommendation(s); {sources['installed']['openclawNodes']} OpenCLAW node(s), {sources['installed']['hermesNodes']} Hermes node(s).",
         "sources": sources,
         "recommendations": recommendations[:12],
+        "previews": previews[:12],
         "privacy": "dashboard-safe metadata only",
     }
     write_json(OUT, payload)

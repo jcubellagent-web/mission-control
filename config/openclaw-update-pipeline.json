@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "owner": "josh2",
+  "package": "openclaw",
+  "productionChannel": "stable",
+  "allowPrereleasePromotion": false,
+  "observationMinutes": 1440,
+  "requiredGates": [
+    "production-baseline",
+    "candidate-install",
+    "candidate-version",
+    "synthetic-canary",
+    "observation-evidence",
+    "rollback-manifest"
+  ],
+  "canaryCommands": [
+    ["{candidate}", "--help"],
+    ["{candidate}", "update", "status", "--json"]
+  ],
+  "criticalSurfaces": [
+    "gateway",
+    "telegramDelivery",
+    "scheduledWork",
+    "modelRouting",
+    "browser",
+    "controlTower"
+  ],
+  "productionMutation": "manual-only",
+  "automaticPromotion": false
+}

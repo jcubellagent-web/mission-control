@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "owner": "jaimes",
   "watchSchedule": "Monday 09:00 America/New_York",
   "sourceRepository": "/Users/jc_agent/.hermes/hermes-agent",
@@ -8,14 +8,30 @@
   "ignoredDirtyPaths": [
     ".install_method"
   ],
+  "replayLocalPatches": true,
+  "localPatchBaseRef": "v2026.7.20",
+  "localPatchHeadRef": "HEAD",
   "requiredGates": [
     "source-clean",
     "candidate-worktree",
+    "local-patch-replay",
     "static-compile",
     "git-diff-check",
     "canary-command",
     "observation-evidence",
     "rollback-manifest"
+  ],
+  "canaryCommands": [
+    [
+      "{python}",
+      "-m",
+      "pytest",
+      "-q",
+      "tests/gateway/test_telegram_final_delivery.py",
+      "tests/gateway/test_telegram_group_gating.py",
+      "tests/gateway/test_restart_starts_new_session.py",
+      "tests/cron/test_scheduler.py"
+    ]
   ],
   "observationMinutes": 1440,
   "productionMutation": "manual-only",
