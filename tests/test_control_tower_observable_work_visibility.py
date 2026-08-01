@@ -46,9 +46,7 @@ class ObservableWorkVisibilityTests(unittest.TestCase):
         styles = STYLES.read_text(encoding="utf-8")
         inspector = styles[styles.index("/* Bounded work visibility"):styles.index("@media (max-width: 900px)")]
 
-        self.assertIn("content-visibility: auto;", inspector)
         self.assertIn("contain: layout paint style;", inspector)
-        self.assertIn("contain-intrinsic-size: 250px;", inspector)
         self.assertIn("max-height: 286px;", inspector)
         self.assertIn("overflow: auto;", inspector)
         self.assertIn(".brain-hero > .live-run-inspector", styles)

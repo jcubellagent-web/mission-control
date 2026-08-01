@@ -53,9 +53,7 @@
 
 /* Bounded work visibility: reuses the existing Live Work detail disclosure. */
 .live-run-inspector {
-  content-visibility: auto;
   contain: layout paint style;
-  contain-intrinsic-size: 250px;
   display: grid;
   gap: 8px;
   margin: 8px 10px 0;
