@@ -5,7 +5,7 @@ import { AlertTriangle, ArrowLeftRight, ArrowUp, BookOpen, Bot, Braces, CheckCir
 import { invalidateMissionControlSidecars, loadMissionControl, subscribeMissionControlRealtime } from "./data";
 import { PRIORITY_JOB_RULES, SORARE_DAILY_GROUPS, SORARE_GENERAL_PATTERN, type PriorityJobKey, type SorareGroupKey } from "./priorityJobs";
 import { CANONICAL_ROUTE_ORDER, CANONICAL_ROUTES, liveWorkModelLabel, routeCssProperties, routeForAgentStatus, routeForProvider, verifiedRouteForAgentStatus } from "./routeIdentity";
-import type { ActiveModelRoute, AgentEvent, AgenticCryptoWallet, AgentId, AgentStatus, MemoryHealthTone, MissionControlState, SignalItem, TodayJobOccurrence, TodayJobsMeta } from "./types";
+import type { ActiveModelRoute, AgentEvent, AgenticCryptoWallet, AgentId, AgentStatus, MemoryDiagnostics, MemoryHealthTone, MissionControlState, SignalItem, TodayJobOccurrence, TodayJobsMeta } from "./types";
 import "./styles.css";
 
 const AGENTS: Record<AgentId, { label: string; role: string; roleBadge: string }> = {
@@ -3771,6 +3771,126 @@ function sanitizedMemoryHealthTone(value: unknown, check: string): MemoryHealthT
   return tone === "clear" || tone === "watch" || tone === "risk" || tone === "idle" ? tone : "idle";
 }
 
+const MEMORY_DIAGNOSTIC_SOURCE_CATEGORIES = new Set([
+  "Task ledger", "Semantic index", "Decision ledger", "Policy and skills",
+  "Brain intake", "Direct instruction", "Research evidence", "Other verified source",
+]);
+const MEMORY_DIAGNOSTIC_OWNERS = new Set(["joshex", "josh2", "jaimes", "jain", "ecosystem", "other"]);
+const MEMORY_REVIEW_BUCKETS = new Set(["<24h", "1-3d", "3-7d", ">7d"]);
+const MEMORY_LINEAGE_DEPTHS = new Set(["1", "2", "3", "4+"]);
+
+function boundedMemoryMetric(value: unknown, maximum: number) {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= maximum ? value : null;
+}
+
+function sanitizedMemoryDiagnostics(value: unknown): MemoryDiagnostics | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const raw = value as Record<string, unknown>;
+  const privacy = raw.privacy as Record<string, unknown> | undefined;
+  if (raw.schemaVersion !== 1 || !isStrictMemoryTimestamp(raw.generatedAt)
+    || privacy?.countsOnly !== true || privacy?.contentIncluded !== false || privacy?.rawIdentifiersIncluded !== false) return undefined;
+  const trendRows = Array.isArray(raw.trend30d) ? raw.trend30d : [];
+  if (trendRows.length !== 30) return undefined;
+  const trend30d: MemoryDiagnostics["trend30d"] = [];
+  for (const valueRow of trendRows) {
+    if (!valueRow || typeof valueRow !== "object" || Array.isArray(valueRow)) return undefined;
+    const row = valueRow as Record<string, unknown>;
+    const date = typeof row.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(row.date) ? row.date : null;
+    const queries = boundedMemoryCount(row.queries);
+    const hitRatePct = row.hitRatePct == null ? null : boundedMemoryMetric(row.hitRatePct, 100);
+    const p95LatencyMs = row.p95LatencyMs == null ? null : boundedMemoryMetric(row.p95LatencyMs, 60_000);
+    const selectedUseRatePct = row.selectedUseRatePct == null ? null : boundedMemoryMetric(row.selectedUseRatePct, 100);
+    const provenanceCoveragePct = row.provenanceCoveragePct == null ? null : boundedMemoryMetric(row.provenanceCoveragePct, 100);
+    if (!date || queries == null || (row.hitRatePct != null && hitRatePct == null)
+      || (row.p95LatencyMs != null && p95LatencyMs == null)
+      || (row.selectedUseRatePct != null && selectedUseRatePct == null)
+      || (row.provenanceCoveragePct != null && provenanceCoveragePct == null)) return undefined;
+    trend30d.push({ date, queries, hitRatePct, p95LatencyMs, selectedUseRatePct, provenanceCoveragePct });
+  }
+  const reviewRows = Array.isArray(raw.reviewAging) ? raw.reviewAging : [];
+  if (reviewRows.length !== 4) return undefined;
+  const reviewAging: MemoryDiagnostics["reviewAging"] = [];
+  for (const valueRow of reviewRows) {
+    if (!valueRow || typeof valueRow !== "object" || Array.isArray(valueRow)) return undefined;
+    const row = valueRow as Record<string, unknown>;
+    const bucket = typeof row.bucket === "string" && MEMORY_REVIEW_BUCKETS.has(row.bucket) ? row.bucket as MemoryDiagnostics["reviewAging"][number]["bucket"] : null;
+    const pending = boundedMemoryCount(row.pending);
+    const disputed = boundedMemoryCount(row.disputed);
+    if (!bucket || pending == null || disputed == null || reviewAging.some((item) => item.bucket === bucket)) return undefined;
+    reviewAging.push({ bucket, pending, disputed });
+  }
+  const rawProvenance = raw.provenanceMatrix as Record<string, unknown> | undefined;
+  const ownerValues = Array.isArray(rawProvenance?.owners) ? rawProvenance.owners : [];
+  const owners = ownerValues.filter((owner): owner is MemoryDiagnostics["provenanceMatrix"]["owners"][number] => typeof owner === "string" && MEMORY_DIAGNOSTIC_OWNERS.has(owner));
+  if (owners.length !== ownerValues.length || new Set(owners).size !== owners.length || owners.length > 6) return undefined;
+  const provenanceRows = Array.isArray(rawProvenance?.rows) ? rawProvenance.rows : [];
+  if (provenanceRows.length > 8) return undefined;
+  const provenanceMatrix: MemoryDiagnostics["provenanceMatrix"] = { owners, rows: [] };
+  for (const valueRow of provenanceRows) {
+    if (!valueRow || typeof valueRow !== "object" || Array.isArray(valueRow)) return undefined;
+    const row = valueRow as Record<string, unknown>;
+    const category = typeof row.category === "string" && MEMORY_DIAGNOSTIC_SOURCE_CATEGORIES.has(row.category) ? row.category : null;
+    const count = boundedMemoryCount(row.count);
+    const withSourceRef = boundedMemoryCount(row.withSourceRef);
+    const coveragePct = row.coveragePct == null ? null : boundedMemoryMetric(row.coveragePct, 100);
+    const ownerCounts = row.owners && typeof row.owners === "object" && !Array.isArray(row.owners) ? row.owners as Record<string, unknown> : null;
+    if (!category || count == null || withSourceRef == null || !ownerCounts || (row.coveragePct != null && coveragePct == null)) return undefined;
+    const safeOwners: Record<string, number> = {};
+    for (const owner of owners) {
+      const ownerCount = boundedMemoryCount(ownerCounts[owner]);
+      if (ownerCount == null) return undefined;
+      safeOwners[owner] = ownerCount;
+    }
+    provenanceMatrix.rows.push({ category, count, withSourceRef, coveragePct, owners: safeOwners });
+  }
+  const rawFreshness = raw.freshnessRunway as Record<string, unknown> | undefined;
+  if (!rawFreshness) return undefined;
+  const freshnessKeys = ["expiredExposure", "next7d", "days8to30", "days31to90", "beyond90d", "noExpiry"] as const;
+  const freshnessValues = Object.fromEntries(freshnessKeys.map((key) => [key, boundedMemoryCount(rawFreshness[key])])) as Record<typeof freshnessKeys[number], number | null>;
+  if (freshnessKeys.some((key) => freshnessValues[key] == null)) return undefined;
+  const rawLineage = raw.lineage as Record<string, unknown> | undefined;
+  if (!rawLineage) return undefined;
+  const lineageCounts = ["supersessionLinks", "orphanLinks", "disputedRecords", "maxDepth", "cycleCount", "recentSupersessions30d"] as const;
+  const lineageValues = Object.fromEntries(lineageCounts.map((key) => [key, boundedMemoryCount(rawLineage[key])])) as Record<typeof lineageCounts[number], number | null>;
+  const rawChainBuckets = Array.isArray(rawLineage.chainBuckets) ? rawLineage.chainBuckets : [];
+  if (lineageCounts.some((key) => lineageValues[key] == null) || rawChainBuckets.length !== 4) return undefined;
+  const chainBuckets: MemoryDiagnostics["lineage"]["chainBuckets"] = [];
+  for (const valueRow of rawChainBuckets) {
+    if (!valueRow || typeof valueRow !== "object" || Array.isArray(valueRow)) return undefined;
+    const row = valueRow as Record<string, unknown>;
+    const depth = typeof row.depth === "string" && MEMORY_LINEAGE_DEPTHS.has(row.depth) ? row.depth as MemoryDiagnostics["lineage"]["chainBuckets"][number]["depth"] : null;
+    const count = boundedMemoryCount(row.count);
+    if (!depth || count == null || chainBuckets.some((item) => item.depth === depth)) return undefined;
+    chainBuckets.push({ depth, count });
+  }
+  const rawReuse = raw.reuseMatrix as Record<string, unknown> | undefined;
+  const reuseAgentValues = Array.isArray(rawReuse?.agents) ? rawReuse.agents : [];
+  const reuseAgents = reuseAgentValues.filter((agent): agent is MemoryDiagnostics["reuseMatrix"]["agents"][number] => typeof agent === "string" && MEMORY_DIAGNOSTIC_OWNERS.has(agent) && agent !== "other");
+  const rawReuseCells = Array.isArray(rawReuse?.cells) ? rawReuse.cells : [];
+  if (reuseAgents.length !== reuseAgentValues.length || new Set(reuseAgents).size !== reuseAgents.length || rawReuseCells.length > 25) return undefined;
+  const cells: MemoryDiagnostics["reuseMatrix"]["cells"] = [];
+  for (const valueRow of rawReuseCells) {
+    if (!valueRow || typeof valueRow !== "object" || Array.isArray(valueRow)) return undefined;
+    const row = valueRow as Record<string, unknown>;
+    const sourceAgent = typeof row.sourceAgent === "string" && reuseAgents.includes(row.sourceAgent as never) ? row.sourceAgent as MemoryDiagnostics["reuseMatrix"]["cells"][number]["sourceAgent"] : null;
+    const consumerAgent = typeof row.consumerAgent === "string" && HERO_AGENT_ORDER.includes(row.consumerAgent as AgentId) ? row.consumerAgent as AgentId : null;
+    const uses = boundedMemoryCount(row.uses);
+    if (!sourceAgent || !consumerAgent || uses == null) return undefined;
+    cells.push({ sourceAgent, consumerAgent, uses });
+  }
+  return {
+    schemaVersion: 1,
+    generatedAt: raw.generatedAt as string,
+    privacy: { countsOnly: true, contentIncluded: false, rawIdentifiersIncluded: false },
+    trend30d,
+    reviewAging,
+    provenanceMatrix,
+    freshnessRunway: freshnessValues as MemoryDiagnostics["freshnessRunway"],
+    lineage: { ...lineageValues, chainBuckets } as MemoryDiagnostics["lineage"],
+    reuseMatrix: { agents: reuseAgents, cells },
+  };
+}
+
 function newestMemoryTimestamp(first: string | null | undefined, second: string | null | undefined) {
   if (!first) return second || null;
   if (!second) return first;
@@ -4044,6 +4164,159 @@ function BrainAtlasOperationsView({
   );
 }
 
+type MemoryTrendMetric = "hitRatePct" | "p95LatencyMs" | "provenanceCoveragePct" | "selectedUseRatePct";
+
+const MEMORY_TREND_LABELS: Record<MemoryTrendMetric, string> = {
+  hitRatePct: "Recall hit rate",
+  p95LatencyMs: "P95 latency",
+  provenanceCoveragePct: "Provenance",
+  selectedUseRatePct: "Verified reuse",
+};
+
+function averageMemoryTrend(rows: MemoryDiagnostics["trend30d"], key: MemoryTrendMetric) {
+  const values = rows.map((row) => row[key]).filter((value): value is number => value != null);
+  return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null;
+}
+
+function memoryTrendDisplay(value: number | null, key: MemoryTrendMetric) {
+  if (value == null) return "—";
+  return key === "p95LatencyMs" ? `${Math.round(value * 10) / 10} ms` : `${Math.round(value)}%`;
+}
+
+function memoryOwnerLabel(owner: string) {
+  if (owner === "ecosystem") return "Shared";
+  if (owner === "other") return "Other";
+  return AGENTS[owner as AgentId]?.label || owner;
+}
+
+function MemoryDiagnosticsView({ diagnostics }: { diagnostics?: MemoryDiagnostics }) {
+  if (!diagnostics) {
+    return (
+      <section className="memory-diagnostics is-unavailable" role="status">
+        <strong>Memory diagnostics unavailable</strong>
+        <p>The counts-only diagnostic contract could not be verified.</p>
+      </section>
+    );
+  }
+  const trendMetrics: MemoryTrendMetric[] = ["hitRatePct", "p95LatencyMs", "provenanceCoveragePct", "selectedUseRatePct"];
+  const maxReview = Math.max(1, ...diagnostics.reviewAging.map((row) => row.pending + row.disputed));
+  const freshnessRows = [
+    ["Expired", diagnostics.freshnessRunway.expiredExposure, "risk"],
+    ["≤7d", diagnostics.freshnessRunway.next7d, "watch"],
+    ["8–30d", diagnostics.freshnessRunway.days8to30, "watch"],
+    ["31–90d", diagnostics.freshnessRunway.days31to90, "clear"],
+    [">90d", diagnostics.freshnessRunway.beyond90d, "clear"],
+    ["No expiry", diagnostics.freshnessRunway.noExpiry, "muted"],
+  ] as const;
+  const maxFreshness = Math.max(1, ...freshnessRows.map(([, count]) => count));
+  const maxProvenanceCell = Math.max(1, ...diagnostics.provenanceMatrix.rows.flatMap((row) => diagnostics.provenanceMatrix.owners.map((owner) => row.owners[owner] || 0)));
+  const reuseCell = new Map(diagnostics.reuseMatrix.cells.map((cell) => [`${cell.sourceAgent}:${cell.consumerAgent}`, cell.uses]));
+  const maxReuse = Math.max(1, ...diagnostics.reuseMatrix.cells.map((cell) => cell.uses));
+
+  return (
+    <section className="memory-diagnostics" aria-labelledby="memory-diagnostics-heading">
+      <header className="memory-diagnostics-header">
+        <div>
+          <h3 id="memory-diagnostics-heading">Memory diagnostics</h3>
+          <p>Thirty-day trends and bounded operational aggregates · counts only · no memory contents</p>
+        </div>
+        <span>{ageLabel(diagnostics.generatedAt)}</span>
+      </header>
+
+      <div className="memory-trend-ribbon" aria-label="Thirty-day memory health trends">
+        {trendMetrics.map((metric) => {
+          const current = averageMemoryTrend(diagnostics.trend30d.slice(-7), metric);
+          const previous = averageMemoryTrend(diagnostics.trend30d.slice(-14, -7), metric);
+          const delta = current != null && previous != null ? current - previous : null;
+          const scale = metric === "p95LatencyMs"
+            ? Math.max(1, ...diagnostics.trend30d.map((row) => row[metric] || 0))
+            : 100;
+          return (
+            <article key={metric} data-memory-visual="health-trend">
+              <header><span>{MEMORY_TREND_LABELS[metric]}</span><strong>{memoryTrendDisplay(current, metric)}</strong></header>
+              <div className="memory-mini-bars" role="img" aria-label={`${MEMORY_TREND_LABELS[metric]} over thirty days`}>
+                {diagnostics.trend30d.map((row) => {
+                  const value = row[metric];
+                  return <i key={row.date} className={value == null ? "is-empty" : ""} style={{ "--bar-value": `${value == null ? 0 : Math.max(4, Math.min(100, value / scale * 100))}%` } as React.CSSProperties} title={`${row.date}: ${memoryTrendDisplay(value, metric)}`} />;
+                })}
+              </div>
+              <em>{delta == null ? "No comparison" : `${delta >= 0 ? "+" : ""}${Math.round(delta * 10) / 10}${metric === "p95LatencyMs" ? " ms" : " pts"} vs prior 7d`}</em>
+            </article>
+          );
+        })}
+      </div>
+
+      <div className="memory-diagnostics-grid">
+        <article className="memory-diagnostic-panel is-review" data-memory-visual="review-aging">
+          <header><span>Review aging</span><strong>{diagnostics.reviewAging.reduce((sum, row) => sum + row.pending + row.disputed, 0)}</strong></header>
+          <div className="memory-aging-bars">
+            {diagnostics.reviewAging.map((row) => (
+              <div key={row.bucket}><span>{row.bucket}</span><i><b style={{ width: `${(row.pending / maxReview) * 100}%` }} /><em style={{ width: `${(row.disputed / maxReview) * 100}%` }} /></i><strong>{row.pending + row.disputed}</strong></div>
+            ))}
+          </div>
+          <footer><i className="is-pending" /> pending <i className="is-disputed" /> disputed</footer>
+        </article>
+
+        <article className="memory-diagnostic-panel is-freshness" data-memory-visual="freshness-runway">
+          <header><span>Freshness runway</span><strong>{diagnostics.freshnessRunway.expiredExposure} exposed</strong></header>
+          <div className="memory-runway-bars">
+            {freshnessRows.map(([label, count, tone]) => (
+              <div key={label} className={`is-${tone}`}><i style={{ height: `${Math.max(count ? 8 : 2, count / maxFreshness * 100)}%` }} /><strong>{count}</strong><span>{label}</span></div>
+            ))}
+          </div>
+        </article>
+
+        <article className="memory-diagnostic-panel is-lineage" data-memory-visual="lineage">
+          <header><span>Conflict + supersession lineage</span><strong>{diagnostics.lineage.supersessionLinks} links</strong></header>
+          <div className="memory-lineage-chain" role="img" aria-label={`Maximum supersession depth ${diagnostics.lineage.maxDepth}`}>
+            {diagnostics.lineage.chainBuckets.map((row, index) => (
+              <React.Fragment key={row.depth}>
+                {index ? <i aria-hidden="true">→</i> : null}
+                <span className={row.count ? "is-used" : ""}><strong>{row.count}</strong><em>depth {row.depth}</em></span>
+              </React.Fragment>
+            ))}
+          </div>
+          <footer>{diagnostics.lineage.disputedRecords} disputed · {diagnostics.lineage.orphanLinks} orphan links · {diagnostics.lineage.cycleCount} cycles · {diagnostics.lineage.recentSupersessions30d} recent</footer>
+        </article>
+
+        <article className="memory-diagnostic-panel is-provenance" data-memory-visual="provenance-matrix">
+          <header><span>Provenance coverage matrix</span><strong>{diagnostics.provenanceMatrix.rows.reduce((sum, row) => sum + row.count - row.withSourceRef, 0)} gaps</strong></header>
+          <div className="memory-matrix" role="table" aria-label="Active memory provenance by source category and owner">
+            <div className="memory-matrix-row is-header" role="row"><span role="columnheader">Source</span>{diagnostics.provenanceMatrix.owners.map((owner) => <span key={owner} role="columnheader">{memoryOwnerLabel(owner)}</span>)}<span role="columnheader">Coverage</span></div>
+            {diagnostics.provenanceMatrix.rows.map((row) => (
+              <div className="memory-matrix-row" role="row" key={row.category}>
+                <strong role="rowheader">{row.category}</strong>
+                {diagnostics.provenanceMatrix.owners.map((owner) => {
+                  const count = row.owners[owner] || 0;
+                  return <span key={owner} role="cell" className={count ? "has-value" : ""} style={{ "--heat": count / maxProvenanceCell } as React.CSSProperties}>{count || "·"}</span>;
+                })}
+                <em role="cell" className={row.coveragePct != null && row.coveragePct < 95 ? "is-watch" : ""}>{row.coveragePct == null ? "—" : `${row.coveragePct}%`}</em>
+              </div>
+            ))}
+          </div>
+        </article>
+
+        <article className="memory-diagnostic-panel is-reuse" data-memory-visual="reuse-matrix">
+          <header><span>Cross-agent verified reuse · 30d</span><strong>{diagnostics.reuseMatrix.cells.reduce((sum, cell) => sum + cell.uses, 0)}</strong></header>
+          <div className="memory-reuse-matrix" role="table" aria-label="Verified memory reuse from source owner to consuming agent">
+            <div className="memory-reuse-row is-header" role="row"><span role="columnheader">From ↓ / Used by →</span>{HERO_AGENT_ORDER.map((agent) => <span key={agent} role="columnheader">{AGENTS[agent].label}</span>)}</div>
+            {diagnostics.reuseMatrix.agents.map((source) => (
+              <div className="memory-reuse-row" role="row" key={source}>
+                <strong role="rowheader">{memoryOwnerLabel(source)}</strong>
+                {HERO_AGENT_ORDER.map((consumer) => {
+                  const uses = reuseCell.get(`${source}:${consumer}`) || 0;
+                  return <span role="cell" key={consumer} className={uses ? "has-value" : ""} style={{ "--heat": uses / maxReuse } as React.CSSProperties}>{uses || "·"}</span>;
+                })}
+              </div>
+            ))}
+          </div>
+          <footer>Rows identify memory ownership; columns identify the consuming agent.</footer>
+        </article>
+      </div>
+    </section>
+  );
+}
+
 function BrainAtlasPanel({
   atlas,
   ownershipGraph,
@@ -4070,7 +4343,7 @@ function BrainAtlasPanel({
   capabilityInventory?: MissionControlState["capabilityInventory"];
 }) {
   const [focusId, setFocusId] = useState("all");
-  const [atlasMode, setAtlasMode] = useState<"evidence" | "ownership" | "operations">("evidence");
+  const [atlasMode, setAtlasMode] = useState<"evidence" | "ownership" | "operations" | "diagnostics">("evidence");
   const [helpNodeId, setHelpNodeId] = useState<BrainAtlasHelpNodeId | null>(null);
   useEffect(() => {
     if (focusId !== "all" && !atlas?.nodes.some((node) => node.id === focusId)) setFocusId("all");
@@ -4080,6 +4353,7 @@ function BrainAtlasPanel({
   const recentProofView = useMemo(() => brainAtlasView(atlas, "all"), [atlas]);
   const recentProofRows = useMemo(() => brainAtlasProofRows(recentProofView), [recentProofView]);
   const activity = useMemo(() => sanitizedMemoryActivity(memoryOperations?.activity), [memoryOperations?.activity]);
+  const diagnostics = useMemo(() => sanitizedMemoryDiagnostics(memoryOperations?.diagnostics), [memoryOperations?.diagnostics]);
   const durableMemoryCount = sanitizedNestedMemoryCount(memoryOperations, "registry", "active");
   const supersededMemoryCount = sanitizedNestedMemoryCount(memoryOperations, "registry", "superseded");
   const registrySourceCount = sanitizedNestedMemoryCount(memoryOperations, "registry", "sources");
@@ -4106,6 +4380,11 @@ function BrainAtlasPanel({
     provenance: sanitizedMemoryHealthTone(memoryOperations, "provenance"),
     reuse: sanitizedMemoryHealthTone(memoryOperations, "reuse"),
   };
+  const diagnosticTone = !diagnostics
+    ? "risk"
+    : Object.values(healthTones).includes("risk")
+      ? "risk"
+      : Object.values(healthTones).includes("watch") ? "watch" : "clear";
   const motionWindowSeconds = Math.min(100, Math.max(15, Number(activity?.motionWindowSeconds || 90)));
   const count = (key: keyof MemoryActivity["counts"]) => Number(activity?.counts[key] || 0);
   const recent = (key: MemorySignalKey) => memorySignalIsRecent(activity?.lastObservedAt[key], motionWindowSeconds);
@@ -4170,6 +4449,8 @@ function BrainAtlasPanel({
       : ownershipGraph.status === "attention" ? "watch" : "clear"
     : atlasMode === "operations"
       ? "clear"
+      : atlasMode === "diagnostics"
+        ? diagnosticTone
       : selectedTone;
   const evidenceStateLabel = atlas?.status === "ready"
     ? `${atlas.counts.receipts} receipt${atlas.counts.receipts === 1 ? "" : "s"} · ${recentProofRows.length} verified path${recentProofRows.length === 1 ? "" : "s"}`
@@ -4225,18 +4506,21 @@ function BrainAtlasPanel({
           <button type="button" className={atlasMode === "evidence" ? "selected" : ""} aria-pressed={atlasMode === "evidence"} onClick={() => setAtlasMode("evidence")}>Memory + proof</button>
           <button type="button" className={atlasMode === "ownership" ? "selected" : ""} aria-pressed={atlasMode === "ownership"} onClick={() => setAtlasMode("ownership")}>Ownership</button>
           <button type="button" className={atlasMode === "operations" ? "selected" : ""} aria-pressed={atlasMode === "operations"} onClick={() => setAtlasMode("operations")}>Operations</button>
+          <button type="button" className={atlasMode === "diagnostics" ? "selected" : ""} aria-pressed={atlasMode === "diagnostics"} onClick={() => setAtlasMode("diagnostics")}>Memory health</button>
         </div>
-        <span className={`brain-atlas-state is-${displayTone}${latestSignalRecent && atlasMode === "evidence" ? " is-live" : ""}`} title={atlasMode === "ownership" ? "Exact ownership and handoff reconciliation" : atlasMode === "operations" ? "Verified model routes, scheduled outcomes, and governed quality telemetry" : loadDisclosure} aria-live="polite">
+        <span className={`brain-atlas-state is-${displayTone}${latestSignalRecent && atlasMode === "evidence" ? " is-live" : ""}`} title={atlasMode === "ownership" ? "Exact ownership and handoff reconciliation" : atlasMode === "operations" ? "Verified model routes, scheduled outcomes, and governed quality telemetry" : atlasMode === "diagnostics" ? "Counts-only trends, review pressure, provenance, freshness, lineage, and reuse" : loadDisclosure} aria-live="polite">
           <span className="brain-atlas-load-meter" role="img" aria-label={`${systemLoad.label} ecosystem load, ${systemLoad.score} of 4`}>
             {Array.from({ length: 4 }, (_, index) => <i key={index} className={index < systemLoad.score ? "is-lit" : ""} />)}
           </span>
-          <strong>{atlasMode === "ownership" ? `${ownershipGraph?.counts.flows || 0} PATHS` : atlasMode === "operations" ? `${(activeModelRoutes || []).filter((route) => route.routeVerified).length} VERIFIED LANES` : `${systemLoad.label.toUpperCase()} · ${workingAgentCount ? `${workingAgentCount} WORKING` : "NONE WORKING"}`}</strong>
-          <em>· {atlasMode === "ownership" ? `${ownershipGraph?.counts.findings || 0} findings` : atlasMode === "operations" ? `${todayJobsMeta?.occurrenceCount || todayJobs?.length || 0} scheduled outcomes` : `${headerActivityStateLabel} · ${evidenceStateLabel}`}</em>
+          <strong>{atlasMode === "ownership" ? `${ownershipGraph?.counts.flows || 0} PATHS` : atlasMode === "operations" ? `${(activeModelRoutes || []).filter((route) => route.routeVerified).length} VERIFIED LANES` : atlasMode === "diagnostics" ? "6 MEMORY VIEWS" : `${systemLoad.label.toUpperCase()} · ${workingAgentCount ? `${workingAgentCount} WORKING` : "NONE WORKING"}`}</strong>
+          <em>· {atlasMode === "ownership" ? `${ownershipGraph?.counts.findings || 0} findings` : atlasMode === "operations" ? `${todayJobsMeta?.occurrenceCount || todayJobs?.length || 0} scheduled outcomes` : atlasMode === "diagnostics" ? diagnostics ? `counts only · ${ageLabel(diagnostics.generatedAt)}` : "telemetry unavailable" : `${headerActivityStateLabel} · ${evidenceStateLabel}`}</em>
         </span>
       </header>
 
       {atlasMode === "ownership" ? <OwnershipGraphView graph={ownershipGraph} /> : atlasMode === "operations" ? (
         <BrainAtlasOperationsView activeModelRoutes={activeModelRoutes} todayJobs={todayJobs} todayJobsMeta={todayJobsMeta} qualityControl={qualityControl} capabilityInventory={capabilityInventory} />
+      ) : atlasMode === "diagnostics" ? (
+        <MemoryDiagnosticsView diagnostics={diagnostics} />
       ) : (
       <section
         id="brain-atlas-unified-panel"

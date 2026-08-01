@@ -394,9 +394,56 @@ export type MemoryOperations = Record<string, unknown> & {
       reuse: { tone: MemoryHealthTone; selectedUseRatePct: number | null; qualityRatePct: number | null; selected30d: number; feedback30d: number };
     };
   };
+  diagnostics?: MemoryDiagnostics;
 };
 
 export type MemoryHealthTone = "clear" | "watch" | "risk" | "idle";
+
+export type MemoryDiagnostics = {
+  schemaVersion: 1;
+  generatedAt: string;
+  privacy: { countsOnly: true; contentIncluded: false; rawIdentifiersIncluded: false };
+  trend30d: Array<{
+    date: string;
+    queries: number;
+    hitRatePct: number | null;
+    p95LatencyMs: number | null;
+    selectedUseRatePct: number | null;
+    provenanceCoveragePct: number | null;
+  }>;
+  reviewAging: Array<{ bucket: "<24h" | "1-3d" | "3-7d" | ">7d"; pending: number; disputed: number }>;
+  provenanceMatrix: {
+    owners: Array<AgentId | "ecosystem" | "other">;
+    rows: Array<{
+      category: string;
+      count: number;
+      withSourceRef: number;
+      coveragePct: number | null;
+      owners: Record<string, number>;
+    }>;
+  };
+  freshnessRunway: {
+    expiredExposure: number;
+    next7d: number;
+    days8to30: number;
+    days31to90: number;
+    beyond90d: number;
+    noExpiry: number;
+  };
+  lineage: {
+    supersessionLinks: number;
+    orphanLinks: number;
+    disputedRecords: number;
+    maxDepth: number;
+    cycleCount: number;
+    chainBuckets: Array<{ depth: "1" | "2" | "3" | "4+"; count: number }>;
+    recentSupersessions30d: number;
+  };
+  reuseMatrix: {
+    agents: Array<AgentId | "ecosystem">;
+    cells: Array<{ sourceAgent: AgentId | "ecosystem"; consumerAgent: AgentId; uses: number }>;
+  };
+};
 
 export type MissionControlState = {
   source: string;

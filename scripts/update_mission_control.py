@@ -206,24 +206,26 @@ CAPABILITY_NODE_RUNTIME_FIELDS = ("openclawCli", "hermesCli", "geminiCli", "code
 
 MEMORY_OPERATIONS_RAW_FIELDS = frozenset({
     "updatedAt", "status", "summary", "registry", "review", "retrieval",
-    "governance", "agentAccess", "activity", "privacy",
+    "freshness", "health", "governance", "agentAccess", "activity", "diagnostics", "privacy",
 })
 MEMORY_OPERATIONS_PROJECTED_FIELDS = frozenset({
     "schemaVersion", "updatedAt", "status", "source", "privacy",
-    "registry", "review", "retrieval", "activity",
+    "registry", "review", "retrieval", "freshness", "health", "activity", "diagnostics",
 })
 MEMORY_CANONICAL_AGENTS = ("joshex", "josh2", "jaimes", "jain")
-MEMORY_REGISTRY_FIELDS = ("active", "superseded", "expired", "sources")
-MEMORY_REVIEW_RAW_FIELDS = frozenset({"pending", "disputed", "lastRun", "lastStatus"})
-MEMORY_REVIEW_PROJECTED_FIELDS = frozenset({"pending", "disputed", "lastRun"})
+MEMORY_REGISTRY_FIELDS = ("active", "superseded", "expired", "sources", "withSourceRef", "provenanceCoveragePct")
+MEMORY_REGISTRY_COUNT_FIELDS = frozenset({"active", "superseded", "expired", "sources", "withSourceRef"})
+MEMORY_REVIEW_RAW_FIELDS = frozenset({"pending", "disputed", "lastRun", "lastStatus", "oldestPendingAt", "oldestPendingAgeHours"})
+MEMORY_REVIEW_PROJECTED_FIELDS = frozenset({"pending", "disputed", "lastRun", "oldestPendingAt", "oldestPendingAgeHours"})
 MEMORY_RETRIEVAL_RAW_FIELDS = frozenset({
     "queries7d", "hits7d", "hitRate", "avgLatencyMs", "feedback30d",
+    "p95LatencyMs",
     "helpful30d", "ignored30d", "corrected30d", "harmful30d",
     "qualityRate", "qualityDefinition", "preflights7d", "selected30d",
     "used30d", "reuseIgnored30d", "selectedUseRate",
 })
 MEMORY_RETRIEVAL_PROJECTED_FIELDS = (
-    "queries7d", "hits7d", "hitRate", "avgLatencyMs", "feedback30d",
+    "queries7d", "hits7d", "hitRate", "avgLatencyMs", "p95LatencyMs", "feedback30d",
     "helpful30d", "ignored30d", "corrected30d", "harmful30d",
     "qualityRate", "preflights7d", "selected30d", "used30d",
     "reuseIgnored30d", "selectedUseRate",
@@ -257,6 +259,13 @@ MEMORY_GOVERNANCE_FIELDS = frozenset({
     "sourceOfTruth", "autoPromote", "manualReview", "privacy",
 })
 MEMORY_STRICT_TIMESTAMP = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
+MEMORY_DIAGNOSTIC_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+MEMORY_DIAGNOSTIC_CATEGORIES = frozenset({
+    "Task ledger", "Semantic index", "Decision ledger", "Policy and skills",
+    "Brain intake", "Direct instruction", "Research evidence", "Other verified source",
+})
+MEMORY_DIAGNOSTIC_OWNERS = ("joshex", "josh2", "jaimes", "jain", "ecosystem", "other")
+MEMORY_DIAGNOSTIC_REUSE_AGENTS = ("joshex", "josh2", "jaimes", "jain", "ecosystem")
 
 
 def _project_mapping(value: Any, fields: frozenset[str]) -> Dict[str, Any]:
@@ -420,6 +429,272 @@ def _valid_memory_raw_envelope(value: Dict[str, Any], updated_at: dt.datetime) -
     )
 
 
+def _sanitize_memory_diagnostics(value: Any, updated_at: dt.datetime) -> Dict[str, Any] | None:
+    """Validate and copy the bounded counts-only Brain Atlas diagnostics contract."""
+
+    if not isinstance(value, dict) or set(value) != {
+        "schemaVersion", "generatedAt", "privacy", "trend30d", "reviewAging",
+        "provenanceMatrix", "freshnessRunway", "lineage", "reuseMatrix",
+    }:
+        return None
+    generated_at = _memory_time(value.get("generatedAt"))
+    if (
+        value.get("schemaVersion") != 1
+        or generated_at is None
+        or abs(generated_at - updated_at) > dt.timedelta(seconds=2)
+        or value.get("privacy") != {
+            "countsOnly": True,
+            "contentIncluded": False,
+            "rawIdentifiersIncluded": False,
+        }
+    ):
+        return None
+
+    trend = value.get("trend30d")
+    if not isinstance(trend, list) or len(trend) != 30:
+        return None
+    clean_trend: list[Dict[str, Any]] = []
+    previous_date: dt.date | None = None
+    for row in trend:
+        if not isinstance(row, dict) or set(row) != {
+            "date", "queries", "hitRatePct", "p95LatencyMs",
+            "selectedUseRatePct", "provenanceCoveragePct",
+        }:
+            return None
+        date_text = row.get("date")
+        if not isinstance(date_text, str) or not MEMORY_DIAGNOSTIC_DATE.fullmatch(date_text):
+            return None
+        try:
+            current_date = dt.date.fromisoformat(date_text)
+        except ValueError:
+            return None
+        if previous_date is not None and current_date != previous_date + dt.timedelta(days=1):
+            return None
+        previous_date = current_date
+        queries = _memory_count(row.get("queries"), 100_000)
+        clean_row: Dict[str, Any] = {"date": date_text, "queries": queries}
+        if queries is None:
+            return None
+        for name, maximum in (
+            ("hitRatePct", 100.0),
+            ("p95LatencyMs", 60_000.0),
+            ("selectedUseRatePct", 100.0),
+            ("provenanceCoveragePct", 100.0),
+        ):
+            item = row.get(name)
+            if item is not None and _memory_metric(item, maximum) is None:
+                return None
+            clean_row[name] = item
+        clean_trend.append(clean_row)
+
+    review = value.get("reviewAging")
+    review_buckets = ("<24h", "1-3d", "3-7d", ">7d")
+    if not isinstance(review, list) or len(review) != len(review_buckets):
+        return None
+    clean_review: list[Dict[str, Any]] = []
+    for expected_bucket, row in zip(review_buckets, review):
+        if not isinstance(row, dict) or set(row) != {"bucket", "pending", "disputed"}:
+            return None
+        pending = _memory_count(row.get("pending"), 100_000)
+        disputed = _memory_count(row.get("disputed"), 100_000)
+        if row.get("bucket") != expected_bucket or pending is None or disputed is None:
+            return None
+        clean_review.append({"bucket": expected_bucket, "pending": pending, "disputed": disputed})
+
+    provenance = value.get("provenanceMatrix")
+    if not isinstance(provenance, dict) or set(provenance) != {"owners", "rows"}:
+        return None
+    owners = provenance.get("owners")
+    rows = provenance.get("rows")
+    if owners != list(MEMORY_DIAGNOSTIC_OWNERS) or not isinstance(rows, list) or len(rows) > 8:
+        return None
+    clean_provenance_rows: list[Dict[str, Any]] = []
+    seen_categories: set[str] = set()
+    for row in rows:
+        if not isinstance(row, dict) or set(row) != {"category", "count", "withSourceRef", "owners", "coveragePct"}:
+            return None
+        category = row.get("category")
+        count = _memory_count(row.get("count"), 100_000)
+        with_ref = _memory_count(row.get("withSourceRef"), 100_000)
+        coverage = row.get("coveragePct")
+        owner_counts = row.get("owners")
+        if (
+            category not in MEMORY_DIAGNOSTIC_CATEGORIES
+            or category in seen_categories
+            or count is None
+            or with_ref is None
+            or with_ref > count
+            or not isinstance(owner_counts, dict)
+            or set(owner_counts) != set(MEMORY_DIAGNOSTIC_OWNERS)
+            or (coverage is not None and _memory_metric(coverage, 100.0) is None)
+        ):
+            return None
+        clean_owner_counts: Dict[str, int] = {}
+        for owner in MEMORY_DIAGNOSTIC_OWNERS:
+            owner_count = _memory_count(owner_counts.get(owner), 100_000)
+            if owner_count is None:
+                return None
+            clean_owner_counts[owner] = owner_count
+        if sum(clean_owner_counts.values()) != count:
+            return None
+        seen_categories.add(category)
+        clean_provenance_rows.append({
+            "category": category,
+            "count": count,
+            "withSourceRef": with_ref,
+            "owners": clean_owner_counts,
+            "coveragePct": coverage,
+        })
+
+    freshness = value.get("freshnessRunway")
+    freshness_fields = ("expiredExposure", "next7d", "days8to30", "days31to90", "beyond90d", "noExpiry")
+    if not isinstance(freshness, dict) or set(freshness) != set(freshness_fields):
+        return None
+    clean_freshness: Dict[str, int] = {}
+    for name in freshness_fields:
+        count = _memory_count(freshness.get(name), 100_000)
+        if count is None:
+            return None
+        clean_freshness[name] = count
+
+    lineage = value.get("lineage")
+    lineage_fields = {
+        "supersessionLinks", "orphanLinks", "disputedRecords", "maxDepth",
+        "cycleCount", "chainBuckets", "recentSupersessions30d",
+    }
+    if not isinstance(lineage, dict) or set(lineage) != lineage_fields:
+        return None
+    clean_lineage: Dict[str, Any] = {}
+    for name in lineage_fields - {"chainBuckets"}:
+        count = _memory_count(lineage.get(name), 100_000)
+        if count is None:
+            return None
+        clean_lineage[name] = count
+    raw_chains = lineage.get("chainBuckets")
+    depths = ("1", "2", "3", "4+")
+    if not isinstance(raw_chains, list) or len(raw_chains) != len(depths):
+        return None
+    clean_chains: list[Dict[str, Any]] = []
+    for expected_depth, row in zip(depths, raw_chains):
+        if not isinstance(row, dict) or set(row) != {"depth", "count"}:
+            return None
+        count = _memory_count(row.get("count"), 100_000)
+        if row.get("depth") != expected_depth or count is None:
+            return None
+        clean_chains.append({"depth": expected_depth, "count": count})
+    clean_lineage["chainBuckets"] = clean_chains
+
+    reuse = value.get("reuseMatrix")
+    if not isinstance(reuse, dict) or set(reuse) != {"agents", "cells"}:
+        return None
+    if reuse.get("agents") != list(MEMORY_DIAGNOSTIC_REUSE_AGENTS):
+        return None
+    raw_cells = reuse.get("cells")
+    if not isinstance(raw_cells, list) or len(raw_cells) > 25:
+        return None
+    clean_cells: list[Dict[str, Any]] = []
+    seen_pairs: set[tuple[str, str]] = set()
+    for row in raw_cells:
+        if not isinstance(row, dict) or set(row) != {"sourceAgent", "consumerAgent", "uses"}:
+            return None
+        source = row.get("sourceAgent")
+        consumer = row.get("consumerAgent")
+        uses = _memory_count(row.get("uses"), 100_000)
+        pair = (source, consumer)
+        if (
+            source not in MEMORY_DIAGNOSTIC_REUSE_AGENTS
+            or consumer not in MEMORY_CANONICAL_AGENTS
+            or source == consumer
+            or pair in seen_pairs
+            or uses is None
+            or uses < 1
+        ):
+            return None
+        seen_pairs.add(pair)
+        clean_cells.append({"sourceAgent": source, "consumerAgent": consumer, "uses": uses})
+
+    return {
+        "schemaVersion": 1,
+        "generatedAt": value["generatedAt"],
+        "privacy": {
+            "countsOnly": True,
+            "contentIncluded": False,
+            "rawIdentifiersIncluded": False,
+        },
+        "trend30d": clean_trend,
+        "reviewAging": clean_review,
+        "provenanceMatrix": {"owners": list(MEMORY_DIAGNOSTIC_OWNERS), "rows": clean_provenance_rows},
+        "freshnessRunway": clean_freshness,
+        "lineage": clean_lineage,
+        "reuseMatrix": {"agents": list(MEMORY_DIAGNOSTIC_REUSE_AGENTS), "cells": clean_cells},
+    }
+
+
+def _sanitize_memory_freshness(value: Any, updated_at: dt.datetime) -> Dict[str, Any] | None:
+    fields = {"expiredExposure", "expiring7d", "nextExpiryAt", "oldestActiveAt"}
+    if not isinstance(value, dict) or set(value) != fields:
+        return None
+    expired = _memory_count(value.get("expiredExposure"), 100_000)
+    expiring = _memory_count(value.get("expiring7d"), 100_000)
+    next_expiry_raw = value.get("nextExpiryAt")
+    oldest_active_raw = value.get("oldestActiveAt")
+    next_expiry = _memory_time(next_expiry_raw) if next_expiry_raw is not None else None
+    oldest_active = _memory_time(oldest_active_raw) if oldest_active_raw is not None else None
+    if (
+        expired is None
+        or expiring is None
+        or (next_expiry_raw is not None and next_expiry is None)
+        or (oldest_active_raw is not None and oldest_active is None)
+        or (oldest_active is not None and oldest_active > updated_at + dt.timedelta(minutes=2))
+    ):
+        return None
+    return {
+        "expiredExposure": expired,
+        "expiring7d": expiring,
+        "nextExpiryAt": next_expiry_raw,
+        "oldestActiveAt": oldest_active_raw,
+    }
+
+
+def _sanitize_memory_health(value: Any) -> Dict[str, Any] | None:
+    if not isinstance(value, dict) or set(value) != {"schemaVersion", "checks"} or value.get("schemaVersion") != 1:
+        return None
+    checks = value.get("checks")
+    expected = {"recall", "freshness", "review", "provenance", "reuse"}
+    if not isinstance(checks, dict) or set(checks) != expected:
+        return None
+    schemas = {
+        "recall": ({"tone", "hitRatePct", "p95LatencyMs", "queries7d"}, {"queries7d": "count", "hitRatePct": 100.0, "p95LatencyMs": 60_000.0}),
+        "freshness": ({"tone", "expiredExposure", "expiring7d"}, {"expiredExposure": "count", "expiring7d": "count"}),
+        "review": ({"tone", "pending", "disputed", "oldestPendingAgeHours"}, {"pending": "count", "disputed": "count", "oldestPendingAgeHours": 1_000_000.0}),
+        "provenance": ({"tone", "coveragePct", "withSourceRef", "active"}, {"coveragePct": 100.0, "withSourceRef": "count", "active": "count"}),
+        "reuse": ({"tone", "selectedUseRatePct", "qualityRatePct", "selected30d", "feedback30d"}, {"selectedUseRatePct": 100.0, "qualityRatePct": 100.0, "selected30d": "count", "feedback30d": "count"}),
+    }
+    clean_checks: Dict[str, Dict[str, Any]] = {}
+    for name in ("recall", "freshness", "review", "provenance", "reuse"):
+        row = checks.get(name)
+        field_names, metrics = schemas[name]
+        if not isinstance(row, dict) or set(row) != field_names or row.get("tone") not in {"clear", "watch", "risk", "idle"}:
+            return None
+        clean_row: Dict[str, Any] = {"tone": row["tone"]}
+        for field, maximum in metrics.items():
+            item = row.get(field)
+            if maximum == "count":
+                clean_item = _memory_count(item, 100_000)
+                if clean_item is None:
+                    return None
+            else:
+                if item is None:
+                    clean_item = None
+                else:
+                    clean_item = _memory_metric(item, maximum)
+                    if clean_item is None:
+                        return None
+            clean_row[field] = clean_item
+        clean_checks[name] = clean_row
+    return {"schemaVersion": 1, "checks": clean_checks}
+
+
 def sanitize_memory_operations(value: Any, now_iso: str) -> Dict[str, Any]:
     """Publish only bounded memory counts and exact activity timestamps.
 
@@ -456,15 +731,29 @@ def sanitize_memory_operations(value: Any, now_iso: str) -> Dict[str, Any]:
         ):
             return fallback
 
+    diagnostics = _sanitize_memory_diagnostics(value.get("diagnostics"), updated_at)
+    freshness = _sanitize_memory_freshness(value.get("freshness"), updated_at)
+    health = _sanitize_memory_health(value.get("health"))
+    if diagnostics is None or freshness is None or health is None:
+        return fallback
+
     registry = value.get("registry")
     if not isinstance(registry, dict) or set(registry) != set(MEMORY_REGISTRY_FIELDS):
         return fallback
-    clean_registry: Dict[str, int] = {}
+    clean_registry: Dict[str, Any] = {}
     for name in MEMORY_REGISTRY_FIELDS:
-        count = _memory_count(registry.get(name))
-        if count is None:
-            return fallback
-        clean_registry[name] = count
+        if name in MEMORY_REGISTRY_COUNT_FIELDS:
+            count = _memory_count(registry.get(name))
+            if count is None:
+                return fallback
+            clean_registry[name] = count
+        else:
+            metric = registry.get(name)
+            if metric is not None and _memory_metric(metric, 100.0) is None:
+                return fallback
+            clean_registry[name] = metric
+    if clean_registry["withSourceRef"] > clean_registry["active"]:
+        return fallback
 
     review = value.get("review")
     expected_review_fields = MEMORY_REVIEW_RAW_FIELDS if raw_input else MEMORY_REVIEW_PROJECTED_FIELDS
@@ -474,11 +763,18 @@ def sanitize_memory_operations(value: Any, now_iso: str) -> Dict[str, Any]:
     disputed = _memory_count(review.get("disputed"))
     last_run_raw = review.get("lastRun")
     last_run = _memory_time(last_run_raw) if last_run_raw is not None else None
+    oldest_pending_raw = review.get("oldestPendingAt")
+    oldest_pending = _memory_time(oldest_pending_raw) if oldest_pending_raw is not None else None
+    oldest_pending_age = review.get("oldestPendingAgeHours")
     if (
         pending is None
         or disputed is None
         or (last_run_raw is not None and last_run is None)
         or (last_run is not None and last_run > updated_at + dt.timedelta(minutes=2))
+        or (oldest_pending_raw is not None and oldest_pending is None)
+        or (oldest_pending is not None and oldest_pending > updated_at + dt.timedelta(minutes=2))
+        or (oldest_pending_age is not None and _memory_metric(oldest_pending_age, 1_000_000.0) is None)
+        or ((pending > 0) != (oldest_pending is not None))
         or (raw_input and review.get("lastStatus") not in {"ok", "not-run"})
     ):
         return fallback
@@ -495,7 +791,7 @@ def sanitize_memory_operations(value: Any, now_iso: str) -> Dict[str, Any]:
         return fallback
     clean_retrieval: Dict[str, Any] = {}
     rate_fields = {"hitRate", "qualityRate", "selectedUseRate"}
-    metric_fields = {"avgLatencyMs"}
+    metric_fields = {"avgLatencyMs", "p95LatencyMs"}
     for name in MEMORY_RETRIEVAL_PROJECTED_FIELDS:
         item = retrieval.get(name)
         if name in rate_fields:
@@ -724,8 +1020,17 @@ def sanitize_memory_operations(value: Any, now_iso: str) -> Dict[str, Any]:
         "source": {"name": "governed-memory-registry", "verified": True},
         "privacy": dict(MEMORY_PRIVACY_CONTRACT),
         "registry": clean_registry,
-        "review": {"pending": pending, "disputed": disputed, "lastRun": last_run_raw},
+        "review": {
+            "pending": pending,
+            "disputed": disputed,
+            "lastRun": last_run_raw,
+            "oldestPendingAt": oldest_pending_raw,
+            "oldestPendingAgeHours": oldest_pending_age,
+        },
         "retrieval": clean_retrieval,
+        "freshness": freshness,
+        "health": health,
+        "diagnostics": diagnostics,
         "activity": {
             "schemaVersion": 2,
             "generatedAt": activity["generatedAt"],

@@ -18198,6 +18198,194 @@ body,
   .brain-atlas-ops-card { min-height: 142px; }
 }
 
+.memory-diagnostics {
+  display: grid;
+  grid-template-rows: auto 84px minmax(0, 1fr);
+  gap: 8px;
+  min-height: 0;
+  overflow: hidden;
+  padding: 8px 10px 10px;
+}
+
+.memory-diagnostics.is-unavailable {
+  place-content: center;
+  text-align: center;
+}
+
+.memory-diagnostics.is-unavailable strong { color: #ffcf76; }
+.memory-diagnostics.is-unavailable p { margin: 5px 0 0; color: var(--soft); font-size: 11px; }
+
+.memory-diagnostics-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.memory-diagnostics-header > div { min-width: 0; }
+.memory-diagnostics-header h3 { margin: 0; color: #f4fbff; font-size: 15px; }
+.memory-diagnostics-header p { margin: 2px 0 0; overflow: hidden; color: var(--soft); font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.memory-diagnostics-header > span { flex: 0 0 auto; color: #9cefc6; font-size: 9px; font-weight: 800; text-transform: uppercase; }
+
+.memory-trend-ribbon {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  min-width: 0;
+}
+
+.memory-trend-ribbon article {
+  display: grid;
+  grid-template-rows: auto 32px auto;
+  gap: 3px;
+  min-width: 0;
+  overflow: hidden;
+  padding: 6px 7px 5px;
+  border-top: 1px solid rgba(88, 238, 154, 0.34);
+  background: rgba(7, 30, 47, 0.66);
+}
+
+.memory-trend-ribbon article header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 5px;
+}
+
+.memory-trend-ribbon article header span,
+.memory-trend-ribbon article > em {
+  overflow: hidden;
+  color: var(--soft);
+  font-size: 7.5px;
+  font-style: normal;
+  font-weight: 760;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.memory-trend-ribbon article header strong { color: #c8f8dd; font-size: 12px; }
+
+.memory-mini-bars {
+  display: flex;
+  align-items: end;
+  gap: 1px;
+  min-width: 0;
+  height: 32px;
+  border-bottom: 1px solid rgba(101, 217, 255, 0.14);
+}
+
+.memory-mini-bars i {
+  flex: 1 1 0;
+  min-width: 1px;
+  height: var(--bar-value);
+  background: linear-gradient(to top, rgba(63, 171, 220, 0.58), rgba(88, 238, 154, 0.9));
+}
+
+.memory-mini-bars i.is-empty { height: 2px; background: rgba(130, 158, 176, 0.16); }
+
+.memory-diagnostics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: minmax(112px, 0.86fr) minmax(142px, 1.14fr);
+  gap: 7px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.memory-diagnostic-panel {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 6px;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  padding: 7px 8px;
+  border-top: 1px solid rgba(101, 217, 255, 0.26);
+  background: rgba(5, 24, 39, 0.72);
+}
+
+.memory-diagnostic-panel > header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 7px;
+}
+
+.memory-diagnostic-panel > header span {
+  overflow: hidden;
+  color: #b7d7e8;
+  font-size: 8px;
+  font-weight: 820;
+  letter-spacing: 0.045em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.memory-diagnostic-panel > header strong { color: #eefbff; font-size: 14px; white-space: nowrap; }
+.memory-diagnostic-panel > footer { overflow: hidden; color: var(--soft); font-size: 7.5px; text-overflow: ellipsis; white-space: nowrap; }
+.memory-diagnostic-panel.is-provenance { grid-column: span 2; }
+
+.memory-aging-bars { display: grid; align-content: center; gap: 4px; min-height: 0; }
+.memory-aging-bars > div { display: grid; grid-template-columns: 34px minmax(0, 1fr) 20px; align-items: center; gap: 5px; }
+.memory-aging-bars span, .memory-aging-bars strong { color: var(--soft); font-size: 8px; }
+.memory-aging-bars strong { color: #eefbff; text-align: right; }
+.memory-aging-bars > div > i { display: flex; height: 6px; overflow: hidden; border-radius: 4px; background: rgba(130, 158, 176, 0.12); }
+.memory-aging-bars b { display: block; background: #65d9ff; }
+.memory-aging-bars em { display: block; background: #ff7878; }
+.memory-diagnostic-panel.is-review > footer { display: flex; align-items: center; gap: 4px; }
+.memory-diagnostic-panel.is-review > footer i { width: 7px; height: 7px; border-radius: 2px; background: #65d9ff; }
+.memory-diagnostic-panel.is-review > footer i.is-disputed { margin-left: 6px; background: #ff7878; }
+
+.memory-runway-bars {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  align-items: end;
+  gap: 4px;
+  min-height: 0;
+}
+
+.memory-runway-bars > div { display: grid; grid-template-rows: minmax(24px, 1fr) auto auto; align-items: end; justify-items: center; gap: 2px; min-width: 0; height: 100%; }
+.memory-runway-bars i { display: block; width: min(20px, 70%); min-height: 2px; background: #58ee9a; }
+.memory-runway-bars .is-risk i { background: #ff7878; }
+.memory-runway-bars .is-watch i { background: #ffd166; }
+.memory-runway-bars .is-muted i { background: rgba(154, 180, 196, 0.48); }
+.memory-runway-bars strong { color: #effcff; font-size: 9px; }
+.memory-runway-bars span { overflow: hidden; width: 100%; color: var(--soft); font-size: 7px; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+
+.memory-lineage-chain { display: flex; align-items: center; justify-content: center; gap: 5px; min-width: 0; }
+.memory-lineage-chain > i { color: rgba(101, 217, 255, 0.46); font-size: 11px; font-style: normal; }
+.memory-lineage-chain > span { display: grid; place-items: center; min-width: 42px; min-height: 42px; border: 1px solid rgba(157, 124, 255, 0.24); border-radius: 50%; background: rgba(103, 77, 170, 0.08); }
+.memory-lineage-chain > span.is-used { border-color: rgba(157, 124, 255, 0.66); box-shadow: 0 0 9px rgba(157, 124, 255, 0.1); }
+.memory-lineage-chain strong { color: #e8dcff; font-size: 12px; }
+.memory-lineage-chain em { color: var(--soft); font-size: 6.5px; font-style: normal; }
+
+.memory-matrix,
+.memory-reuse-matrix { min-width: 0; overflow: auto; scrollbar-width: thin; }
+.memory-matrix-row { display: grid; grid-template-columns: minmax(112px, 1.45fr) repeat(6, minmax(34px, 0.62fr)) minmax(50px, 0.72fr); min-width: 430px; }
+.memory-matrix-row > *, .memory-reuse-row > * { display: grid; place-items: center; min-width: 0; min-height: 18px; border-bottom: 1px solid rgba(101, 217, 255, 0.08); color: var(--soft); font-size: 7px; font-style: normal; text-align: center; }
+.memory-matrix-row > strong, .memory-reuse-row > strong, .memory-matrix-row.is-header > span:first-child, .memory-reuse-row.is-header > span:first-child { justify-items: start; padding-left: 4px; overflow: hidden; color: #cce9f6; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
+.memory-matrix-row.is-header > *, .memory-reuse-row.is-header > * { color: #91b7ca; font-size: 6.5px; font-weight: 800; text-transform: uppercase; }
+.memory-matrix-row > span.has-value, .memory-reuse-row > span.has-value { color: #effcff; background: rgba(88, 238, 154, calc(0.08 + var(--heat) * 0.42)); }
+.memory-matrix-row > em.is-watch { color: #ffe091; }
+
+.memory-reuse-row { display: grid; grid-template-columns: minmax(98px, 1.3fr) repeat(4, minmax(42px, 0.75fr)); min-width: 330px; }
+
+@media (max-width: 1050px) {
+  #brain-atlas .brain-atlas-view-switch button { padding-inline: 6px; font-size: 8px; }
+  .memory-diagnostics { overflow: auto; }
+  .memory-diagnostics-grid { grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, minmax(120px, auto)); overflow: visible; }
+  .memory-diagnostic-panel.is-provenance { grid-column: span 2; }
+  .memory-trend-ribbon { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 720px) {
+  .memory-diagnostics-grid, .memory-trend-ribbon { grid-template-columns: 1fr; }
+  .memory-diagnostic-panel.is-provenance { grid-column: auto; }
+}
+
 .memory-flow-node.is-work-active > rect:not(.memory-flow-node-aura) {
   fill: rgba(8, 38, 57, 0.98);
   stroke: #65d9ff;

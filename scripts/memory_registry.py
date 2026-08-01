@@ -92,6 +92,238 @@ def health_tone(*, risk: bool = False, watch: bool = False, idle: bool = False) 
     return "clear"
 
 
+def dashboard_memory_owner(value: Any) -> str:
+    owner = canonical_agent(value)
+    if owner in MEMORY_ACTIVITY_AGENTS:
+        return owner
+    if clean_text(value, 80).lower() == "ecosystem":
+        return "ecosystem"
+    return "other"
+
+
+def dashboard_source_category(value: Any) -> str:
+    """Collapse provenance into safe operational categories, never raw paths."""
+    source = clean_text(value, 500).lower()
+    if "agent-task-queue" in source:
+        return "Task ledger"
+    if "semantic-memory-index" in source:
+        return "Semantic index"
+    if "decisions.json" in source:
+        return "Decision ledger"
+    if "agent-skills" in source or "agents.md" in source or "memory.md" in source or "policy" in source:
+        return "Policy and skills"
+    if "brain-source" in source:
+        return "Brain intake"
+    if "codex" in source or "josh direct" in source or "user-direct" in source:
+        return "Direct instruction"
+    if "research" in source or "analysis" in source or "audit" in source or "radar" in source:
+        return "Research evidence"
+    return "Other verified source"
+
+
+def age_bucket(hours: float) -> str:
+    if hours < 24:
+        return "<24h"
+    if hours < 72:
+        return "1-3d"
+    if hours < 168:
+        return "3-7d"
+    return ">7d"
+
+
+def memory_diagnostics_payload(db: sqlite3.Connection, now: dt.datetime | None = None) -> dict[str, Any]:
+    """Return bounded, counts-only aggregates for Brain Atlas diagnostics."""
+    now = now or utc_now()
+    start = now - dt.timedelta(days=29)
+    days = [(start + dt.timedelta(days=offset)).date().isoformat() for offset in range(30)]
+    trend = {
+        day: {"date": day, "queries": 0, "hits": 0, "latencies": [], "selected": 0, "used": 0}
+        for day in days
+    }
+    for row in db.execute(
+        "SELECT time,outcome,latency_ms FROM retrieval_events WHERE time >= ? ORDER BY time",
+        (iso(start),),
+    ).fetchall():
+        day = str(row["time"] or "")[:10]
+        if day not in trend:
+            continue
+        trend[day]["queries"] += 1
+        trend[day]["hits"] += int(row["outcome"] == "hit")
+        trend[day]["latencies"].append(float(row["latency_ms"] or 0))
+    for row in db.execute(
+        "SELECT time,outcome FROM memory_reuse_events WHERE time >= ? ORDER BY time",
+        (iso(start),),
+    ).fetchall():
+        day = str(row["time"] or "")[:10]
+        if day in trend and row["outcome"] in {"selected", "used"}:
+            trend[day][row["outcome"]] += 1
+
+    active_records = db.execute(
+        """SELECT id,owner,source_path,source_ref,status,valid_until,recorded_at,supersedes
+           FROM memory_records WHERE status='active'"""
+    ).fetchall()
+    active_by_day = sorted(
+        (
+            str(row["recorded_at"] or "")[:10],
+            bool(clean_text(row["source_ref"], 240)),
+        )
+        for row in active_records
+        if str(row["recorded_at"] or "")[:10]
+    )
+    trend_rows = []
+    for day in days:
+        row = trend[day]
+        cohort = [has_ref for recorded_day, has_ref in active_by_day if recorded_day <= day]
+        trend_rows.append({
+            "date": day,
+            "queries": row["queries"],
+            "hitRatePct": round(row["hits"] / row["queries"] * 100, 1) if row["queries"] else None,
+            "p95LatencyMs": nearest_rank_percentile(row["latencies"], 0.95),
+            "selectedUseRatePct": round(row["used"] / row["selected"] * 100, 1) if row["selected"] else None,
+            "provenanceCoveragePct": round(sum(cohort) / len(cohort) * 100, 1) if cohort else None,
+        })
+
+    review = {label: {"bucket": label, "pending": 0, "disputed": 0} for label in ("<24h", "1-3d", "3-7d", ">7d")}
+    for row in db.execute(
+        "SELECT status,proposed_at FROM memory_candidates WHERE status IN ('candidate','disputed')"
+    ).fetchall():
+        try:
+            proposed = dt.datetime.fromisoformat(str(row["proposed_at"]).replace("Z", "+00:00"))
+        except (TypeError, ValueError):
+            continue
+        bucket = age_bucket(max(0.0, (now - proposed).total_seconds() / 3600))
+        review[bucket]["disputed" if row["status"] == "disputed" else "pending"] += 1
+
+    owners = [*MEMORY_ACTIVITY_AGENTS, "ecosystem", "other"]
+    provenance: dict[str, dict[str, Any]] = {}
+    for row in active_records:
+        category = dashboard_source_category(row["source_path"])
+        owner = dashboard_memory_owner(row["owner"])
+        item = provenance.setdefault(category, {
+            "category": category,
+            "count": 0,
+            "withSourceRef": 0,
+            "owners": {agent: 0 for agent in owners},
+        })
+        item["count"] += 1
+        item["withSourceRef"] += int(bool(clean_text(row["source_ref"], 240)))
+        item["owners"][owner] += 1
+    provenance_rows = []
+    for item in provenance.values():
+        provenance_rows.append({
+            **item,
+            "coveragePct": round(item["withSourceRef"] / item["count"] * 100, 1) if item["count"] else None,
+        })
+    provenance_rows.sort(key=lambda item: (-item["count"], item["category"]))
+
+    freshness = {
+        "expiredExposure": 0,
+        "next7d": 0,
+        "days8to30": 0,
+        "days31to90": 0,
+        "beyond90d": 0,
+        "noExpiry": 0,
+    }
+    for row in active_records:
+        if not row["valid_until"]:
+            freshness["noExpiry"] += 1
+            continue
+        try:
+            expiry = dt.datetime.fromisoformat(str(row["valid_until"]).replace("Z", "+00:00"))
+        except (TypeError, ValueError):
+            freshness["noExpiry"] += 1
+            continue
+        days_until = (expiry - now).total_seconds() / 86400
+        if days_until < 0:
+            freshness["expiredExposure"] += 1
+        elif days_until <= 7:
+            freshness["next7d"] += 1
+        elif days_until <= 30:
+            freshness["days8to30"] += 1
+        elif days_until <= 90:
+            freshness["days31to90"] += 1
+        else:
+            freshness["beyond90d"] += 1
+
+    lineage_rows = db.execute(
+        "SELECT id,status,supersedes,recorded_at FROM memory_records"
+    ).fetchall()
+    known_ids = {str(row["id"]) for row in lineage_rows}
+    parents = {
+        str(row["id"]): str(row["supersedes"])
+        for row in lineage_rows
+        if clean_text(row["supersedes"], 240)
+    }
+
+    def lineage_depth(record_id: str) -> tuple[int, bool]:
+        seen = {record_id}
+        current = record_id
+        depth = 1
+        while current in parents:
+            current = parents[current]
+            if current in seen:
+                return depth, True
+            seen.add(current)
+            depth += 1
+        return depth, False
+
+    depths = []
+    cycles = 0
+    for record_id in known_ids:
+        depth, cycle = lineage_depth(record_id)
+        depths.append(depth)
+        cycles += int(cycle)
+    chain_buckets = {"1": 0, "2": 0, "3": 0, "4+": 0}
+    for depth in depths:
+        chain_buckets["4+" if depth >= 4 else str(depth)] += 1
+    lineage = {
+        "supersessionLinks": len(parents),
+        "orphanLinks": sum(parent not in known_ids for parent in parents.values()),
+        "disputedRecords": sum(str(row["status"]) == "disputed" for row in lineage_rows),
+        "maxDepth": max(depths, default=0),
+        "cycleCount": cycles,
+        "chainBuckets": [{"depth": label, "count": count} for label, count in chain_buckets.items()],
+        "recentSupersessions30d": sum(
+            bool(clean_text(row["supersedes"], 240)) and str(row["recorded_at"] or "") >= iso(now - dt.timedelta(days=30))
+            for row in lineage_rows
+        ),
+    }
+
+    reuse_agents = [*MEMORY_ACTIVITY_AGENTS, "ecosystem"]
+    reuse_cells: dict[tuple[str, str], int] = {}
+    for row in db.execute(
+        """SELECT event.agent,record.owner,COUNT(*) AS uses
+           FROM memory_reuse_events event
+           JOIN memory_records record ON record.id=event.memory_id
+           WHERE event.outcome='used' AND event.time >= ?
+           GROUP BY event.agent,record.owner""",
+        (iso(now - dt.timedelta(days=30)),),
+    ).fetchall():
+        consumer = dashboard_memory_owner(row["agent"])
+        source = dashboard_memory_owner(row["owner"])
+        if consumer not in MEMORY_ACTIVITY_AGENTS or source not in reuse_agents or source == consumer:
+            continue
+        reuse_cells[(source, consumer)] = int(row["uses"] or 0)
+
+    return {
+        "schemaVersion": 1,
+        "generatedAt": iso(now),
+        "privacy": {"countsOnly": True, "contentIncluded": False, "rawIdentifiersIncluded": False},
+        "trend30d": trend_rows,
+        "reviewAging": list(review.values()),
+        "provenanceMatrix": {"owners": owners, "rows": provenance_rows},
+        "freshnessRunway": freshness,
+        "lineage": lineage,
+        "reuseMatrix": {
+            "agents": reuse_agents,
+            "cells": [
+                {"sourceAgent": source, "consumerAgent": consumer, "uses": uses}
+                for (source, consumer), uses in sorted(reuse_cells.items())
+            ],
+        },
+    }
+
+
 def utc_now() -> dt.datetime:
     return dt.datetime.now(dt.timezone.utc)
 
@@ -1341,6 +1573,7 @@ def status_payload(db: sqlite3.Connection) -> dict[str, Any]:
             "josh2": "local CLI", "jaimes": "shared SSH client", "jain": "shared SSH client", "joshex": "oversight SSH client",
         },
         "activity": memory_activity_payload(db),
+        "diagnostics": memory_diagnostics_payload(db, now),
         "privacy": privacy_audit_payload(db),
     }
 

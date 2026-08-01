@@ -375,6 +375,91 @@ class MemoryRegistryTest(unittest.TestCase):
         self.assertEqual(status["health"]["checks"]["provenance"]["tone"], "risk")
         self.assertEqual(status["status"], "attention")
 
+    def test_diagnostics_export_is_counts_only_and_covers_all_visual_contracts(self) -> None:
+        fixed_now = dt.datetime(2026, 8, 1, 12, 0, tzinfo=dt.timezone.utc)
+        with mock.patch.object(memory_registry, "DB_PATH", self.database), mock.patch.object(memory_registry, "utc_now", return_value=fixed_now):
+            db = memory_registry.connect()
+            parent_id, _ = memory_registry.upsert_record(
+                db, memory_type="fact", subject="Private parent marker", predicate="is", value="ready",
+                owner="jaimes", visibility="shared", privacy="dashboard-safe",
+                source_path="data/agent-task-queue.json", source_ref="task-safe",
+                valid_until="2026-08-07T12:00:00Z",
+            )
+            child_id, _ = memory_registry.upsert_record(
+                db, memory_type="fact", subject="Private child marker", predicate="is", value="current",
+                owner="jaimes", visibility="shared", privacy="dashboard-safe",
+                source_path="custom-policy-source", supersedes=parent_id,
+                valid_until="2026-08-21T12:00:00Z",
+            )
+            memory_registry.upsert_record(
+                db, memory_type="episode", subject="Private expired marker", predicate="was", value="historical",
+                owner="ecosystem", visibility="shared", privacy="dashboard-safe",
+                source_path="research-audit-source", source_ref="audit-safe",
+                valid_until="2026-07-31T12:00:00Z",
+            )
+            for candidate_id, status, proposed_at in (
+                ("candidate-23h", "candidate", "2026-07-31T13:00:00Z"),
+                ("candidate-50h", "candidate", "2026-07-30T10:00:00Z"),
+                ("candidate-100h", "disputed", "2026-07-28T08:00:00Z"),
+                ("candidate-200h", "candidate", "2026-07-24T04:00:00Z"),
+            ):
+                db.execute(
+                    """INSERT INTO memory_candidates(
+                         id,proposed_by,memory_type,subject,predicate,object_text,owner,visibility,privacy,
+                         source_path,evidence,confidence,status,proposed_at,content_hash
+                       ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    (
+                        candidate_id, "jaimes", "fact", "Private candidate marker", "is", "pending", "jaimes",
+                        "shared", "dashboard-safe", "candidate-source", "unit test", 0.9, status,
+                        proposed_at, f"{candidate_id}-hash",
+                    ),
+                )
+            for index, (time_value, latency, outcome) in enumerate((
+                ("2026-07-31T11:00:00Z", 2.0, "hit"),
+                ("2026-08-01T11:00:00Z", 8.0, "miss"),
+            )):
+                db.execute(
+                    """INSERT INTO retrieval_events(
+                         id,time,agent,scope,query_hash,term_count,matched_count,latency_ms,memory_ids_json,outcome
+                       ) VALUES (?,?,?,?,?,?,?,?,?,?)""",
+                    (
+                        f"retrieval-diagnostic-{index}", time_value, "jain", "ecosystem", f"query-{index}",
+                        1, 1 if outcome == "hit" else 0, latency, "[]", outcome,
+                    ),
+                )
+            db.execute(
+                """INSERT INTO memory_reuse_events(
+                     id,time,agent,retrieval_id,memory_id,outcome,reason_code
+                   ) VALUES (?,?,?,?,?,?,?)""",
+                ("reuse-diagnostic", "2026-08-01T11:05:00Z", "jain", "retrieval-diagnostic-1", child_id, "used", "applied"),
+            )
+            db.commit()
+            diagnostics = memory_registry.memory_diagnostics_payload(db, fixed_now)
+            db.close()
+
+        self.assertEqual(diagnostics["schemaVersion"], 1)
+        self.assertTrue(diagnostics["privacy"]["countsOnly"])
+        self.assertEqual(len(diagnostics["trend30d"]), 30)
+        self.assertEqual(diagnostics["trend30d"][-1]["p95LatencyMs"], 8.0)
+        aging = {row["bucket"]: row for row in diagnostics["reviewAging"]}
+        self.assertEqual(aging["<24h"]["pending"], 1)
+        self.assertEqual(aging["1-3d"]["pending"], 1)
+        self.assertEqual(aging["3-7d"]["disputed"], 1)
+        self.assertEqual(aging[">7d"]["pending"], 1)
+        self.assertEqual(diagnostics["freshnessRunway"]["expiredExposure"], 1)
+        self.assertEqual(diagnostics["freshnessRunway"]["next7d"], 1)
+        self.assertEqual(diagnostics["freshnessRunway"]["days8to30"], 1)
+        self.assertEqual(diagnostics["lineage"]["supersessionLinks"], 1)
+        self.assertEqual(diagnostics["lineage"]["maxDepth"], 2)
+        self.assertEqual(diagnostics["reuseMatrix"]["cells"], [{
+            "sourceAgent": "jaimes", "consumerAgent": "jain", "uses": 1,
+        }])
+        rendered = json.dumps(diagnostics)
+        self.assertNotIn(parent_id, rendered)
+        self.assertNotIn(child_id, rendered)
+        self.assertNotIn("Private parent marker", rendered)
+        self.assertNotIn("custom-policy-source", rendered)
+
     def test_activity_export_is_counts_only_and_updates_on_retrieval(self) -> None:
         memory_id = self.create_memory("live activity", privacy="dashboard-safe")
         private_query = "Privacy fixture live activity raw-query-marker"

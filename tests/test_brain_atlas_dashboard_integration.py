@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import datetime as dt
 import importlib.util
 import json
 from pathlib import Path
@@ -138,18 +139,21 @@ def valid_memory_operations() -> dict:
         "updatedAt": generated,
         "status": "watch",
         "summary": "Two governed candidates are awaiting review.",
-        "registry": {"active": 10, "superseded": 1, "expired": 2, "sources": 4},
+        "registry": {"active": 10, "superseded": 1, "expired": 2, "sources": 4, "withSourceRef": 9, "provenanceCoveragePct": 90.0},
         "review": {
             "pending": 2,
             "disputed": 0,
             "lastRun": "2026-07-18T15:00:00Z",
             "lastStatus": "ok",
+            "oldestPendingAt": "2026-07-18T14:00:00Z",
+            "oldestPendingAgeHours": 2.0,
         },
         "retrieval": {
             "queries7d": 100,
             "hits7d": 90,
             "hitRate": 90.0,
             "avgLatencyMs": 1.2,
+            "p95LatencyMs": 2.0,
             "feedback30d": 10,
             "helpful30d": 6,
             "ignored30d": 3,
@@ -163,6 +167,22 @@ def valid_memory_operations() -> dict:
             "reuseIgnored30d": 1,
             "selectedUseRate": 80.0,
         },
+        "freshness": {
+            "expiredExposure": 0,
+            "expiring7d": 1,
+            "nextExpiryAt": "2026-07-20T16:00:00Z",
+            "oldestActiveAt": "2026-07-01T16:00:00Z",
+        },
+        "health": {
+            "schemaVersion": 1,
+            "checks": {
+                "recall": {"tone": "clear", "hitRatePct": 90.0, "p95LatencyMs": 2.0, "queries7d": 100},
+                "freshness": {"tone": "watch", "expiredExposure": 0, "expiring7d": 1},
+                "review": {"tone": "watch", "pending": 2, "disputed": 0, "oldestPendingAgeHours": 2.0},
+                "provenance": {"tone": "watch", "coveragePct": 90.0, "withSourceRef": 9, "active": 10},
+                "reuse": {"tone": "clear", "selectedUseRatePct": 80.0, "qualityRatePct": 60.0, "selected30d": 5, "feedback30d": 10},
+            },
+        },
         "governance": {
             "sourceOfTruth": "Checked-in operating rules",
             "autoPromote": "Verified low-risk facts only",
@@ -174,6 +194,68 @@ def valid_memory_operations() -> dict:
             "jaimes": "shared SSH client",
             "jain": "shared SSH client",
             "joshex": "oversight SSH client",
+        },
+        "diagnostics": {
+            "schemaVersion": 1,
+            "generatedAt": generated,
+            "privacy": {
+                "countsOnly": True,
+                "contentIncluded": False,
+                "rawIdentifiersIncluded": False,
+            },
+            "trend30d": [
+                {
+                    "date": (dt.date(2026, 6, 19) + dt.timedelta(days=index)).isoformat(),
+                    "queries": index,
+                    "hitRatePct": 90.0 if index else None,
+                    "p95LatencyMs": 2.0 if index else None,
+                    "selectedUseRatePct": 80.0 if index else None,
+                    "provenanceCoveragePct": 95.0 if index else None,
+                }
+                for index in range(30)
+            ],
+            "reviewAging": [
+                {"bucket": "<24h", "pending": 2, "disputed": 0},
+                {"bucket": "1-3d", "pending": 0, "disputed": 0},
+                {"bucket": "3-7d", "pending": 0, "disputed": 0},
+                {"bucket": ">7d", "pending": 0, "disputed": 0},
+            ],
+            "provenanceMatrix": {
+                "owners": ["joshex", "josh2", "jaimes", "jain", "ecosystem", "other"],
+                "rows": [{
+                    "category": "Task ledger",
+                    "count": 10,
+                    "withSourceRef": 9,
+                    "owners": {"joshex": 4, "josh2": 3, "jaimes": 2, "jain": 1, "ecosystem": 0, "other": 0},
+                    "coveragePct": 90.0,
+                }],
+            },
+            "freshnessRunway": {
+                "expiredExposure": 0,
+                "next7d": 1,
+                "days8to30": 4,
+                "days31to90": 2,
+                "beyond90d": 1,
+                "noExpiry": 2,
+            },
+            "lineage": {
+                "supersessionLinks": 1,
+                "orphanLinks": 0,
+                "disputedRecords": 0,
+                "maxDepth": 2,
+                "cycleCount": 0,
+                "chainBuckets": [
+                    {"depth": "1", "count": 9},
+                    {"depth": "2", "count": 1},
+                    {"depth": "3", "count": 0},
+                    {"depth": "4+", "count": 0},
+                ],
+                "recentSupersessions30d": 1,
+            },
+            "reuseMatrix": {
+                "agents": ["joshex", "josh2", "jaimes", "jain", "ecosystem"],
+                "cells": [{"sourceAgent": "jaimes", "consumerAgent": "joshex", "uses": 1}],
+            },
         },
         "activity": {
             "schemaVersion": 2,
@@ -533,7 +615,7 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertEqual(
             {
                 "schemaVersion", "updatedAt", "status", "source", "privacy",
-                "registry", "review", "retrieval", "activity",
+                "registry", "review", "retrieval", "freshness", "health", "activity", "diagnostics",
             },
             set(clean),
         )
@@ -546,6 +628,8 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
             [row["agent"] for row in clean["activity"]["agents"]],
         )
         self.assertEqual(clean, second_pass)
+        self.assertEqual(30, len(clean["diagnostics"]["trend30d"]))
+        self.assertEqual(1, clean["diagnostics"]["reuseMatrix"]["cells"][0]["uses"])
         serialized = json.dumps(clean)
         for private_field in ("summary", "governance", "agentAccess", "qualityDefinition", "publicLabels"):
             self.assertNotIn(private_field, serialized)
@@ -572,6 +656,10 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         agent_identifier = valid_memory_operations()
         agent_identifier["activity"]["agents"][0]["memoryId"] = secret
         mutations.append(agent_identifier)
+
+        diagnostic_content = valid_memory_operations()
+        diagnostic_content["diagnostics"]["query"] = secret
+        mutations.append(diagnostic_content)
 
         for source in mutations:
             with self.subTest(keys=sorted(source)):
