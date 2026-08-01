@@ -132,7 +132,7 @@ class TodaysJobsProjectionTests(unittest.TestCase):
         self.assertEqual(len(watchdog), 1)
         self.assertEqual(watchdog[0]["scheduledTime"], "Coverage")
         self.assertEqual(watchdog[0]["outcome"], "complete")
-        self.assertEqual(watchdog[0]["runStatus"], "coverage-current")
+        self.assertEqual(watchdog[0]["runStatus"], "coverage-complete")
 
     def test_historical_failure_is_not_reused_but_missing_today_becomes_overdue(self) -> None:
         historical = {
