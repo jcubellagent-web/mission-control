@@ -3524,6 +3524,51 @@ const MEMORY_SIGNAL_LABELS: Record<MemorySignalKey, string> = {
   promoted: "Governed memory updated",
 };
 
+type MemoryFlowEvent = {
+  key: string;
+  signal: MemorySignalKey;
+  observedAt: string;
+  agent: AgentId | null;
+  sourceAgent: AgentId | null;
+  consumerAgent: AgentId | null;
+};
+
+const MEMORY_FLOW_EVENT_LIMIT = 6;
+const MEMORY_FLOW_REPLAY_STEP_MS = 1150;
+
+function memoryFlowEventTone(signal: MemorySignalKey) {
+  if (signal === "crossAgentUsed" || signal === "miss" || signal === "reuseIgnored") return "amber";
+  if (signal === "feedback" || signal === "corrected" || signal === "proposed") return "purple";
+  if (signal === "promoted" || signal === "hit") return "green";
+  return "cyan";
+}
+
+function memoryFlowEventPath(event: MemoryFlowEvent) {
+  const agentIndex = event.agent ? HERO_AGENT_ORDER.indexOf(event.agent) : -1;
+  const agentY = 41 + Math.max(0, agentIndex) * 52;
+  if (event.signal === "crossAgentUsed" && event.sourceAgent && event.consumerAgent) {
+    const sourceY = 41 + HERO_AGENT_ORDER.indexOf(event.sourceAgent) * 52;
+    const consumerY = 41 + HERO_AGENT_ORDER.indexOf(event.consumerAgent) * 52;
+    return `M ${brainAtlasWideX(18)} ${sourceY} C 4 ${sourceY}, 4 ${consumerY}, ${brainAtlasWideX(18)} ${consumerY} C ${brainAtlasWideX(98)} ${consumerY}, ${brainAtlasWideX(198)} 119, ${brainAtlasWideX(232)} 119`;
+  }
+  if (["retrieval", "hit", "miss"].includes(event.signal)) {
+    return `M ${brainAtlasWideX(168)} ${agentY} C ${brainAtlasWideX(200)} ${agentY}, ${brainAtlasWideX(202)} 119, ${brainAtlasWideX(232)} 119 L ${brainAtlasWideX(372)} 119 C ${brainAtlasWideX(392)} 119, ${brainAtlasWideX(408)} 119, ${brainAtlasWideX(430)} 119`;
+  }
+  if (["selected", "used"].includes(event.signal)) {
+    return `M ${brainAtlasWideX(503)} 119 C ${brainAtlasWideX(610)} 119, ${brainAtlasWideX(606)} 58, ${brainAtlasWideX(640)} 58`;
+  }
+  if (["feedback", "corrected"].includes(event.signal)) {
+    return `M ${brainAtlasWideX(503)} 119 C ${brainAtlasWideX(610)} 119, ${brainAtlasWideX(606)} 181, ${brainAtlasWideX(640)} 181 C ${brainAtlasWideX(802)} 181, ${brainAtlasWideX(812)} 181, ${brainAtlasWideX(830)} 181`;
+  }
+  if (event.signal === "proposed") {
+    return `M ${brainAtlasWideX(712)} 181 C ${brainAtlasWideX(802)} 181, ${brainAtlasWideX(812)} 181, ${brainAtlasWideX(830)} 181`;
+  }
+  if (event.signal === "promoted") {
+    return `M ${brainAtlasWideX(902)} 181 L ${brainAtlasWideX(902)} 84 C ${brainAtlasWideX(830)} 20, ${brainAtlasWideX(514)} 10, ${brainAtlasWideX(503)} 92`;
+  }
+  return `M ${brainAtlasWideX(503)} 119 L ${brainAtlasWideX(640)} 119`;
+}
+
 function exactMemoryRecord(value: unknown, expectedKeys: string[]): Record<string, unknown> | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
   const record = value as Record<string, unknown>;
@@ -4345,6 +4390,11 @@ function BrainAtlasPanel({
   const [focusId, setFocusId] = useState("all");
   const [atlasMode, setAtlasMode] = useState<"evidence" | "ownership" | "operations" | "diagnostics">("evidence");
   const [helpNodeId, setHelpNodeId] = useState<BrainAtlasHelpNodeId | null>(null);
+  const [activeMemoryEvent, setActiveMemoryEvent] = useState<MemoryFlowEvent | null>(null);
+  const [memoryFlowMode, setMemoryFlowMode] = useState<"idle" | "replay" | "live">("idle");
+  const [memoryFlowEventCount, setMemoryFlowEventCount] = useState(0);
+  const replayedMemoryEvents = useRef(new Set<string>());
+  const memoryReplayInitialized = useRef(false);
   useEffect(() => {
     if (focusId !== "all" && !atlas?.nodes.some((node) => node.id === focusId)) setFocusId("all");
   }, [atlas?.generatedAt, atlas?.nodes, focusId]);
@@ -4367,6 +4417,7 @@ function BrainAtlasPanel({
   const helpful30d = sanitizedNestedMemoryCount(memoryOperations, "retrieval", "helpful30d");
   const pendingReviewCount = sanitizedNestedMemoryCount(memoryOperations, "review", "pending");
   const disputedReviewCount = sanitizedNestedMemoryCount(memoryOperations, "review", "disputed");
+  const oldestPendingAgeHours = sanitizedNestedMemoryMetric(memoryOperations, "review", "oldestPendingAgeHours", 1_000_000);
   const expiredMemoryExposure = sanitizedNestedMemoryCount(memoryOperations, "freshness", "expiredExposure");
   const expiringMemory7d = sanitizedNestedMemoryCount(memoryOperations, "freshness", "expiring7d");
   const provenanceCoverage = sanitizedNestedMemoryMetric(memoryOperations, "registry", "provenanceCoveragePct", 100);
@@ -4435,6 +4486,57 @@ function BrainAtlasPanel({
   });
   const agentMemorySignals = new Map(flowAgents.map((row) => [row.agent, latestAgentMemorySignal(row)]));
   const reuseLinks = activity?.reuseLinks || [];
+  const verifiedMemoryEvents = useMemo(() => {
+    if (!activity) return [];
+    const candidates = MEMORY_SIGNAL_KEYS.flatMap((signal): MemoryFlowEvent[] => {
+      const observedAt = activity.lastObservedAt[signal];
+      if (!observedAt) return [];
+      const agentRow = activity.agents.find((row) => (
+        signal === "retrieval" || signal === "hit" || signal === "miss"
+          ? row.lastRetrievalAt === observedAt
+          : signal === "selected"
+            ? row.lastSelectedAt === observedAt
+            : signal === "used" || signal === "feedback" || signal === "corrected"
+              ? row.lastUsedAt === observedAt
+              : signal === "crossAgentUsed"
+                ? row.lastCrossAgentUsedAt === observedAt
+                : false
+      ));
+      const reuseLink = signal === "crossAgentUsed"
+        ? activity.reuseLinks.find((row) => row.lastUsedAt === observedAt)
+        : undefined;
+      return [{
+        key: `${signal}:${observedAt}`,
+        signal,
+        observedAt,
+        agent: agentRow?.agent || reuseLink?.consumerAgent || null,
+        sourceAgent: reuseLink?.sourceAgent || null,
+        consumerAgent: reuseLink?.consumerAgent || null,
+      }];
+    });
+    // Hit/miss share a retrieval timestamp, and cross-agent use shares a use
+    // timestamp. Collapse those aliases so the visible count never inflates a
+    // single verified registry receipt into multiple animated events.
+    return [...new Map(candidates.map((event) => [event.observedAt, event])).values()]
+      .sort((a, b) => timeValue(a.observedAt) - timeValue(b.observedAt))
+      .slice(-MEMORY_FLOW_EVENT_LIMIT);
+  }, [activity]);
+  useEffect(() => {
+    if (atlasMode !== "evidence" || !verifiedMemoryEvents.length) return;
+    const unseen = verifiedMemoryEvents.filter((event) => !replayedMemoryEvents.current.has(event.key));
+    if (!unseen.length) return;
+    const initialReplay = !memoryReplayInitialized.current;
+    memoryReplayInitialized.current = true;
+    unseen.forEach((event) => replayedMemoryEvents.current.add(event.key));
+    const events = initialReplay ? unseen.slice(-5) : unseen;
+    setMemoryFlowMode(initialReplay ? "replay" : "live");
+    setMemoryFlowEventCount(events.length);
+    const timers = events.map((event, index) => window.setTimeout(() => {
+      setActiveMemoryEvent(event);
+    }, index * MEMORY_FLOW_REPLAY_STEP_MS));
+    timers.push(window.setTimeout(() => setActiveMemoryEvent(null), events.length * MEMORY_FLOW_REPLAY_STEP_MS + 900));
+    return () => timers.forEach((timer) => window.clearTimeout(timer));
+  }, [atlasMode, verifiedMemoryEvents]);
   const age = ageMinutes(atlas?.generatedAt);
   const stale = Number.isFinite(age) && age > 60;
   const unavailable = !atlas || atlas.status === "unavailable";
@@ -4535,9 +4637,16 @@ function BrainAtlasPanel({
             <h3 id="brain-atlas-unified-heading">Governed memory activity</h3>
             <p id="brain-atlas-unified-description">The main view shows how shared memory is recalled, applied, assessed, and promoted—not private reasoning.</p>
           </div>
-          <span className={`brain-atlas-maturity is-${maturityTone}`} title="Memory foundation and hygiene are live. Advanced retrieval pilots remain gated until the current dashboard-safe reliability evidence is clean.">
-            Maturity · {maturityBadgeLabel}
-          </span>
+          <div className="brain-atlas-memory-statuses">
+            {memoryFlowEventCount > 0 ? (
+              <span className={`memory-flow-live-status is-${memoryFlowMode}`} role="status" aria-live="polite">
+                <i />{memoryFlowMode === "live" ? "LIVE FLOW" : "RECENT REPLAY"} · {memoryFlowEventCount} VERIFIED EVENT{memoryFlowEventCount === 1 ? "" : "S"}
+              </span>
+            ) : null}
+            <span className={`brain-atlas-maturity is-${maturityTone}`} title="Memory foundation and hygiene are live. Advanced retrieval pilots remain gated until the current dashboard-safe reliability evidence is clean.">
+              Maturity · {maturityBadgeLabel}
+            </span>
+          </div>
         </header>
 
         <div className="memory-health-strip" role="status" aria-label="Shared memory health checks">
@@ -4568,6 +4677,12 @@ function BrainAtlasPanel({
         </div>
 
         <div className="memory-flow-map is-unified" tabIndex={0} aria-label="Governed memory activity graph. Scroll horizontally on narrow screens.">
+          <div className="memory-flow-legend" aria-label="Memory event color legend">
+            <span className="is-cyan"><i />Verified recall</span>
+            <span className="is-amber"><i />Cross-agent relay</span>
+            <span className="is-purple"><i />Outcome</span>
+            <span className="is-green"><i />Promotion</span>
+          </div>
           <svg
             viewBox={`0 0 ${BRAIN_ATLAS_WIDE_VIEWBOX_WIDTH} 376`}
             role="img"
@@ -4677,6 +4792,26 @@ function BrainAtlasPanel({
             <path className={`memory-flow-edge is-promoted${recent("promoted") ? " is-live" : ""}`} data-operation="promoted" data-observed-at={activity?.lastObservedAt.promoted || undefined} d={`M ${brainAtlasWideX(902)} 154 C ${brainAtlasWideX(902)} 134, ${brainAtlasWideX(902)} 103, ${brainAtlasWideX(902)} 84`} />
             <path className={`memory-flow-edge is-promoted is-return${recent("promoted") ? " is-live" : ""}`} data-operation="promoted" data-observed-at={activity?.lastObservedAt.promoted || undefined} d={`M ${brainAtlasWideX(830)} 57 C ${brainAtlasWideX(756)} 10, ${brainAtlasWideX(514)} 10, ${brainAtlasWideX(504)} 92`} />
             </g>
+            {activeMemoryEvent ? (
+              <g
+                key={activeMemoryEvent.key}
+                className={`memory-event-packet is-${memoryFlowEventTone(activeMemoryEvent.signal)}`}
+                data-memory-event={activeMemoryEvent.signal}
+                data-observed-at={activeMemoryEvent.observedAt}
+                aria-hidden="true"
+              >
+                {[0, 1, 2].map((trail) => (
+                  <circle key={trail} className={`memory-event-packet-dot is-trail-${trail}`} r={trail === 0 ? 5.2 : 3.2}>
+                    <animateMotion
+                      dur="1.05s"
+                      begin={`${trail * 0.11}s`}
+                      fill="freeze"
+                      path={memoryFlowEventPath(activeMemoryEvent)}
+                    />
+                  </circle>
+                ))}
+              </g>
+            ) : null}
             <g className="memory-flow-nodes">
             {flowAgents.map((row, index) => {
               const y = 22 + index * 52;
@@ -4735,7 +4870,7 @@ function BrainAtlasPanel({
               <text className="memory-flow-node-detail" x={brainAtlasWideX(302)} y="132" textAnchor="middle">{recallEfficiency != null ? [recallEfficiency, "% hit · ", avgRecallLatencyMs == null ? "latency unavailable" : [avgRecallLatencyMs, " ms"].join("")].join("") : activity ? [retrievals, " queried · ", count("misses"), " miss"].join("") : "telemetry unavailable"}</text>
               </g>
             </g>
-            <g className={`memory-flow-node is-registry is-explainable${helpNodeId === "registry" ? " is-help-open" : ""}${recent("hit") || recent("promoted") ? " is-live" : ""}`} role="button" tabIndex={0} aria-label="Explain Memory registry" aria-expanded={helpNodeId === "registry"} aria-controls="brain-atlas-node-help" onClick={() => toggleNodeHelp("registry")} onKeyDown={(event) => nodeHelpKeyDown(event, "registry")}>
+            <g className={`memory-flow-node is-registry is-explainable${helpNodeId === "registry" ? " is-help-open" : ""}${recent("hit") || recent("promoted") ? " is-live" : ""}${expiredMemoryExposure > 0 || expiringMemory7d > 0 ? " is-freshness-watch" : ""}`} role="button" tabIndex={0} aria-label="Explain Memory registry" aria-expanded={helpNodeId === "registry"} aria-controls="brain-atlas-node-help" onClick={() => toggleNodeHelp("registry")} onKeyDown={(event) => nodeHelpKeyDown(event, "registry")}>
               <title>{activity ? `${durableMemoryCount} active records · ${supersededMemoryCount} superseded · ${registrySourceCount} sources` : "Registry telemetry unavailable"}</title>
               <circle className="memory-flow-node-receipt-ring" cx={brainAtlasWideX(503)} cy="119" r="37" />
               <rect x={brainAtlasWideX(430)} y="92" width={brainAtlasWideWidth(430, 146)} height="54" rx="9" />
@@ -4762,16 +4897,17 @@ function BrainAtlasPanel({
               <text className="memory-flow-node-detail" x={brainAtlasWideX(712)} y="194" textAnchor="middle">{feedbackQuality != null ? [helpful30d, "/", feedback30d, " helpful · 30d"].join("") : activity ? [count("feedback"), " recent outcome", count("feedback") === 1 ? "" : "s"].join("") : "telemetry unavailable"}</text>
               </g>
             </g>
-            <g className={`memory-flow-node is-candidate is-explainable${helpNodeId === "candidate" ? " is-help-open" : ""}${candidateIsRecent ? " is-live" : ""}`} role="button" tabIndex={0} aria-label="Explain Candidate" aria-expanded={helpNodeId === "candidate"} aria-controls="brain-atlas-node-help" onClick={() => toggleNodeHelp("candidate")} onKeyDown={(event) => nodeHelpKeyDown(event, "candidate")} data-observed-at={candidateObservedAt || undefined}>
+            <g className={`memory-flow-node is-candidate is-explainable${helpNodeId === "candidate" ? " is-help-open" : ""}${candidateIsRecent ? " is-live" : ""}${oldestPendingAgeHours != null && oldestPendingAgeHours >= 72 ? " is-review-aging" : ""}`} role="button" tabIndex={0} aria-label="Explain Candidate" aria-expanded={helpNodeId === "candidate"} aria-controls="brain-atlas-node-help" onClick={() => toggleNodeHelp("candidate")} onKeyDown={(event) => nodeHelpKeyDown(event, "candidate")} data-observed-at={candidateObservedAt || undefined}>
               <title>{activity ? [pendingReviewCount, " pending and not learned; ", disputedReviewCount, " disputed"].join("") : "Candidate telemetry unavailable"}</title>
               <circle className="memory-flow-node-receipt-ring" cx={brainAtlasWideX(902)} cy="181" r="37" />
               <rect x={brainAtlasWideX(830)} y="154" width={brainAtlasWideWidth(830, 144)} height="54" rx="9" />
+              <circle className="memory-review-aging-beacon" cx={brainAtlasWideX(958)} cy="164" r="4.5" />
               <g className="memory-flow-node-copy" clipPath="url(#brain-atlas-candidate-copy)">
               <text className="memory-flow-node-title" x={brainAtlasWideX(902)} y="177" textAnchor="middle">Candidate</text>
               <text className="memory-flow-node-detail" x={brainAtlasWideX(902)} y="194" textAnchor="middle">{activity ? [pendingReviewCount, " pending · ", disputedReviewCount, " disputed"].join("") : "telemetry unavailable"}</text>
               </g>
             </g>
-            <g className={`memory-flow-node is-durable is-explainable${helpNodeId === "durable" ? " is-help-open" : ""}${recent("promoted") ? " is-live" : ""}`} role="button" tabIndex={0} aria-label="Explain Durable" aria-expanded={helpNodeId === "durable"} aria-controls="brain-atlas-node-help" onClick={() => toggleNodeHelp("durable")} onKeyDown={(event) => nodeHelpKeyDown(event, "durable")}>
+            <g className={`memory-flow-node is-durable is-explainable${helpNodeId === "durable" ? " is-help-open" : ""}${recent("promoted") ? " is-live is-promotion-confirmed" : ""}`} role="button" tabIndex={0} aria-label="Explain Durable" aria-expanded={helpNodeId === "durable"} aria-controls="brain-atlas-node-help" onClick={() => toggleNodeHelp("durable")} onKeyDown={(event) => nodeHelpKeyDown(event, "durable")}>
               <circle className="memory-flow-node-receipt-ring" cx={brainAtlasWideX(902)} cy="58" r="37" />
               <rect x={brainAtlasWideX(830)} y="31" width={brainAtlasWideWidth(830, 144)} height="54" rx="9" />
               <g className="memory-flow-node-copy" clipPath="url(#brain-atlas-durable-copy)">

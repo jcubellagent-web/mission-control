@@ -47,6 +47,50 @@ final result: passed
 
 ---
 
+# Control Tower Brain Atlas verified-event motion QA
+
+## Scope and evidence
+
+- Approved visual target: `/Users/joshcubell/.codex/generated_images/019fba4e-cc7a-7d53-83c6-ed289d1aba12/exec-1fc85df3-07a0-4762-8428-bfb4fb666771.png`
+- Final rendered dashboard capture: `/private/tmp/brain-atlas-live-motion.png`
+- Same-input target/implementation comparison: `/private/tmp/brain-atlas-design-comparison-v2.png`
+- Browser and viewport: the current Josh 2.0 Control Tower at desktop, mobile, 1920 x 1080 kiosk, 2048 x 1228 reference, and 1920 x 1080 reduced-motion states.
+- State reviewed: verified governed-memory timestamps, live agent work, cross-agent reuse, memory review age, freshness exposure, and recent promotion state.
+
+## Implemented motion contract
+
+1. Added a bounded six-event replay queue sourced only from the existing validated, counts-only registry timestamps. Stable timestamp keys prevent the same event from replaying on routine refreshes.
+2. Added cyan recall/apply packets, amber cross-agent relays, purple outcome packets, and green promotion packets with short three-dot trails. Every packet exposes its exact operation and observed timestamp as dashboard-safe DOM evidence.
+3. Added an explicit `RECENT REPLAY` versus `LIVE FLOW` status so historical playback cannot be mistaken for current activity.
+4. Added a compact color legend, an amber review-aging beacon after 72 hours, a freshness-watch registry shell, and a one-shot durable-memory promotion confirmation.
+5. Preserved the static exact-proof lane. No private reasoning, memory content, query, feedback reason, raw identifier, or synthetic thinking state is displayed.
+6. Added reduced-motion behavior that removes moving event packets and all new pulsing/bloom animation while retaining labels, colors, and status.
+
+## Visual comparison
+
+- The implementation preserves the approved topology, dark Control Tower palette, agent-to-recall flow, registry split to Applied and Outcome, candidate-to-durable promotion loop, and four semantic motion colors.
+- The live product keeps the existing health strip and exact panel geometry rather than enlarging the concept art or fabricating its sample values.
+- The rendered implementation shows the replay label, compact legend, active-agent path, current packet glow, and review-aging beacon without text overlap or node collision.
+- No P0, P1, or P2 visual mismatch remained after the same-input comparison.
+
+## Runtime and regression checks
+
+- Production React build passed.
+- Brain Atlas integration suite passed all 31 tests.
+- Runtime-layout self-test and Control Tower regression check passed.
+- Strict rendered-browser and visual verification passed with zero issues, degraded reasons, console errors, page errors, failed requests, bad HTTP responses, internal-text leaks, or desktop/kiosk page overflow.
+- Brain Atlas measured 0 HTML text overflows, 0 SVG text overflows, 0 SVG text overlaps, and 0 node overlaps. Reduced-motion semantics passed.
+
+## Severity review
+
+- P0: none.
+- P1: none.
+- P2: none.
+
+final result: passed
+
+---
+
 # Control Tower Brain Atlas proof-recovery and text-fit QA
 
 ## Scope and evidence

@@ -17729,6 +17729,8 @@ body,
 }
 
 .memory-flow-map {
+  position: relative;
+  contain: layout paint;
   flex: 1 1 auto;
   min-width: 0;
   min-height: 0;
@@ -17739,6 +17741,88 @@ body,
     radial-gradient(circle at 51% 50%, rgba(44, 177, 199, 0.075), transparent 38%),
     #03111f;
 }
+
+.brain-atlas-memory-statuses {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.memory-flow-live-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 25px;
+  padding: 4px 9px;
+  border: 1px solid rgba(101, 217, 255, 0.42);
+  border-radius: 999px;
+  background: rgba(5, 25, 41, 0.88);
+  color: #a9eaff;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.075em;
+  white-space: nowrap;
+}
+
+.memory-flow-live-status i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #65d9ff;
+  box-shadow: 0 0 8px rgba(101, 217, 255, 0.88);
+}
+
+.memory-flow-live-status.is-live {
+  border-color: rgba(88, 238, 154, 0.52);
+  color: #a8f3cc;
+}
+
+.memory-flow-live-status.is-live i {
+  background: #58ee9a;
+  box-shadow: 0 0 8px rgba(88, 238, 154, 0.88);
+  animation: memory-event-status-pulse 1.6s ease-in-out infinite;
+}
+
+.memory-flow-legend {
+  position: absolute;
+  z-index: 2;
+  top: 10px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 8px;
+  border: 1px solid rgba(116, 157, 178, 0.2);
+  border-radius: 5px;
+  background: rgba(3, 17, 31, 0.82);
+  color: #7893a2;
+  font-size: 8px;
+  font-weight: 760;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+}
+
+.memory-flow-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.memory-flow-legend i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 5px currentColor;
+}
+
+.memory-flow-legend .is-cyan { color: #65d9ff; }
+.memory-flow-legend .is-amber { color: #ffd166; }
+.memory-flow-legend .is-purple { color: #b48cff; }
+.memory-flow-legend .is-green { color: #58ee9a; }
 
 #brain-atlas.has-live-memory-flow .memory-flow-map {
   border-color: rgba(88, 238, 154, 0.4);
@@ -17922,6 +18006,24 @@ body,
   animation: memory-flow-travel 1.05s linear infinite;
 }
 
+.memory-event-packet {
+  color: #65d9ff;
+  filter: drop-shadow(0 0 3px currentColor) drop-shadow(0 0 8px currentColor);
+  pointer-events: none;
+}
+
+.memory-event-packet.is-amber { color: #ffd166; }
+.memory-event-packet.is-purple { color: #b48cff; }
+.memory-event-packet.is-green { color: #58ee9a; }
+
+.memory-event-packet-dot {
+  fill: currentColor;
+  opacity: 0.96;
+}
+
+.memory-event-packet-dot.is-trail-1 { opacity: 0.48; }
+.memory-event-packet-dot.is-trail-2 { opacity: 0.22; }
+
 .memory-flow-edge.is-work-lifeline.is-live {
   stroke: color-mix(in srgb, var(--agent-tone, var(--cyan)) 78%, transparent);
   stroke-width: 4.4;
@@ -17950,6 +18052,29 @@ body,
 .memory-flow-node.is-feedback > rect,
 .memory-flow-node.is-candidate > rect { stroke: rgba(180, 140, 255, 0.48); }
 .memory-flow-node.is-applied > rect { stroke: rgba(101, 205, 245, 0.5); }
+
+.memory-flow-node.is-registry.is-freshness-watch > rect {
+  stroke: rgba(255, 209, 102, 0.78);
+}
+
+.memory-review-aging-beacon {
+  fill: #ffd166;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.memory-flow-node.is-review-aging .memory-review-aging-beacon {
+  opacity: 0.95;
+  filter: drop-shadow(0 0 5px rgba(255, 209, 102, 0.9));
+  animation: memory-review-aging-pulse 2.2s ease-in-out infinite;
+}
+
+.memory-flow-node.is-promotion-confirmed > rect {
+  stroke: #58ee9a;
+  filter: drop-shadow(0 0 4px rgba(88, 238, 154, 0.48)) drop-shadow(0 0 11px rgba(88, 238, 154, 0.22));
+  animation: memory-promotion-confirmation 1.4s ease-out 1;
+}
 
 .memory-flow-node:not(.is-agent).is-live > rect:not(.memory-flow-node-aura) {
   fill: rgba(12, 42, 58, 0.98);
@@ -18521,6 +18646,22 @@ body,
   to { stroke-dashoffset: -64; }
 }
 
+@keyframes memory-event-status-pulse {
+  0%, 100% { opacity: 0.62; transform: scale(0.86); }
+  50% { opacity: 1; transform: scale(1.18); }
+}
+
+@keyframes memory-review-aging-pulse {
+  0%, 100% { opacity: 0.58; transform: scale(0.82); }
+  50% { opacity: 1; transform: scale(1.26); }
+}
+
+@keyframes memory-promotion-confirmation {
+  0% { stroke-width: 1.15; filter: none; }
+  45% { stroke-width: 2.8; filter: drop-shadow(0 0 9px rgba(88, 238, 154, 0.8)); }
+  100% { stroke-width: 1.15; filter: drop-shadow(0 0 4px rgba(88, 238, 154, 0.48)); }
+}
+
 @keyframes memory-flow-receipt-glow {
   0%, 100% { stroke-opacity: 0.72; }
   50% { stroke-opacity: 1; }
@@ -18873,6 +19014,17 @@ body,
     animation: none !important;
     stroke-dasharray: none;
     opacity: 0.92;
+  }
+
+  .memory-event-packet {
+    display: none;
+  }
+
+  .memory-flow-live-status i,
+  .memory-flow-node.is-review-aging .memory-review-aging-beacon,
+  .memory-flow-node.is-promotion-confirmed > rect {
+    animation: none !important;
+    transform: none;
   }
 
   #brain-atlas.has-live-memory-flow .memory-flow-map,
