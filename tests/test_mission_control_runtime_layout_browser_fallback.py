@@ -97,16 +97,16 @@ def valid_kiosk_legibility_measurements() -> dict[str, object]:
             "animatedEdgeCount": 1,
             "animatedInactiveCount": 0,
             "atlasAgentNodes": [
-                {"agent": "joshex", "layer": "memory", "working": False, "workState": "quiet", "memoryState": "idle", "memoryOperation": "retrieval", "workClass": False, "memoryClass": False, "memoryReceiptVisible": False, "auraAnimationName": "none", "presenceAnimationName": "none", "memoryAnimationName": "none", "workAnimated": False, "memoryAnimated": False, "animated": False},
-                {"agent": "josh2", "layer": "memory", "working": True, "workState": "working", "memoryState": "live", "memoryOperation": "retrieval", "workClass": True, "memoryClass": True, "memoryReceiptVisible": True, "auraAnimationName": "memory-agent-presence-halo", "presenceAnimationName": "memory-agent-presence-dot", "memoryAnimationName": "none", "memoryFilter": "none", "memoryStrokeWidth": 3.1, "workAnimated": True, "memoryAnimated": False, "animated": True},
-                {"agent": "jaimes", "layer": "memory", "working": False, "workState": "quiet", "memoryState": "idle", "memoryOperation": "retrieval", "workClass": False, "memoryClass": False, "memoryReceiptVisible": False, "auraAnimationName": "none", "presenceAnimationName": "none", "memoryAnimationName": "none", "workAnimated": False, "memoryAnimated": False, "animated": False},
-                {"agent": "jain", "layer": "memory", "working": False, "workState": "quiet", "memoryState": "idle", "memoryOperation": "retrieval", "workClass": False, "memoryClass": False, "memoryReceiptVisible": False, "auraAnimationName": "none", "presenceAnimationName": "none", "memoryAnimationName": "none", "workAnimated": False, "memoryAnimated": False, "animated": False},
+                {"agent": "joshex", "layer": "memory", "working": False, "activity": "quiet", "workerCount": 0, "workerLaneCount": 0, "workerLaneFamily": "", "workState": "quiet", "memoryState": "idle", "memoryOperation": "retrieval", "workClass": False, "memoryClass": False, "memoryReceiptVisible": False, "auraAnimationName": "none", "presenceAnimationName": "none", "memoryAnimationName": "none", "workAnimated": False, "memoryAnimated": False, "animated": False},
+                {"agent": "josh2", "layer": "memory", "working": True, "activity": "thinking", "workerCount": 1, "workerLaneCount": 1, "workerLaneFamily": "antigravity", "workState": "working", "memoryState": "live", "memoryOperation": "retrieval", "workClass": True, "memoryClass": True, "memoryReceiptVisible": True, "auraAnimationName": "memory-agent-presence-halo", "presenceAnimationName": "memory-agent-presence-dot", "memoryAnimationName": "none", "memoryFilter": "none", "memoryStrokeWidth": 3.1, "workAnimated": True, "memoryAnimated": False, "animated": True},
+                {"agent": "jaimes", "layer": "memory", "working": False, "activity": "quiet", "workerCount": 0, "workerLaneCount": 0, "workerLaneFamily": "", "workState": "quiet", "memoryState": "idle", "memoryOperation": "retrieval", "workClass": False, "memoryClass": False, "memoryReceiptVisible": False, "auraAnimationName": "none", "presenceAnimationName": "none", "memoryAnimationName": "none", "workAnimated": False, "memoryAnimated": False, "animated": False},
+                {"agent": "jain", "layer": "memory", "working": False, "activity": "quiet", "workerCount": 0, "workerLaneCount": 0, "workerLaneFamily": "", "workState": "quiet", "memoryState": "idle", "memoryOperation": "retrieval", "workClass": False, "memoryClass": False, "memoryReceiptVisible": False, "auraAnimationName": "none", "presenceAnimationName": "none", "memoryAnimationName": "none", "workAnimated": False, "memoryAnimated": False, "animated": False},
             ],
             "liveWorkAgents": [
-                {"agent": "joshex", "working": False, "modelFamily": "unverified", "modelVerified": False, "modelLabel": "Unverified model route pending", "modelChipFamily": "unverified", "modelChipVerified": False, "workerCount": 0, "visibleWorkerCount": 0, "workerFamilies": [], "workerLabels": [], "workerStaleStates": [], "workerOverflow": "", "headerOverflowX": 0, "headerOverflowY": 0},
-                {"agent": "josh2", "working": True, "modelFamily": "codex", "modelVerified": True, "modelLabel": "GPT codex/gpt-5.6-terra", "modelChipFamily": "codex", "modelChipVerified": True, "workerCount": 1, "visibleWorkerCount": 1, "workerFamilies": ["antigravity"], "workerLabels": ["Worker · Gemini · gemini-3.1-pro · active"], "workerStaleStates": ["false"], "workerOverflow": "", "headerOverflowX": 0, "headerOverflowY": 0},
-                {"agent": "jaimes", "working": False, "modelFamily": "unverified", "modelVerified": False, "modelLabel": "Unverified model route pending", "modelChipFamily": "unverified", "modelChipVerified": False, "workerCount": 0, "visibleWorkerCount": 0, "workerFamilies": [], "workerLabels": [], "workerStaleStates": [], "workerOverflow": "", "headerOverflowX": 0, "headerOverflowY": 0},
-                {"agent": "jain", "working": False, "modelFamily": "unverified", "modelVerified": False, "modelLabel": "Unverified model route pending", "modelChipFamily": "unverified", "modelChipVerified": False, "workerCount": 0, "visibleWorkerCount": 0, "workerFamilies": [], "workerLabels": [], "workerStaleStates": [], "workerOverflow": "", "headerOverflowX": 0, "headerOverflowY": 0},
+                {"agent": "joshex", "working": False, "activity": "quiet", "activityLabel": "", "activityBarAnimationNames": [], "modelFamily": "unverified", "modelVerified": False, "modelLabel": "Unverified model route pending", "modelChipFamily": "unverified", "modelChipVerified": False, "workerCount": 0, "visibleWorkerCount": 0, "workerFamilies": [], "workerLabels": [], "workerStaleStates": [], "workerOverflow": "", "headerOverflowX": 0, "headerOverflowY": 0},
+                {"agent": "josh2", "working": True, "activity": "thinking", "activityLabel": "Thinking 1 lane", "activityBarAnimationNames": ["agent-activity-wave", "agent-activity-wave", "agent-activity-wave"], "modelFamily": "codex", "modelVerified": True, "modelLabel": "GPT codex/gpt-5.6-terra", "modelChipFamily": "codex", "modelChipVerified": True, "workerCount": 1, "visibleWorkerCount": 1, "workerFamilies": ["antigravity"], "workerLabels": ["Worker · Gemini · gemini-3.1-pro · active"], "workerStaleStates": ["false"], "workerOverflow": "", "headerOverflowX": 0, "headerOverflowY": 0},
+                {"agent": "jaimes", "working": False, "activity": "quiet", "activityLabel": "", "activityBarAnimationNames": [], "modelFamily": "unverified", "modelVerified": False, "modelLabel": "Unverified model route pending", "modelChipFamily": "unverified", "modelChipVerified": False, "workerCount": 0, "visibleWorkerCount": 0, "workerFamilies": [], "workerLabels": [], "workerStaleStates": [], "workerOverflow": "", "headerOverflowX": 0, "headerOverflowY": 0},
+                {"agent": "jain", "working": False, "activity": "quiet", "activityLabel": "", "activityBarAnimationNames": [], "modelFamily": "unverified", "modelVerified": False, "modelLabel": "Unverified model route pending", "modelChipFamily": "unverified", "modelChipVerified": False, "workerCount": 0, "visibleWorkerCount": 0, "workerFamilies": [], "workerLabels": [], "workerStaleStates": [], "workerOverflow": "", "headerOverflowX": 0, "headerOverflowY": 0},
             ],
             "workingAgentCount": 1,
         },
@@ -798,9 +798,13 @@ def test_layout_accepts_idle_agent_with_exact_live_memory_path() -> None:
     assert isinstance(nodes, list)
     board_node = next(row for row in board if row.get("agent") == "josh2")
     board_node["working"] = False
+    board_node["activity"] = "quiet"
+    board_node["activityLabel"] = ""
+    board_node["activityBarAnimationNames"] = []
     atlas_node = next(row for row in nodes if row.get("agent") == "josh2")
     atlas_node.update({
         "working": False,
+        "activity": "quiet",
         "workState": "quiet",
         "workClass": False,
         "auraAnimationName": "none",
@@ -904,6 +908,12 @@ def test_layout_accepts_exact_live_path_without_animation_in_reduced_motion() ->
         node["workAnimated"] = False
         node["memoryAnimated"] = False
         node["animated"] = False
+    live_work_agents = memory["liveWorkAgents"]
+    assert isinstance(live_work_agents, list)
+    for card in live_work_agents:
+        assert isinstance(card, dict)
+        if card.get("working") is True:
+            card["activityBarAnimationNames"] = ["none", "none", "none"]
 
     assert runtime_layout.validate_control_tower_layout(
         measurements,

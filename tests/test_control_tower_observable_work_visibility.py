@@ -39,8 +39,28 @@ class ObservableWorkVisibilityTests(unittest.TestCase):
         self.assertIn("const observedPhase", atlas_nodes)
         self.assertIn("const observedTool", atlas_nodes)
         self.assertIn("const memoryState", atlas_nodes)
-        self.assertIn('data-observable-state-label={working ? "ACTIVE · WORKING" : "QUIET"}', atlas_nodes)
+        self.assertIn('data-observable-state-label={activityMode ? `ACTIVE · ${activityMode.toUpperCase()}` : "QUIET"}', atlas_nodes)
+        self.assertIn('data-agent-activity={activityMode || "quiet"}', atlas_nodes)
         self.assertIn("Observable execution metadata only, not private reasoning", atlas_nodes)
+
+    def test_live_work_and_brain_atlas_share_verified_activity_and_worker_lanes(self) -> None:
+        source = MAIN.read_text(encoding="utf-8")
+        styles = STYLES.read_text(encoding="utf-8")
+        card = source[source.index("function AgentHeroCard("):source.index("type MetricTone")]
+        atlas = source[source.index("function BrainAtlasPanel("):source.index("function AgentWorkBoard(")]
+
+        self.assertIn("function agentActivityMode", source)
+        self.assertIn("verifiedWorkerRoutesForAgent", source)
+        self.assertIn('className={`agent-activity-indicator is-${activityMode}`}', card)
+        self.assertIn('role="status"', card)
+        self.assertIn('data-agent-activity={activityMode || "quiet"}', card)
+        self.assertIn("workerObjectiveForRoute", card)
+        self.assertIn("workerRoutesByAgent", atlas)
+        self.assertIn('className="memory-flow-worker-lane"', atlas)
+        self.assertIn('data-worker-count={workerRoutes.length}', atlas)
+        self.assertIn(".agent-activity-indicator", styles)
+        self.assertIn("@keyframes agent-activity-wave", styles)
+        self.assertIn("@media (prefers-reduced-motion: reduce)", styles)
 
     def test_run_inspector_has_render_and_overflow_guards(self) -> None:
         styles = STYLES.read_text(encoding="utf-8")
