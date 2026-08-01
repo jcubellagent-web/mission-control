@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -49,6 +50,14 @@ def run(command: list[str], timeout: int = 45) -> dict[str, Any]:
     return {"ok": proc.returncode == 0, "code": proc.returncode}
 
 
+def run_capture(command: list[str], timeout: int = 45) -> dict[str, Any]:
+    try:
+        proc = subprocess.run(command, cwd=ROOT, text=True, capture_output=True, timeout=timeout, check=False)
+    except Exception as exc:
+        return {"ok": False, "reason": type(exc).__name__, "output": ""}
+    return {"ok": proc.returncode == 0, "code": proc.returncode, "output": proc.stdout.strip()}
+
+
 def age_seconds(path: Path) -> int | None:
     try:
         return max(0, int(utc_now().timestamp() - path.stat().st_mtime))
@@ -73,6 +82,48 @@ def latest_manifest(directory: Path) -> dict[str, Any]:
     }
 
 
+def latest_remote_manifest(host: str, directory: str) -> dict[str, Any]:
+    """Read candidate health on its owning host without copying private logs."""
+    code = """import datetime as dt
+import json
+import sys
+from pathlib import Path
+
+directory = Path(sys.argv[1])
+paths = sorted(directory.glob('candidate-*.json'), key=lambda path: path.stat().st_mtime, reverse=True)
+if not paths:
+    print(json.dumps({'present': False, 'healthy': True}))
+    raise SystemExit(0)
+path = paths[0]
+try:
+    manifest = json.loads(path.read_text(encoding='utf-8'))
+except Exception:
+    manifest = {}
+sandbox = Path(str(manifest.get('sandbox') or ''))
+age = max(0, int(dt.datetime.now(dt.timezone.utc).timestamp() - path.stat().st_mtime))
+print(json.dumps({
+    'present': True,
+    'healthy': bool(manifest) and sandbox.is_dir(),
+    'target': manifest.get('target'),
+    'ageSeconds': age,
+    'promotion': (manifest.get('promotion') or {}).get('status'),
+    'observationRecorded': isinstance(manifest.get('observationEvidence'), dict),
+}))
+"""
+    remote = " ".join(
+        shlex.quote(part)
+        for part in ["/opt/homebrew/bin/python3", "-c", code, directory]
+    )
+    result = run_capture(["ssh", host, remote], timeout=30)
+    if not result.get("ok"):
+        return {"present": False, "healthy": False, "reason": result.get("reason") or f"exit-{result.get('code')}"}
+    try:
+        value = json.loads(result.get("output") or "")
+    except (TypeError, json.JSONDecodeError):
+        return {"present": False, "healthy": False, "reason": "invalid-json"}
+    return value if isinstance(value, dict) else {"present": False, "healthy": False, "reason": "invalid-payload"}
+
+
 def publish_transition(payload: dict[str, Any], previous: dict[str, Any]) -> None:
     if payload.get("status") == previous.get("status"):
         return
@@ -92,6 +143,7 @@ def build(config: dict[str, Any]) -> dict[str, Any]:
     max_watch_age = int(config.get("capabilityWatchMaxAgeSeconds") or 93600)
     watch_age = age_seconds(CAPABILITY_WATCH)
     jaimes = str(config.get("jaimesHost") or "jaimes")
+    jaimes_root = str(config.get("jaimesMissionControl") or "/Users/jc_agent/.openclaw/workspace/mission-control")
     job = str(config.get("jaimesCapabilityJob") or "ai.jaimes.capability-upgrade-sweep")
     checks = {
         "capabilityWatchFresh": {"ok": watch_age is not None and watch_age <= max_watch_age, "ageSeconds": watch_age, "maxAgeSeconds": max_watch_age},
@@ -104,7 +156,7 @@ def build(config: dict[str, Any]) -> dict[str, Any]:
     }
     candidates = {
         "openclaw": latest_manifest(ROOT / "data" / "openclaw-update-evidence"),
-        "hermes": latest_manifest(ROOT / "data" / "hermes-update-evidence"),
+        "hermes": latest_remote_manifest(jaimes, f"{jaimes_root}/data/hermes-update-evidence"),
     }
     failures = [name for name, result in checks.items() if not result.get("ok")]
     failures.extend(f"{name}Candidate" for name, result in candidates.items() if not result.get("healthy"))
