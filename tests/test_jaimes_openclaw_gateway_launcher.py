@@ -13,29 +13,39 @@ MODULE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MODULE)
 
 
+def test_process_variables_selects_only_allowed_credentials(monkeypatch) -> None:
+    monkeypatch.setattr(
+        MODULE,
+        "run",
+        lambda _args: (
+            "node gateway OPENAI_API_KEY=openai-value GEMINI_API_KEY=gemini-value "
+            "TELEGRAM_BOT_TOKEN=must-not-forward UNRELATED=value"
+        ),
+    )
+
+    assert MODULE.process_variables("123") == {
+        "OPENAI_API_KEY": "openai-value",
+        "GEMINI_API_KEY": "gemini-value",
+    }
+
+
+def test_gateway_environment_never_forwards_telegram(monkeypatch) -> None:
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "inherited-bot-token")
+    env = MODULE.gateway_environment({"OPENAI_API_KEY": "provider-value"})
+
+    assert env["OPENAI_API_KEY"] == "provider-value"
+    assert "TELEGRAM_BOT_TOKEN" not in env
+
+
+def test_gateway_environment_requires_one_provider(monkeypatch) -> None:
+    for name in (*MODULE.PROVIDER_VARIABLES, *MODULE.FORBIDDEN_VARIABLES):
+        monkeypatch.delenv(name, raising=False)
+
+    with pytest.raises(RuntimeError, match="no provider credential"):
+        MODULE.gateway_environment({"CONTROL_TOWER_SHARED_SECRET": "control-only"})
+
+
 def test_command_after_separator() -> None:
     assert MODULE.command_after_separator(["--", "node", "gateway"]) == ["node", "gateway"]
     with pytest.raises(RuntimeError, match="command is missing"):
         MODULE.command_after_separator([])
-
-
-def test_broker_command_selects_providers_without_telegram(tmp_path, monkeypatch) -> None:
-    runner = tmp_path / "op_agent_env.sh"
-    template = tmp_path / "hermes.op.env"
-    runner.write_text("#!/bin/zsh\n", encoding="utf-8")
-    template.write_text("OPENAI_API_KEY=op://example/reference\n", encoding="utf-8")
-    monkeypatch.setattr(MODULE, "OP_ENV_RUNNER", runner)
-    monkeypatch.setattr(MODULE, "OP_ENV_TEMPLATE", template)
-
-    command = MODULE.broker_command(["node", "gateway"])
-
-    assert command[:4] == [str(runner), str(template), "--only", ",".join(MODULE.PROVIDER_VARIABLES)]
-    assert command[4:] == ["--", "node", "gateway"]
-    assert "TELEGRAM_BOT_TOKEN" not in command[3]
-
-
-def test_launcher_never_inspects_process_environments() -> None:
-    source = MODULE_PATH.read_text(encoding="utf-8")
-    assert "ps" + " eww" not in source
-    assert "process_variables" not in source
-    assert "service_pid" not in source

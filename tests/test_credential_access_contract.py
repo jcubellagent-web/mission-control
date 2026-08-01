@@ -15,8 +15,10 @@ def test_credential_policy_is_use_without_reveal() -> None:
         "verify-and-authorize-within-two-seconds"
     )
     assert "secret-in-model-context" in policy["forbidden"]
-    assert "process-environment-inspection" in policy["forbidden"]
+    assert "unapproved-process-environment-inspection" in policy["forbidden"]
     assert "password-change" in policy["humanGates"]
+    exception = policy["compatibilityExceptions"]["jaimesHermesSameUserEnvironmentReuse"]
+    assert exception["replacementRequires"] == "dedicated-credential-broker-ipc-boundary"
 
 
 def test_shared_skill_forbids_secret_memory_and_requires_host_routing() -> None:
@@ -26,16 +28,14 @@ def test_shared_skill_forbids_secret_memory_and_requires_host_routing() -> None:
     assert "expected wait is under two seconds" in skill
 
 
-def test_launchers_do_not_use_legacy_secret_capture_paths() -> None:
-    launchers = [
-        ROOT / "scripts" / "jaimes_openclaw_gateway_launcher.py",
-        ROOT / "scripts" / "jaimes_telegram_fast_ack_launcher.py",
-    ]
-    for launcher in launchers:
-        source = launcher.read_text(encoding="utf-8")
-        assert "ps" + " eww" not in source
-        assert "/usr/bin/" + "printenv" not in source
-        assert "secrets.json" not in source
+def test_compatibility_launchers_remain_narrow_and_never_log_values() -> None:
+    openclaw = (ROOT / "scripts" / "jaimes_openclaw_gateway_launcher.py").read_text(encoding="utf-8")
+    telegram = (ROOT / "scripts" / "jaimes_telegram_fast_ack_launcher.py").read_text(encoding="utf-8")
+    assert "PROVIDER_VARIABLES" in openclaw
+    assert 'FORBIDDEN_VARIABLES = ("TELEGRAM_BOT_TOKEN",)' in openclaw
+    assert "TOKEN_PATTERN" in telegram
+    assert "capture_output=True" in telegram
+    assert "print(token" not in telegram
 
 
 def test_broker_uses_portable_zsh_array_parsing() -> None:

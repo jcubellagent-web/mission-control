@@ -33,9 +33,13 @@ entitled to receive the credential value. Apply
 - JAIMES uses its host-scoped read-only identity for JAIMES and J.A.I.N
   services.
 - The broker resolves only the variables selected for the intended child.
-  Launchers must not inspect another process environment, run a reveal command,
-  capture a secret on stdout, or read protected app stores into a parent
-  process.
+  Launchers must not run a reveal command, capture a secret on stdout, or read
+  protected app stores into model-visible context.
+- JAIMES retains one bounded same-user compatibility path: its checked-in
+  OpenCLAW and Telegram launchers may select only allowlisted fields from the
+  already-running Hermes gateway. A live canary confirmed that fresh
+  1Password reads can time out under JAIMES launchd. Do not generalize this
+  exception; replacing it safely requires a dedicated broker/IPC boundary.
 - Ordinary expected 1Password CLI authorization is verified and accepted
   immediately, with an expected wait under two seconds. Identity, account,
   recovery, security-factor, financial, permission, public, and irreversible

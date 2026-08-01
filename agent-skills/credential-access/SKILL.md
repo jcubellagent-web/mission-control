@@ -21,8 +21,11 @@ logs.
    remains in that host's login Keychain and the resolved value exists only in
    broker memory and the intended child environment.
 3. For an app-specific protected store, use its checked-in launcher or broker.
-   Do not inspect another process environment, read a secret store into the
-   model, or improvise a reveal command.
+   Do not create a new process-environment inspection route, read a secret
+   store into the model, or improvise a reveal command. The checked-in JAIMES
+   launchers are a bounded same-user compatibility exception: they select only
+   allowlisted fields from the already-running Hermes gateway because direct
+   1Password reads can time out under launchd. Do not generalize that exception.
 4. Report only capability, host, purpose, authorization outcome, and success or
    failure. Never report an item value, OTP, recovery material, or raw account
    content.
