@@ -888,7 +888,7 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertIn("const agentY = agentIndex >= 0 ? 41 + agentIndex * 52 : 119", component)
         self.assertIn('d={`M ${brainAtlasWideX(168)} ${agentY}', component)
         self.assertIn('d={`M ${brainAtlasWideX(168)} ${y + 19}', component)
-        self.assertIn('data-observable-state-label={activityMode ? `ACTIVE · ${activityMode.toUpperCase()}` : "QUIET"}', component)
+        self.assertIn('data-observable-state-label={promptReceived ? "RECEIVED" : activityMode ? `ACTIVE · ${activityMode.toUpperCase()}` : "QUIET"}', component)
         self.assertIn('data-agent-activity={activityMode || "quiet"}', component)
         self.assertIn('className="memory-flow-worker-lane"', component)
         self.assertIn("brain-atlas-agent-copy-", component)
@@ -1068,7 +1068,7 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         main = (MISSION_CONTROL / "v2-react" / "src" / "main.tsx").read_text(encoding="utf-8")
         self.assertIn("function hasPublishedActiveObjective", main)
         self.assertIn("if (!hasPublishedActiveObjective(status, activeWork)) return false;", main)
-        self.assertIn("value === \"queued\" && hasPublishedActiveObjective(status, activeWork)", main)
+        self.assertIn("agentPromptReceiptIsFresh(status, activeWork)", main)
 
     def test_handoff_receipt_bridge_support_is_preserved(self) -> None:
         source = UPDATE_SCRIPT.read_text(encoding="utf-8")

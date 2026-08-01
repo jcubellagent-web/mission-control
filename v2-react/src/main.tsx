@@ -21,7 +21,7 @@ const AGENT_WORKER_STALE_MS = 90_000;
 type AttentionTarget = "brain-feed" | "today-jobs";
 type WorkState = "working" | "waiting" | "blocked" | "ready" | "done" | "quiet";
 type AgentVisualState = "working" | "ready" | "waiting" | "blocked" | "stale" | "offline";
-type AgentActivityMode = "thinking" | "working";
+type AgentActivityMode = "received" | "thinking" | "working";
 type StepTrailState = "done" | "current" | "pending";
 type AgentHeadline = { title: string; description: string };
 type ActiveAgentReadout = {
@@ -333,9 +333,10 @@ function kioskPulse(state: MissionControlState, trackedJobs: JobRow[], lastUpdat
 
 function agentOperatingState(status: AgentStatus) {
   const value = String(status.status || "").toLowerCase();
-  if (isOptionalJoshexOffline(status)) return "Offline";
   if (value === "blocked" || value === "error") return "Needs focus";
-  if (value === "active" || value === "queued" || (status.active && isFreshActiveTimestamp(status.updated_at))) return "Working";
+  if (agentPromptReceiptIsFresh(status)) return "Received";
+  if (isOptionalJoshexOffline(status)) return "Offline";
+  if (value === "active" || value === "working" || (status.active && isFreshActiveTimestamp(status.updated_at))) return "Working";
   if (value === "ready" || value === "ok" || value === "done" || value === "approved") return "Ready";
   if (value === "stale" || value === "idle" || value === "offline") return "Quiet";
   return displayStatus(status.status);
@@ -360,7 +361,8 @@ function workStateLabel(state?: WorkState) {
 function statusWorkState(status: AgentStatus): WorkState {
   const value = String(status.status || "").toLowerCase();
   if (value === "blocked" || value === "error") return "blocked";
-  if (value === "active" || value === "queued" || status.active) return "working";
+  if (agentPromptReceiptIsFresh(status)) return "ready";
+  if (value === "active" || value === "working" || status.active) return "working";
   if (value === "ready" || value === "ok" || value === "approved") return "ready";
   if (value === "done") return "done";
   return "quiet";
@@ -511,6 +513,7 @@ function ageMinutes(value?: string | null) {
 
 const ACTIVE_FOCUS_FRESH_MINUTES = 45;
 const ACTIVE_JOB_FRESH_MINUTES = 90;
+const PROMPT_RECEIPT_FRESH_MINUTES = 10;
 
 function jobIsFreshActive(job: JobRow) {
   const status = jobStatusValue(job);
@@ -745,7 +748,8 @@ function agentVisualState(status: AgentStatus, activeFocus: boolean, activeWork?
   // signal, including when an optional host has not published a status row yet.
   // Resolve it before the offline fallback so the board and Atlas cannot
   // disagree about a visibly working agent.
-  if (activeFocus || (value === "queued" && hasPublishedActiveObjective(status, activeWork))) return "working";
+  if (activeFocus) return "working";
+  if (agentPromptReceiptIsFresh(status, activeWork)) return "ready";
   if (isOptionalJoshexOffline(status)) return "offline";
   if (freshnessClass(status.updated_at) === "is-stale") return "stale";
   return "ready";
@@ -770,8 +774,17 @@ function agentIsShownWorking(status: AgentStatus, activeWork?: WorkItem) {
 }
 
 const THINKING_ACTIVITY_PATTERN = /\b(thinking|reasoning|decision|deciding|planning|analysis|analyzing|review|reviewing|synthesis|synthesizing|evaluating|research|diagnosing|triage|design|architect|mapping|investigating)\b/i;
+const PROMPT_RECEIPT_STATUSES = new Set(["queued", "accepted", "planned", "routed", "pending"]);
+
+function agentPromptReceiptIsFresh(status: AgentStatus, activeWork?: WorkItem) {
+  const value = String(status.status || "").toLowerCase();
+  return PROMPT_RECEIPT_STATUSES.has(value)
+    && hasPublishedActiveObjective(status, activeWork)
+    && ageMinutes(status.updated_at) <= PROMPT_RECEIPT_FRESH_MINUTES;
+}
 
 function agentActivityMode(liveWork: AgentLiveWorkPresentation): AgentActivityMode | null {
+  if (!liveWork.working && agentPromptReceiptIsFresh(liveWork.status, liveWork.activeWork)) return "received";
   if (!liveWork.working) return null;
   const observableActivity = [
     liveWork.status.phase,
@@ -5079,6 +5092,7 @@ function BrainAtlasPanel({
               const agentLoad = loadByAgent.get(row.agent)!;
               const liveWork = liveWorkByAgent.get(row.agent);
               const workObservedAt = liveWork?.activeWork?.updated_at || liveWork?.status.updated_at;
+              const promptReceived = activityMode === "received";
               const workActive = Boolean(working);
               const workLinked = Boolean(workActive && memorySignalIsRecent(workObservedAt, motionWindowSeconds));
               const observedPhase = compactText(liveWork?.status.phase || liveWork?.status.status || "working", 12);
@@ -5091,20 +5105,20 @@ function BrainAtlasPanel({
               return (
                 <g
                   key={row.agent}
-                  className={`memory-flow-node is-agent agent-${row.agent}${working ? " is-work-active" : ""}${live ? " is-memory-live" : ""}`}
+                  className={`memory-flow-node is-agent agent-${row.agent}${working ? " is-work-active" : ""}${promptReceived ? " is-prompt-received" : ""}${live ? " is-memory-live" : ""}`}
                   data-agent={row.agent}
                   data-agent-working={working ? "true" : "false"}
-                  data-observable-state-label={activityMode ? `ACTIVE · ${activityMode.toUpperCase()}` : "QUIET"}
+                  data-observable-state-label={promptReceived ? "RECEIVED" : activityMode ? `ACTIVE · ${activityMode.toUpperCase()}` : "QUIET"}
                   data-agent-activity={activityMode || "quiet"}
                   data-worker-count={workerRoutes.length}
-                  data-work-state={working ? "working" : "quiet"}
+                  data-work-state={working ? "working" : promptReceived ? "received" : "quiet"}
                   data-memory-state={!activity ? "unavailable" : live ? "live" : "idle"}
                   data-memory-operation={memorySignal?.[0] || "none"}
                   data-agent-load-tier={agentLoad.tier}
                   data-agent-load-score={agentLoad.score}
                   style={{ "--atlas-agent-phase": `${index * -0.18}s` } as React.CSSProperties}
                 >
-                  <title>{`${AGENTS[row.agent].label}: ${working ? `${activityMode}; ${agentLoad.label.toLowerCase()} verified work load (${agentLoad.score}/4); phase ${observedPhase}; tool ${observedTool}` : "not working"}; ${workerRoutes.length ? `${workerRoutes.length} verified worker lane${workerRoutes.length === 1 ? "" : "s"}: ${workerRoutes.map((worker, workerIndex) => `${worker.modelId} — ${workerTasks[workerIndex]}`).join("; ")}; ` : ""}${workLinked ? "fresh Live Work lifeline active" : workActive ? "active Live Work link, awaiting fresh heartbeat" : "no active Live Work link"}; ${memoryState}. Observable execution metadata only, not private reasoning.`}</title>
+                  <title>{`${AGENTS[row.agent].label}: ${working ? `${activityMode}; ${agentLoad.label.toLowerCase()} verified work load (${agentLoad.score}/4); phase ${observedPhase}; tool ${observedTool}` : promptReceived ? `prompt received; phase ${observedPhase}; execution not yet active` : "not working"}; ${workerRoutes.length ? `${workerRoutes.length} verified worker lane${workerRoutes.length === 1 ? "" : "s"}: ${workerRoutes.map((worker, workerIndex) => `${worker.modelId} — ${workerTasks[workerIndex]}`).join("; ")}; ` : ""}${workLinked ? "fresh Live Work lifeline active" : workActive ? "active Live Work link, awaiting fresh heartbeat" : promptReceived ? "intake receipt visible; no work or memory flow implied" : "no active Live Work link"}; ${memoryState}. Observable execution metadata only, not private reasoning.`}</title>
                   <rect className="memory-flow-node-aura" x={brainAtlasWideX(13)} y={y - 5} width={brainAtlasWideWidth(13, 160)} height="48" rx="12" />
                   <rect x={brainAtlasWideX(18)} y={y} width={brainAtlasWideWidth(18, 150)} height="38" rx="7" />
                   <g className="memory-flow-node-copy" clipPath={`url(#brain-atlas-agent-copy-${row.agent})`}>
@@ -5117,7 +5131,7 @@ function BrainAtlasPanel({
                   />
                   <text className="memory-flow-node-detail" x={brainAtlasWideX(30)} y={y + 35}>
                     {activityMode
-                      ? `${activityMode === "thinking" ? "THINK" : "WORK"} · ${workerRoutes.length ? `${workerRoutes.length} ${compactText(visibleWorkerLabel, 9)}` : observedPhase}`
+                      ? `${activityMode === "received" ? "RECEIVED" : activityMode === "thinking" ? "THINK" : "WORK"} · ${workerRoutes.length ? `${workerRoutes.length} ${compactText(visibleWorkerLabel, 9)}` : observedPhase}`
                       : !activity
                         ? "Quiet · memory unavailable"
                         : row.crossAgentUsed
@@ -5900,7 +5914,7 @@ function buildAgentInsights(
   ];
 }
 
-function agentHeadline(activeFocus: boolean, activeReadout: ActiveAgentReadout, idleContext: AgentIdleContext, idleRows: AgentBriefRow[]): AgentHeadline {
+function agentHeadline(activeFocus: boolean, promptReceived: boolean, activeReadout: ActiveAgentReadout, idleContext: AgentIdleContext, idleRows: AgentBriefRow[]): AgentHeadline {
   const nextTitle = headlineTitle(idleContext.nextTitle);
   const nextOutput = briefOutputForHeadline(nextTitle, idleRows);
   if (activeFocus) {
@@ -5908,6 +5922,12 @@ function agentHeadline(activeFocus: boolean, activeReadout: ActiveAgentReadout, 
     return {
       title: `Now: ${current}`,
       description: `${activeReadout.phase}: ${activeReadout.action}`,
+    };
+  }
+  if (promptReceived) {
+    return {
+      title: `Received: ${headlineTitle(activeReadout.objective, 58)}`,
+      description: "Prompt accepted into the canonical work ledger; execution has not started yet.",
     };
   }
   if (!idleContext.nextAt && /awaiting instruction/i.test(idleContext.nextTitle)) {
@@ -5956,8 +5976,9 @@ function AgentHeroCard({
     { label: "Next", text: compactText(idleContext.countdown ? `${idleContext.countdown} + ${idleContext.nextTitle}` : idleContext.nextTitle, 84) },
   ];
   const activeReadout = activeAgentReadout(status, activeWorkDetail);
-  const headline = agentHeadline(activeFocus, activeReadout, idleContext, idleBriefRows);
   const activityMode = agentActivityMode(liveWork);
+  const promptReceived = activityMode === "received";
+  const headline = agentHeadline(activeFocus, promptReceived, activeReadout, idleContext, idleBriefRows);
   const stepTrail = stepTrailForAgent(status, activeFocus, activeWork);
   const showStepTrail = activeFocus || visualState === "waiting" || visualState === "blocked";
   const updateAgeMs = Math.max(0, Date.now() - timeValue(status.updated_at));
@@ -5989,7 +6010,7 @@ function AgentHeroCard({
   }, [headline.title]);
   return (
     <article
-      className={`agent-hero-card ${agentClass(agent)} ${freshness} ${statusClass(status.status)} is-state-${visualState} ${activeFocus ? "is-working-focus" : "is-up-next-focus"} ${verifiedRoute ? "has-verified-route" : "is-route-pending"}${changedRowClass(changed)}`}
+      className={`agent-hero-card ${agentClass(agent)} ${freshness} ${statusClass(status.status)} is-state-${visualState} ${activeFocus ? "is-working-focus" : promptReceived ? "is-prompt-received" : "is-up-next-focus"} ${verifiedRoute ? "has-verified-route" : "is-route-pending"}${changedRowClass(changed)}`}
       data-agent={agent}
       data-agent-working={visualState === "working" ? "true" : "false"}
       data-agent-activity={activityMode || "quiet"}
@@ -6082,7 +6103,7 @@ function AgentHeroCard({
         {activityMode ? (
           <span className={`agent-activity-indicator is-${activityMode}`} role="status" aria-label={`${AGENTS[agent].label} is ${activityMode}`}>
             <span className="agent-activity-wave" aria-hidden="true"><i /><i /><i /></span>
-            <strong>{activityMode === "thinking" ? "Thinking" : "Working"}</strong>
+            <strong>{activityMode === "received" ? "Received" : activityMode === "thinking" ? "Thinking" : "Working"}</strong>
             {workerRoutes.length ? <em>{workerRoutes.length} lane{workerRoutes.length === 1 ? "" : "s"}</em> : null}
           </span>
         ) : null}

@@ -39,7 +39,7 @@ class ObservableWorkVisibilityTests(unittest.TestCase):
         self.assertIn("const observedPhase", atlas_nodes)
         self.assertIn("const observedTool", atlas_nodes)
         self.assertIn("const memoryState", atlas_nodes)
-        self.assertIn('data-observable-state-label={activityMode ? `ACTIVE · ${activityMode.toUpperCase()}` : "QUIET"}', atlas_nodes)
+        self.assertIn('data-observable-state-label={promptReceived ? "RECEIVED" : activityMode ? `ACTIVE · ${activityMode.toUpperCase()}` : "QUIET"}', atlas_nodes)
         self.assertIn('data-agent-activity={activityMode || "quiet"}', atlas_nodes)
         self.assertIn("Observable execution metadata only, not private reasoning", atlas_nodes)
 
@@ -61,6 +61,27 @@ class ObservableWorkVisibilityTests(unittest.TestCase):
         self.assertIn(".agent-activity-indicator", styles)
         self.assertIn("@keyframes agent-activity-wave", styles)
         self.assertIn("@media (prefers-reduced-motion: reduce)", styles)
+
+    def test_new_prompt_receipt_is_immediate_but_does_not_claim_active_work(self) -> None:
+        source = MAIN.read_text(encoding="utf-8")
+        styles = STYLES.read_text(encoding="utf-8")
+        card = source[source.index("function AgentHeroCard("):source.index("type MetricTone")]
+        atlas = source[source.index("function BrainAtlasPanel("):source.index("function AgentWorkBoard(")]
+
+        self.assertIn('type AgentActivityMode = "received" | "thinking" | "working";', source)
+        self.assertIn('const PROMPT_RECEIPT_STATUSES = new Set(["queued", "accepted", "planned", "routed", "pending"]);', source)
+        self.assertIn("PROMPT_RECEIPT_FRESH_MINUTES = 10", source)
+        self.assertIn("agentPromptReceiptIsFresh", source)
+        self.assertIn('title: `Received: ${headlineTitle(activeReadout.objective, 58)}`', source)
+        self.assertIn('data-agent-working={visualState === "working" ? "true" : "false"}', card)
+        self.assertIn('promptReceived ? "is-prompt-received"', card)
+        self.assertIn('activityMode === "received" ? "Received"', card)
+        self.assertIn('promptReceived ? " is-prompt-received"', atlas)
+        self.assertIn('data-work-state={working ? "working" : promptReceived ? "received" : "quiet"}', atlas)
+        self.assertIn("no work or memory flow implied", atlas)
+        self.assertIn(".agent-activity-indicator.is-received", styles)
+        self.assertIn("@keyframes agent-received-wave", styles)
+        self.assertIn(".memory-flow-node.is-prompt-received", styles)
 
     def test_run_inspector_has_render_and_overflow_guards(self) -> None:
         styles = STYLES.read_text(encoding="utf-8")

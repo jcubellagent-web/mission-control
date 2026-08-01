@@ -19290,7 +19290,9 @@ body,
   .memory-flow-node:not(.is-agent).is-live > rect:not(.memory-flow-node-aura),
   .memory-flow-node.is-live .memory-flow-node-receipt-ring,
   .memory-flow-node.is-work-active .memory-flow-node-aura,
-  .memory-flow-node.is-work-active .memory-flow-presence-dot {
+  .memory-flow-node.is-work-active .memory-flow-presence-dot,
+  .memory-flow-node.is-prompt-received .memory-flow-node-aura,
+  .memory-flow-node.is-prompt-received .memory-flow-presence-dot {
     animation: none !important;
   }
 
@@ -19300,6 +19302,16 @@ body,
   }
 
   .memory-flow-node.is-work-active .memory-flow-presence-dot {
+    opacity: 1;
+    transform: none;
+  }
+
+  .memory-flow-node.is-prompt-received .memory-flow-node-aura {
+    opacity: .62;
+    transform: none;
+  }
+
+  .memory-flow-node.is-prompt-received .memory-flow-presence-dot {
     opacity: 1;
     transform: none;
   }
@@ -19582,6 +19594,13 @@ body,
 
 .agent-activity-indicator.is-thinking { --activity-tone: #b48cff; }
 .agent-activity-indicator.is-working { --activity-tone: #65cdf5; }
+.agent-activity-indicator.is-received { --activity-tone: #f4c86a; }
+
+.agent-activity-indicator.is-received .agent-activity-wave i {
+  height: 7px;
+  animation-name: agent-received-wave;
+  animation-duration: 1.35s;
+}
 
 .agent-activity-indicator > strong {
   grid-area: label;
@@ -19630,6 +19649,39 @@ body,
 @keyframes agent-activity-wave {
   0%, 100% { transform: scaleY(.55); opacity: .58; }
   50% { transform: scaleY(2.25); opacity: 1; }
+}
+
+@keyframes agent-received-wave {
+  0%, 100% { transform: scaleY(.65); opacity: .52; }
+  50% { transform: scaleY(1.5); opacity: 1; }
+}
+
+.memory-flow-node.is-prompt-received > rect:not(.memory-flow-node-aura) {
+  fill: rgba(48, 38, 14, 0.96);
+  stroke: #f4c86a;
+  stroke-width: 2.1;
+}
+
+.memory-flow-node.is-prompt-received .memory-flow-node-aura {
+  stroke: rgba(244, 200, 106, .72);
+  stroke-width: 2;
+  opacity: .62;
+  animation: memory-prompt-received-halo 2.6s ease-out infinite;
+  animation-delay: var(--atlas-agent-phase, 0s);
+}
+
+.memory-flow-node.is-prompt-received .memory-flow-presence-dot {
+  fill: #f4c86a;
+  opacity: 1;
+  animation: memory-agent-presence-dot 2.6s ease-in-out infinite;
+  animation-delay: var(--atlas-agent-phase, 0s);
+}
+
+.memory-flow-node.is-prompt-received .memory-flow-node-detail { fill: #f7d98f; }
+
+@keyframes memory-prompt-received-halo {
+  0% { opacity: .68; transform: scale(.98); }
+  72%, 100% { opacity: 0; transform: scale(1.07); }
 }
 
 .memory-flow-worker-lane line {

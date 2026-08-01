@@ -1280,6 +1280,7 @@ def validate_control_tower_layout(
         activity_mode = str(card.get("activity") or "")
         activity_label = str(card.get("activityLabel") or "")
         activity_animations = card.get("activityBarAnimationNames") if isinstance(card.get("activityBarAnimationNames"), list) else []
+        received = activity_mode == "received"
         if working:
             if activity_mode not in {"thinking", "working"}:
                 failures.append(f"{label}: {agent} is working without a verified Thinking or Working state")
@@ -1291,6 +1292,15 @@ def validate_control_tower_layout(
                 failures.append(f"{label}: reduced-motion mode still animates {agent} Live Work activity")
             elif not expect_reduced_motion and any(str(name) != "agent-activity-wave" for name in activity_animations):
                 failures.append(f"{label}: {agent} Live Work activity signal is not animated")
+        elif received:
+            if not activity_label.lower().startswith("received"):
+                failures.append(f"{label}: {agent} prompt receipt indicator lacks a readable Received label")
+            if len(activity_animations) != 3:
+                failures.append(f"{label}: {agent} prompt receipt indicator lacks its three-bar signal")
+            elif expect_reduced_motion and any(str(name) != "none" for name in activity_animations):
+                failures.append(f"{label}: reduced-motion mode still animates {agent} prompt receipt")
+            elif not expect_reduced_motion and any(str(name) != "agent-received-wave" for name in activity_animations):
+                failures.append(f"{label}: {agent} prompt receipt signal is not animated")
         elif activity_mode != "quiet" or activity_label or activity_animations:
             failures.append(f"{label}: {agent} shows activity while its verified work state is quiet")
         family = str(card.get("modelFamily") or "")
@@ -1380,8 +1390,10 @@ def validate_control_tower_layout(
         if str(node.get("layer") or "") != "memory":
             failures.append(f"{label}: Brain Atlas {agent} shared agent node is outside the memory layer")
         working = node.get("working") is True
+        received = str(node.get("activity") or "") == "received"
         memory_live = str(node.get("memoryState") or "") == "live"
-        if str(node.get("workState") or "") != ("working" if working else "quiet"):
+        expected_work_state = "working" if working else "received" if received else "quiet"
+        if str(node.get("workState") or "") != expected_work_state:
             failures.append(f"{label}: Brain Atlas {agent} work-state label disagrees with its working flag")
         if node.get("workClass") is not working:
             failures.append(f"{label}: Brain Atlas {agent} work-presence class disagrees with Live Work state")
@@ -1406,8 +1418,10 @@ def validate_control_tower_layout(
         else:
             if working and node.get("workAnimated") is not True:
                 failures.append(f"{label}: working Brain Atlas agent {agent} lacks an active presence animation")
-            if not working and node.get("workAnimated") is True:
+            if not working and not received and node.get("workAnimated") is True:
                 failures.append(f"{label}: quiet Brain Atlas agent {agent} has an active presence animation")
+            if received and node.get("workAnimated") is not True:
+                failures.append(f"{label}: received Brain Atlas agent {agent} lacks an intake presence animation")
     if expect_reduced_motion:
         if animated_edges:
             failures.append(f"{label}: reduced-motion mode still animates {len(animated_edges)} Brain Atlas path(s)")
