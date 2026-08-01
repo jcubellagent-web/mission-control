@@ -1601,9 +1601,11 @@ function liveRunInspectorRows(state: MissionControlState, statuses: Map<AgentId,
     const ownedControllers = activeWorks
       .filter((work) => work.ownerAgent === agent && work.executionRole !== "worker")
       .sort((left, right) => timeValue(right.updatedAt) - timeValue(left.updatedAt));
-    const controller = ownedControllers.find((work) => (
+    const statusIdentifiesRun = Boolean(status.work_id && status.run_id);
+    const exactController = ownedControllers.find((work) => (
       work.workId === status.work_id && work.runId === status.run_id
-    )) || ownedControllers[0] || null;
+    ));
+    const controller = exactController || (!statusIdentifiesRun ? ownedControllers[0] : null) || null;
     const controllerWorkId = controller?.workId || status.work_id;
     const controllerRunId = controller?.runId || status.run_id;
     const explicitWorkers = activeWorks.filter((work) => (

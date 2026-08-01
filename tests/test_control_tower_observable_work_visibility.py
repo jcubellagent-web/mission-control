@@ -20,6 +20,8 @@ class ObservableWorkVisibilityTests(unittest.TestCase):
         self.assertIn('role="treeitem"', inspector)
         self.assertIn("controllerWorkId === controllerWorkId", inspector)
         self.assertIn("controllerRunId === controllerRunId", inspector)
+        self.assertIn("const statusIdentifiesRun", inspector)
+        self.assertIn("!statusIdentifiesRun ? ownedControllers[0] : null", inspector)
         self.assertIn("never private reasoning", inspector)
 
     def test_live_refresh_transitions_only_non_loading_updates(self) -> None:
