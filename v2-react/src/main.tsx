@@ -4989,12 +4989,12 @@ function BrainAtlasPanel({
               const workObservedAt = liveWork?.activeWork?.updated_at || liveWork?.status.updated_at;
               const workActive = Boolean(working);
               const workLinked = Boolean(workActive && memorySignalIsRecent(workObservedAt, motionWindowSeconds));
-              const observedPhase = compactText(liveWork?.status.phase || liveWork?.status.status || "working", 18);
+              const observedPhase = compactText(liveWork?.status.phase || liveWork?.status.status || "working", 12);
               const observedTool = compactText(liveWork?.status.current_tool || "tool pending", 18);
               const memoryState = !activity
                 ? "memory unavailable"
                 : live && memorySignal
-                  ? `${MEMORY_SIGNAL_LABELS[memorySignal[0]]} verified`
+                  ? `${MEMORY_SIGNAL_LABELS[memorySignal[0]]} receipt verified`
                   : "memory quiet";
               return (
                 <g
@@ -5010,7 +5010,7 @@ function BrainAtlasPanel({
                   data-agent-load-score={agentLoad.score}
                   style={{ "--atlas-agent-phase": `${index * -0.18}s` } as React.CSSProperties}
                 >
-                  <title>{`${AGENTS[row.agent].label}: ${working ? `${agentLoad.label.toLowerCase()} verified work load (${agentLoad.score}/4); phase ${observedPhase}; tool ${observedTool}` : "not working"}; ${workLinked ? "fresh Live Work lifeline active" : workActive ? "active Live Work link, awaiting fresh heartbeat" : "no active Live Work link"}; ${!activity ? "memory telemetry unavailable" : live && memorySignal ? `${MEMORY_SIGNAL_LABELS[memorySignal[0]]} receipt verified` : "memory quiet"}. Observable execution metadata only, not private reasoning.`}</title>
+                  <title>{`${AGENTS[row.agent].label}: ${working ? `${agentLoad.label.toLowerCase()} verified work load (${agentLoad.score}/4); phase ${observedPhase}; tool ${observedTool}` : "not working"}; ${workLinked ? "fresh Live Work lifeline active" : workActive ? "active Live Work link, awaiting fresh heartbeat" : "no active Live Work link"}; ${memoryState}. Observable execution metadata only, not private reasoning.`}</title>
                   <rect className="memory-flow-node-aura" x={brainAtlasWideX(13)} y={y - 5} width={brainAtlasWideWidth(13, 160)} height="48" rx="12" />
                   <rect x={brainAtlasWideX(18)} y={y} width={brainAtlasWideWidth(18, 150)} height="38" rx="7" />
                   <g className="memory-flow-node-copy" clipPath={`url(#brain-atlas-agent-copy-${row.agent})`}>
@@ -5023,7 +5023,7 @@ function BrainAtlasPanel({
                   />
                   <text className="memory-flow-node-detail" x={brainAtlasWideX(30)} y={y + 35}>
                     {working
-                      ? `WORK · ${observedPhase} · ${memoryState}`
+                      ? `WORK · ${observedPhase}`
                       : !activity
                         ? "Quiet · memory unavailable"
                         : row.crossAgentUsed
