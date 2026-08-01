@@ -12,6 +12,8 @@ This runbook keeps the ecosystem current without granting an updater permission 
 
 The daily JAIMES LaunchAgent `ai.jaimes.capability-upgrade-sweep` refreshes the host inventory, upstream stable release metadata, npm stable/beta tags, and Control Tower's Capability Watch. Beta information is a preview, not an Action Required item.
 
+The Josh 2.0 LaunchAgent `ai.joshex.self-update-monitor` runs every five minutes. It verifies release-discovery freshness, both production runtimes, OpenCLAW gateway health, JAIMES Telegram health, the daily JAIMES sweep, and candidate-sandbox integrity. It records bounded metadata in `data/self-update-monitor.json` and publishes only status transitions. It cannot install or promote a release.
+
 ## Release flow
 
 1. **Discover.** Compare exact installed versions with npm's `latest` tag and the latest signed GitHub release. Do not use “commits behind main” as the stable-version decision.

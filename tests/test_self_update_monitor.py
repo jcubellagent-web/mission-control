@@ -1,0 +1,30 @@
+import json
+
+from scripts import self_update_monitor as monitor
+
+
+def test_latest_manifest_is_dashboard_safe(tmp_path):
+    sandbox = tmp_path / "candidate"
+    sandbox.mkdir()
+    evidence = tmp_path / "evidence"
+    evidence.mkdir()
+    (evidence / "candidate-test.json").write_text(json.dumps({
+        "target": "1.2.3", "sandbox": str(sandbox),
+        "promotion": {"status": "manual-review-required"},
+    }))
+    result = monitor.latest_manifest(evidence)
+    assert result["healthy"] is True
+    assert result["target"] == "1.2.3"
+    assert "sandbox" not in result
+
+
+def test_build_fails_closed_when_a_probe_fails(monkeypatch, tmp_path):
+    monkeypatch.setattr(monitor, "CAPABILITY_WATCH", tmp_path / "watch.json")
+    (tmp_path / "watch.json").write_text("{}")
+    monkeypatch.setattr(monitor, "ROOT", tmp_path)
+    calls = iter([True, True, False, True, True, True])
+    monkeypatch.setattr(monitor, "run", lambda *args, **kwargs: {"ok": next(calls)})
+    result = monitor.build({"capabilityWatchMaxAgeSeconds": 100})
+    assert result["status"] == "attention"
+    assert "openclawGateway" in result["failures"]
+    assert result["automaticPromotion"] is False
