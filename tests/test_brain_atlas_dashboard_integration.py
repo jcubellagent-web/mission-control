@@ -641,6 +641,19 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertEqual("ready", clean["status"])
         self.assertTrue(clean["source"]["verified"])
 
+    def test_memory_operations_allows_selection_to_age_out_before_use(self) -> None:
+        source = valid_memory_operations()
+        source["activity"]["counts"]["selected"] = 0
+        source["activity"]["lastObservedAt"]["selected"] = None
+        source["activity"]["agents"][0]["selected"] = 0
+        source["activity"]["agents"][0]["lastSelectedAt"] = None
+
+        clean = self.update.sanitize_memory_operations(source, "2026-07-18T16:01:00Z")
+
+        self.assertEqual("ready", clean["status"])
+        self.assertEqual(0, clean["activity"]["counts"]["selected"])
+        self.assertEqual(1, clean["activity"]["counts"]["used"])
+
     def test_memory_operations_rejects_content_and_unknown_fields_without_echo(self) -> None:
         secret = "private-memory-content-never-publish"
         mutations = []

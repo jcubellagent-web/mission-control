@@ -3640,7 +3640,7 @@ function sanitizedMemoryActivity(value: unknown): MemoryActivity | undefined {
     const lastCrossAgentUsedAt = agentRow.lastCrossAgentUsedAt;
     if (
       retrievals === null || hits === null || misses === null || selected === null || used === null
-      || crossAgentUsed === null || hits + misses !== retrievals || used > selected || crossAgentUsed > used
+      || crossAgentUsed === null || hits + misses !== retrievals || crossAgentUsed > used
     ) return undefined;
     if (lastRetrievalAt !== null && !isStrictMemoryTimestamp(lastRetrievalAt)) return undefined;
     if (lastSelectedAt !== null && !isStrictMemoryTimestamp(lastSelectedAt)) return undefined;

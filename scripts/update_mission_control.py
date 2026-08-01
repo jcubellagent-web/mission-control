@@ -861,7 +861,9 @@ def sanitize_memory_operations(value: Any, now_iso: str) -> Dict[str, Any]:
         + clean_counts["corrected"]
         + clean_counts["harmful"]
         != clean_counts["feedback"]
-        or clean_counts["used"] + clean_counts["reuseIgnored"] > clean_counts["selected"]
+        # Selection and use are separate timestamped events. At a rolling
+        # window boundary, an earlier selection may age out while its later
+        # use remains visible, so used does not have to be <= selected here.
         or clean_counts["crossAgentUsed"] > clean_counts["used"]
     ):
         return fallback
@@ -920,7 +922,6 @@ def sanitize_memory_operations(value: Any, now_iso: str) -> Dict[str, Any]:
             or used is None
             or cross_agent_used is None
             or retrievals != hits + misses
-            or used > selected
             or cross_agent_used > used
             or (raw_last is not None and last_retrieval is None)
             or (last_retrieval is not None and not window_start <= last_retrieval <= generated_at)
