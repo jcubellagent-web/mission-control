@@ -1400,11 +1400,18 @@ def validate_kiosk_legibility(measurements: Any) -> list[str]:
     live_contract = (
         ("objectives", "Live Work objective", KIOSK_LEGIBILITY_THRESHOLDS["liveObjectiveFont"]),
         ("names", "Live Work name", KIOSK_LEGIBILITY_THRESHOLDS["liveNameFont"]),
-        ("descriptions", "Live Work description", KIOSK_LEGIBILITY_THRESHOLDS["liveDescriptionFont"]),
-        ("secondary", "Live Work secondary text", KIOSK_LEGIBILITY_THRESHOLDS["liveSecondaryFont"]),
     )
     for key, label, minimum in live_contract:
         failures.extend(_font_and_clipping_failures(live_work.get(key), label=label, minimum=minimum))
+    for key, label in (
+        ("descriptions", "Live Work subordinate descriptions"),
+        ("secondary", "Live Work secondary text"),
+    ):
+        rows = live_work.get(key)
+        if not isinstance(rows, list):
+            failures.append(f"{KIOSK_PROBE_LABEL}: {label} measurements are missing")
+        elif rows:
+            failures.append(f"{KIOSK_PROBE_LABEL}: {label} must be absent; found {len(rows)} visible row(s)")
 
     finops = measurements.get("finops") if isinstance(measurements.get("finops"), dict) else {}
     if not finops.get("bodyPresent"):
@@ -1955,8 +1962,8 @@ def self_test() -> int:
         "liveWork": {
             "objectives": [{"fontSize": 24, "clipped": False}],
             "names": [{"fontSize": 17, "clipped": False}],
-            "descriptions": [{"fontSize": 12.5, "clipped": False}],
-            "secondary": [{"fontSize": 10.5, "clipped": False}],
+            "descriptions": [],
+            "secondary": [],
         },
         "finops": {
             "bodyPresent": True,

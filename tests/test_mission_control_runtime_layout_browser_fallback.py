@@ -160,8 +160,8 @@ def valid_kiosk_legibility_measurements() -> dict[str, object]:
         "liveWork": {
             "objectives": [{"fontSize": 24, "clipped": False}],
             "names": [{"fontSize": 17, "clipped": False}],
-            "descriptions": [{"fontSize": 12.5, "clipped": False}],
-            "secondary": [{"fontSize": 10.5, "clipped": False}],
+            "descriptions": [],
+            "secondary": [],
         },
         "finops": {
             "bodyPresent": True,
@@ -987,8 +987,8 @@ def test_kiosk_legibility_reports_every_regression() -> None:
     assert isinstance(live_work, dict)
     live_work["objectives"] = [{"fontSize": 23.5, "clipped": True}]
     live_work["names"] = [{"fontSize": 16.5, "clipped": True}]
-    live_work["descriptions"] = [{"fontSize": 12, "clipped": True}]
-    live_work["secondary"] = [{"fontSize": 10, "clipped": True}]
+    live_work["descriptions"] = [{"fontSize": 12.5, "clipped": False}]
+    live_work["secondary"] = [{"fontSize": 10.5, "clipped": False}]
     finops = measurements["finops"]
     assert isinstance(finops, dict)
     finops["bodyBottomDeadSpace"] = 11
@@ -1050,10 +1050,8 @@ def test_kiosk_legibility_reports_every_regression() -> None:
         "Live Work objective has 1 clipped",
         "Live Work name minimum font",
         "Live Work name has 1 clipped",
-        "Live Work description minimum font",
-        "Live Work description has 1 clipped",
-        "Live Work secondary text minimum font",
-        "Live Work secondary text has 1 clipped",
+        "Live Work subordinate descriptions must be absent",
+        "Live Work secondary text must be absent",
         "FinOps bottom dead space",
         "FinOps body overshoots",
         "FinOps wallet width",
