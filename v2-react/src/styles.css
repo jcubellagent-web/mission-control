@@ -66,6 +66,16 @@
   padding: 10px;
 }
 
+.brain-hero > .live-run-inspector {
+  position: absolute;
+  inset: 58px 10px 10px;
+  z-index: 24;
+  margin: 0;
+  overflow: auto;
+  background: rgba(8, 33, 63, 0.98);
+  box-shadow: 0 12px 32px rgba(1, 9, 18, 0.42);
+}
+
 .live-run-inspector > header {
   display: flex;
   align-items: center;
@@ -294,6 +304,7 @@
 }
 
 @media (max-width: 900px) {
+  .brain-hero > .live-run-inspector { position: relative; inset: auto; margin: 8px 10px 0; }
   .live-run-inspector > header { align-items: flex-start; flex-direction: column; }
   .live-run-agent-switch { width: 100%; overflow-x: auto; }
   .live-run-node { grid-template-columns: 12px minmax(0, 1fr); }

@@ -49,6 +49,8 @@ class ObservableWorkVisibilityTests(unittest.TestCase):
         self.assertIn("contain-intrinsic-size: 250px;", inspector)
         self.assertIn("max-height: 286px;", inspector)
         self.assertIn("overflow: auto;", inspector)
+        self.assertIn(".brain-hero > .live-run-inspector", styles)
+        self.assertIn("inset: 58px 10px 10px;", styles)
 
 
 if __name__ == "__main__":
