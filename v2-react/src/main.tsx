@@ -1,11 +1,11 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { memo, startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { createRoot } from "react-dom/client";
 import { AlertTriangle, ArrowLeftRight, ArrowUp, BookOpen, Bot, Braces, CheckCircle2, CircleHelp, ClipboardList, Coins, DollarSign, Download, ExternalLink, EyeOff, Gauge, GitBranch, Moon, Radio, RefreshCw, ShieldCheck, Sparkles, Sun, Timer, TrendingDown, UserRoundCheck, WalletCards } from "lucide-react";
 import { invalidateMissionControlSidecars, loadMissionControl, subscribeMissionControlRealtime } from "./data";
 import { PRIORITY_JOB_RULES, SORARE_DAILY_GROUPS, SORARE_GENERAL_PATTERN, type PriorityJobKey, type SorareGroupKey } from "./priorityJobs";
 import { CANONICAL_ROUTE_ORDER, CANONICAL_ROUTES, liveWorkModelLabel, routeCssProperties, routeForAgentStatus, routeForProvider, verifiedRouteForAgentStatus } from "./routeIdentity";
-import type { ActiveModelRoute, AgentEvent, AgenticCryptoWallet, AgentId, AgentStatus, MemoryDiagnostics, MemoryHealthTone, MissionControlState, SignalItem, TodayJobOccurrence, TodayJobsMeta } from "./types";
+import type { ActiveModelRoute, ActiveWork, AgentEvent, AgenticCryptoWallet, AgentId, AgentStatus, MemoryDiagnostics, MemoryHealthTone, MissionControlState, SignalItem, TodayJobOccurrence, TodayJobsMeta } from "./types";
 import "./styles.css";
 
 const AGENTS: Record<AgentId, { label: string; role: string; roleBadge: string }> = {
@@ -1231,7 +1231,11 @@ function App() {
               const next = await loadMissionControl();
               if (coveredVersion < latestAppliedRefreshRef.current) return;
               latestAppliedRefreshRef.current = coveredVersion;
-              setState(next);
+              if (refreshLoadingThroughVersionRef.current > 0) {
+                setState(next);
+              } else {
+                startTransition(() => setState(next));
+              }
               setDataError(null);
             } catch (error) {
               if (coveredVersion < latestAppliedRefreshRef.current) return;
@@ -1571,6 +1575,7 @@ function BrainHero({
 
       {showDetails ? (
         <>
+          <LiveRunInspector state={state} statuses={statuses} />
           <BrainOperationsSummary state={state} workItems={workItems} quietMode={quietMode} onNavigate={onNavigate} liveCues={liveCues} />
           <EcosystemOperationsPanel state={state} workItems={workItems} />
           <MemoryOperationsPanel state={state} />
@@ -1579,6 +1584,167 @@ function BrainHero({
     </section>
   );
 }
+
+type LiveRunInspectorRow = {
+  agent: AgentId;
+  controller: ActiveWork | null;
+  status: AgentStatus;
+  workers: ActiveWork[];
+  recentEvent?: AgentEvent;
+};
+
+function liveRunInspectorRows(state: MissionControlState, statuses: Map<AgentId, AgentStatus>): LiveRunInspectorRow[] {
+  const activeWorks = state.workHot?.activeWorks || [];
+  const activeRoutes = state.activeModelRoutes || [];
+  const rows = HERO_AGENT_ORDER.map((agent) => {
+    const status = statuses.get(agent) || offlineStatus(agent);
+    const ownedControllers = activeWorks
+      .filter((work) => work.ownerAgent === agent && work.executionRole !== "worker")
+      .sort((left, right) => timeValue(right.updatedAt) - timeValue(left.updatedAt));
+    const controller = ownedControllers.find((work) => (
+      work.workId === status.work_id && work.runId === status.run_id
+    )) || ownedControllers[0] || null;
+    const controllerWorkId = controller?.workId || status.work_id;
+    const controllerRunId = controller?.runId || status.run_id;
+    const explicitWorkers = activeWorks.filter((work) => (
+      work.executionRole === "worker"
+      && work.controllerWorkId === controllerWorkId
+      && work.controllerRunId === controllerRunId
+    ));
+    const knownWorkerKeys = new Set(explicitWorkers.map((work) => `${work.workId}:${work.runId}`));
+    const routeWorkers: ActiveWork[] = activeRoutes
+      .filter((route) => (
+        route.ownerAgent === agent
+        && route.executionRole === "worker"
+        && route.controllerWorkId === controllerWorkId
+        && route.controllerRunId === controllerRunId
+        && route.routeVerified === true
+      ))
+      .filter((route) => !knownWorkerKeys.has(`${route.workId}:${route.runId}`))
+      .map((route) => ({
+        workId: route.workId,
+        runId: route.runId,
+        generation: 1,
+        sequence: 0,
+        status: "active",
+        ownerAgent: route.ownerAgent,
+        objective: "Specialist worker lane",
+        phase: "Executing delegated work",
+        tool: "Verified model route",
+        detail: "Worker activity is verified by the active route ledger.",
+        modelFamily: route.modelFamily,
+        modelId: route.modelId,
+        routeVerified: true,
+        executionRole: "worker",
+        controllerWorkId: route.controllerWorkId,
+        controllerRunId: route.controllerRunId,
+        leaseUntil: route.leaseUntil,
+        createdAt: route.activatedAt || route.updatedAt,
+        updatedAt: route.updatedAt,
+      }));
+    const workers = [...explicitWorkers, ...routeWorkers]
+      .sort((left, right) => timeValue(right.updatedAt) - timeValue(left.updatedAt))
+      .slice(0, 6);
+    const recentEvent = state.events.find((event) => (
+      event.agent_id === agent
+      && (!controllerWorkId || event.work_id === controllerWorkId)
+      && (!controllerRunId || event.run_id === controllerRunId)
+    ));
+    return { agent, controller, status, workers, recentEvent };
+  });
+  return rows.filter((row) => row.controller || row.status.active || row.workers.length > 0);
+}
+
+const LiveRunInspector = memo(function LiveRunInspector({
+  state,
+  statuses,
+}: {
+  state: MissionControlState;
+  statuses: Map<AgentId, AgentStatus>;
+}) {
+  const rows = useMemo(() => liveRunInspectorRows(state, statuses), [state, statuses]);
+  const [selectedAgent, setSelectedAgent] = useState<AgentId | null>(rows[0]?.agent || null);
+  useEffect(() => {
+    if (!rows.length) {
+      setSelectedAgent(null);
+      return;
+    }
+    if (!selectedAgent || !rows.some((row) => row.agent === selectedAgent)) setSelectedAgent(rows[0].agent);
+  }, [rows, selectedAgent]);
+  const selected = rows.find((row) => row.agent === selectedAgent) || rows[0];
+  const controller = selected?.controller;
+  const controllerObjective = controller?.objective || selected?.status.objective || "No active objective published";
+  const controllerPhase = controller?.phase || selected?.status.phase || selected?.status.status || "Status unavailable";
+  const controllerTool = controller?.tool || selected?.status.current_tool || "No tool reported";
+  const controllerObservedAt = controller?.updatedAt || selected?.status.updated_at;
+  return (
+    <section className="live-run-inspector" aria-labelledby="live-run-inspector-heading">
+      <header>
+        <div>
+          <p>Observable execution tree</p>
+          <h3 id="live-run-inspector-heading">Active runs and specialist workers</h3>
+        </div>
+        <div className="live-run-agent-switch" role="group" aria-label="Inspect active agent run">
+          {rows.map((row) => (
+            <button
+              key={row.agent}
+              type="button"
+              className={selected?.agent === row.agent ? "selected" : ""}
+              aria-pressed={selected?.agent === row.agent}
+              onClick={() => setSelectedAgent(row.agent)}
+            >
+              {AGENTS[row.agent].label}<span>{row.workers.length}</span>
+            </button>
+          ))}
+        </div>
+      </header>
+      {selected ? (
+        <div className="live-run-tree" role="tree" aria-label={`${AGENTS[selected.agent].label} active execution tree`}>
+          <article className="live-run-node is-controller" role="treeitem" aria-level={1} aria-expanded={selected.workers.length > 0}>
+            <span className="live-run-node-mark" aria-hidden="true" />
+            <div className="live-run-node-copy">
+              <span>Controller · generation {controller?.generation || 1}</span>
+              <strong>{compactText(controllerObjective, 112)}</strong>
+              <em>{compactText(`${controllerPhase} · ${controllerTool}`, 112)}</em>
+            </div>
+            <div className="live-run-node-proof">
+              <span className={controller?.routeVerified || selected.status.route_verified ? "is-verified" : "is-pending"}>
+                {controller?.routeVerified || selected.status.route_verified ? "Verified route" : "Route pending"}
+              </span>
+              <time dateTime={controllerObservedAt}>{ageLabel(controllerObservedAt)}</time>
+            </div>
+          </article>
+          {selected.workers.length ? (
+            <div className="live-run-worker-list" role="group" aria-label="Specialist workers">
+              {selected.workers.map((worker) => (
+                <article key={`${worker.workId}:${worker.runId}`} className="live-run-node is-worker" role="treeitem" aria-level={2}>
+                  <span className="live-run-node-mark" aria-hidden="true" />
+                  <div className="live-run-node-copy">
+                    <span>Worker · {worker.modelId || worker.modelFamily || "model pending"}</span>
+                    <strong>{compactText(worker.objective || worker.detail, 96)}</strong>
+                    <em>{compactText(`${worker.phase} · ${worker.tool}`, 96)}</em>
+                  </div>
+                  <div className="live-run-node-proof">
+                    <span className={worker.routeVerified ? "is-verified" : "is-pending"}>{worker.routeVerified ? "Verified" : "Pending"}</span>
+                    <time dateTime={worker.updatedAt}>{ageLabel(worker.updatedAt)}</time>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p className="live-run-empty">No specialist worker is attached to this controller run.</p>
+          )}
+          {selected.recentEvent ? (
+            <p className="live-run-receipt"><strong>Latest receipt</strong>{compactText(selected.recentEvent.title || selected.recentEvent.detail, 140)}</p>
+          ) : null}
+        </div>
+      ) : (
+        <p className="live-run-empty is-board-empty">No active controller run is currently published.</p>
+      )}
+      <footer>Observable objectives, phases, tools, routes, and receipts only—never private reasoning.</footer>
+    </section>
+  );
+});
 
 function objectRows(value: unknown): Array<Record<string, any>> {
   return Array.isArray(value) ? value.filter((row) => row && typeof row === "object") : [];
@@ -4823,12 +4989,20 @@ function BrainAtlasPanel({
               const workObservedAt = liveWork?.activeWork?.updated_at || liveWork?.status.updated_at;
               const workActive = Boolean(working);
               const workLinked = Boolean(workActive && memorySignalIsRecent(workObservedAt, motionWindowSeconds));
+              const observedPhase = compactText(liveWork?.status.phase || liveWork?.status.status || "working", 18);
+              const observedTool = compactText(liveWork?.status.current_tool || "tool pending", 18);
+              const memoryState = !activity
+                ? "memory unavailable"
+                : live && memorySignal
+                  ? `${MEMORY_SIGNAL_LABELS[memorySignal[0]]} verified`
+                  : "memory quiet";
               return (
                 <g
                   key={row.agent}
                   className={`memory-flow-node is-agent agent-${row.agent}${working ? " is-work-active" : ""}${live ? " is-memory-live" : ""}`}
                   data-agent={row.agent}
                   data-agent-working={working ? "true" : "false"}
+                  data-observable-state-label={working ? "ACTIVE · WORKING" : "QUIET"}
                   data-work-state={working ? "working" : "quiet"}
                   data-memory-state={!activity ? "unavailable" : live ? "live" : "idle"}
                   data-memory-operation={memorySignal?.[0] || "none"}
@@ -4836,7 +5010,7 @@ function BrainAtlasPanel({
                   data-agent-load-score={agentLoad.score}
                   style={{ "--atlas-agent-phase": `${index * -0.18}s` } as React.CSSProperties}
                 >
-                  <title>{`${AGENTS[row.agent].label}: ${working ? `${agentLoad.label.toLowerCase()} verified work load (${agentLoad.score}/4)` : "not working"}; ${workLinked ? "fresh Live Work lifeline active" : workActive ? "active Live Work link, awaiting fresh heartbeat" : "no active Live Work link"}; ${!activity ? "memory telemetry unavailable" : live && memorySignal ? `${MEMORY_SIGNAL_LABELS[memorySignal[0]]} receipt verified` : "memory quiet"}`}</title>
+                  <title>{`${AGENTS[row.agent].label}: ${working ? `${agentLoad.label.toLowerCase()} verified work load (${agentLoad.score}/4); phase ${observedPhase}; tool ${observedTool}` : "not working"}; ${workLinked ? "fresh Live Work lifeline active" : workActive ? "active Live Work link, awaiting fresh heartbeat" : "no active Live Work link"}; ${!activity ? "memory telemetry unavailable" : live && memorySignal ? `${MEMORY_SIGNAL_LABELS[memorySignal[0]]} receipt verified` : "memory quiet"}. Observable execution metadata only, not private reasoning.`}</title>
                   <rect className="memory-flow-node-aura" x={brainAtlasWideX(13)} y={y - 5} width={brainAtlasWideWidth(13, 160)} height="48" rx="12" />
                   <rect x={brainAtlasWideX(18)} y={y} width={brainAtlasWideWidth(18, 150)} height="38" rx="7" />
                   <g className="memory-flow-node-copy" clipPath={`url(#brain-atlas-agent-copy-${row.agent})`}>
@@ -4849,7 +5023,7 @@ function BrainAtlasPanel({
                   />
                   <text className="memory-flow-node-detail" x={brainAtlasWideX(30)} y={y + 35}>
                     {working
-                      ? "ACTIVE · WORKING"
+                      ? `WORK · ${observedPhase} · ${memoryState}`
                       : !activity
                         ? "Quiet · memory unavailable"
                         : row.crossAgentUsed
