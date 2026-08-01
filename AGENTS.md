@@ -289,19 +289,19 @@ Josh approved this default policy for Codex-app, Josh 2.0, and JAIMES work:
 - Prefer subscription-auth Codex lanes. Use metered providers only when Josh
   explicitly asks for that route or a standing temporary credit-burn policy is
   active.
-- Use `ollama/glm-5.2:cloud` as a deliberate sub-agent on both Josh 2.0 and
-  JAIMES for dashboard-safe large-context technical analysis, architecture
-  analysis, multi-file planning, structured code review, and parallel technical
-  second opinions. GLM may reason, plan, and review; the owning Codex lane keeps
-  repo edits, terminal execution, permissions, approvals, and final verification.
+- Use `ollama/glm-5.2:cloud` as the first-stop sub-agent on both Josh 2.0 and
+  JAIMES for substantive dashboard-safe technical reasoning: large-context and
+  architecture analysis, repository/code/quality/risk review, diagnosis,
+  multi-file or implementation planning, technical strategy, and parallel
+  technical second opinions. These core routes remain GLM-first at any usable
+  allowance. GLM may reason, plan, and review; the owning Codex lane keeps repo
+  edits, terminal execution, permissions, approvals, and final verification.
 - When fresh Ollama session and weekly allowance both have at least 80% remaining,
-  increase GLM's routing weight by making it first-stop for substantive
-  dashboard-safe deep/code/repository review, strategy, planning,
-  implementation-plan, diagnostic, quality/risk review, and second-opinion work.
-  Turn this surplus expansion off when quota is below 80%, stale, unknown, or
-  exhausted. Do not move generic/UI review, summaries, private context, mutations,
-  tools, approvals, or final integration away from their existing owners, and do
-  not invent specialist calls solely to consume credit.
+  increase GLM's routing weight only for otherwise-generic strategy work. Turn
+  this narrow surplus expansion off below 80% or when telemetry is stale,
+  unknown, or exhausted. Do not move generic/UI review, summaries, private
+  context, mutations, tools, approvals, or final integration away from their
+  existing owners, and do not invent specialist calls solely to consume credit.
 - GLM 5.2 is Ollama Cloud, not an offline/private model. Never send it secrets,
   OAuth payloads, cookies, raw emails, raw connector or account contents, wallet
   data, credentials, or other private context. Use local Qwen/Llama for offline

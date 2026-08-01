@@ -54,6 +54,7 @@ SOURCE_PATHS = (
     "scripts/model_lane.py",
     "scripts/model_lane_receipt.py",
     "scripts/ollama_cloud_pass.py",
+    "scripts/ollama_local_pass.py",
     "scripts/ollama_cloud_shadow_benchmark.py",
     "scripts/gemini_agent.py",
     "scripts/ecosystem_health_sweep.py",

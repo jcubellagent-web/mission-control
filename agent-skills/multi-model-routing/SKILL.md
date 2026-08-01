@@ -33,9 +33,11 @@ final answer.
   synthesis, routine document review, and low-risk second passes.
 - Antigravity `gemini-3.1-pro-high`: nuanced multi-document judgment and deep
   dashboard-safe review when Flash is insufficient.
-- Ollama Cloud `glm-5.2:cloud`: large-context technical analysis, architecture
-  analysis, multi-file planning, structured code review, and parallel technical
-  reasoning. GLM plans and reviews; Codex retains execution and verification.
+- Ollama Cloud `glm-5.2:cloud`: first-stop for substantive dashboard-safe
+  technical analysis, architecture and repository analysis, code/quality/risk
+  review, diagnosis, implementation planning, technical strategy, and parallel
+  technical second opinions. GLM plans and reviews; Codex retains execution and
+  verification.
 - Grok `grok-4.5`: X-native research, current events, public social signals, and
   outside critique that depends on fresh public context.
 - Local Qwen/Llama: bounded private/offline drafts that do not require frontier
@@ -58,14 +60,14 @@ reasoning out first and reserve GPT for orchestration, execution, and synthesis.
 - Gemini Pro High: nuanced multi-document judgment, deep research synthesis,
   model evaluation, escalation review, and long-context dashboard-safe analysis.
 - GLM 5.2 Cloud: architecture, repository analysis, debugging hypotheses,
-  multi-file planning, structured code review, long-context technical analysis,
-  and parallel technical second opinions. It does not edit or execute.
+  multi-file and implementation planning, structured code/repository review,
+  diagnosis, technical strategy, quality/risk review, long-context technical
+  analysis, and parallel technical second opinions. These core technical routes
+  stay GLM-first at any usable allowance; GLM does not edit or execute.
 - GLM surplus boost: when fresh Ollama session and weekly allowance both leave at
-  least 80% remaining, also route substantive dashboard-safe deep/code/repository
-  review, strategy, planning, implementation-plan, diagnostic, quality/risk
-  review, and second-opinion work to GLM first. Disable this expansion when quota
-  is below 80%, stale, unknown, or exhausted. Generic/UI review and summaries
-  remain Gemini work; private context and mutations remain Codex work.
+  least 80% remaining, route otherwise-generic strategy work to GLM first too.
+  Generic/UI review and summaries remain Gemini work; private context and
+  mutations remain Codex work.
 - Local Ollama: private/offline bounded drafting and extraction only. On the
   current 16 GB hosts, keep Qwen 2.5 7B as the verified general fallback and use
   GLM-OCR only for local OCR after its dedicated canary passes.
@@ -84,8 +86,8 @@ reasoning out first and reserve GPT for orchestration, execution, and synthesis.
 - Keep provider health and quota separate. Health controls whether a lane may
   execute; quota controls preference and conservation. Unknown quota with
   verified health is usable, while exhausted quota or failed health is not.
-- Treat the 80% GLM surplus rule as a weighting boost for real, task-matched
-  work, not permission to manufacture calls merely to consume credit.
+- Treat the 80% GLM surplus rule as a narrow generic-strategy weighting boost,
+  not a gate on core technical work and not permission to manufacture calls.
 
 ## Ollama Catalog Decisions
 

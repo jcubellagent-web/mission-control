@@ -1,9 +1,10 @@
 {
-  "updatedAt": "2026-07-21T23:05:00Z",
+  "updatedAt": "2026-08-01T01:00:00Z",
   "currency": "USD",
   "policy": {
-    "defaultProvider": "codex-luna-inbox-plus-codex-terra-execution",
-    "reviewProvider": "gemini-pro-when-judgment-needed",
+    "defaultProvider": "task-classified-provider-with-codex-execution-owner",
+    "technicalReasoningProvider": "ollama-glm-5.2-cloud",
+    "reviewProvider": "glm-for-technical-review-gemini-for-generic-or-readability-review",
     "currentEventsProvider": "xai",
     "fallbackProvider": "openrouter",
     "codexAllowanceMode": "auto",
@@ -12,7 +13,7 @@
       "rule": "Route dashboard-safe summaries, reviews, digests, stale-task compression, and non-execution synthesis to Gemini. Route public current-events and X-native research to xAI only when enabled and verified; otherwise disclose the verified Codex fallback. Route explicit non-sensitive fallback checks to OpenRouter. Reserve Codex, OpenAI API, or OpenRouter spend for execution, private connector work, repo edits, terminal actions, approvals, and final integration.",
       "telegramDisclosure": "Josh 2.0 and JAIMES must state Active Model/Auth and Route reason before doing substantive work while this mode is active."
     },
-    "rule": "Deterministic ladder first: Josh 2.0/Codex Luna owns bounded shared Inbox coordination; Terra owns code, repairs, tools, and multi-step execution; Sol is allowed only for earned hard/high-blast work. Gemini handles privacy-safe review/summaries, verified Grok handles current-events/X work, and Josh approves irreversible external actions.",
+    "rule": "One deterministic task classification: GLM Cloud handles substantive dashboard-safe technical analysis, repository/code review, diagnosis, planning, technical strategy, and technical second opinions; Gemini handles summaries, synthesis, and generic/readability review; verified Grok handles current public/X signals; local Ollama handles bounded private/offline drafts; Codex Luna owns bounded shared Inbox coordination and Terra/Sol own tools, mutations, private connectors, approvals, execution, and final verification.",
     "tripleConstraint": "Balance speed, routing effectiveness, and token efficiency by task context: mobile/frontdesk favors speed, complex/high-risk work favors route quality, ambient background work favors local/Gemini efficiency.",
     "failoverTriggers": [
       "HTTP 429",
@@ -21,10 +22,10 @@
       "provider timeout",
       "provider latency above task baseline"
     ],
-    "failoverRule": "Before external fallback, keep ownership on the right internal lane. If Gemini/xAI/OpenRouter fails for dashboard-safe work, preserve a bounded state package and continue through Codex/OpenAI on the selected owner lane.",
+    "failoverRule": "Keep ownership on the initiating agent and disclose every fresh-lane switch. GLM Cloud fails to Gemini Pro then Codex Terra; Gemini fails to GLM Cloud then Codex Terra; Grok fails to the authenticated public-X/browser ladder. Local private/offline Ollama never spills to a cloud model and falls back only to Codex on the owning trusted lane.",
     "statePreservation": "Failover packages may include objective summary, current step, recent safe activity, route decision, task/handoff ids, AGENTS.md/shared-skill pointers, and sanitized memory refs. They must exclude secrets, OAuth payloads, cookies, passwords, tokens, raw emails, raw connector data, and private account contents.",
-    "lastModeChangeAt": "2026-07-20T00:00:00Z",
-    "lastModeChangeReason": "derive conservation mode from exact CodexBar weekly allowance while preserving GPT for execution/private integration and using verified specialist subscriptions"
+    "lastModeChangeAt": "2026-08-01T01:00:00Z",
+    "lastModeChangeReason": "consolidate task classification, make GLM first-stop for core technical reasoning, isolate local Ollama quota, and preserve truthful provider-specific fallbacks"
   },
   "providers": [
     {
@@ -45,7 +46,7 @@
     {
       "id": "gemini",
       "label": "Gemini",
-      "role": "Privacy-safe review and summarization specialist; not the shared Inbox owner.",
+      "role": "Privacy-safe summary, synthesis, generic/readability review specialist; not the technical reasoning or shared Inbox owner.",
       "budgetType": "subscription",
       "monthlyCapUsd": 19.99,
       "dailyCapUsd": 0,
@@ -73,7 +74,7 @@
     {
       "id": "xai",
       "label": "xAI / Grok",
-      "role": "Current-events, X-native research, outside critique, and batch audit specialist",
+      "role": "Current-events, X-native research, public social signal, and market narrative specialist",
       "budgetType": "premium-subscription",
       "monthlyCapUsd": 30,
       "dailyCapUsd": 0,
@@ -107,14 +108,14 @@
     {
       "id": "ollama",
       "label": "Ollama Pro",
-      "role": "Local/Ollama Cloud model lane; GLM-5.2 eval plus local models.",
+      "role": "GLM-5.2 Cloud technical reasoning first-stop plus bounded local private/offline models.",
       "budgetType": "annual-subscription",
       "monthlyCapUsd": 16.67,
       "dailyCapUsd": 0,
       "remainingCreditUsd": null,
       "lastModelUsed": "glm-5.2:cloud + local Ollama",
       "authStatus": "ollama-pro-subscription",
-      "lastRouteReason": "$200/year amortized as $16.67/mo and $4.17/wk; local models remain zero incremental cost.",
+      "lastRouteReason": "GLM 5.2 Cloud is primary for substantive safe technical analysis/planning/review; local models remain zero-incremental-cost bounded private/offline lanes.",
       "fixedMonthlyUsd": 16.67,
       "fixedWeeklyUsd": 4.17,
       "pricingBasis": "Ollama Pro listed at $20/month or $200/year on Ollama's official pricing page, checked 2026-07-21.",
@@ -134,7 +135,7 @@
     "Do not route secrets, OAuth payloads, raw connector data, raw emails, or private account contents to Gemini, xAI, or OpenRouter automatically.",
     "Any provider with a daily cap is blocked once dailySpendUsd is greater than or equal to dailyCapUsd unless Josh explicitly approves an override.",
     "When Codex allowance mode is exhausted, non-execution dashboard-safe work must leave Codex first; Codex/API/OpenRouter spend is reserved for execution and private actions.",
-    "xAI is not the default brain. It is a specialist lane for current-events, X-native research, outside critique, and batch audits.",
+    "xAI is not the default brain. It is a specialist lane for current-events, X-native research, public social signals, and market narrative work.",
     "Gemini Flash Lite must never be the sole gatekeeper for escalation.",
     "Execution tasks involving code, files, tools, crons, tests, browser/auth work, trade prep, or account mutation must route to Codex/JAIMES/JOSHeX approval lanes, not Lite/Flash alone.",
     "Route telemetry must not contain raw prompts, secrets, OAuth payloads, cookies, passwords, tokens, raw emails, or private account contents."

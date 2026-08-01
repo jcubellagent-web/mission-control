@@ -440,6 +440,12 @@ def command_for(args: argparse.Namespace, route: dict[str, Any]) -> list[str]:
             "--model", model, "--prompt", prompt,
         ]
 
+    if provider == "ollama":
+        return [
+            sys.executable, str(ROOT / "scripts" / "ollama_local_pass.py"),
+            "--model", model, "--prompt", prompt,
+        ]
+
     hermes_provider = {
         "codex": "openai-codex",
         "gemini": "antigravity",

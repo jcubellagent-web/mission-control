@@ -253,6 +253,41 @@ def test_antigravity_model_ids_are_executable_not_human_labels() -> None:
     assert route.normalize_requested_model("gemini", "google-gemini-cli/gemini-3.6-flash-high") == "gemini-3.6-flash-high"
 
 
+def test_provider_detection_keeps_ollama_gpt_oss_out_of_codex() -> None:
+    route = load_module("agent_route_provider_detection", ROOT / "scripts" / "agent_route.py")
+    update = load_module("mission_control_provider_detection", ROOT / "scripts" / "update_mission_control.py")
+    assert route.normalize_requested_provider(model="gpt-oss:20b-cloud") == "ollama"
+    assert route.normalize_requested_provider(model="ollama/gpt-oss:20b-cloud") == "ollama"
+    assert route.normalize_requested_provider(model="gpt-5.6-terra") == "codex"
+    assert update.provider_from_model_name("gpt-oss:20b-cloud", "ollama") == "ollama"
+    assert update.provider_from_model_name("gpt-5.6-terra", "codex") == "codex"
+
+
+def test_model_classification_sets_are_non_overlapping() -> None:
+    route = load_module("agent_route_classification_contract", ROOT / "scripts" / "agent_route.py")
+    primary_task_sets = [
+        route.GEMINI_FIRST_TASK_TYPES,
+        route.GLM_FIRST_TASK_TYPES,
+        route.LOCAL_OLLAMA_TASK_TYPES,
+        route.XAI_FIRST_TASK_TYPES,
+        route.OPENROUTER_FALLBACK_TASK_TYPES,
+    ]
+    for index, left in enumerate(primary_task_sets):
+        for right in primary_task_sets[index + 1:]:
+            assert left.isdisjoint(right)
+    assert route.GLM_FIRST_TASK_TYPES.isdisjoint(route.GLM_SURPLUS_TASK_TYPES)
+
+
+def test_checked_in_policy_mirrors_executable_specialist_taxonomy() -> None:
+    route = load_module("agent_route_policy_mirror", ROOT / "scripts" / "agent_route.py")
+    policy = json.loads((ROOT / "data" / "agent-routing-policy.json").read_text())["modelRouting"]
+    assert "codexAllowanceMode" not in policy
+    assert set(policy["geminiFirstTaskTypes"]) == route.GEMINI_FIRST_TASK_TYPES
+    assert set(policy["glmFirstTaskTypes"]) == route.GLM_FIRST_TASK_TYPES
+    assert set(policy["localOllamaTaskTypes"]) == route.LOCAL_OLLAMA_TASK_TYPES
+    assert set(policy["xaiFirstTaskTypes"]) == route.XAI_FIRST_TASK_TYPES
+
+
 def model_args(*, transport: str = "auto") -> SimpleNamespace:
     return SimpleNamespace(
         transport=transport,
@@ -314,6 +349,13 @@ def test_direct_specialist_commands_cannot_silently_use_gpt(monkeypatch) -> None
     })
     assert glm[1].endswith("scripts/ollama_cloud_pass.py")
     assert "SENSITIVE_SENTINEL" not in lane.command_preview(glm)
+
+    local = lane.command_for(model_args(transport="hermes"), {
+        "agent": "jaimes", "modelRoute": {"provider": "ollama", "model": "qwen2.5:7b"},
+    })
+    assert local[1].endswith("scripts/ollama_local_pass.py")
+    assert "hermes" not in local
+    assert "SENSITIVE_SENTINEL" not in lane.command_preview(local)
 
 
 @pytest.mark.parametrize("task_type", ["architecture", "technical-analysis"])
@@ -516,7 +558,7 @@ def test_canonical_ollama_lookup_uses_control_tower_account(monkeypatch) -> None
 def test_surplus_ollama_quota_expands_glm_first_stop_weighting(monkeypatch) -> None:
     route = load_module("agent_route_glm_surplus", ROOT / "scripts" / "agent_route.py")
     args = model_args()
-    args.task_type = "deep-review"
+    args.task_type = "strategy"
     args.priority = "normal"
     args.complexity = "auto"
     args.blast_radius = "auto"
@@ -540,9 +582,53 @@ def test_surplus_ollama_quota_expands_glm_first_stop_weighting(monkeypatch) -> N
     assert route.choose_model_route(args, "joshex", False)["provider"] == "gemini"
     args.task_type = "repo-patch"
     assert route.choose_model_route(args, "joshex", False)["provider"] == "codex"
-    args.task_type = "deep-review"
+    args.task_type = "strategy"
     args.privacy = "agent-private"
     assert route.choose_model_route(args, "joshex", False)["provider"] == "codex"
+
+
+@pytest.mark.parametrize(
+    "task_type",
+    [
+        "code-review", "repository-review", "implementation-plan",
+        "diagnostic-analysis", "quality-review", "risk-review", "second-opinion",
+    ],
+)
+def test_core_technical_work_is_glm_first_below_surplus_threshold(monkeypatch, task_type) -> None:
+    route = load_module(f"agent_route_glm_core_{task_type}", ROOT / "scripts" / "agent_route.py")
+    args = model_args()
+    args.task_type = task_type
+    args.priority = "normal"
+    args.complexity = "auto"
+    args.blast_radius = "auto"
+    monkeypatch.setattr(route, "codex_allowance_mode", lambda _args: "normal")
+    monkeypatch.setattr(route, "ollama_live_allowance_status", lambda: (True, "Ollama live allowance has 40% remaining"))
+    selected = route.choose_model_route(args, "jaimes", False)
+    assert selected["provider"] == "ollama"
+    assert selected["model"] == "glm-5.2:cloud"
+    assert selected["role"] == "glm-large-context-technical-reasoning"
+
+
+def test_local_ollama_route_does_not_consult_cloud_allowance(monkeypatch) -> None:
+    route = load_module("agent_route_local_ollama", ROOT / "scripts" / "agent_route.py")
+    args = model_args()
+    args.task_type = "offline-draft"
+    args.privacy = "agent-private"
+    args.priority = "normal"
+    args.complexity = "bounded"
+    args.blast_radius = "low"
+    monkeypatch.setattr(route, "codex_allowance_mode", lambda _args: "normal")
+
+    def fail_if_cloud_quota_is_read():
+        raise AssertionError("local Ollama must not consult cloud allowance")
+
+    monkeypatch.setattr(route, "ollama_live_allowance_status", fail_if_cloud_quota_is_read)
+    monkeypatch.setattr(route, "explicit_route_unavailable", lambda provider, model="": "")
+    selected = route.choose_model_route(args, "jaimes", False)
+    assert selected["provider"] == "ollama"
+    assert selected["model"] == "qwen2.5:7b"
+    assert selected["privacy"] == "agent-private"
+    assert "fallbackRoutes" not in selected
 
 
 def test_automatic_model_lane_discloses_and_executes_declared_fallback(monkeypatch, capsys) -> None:

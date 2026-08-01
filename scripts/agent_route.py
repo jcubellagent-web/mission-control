@@ -24,7 +24,6 @@ POLICY_PATH = DATA_DIR / "agent-routing-policy.json"
 CAPABILITIES_PATH = DATA_DIR / "agent-capabilities.json"
 BUDGETS_PATH = DATA_DIR / "model-provider-budgets.json"
 MODEL_USAGE_PATH = DATA_DIR / "modelUsage.json"
-JAIMES_GEMINI_POLICY_PATH = DATA_DIR / "jaimes-gemini-policy.json"
 ROUTE_TELEMETRY_PATH = Path(
     os.environ.get("AGENT_ROUTE_TELEMETRY_PATH", DATA_DIR / "agent-route-decisions.jsonl")
 )
@@ -69,8 +68,9 @@ GEMINI_FIRST_CAPABILITIES = {
     "non-sensitive-log-review",
 }
 
-#JAIMES: GLM 5.2 Cloud is the deliberate long-context technical-reasoning sub-agent,
-# while Gemini owns synthesis and Codex owns mutation, permissions, and integration.
+#JAIMES: These sets form one non-overlapping classification table. GLM owns
+# substantive dashboard-safe technical reasoning; Gemini owns synthesis; local
+# Ollama owns bounded offline/private drafting; Codex owns execution/integration.
 GLM_FIRST_TASK_TYPES = {
     "architecture",
     "architecture-review",
@@ -83,6 +83,18 @@ GLM_FIRST_TASK_TYPES = {
     "parallel-technical-reasoning",
     "structured-code-review",
     "technical-second-opinion",
+    "deep-review",
+    "code-review",
+    "repository-review",
+    "technical-strategy",
+    "planning",
+    "implementation-plan",
+    "technical-plan",
+    "debugging-review",
+    "diagnostic-analysis",
+    "quality-review",
+    "risk-review",
+    "second-opinion",
     "sorare-analytics",
     "sorare-strategy",
     "sorare-review",
@@ -93,6 +105,9 @@ GLM_FIRST_CAPABILITIES = {
     "large-context-technical-reasoning",
     "multi-file-planning",
     "structured-code-review",
+    "technical-review",
+    "diagnostic-review",
+    "implementation-planning",
 }
 
 # Expand GLM into adjacent read-only reasoning only while fresh Ollama quota is
@@ -100,26 +115,24 @@ GLM_FIRST_CAPABILITIES = {
 # usable allowance; this set is a reversible surplus-capacity weighting boost.
 GLM_SURPLUS_THRESHOLD_PERCENT = 80.0
 GLM_SURPLUS_TASK_TYPES = {
-    "deep-review",
-    "code-review",
-    "repository-review",
     "strategy",
-    "technical-strategy",
-    "planning",
-    "implementation-plan",
-    "technical-plan",
-    "debugging-review",
-    "diagnostic-analysis",
-    "quality-review",
-    "risk-review",
-    "second-opinion",
 }
 
 GLM_SURPLUS_CAPABILITIES = {
-    "technical-review",
     "strategy-analysis",
-    "diagnostic-review",
-    "implementation-planning",
+}
+
+LOCAL_OLLAMA_TASK_TYPES = {
+    "bounded-private-draft",
+    "offline-draft",
+    "private-local-draft",
+    "local-extraction",
+}
+
+LOCAL_OLLAMA_CAPABILITIES = {
+    "local-private-draft",
+    "offline-analysis",
+    "local-extraction",
 }
 
 CODEX_ONLY_TASK_TYPES = {
@@ -346,6 +359,41 @@ def compact(value: Any, limit: int = 220) -> str:
     return text if len(text) <= limit else text[: limit - 1].rstrip() + "..."
 
 
+def classify_model_intent(args: argparse.Namespace) -> dict[str, bool]:
+    """Return the single canonical model classification used by routing and telemetry."""
+    task_type = str(args.task_type or "").strip().lower()
+    caps = {str(value).strip().lower() for value in (args.capability or [])}
+    codex_only = (
+        task_type in CODEX_ONLY_TASK_TYPES
+        or task_type in INBOX_FRONTDOOR_TYPES
+        or task_type in CONTROL_TOWER_TYPES
+        or task_type in SORARE_EXECUTION_TYPES
+    )
+    return {
+        "codexOnly": codex_only,
+        "gemini": task_type in GEMINI_FIRST_TASK_TYPES or bool(caps & GEMINI_FIRST_CAPABILITIES),
+        "glm": task_type in GLM_FIRST_TASK_TYPES or bool(caps & GLM_FIRST_CAPABILITIES),
+        "glmSurplus": task_type in GLM_SURPLUS_TASK_TYPES or bool(caps & GLM_SURPLUS_CAPABILITIES),
+        "localOllama": task_type in LOCAL_OLLAMA_TASK_TYPES or bool(caps & LOCAL_OLLAMA_CAPABILITIES),
+        "xai": task_type in XAI_FIRST_TASK_TYPES or bool(caps & XAI_FIRST_CAPABILITIES),
+        "openrouter": task_type in OPENROUTER_FALLBACK_TASK_TYPES or bool(caps & OPENROUTER_FALLBACK_CAPABILITIES),
+    }
+
+
+def with_fallback_routes(
+    payload: dict[str, Any],
+    fallback_routes: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Keep the executable fallback objects as the source of ladder labels."""
+    primary = f"{payload['provider']}/{payload['model']}"
+    payload["fallbackRoutes"] = fallback_routes
+    payload["fallbackLadder"] = [
+        primary,
+        *[f"{row['provider']}/{row['model']}" for row in fallback_routes],
+    ]
+    return payload
+
+
 def optional_ms(value: Optional[float]) -> Optional[int]:
     if value is None:
         return None
@@ -421,16 +469,9 @@ def annotate_glm_accountability(
     needs_approval: bool,
 ) -> dict[str, Any]:
     """Attach a machine-auditable GLM eligibility decision to every route."""
-    caps = {str(value).strip().lower() for value in (args.capability or [])}
-    task_type = str(args.task_type or "").strip().lower()
-    codex_only = (
-        task_type in CODEX_ONLY_TASK_TYPES
-        or task_type in INBOX_FRONTDOOR_TYPES
-        or task_type in CONTROL_TOWER_TYPES
-        or task_type in SORARE_EXECUTION_TYPES
-    )
-    direct = task_type in GLM_FIRST_TASK_TYPES or bool(caps & GLM_FIRST_CAPABILITIES)
-    surplus_candidate = task_type in GLM_SURPLUS_TASK_TYPES or bool(caps & GLM_SURPLUS_CAPABILITIES)
+    classification = classify_model_intent(args)
+    direct = classification["glm"]
+    surplus_candidate = classification["glmSurplus"]
     allowance_ok, allowance_reason = (
         ollama_live_allowance_status() if direct or surplus_candidate else (None, "not GLM-classified")
     )
@@ -438,7 +479,7 @@ def annotate_glm_accountability(
     eligible = bool(
         args.privacy == "dashboard-safe"
         and not needs_approval
-        and not codex_only
+        and not classification["codexOnly"]
         and (direct or (surplus_candidate and surplus))
     )
     selected = (
@@ -510,38 +551,15 @@ def provider_budget(provider_id: str) -> dict[str, Any]:
 
 
 def gemini_model(alias: str = "fast") -> str:
-    #JAIMES: Antigravity model ids are executable; human labels and retired
-    # google-gemini-cli ids must never leak into a fresh lane command.
-    antigravity_models = {
+    """Resolve only the executable Antigravity model contract."""
+    models = {
         "deep": "gemini-3.1-pro-high",
         "judgment": "gemini-3.1-pro-high",
         "longContext": "gemini-3.1-pro-high",
         "review": "gemini-3.6-flash-high",
         "fast": "gemini-3.6-flash-medium",
     }
-    if alias in antigravity_models:
-        return antigravity_models[alias]
-    policy = read_json(JAIMES_GEMINI_POLICY_PATH, {})
-    aliases = policy.get("modelAliases") if isinstance(policy, dict) else {}
-    if isinstance(aliases, dict):
-        value = aliases.get(alias) or aliases.get("fast")
-        if value:
-            return str(value)
-    budget = provider_budget("gemini")
-    preferred = budget.get("preferredModels") if isinstance(budget.get("preferredModels"), dict) else {}
-    budget_aliases = {
-        "fast": "routine",
-        "review": "review",
-        "deep": "deep",
-        "longContext": "longContext",
-    }
-    preferred_value = preferred.get(budget_aliases.get(alias, alias)) if isinstance(preferred, dict) else None
-    if preferred_value:
-        return str(preferred_value)
-    budget_value = str(budget.get("lastModelUsed") or "")
-    if "gemini" in budget_value.lower() and "subscription" not in budget_value.lower():
-        return budget_value
-    return PROVIDER_DEFAULT_MODELS["gemini"]
+    return models.get(alias, models["fast"])
 
 
 def provider_budget_guard(provider_id: str) -> tuple[bool, str]:
@@ -714,6 +732,9 @@ def hard_owner_for(args: argparse.Namespace) -> str:
     requester = str(args.requester or "").strip().lower()
     privacy = str(args.privacy or "").strip().lower()
 
+    if task_type in LOCAL_OLLAMA_TASK_TYPES:
+        return "jaimes"
+
     #JAIMES: GLM specialist passes stay owned by the Telegram/agent lane that requested them.
     if task_type in GLM_FIRST_TASK_TYPES:
         if requester in {"josh", "josh2", "josh2.0"}:
@@ -744,16 +765,18 @@ def normalize_requested_provider(value: str = "", model: str = "") -> str:
     model_text = str(model or "").strip().lower()
     if text:
         return REQUESTED_PROVIDER_ALIASES.get(text, text)
-    if model_text.startswith(("gpt-", "o", "codex/", "openai/")):
-        return "codex"
+    # Ollama publishes models such as gpt-oss; exact provider families must be
+    # recognized before generic OpenAI/Codex prefixes.
+    if model_text.startswith(("ollama/", "gpt-oss")) or any(name in model_text for name in ("qwen", "llama", "gemma", "glm")):
+        return "ollama"
     if "gemini" in model_text:
         return "gemini"
-    if model_text.startswith("ollama/") or any(name in model_text for name in ("qwen", "llama", "gemma", "glm")):
-        return "ollama"
     if "grok" in model_text or model_text.startswith("xai/"):
         return "xai"
     if "openrouter" in model_text:
         return "openrouter"
+    if model_text.startswith(("gpt-", "codex/", "openai/")) or re.fullmatch(r"o\d(?:[-.:/].*)?", model_text):
+        return "codex"
     return ""
 
 
@@ -807,17 +830,24 @@ def remote_specialist_available(provider: str, model: str = "") -> bool:
             "-H 'Authorization: Bearer agy-local' "
             f"| grep -Fq {shlex.quote(requested)}"
         )
-    elif provider == "ollama" and str(model or "").lower().endswith(":cloud"):
-        payload = json.dumps({
-            "model": str(model).lower().removeprefix("ollama/"),
-            "prompt": "",
-            "stream": False,
-            "options": {"num_predict": 0},
-        })
-        command = (
-            "curl -fsS --max-time 10 http://127.0.0.1:11434/api/generate "
-            f"-H 'Content-Type: application/json' -d {shlex.quote(payload)} >/dev/null"
-        )
+    elif provider == "ollama":
+        requested = str(model or "").lower().removeprefix("ollama/")
+        if requested.endswith(":cloud"):
+            payload = json.dumps({
+                "model": requested,
+                "prompt": "",
+                "stream": False,
+                "options": {"num_predict": 0},
+            })
+            command = (
+                "curl -fsS --max-time 10 http://127.0.0.1:11434/api/generate "
+                f"-H 'Content-Type: application/json' -d {shlex.quote(payload)} >/dev/null"
+            )
+        else:
+            command = (
+                "curl -fsS --max-time 5 http://127.0.0.1:11434/api/tags "
+                f"| grep -Fq {shlex.quote(requested)}"
+            )
     elif provider == "xai":
         requested = normalize_requested_model(provider, model or PROVIDER_DEFAULT_MODELS[provider])
         command = (
@@ -885,19 +915,21 @@ def explicit_route_unavailable(provider: str, model: str = "") -> str:
         if not available:
             return f"Grok subscription model {requested} is unavailable on JAIMES"
     if provider == "ollama":
-        allowance_ok, allowance_reason = ollama_live_allowance_status()
-        if allowance_ok is False:
-            return allowance_reason
+        requested = str(model or "").lower().removeprefix("ollama/")
+        cloud_model = requested.endswith(":cloud")
+        if cloud_model:
+            allowance_ok, allowance_reason = ollama_live_allowance_status()
+            if allowance_ok is False:
+                return allowance_reason
         try:
             with urllib.request.urlopen("http://127.0.0.1:11434/api/tags", timeout=2) as response:
                 tags = json.loads(response.read())
             names = {str(row.get("name") or "").lower() for row in tags.get("models", []) if isinstance(row, dict)}
-            requested = str(model or "").lower().removeprefix("ollama/")
             if requested and requested not in names:
                 if remote_specialist_available(provider, model):
                     return ""
                 return f"Ollama model {requested} is not installed on this host or JAIMES"
-            if requested.endswith(":cloud"):
+            if cloud_model:
                 payload = json.dumps({
                     "model": requested,
                     "prompt": "",
@@ -1172,23 +1204,19 @@ def ollama_surplus_capacity_available(
 
 
 def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: bool) -> dict[str, Any]:
-    caps = set(args.capability or [])
     task_type = args.task_type
+    classification = classify_model_intent(args)
     allowance_mode = codex_allowance_mode(args)
     codex_constrained = allowance_mode in {"conserve", "exhausted"}
     unsafe_privacy = args.privacy != "dashboard-safe"
-    codex_only = (
-        task_type in CODEX_ONLY_TASK_TYPES
-        or task_type in INBOX_FRONTDOOR_TYPES
-        or task_type in CONTROL_TOWER_TYPES
-        or task_type in SORARE_EXECUTION_TYPES
-    )
-    gemini_hint = task_type in GEMINI_FIRST_TASK_TYPES or bool(caps & GEMINI_FIRST_CAPABILITIES)
-    glm_hint = task_type in GLM_FIRST_TASK_TYPES or bool(caps & GLM_FIRST_CAPABILITIES)
-    xai_hint = task_type in XAI_FIRST_TASK_TYPES or bool(caps & XAI_FIRST_CAPABILITIES)
-    openrouter_hint = task_type in OPENROUTER_FALLBACK_TASK_TYPES or bool(caps & OPENROUTER_FALLBACK_CAPABILITIES)
+    codex_only = classification["codexOnly"]
+    gemini_hint = classification["gemini"]
+    glm_hint = classification["glm"]
+    local_ollama_hint = classification["localOllama"]
+    xai_hint = classification["xai"]
+    openrouter_hint = classification["openrouter"]
     gemini_first = bool(gemini_hint and not codex_only and not unsafe_privacy and not needs_approval)
-    glm_surplus_candidate = task_type in GLM_SURPLUS_TASK_TYPES or bool(caps & GLM_SURPLUS_CAPABILITIES)
+    glm_surplus_candidate = classification["glmSurplus"]
     if glm_hint or glm_surplus_candidate:
         ollama_allowance_ok, ollama_allowance_reason = ollama_live_allowance_status()
     else:
@@ -1264,9 +1292,36 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
             })
         return payload
 
+    if local_ollama_hint and not needs_approval:
+        local_model = PROVIDER_DEFAULT_MODELS["ollama"]
+        unavailable = explicit_route_unavailable("ollama", local_model)
+        if not unavailable:
+            return {
+                "firstStop": "ollama",
+                "provider": "ollama",
+                "model": local_model,
+                "auth": provider_auth_label("ollama", local_model),
+                "role": "local-private-bounded-draft",
+                "owner": owner,
+                "enforced": True,
+                "freshLaneRequired": True,
+                "verifyBeforeWork": True,
+                "codexAllowanceMode": allowance_mode,
+                "spendClass": "local-zero-incremental",
+                "privacy": args.privacy,
+                "reason": compact(f"{task_type} is a bounded local/offline task; use verified local Ollama without consulting cloud quota."),
+                "guardrails": [
+                    "Keep the prompt and output on the local JAIMES runtime.",
+                    "Do not use this bounded lane for frontier reasoning, mutations, approvals, or final verification.",
+                ],
+            }
+        # A private/offline request must never spill to a cloud specialist.
+        codex_only = True
+        gemini_first = False
+
     if glm_first:
         surplus_selected = bool(glm_surplus_boost and not glm_hint)
-        return {
+        return with_fallback_routes({
                 "firstStop": "ollama",
                 "provider": "ollama",
                 "model": "glm-5.2:cloud",
@@ -1283,12 +1338,17 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
                     else "quota-favored-cloud-specialist" if ollama_allowance_ok is True else "cloud-specialist"
                 ),
                 "privacy": "dashboard-safe",
-                "fallbackLadder": [
-                    "ollama/glm-5.2:cloud",
-                    "gemini/gemini-3.1-pro-high",
-                    "codex/gpt-5.6-terra",
+                "reason": compact(
+                    f"Fresh surplus Ollama capacity expands GLM 5.2 first-stop routing to eligible {task_type} work; {ollama_allowance_reason}."
+                    if surplus_selected
+                    else f"{task_type} benefits from GLM 5.2's large-context, tool-capable technical reasoning before owner integration; {ollama_allowance_reason}."
+                ),
+                "guardrails": [
+                    "Send sanitized technical context only; Ollama GLM 5.2 is a cloud model, not a private local lane.",
+                    "Do not send secrets, OAuth payloads, raw emails, raw connector data, private account contents, wallet data, or customer/account data.",
+                    "GLM may analyze, plan, or review; Codex on the owning host retains edits, permissions, execution, approvals, and final verification.",
                 ],
-                "fallbackRoutes": [
+        }, [
                     {
                         "provider": "gemini",
                         "model": "gemini-3.1-pro-high",
@@ -1303,18 +1363,7 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
                         "role": "specialist-runtime-fallback",
                         "reason": "Both outside specialist lanes failed; use Codex for the bounded fallback and disclose it.",
                     },
-                ],
-                "reason": compact(
-                    f"Fresh surplus Ollama capacity expands GLM 5.2 first-stop routing to eligible {task_type} work; {ollama_allowance_reason}."
-                    if surplus_selected
-                    else f"{task_type} benefits from GLM 5.2's large-context, tool-capable technical reasoning before owner integration; {ollama_allowance_reason}."
-                ),
-                "guardrails": [
-                    "Send sanitized technical context only; Ollama GLM 5.2 is a cloud model, not a private local lane.",
-                    "Do not send secrets, OAuth payloads, raw emails, raw connector data, private account contents, wallet data, or customer/account data.",
-                    "GLM may analyze, plan, or review; Codex on the owning host retains edits, permissions, execution, approvals, and final verification.",
-                ],
-        }
+        ])
 
     if xai_first:
         budget_ok, budget_reason = provider_budget_guard("xai")
@@ -1448,7 +1497,7 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
         role = "gemini-review"
         model = gemini_model("fast")
 
-    result = {
+    result = with_fallback_routes({
         "firstStop": "gemini",
         "provider": "gemini",
         "model": model,
@@ -1458,12 +1507,17 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
         "codexAllowanceMode": allowance_mode,
         "spendClass": "codex-sparing" if codex_constrained else "normal",
         "privacy": "dashboard-safe",
-        "fallbackLadder": [
-            f"gemini/{model}",
-            "ollama/glm-5.2:cloud",
-            "codex/gpt-5.6-terra",
+        "reason": compact(
+            f"{task_type} is dashboard-safe synthesis/review work; use Gemini before Codex."
+            if not codex_constrained
+            else f"Codex allowance mode is {allowance_mode}; route dashboard-safe non-execution work to Gemini first."
+        ),
+        "guardrails": [
+            "Send sanitized briefs, summaries, or selected non-sensitive files only.",
+            "Do not send secrets, OAuth payloads, raw emails, raw connector data, private account contents, or customer/account data.",
+            "The selected owner still owns execution, approvals, repo edits, and final integration.",
         ],
-        "fallbackRoutes": [
+    }, [
             {
                 "provider": "ollama",
                 "model": "glm-5.2:cloud",
@@ -1478,18 +1532,7 @@ def choose_model_route(args: argparse.Namespace, owner: str, needs_approval: boo
                 "role": "specialist-runtime-fallback",
                 "reason": "Both outside specialist lanes failed; use Codex for the bounded fallback and disclose it.",
             },
-        ],
-        "reason": compact(
-            f"{task_type} is dashboard-safe synthesis/review work; use Gemini before Codex."
-            if not codex_constrained
-            else f"Codex allowance mode is {allowance_mode}; route dashboard-safe non-execution work to Gemini first."
-        ),
-        "guardrails": [
-            "Send sanitized briefs, summaries, or selected non-sensitive files only.",
-            "Do not send secrets, OAuth payloads, raw emails, raw connector data, private account contents, or customer/account data.",
-            "The selected owner still owns execution, approvals, repo edits, and final integration.",
-        ],
-    }
+    ])
     if glm_quota_fallback:
         result.update({
             "fallbackFrom": "ollama",

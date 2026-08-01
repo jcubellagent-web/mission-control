@@ -2339,17 +2339,19 @@ def fetch_shared_operating_layer(now_iso: str) -> Dict[str, Any]:
 
 
 def provider_from_model_name(name: str, source: str = "") -> str:
-    text = f"{name} {source}".lower()
+    model = str(name or "").lower()
+    explicit_source = str(source or "").lower()
+    text = f"{model} {explicit_source}"
     if "openrouter" in text:
         return "openrouter"
     if "grok" in text or "xai" in text:
         return "xai"
     if "gemini" in text or "google/" in text:
         return "gemini"
-    if "codex" in text or "openai" in text or "gpt-" in text:
-        return "codex"
-    if "ollama" in text:
+    if "ollama" in explicit_source or model.startswith(("ollama/", "gpt-oss")):
         return "ollama"
+    if "codex" in text or "openai" in text or model.startswith("gpt-"):
+        return "codex"
     return "other"
 
 
