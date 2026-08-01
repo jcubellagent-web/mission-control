@@ -19479,3 +19479,68 @@ body,
   color: #d8e6eb !important;
   opacity: 1 !important;
 }
+
+/* Distance-readable Live Work cards: one dominant headline, no subordinate copy. */
+.brain-hero.is-flight-deck .agent-hero-card {
+  grid-template-rows: minmax(0, 1fr) !important;
+  grid-template-areas: "agent objective route" !important;
+  row-gap: 0 !important;
+}
+
+.brain-hero.is-flight-deck .agent-objective {
+  align-self: center !important;
+  min-height: 0 !important;
+  max-height: 82px !important;
+}
+
+.brain-hero.is-flight-deck .agent-objective-text {
+  display: flex !important;
+  align-items: center !important;
+  height: 100% !important;
+  gap: 0 !important;
+}
+
+.brain-hero.is-flight-deck .agent-objective-main,
+.brain-hero.is-flight-deck .agent-hero-card.is-working-focus .agent-objective-main {
+  max-height: 78px !important;
+  font-size: clamp(24px, 1.75vw, 36px) !important;
+  line-height: 1.04 !important;
+  letter-spacing: -0.018em !important;
+  -webkit-line-clamp: 2 !important;
+}
+
+/* Counts-only historical reuse stays static and subordinate to fresh receipt motion. */
+.memory-flow-edge.is-historical-reuse {
+  stroke: rgba(255, 209, 102, 0.32);
+  stroke-width: var(--historical-reuse-weight, 1.4);
+  stroke-dasharray: 4 7;
+  opacity: 0.72;
+  animation: none !important;
+}
+
+.memory-flow-node-provenance-track,
+.memory-flow-node-provenance-value {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+.memory-flow-node-provenance-track {
+  stroke: rgba(101, 205, 245, 0.16);
+  stroke-width: 3;
+}
+
+.memory-flow-node-provenance-value {
+  stroke: #65cdf5;
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0.88;
+  animation: none !important;
+}
+
+@media (max-width: 980px) {
+  .brain-hero.is-flight-deck .agent-objective-main,
+  .brain-hero.is-flight-deck .agent-hero-card.is-working-focus .agent-objective-main {
+    font-size: clamp(22px, 5.6vw, 31px) !important;
+  }
+}

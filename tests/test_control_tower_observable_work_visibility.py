@@ -52,6 +52,33 @@ class ObservableWorkVisibilityTests(unittest.TestCase):
         self.assertIn(".brain-hero > .live-run-inspector", styles)
         self.assertIn("inset: 58px 10px 10px;", styles)
 
+    def test_live_work_cards_render_one_distance_readable_headline(self) -> None:
+        source = MAIN.read_text(encoding="utf-8")
+        styles = STYLES.read_text(encoding="utf-8")
+        card = source[source.index("function AgentHeroCard("):source.index("type MetricTone")]
+
+        self.assertIn('<span className="agent-objective-main">{headline.title}</span>', card)
+        self.assertIn("title={headline.description}", card)
+        self.assertNotIn("agent-objective-description", card)
+        self.assertNotIn("agent-support-note", card)
+        self.assertIn("font-size: clamp(24px, 1.75vw, 36px) !important;", styles)
+        self.assertIn('grid-template-areas: "agent objective route" !important;', styles)
+
+    def test_brain_atlas_adds_static_reuse_and_provenance_visuals(self) -> None:
+        source = MAIN.read_text(encoding="utf-8")
+        styles = STYLES.read_text(encoding="utf-8")
+        atlas = source[source.index("function BrainAtlasPanel("):source.index("function AgentWorkBoard(")]
+
+        self.assertIn("const historicalReuseLinks", atlas)
+        self.assertIn("diagnostics?.reuseMatrix.cells", atlas)
+        self.assertIn('data-use-count={link.uses}', atlas)
+        self.assertIn("memory-flow-node-provenance-track", atlas)
+        self.assertIn("memory-flow-node-provenance-value", atlas)
+        self.assertIn('pathLength="100"', atlas)
+        self.assertIn("VERIFIED REUSE / 30D", atlas)
+        self.assertIn(".memory-flow-edge.is-historical-reuse", styles)
+        self.assertIn("animation: none !important;", styles)
+
 
 if __name__ == "__main__":
     unittest.main()

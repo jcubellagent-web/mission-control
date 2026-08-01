@@ -1557,7 +1557,6 @@ function BrainHero({
           {heroAgents.map((agent) => {
             const liveWork = liveWorkPresentationForAgent(agent, statuses.get(agent), workItems);
             const idleContext = buildAgentIdleContext(agent, state, nowMs);
-            const recentEvent = latestMeaningfulAgentEvent(events, agent, liveWork.status);
             return (
               <AgentHeroCard
                 key={agent}
@@ -1565,7 +1564,6 @@ function BrainHero({
                 liveWork={liveWork}
                 idleContext={idleContext}
                 activeModelRoutes={state.activeModelRoutes || []}
-                recentEvent={recentEvent}
                 changed={Boolean(liveCues.rows[cueRowKey("agent", agent)])}
               />
             );
@@ -4572,6 +4570,16 @@ function BrainAtlasPanel({
   const recentProofRows = useMemo(() => brainAtlasProofRows(recentProofView), [recentProofView]);
   const activity = useMemo(() => sanitizedMemoryActivity(memoryOperations?.activity), [memoryOperations?.activity]);
   const diagnostics = useMemo(() => sanitizedMemoryDiagnostics(memoryOperations?.diagnostics), [memoryOperations?.diagnostics]);
+  const historicalReuseLinks = useMemo(() => (diagnostics?.reuseMatrix.cells || [])
+    .filter((link) => (
+      HERO_AGENT_ORDER.includes(link.sourceAgent as AgentId)
+      && HERO_AGENT_ORDER.includes(link.consumerAgent as AgentId)
+      && link.sourceAgent !== link.consumerAgent
+      && link.uses > 0
+    ))
+    .sort((left, right) => right.uses - left.uses)
+    .slice(0, 6), [diagnostics]);
+  const historicalReuseCount = historicalReuseLinks.reduce((sum, link) => sum + link.uses, 0);
   const durableMemoryCount = sanitizedNestedMemoryCount(memoryOperations, "registry", "active");
   const supersededMemoryCount = sanitizedNestedMemoryCount(memoryOperations, "registry", "superseded");
   const registrySourceCount = sanitizedNestedMemoryCount(memoryOperations, "registry", "sources");
@@ -4589,6 +4597,7 @@ function BrainAtlasPanel({
   const expiredMemoryExposure = sanitizedNestedMemoryCount(memoryOperations, "freshness", "expiredExposure");
   const expiringMemory7d = sanitizedNestedMemoryCount(memoryOperations, "freshness", "expiring7d");
   const provenanceCoverage = sanitizedNestedMemoryMetric(memoryOperations, "registry", "provenanceCoveragePct", 100);
+  const provenanceArc = Math.min(100, Math.max(0, provenanceCoverage || 0));
   const recallEfficiency = queries7d && hits7d <= queries7d ? Math.round((hits7d / queries7d) * 100) : null;
   const selectionUseRate = selected30d && used30d <= selected30d ? Math.round((used30d / selected30d) * 100) : null;
   const feedbackQuality = feedback30d && helpful30d <= feedback30d ? Math.round((helpful30d / feedback30d) * 100) : null;
@@ -4862,6 +4871,7 @@ function BrainAtlasPanel({
             <title id="brain-atlas-title">Governed memory activity</title>
             <desc id="brain-atlas-description">
               Shared agent nodes show {workingAgentCount} agents working from the same current state as the Live Work Board. Verified claimed-work priority and fresh step or tool signals set the {systemLoad.label.toLowerCase()} halo intensity. Only governed memory receipt paths and receipt rings move when a recent exact registry timestamp exists. This visualization shows observable operations and evidence, not private model reasoning or memory contents.
+              The static background constellation summarizes {historicalReuseCount} verified cross-agent memory uses over 30 days, and the registry completion halo shows {provenanceCoverage == null ? "unavailable" : `${provenanceCoverage}%`} provenance coverage.
             </desc>
             <defs>
               {flowAgents.map((row, index) => {
@@ -4905,8 +4915,28 @@ function BrainAtlasPanel({
               })}
             </defs>
             <g className="brain-atlas-memory-layer" data-atlas-layer="memory" transform="scale(1 1.62)">
-            <text className="brain-atlas-lane-label is-memory" x={brainAtlasWideX(18)} y="14">LIVE AGENTS + GOVERNED MEMORY</text>
+            <text className="brain-atlas-lane-label is-memory" x={brainAtlasWideX(18)} y="14">LIVE AGENTS + GOVERNED MEMORY · {historicalReuseCount} VERIFIED REUSE / 30D</text>
             <g className="memory-flow-edges" aria-hidden="true">
+            {historicalReuseLinks.map((link, index) => {
+              const sourceIndex = HERO_AGENT_ORDER.indexOf(link.sourceAgent as AgentId);
+              const consumerIndex = HERO_AGENT_ORDER.indexOf(link.consumerAgent as AgentId);
+              const sourceY = 41 + sourceIndex * 52;
+              const consumerY = 41 + consumerIndex * 52;
+              const controlX = brainAtlasWideX(14 - index * 2);
+              return (
+                <path
+                  key={`historical-reuse-${link.sourceAgent}-${link.consumerAgent}`}
+                  className="memory-flow-edge is-historical-reuse"
+                  data-source-agent={link.sourceAgent}
+                  data-consumer-agent={link.consumerAgent}
+                  data-use-count={link.uses}
+                  style={{ "--historical-reuse-weight": Math.min(4, 1.2 + Math.log2(link.uses + 1) * 0.55) } as React.CSSProperties}
+                  d={`M ${brainAtlasWideX(18)} ${sourceY} C ${controlX} ${sourceY}, ${controlX} ${consumerY}, ${brainAtlasWideX(18)} ${consumerY}`}
+                >
+                  <title>{`${AGENTS[link.sourceAgent as AgentId].label} memory used by ${AGENTS[link.consumerAgent as AgentId].label} ${link.uses} time${link.uses === 1 ? "" : "s"} in 30 days`}</title>
+                </path>
+              );
+            })}
             {reuseLinks.map((link) => {
               const sourceIndex = HERO_AGENT_ORDER.indexOf(link.sourceAgent);
               const consumerIndex = HERO_AGENT_ORDER.indexOf(link.consumerAgent);
@@ -5048,11 +5078,22 @@ function BrainAtlasPanel({
             </g>
             <g className={`memory-flow-node is-registry is-explainable${helpNodeId === "registry" ? " is-help-open" : ""}${recent("hit") || recent("promoted") ? " is-live" : ""}${expiredMemoryExposure > 0 || expiringMemory7d > 0 ? " is-freshness-watch" : ""}`} role="button" tabIndex={0} aria-label="Explain Memory registry" aria-expanded={helpNodeId === "registry"} aria-controls="brain-atlas-node-help" onClick={() => toggleNodeHelp("registry")} onKeyDown={(event) => nodeHelpKeyDown(event, "registry")}>
               <title>{activity ? `${durableMemoryCount} active records · ${supersededMemoryCount} superseded · ${registrySourceCount} sources` : "Registry telemetry unavailable"}</title>
+              <circle className="memory-flow-node-provenance-track" cx={brainAtlasWideX(503)} cy="119" r="44" />
+              <circle
+                className="memory-flow-node-provenance-value"
+                cx={brainAtlasWideX(503)}
+                cy="119"
+                r="44"
+                pathLength="100"
+                strokeDasharray={`${provenanceArc} ${100 - provenanceArc}`}
+                transform={`rotate(-90 ${brainAtlasWideX(503)} 119)`}
+                data-provenance-coverage={provenanceCoverage ?? undefined}
+              />
               <circle className="memory-flow-node-receipt-ring" cx={brainAtlasWideX(503)} cy="119" r="37" />
               <rect x={brainAtlasWideX(430)} y="92" width={brainAtlasWideWidth(430, 146)} height="54" rx="9" />
               <g className="memory-flow-node-copy" clipPath="url(#brain-atlas-registry-copy)">
               <text className="memory-flow-node-title" x={brainAtlasWideX(503)} y="115" textAnchor="middle">Memory registry</text>
-              <text className="memory-flow-node-detail" x={brainAtlasWideX(503)} y="132" textAnchor="middle">{activity ? `${durableMemoryCount} active · ${registrySourceCount} sources` : "telemetry unavailable"}</text>
+              <text className="memory-flow-node-detail" x={brainAtlasWideX(503)} y="132" textAnchor="middle">{activity ? `${provenanceCoverage == null ? "—" : `${provenanceCoverage}%`} sourced · ${registrySourceCount} sources` : "telemetry unavailable"}</text>
               </g>
             </g>
             <g className={`memory-flow-node is-applied is-explainable${helpNodeId === "applied" ? " is-help-open" : ""}${recent("used") ? " is-live" : ""}`} role="button" tabIndex={0} aria-label="Explain Applied" aria-expanded={helpNodeId === "applied"} aria-controls="brain-atlas-node-help" onClick={() => toggleNodeHelp("applied")} onKeyDown={(event) => nodeHelpKeyDown(event, "applied")}>
@@ -5816,14 +5857,12 @@ function AgentHeroCard({
   liveWork,
   idleContext,
   activeModelRoutes,
-  recentEvent,
   changed,
 }: {
   agent: AgentId;
   liveWork: AgentLiveWorkPresentation;
   idleContext: AgentIdleContext;
   activeModelRoutes: ActiveModelRoute[];
-  recentEvent?: AgentEvent;
   changed?: boolean;
 }) {
   const { status, activeWork, activeFocus, visualState } = liveWork;
@@ -5865,10 +5904,6 @@ function AgentHeroCard({
   ];
   const activeReadout = activeAgentReadout(status, activeWorkDetail);
   const headline = agentHeadline(activeFocus, activeReadout, idleContext, idleBriefRows);
-  const eventNote = agentEventReadout(recentEvent);
-  const supportNote = eventNote || (activeFocus
-    ? `Output: ${readoutFit(activeReadout.expectedOutput, 78)}`
-    : `Complete: ${readoutSummary(idleContext.complete, "No recent completion reported.", 78)}`);
   const stepTrail = stepTrailForAgent(status, activeFocus, activeWork);
   const showStepTrail = activeFocus || visualState === "waiting" || visualState === "blocked";
   const updateAgeMs = Math.max(0, Date.now() - timeValue(status.updated_at));
@@ -5897,7 +5932,7 @@ function AgentHeroCard({
       window.cancelAnimationFrame(frame);
       window.removeEventListener("resize", measure);
     };
-  }, [headline.title, headline.description]);
+  }, [headline.title]);
   return (
     <article
       className={`agent-hero-card ${agentClass(agent)} ${freshness} ${statusClass(status.status)} is-state-${visualState} ${activeFocus ? "is-working-focus" : "is-up-next-focus"} ${verifiedRoute ? "has-verified-route" : "is-route-pending"}${changedRowClass(changed)}`}
@@ -5979,6 +6014,7 @@ function AgentHeroCard({
       <h3
         ref={objectiveRef}
         className={`agent-objective ${objectiveScroll.active ? "is-scrollable" : ""}`}
+        title={headline.description}
         style={{
           "--objective-scroll-distance": `${objectiveScroll.distance}px`,
           "--objective-scroll-duration": `${objectiveScroll.duration}s`,
@@ -5986,10 +6022,8 @@ function AgentHeroCard({
       >
         <span className="agent-objective-text">
           <span className="agent-objective-main">{headline.title}</span>
-          <span className="agent-objective-description">{headline.description}</span>
         </span>
       </h3>
-      <p className="agent-support-note" title={supportNote}>{supportNote}</p>
       <div className="agent-workflow-lane" title={workerRoutes.length ? "Verified active specialist workers attached to this controller work" : activeFocus ? "Current verified workflow phase" : "Next known work state"}>
         <span aria-hidden="true" />
         <div>
