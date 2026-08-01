@@ -5,7 +5,7 @@ import { AlertTriangle, ArrowLeftRight, ArrowUp, BookOpen, Bot, Braces, CheckCir
 import { invalidateMissionControlSidecars, loadMissionControl, subscribeMissionControlRealtime } from "./data";
 import { PRIORITY_JOB_RULES, SORARE_DAILY_GROUPS, SORARE_GENERAL_PATTERN, type PriorityJobKey, type SorareGroupKey } from "./priorityJobs";
 import { CANONICAL_ROUTE_ORDER, CANONICAL_ROUTES, liveWorkModelLabel, routeCssProperties, routeForAgentStatus, routeForProvider, verifiedRouteForAgentStatus } from "./routeIdentity";
-import type { ActiveModelRoute, AgentEvent, AgenticCryptoWallet, AgentId, AgentStatus, MissionControlState, SignalItem, TodayJobOccurrence, TodayJobOutcome, TodayJobsMeta } from "./types";
+import type { ActiveModelRoute, AgentEvent, AgenticCryptoWallet, AgentId, AgentStatus, MemoryHealthTone, MissionControlState, SignalItem, TodayJobOccurrence, TodayJobsMeta } from "./types";
 import "./styles.css";
 
 const AGENTS: Record<AgentId, { label: string; role: string; roleBadge: string }> = {
@@ -3759,6 +3759,18 @@ function sanitizedNestedMemoryTimestamp(value: unknown, section: string, key: st
   return isStrictMemoryTimestamp(timestamp) && Date.parse(timestamp) <= Date.now() + 5 * 60_000 ? timestamp : null;
 }
 
+function sanitizedMemoryHealthTone(value: unknown, check: string): MemoryHealthTone {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return "idle";
+  const health = (value as Record<string, unknown>).health;
+  if (!health || typeof health !== "object" || Array.isArray(health)) return "idle";
+  const checks = (health as Record<string, unknown>).checks;
+  if (!checks || typeof checks !== "object" || Array.isArray(checks)) return "idle";
+  const row = (checks as Record<string, unknown>)[check];
+  if (!row || typeof row !== "object" || Array.isArray(row)) return "idle";
+  const tone = (row as Record<string, unknown>).tone;
+  return tone === "clear" || tone === "watch" || tone === "risk" || tone === "idle" ? tone : "idle";
+}
+
 function newestMemoryTimestamp(first: string | null | undefined, second: string | null | undefined) {
   if (!first) return second || null;
   if (!second) return first;
@@ -4074,15 +4086,26 @@ function BrainAtlasPanel({
   const queries7d = sanitizedNestedMemoryCount(memoryOperations, "retrieval", "queries7d");
   const hits7d = sanitizedNestedMemoryCount(memoryOperations, "retrieval", "hits7d");
   const avgRecallLatencyMs = sanitizedNestedMemoryMetric(memoryOperations, "retrieval", "avgLatencyMs", 60_000);
+  const p95RecallLatencyMs = sanitizedNestedMemoryMetric(memoryOperations, "retrieval", "p95LatencyMs", 60_000);
   const selected30d = sanitizedNestedMemoryCount(memoryOperations, "retrieval", "selected30d");
   const used30d = sanitizedNestedMemoryCount(memoryOperations, "retrieval", "used30d");
   const feedback30d = sanitizedNestedMemoryCount(memoryOperations, "retrieval", "feedback30d");
   const helpful30d = sanitizedNestedMemoryCount(memoryOperations, "retrieval", "helpful30d");
   const pendingReviewCount = sanitizedNestedMemoryCount(memoryOperations, "review", "pending");
   const disputedReviewCount = sanitizedNestedMemoryCount(memoryOperations, "review", "disputed");
+  const expiredMemoryExposure = sanitizedNestedMemoryCount(memoryOperations, "freshness", "expiredExposure");
+  const expiringMemory7d = sanitizedNestedMemoryCount(memoryOperations, "freshness", "expiring7d");
+  const provenanceCoverage = sanitizedNestedMemoryMetric(memoryOperations, "registry", "provenanceCoveragePct", 100);
   const recallEfficiency = queries7d && hits7d <= queries7d ? Math.round((hits7d / queries7d) * 100) : null;
   const selectionUseRate = selected30d && used30d <= selected30d ? Math.round((used30d / selected30d) * 100) : null;
   const feedbackQuality = feedback30d && helpful30d <= feedback30d ? Math.round((helpful30d / feedback30d) * 100) : null;
+  const healthTones = {
+    recall: sanitizedMemoryHealthTone(memoryOperations, "recall"),
+    freshness: sanitizedMemoryHealthTone(memoryOperations, "freshness"),
+    review: sanitizedMemoryHealthTone(memoryOperations, "review"),
+    provenance: sanitizedMemoryHealthTone(memoryOperations, "provenance"),
+    reuse: sanitizedMemoryHealthTone(memoryOperations, "reuse"),
+  };
   const motionWindowSeconds = Math.min(100, Math.max(15, Number(activity?.motionWindowSeconds || 90)));
   const count = (key: keyof MemoryActivity["counts"]) => Number(activity?.counts[key] || 0);
   const recent = (key: MemorySignalKey) => memorySignalIsRecent(activity?.lastObservedAt[key], motionWindowSeconds);
@@ -4232,6 +4255,33 @@ function BrainAtlasPanel({
             Maturity · {maturityBadgeLabel}
           </span>
         </header>
+
+        <div className="memory-health-strip" role="status" aria-label="Shared memory health checks">
+          <article className={`is-${healthTones.recall}`} data-memory-health="recall">
+            <span>Recall</span><strong>{recallEfficiency == null ? "—" : `${recallEfficiency}%`}</strong>
+            <em>{queries7d} queries · 7d</em>
+          </article>
+          <article className={`is-${healthTones.recall}`} data-memory-health="latency">
+            <span>P95 latency</span><strong>{p95RecallLatencyMs == null ? "—" : `${p95RecallLatencyMs} ms`}</strong>
+            <em>{avgRecallLatencyMs == null ? "average unavailable" : `${avgRecallLatencyMs} ms avg`}</em>
+          </article>
+          <article className={`is-${healthTones.freshness}`} data-memory-health="freshness">
+            <span>Freshness</span><strong>{expiredMemoryExposure} exposed</strong>
+            <em>{expiringMemory7d} expire within 7d</em>
+          </article>
+          <article className={`is-${healthTones.review}`} data-memory-health="review">
+            <span>Review pressure</span><strong>{pendingReviewCount} pending</strong>
+            <em>{disputedReviewCount} disputed</em>
+          </article>
+          <article className={`is-${healthTones.provenance}`} data-memory-health="provenance">
+            <span>Provenance</span><strong>{provenanceCoverage == null ? "—" : `${provenanceCoverage}%`}</strong>
+            <em>{registrySourceCount} active sources</em>
+          </article>
+          <article className={`is-${healthTones.reuse}`} data-memory-health="reuse">
+            <span>Verified reuse</span><strong>{selectionUseRate == null ? "—" : `${selectionUseRate}%`}</strong>
+            <em>{feedbackQuality == null ? "outcomes unavailable" : `${feedbackQuality}% helpful`}</em>
+          </article>
+        </div>
 
         <div className="memory-flow-map is-unified" tabIndex={0} aria-label="Governed memory activity graph. Scroll horizontally on narrow screens.">
           <svg

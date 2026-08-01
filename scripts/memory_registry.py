@@ -73,6 +73,25 @@ MEMORY_ACTIVITY_AGENTS = ("joshex", "josh2", "jaimes", "jain")
 EPISODE_RETENTION_DAYS = 30
 
 
+def nearest_rank_percentile(values: Iterable[float], percentile: float) -> float | None:
+    """Return a deterministic nearest-rank percentile for bounded telemetry."""
+    ordered = sorted(float(value) for value in values)
+    if not ordered:
+        return None
+    rank = max(1, min(len(ordered), int((percentile * len(ordered)) + 0.999999)))
+    return round(ordered[rank - 1], 1)
+
+
+def health_tone(*, risk: bool = False, watch: bool = False, idle: bool = False) -> str:
+    if risk:
+        return "risk"
+    if watch:
+        return "watch"
+    if idle:
+        return "idle"
+    return "clear"
+
+
 def utc_now() -> dt.datetime:
     return dt.datetime.now(dt.timezone.utc)
 
@@ -1131,6 +1150,10 @@ def memory_activity_payload(db: sqlite3.Connection) -> dict[str, Any]:
 
 
 def status_payload(db: sqlite3.Connection) -> dict[str, Any]:
+    now = utc_now()
+    now_iso = iso(now)
+    seven_days_ago = iso(now - dt.timedelta(days=7))
+    thirty_days_ago = iso(now - dt.timedelta(days=30))
     counts = {row["status"]: row["count"] for row in db.execute("SELECT status,COUNT(*) AS count FROM memory_records GROUP BY status")}
     candidates = {row["status"]: row["count"] for row in db.execute("SELECT status,COUNT(*) AS count FROM memory_candidates GROUP BY status")}
     retrieval = db.execute(
@@ -1138,8 +1161,15 @@ def status_payload(db: sqlite3.Connection) -> dict[str, Any]:
                   AVG(latency_ms) AS avg_latency,
                   SUM(CASE WHEN preflight=1 THEN 1 ELSE 0 END) AS preflights
            FROM retrieval_events WHERE time >= ?""",
-        (iso(utc_now() - dt.timedelta(days=7)),),
+        (seven_days_ago,),
     ).fetchone()
+    retrieval_latencies = [
+        float(row["latency_ms"])
+        for row in db.execute(
+            "SELECT latency_ms FROM retrieval_events WHERE time >= ? ORDER BY latency_ms",
+            (seven_days_ago,),
+        ).fetchall()
+    ]
     feedback = db.execute(
         """SELECT COUNT(*) AS total,
                   SUM(CASE WHEN outcome='helpful' THEN 1 ELSE 0 END) AS helpful,
@@ -1147,7 +1177,7 @@ def status_payload(db: sqlite3.Connection) -> dict[str, Any]:
                   SUM(CASE WHEN outcome='corrected' THEN 1 ELSE 0 END) AS corrected,
                   SUM(CASE WHEN outcome='harmful' THEN 1 ELSE 0 END) AS harmful
            FROM memory_feedback WHERE time >= ?""",
-        (iso(utc_now() - dt.timedelta(days=30)),),
+        (thirty_days_ago,),
     ).fetchone()
     reuse = db.execute(
         """WITH recent AS (
@@ -1163,7 +1193,22 @@ def status_payload(db: sqlite3.Connection) -> dict[str, Any]:
                   ) THEN 1 ELSE 0 END) AS used,
                   SUM(CASE WHEN event.outcome='ignored' THEN 1 ELSE 0 END) AS ignored
                FROM recent event""",
-        (iso(utc_now() - dt.timedelta(days=30)),),
+        (thirty_days_ago,),
+    ).fetchone()
+    active_registry = db.execute(
+        """SELECT COUNT(*) AS active,
+                  COUNT(DISTINCT source_path) AS sources,
+                  SUM(CASE WHEN COALESCE(source_ref,'') <> '' THEN 1 ELSE 0 END) AS with_source_ref,
+                  SUM(CASE WHEN valid_until IS NOT NULL AND valid_until < ? THEN 1 ELSE 0 END) AS expired_exposure,
+                  SUM(CASE WHEN valid_until IS NOT NULL AND valid_until >= ? AND valid_until <= ? THEN 1 ELSE 0 END) AS expiring_7d,
+                  MIN(CASE WHEN valid_until IS NOT NULL AND valid_until >= ? THEN valid_until END) AS next_expiry_at,
+                  MIN(recorded_at) AS oldest_active_at
+           FROM memory_records WHERE status='active'""",
+        (now_iso, now_iso, iso(now + dt.timedelta(days=7)), now_iso),
+    ).fetchone()
+    candidate_age = db.execute(
+        """SELECT MIN(proposed_at) AS oldest_pending_at
+           FROM memory_candidates WHERE status IN ('candidate','disputed')"""
     ).fetchone()
     last_review = db.execute("SELECT * FROM memory_reviews ORDER BY completed_at DESC LIMIT 1").fetchone()
     total = int(retrieval["total"] or 0)
@@ -1179,30 +1224,113 @@ def status_payload(db: sqlite3.Connection) -> dict[str, Any]:
     selected = int(reuse["selected"] or 0)
     used = int(reuse["used"] or 0)
     reuse_ignored = int(reuse["ignored"] or 0)
-    status = "attention" if disputed else "watch" if pending else "ok"
+    active = int(active_registry["active"] or 0)
+    with_source_ref = int(active_registry["with_source_ref"] or 0)
+    provenance_coverage = round(with_source_ref / active * 100, 1) if active else None
+    expired_exposure = int(active_registry["expired_exposure"] or 0)
+    expiring_7d = int(active_registry["expiring_7d"] or 0)
+    oldest_pending_at = candidate_age["oldest_pending_at"]
+    oldest_pending_age_hours = None
+    if oldest_pending_at:
+        try:
+            oldest_pending_age_hours = round(
+                max(0.0, (now - dt.datetime.fromisoformat(oldest_pending_at.replace("Z", "+00:00"))).total_seconds() / 3600),
+                1,
+            )
+        except ValueError:
+            oldest_pending_at = None
+    p95_latency = nearest_rank_percentile(retrieval_latencies, 0.95)
+    hit_rate = round(hits / total * 100, 1) if total else None
+    quality_rate = round(helpful / feedback_total * 100, 1) if feedback_total else None
+    selected_use_rate = round(used / selected * 100, 1) if selected else None
+    health_checks = {
+        "recall": {
+            "tone": health_tone(
+                risk=bool(total and (hit_rate is not None and hit_rate < 50 or p95_latency is not None and p95_latency > 1000)),
+                watch=bool(total and (hit_rate is not None and hit_rate < 75 or p95_latency is not None and p95_latency > 250)),
+                idle=not total,
+            ),
+            "hitRatePct": hit_rate,
+            "p95LatencyMs": p95_latency,
+            "queries7d": total,
+        },
+        "freshness": {
+            "tone": health_tone(risk=expired_exposure > 0, watch=expiring_7d > 0),
+            "expiredExposure": expired_exposure,
+            "expiring7d": expiring_7d,
+        },
+        "review": {
+            "tone": health_tone(
+                risk=disputed > 0 or bool(oldest_pending_age_hours is not None and oldest_pending_age_hours >= 168),
+                watch=pending > 0,
+            ),
+            "pending": pending,
+            "disputed": disputed,
+            "oldestPendingAgeHours": oldest_pending_age_hours,
+        },
+        "provenance": {
+            "tone": health_tone(
+                risk=bool(active and provenance_coverage is not None and provenance_coverage < 80),
+                watch=bool(active and provenance_coverage is not None and provenance_coverage < 95),
+                idle=not active,
+            ),
+            "coveragePct": provenance_coverage,
+            "withSourceRef": with_source_ref,
+            "active": active,
+        },
+        "reuse": {
+            "tone": health_tone(
+                risk=bool(
+                    selected_use_rate is not None and selected_use_rate < 40
+                    or quality_rate is not None and quality_rate < 50
+                ),
+                watch=bool(
+                    selected_use_rate is not None and selected_use_rate < 60
+                    or quality_rate is not None and quality_rate < 70
+                ),
+                idle=selected_use_rate is None and quality_rate is None,
+            ),
+            "selectedUseRatePct": selected_use_rate,
+            "qualityRatePct": quality_rate,
+            "selected30d": selected,
+            "feedback30d": feedback_total,
+        },
+    }
+    health_tones = {check["tone"] for check in health_checks.values()}
+    status = "attention" if "risk" in health_tones else "watch" if "watch" in health_tones else "ok"
     return {
         "updatedAt": iso(), "status": status,
-        "summary": "Shared memory is healthy" if status == "ok" else f"{pending} candidate(s), {disputed} conflict(s) need review",
+        "summary": "Shared memory is healthy" if status == "ok" else f"Memory health is {status}: {pending} candidate(s), {disputed} conflict(s), {expired_exposure} expired exposure(s)",
         "registry": {
-            "active": int(counts.get("active", 0)), "superseded": int(counts.get("superseded", 0)),
-            "expired": int(counts.get("expired", 0)), "sources": 4,
+            "active": active, "superseded": int(counts.get("superseded", 0)),
+            "expired": int(counts.get("expired", 0)), "sources": int(active_registry["sources"] or 0),
+            "withSourceRef": with_source_ref, "provenanceCoveragePct": provenance_coverage,
+        },
+        "freshness": {
+            "expiredExposure": expired_exposure, "expiring7d": expiring_7d,
+            "nextExpiryAt": active_registry["next_expiry_at"],
+            "oldestActiveAt": active_registry["oldest_active_at"],
         },
         "review": {
             "pending": pending, "disputed": disputed,
             "lastRun": last_review["completed_at"] if last_review else None,
             "lastStatus": last_review["status"] if last_review else "not-run",
+            "oldestPendingAt": oldest_pending_at,
+            "oldestPendingAgeHours": oldest_pending_age_hours,
         },
         "retrieval": {
-            "queries7d": total, "hits7d": hits, "hitRate": round(hits / total * 100, 1) if total else None,
+            "queries7d": total, "hits7d": hits, "hitRate": hit_rate,
             "avgLatencyMs": round(float(retrieval["avg_latency"] or 0), 1),
+            "p95LatencyMs": p95_latency,
             "feedback30d": feedback_total, "helpful30d": helpful, "ignored30d": ignored,
             "corrected30d": corrected, "harmful30d": harmful,
-            "qualityRate": round(helpful / feedback_total * 100, 1) if feedback_total else None,
+            "qualityRate": quality_rate,
             "qualityDefinition": "helpful feedback divided by all feedback, including ignored, corrected, and harmful",
             "preflights7d": preflights,
             "selected30d": selected, "used30d": used, "reuseIgnored30d": reuse_ignored,
-            "selectedUseRate": round(used / selected * 100, 1) if selected else None,
+            "selectedUseRate": selected_use_rate,
         },
+        "health": {"schemaVersion": 1, "checks": health_checks},
         "governance": {
             "sourceOfTruth": "Checked-in AGENTS.md, MEMORY.md, and skills",
             "autoPromote": "Verified low-risk facts, lessons, entities, and relationships only",

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime as dt
 import json
 import os
 import sqlite3
@@ -320,6 +321,59 @@ class MemoryRegistryTest(unittest.TestCase):
         status = self.cli("status")
         self.assertEqual(status["retrieval"]["feedback30d"], 2)
         self.assertEqual(status["retrieval"]["qualityRate"], 50.0)
+
+    def test_status_exports_latency_freshness_review_provenance_and_health(self) -> None:
+        fixed_now = dt.datetime(2026, 8, 1, 12, 0, tzinfo=dt.timezone.utc)
+        with mock.patch.object(memory_registry, "DB_PATH", self.database), mock.patch.object(memory_registry, "utc_now", return_value=fixed_now):
+            db = memory_registry.connect()
+            memory_registry.upsert_record(
+                db, memory_type="fact", subject="Fresh referenced", predicate="is", value="ready",
+                owner="joshex", visibility="shared", privacy="dashboard-safe",
+                source_path="data/source-a.json", source_ref="row-a",
+                valid_until="2026-08-04T12:00:00Z",
+            )
+            memory_registry.upsert_record(
+                db, memory_type="fact", subject="Expired exposure", predicate="is", value="stale",
+                owner="joshex", visibility="shared", privacy="dashboard-safe",
+                source_path="data/source-b.json", valid_until="2026-07-31T12:00:00Z",
+            )
+            db.execute(
+                """INSERT INTO memory_candidates(
+                     id,proposed_by,memory_type,subject,predicate,object_text,owner,visibility,privacy,
+                     source_path,evidence,confidence,status,proposed_at,content_hash
+                   ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                (
+                    "candidate-old", "jaimes", "fact", "Old candidate", "is", "pending", "jaimes",
+                    "shared", "dashboard-safe", "test:old", "unit test", 0.9, "candidate",
+                    "2026-07-24T12:00:00Z", "candidate-old-hash",
+                ),
+            )
+            for index, (latency, outcome) in enumerate(((1.0, "hit"), (2.0, "hit"), (3.0, "hit"), (400.0, "miss"))):
+                db.execute(
+                    """INSERT INTO retrieval_events(
+                         id,time,agent,scope,query_hash,term_count,matched_count,latency_ms,memory_ids_json,outcome
+                       ) VALUES (?,?,?,?,?,?,?,?,?,?)""",
+                    (
+                        f"retrieval-health-{index}", "2026-08-01T11:00:00Z", "joshex", "ecosystem",
+                        f"query-{index}", 1, 1 if outcome == "hit" else 0, latency, "[]", outcome,
+                    ),
+                )
+            db.commit()
+            status = memory_registry.status_payload(db)
+            db.close()
+
+        self.assertEqual(status["retrieval"]["p95LatencyMs"], 400.0)
+        self.assertEqual(status["retrieval"]["hitRate"], 75.0)
+        self.assertEqual(status["freshness"]["expiredExposure"], 1)
+        self.assertEqual(status["freshness"]["expiring7d"], 1)
+        self.assertEqual(status["registry"]["sources"], 2)
+        self.assertEqual(status["registry"]["provenanceCoveragePct"], 50.0)
+        self.assertEqual(status["review"]["oldestPendingAgeHours"], 192.0)
+        self.assertEqual(status["health"]["checks"]["recall"]["tone"], "watch")
+        self.assertEqual(status["health"]["checks"]["freshness"]["tone"], "risk")
+        self.assertEqual(status["health"]["checks"]["review"]["tone"], "risk")
+        self.assertEqual(status["health"]["checks"]["provenance"]["tone"], "risk")
+        self.assertEqual(status["status"], "attention")
 
     def test_activity_export_is_counts_only_and_updates_on_retrieval(self) -> None:
         memory_id = self.create_memory("live activity", privacy="dashboard-safe")

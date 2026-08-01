@@ -17405,6 +17405,76 @@ body,
   white-space: normal;
 }
 
+#brain-atlas .memory-health-strip {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  flex: 0 0 40px;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(85, 215, 255, 0.14);
+  border-radius: 6px;
+  background: rgba(4, 24, 39, 0.78);
+}
+
+#brain-atlas .memory-health-strip article {
+  display: grid;
+  align-content: center;
+  gap: 1px;
+  min-width: 0;
+  padding: 3px 8px;
+  border-top: 2px solid rgba(142, 168, 183, 0.26);
+}
+
+#brain-atlas .memory-health-strip article + article {
+  border-left: 1px solid rgba(85, 215, 255, 0.11);
+}
+
+#brain-atlas .memory-health-strip article.is-clear { border-top-color: rgba(88, 238, 154, 0.72); }
+#brain-atlas .memory-health-strip article.is-watch { border-top-color: rgba(255, 209, 102, 0.76); }
+#brain-atlas .memory-health-strip article.is-risk { border-top-color: rgba(255, 118, 118, 0.82); }
+
+#brain-atlas .memory-health-strip span,
+#brain-atlas .memory-health-strip strong,
+#brain-atlas .memory-health-strip em {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#brain-atlas .memory-health-strip span {
+  color: var(--muted);
+  font-size: 7.5px;
+  font-weight: 850;
+  letter-spacing: 0.055em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+#brain-atlas .memory-health-strip strong {
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+#brain-atlas .memory-health-strip em {
+  color: var(--soft);
+  font-size: 7.5px;
+  font-style: normal;
+  font-weight: 690;
+  line-height: 1;
+}
+
+#brain-atlas .memory-health-strip article.is-clear strong { color: #9cefc6; }
+#brain-atlas .memory-health-strip article.is-watch strong { color: #ffe091; }
+#brain-atlas .memory-health-strip article.is-risk strong { color: #ffb3b3; }
+
+@media (max-width: 1120px) {
+  #brain-atlas .memory-health-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); flex-basis: 72px; }
+  #brain-atlas .memory-health-strip article:nth-child(4) { border-left: 0; }
+}
+
 #brain-atlas .brain-atlas-scope {
   display: flex;
   flex: 0 1 auto;

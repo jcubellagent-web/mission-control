@@ -384,7 +384,19 @@ export type MemoryOperations = Record<string, unknown> & {
   updatedAt?: string;
   status?: string;
   activity?: MemoryActivity;
+  health?: {
+    schemaVersion: 1;
+    checks: {
+      recall: { tone: MemoryHealthTone; hitRatePct: number | null; p95LatencyMs: number | null; queries7d: number };
+      freshness: { tone: MemoryHealthTone; expiredExposure: number; expiring7d: number };
+      review: { tone: MemoryHealthTone; pending: number; disputed: number; oldestPendingAgeHours: number | null };
+      provenance: { tone: MemoryHealthTone; coveragePct: number | null; withSourceRef: number; active: number };
+      reuse: { tone: MemoryHealthTone; selectedUseRatePct: number | null; qualityRatePct: number | null; selected30d: number; feedback30d: number };
+    };
+  };
 };
+
+export type MemoryHealthTone = "clear" | "watch" | "risk" | "idle";
 
 export type MissionControlState = {
   source: string;
