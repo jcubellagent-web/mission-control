@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import fcntl
+import hashlib
 import json
 import os
 import shutil
@@ -12,7 +14,6 @@ import sys
 import uuid
 from contextlib import contextmanager
 from pathlib import Path
-
 
 ROOT = Path(__file__).resolve().parents[1]
 STATE_DIR = Path.home() / ".openclaw" / "state"
@@ -170,6 +171,73 @@ PYTHON_COMPILE_PATHS = (
     "hermes-plugins/jaimes-topic17-runtime-owner/__init__.py",
 )
 LEASE_MINUTES = 45
+TASKS_PATH = ROOT / "data" / "agent-task-queue.json"
+CLOSEOUT_DIR = STATE_DIR / "agent-source-closeouts"
+LIFECYCLE_LOCK_PATH = STATE_DIR / "agent-source-lifecycle.lock"
+TERMINAL_TASK_STATUSES = {"done", "blocked", "error", "cancelled"}
+VALID_CLOSEOUT_OUTCOMES = {"finished", "aborted", "expired-orphan-recovered"}
+
+
+@contextmanager
+def source_lifecycle_lock():
+    STATE_DIR.mkdir(parents=True, exist_ok=True)
+    with LIFECYCLE_LOCK_PATH.open("w", encoding="utf-8") as handle:
+        fcntl.flock(handle, fcntl.LOCK_EX)
+        yield
+        fcntl.flock(handle, fcntl.LOCK_UN)
+
+
+def task_binding(task: dict) -> dict[str, str]:
+    return {
+        "taskId": str(task.get("taskId") or task.get("id") or ""),
+        "workId": str(task.get("workId") or ""),
+        "runId": str(task.get("runId") or ""),
+    }
+
+
+def closeout_receipt_path(binding: dict) -> Path:
+    exact = "|".join(task_binding(binding)[key] for key in ("taskId", "workId", "runId"))
+    return CLOSEOUT_DIR / f"{hashlib.sha256(exact.encode('utf-8')).hexdigest()}.json"
+
+
+def require_open_source_task(task_id: str, work_id: str, run_id: str) -> dict:
+    try:
+        tasks = json.loads(TASKS_PATH.read_text()).get("tasks", [])
+    except (FileNotFoundError, json.JSONDecodeError, OSError):
+        tasks = []
+    task = next((row for row in tasks if isinstance(row, dict) and row.get("id") == task_id), None)
+    if not task:
+        raise SystemExit(f"Source lease task not found: {task_id}")
+    if task.get("status") in TERMINAL_TASK_STATUSES:
+        raise SystemExit(f"Source lease task is already terminal as {task.get('status')}.")
+    if task.get("workScope") != "shared-source":
+        raise SystemExit("Source leases require a task created with --work-scope shared-source.")
+    if task_binding(task) != {"taskId": task_id, "workId": work_id, "runId": run_id}:
+        raise SystemExit("Source lease task/work/run binding does not match the task ledger.")
+    return task
+
+
+def write_receipt(payload: dict, *, outcome: str, detail: str, recorded_at: str,
+                  head_commit: str, source_clean: bool, origin_synced: bool,
+                  evidence: str) -> Path | None:
+    binding = payload.get("taskBinding")
+    if not isinstance(binding, dict):
+        return None
+    if outcome not in VALID_CLOSEOUT_OUTCOMES:
+        raise SystemExit(f"Unsupported source closeout outcome: {outcome}")
+    receipt = {
+        "version": 1, **task_binding(binding), "outcome": outcome, "detail": detail,
+        "recordedAt": recorded_at, "baseCommit": str(payload.get("baseCommit") or ""),
+        "headCommit": head_commit, "sourceClean": bool(source_clean),
+        "originSynced": bool(origin_synced), "evidence": evidence,
+    }
+    CLOSEOUT_DIR.mkdir(parents=True, exist_ok=True)
+    path = closeout_receipt_path(receipt)
+    temporary = path.with_suffix(".tmp")
+    temporary.write_text(json.dumps(receipt, indent=2) + "\n")
+    os.chmod(temporary, 0o600)
+    temporary.replace(path)
+    return path
 
 
 def standing_push_approval(agent: str) -> dict | None:
@@ -317,7 +385,12 @@ def rollback_snapshot(payload: dict) -> list[dict[str, object]]:
     return normalized
 
 
-def begin(agent: str, objective: str) -> None:
+def begin(agent: str, objective: str, task_id: str = "", work_id: str = "", run_id: str = "") -> None:
+    binding_values = (task_id, work_id, run_id)
+    if any(binding_values) and not all(binding_values):
+        raise SystemExit("Linked source leases require task, work, and run IDs together.")
+    if all(binding_values):
+        require_open_source_task(task_id, work_id, run_id)
     STATE_DIR.mkdir(parents=True, exist_ok=True)
     BACKUP_ROOT.mkdir(parents=True, exist_ok=True)
     existing = read_lock()
@@ -357,6 +430,8 @@ def begin(agent: str, objective: str) -> None:
         "source": "v2-react",
         "port": 5174,
     }
+    if all(binding_values):
+        payload["taskBinding"] = {"taskId": task_id, "workId": work_id, "runId": run_id}
     LOCK_PATH.write_text(json.dumps(payload, indent=2) + "\n")
     print(json.dumps({"ok": True, "lease": payload}, indent=2))
 
@@ -512,8 +587,13 @@ def recover_expired() -> None:
     if not allowed:
         raise SystemExit(json.dumps({"ok": False, "reason": reason, "lease": public_lease(payload)}, indent=2))
     evidence = release_evidence(payload, "expired-orphan-recovered", reason)
+    receipt = write_receipt(
+        payload, outcome="expired-orphan-recovered", detail=reason, recorded_at=iso(),
+        head_commit=(run(["git", "rev-parse", "HEAD"]).stdout.strip() if payload.get("taskBinding") else ""), source_clean=True,
+        origin_synced=True, evidence=str(evidence),
+    )
     LOCK_PATH.unlink(missing_ok=True)
-    print(json.dumps({"ok": True, "recovered": True, "evidence": str(evidence)}, indent=2))
+    print(json.dumps({"ok": True, "recovered": True, "evidence": str(evidence), "receipt": str(receipt or "")}, indent=2))
 
 
 def source_changed_since(payload: dict) -> bool:
@@ -543,8 +623,13 @@ def finish(token: str) -> None:
     if source_changed_since(payload) and not payload.get("pushApproval"):
         raise SystemExit(json.dumps({"ok": False, "reason": "explicit push approval is not recorded"}, indent=2))
     evidence = release_evidence(payload, "finished", "verification passed and local main matches origin/main")
+    receipt = write_receipt(
+        payload, outcome="finished", detail="verification passed and local main matches origin/main",
+        recorded_at=iso(), head_commit=(run(["git", "rev-parse", "HEAD"]).stdout.strip() if payload.get("taskBinding") else ""),
+        source_clean=True, origin_synced=True, evidence=str(evidence),
+    )
     LOCK_PATH.unlink(missing_ok=True)
-    print(json.dumps({"ok": True, "released": payload["agent"], "backup": payload["backup"], "evidence": str(evidence)}, indent=2))
+    print(json.dumps({"ok": True, "released": payload["agent"], "backup": payload["backup"], "evidence": str(evidence), "receipt": str(receipt or "")}, indent=2))
 
 
 def abort(token: str) -> None:
@@ -571,8 +656,13 @@ def abort(token: str) -> None:
             shutil.copytree(source, target)
         else:
             shutil.copy2(source, target)
+    receipt = write_receipt(
+        payload, outcome="aborted", detail="source restored from immutable pre-edit snapshot",
+        recorded_at=iso(), head_commit=(run(["git", "rev-parse", "HEAD"]).stdout.strip() if payload.get("taskBinding") else ""),
+        source_clean=not source_changes(), origin_synced=False, evidence=str(evidence),
+    )
     LOCK_PATH.unlink(missing_ok=True)
-    print(json.dumps({"ok": True, "restored": str(backup), "released": payload["agent"], "evidence": str(evidence)}, indent=2))
+    print(json.dumps({"ok": True, "restored": str(backup), "released": payload["agent"], "evidence": str(evidence), "receipt": str(receipt or "")}, indent=2))
 
 
 @contextmanager
@@ -595,6 +685,9 @@ def main() -> None:
     start = sub.add_parser("begin")
     start.add_argument("--agent", required=True, choices=["joshex", "josh2", "jaimes", "jain"])
     start.add_argument("--objective", required=True)
+    start.add_argument("--task-id", required=True)
+    start.add_argument("--work-id", required=True)
+    start.add_argument("--run-id", required=True)
     sub.add_parser("status")
     for name in ("renew", "extend-snapshot", "verify", "finish", "abort"):
         command = sub.add_parser(name)
@@ -604,7 +697,9 @@ def main() -> None:
     approve.add_argument("--approval-ref", required=True)
     sub.add_parser("recover-expired")
     args = parser.parse_args()
-    if args.command == "begin": begin(args.agent, args.objective)
+    if args.command == "begin":
+        with source_lifecycle_lock():
+            begin(args.agent, args.objective, args.task_id, args.work_id, args.run_id)
     elif args.command == "status": status()
     elif args.command == "renew": renew(args.token)
     elif args.command == "extend-snapshot": extend_snapshot(args.token)

@@ -11,6 +11,41 @@ import agent_task
 
 
 class AgentTaskTerminalTransitionTests(unittest.TestCase):
+    def test_shared_source_task_cannot_complete_without_closeout_receipt(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="agent-source-closeout-") as directory:
+            root = Path(directory)
+            task_path = root / "agent-task-queue.json"
+            task_path.write_text(json.dumps({
+                "tasks": [{
+                    "id": "task-source-1", "workId": "work-source-1", "runId": "run-source-1",
+                    "generation": 1, "origin": "test", "originClaimHash": "b" * 64,
+                    "title": "Source closeout", "objective": "Close source", "owner": "joshex",
+                    "requester": "joshex", "status": "active", "workScope": "shared-source",
+                    "sourceClosure": {"version": 1, "status": "pending"},
+                    "artifactContract": {"version": 1, "required": True, "status": "pending"},
+                    "artifacts": [], "notes": [],
+                }],
+            }), encoding="utf-8")
+            before = task_path.read_bytes()
+            args = SimpleNamespace(
+                agent="joshex", id="task-source-1", work_event="terminal", owner="",
+                artifact=[], summary="", note="done", phase="", model_family=None,
+                model_id=None, route_verified=None, artifact_outcome="no-artifact-needed",
+                artifact_reason="No durable artifact", no_brain_feed=True, job=False,
+                lease_seconds=900, cmd="complete",
+            )
+            with mock.patch.object(agent_task, "TASKS_PATH", task_path), \
+                 mock.patch.object(agent_task, "SOURCE_STATE_DIR", root / "state"), \
+                 mock.patch.object(agent_task, "SOURCE_LEASE_PATH", root / "state" / "lease.json"), \
+                 mock.patch.object(agent_task, "SOURCE_CLOSEOUT_DIR", root / "state" / "receipts"), \
+                 mock.patch.object(agent_task, "SOURCE_LIFECYCLE_LOCK_PATH", root / "state" / "lifecycle.lock"), \
+                 mock.patch.object(agent_task, "publish_event") as publish, \
+                 self.assertRaisesRegex(SystemExit, "closeout evidence is missing"):
+                agent_task.set_status(args, "done")
+
+            self.assertEqual(before, task_path.read_bytes())
+            publish.assert_not_called()
+
     def test_artifact_contract_requires_explicit_closeout(self) -> None:
         task = {"artifactContract": {"version": 1, "required": True, "status": "pending"}, "artifacts": []}
         args = SimpleNamespace(artifact_outcome="", artifact_reason="")

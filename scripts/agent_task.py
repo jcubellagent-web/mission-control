@@ -12,6 +12,7 @@ import re
 import shlex
 import subprocess
 import sys
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
@@ -23,8 +24,6 @@ from control_tower_work_store import (
 )
 from handoff_receipt_bridge import HandoffReceiptError, record_receipt
 from linear_work_intent import enqueue_task_intent, linear_metadata
-
-
 ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = Path(os.environ.get("CONTROL_TOWER_DATA_DIR", ROOT / "data"))
 TASKS_PATH = DATA_DIR / "agent-task-queue.json"
@@ -53,6 +52,11 @@ REQUIRES_APPROVAL = {"josh-approval", "sensitive-account", "destructive"}
 DEFAULT_ACTIVE_TASK_LEASE_SECONDS = 900
 TERMINAL_STATUSES = {"done", "blocked", "error", "cancelled"}
 ARTIFACT_OUTCOMES = {"promoted", "updated-existing", "no-artifact-needed"}
+SOURCE_STATE_DIR = Path(os.environ.get("CONTROL_TOWER_STATE_DIR", Path.home() / ".openclaw" / "state"))
+SOURCE_LEASE_PATH = SOURCE_STATE_DIR / "control-tower-change-lock.json"
+SOURCE_CLOSEOUT_DIR = SOURCE_STATE_DIR / "agent-source-closeouts"
+SOURCE_LIFECYCLE_LOCK_PATH = SOURCE_STATE_DIR / "agent-source-lifecycle.lock"
+VALID_SOURCE_OUTCOMES = {"finished", "aborted", "expired-orphan-recovered"}
 CANONICAL_TASK_HOST = os.environ.get("CONTROL_TOWER_CANONICAL_HOST", "josh2.0@josh2")
 CANONICAL_TASK_ROOT = os.environ.get(
     "CONTROL_TOWER_CANONICAL_ROOT",
@@ -110,6 +114,52 @@ def read_json(path: Path, default: Any) -> Any:
 def write_json(path: Path, data: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=2) + "\n")
+
+
+def source_task_binding(task: dict[str, Any]) -> dict[str, str]:
+    return {
+        "taskId": str(task.get("taskId") or task.get("id") or ""),
+        "workId": str(task.get("workId") or ""),
+        "runId": str(task.get("runId") or ""),
+    }
+
+
+def source_receipt_path(task: dict[str, Any]) -> Path:
+    binding = source_task_binding(task)
+    exact = "|".join(binding[key] for key in ("taskId", "workId", "runId"))
+    return SOURCE_CLOSEOUT_DIR / f"{hashlib.sha256(exact.encode('utf-8')).hexdigest()}.json"
+
+
+@contextmanager
+def source_lifecycle_lock():
+    SOURCE_STATE_DIR.mkdir(parents=True, exist_ok=True)
+    with SOURCE_LIFECYCLE_LOCK_PATH.open("w", encoding="utf-8") as handle:
+        fcntl.flock(handle, fcntl.LOCK_EX)
+        yield
+        fcntl.flock(handle, fcntl.LOCK_UN)
+
+
+def validate_terminal_source_closeout(task: dict[str, Any]) -> dict[str, Any] | None:
+    if task.get("workScope") != "shared-source":
+        return None
+    binding = source_task_binding(task)
+    active = read_json(SOURCE_LEASE_PATH, {})
+    if active and active.get("taskBinding") == binding:
+        raise SystemExit("Terminal transition rejected: the matching shared-source lease is still active.")
+    receipt = read_json(source_receipt_path(task), {})
+    if not receipt:
+        raise SystemExit("Terminal transition rejected: matching shared-source closeout evidence is missing.")
+    if source_task_binding(receipt) != binding:
+        raise SystemExit("Terminal transition rejected: shared-source closeout identity does not match.")
+    if receipt.get("outcome") not in VALID_SOURCE_OUTCOMES or receipt.get("sourceClean") is not True:
+        raise SystemExit("Terminal transition rejected: shared-source closeout is incomplete.")
+    if receipt.get("outcome") == "finished" and receipt.get("originSynced") is not True:
+        raise SystemExit("Terminal transition rejected: finished source is not synchronized to origin/main.")
+    task["sourceClosure"] = {
+        "version": 1, "status": "satisfied", "outcome": receipt["outcome"],
+        "headCommit": receipt.get("headCommit"), "recordedAt": receipt.get("recordedAt"),
+    }
+    return receipt
 
 
 def load_tasks() -> dict[str, Any]:
@@ -605,6 +655,7 @@ def create(args: argparse.Namespace) -> dict[str, Any]:
         "dependencies": args.depends_on or [],
         "artifacts": args.artifact or [],
         "artifactContract": artifact_contract(),
+        "workScope": args.work_scope,
         "notes": [],
         "createdAt": now,
         "updatedAt": now,
@@ -612,6 +663,8 @@ def create(args: argparse.Namespace) -> dict[str, Any]:
         "completedAt": None,
         "summary": "",
     }
+    if args.work_scope == "shared-source":
+        task["sourceClosure"] = {"version": 1, "status": "pending"}
     if args.durable:
         if privacy != "dashboard-safe":
             raise SystemExit("Durable Linear tasks require --privacy dashboard-safe.")
@@ -698,6 +751,8 @@ def set_status(args: argparse.Namespace, status: str) -> dict[str, Any]:
             task["runId"] = new_id("run")
             task["artifactContract"] = artifact_contract()
             task.pop("artifactDecision", None)
+            if task.get("workScope") == "shared-source":
+                task["sourceClosure"] = {"version": 1, "status": "pending"}
         task["status"] = effective_status
         task["updatedAt"] = now
         if effective_status in {"done", "cancelled", "error", "blocked"}:
@@ -724,6 +779,7 @@ def set_status(args: argparse.Namespace, status: str) -> dict[str, Any]:
         if task.get("routeVerified") and (not task.get("modelFamily") or not task.get("modelId")):
             raise SystemExit("A verified route requires modelFamily and modelId.")
         if effective_status in terminal_statuses:
+            validate_terminal_source_closeout(task)
             artifact_decision(task, args, agent, now)
         add_note(task, agent, args.note or args.summary or effective_status, effective_status)
         if getattr(args, "work_event", "") != "heartbeat":
@@ -734,7 +790,8 @@ def set_status(args: argparse.Namespace, status: str) -> dict[str, Any]:
             enqueue_task_intent(task)
         return task
 
-    result = locked_tasks(mutate)
+    with source_lifecycle_lock():
+        result = locked_tasks(mutate)
     memory_result = propose_artifact_memory(result, agent)
     if memory_result:
         def record_memory(data: dict[str, Any]) -> dict[str, Any]:
@@ -848,6 +905,10 @@ def main() -> int:
     create_p.add_argument("--capability", action="append", default=[])
     create_p.add_argument("--depends-on", action="append", default=[])
     create_p.add_argument("--artifact", action="append", default=[])
+    create_p.add_argument(
+        "--work-scope", choices=("none", "shared-source"), default="none",
+        help="Declare shared-source work so terminal status requires exact lease-closeout evidence.",
+    )
     create_p.add_argument("--due-at", default=None)
     create_p.add_argument("--note", default="")
     create_p.add_argument("--brain-feed", action="store_true", help="Accepted for compatibility; Brain Feed publishing is on by default")
