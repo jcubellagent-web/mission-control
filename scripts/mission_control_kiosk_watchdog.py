@@ -18,6 +18,9 @@ from control_tower_foreground import ensure_foreground
 ROOT = Path(__file__).resolve().parents[1]
 QA_PYTHON = ROOT / ".venv-qa" / "bin" / "python"
 PLAYWRIGHT_PYTHON = Path("/opt/homebrew/bin/python3")
+KIOSK_CDP_URL = "http://127.0.0.1:9224/json"
+KIOSK_ORIGIN = "http://127.0.0.1:5174"
+KIOSK_LAUNCHER = ROOT / "scripts" / "open_mission_control_kiosk.sh"
 SHARED_EVENTS_PATH = ROOT / "data" / "shared-events.json"
 WATCHDOG_STATE_PATH = ROOT / "data" / "mission-control-kiosk-watchdog-state.json"
 CHANGE_LOCK = Path.home() / ".openclaw" / "state" / "control-tower-change-lock.json"
@@ -152,6 +155,41 @@ def runtime_check() -> tuple[bool, dict[str, Any], str]:
     return ok, payload, detail
 
 
+def kiosk_renderer_check() -> tuple[bool, dict[str, Any], str]:
+    """Verify the physical kiosk target, not only an independent test render."""
+    proc = run(["/usr/bin/curl", "-fsS", "--max-time", "3", KIOSK_CDP_URL], timeout=5)
+    try:
+        targets = json.loads(proc.stdout)
+    except Exception:
+        targets = []
+    target = next(
+        (
+            item
+            for item in targets
+            if isinstance(item, dict)
+            and item.get("type") == "page"
+            and str(item.get("url") or "").startswith(KIOSK_ORIGIN)
+        ),
+        None,
+    )
+    title = str((target or {}).get("title") or "")
+    crashed = "aw, snap" in title.lower()
+    ok = proc.returncode == 0 and target is not None and not crashed
+    payload = {
+        "ok": ok,
+        "targetPresent": target is not None,
+        "rendererCrashed": crashed,
+        "title": title[:80],
+    }
+    if crashed:
+        detail = "Physical Control Tower kiosk renderer shows Aw, Snap."
+    elif target is None:
+        detail = "Physical Control Tower kiosk target is unavailable."
+    else:
+        detail = "Physical Control Tower kiosk renderer is healthy."
+    return ok, payload, detail
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Refresh Control Tower kiosk screen-check status.")
     parser.add_argument("--repair", action="store_true", help="Try to reopen the kiosk if the live check fails.")
@@ -173,6 +211,11 @@ def main() -> int:
     )
 
     ok, payload, detail = runtime_check()
+    kiosk_ok, kiosk_payload, kiosk_detail = kiosk_renderer_check()
+    payload["physicalKiosk"] = kiosk_payload
+    if not kiosk_ok:
+        ok = False
+        detail = f"{detail}; {kiosk_detail}"
     repaired = False
     foreground = ensure_foreground(repair=False)
     if foreground.get("status") == "deferred" and foreground.get("reason") == "active-visible-work":
@@ -196,14 +239,24 @@ def main() -> int:
         detail = f"{detail}; Control Tower refresh failed"
 
     failure_streak = 0 if ok else int(prior_state.get("failureStreak") or 0) + 1
-    if not ok and failure_streak >= 2 and args.repair and not foreground_ok:
-        foreground = ensure_foreground(repair=True)
-        repaired = True
+    if not ok and failure_streak >= 2 and args.repair and (not foreground_ok or not kiosk_ok):
+        if not kiosk_ok:
+            repair = run([str(KIOSK_LAUNCHER), "--force"], timeout=45)
+            repaired = repair.returncode == 0
+            foreground = ensure_foreground(repair=False)
+        else:
+            foreground = ensure_foreground(repair=True)
+            repaired = True
         foreground_ok = bool(foreground.get("ok"))
         foreground_action = foreground.get("status") == "focused"
-        if foreground_ok:
+        if foreground_ok and repaired:
             time.sleep(1)
             ok, payload, detail = runtime_check()
+            kiosk_ok, kiosk_payload, kiosk_detail = kiosk_renderer_check()
+            payload["physicalKiosk"] = kiosk_payload
+            if not kiosk_ok:
+                ok = False
+                detail = f"{detail}; {kiosk_detail}"
             update = run([sys.executable, str(ROOT / "scripts" / "update_mission_control.py")], timeout=120)
             if update.returncode != 0:
                 ok = False

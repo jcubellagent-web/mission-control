@@ -79,6 +79,58 @@ def test_runtime_check_prefers_playwright_python_over_qa_runtime(monkeypatch, tm
     assert observed[0][0] == str(playwright_python)
 
 
+def test_kiosk_renderer_check_accepts_live_control_tower_target(monkeypatch):
+    monkeypatch.setattr(
+        watchdog,
+        "run",
+        lambda *args, **kwargs: type(
+            "Result",
+            (),
+            {
+                "returncode": 0,
+                "stdout": json.dumps([
+                    {
+                        "type": "page",
+                        "url": "http://127.0.0.1:5174/?ct_refresh=test",
+                        "title": "Josh 2.0 | Control Tower",
+                    }
+                ]),
+                "stderr": "",
+            },
+        )(),
+    )
+    ok, payload, detail = watchdog.kiosk_renderer_check()
+    assert ok is True
+    assert payload["rendererCrashed"] is False
+    assert "healthy" in detail
+
+
+def test_kiosk_renderer_check_rejects_aw_snap_target(monkeypatch):
+    monkeypatch.setattr(
+        watchdog,
+        "run",
+        lambda *args, **kwargs: type(
+            "Result",
+            (),
+            {
+                "returncode": 0,
+                "stdout": json.dumps([
+                    {
+                        "type": "page",
+                        "url": "http://127.0.0.1:5174/",
+                        "title": "Aw, Snap!",
+                    }
+                ]),
+                "stderr": "",
+            },
+        )(),
+    )
+    ok, payload, detail = watchdog.kiosk_renderer_check()
+    assert ok is False
+    assert payload["rendererCrashed"] is True
+    assert "Aw, Snap" in detail
+
+
 def test_latest_screen_check_status_uses_newest_matching_event(tmp_path):
     events_path = tmp_path / "shared-events.json"
     events_path.write_text(
@@ -171,6 +223,11 @@ def test_main_refreshes_dashboard_after_recovery_publication(monkeypatch, tmp_pa
     )
     monkeypatch.setattr(
         watchdog,
+        "kiosk_renderer_check",
+        lambda: (True, {"ok": True}, "Physical kiosk passed."),
+    )
+    monkeypatch.setattr(
+        watchdog,
         "ensure_foreground",
         lambda repair=False: {"ok": True, "status": "foreground", "reason": "already-foreground"},
     )
@@ -214,6 +271,11 @@ def test_second_layout_only_failure_never_repairs_kiosk(monkeypatch, tmp_path):
         "runtime_check",
         lambda: (False, {"ok": False}, "Rendered layout failed."),
     )
+    monkeypatch.setattr(
+        watchdog,
+        "kiosk_renderer_check",
+        lambda: (True, {"ok": True}, "Physical kiosk passed."),
+    )
 
     def foreground(repair=False):
         repairs.append(repair)
@@ -230,3 +292,38 @@ def test_second_layout_only_failure_never_repairs_kiosk(monkeypatch, tmp_path):
     assert watchdog.main() == 1
     assert repairs == [False]
     assert json.loads(state.read_text())["failureStreak"] == 2
+
+
+def test_second_aw_snap_failure_restarts_only_kiosk(monkeypatch, tmp_path):
+    state = tmp_path / "watchdog-state.json"
+    state.write_text(json.dumps({"failureStreak": 1, "incidentOpen": False}), encoding="utf-8")
+    actions = []
+    kiosk_results = iter([
+        (False, {"ok": False, "rendererCrashed": True}, "Physical kiosk shows Aw, Snap."),
+        (True, {"ok": True, "rendererCrashed": False}, "Physical kiosk passed."),
+    ])
+    monkeypatch.setattr(watchdog, "WATCHDOG_STATE_PATH", state)
+    monkeypatch.setattr(watchdog, "change_lease_active", lambda: False)
+    monkeypatch.setattr(
+        watchdog,
+        "runtime_check",
+        lambda: (True, {"ok": True}, "Rendered layout passed."),
+    )
+    monkeypatch.setattr(watchdog, "kiosk_renderer_check", lambda: next(kiosk_results))
+    monkeypatch.setattr(
+        watchdog,
+        "ensure_foreground",
+        lambda repair=False: {"ok": True, "status": "foreground", "reason": "already-foreground"},
+    )
+
+    def fake_run(cmd, timeout=90):
+        actions.append(cmd)
+        return type("Result", (), {"returncode": 0, "stdout": "", "stderr": ""})()
+
+    monkeypatch.setattr(watchdog, "run", fake_run)
+    monkeypatch.setattr(watchdog.time, "sleep", lambda _: None)
+    monkeypatch.setattr(sys, "argv", ["mission_control_kiosk_watchdog.py", "--repair", "--no-publish"])
+
+    assert watchdog.main() == 0
+    assert [str(watchdog.KIOSK_LAUNCHER), "--force"] in actions
+    assert json.loads(state.read_text())["failureStreak"] == 0
