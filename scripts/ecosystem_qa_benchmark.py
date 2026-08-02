@@ -51,6 +51,10 @@ def compact(value: Any, limit: int = 2000) -> str:
 def execute(name: str, command: list[str], timeout: int = 300, env: dict[str, str] | None = None) -> dict[str, Any]:
     started = time.perf_counter()
     proc = subprocess.run(command, cwd=ROOT, text=True, capture_output=True, timeout=timeout, check=False, env=env)
+    try:
+        parsed = json.loads(proc.stdout)
+    except (TypeError, ValueError, json.JSONDecodeError):
+        parsed = {}
     return {
         "name": name,
         "ok": proc.returncode == 0,
@@ -58,7 +62,25 @@ def execute(name: str, command: list[str], timeout: int = 300, env: dict[str, st
         "durationMs": round((time.perf_counter() - started) * 1000),
         "stdout": compact(proc.stdout),
         "stderr": compact(proc.stderr),
+        "reportedStatus": str(parsed.get("status") or "") if isinstance(parsed, dict) else "",
     }
+
+
+def route_only_outcome(checks: list[dict[str, Any]]) -> tuple[str, int]:
+    """Keep telemetry watch signals distinct from broken routing contracts."""
+    by_name = {str(row.get("name") or ""): row for row in checks}
+    contract = by_name.get("route-contract", {})
+    telemetry = by_name.get("route-telemetry-slo", {})
+    if not contract.get("ok"):
+        return "fail", 1
+    telemetry_status = str(telemetry.get("reportedStatus") or "").strip().lower()
+    if telemetry_status == "fail" or int(telemetry.get("returncode") or 0) == 1:
+        return "fail", 1
+    if telemetry_status in {"attention", "degraded", "warning"} or int(telemetry.get("returncode") or 0) == 2:
+        return "attention", 2
+    if not telemetry.get("ok"):
+        return "fail", 1
+    return "ok", 0
 
 
 def percentile(values: list[float], fraction: float) -> float | None:
@@ -244,7 +266,13 @@ def main() -> int:
     args = parser.parse_args()
     checks: list[dict[str, Any]] = []
     if args.route_only:
-        checks.append(execute("route-contract", [sys.executable, "scripts/route_contract_benchmark.py"], timeout=240))
+        route_env = os.environ.copy()
+        route_env["PYTHONPYCACHEPREFIX"] = "/private/tmp/ecosystem-qa-pycache"
+        route_env["PYTHONPATH"] = str(ROOT / "scripts")
+        checks.extend([
+            execute("route-contract", [sys.executable, "scripts/route_contract_benchmark.py"], timeout=120, env=route_env),
+            execute("route-telemetry-slo", [sys.executable, "scripts/route_quality_audit.py"], timeout=60, env=route_env),
+        ])
         mode_name = "route-only"
     elif args.fault_injection:
         checks = fault_injection()
@@ -269,13 +297,19 @@ def main() -> int:
             ecosystem_health_check(env),
         ])
         mode_name = "full"
-    ok = all(bool(row.get("ok")) for row in checks)
+    if args.route_only:
+        status, exit_code = route_only_outcome(checks)
+        ok = status == "ok"
+    else:
+        ok = all(bool(row.get("ok")) for row in checks)
+        status = "ok" if ok else "attention"
+        exit_code = 0 if ok else 1
     payload = {
         "checkedAt": iso(),
         "slo": json.loads(SLO_PATH.read_text(encoding="utf-8")) if SLO_PATH.exists() else {"status": "missing"},
         "mode": mode_name,
         "ok": ok,
-        "status": "ok" if ok else "attention",
+        "status": status,
         "checksPassed": sum(bool(row.get("ok")) for row in checks),
         "checksTotal": len(checks),
         "checks": checks,
@@ -283,7 +317,7 @@ def main() -> int:
     if not args.no_write:
         atomic_write(OUTPUT, payload)
     print(json.dumps(payload, indent=2))
-    return 0 if ok else 1
+    return exit_code
 
 
 if __name__ == "__main__":

@@ -1581,7 +1581,7 @@ def create_task(args: argparse.Namespace, owner: str, approval: str, model_route
     return json.loads(proc.stdout)
 
 
-def main() -> int:
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Choose an agent route and optionally create a queued task.")
     parser.add_argument("--task-type", required=True)
     parser.add_argument("--title", required=True)
@@ -1616,7 +1616,16 @@ def main() -> int:
     parser.add_argument("--tool-duration-ms", type=float, default=None)
     parser.add_argument("--model-duration-ms", type=float, default=None)
     parser.add_argument("--no-telemetry", action="store_true", help="Skip the route-decision telemetry append.")
-    args = parser.parse_args()
+    return parser
+
+
+def route_request(args: argparse.Namespace) -> dict[str, Any]:
+    """Evaluate one route without requiring a subprocess boundary.
+
+    The scheduled route benchmark calls this function with telemetry disabled
+    and deterministic provider signals. Production callers still enter through
+    ``main`` and retain the same CLI, telemetry, and task-creation behavior.
+    """
 
     route_started = time.perf_counter()
     agent, route, needs_approval = choose_agent(args)
@@ -1639,11 +1648,12 @@ def main() -> int:
             f"capabilities={','.join(args.capability or []) or 'none'}; privacy={args.privacy}"
         ),
     }
+    routing_duration_ms = max(0.0, round((time.perf_counter() - route_started) * 1000, 1))
+    result["routingDurationMs"] = routing_duration_ms
     if args.create_task:
         result["task"] = create_task(args, agent, approval, model_route).get("task")
     if not args.no_telemetry:
-        routing_duration_ms = max(0, round((time.perf_counter() - route_started) * 1000))
-        telemetry = append_route_telemetry(args, result, routing_duration_ms)
+        telemetry = append_route_telemetry(args, result, round(routing_duration_ms))
         result["routeTelemetry"] = {
             key: telemetry.get(key)
             for key in (
@@ -1651,7 +1661,12 @@ def main() -> int:
                 "glmBypassReason", "ollamaSurplusCapacity",
             )
         }
-    print(json.dumps(result, indent=2))
+    return result
+
+
+def main() -> int:
+    args = build_parser().parse_args()
+    print(json.dumps(route_request(args), indent=2))
     return 0
 
 

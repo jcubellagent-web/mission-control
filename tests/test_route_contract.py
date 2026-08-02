@@ -76,9 +76,26 @@ class RouteContractTest(unittest.TestCase):
         )
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
         payload = json.loads(proc.stdout)
-        self.assertGreaterEqual(payload["fixtureCount"], 24)
+        self.assertGreaterEqual(payload["fixtureCount"], 43)
         self.assertEqual(payload["passRatePct"], 100.0)
         self.assertEqual(payload["routeMetadataCoveragePct"], {"provider": 100.0, "model": 100.0, "reason": 100.0})
+        self.assertLessEqual(payload["decisionLatencyMs"]["p95"], 25.0)
+        case_ids = {row["id"] for row in payload["results"]}
+        self.assertTrue({
+            "dashboard_safe_architecture_uses_glm",
+            "glm_exhaustion_uses_gemini_pro_fallback",
+            "surplus_strategy_expands_to_glm",
+            "strategy_without_surplus_stays_codex",
+            "dashboard_readability_review_uses_flash_high",
+            "bounded_private_draft_uses_local_ollama",
+            "bounded_private_draft_offline_falls_back_to_codex",
+            "constrained_generic_safe_work_uses_gemini",
+        }.issubset(case_ids))
+
+    def test_route_scheduler_accepts_only_telemetry_attention_exit(self) -> None:
+        schedule = json.loads((ROOT / "config" / "ecosystem-qa-schedule.json").read_text(encoding="utf-8"))
+        route_job = next(row for row in schedule["jobs"] if row["id"] == "route-benchmark")
+        self.assertEqual(route_job["observationReturnCodes"], [2])
 
     def run_audit(self, rows: list[dict[str, object]]) -> tuple[subprocess.CompletedProcess[str], dict[str, object]]:
         with tempfile.TemporaryDirectory() as tmp:

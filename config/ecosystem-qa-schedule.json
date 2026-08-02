@@ -111,6 +111,7 @@
       "schedule": {"minutes": [23], "hours": [0, 6, 12, 18]},
       "command": ["python3", "scripts/ecosystem_qa_benchmark.py", "--route-only"],
       "timeoutSeconds": 240,
+      "observationReturnCodes": [2],
       "severity": "p1"
     },
     {

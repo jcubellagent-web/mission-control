@@ -185,3 +185,19 @@ def test_zero_age_dashboard_is_fresh(tmp_path) -> None:
         result = benchmark.ecosystem_health_check()
 
     assert result["ok"] is True
+
+
+def test_route_only_attention_is_observation_not_contract_failure() -> None:
+    status, exit_code = benchmark.route_only_outcome([
+        {"name": "route-contract", "ok": True, "returncode": 0, "reportedStatus": "ok"},
+        {"name": "route-telemetry-slo", "ok": False, "returncode": 2, "reportedStatus": "attention"},
+    ])
+    assert (status, exit_code) == ("attention", 2)
+
+
+def test_route_only_contract_failure_remains_hard_failure() -> None:
+    status, exit_code = benchmark.route_only_outcome([
+        {"name": "route-contract", "ok": False, "returncode": 1, "reportedStatus": "fail"},
+        {"name": "route-telemetry-slo", "ok": True, "returncode": 0, "reportedStatus": "ok"},
+    ])
+    assert (status, exit_code) == ("fail", 1)

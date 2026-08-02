@@ -7,11 +7,12 @@ import datetime as dt
 import json
 import math
 import os
-import subprocess
 import sys
 import tempfile
 import time
+from contextlib import ExitStack
 from pathlib import Path
+from unittest import mock
 from typing import Any
 
 
@@ -19,6 +20,16 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SUITE = ROOT / "data" / "agent-route-benchmark-suite.json"
 DEFAULT_OUTPUT = ROOT / "data" / "agent-route-benchmark-results.json"
 ROUTER = ROOT / "scripts" / "agent_route.py"
+sys.path.insert(0, str(ROOT / "scripts"))
+import agent_route  # noqa: E402
+
+
+ALLOWANCE_SIGNALS = {
+    "unknown": (None, "fixture allowance is unknown"),
+    "usable": (True, "Ollama live allowance has 50% remaining"),
+    "surplus": (True, "Ollama live allowance has 95% remaining"),
+    "exhausted": (False, "Ollama live allowance is exhausted"),
+}
 
 
 def read_json(path: Path) -> dict[str, Any]:
@@ -45,71 +56,84 @@ def atomic_write(path: Path, payload: dict[str, Any]) -> None:
             pass
 
 
-def command_for(case: dict[str, Any], *, emit_telemetry: bool = False) -> list[str]:
-    cmd = [
-        sys.executable,
-        str(ROUTER),
-        "--task-type",
-        str(case["taskType"]),
-        "--title",
-        str(case.get("title") or case["id"]),
-        "--objective",
-        str(case.get("objective") or "Exercise the deterministic route contract"),
-        "--privacy",
-        str(case.get("privacy") or "dashboard-safe"),
-        "--priority",
-        str(case.get("priority") or "normal"),
-        "--requester",
-        str(case.get("requester") or "joshex"),
-        "--complexity",
-        str(case.get("complexity") or "auto"),
-        "--blast-radius",
-        str(case.get("blastRadius") or "auto"),
-        "--codex-allowance",
-        str(case.get("codexAllowance") or "normal"),
-    ]
-    if not emit_telemetry:
-        cmd.append("--no-telemetry")
-    for capability in case.get("capabilities") or []:
-        cmd.extend(["--capability", str(capability)])
-    if case.get("approval"):
-        cmd.extend(["--approval", str(case["approval"])])
-    if case.get("prefer"):
-        cmd.extend(["--prefer", str(case["prefer"])])
-    if case.get("requestedProvider"):
-        cmd.extend(["--requested-provider", str(case["requestedProvider"])])
-    if case.get("requestedModel"):
-        cmd.extend(["--requested-model", str(case["requestedModel"])])
-    return cmd
+def args_for(case: dict[str, Any], *, emit_telemetry: bool = False) -> argparse.Namespace:
+    return argparse.Namespace(
+        task_type=str(case["taskType"]),
+        title=str(case.get("title") or case["id"]),
+        objective=str(case.get("objective") or "Exercise the deterministic route contract"),
+        capability=[str(value) for value in case.get("capabilities") or []],
+        privacy=str(case.get("privacy") or "dashboard-safe"),
+        priority=str(case.get("priority") or "normal"),
+        complexity=str(case.get("complexity") or "auto"),
+        blast_radius=str(case.get("blastRadius") or "auto"),
+        requester=str(case.get("requester") or "joshex"),
+        prefer=str(case.get("prefer") or ""),
+        approval=str(case.get("approval") or "none"),
+        codex_allowance=str(case.get("codexAllowance") or "normal"),
+        requested_provider=str(case.get("requestedProvider") or ""),
+        requested_model=str(case.get("requestedModel") or ""),
+        requested_reason="deterministic Route QA fixture",
+        create_task=False,
+        brain_feed=False,
+        job=False,
+        queue_duration_ms=None,
+        memory_duration_ms=None,
+        tool_duration_ms=None,
+        model_duration_ms=None,
+        no_telemetry=not emit_telemetry,
+    )
+
+
+def fixture_xai_available(case: dict[str, Any]) -> bool:
+    if "xaiAvailable" in case:
+        return bool(case["xaiAvailable"])
+    environment = case.get("environment") if isinstance(case.get("environment"), dict) else {}
+    return str(environment.get("XAI_ENABLED") or "0") == "1" and str(environment.get("XAI_VERIFIED") or "0") == "1"
 
 
 def run_case(case: dict[str, Any], *, emit_telemetry: bool = False) -> dict[str, Any]:
-    env = os.environ.copy()
-    env.pop("XAI_ENABLED", None)
-    env.pop("XAI_VERIFIED", None)
-    for key, value in (case.get("environment") or {}).items():
-        env[str(key)] = str(value)
+    allowance_name = str(case.get("ollamaAllowance") or "usable")
+    allowance = ALLOWANCE_SIGNALS.get(allowance_name)
+    if allowance is None:
+        return {"id": case.get("id"), "passed": False, "durationMs": 0.0, "errors": [f"unknown ollamaAllowance fixture: {allowance_name}"]}
+    xai_available = fixture_xai_available(case)
+    local_ollama_available = bool(case.get("localOllamaAvailable", True))
     started = time.perf_counter()
-    proc = subprocess.run(
-        command_for(case, emit_telemetry=emit_telemetry),
-        cwd=ROOT,
-        env=env,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    duration_ms = round((time.perf_counter() - started) * 1000, 1)
-    if proc.returncode != 0:
-        return {
-            "id": case.get("id"),
-            "passed": False,
-            "durationMs": duration_ms,
-            "errors": [f"router exited {proc.returncode}: {(proc.stderr or proc.stdout).strip()[:300]}"],
-        }
     try:
-        result = json.loads(proc.stdout)
+        with ExitStack() as stack:
+            live_unavailable = agent_route.explicit_route_unavailable
+            stack.enter_context(mock.patch.object(agent_route, "ollama_live_allowance_status", return_value=allowance))
+            stack.enter_context(mock.patch.object(
+                agent_route,
+                "xai_verified_available",
+                return_value=(xai_available, "fixture xAI runtime available" if xai_available else "fixture xAI runtime unavailable"),
+            ))
+            stack.enter_context(mock.patch.object(
+                agent_route,
+                "provider_budget_guard",
+                side_effect=lambda provider: (True, "fixture budget available") if provider == "xai" else (True, "budget available"),
+            ))
+            stack.enter_context(mock.patch.object(
+                agent_route,
+                "explicit_route_unavailable",
+                side_effect=lambda provider, model="": (
+                    ""
+                    if provider == "ollama"
+                    and not str(model).lower().endswith(":cloud")
+                    and local_ollama_available
+                    else (
+                        "fixture local Ollama runtime unavailable"
+                        if provider == "ollama" and not str(model).lower().endswith(":cloud")
+                        else live_unavailable(provider, model)
+                    )
+                ),
+            ))
+            result = agent_route.route_request(args_for(case, emit_telemetry=emit_telemetry))
     except Exception as exc:
-        return {"id": case.get("id"), "passed": False, "durationMs": duration_ms, "errors": [f"invalid router JSON: {exc}"]}
+        duration_ms = round((time.perf_counter() - started) * 1000, 1)
+        return {"id": case.get("id"), "passed": False, "durationMs": duration_ms, "errors": [f"router raised {type(exc).__name__}: {exc}"]}
+    execution_duration_ms = round((time.perf_counter() - started) * 1000, 1)
+    duration_ms = float(result.get("routingDurationMs") or execution_duration_ms)
 
     model_route = result.get("modelRoute") if isinstance(result.get("modelRoute"), dict) else {}
     actual = {
@@ -142,7 +166,17 @@ def run_case(case: dict[str, Any], *, emit_telemetry: bool = False) -> dict[str,
             errors.append(f"{field}: expected one of {allowed!r}, got {actual.get(field)!r}")
     if not all(actual.get(field) not in {None, "", "unknown"} for field in ("provider", "model", "reason")):
         errors.append("provider/model/reason coverage is incomplete")
-    return {"id": case.get("id"), "passed": not errors, "durationMs": duration_ms, "actual": actual, "errors": errors}
+    expected_fallback = case.get("expectedFallbackLadder")
+    if expected_fallback is not None and model_route.get("fallbackLadder") != expected_fallback:
+        errors.append(f"fallbackLadder: expected {expected_fallback!r}, got {model_route.get('fallbackLadder')!r}")
+    return {
+        "id": case.get("id"),
+        "passed": not errors,
+        "durationMs": duration_ms,
+        "executionDurationMs": execution_duration_ms,
+        "actual": actual,
+        "errors": errors,
+    }
 
 
 def percentile(values: list[float], fraction: float) -> float | None:

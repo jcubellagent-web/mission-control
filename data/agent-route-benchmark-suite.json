@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-07-15T00:00:00Z",
-  "description": "Deterministic ownership and model-ladder contract for Inbox, Control Tower, private accounts, specialists, and execution lanes.",
+  "updatedAt": "2026-08-02T00:00:00Z",
+  "description": "Deterministic ownership and current model-ladder contract for Inbox, Control Tower, Codex allowance, Gemini synthesis, GLM core and surplus technical routes, Grok public signals, local private drafts, and trusted execution lanes.",
   "minimumFixtures": 24,
   "minimumPassRatePct": 100,
   "requiredRouteMetadataCoveragePct": 100,
@@ -298,9 +298,110 @@
       "title": "Architecture analysis",
       "objective": "Analyze a sanitized multi-provider architecture",
       "expectedOwner": "joshex",
-      "expectedProviderAny": ["ollama", "gemini"],
-      "expectedModelAny": ["glm-5.2:cloud", "gemini-3.1-pro-high"],
-      "expectedRoleAny": ["glm-large-context-technical-reasoning", "glm-allowance-fallback"]
+      "ollamaAllowance": "usable",
+      "expectedProvider": "ollama",
+      "expectedModel": "glm-5.2:cloud",
+      "expectedRole": "glm-large-context-technical-reasoning",
+      "expectedFallbackLadder": ["ollama/glm-5.2:cloud", "gemini/gemini-3.1-pro-high", "codex/gpt-5.6-terra"]
+    },
+    {
+      "id": "dashboard_safe_technical_plan_uses_glm",
+      "taskType": "implementation-plan",
+      "title": "Technical implementation plan",
+      "objective": "Plan a sanitized multi-file implementation",
+      "ollamaAllowance": "usable",
+      "expectedOwner": "joshex",
+      "expectedProvider": "ollama",
+      "expectedModel": "glm-5.2:cloud",
+      "expectedRole": "glm-large-context-technical-reasoning"
+    },
+    {
+      "id": "glm_exhaustion_uses_gemini_pro_fallback",
+      "taskType": "architecture-review",
+      "title": "Architecture review with exhausted GLM allowance",
+      "objective": "Review a sanitized architecture through the verified fallback ladder",
+      "ollamaAllowance": "exhausted",
+      "expectedOwner": "joshex",
+      "expectedProvider": "gemini",
+      "expectedModel": "gemini-3.1-pro-high",
+      "expectedRole": "glm-allowance-fallback",
+      "expectedFallbackLadder": ["gemini/gemini-3.1-pro-high", "codex/gpt-5.6-terra"]
+    },
+    {
+      "id": "surplus_strategy_expands_to_glm",
+      "taskType": "strategy",
+      "title": "Generic strategy with surplus specialist capacity",
+      "objective": "Analyze a sanitized strategy while Ollama capacity is abundant",
+      "ollamaAllowance": "surplus",
+      "expectedOwner": "jaimes",
+      "expectedProvider": "ollama",
+      "expectedModel": "glm-5.2:cloud",
+      "expectedRole": "glm-surplus-capacity-reasoning"
+    },
+    {
+      "id": "strategy_without_surplus_stays_codex",
+      "taskType": "strategy",
+      "title": "Generic strategy without surplus capacity",
+      "objective": "Analyze a sanitized strategy without expanding specialist scope",
+      "ollamaAllowance": "usable",
+      "expectedOwner": "jaimes",
+      "expectedProvider": "codex",
+      "expectedModel": "gpt-5.6-terra",
+      "expectedRole": "codex-execution"
+    },
+    {
+      "id": "dashboard_readability_review_uses_flash_high",
+      "taskType": "dashboard-readability-review",
+      "title": "Dashboard readability review",
+      "objective": "Review sanitized dashboard copy and hierarchy",
+      "expectedOwner": "jaimes",
+      "expectedProvider": "gemini",
+      "expectedModel": "gemini-3.6-flash-high",
+      "expectedRole": "gemini-review"
+    },
+    {
+      "id": "gemini_evaluation_uses_pro_high",
+      "taskType": "gemini-evaluation",
+      "title": "Deep model evaluation",
+      "objective": "Evaluate a sanitized long-context model result",
+      "expectedOwner": "jaimes",
+      "expectedProvider": "gemini",
+      "expectedModel": "gemini-3.1-pro-high",
+      "expectedRole": "gemini-evaluation"
+    },
+    {
+      "id": "bounded_private_draft_uses_local_ollama",
+      "taskType": "bounded-private-draft",
+      "title": "Private offline draft",
+      "objective": "Draft bounded private text without cloud processing",
+      "privacy": "agent-private",
+      "expectedOwner": "jaimes",
+      "expectedProvider": "ollama",
+      "expectedModel": "qwen2.5:7b",
+      "expectedRole": "local-private-bounded-draft"
+    },
+    {
+      "id": "bounded_private_draft_offline_falls_back_to_codex",
+      "taskType": "bounded-private-draft",
+      "title": "Private draft with local runtime unavailable",
+      "objective": "Keep a bounded private draft off cloud specialists when local Ollama is unavailable",
+      "privacy": "agent-private",
+      "localOllamaAvailable": false,
+      "expectedOwner": "jaimes",
+      "expectedProvider": "codex",
+      "expectedModel": "gpt-5.6-terra",
+      "expectedRole": "codex-execution"
+    },
+    {
+      "id": "constrained_generic_safe_work_uses_gemini",
+      "taskType": "generic-analysis",
+      "title": "Generic safe analysis under Codex conservation",
+      "objective": "Analyze sanitized context while reserving Codex for execution",
+      "codexAllowance": "conserve",
+      "expectedOwner": "jaimes",
+      "expectedProvider": "gemini",
+      "expectedModel": "gemini-3.6-flash-medium",
+      "expectedRole": "gemini-review"
     },
     {
       "id": "private_summary_stays_codex",
