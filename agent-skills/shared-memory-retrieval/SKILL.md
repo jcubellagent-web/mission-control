@@ -60,6 +60,18 @@ Use `propose` for a durable fact, decision, preference, procedure, lesson, entit
 
 Never promote raw model inference directly. Preferences, policy, procedures, sensitive facts, and conflicts stay pending review. The nightly reviewer may auto-promote only verified low-risk facts, lessons, entities, and relationships.
 
+## Close out durable artifacts
+
+For Control Tower tasks using artifact contract version 1, every terminal transition must declare exactly one artifact outcome:
+
+- `promoted`: a new durable artifact was produced and is referenced with `--artifact`.
+- `updated-existing`: an authoritative existing artifact was materially updated and is referenced with `--artifact`.
+- `no-artifact-needed`: the result was intentionally transient or already represented; explain why.
+
+Pass `--artifact-outcome` and `--artifact-reason` to `agent_task.py complete`, `block`, `error`, or `cancel`. Promoted and updated artifacts automatically create a pending episode candidate with task/work/run provenance. Review that candidate through the normal governed queue; task closeout never directly activates memory. When a promoted artifact is authoritative policy, procedure, preference, or a durable fact, review it into the appropriate typed memory or supersede the older record rather than leaving duplicate active guidance.
+
+If the registry is unavailable, the task ledger durably records `proposal-error` without blocking terminal state. After recovery, run `agent_task.py replay-artifact-proposals --agent <agent>` to idempotently retry failed or pending task-bound proposals.
+
 ## Maintain
 
 - Status: `memory_registry.py status`

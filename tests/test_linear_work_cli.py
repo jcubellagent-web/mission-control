@@ -144,9 +144,13 @@ def test_jain_delegation_creates_a_jaimes_connector_task(tmp_path):
         ("verify", "In Review"),
         ("complete", "Done"),
     ]:
+        closeout = [
+            "--artifact-outcome", "no-artifact-needed",
+            "--artifact-reason", "CLI connector lifecycle test produces no durable artifact",
+        ] if command == "complete" else []
         updated = run_json(
             "agent_task.py",
-            [command, "--id", result["task"]["id"], "--agent", "jain", "--no-brain-feed"],
+            [command, "--id", result["task"]["id"], "--agent", "jain", "--no-brain-feed", *closeout],
             env,
         )["task"]
         tasks = json.loads((tmp_path / "data" / "agent-task-queue.json").read_text())["tasks"]

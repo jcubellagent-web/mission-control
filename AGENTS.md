@@ -116,6 +116,8 @@ Use `scripts/ecosystem_state_reconciler.py` to reconcile stale or superseded lif
 
 Checked-in `AGENTS.md`, `MEMORY.md`, and `agent-skills` remain authoritative. The shared memory registry adds typed retrieval, provenance, validity, conflict review, and cross-agent continuity; it does not replace those files.
 
+Every newly created Control Tower task carries artifact-closeout contract version 1. Before a task enters a terminal state, its owner must explicitly record one disposition: `promoted`, `updated-existing`, or `no-artifact-needed`, with a concise reason. `promoted` and `updated-existing` require at least one artifact reference and create a governed memory candidate bound to the task, work, and run identity. They never bypass memory review. Legacy tasks remain closable with a visible `legacy-default` disposition, and reopened legacy tasks adopt the current contract.
+
 - Before repeating work, asking Josh for known context, or accepting a cross-agent handoff, query shared memory:
   `python3 scripts/memory_registry.py retrieve --agent <agent> --query "<specific question>"`
 - Cite the returned source and confidence when memory materially changes a decision.
@@ -174,6 +176,8 @@ Default ownership:
 - JOSHeX: planning, coordination, architecture decisions, lightweight integration, private-Mac-only work, personal account/browser/keychain/OAuth work, and final review when the user is directly engaging from this laptop.
 - Josh 2.0: Control Tower kiosk, OpenCLAW operations, device alerts on the Josh 2.0 Mac mini, dashboard refreshes, service checks, browser automation that should not disturb the MacBook, and ecosystem host maintenance.
 - JAIMES/J.AI.N: heavier compute, long-running work, scheduled jobs, Gemini/Grok specialist passes, Sorare operations, intelligence scans, durable Hermes workflows, and background processing.
+
+Recurring autonomous jobs must be owned and scheduled on the canonical always-on host for their agent lane. A personal laptop may initiate, inspect, approve, or temporarily recover a run, but must not be the only scheduler or required execution host for background autonomy. Each recurring job needs one explicit owner, one canonical schedule, a visible heartbeat or terminal receipt, and a documented recovery path; duplicate schedules across hosts are prohibited unless one is an explicitly fenced standby.
 
 Dedicated-host autonomy:
 

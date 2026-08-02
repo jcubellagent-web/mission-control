@@ -11,6 +11,59 @@ import agent_task
 
 
 class AgentTaskTerminalTransitionTests(unittest.TestCase):
+    def test_artifact_contract_requires_explicit_closeout(self) -> None:
+        task = {"artifactContract": {"version": 1, "required": True, "status": "pending"}, "artifacts": []}
+        args = SimpleNamespace(artifact_outcome="", artifact_reason="")
+        with self.assertRaisesRegex(SystemExit, "artifact-outcome"):
+            agent_task.artifact_decision(task, args, "joshex", "2026-08-02T00:00:00Z")
+
+    def test_promoted_artifact_is_bound_to_governed_memory_proposal(self) -> None:
+        task = {
+            "artifactContract": {"version": 1, "required": True, "status": "pending"},
+            "artifacts": ["docs/shared-contract.md"],
+        }
+        args = SimpleNamespace(artifact_outcome="promoted", artifact_reason="Reusable across projects")
+        decision = agent_task.artifact_decision(task, args, "joshex", "2026-08-02T00:00:00Z")
+        self.assertEqual("pending-proposal", decision["memoryStatus"])
+        self.assertEqual("satisfied", task["artifactContract"]["status"])
+
+    def test_legacy_task_remains_compatible_but_records_default(self) -> None:
+        task = {"artifacts": []}
+        args = SimpleNamespace(artifact_outcome="", artifact_reason="")
+        decision = agent_task.artifact_decision(task, args, "joshex", "2026-08-02T00:00:00Z")
+        self.assertEqual("no-artifact-needed", decision["outcome"])
+        self.assertEqual("legacy-default", decision["decisionSource"])
+
+    def test_artifact_memory_proposal_binds_task_work_and_run(self) -> None:
+        task = {
+            "id": "task-a", "workId": "work-a", "runId": "run-a",
+            "title": "Reusable result", "objective": "Create it", "owner": "joshex",
+            "privacy": "dashboard-safe", "artifacts": ["docs/result.md"],
+            "artifactDecision": {
+                "outcome": "promoted", "reason": "Used by other projects",
+                "artifacts": ["docs/result.md"],
+            },
+        }
+        completed = mock.Mock(returncode=0, stdout='{"id":"candidate-a","status":"candidate"}', stderr="")
+        with mock.patch.object(agent_task.subprocess, "run", return_value=completed) as run:
+            result = agent_task.propose_artifact_memory(task, "joshex")
+        self.assertEqual("candidate-a", result["candidateId"])
+        command = run.call_args.args[0]
+        self.assertEqual("task-a|work-a|run-a", command[command.index("--source-ref") + 1])
+
+    def test_registry_failure_is_returned_for_durable_task_ledger_replay(self) -> None:
+        task = {
+            "id": "task-a", "workId": "work-a", "runId": "run-a",
+            "title": "Reusable result", "objective": "Create it", "owner": "joshex",
+            "privacy": "dashboard-safe", "artifacts": ["docs/result.md"],
+            "artifactDecision": {"outcome": "promoted", "reason": "Reusable", "artifacts": ["docs/result.md"]},
+        }
+        completed = mock.Mock(returncode=1, stdout="", stderr="registry unavailable")
+        with mock.patch.object(agent_task.subprocess, "run", return_value=completed):
+            result = agent_task.propose_artifact_memory(task, "joshex")
+        self.assertEqual("proposal-error", result["status"])
+        self.assertIn("registry unavailable", result["error"])
+
     def test_conflicting_terminal_transition_fails_before_any_mutation(self) -> None:
         with tempfile.TemporaryDirectory(prefix="agent-task-terminal-") as directory:
             task_path = Path(directory) / "agent-task-queue.json"

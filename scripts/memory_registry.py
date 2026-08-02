@@ -667,18 +667,25 @@ def source_rows() -> Iterable[dict[str, Any]]:
     decisions = load_json(DATA / "decisions.json", {}).get("decisions", [])
     for row in decisions:
         title = row.get("title") or "Ecosystem decision"
+        normalized_title = " ".join(str(title).strip().lower().split())
         historical_trading_snapshot = bool(
             re.match(r"^trad(?:e|ing)\s+monitor\b", str(title).strip(), re.IGNORECASE)
         )
+        observation = row.get("decisionKind") == "operational-observation" or (
+            not row.get("decisionKind")
+            and any(marker in normalized_title for marker in ("monitor", "no trade", "no-trade", "scan", "health check", "status check"))
+        )
         yield {
-            "memory_type": "episode" if historical_trading_snapshot else "decision",
+            "memory_type": "episode" if observation else "decision",
             "subject": title,
-            "predicate": "historical trading decision" if historical_trading_snapshot else "decision",
+            "predicate": "historical trading decision" if historical_trading_snapshot else "operational observation" if observation else "decision",
             "value": row.get("detail") or row.get("status") or "Recorded decision",
             "owner": row.get("agent") or "ecosystem", "visibility": "shared", "privacy": row.get("privacy") or "dashboard-safe",
             "source_path": "data/decisions.json", "source_ref": row.get("id") or "", "confidence": 0.98,
-            "valid_from": row.get("time") or "", "valid_until": episode_retention_deadline(row.get("time") or "") if historical_trading_snapshot else "", "metadata": {
+            "valid_from": row.get("time") or "", "valid_until": episode_retention_deadline(row.get("time") or "") if observation else "", "metadata": {
                 "decisionStatus": row.get("status"),
+                "decisionKind": "operational-observation" if observation else "governance",
+                "classificationSource": row.get("classificationSource") or "memory-registry-inference",
                 "historicalSnapshot": historical_trading_snapshot,
             },
         }
@@ -693,7 +700,12 @@ def source_rows() -> Iterable[dict[str, Any]]:
             "owner": row.get("owner") or "ecosystem", "visibility": "shared", "privacy": row.get("privacy") or "dashboard-safe",
             "source_path": "data/agent-task-queue.json", "source_ref": row.get("id") or "", "confidence": 0.92,
             "valid_from": completed_at, "valid_until": episode_retention_deadline(completed_at),
-            "metadata": {"retention": f"expire-after-{EPISODE_RETENTION_DAYS}d"},
+            "metadata": {
+                "retention": f"expire-after-{EPISODE_RETENTION_DAYS}d",
+                "artifactDecision": row.get("artifactDecision") or {},
+                "workId": row.get("workId"),
+                "runId": row.get("runId"),
+            },
         }
     graph = load_json(INDEX_PATH, {})
     for row in graph.get("nodes", []):

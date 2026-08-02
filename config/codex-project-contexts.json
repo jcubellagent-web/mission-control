@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "canonicalMemory": "Control Tower governed memory registry",
+  "sharedSources": [
+    "AGENTS.md",
+    "agent-skills/shared-memory-retrieval/SKILL.md",
+    "data/memory-operations.json",
+    "data/agent-context-registry.json"
+  ],
+  "projects": [
+    {"key": "ecosystem-maintenance", "label": "Ecosystem Maintenance", "scope": "Agent ecosystem governance, maintenance, and Control Tower changes", "contractVersion": 1},
+    {"key": "social-pack-rips", "label": "Social Pack Rips", "scope": "Social and pack-rip production workflows", "contractVersion": 1},
+    {"key": "telegram-behavior", "label": "Telegram Behavior", "scope": "Telegram interaction behavior and delivery contracts", "contractVersion": 1},
+    {"key": "sorare", "label": "SoRare", "scope": "Sorare research and operational workflows", "contractVersion": 1},
+    {"key": "news-feed", "label": "News Feed", "scope": "News monitoring, synthesis, and delivery", "contractVersion": 1},
+    {"key": "crypto-research", "label": "Crypto Trading and Research", "scope": "Crypto research, monitoring, and trading support", "contractVersion": 1},
+    {"key": "health", "label": "Health", "scope": "Private health research and personal analysis", "contractVersion": 1}
+  ]
+}

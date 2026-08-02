@@ -51,6 +51,8 @@ PRIVACY_TIERS = {"dashboard-safe", "agent-private", "josh-approval", "sensitive-
 APPROVALS = {"none", "required", "approved", "rejected"}
 REQUIRES_APPROVAL = {"josh-approval", "sensitive-account", "destructive"}
 DEFAULT_ACTIVE_TASK_LEASE_SECONDS = 900
+TERMINAL_STATUSES = {"done", "blocked", "error", "cancelled"}
+ARTIFACT_OUTCOMES = {"promoted", "updated-existing", "no-artifact-needed"}
 CANONICAL_TASK_HOST = os.environ.get("CONTROL_TOWER_CANONICAL_HOST", "josh2.0@josh2")
 CANONICAL_TASK_ROOT = os.environ.get(
     "CONTROL_TOWER_CANONICAL_ROOT",
@@ -117,6 +119,106 @@ def load_tasks() -> dict[str, Any]:
 def save_tasks(data: dict[str, Any]) -> None:
     data["updatedAt"] = utc_now()
     write_json(TASKS_PATH, data)
+
+
+def artifact_contract() -> dict[str, Any]:
+    return {"version": 1, "required": True, "status": "pending"}
+
+
+def artifact_decision(task: dict[str, Any], args: argparse.Namespace, agent: str, now: str) -> dict[str, Any]:
+    outcome = compact(getattr(args, "artifact_outcome", ""), 40)
+    reason = compact(getattr(args, "artifact_reason", ""), 600)
+    if outcome and not reason:
+        raise SystemExit("--artifact-outcome requires --artifact-reason.")
+    contract = task.get("artifactContract") if isinstance(task.get("artifactContract"), dict) else None
+    if contract and int(contract.get("version") or 0) >= 1:
+        if outcome not in ARTIFACT_OUTCOMES:
+            raise SystemExit("Terminal transitions require --artifact-outcome promoted, updated-existing, or no-artifact-needed.")
+        if not reason:
+            raise SystemExit("Terminal transitions require --artifact-reason.")
+    elif not outcome:
+        outcome = "no-artifact-needed"
+        reason = "Legacy task closed before the artifact disposition contract was introduced."
+
+    if outcome not in ARTIFACT_OUTCOMES:
+        raise SystemExit(f"Unknown artifact outcome: {outcome}")
+    if outcome in {"promoted", "updated-existing"} and not task.get("artifacts"):
+        raise SystemExit(f"Artifact outcome {outcome} requires at least one --artifact.")
+    decision = {
+        "version": 1,
+        "outcome": outcome,
+        "reason": reason or "Explicitly reviewed; no durable shared artifact was needed.",
+        "decidedBy": agent,
+        "decidedAt": now,
+        "artifacts": list(task.get("artifacts") or []),
+        "decisionSource": "explicit" if getattr(args, "artifact_outcome", "") else "legacy-default",
+        "memoryStatus": "not-applicable" if outcome == "no-artifact-needed" else "pending-proposal",
+    }
+    task["artifactDecision"] = decision
+    task["artifactContract"] = {"version": 1, "required": True, "status": "satisfied"}
+    return decision
+
+
+def propose_artifact_memory(task: dict[str, Any], agent: str) -> dict[str, Any] | None:
+    decision = task.get("artifactDecision") if isinstance(task.get("artifactDecision"), dict) else {}
+    if decision.get("outcome") not in {"promoted", "updated-existing"}:
+        return None
+    evidence = compact(
+        f"Disposition: {decision.get('outcome')}. Reason: {decision.get('reason')}. "
+        f"Artifacts: {', '.join(decision.get('artifacts') or [])}",
+        1200,
+    )
+    cmd = [
+        sys.executable, str(ROOT / "scripts" / "memory_registry.py"), "propose",
+        "--agent", agent, "--type", "episode",
+        "--subject", compact(task.get("title") or "Task artifact", 240),
+        "--predicate", "produced durable artifact",
+        "--value", compact(task.get("summary") or task.get("objective") or evidence, 1200),
+        "--owner", str(task.get("owner") or "ecosystem"),
+        "--visibility", "shared", "--privacy", str(task.get("privacy") or "dashboard-safe"),
+        "--source", "data/agent-task-queue.json",
+        "--source-ref", compact(f"{task.get('id')}|{task.get('workId')}|{task.get('runId')}", 240),
+        "--evidence", evidence, "--confidence", "0.92",
+    ]
+    result = subprocess.run(cmd, cwd=ROOT, check=False, capture_output=True, text=True)
+    if result.returncode != 0:
+        return {"status": "proposal-error", "error": compact(result.stderr or result.stdout, 400)}
+    try:
+        payload = json.loads(result.stdout or "{}")
+    except json.JSONDecodeError:
+        return {"status": "proposal-error", "error": "Memory registry returned invalid JSON."}
+    return {"status": payload.get("status") or "candidate", "candidateId": payload.get("id")}
+
+
+def replay_artifact_proposals(args: argparse.Namespace) -> dict[str, Any]:
+    """Retry durable task-ledger proposals after a fail-open registry outage."""
+    agent = validate_agent(args.agent)
+    tasks = load_tasks().get("tasks", [])
+    eligible = []
+    for task in tasks:
+        decision = task.get("artifactDecision") if isinstance(task.get("artifactDecision"), dict) else {}
+        if decision.get("outcome") not in {"promoted", "updated-existing"}:
+            continue
+        if decision.get("memoryStatus") not in {"pending-proposal", "proposal-error"}:
+            continue
+        eligible.append(task)
+        if len(eligible) >= args.limit:
+            break
+    results = []
+    for task in eligible:
+        memory_result = propose_artifact_memory(task, agent) or {"status": "not-applicable"}
+        def record_memory(data: dict[str, Any]) -> dict[str, Any]:
+            current = find_task(data, task["id"])
+            current.setdefault("artifactDecision", {}).update({
+                "memoryStatus": memory_result.get("status"),
+                "memoryCandidateId": memory_result.get("candidateId"),
+                "memoryError": memory_result.get("error"),
+                "memoryRetriedAt": utc_now(),
+            })
+            return current
+        locked_tasks(record_memory)
+        results.append({"taskId": task.get("id"), **memory_result})
+    return {"attempted": len(results), "results": results}
 
 
 def locked_tasks(fn):
@@ -502,6 +604,7 @@ def create(args: argparse.Namespace) -> dict[str, Any]:
         "requiredCapabilities": args.capability or [],
         "dependencies": args.depends_on or [],
         "artifacts": args.artifact or [],
+        "artifactContract": artifact_contract(),
         "notes": [],
         "createdAt": now,
         "updatedAt": now,
@@ -579,7 +682,7 @@ def set_status(args: argparse.Namespace, status: str) -> dict[str, Any]:
         )
         previous_status = str(task.get("status") or "queued")
         effective_status = previous_status if getattr(args, "work_event", "") == "heartbeat" else status
-        terminal_statuses = {"done", "blocked", "error", "cancelled"}
+        terminal_statuses = TERMINAL_STATUSES
         if (
             previous_status in terminal_statuses
             and effective_status in terminal_statuses
@@ -593,6 +696,8 @@ def set_status(args: argparse.Namespace, status: str) -> dict[str, Any]:
         if reopened:
             task["generation"] = int(task.get("generation") or 1) + 1
             task["runId"] = new_id("run")
+            task["artifactContract"] = artifact_contract()
+            task.pop("artifactDecision", None)
         task["status"] = effective_status
         task["updatedAt"] = now
         if effective_status in {"done", "cancelled", "error", "blocked"}:
@@ -618,6 +723,8 @@ def set_status(args: argparse.Namespace, status: str) -> dict[str, Any]:
             task["routeVerified"] = bool(args.route_verified)
         if task.get("routeVerified") and (not task.get("modelFamily") or not task.get("modelId")):
             raise SystemExit("A verified route requires modelFamily and modelId.")
+        if effective_status in terminal_statuses:
+            artifact_decision(task, args, agent, now)
         add_note(task, agent, args.note or args.summary or effective_status, effective_status)
         if getattr(args, "work_event", "") != "heartbeat":
             metadata = task.get("linear") if isinstance(task.get("linear"), dict) else {}
@@ -628,6 +735,17 @@ def set_status(args: argparse.Namespace, status: str) -> dict[str, Any]:
         return task
 
     result = locked_tasks(mutate)
+    memory_result = propose_artifact_memory(result, agent)
+    if memory_result:
+        def record_memory(data: dict[str, Any]) -> dict[str, Any]:
+            current = find_task(data, result["id"])
+            current.setdefault("artifactDecision", {}).update({
+                "memoryStatus": memory_result.get("status"),
+                "memoryCandidateId": memory_result.get("candidateId"),
+                "memoryError": memory_result.get("error"),
+            })
+            return current
+        result = locked_tasks(record_memory)
     if getattr(args, "work_event", "") != "heartbeat":
         upsert_linear_connector_task(
             result,
@@ -770,6 +888,8 @@ def main() -> int:
         p.add_argument("--note", default="")
         p.add_argument("--summary", default="")
         p.add_argument("--artifact", action="append", default=[])
+        p.add_argument("--artifact-outcome", choices=sorted(ARTIFACT_OUTCOMES), default="")
+        p.add_argument("--artifact-reason", default="")
         p.add_argument("--brain-feed", action="store_true", help="Accepted for compatibility; Brain Feed publishing is on by default")
         p.add_argument("--no-brain-feed", action="store_true", help="Suppress Brain Feed only for dry-runs or local render tests")
         p.add_argument("--job", action="store_true")
@@ -817,6 +937,10 @@ def main() -> int:
     list_p.add_argument("--limit", type=int, default=20)
     list_p.add_argument("--json", action="store_true")
 
+    replay_p = sub.add_parser("replay-artifact-proposals")
+    replay_p.add_argument("--agent", required=True)
+    replay_p.add_argument("--limit", type=int, default=50)
+
     args = parser.parse_args()
     if args.cmd == "create":
         result = create(args)
@@ -836,6 +960,8 @@ def main() -> int:
     elif args.cmd == "track":
         result = enable_linear_tracking(args)
         print(json.dumps({"ok": True, "task": result}, indent=2))
+    elif args.cmd == "replay-artifact-proposals":
+        print(json.dumps({"ok": True, **replay_artifact_proposals(args)}, indent=2))
     else:
         result = set_status(args, args.status)
         print(json.dumps({"ok": True, "task": result}, indent=2))

@@ -19,6 +19,8 @@ WATCH_FILES = {
     "jainBrainFeed": DATA / "jain-brain-feed.json",
     "heartbeats": DATA / "agent-heartbeats.json",
     "dashboard": DATA / "dashboard-data.json",
+    "projectContext": DATA / "project-context-registry.json",
+    "agentContext": DATA / "agent-context-registry.json",
 }
 AGENT_FEED_NAMES = {"brainFeed", "jaimesBrainFeed", "jainBrainFeed"}
 STALE_MINUTES = 20
@@ -101,6 +103,8 @@ def main() -> int:
         actions.append(run([sys.executable, "scripts/jaimes_brain_feed_poller.py"], cwd=WORKSPACE, timeout=90))
 
     if args.repair:
+        actions.append(run([sys.executable, "scripts/project_context_registry.py"], cwd=ROOT, timeout=45))
+        actions.append(run([sys.executable, "scripts/agent_context_registry.py"], cwd=ROOT, timeout=45))
         actions.append(run([sys.executable, "scripts/update_mission_control.py"], cwd=ROOT, timeout=120))
 
     issues = control_tower_issues()

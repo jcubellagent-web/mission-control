@@ -540,7 +540,18 @@ def locked_update(path: Path, key: str, record: dict[str, Any], limit: int = 300
         fcntl.flock(lock, fcntl.LOCK_UN)
 
 
-def append_decision(event: dict[str, Any], tags: list[str]) -> None:
+def decision_kind(title: str, explicit: str = "") -> tuple[str, str]:
+    if explicit:
+        return explicit, "explicit"
+    normalized = " ".join(str(title or "").lower().split())
+    observation_markers = ("monitor", "no trade", "no-trade", "scan", "health check", "status check")
+    if any(marker in normalized for marker in observation_markers):
+        return "operational-observation", "legacy-inference"
+    return "governance", "legacy-inference"
+
+
+def append_decision(event: dict[str, Any], tags: list[str], explicit_kind: str = "") -> None:
+    kind, classification_source = decision_kind(event.get("title") or "", explicit_kind)
     record = {
         "id": event["id"],
         "workId": event["workId"],
@@ -553,6 +564,8 @@ def append_decision(event: dict[str, Any], tags: list[str]) -> None:
         "detail": event.get("detail") or "",
         "privacy": event["privacy"],
         "tags": tags[:12],
+        "decisionKind": kind,
+        "classificationSource": classification_source,
     }
     locked_update(DECISIONS_PATH, "decisions", record)
 
@@ -761,6 +774,7 @@ def main() -> int:
     parser.add_argument("--job", action="store_true", help="Also log as a Today Jobs entry")
     parser.add_argument("--handoff-to", default="", help="Write a markdown handoff doc for this target")
     parser.add_argument("--tag", action="append", default=[], help="Decision/knowledge tag. May be repeated.")
+    parser.add_argument("--decision-kind", choices=["governance", "operational-observation"], default="", help="Classify durable governance separately from routine observations.")
     parser.add_argument("--rollup", action="store_true", help="Regenerate data/daily-rollup.json after publishing")
     parser.add_argument("--v2", action="store_true", help="Retired compatibility flag; local Control Tower sidecars remain the source of truth")
     parser.add_argument("--work-id", default="", help="Stable objective id. Omit only for an explicit ad hoc event.")
@@ -833,7 +847,7 @@ def main() -> int:
     if args.job or args.type == "job":
         append_codex_job(event)
     if args.type == "decision":
-        append_decision(event, args.tag)
+        append_decision(event, args.tag, args.decision_kind)
     if args.handoff_to or args.type == "handoff":
         target = args.handoff_to or "agent"
         handoff = write_handoff(event, target)
