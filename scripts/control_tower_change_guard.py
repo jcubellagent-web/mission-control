@@ -97,6 +97,9 @@ SOURCE_PATHS = (
     "scripts/update_mission_control.py",
     "scripts/control_tower_path_guard.py",
     "scripts/control_tower_change_guard.py",
+    "scripts/scoped_change_guard.py",
+    "scripts/immutable_deploy_bundle.py",
+    "scripts/interaction_capability_probe.py",
     "scripts/control_tower_work_store.py",
     "scripts/control_tower_foreground.py",
     "scripts/codex_remote_manual_lane.py",
@@ -131,6 +134,9 @@ PYTHON_COMPILE_PATHS = (
     "scripts/agent_mfa_broker.py",
     "scripts/continuous_maintenance.py",
     "scripts/control_tower_change_guard.py",
+    "scripts/scoped_change_guard.py",
+    "scripts/immutable_deploy_bundle.py",
+    "scripts/interaction_capability_probe.py",
     "scripts/control_tower_work_store.py",
     "scripts/codex_remote_manual_lane.py",
     "scripts/ecosystem_health_sweep.py",
@@ -385,7 +391,7 @@ def rollback_snapshot(payload: dict) -> list[dict[str, object]]:
     return normalized
 
 
-def begin(agent: str, objective: str, task_id: str = "", work_id: str = "", run_id: str = "") -> None:
+def _begin_locked(agent: str, objective: str, task_id: str = "", work_id: str = "", run_id: str = "") -> None:
     binding_values = (task_id, work_id, run_id)
     if any(binding_values) and not all(binding_values):
         raise SystemExit("Linked source leases require task, work, and run IDs together.")
@@ -434,6 +440,13 @@ def begin(agent: str, objective: str, task_id: str = "", work_id: str = "", run_
         payload["taskBinding"] = {"taskId": task_id, "workId": work_id, "runId": run_id}
     LOCK_PATH.write_text(json.dumps(payload, indent=2) + "\n")
     print(json.dumps({"ok": True, "lease": payload}, indent=2))
+
+
+def begin(agent: str, objective: str, task_id: str = "", work_id: str = "", run_id: str = "") -> None:
+    # Scoped and canonical acquisition share one lifecycle mutex so a scoped
+    # claim cannot slip in between the global lease check and publication.
+    with source_lifecycle_lock():
+        _begin_locked(agent, objective, task_id, work_id, run_id)
 
 
 def status() -> None:

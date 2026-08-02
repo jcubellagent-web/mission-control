@@ -490,7 +490,10 @@ def collect(host: str, role: str | None, config_path: Path, active_canary: bool 
         computer_ready = codex_cu.get("status") == "ok" and display_ready
         if active_canary:
             computer_ready = computer_ready and canary.get("status") == "ok"
-    if canary.get("alert") is True:
+    # A stored display-canary alert belongs to a prior visible/active probe. It
+    # must not downgrade an ordinary headless metadata collection that did not
+    # request a fresh active canary.
+    if active_canary and canary.get("alert") is True:
         computer_ready = False
     overall = "ok" if browser_ready and computer_ready else "degraded" if browser_ready or computer_ready else "down"
     payload = {

@@ -46,9 +46,28 @@ python3 scripts/control_tower_foreground.py end --lease-id <returned-lease-id>
 
 ## Control Tower Change Control
 
-Control Tower source edits require an exclusive change lease. This rule applies to JOSHeX, Josh 2.0, JAIMES, and J.A.I.N.
+Shared source edits require either a scoped worktree preparation lease or the
+short exclusive canonical integration lease. This rule applies to JOSHeX,
+Josh 2.0, JAIMES, and J.A.I.N.
 
-Before editing canonical source, run:
+Prefer concurrent scoped preparation for disjoint areas. Create a linked Git
+worktree on a non-`main` task branch, then claim every path the task may change:
+
+```bash
+python3 scripts/scoped_change_guard.py begin --agent <agent> --objective "<specific change>" \
+  --task-id <task-id> --work-id <work-id> --run-id <run-id> \
+  --repo <task-worktree> --scope <path> [--scope <other-path>]
+```
+
+The scoped guard rejects parent/child overlap, symlink escapes, existing dirt in
+claimed paths, canonical `main`, and ordinary non-worktree checkouts. Disjoint
+claims in separate worktrees may run concurrently. Commit only claimed paths,
+then call `scoped_change_guard.py prepare --token <token>`. Preparation releases
+the path claim and returns an exact commit for canonical integration; it does
+not by itself close the source task.
+
+Use the exclusive guard only for direct canonical edits or the short
+fetch/rebase/cherry-pick/test/push integration critical section:
 
 ```bash
 python3 scripts/control_tower_change_guard.py begin --agent <agent> --objective "<specific change>" \
@@ -58,7 +77,7 @@ python3 scripts/control_tower_change_guard.py begin --agent <agent> --objective 
 - Create the task with `--work-scope shared-source`; the command must match that
   exact open task/work/run identity, report a clean canonical source tree, and
   return a lease token.
-- Do not edit if another agent owns the lease. Handoff or wait for that lease to finish.
+- Do not edit canonical `main` if another agent owns the integration lease.
 - Edit only `v2-react/` and explicitly named supporting scripts. Never hand-edit `dist/`, legacy `index.html`, or legacy `v2/`.
 - Preserve the returned backup path and token for verification or rollback.
 - Runtime JSON, logs, and generated build artifacts are not source ownership signals.
@@ -70,6 +89,13 @@ python3 scripts/control_tower_change_guard.py finish --token <token>
 ```
 
 This performs the canonical build, data regeneration, regression checks, and host-local kiosk layout screenshot before releasing the lease. It also writes a task-bound source-closeout receipt. A shared-source task cannot become done, blocked, errored, or cancelled until that exact lease finishes cleanly or abort restores the source. If validation fails, keep the lease, repair the issue, and verify again. Use `abort --token <token>` to restore the pre-edit source backup. Production pushes and merges still require Josh approval unless the task explicitly includes that approval.
+
+Deployments must not read a mutable working tree. Create and verify a bounded
+manifest with `scripts/immutable_deploy_bundle.py` from an exact Git commit, then
+materialize that manifest into a new versioned release directory. Unrelated
+working-tree dirt is allowed because it is physically excluded from the commit
+and manifest. Service activation, migrations, shared dependency manifests, and
+the final `main` integration remain single-owner operations.
 
 Standing validated ecosystem push authorization (Josh, 2026-07-24): JOSHeX, JAIMES, and Josh 2.0 may automatically push a validated source commit to the canonical `mission-control` repository's `origin/main` after the applicable change guard and test gates pass and the source commit is clean. `config/control-tower-push-policy.json` records this narrow authorization so each agent's new lease can capture it before edits begin. This does not authorize merges, public releases or posts, purchases, account changes, wallet actions, destructive external actions, or pushes to another repository, remote, or branch.
 

@@ -9,7 +9,11 @@ import subprocess
 from pathlib import Path
 
 
-RUNTIME_PREFIXES = ("data/", "dist/", "logs/", "tmp/")
+# Generated handoff records are append-only operational evidence. They are
+# deliberately preserved and committed by the audit reconciler, but they do not
+# share edit ownership with authored source and must not globally block an
+# unrelated source lease or immutable deployment.
+RUNTIME_PREFIXES = ("data/", "dist/", "logs/", "tmp/", "docs/handoffs/")
 OPEN_STATES = {"active", "assigned", "claimed", "in_progress", "pending", "queued", "running", "working"}
 
 

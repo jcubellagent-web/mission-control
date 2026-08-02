@@ -19,6 +19,7 @@ def isolated_state(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     data.mkdir()
     monkeypatch.setattr(closeout, "SOURCE_STATE_DIR", state)
     monkeypatch.setattr(closeout, "SOURCE_LEASE_PATH", state / "control-tower-change-lock.json")
+    monkeypatch.setattr(closeout, "SCOPED_SOURCE_LEASES_PATH", state / "scoped-change-leases.json")
     monkeypatch.setattr(closeout, "SOURCE_CLOSEOUT_DIR", state / "agent-source-closeouts")
     monkeypatch.setattr(closeout, "SOURCE_LIFECYCLE_LOCK_PATH", state / "agent-source-lifecycle.lock")
     monkeypatch.setattr(guard, "TASKS_PATH", data / "agent-task-queue.json")
@@ -48,6 +49,16 @@ def test_active_matching_lease_blocks_terminal_transition() -> None:
     closeout.SOURCE_LEASE_PATH.parent.mkdir(parents=True)
     closeout.SOURCE_LEASE_PATH.write_text(json.dumps({"taskBinding": closeout.source_task_binding(source_task())}))
     with pytest.raises(SystemExit, match="still active"):
+        closeout.validate_terminal_source_closeout(source_task())
+
+
+def test_active_matching_scoped_lease_blocks_terminal_transition() -> None:
+    closeout.SCOPED_SOURCE_LEASES_PATH.parent.mkdir(parents=True)
+    closeout.SCOPED_SOURCE_LEASES_PATH.write_text(json.dumps({
+        "version": 1,
+        "leases": [{"taskBinding": closeout.source_task_binding(source_task())}],
+    }))
+    with pytest.raises(SystemExit, match="scoped source lease is still active"):
         closeout.validate_terminal_source_closeout(source_task())
 
 

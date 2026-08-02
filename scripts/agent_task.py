@@ -54,6 +54,7 @@ TERMINAL_STATUSES = {"done", "blocked", "error", "cancelled"}
 ARTIFACT_OUTCOMES = {"promoted", "updated-existing", "no-artifact-needed"}
 SOURCE_STATE_DIR = Path(os.environ.get("CONTROL_TOWER_STATE_DIR", Path.home() / ".openclaw" / "state"))
 SOURCE_LEASE_PATH = SOURCE_STATE_DIR / "control-tower-change-lock.json"
+SCOPED_SOURCE_LEASES_PATH = SOURCE_STATE_DIR / "scoped-change-leases.json"
 SOURCE_CLOSEOUT_DIR = SOURCE_STATE_DIR / "agent-source-closeouts"
 SOURCE_LIFECYCLE_LOCK_PATH = SOURCE_STATE_DIR / "agent-source-lifecycle.lock"
 VALID_SOURCE_OUTCOMES = {"finished", "aborted", "expired-orphan-recovered"}
@@ -146,6 +147,10 @@ def validate_terminal_source_closeout(task: dict[str, Any]) -> dict[str, Any] | 
     active = read_json(SOURCE_LEASE_PATH, {})
     if active and active.get("taskBinding") == binding:
         raise SystemExit("Terminal transition rejected: the matching shared-source lease is still active.")
+    scoped = read_json(SCOPED_SOURCE_LEASES_PATH, {})
+    scoped_leases = scoped.get("leases", []) if isinstance(scoped, dict) else []
+    if any(isinstance(lease, dict) and lease.get("taskBinding") == binding for lease in scoped_leases):
+        raise SystemExit("Terminal transition rejected: the matching scoped source lease is still active.")
     receipt = read_json(source_receipt_path(task), {})
     if not receipt:
         raise SystemExit("Terminal transition rejected: matching shared-source closeout evidence is missing.")

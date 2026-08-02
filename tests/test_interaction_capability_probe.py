@@ -71,6 +71,7 @@ def test_collect_headless_is_metadata_only(monkeypatch, tmp_path) -> None:
     })
     monkeypatch.setattr(probe, "probe_codex_computer_use", lambda: {"status": "ok", "version": "1.0", "mcpEnabled": True})
     monkeypatch.setattr(probe, "display_online", lambda: {"status": "ok", "online": True, "width": 1920, "height": 1080})
+    monkeypatch.setattr(probe, "load_canary_state", lambda: {"status": "down", "alert": True})
 
     payload = probe.collect("jaimes", "headless", config)
     encoded = json.dumps(payload).lower()

@@ -39,6 +39,7 @@ def isolated_guard(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     root.mkdir()
     monkeypatch.setattr(GUARD, "ROOT", root)
     monkeypatch.setattr(GUARD, "STATE_DIR", tmp_path / "state")
+    monkeypatch.setattr(GUARD, "LIFECYCLE_LOCK_PATH", tmp_path / "state" / "agent-source-lifecycle.lock")
     monkeypatch.setattr(GUARD, "LOCK_PATH", tmp_path / "lease.json")
     monkeypatch.setattr(GUARD, "BACKUP_ROOT", tmp_path / "backups")
     monkeypatch.setattr(GUARD, "PUSH_POLICY_PATH", tmp_path / "push-policy.json")
