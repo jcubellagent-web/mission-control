@@ -71,6 +71,17 @@ MEMORY_ACTIVITY_WINDOW_MINUTES = 30
 MEMORY_ACTIVITY_MOTION_SECONDS = 90
 MEMORY_ACTIVITY_AGENTS = ("joshex", "josh2", "jaimes", "jain")
 EPISODE_RETENTION_DAYS = 30
+MEMORY_REVIEW_SLA_HOURS = 72
+CANDIDATE_RELATION_THRESHOLD = 0.55
+CANDIDATE_RELATION_STOPWORDS = RETRIEVAL_STOPWORDS | {
+    "candidate", "decision", "fact", "lesson", "memory", "preference",
+    "procedure", "relationship", "requires", "states", "uses",
+}
+CANDIDATE_CONTRADICTIONS = (
+    ("allow", "deny"), ("approve", "reject"), ("deploy", "decommission"),
+    ("enable", "disable"), ("increase", "decrease"), ("keep", "drop"),
+    ("required", "optional"), ("start", "stop"),
+)
 
 
 def nearest_rank_percentile(values: Iterable[float], percentile: float) -> float | None:
@@ -131,6 +142,95 @@ def age_bucket(hours: float) -> str:
     return ">7d"
 
 
+def parsed_time(value: Any) -> dt.datetime | None:
+    try:
+        return dt.datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    except (TypeError, ValueError):
+        return None
+
+
+def normalized_candidate_text(value: Any) -> str:
+    return " ".join(re.findall(r"[a-z0-9]+", clean_text(value).lower()))
+
+
+def candidate_semantic_key(row: Any) -> tuple[str, str, str, str, str]:
+    def field(name: str, fallback: str = "") -> Any:
+        if isinstance(row, dict):
+            return row.get(name, fallback)
+        try:
+            return row[name]
+        except (IndexError, KeyError):
+            return fallback
+
+    return (
+        normalized_candidate_text(field("memory_type")),
+        normalized_candidate_text(field("subject")),
+        normalized_candidate_text(field("predicate")),
+        normalized_candidate_text(field("object_text")),
+        canonical_agent(field("owner")) or normalized_candidate_text(field("owner")),
+    )
+
+
+def candidate_relation_tokens(row: sqlite3.Row) -> set[str]:
+    text = f"{row['subject']} {row['predicate']}"
+    return {
+        token
+        for token in re.findall(r"[a-z0-9]+", text.lower())
+        if len(token) >= 3 and token not in CANDIDATE_RELATION_STOPWORDS
+    }
+
+
+def candidate_relation(row: sqlite3.Row, other: sqlite3.Row) -> tuple[bool, str]:
+    if row["id"] == other["id"] or row["memory_type"] != other["memory_type"]:
+        return False, ""
+    if canonical_agent(row["owner"]) != canonical_agent(other["owner"]):
+        return False, ""
+    left, right = candidate_relation_tokens(row), candidate_relation_tokens(other)
+    overlap = left & right
+    union = left | right
+    if len(overlap) < 3 or not union or len(overlap) / len(union) < CANDIDATE_RELATION_THRESHOLD:
+        return False, ""
+    contradictory = any(
+        (first in left and second in right) or (second in left and first in right)
+        for first, second in CANDIDATE_CONTRADICTIONS
+    )
+    return True, "compare-for-conflict" if contradictory else "compare-for-supersession"
+
+
+def candidate_relation_map(rows: Iterable[sqlite3.Row]) -> dict[str, dict[str, Any]]:
+    pending = list(rows)
+    result = {str(row["id"]): {"relatedCandidateIds": [], "suggestedAction": "review"} for row in pending}
+    for index, row in enumerate(pending):
+        for other in pending[index + 1:]:
+            related, action = candidate_relation(row, other)
+            if not related:
+                continue
+            result[str(row["id"])]["relatedCandidateIds"].append(str(other["id"]))
+            result[str(other["id"])]["relatedCandidateIds"].append(str(row["id"]))
+            if action == "compare-for-conflict":
+                result[str(row["id"])]["suggestedAction"] = action
+                result[str(other["id"])]["suggestedAction"] = action
+            elif result[str(row["id"])]["suggestedAction"] == "review":
+                result[str(row["id"])]["suggestedAction"] = action
+            elif result[str(other["id"])]["suggestedAction"] == "review":
+                result[str(other["id"])]["suggestedAction"] = action
+    return result
+
+
+def source_locator_kind(source_path: Any, source_ref: Any) -> str:
+    if clean_text(source_ref, 240):
+        return "exact-ref"
+    source = clean_text(source_path, 500)
+    lowered = source.lower()
+    if re.match(r"^https?://", lowered):
+        return "canonical-path"
+    if lowered.startswith(("data/", "docs/", "agent-skills/", "config/", "schemas/", "codex-thread:", "git:", "task:", "work-")):
+        return "canonical-path"
+    if source.startswith("/") and Path(source).suffix.lower() in {".json", ".md", ".py", ".txt", ".yaml", ".yml"}:
+        return "canonical-path"
+    return "descriptive"
+
+
 def memory_diagnostics_payload(db: sqlite3.Connection, now: dt.datetime | None = None) -> dict[str, Any]:
     """Return bounded, counts-only aggregates for Brain Atlas diagnostics."""
     now = now or utc_now()
@@ -184,15 +284,53 @@ def memory_diagnostics_payload(db: sqlite3.Connection, now: dt.datetime | None =
         })
 
     review = {label: {"bucket": label, "pending": 0, "disputed": 0} for label in ("<24h", "1-3d", "3-7d", ">7d")}
-    for row in db.execute(
-        "SELECT status,proposed_at FROM memory_candidates WHERE status IN ('candidate','disputed')"
-    ).fetchall():
-        try:
-            proposed = dt.datetime.fromisoformat(str(row["proposed_at"]).replace("Z", "+00:00"))
-        except (TypeError, ValueError):
+    pending_candidates = db.execute(
+        "SELECT * FROM memory_candidates WHERE status IN ('candidate','disputed') ORDER BY proposed_at"
+    ).fetchall()
+    for row in pending_candidates:
+        proposed = parsed_time(row["proposed_at"])
+        if proposed is None:
             continue
         bucket = age_bucket(max(0.0, (now - proposed).total_seconds() / 3600))
         review[bucket]["disputed" if row["status"] == "disputed" else "pending"] += 1
+
+    reviewed_rows = db.execute(
+        """SELECT status,proposed_at,reviewed_at FROM memory_candidates
+           WHERE reviewed_at IS NOT NULL AND reviewed_at >= ?""",
+        (iso(now - dt.timedelta(days=30)),),
+    ).fetchall()
+    resolved_rows = [row for row in reviewed_rows if row["status"] in {"active", "rejected", "superseded"}]
+    accepted_rows = [row for row in resolved_rows if row["status"] == "active"]
+    review_latencies = []
+    for row in resolved_rows:
+        proposed, reviewed = parsed_time(row["proposed_at"]), parsed_time(row["reviewed_at"])
+        if proposed is not None and reviewed is not None:
+            review_latencies.append(max(0.0, (reviewed - proposed).total_seconds() / 3600))
+    relation_map = candidate_relation_map(pending_candidates)
+    duplicate_avoided = 0
+    for row in db.execute("SELECT metadata_json FROM memory_candidates").fetchall():
+        try:
+            metadata = json.loads(row["metadata_json"] or "{}")
+        except (TypeError, json.JSONDecodeError):
+            continue
+        duplicate_at = parsed_time(metadata.get("lastDuplicateProposedAt")) if isinstance(metadata, dict) else None
+        if duplicate_at is not None and duplicate_at >= now - dt.timedelta(days=30):
+            duplicate_avoided += int(metadata.get("duplicateProposalCount") or 0)
+    review_quality = {
+        "slaHours": MEMORY_REVIEW_SLA_HOURS,
+        "overduePending": sum(
+            parsed_time(row["proposed_at"]) is not None
+            and (now - parsed_time(row["proposed_at"])).total_seconds() / 3600 >= MEMORY_REVIEW_SLA_HOURS
+            for row in pending_candidates
+        ),
+        "relatedPending": sum(bool(item["relatedCandidateIds"]) for item in relation_map.values()),
+        "semanticDuplicatesAvoided30d": duplicate_avoided,
+        "reviewed30d": len(resolved_rows),
+        "accepted30d": len(accepted_rows),
+        "rejected30d": sum(row["status"] in {"rejected", "superseded"} for row in resolved_rows),
+        "acceptanceRatePct": round(len(accepted_rows) / len(resolved_rows) * 100, 1) if resolved_rows else None,
+        "medianReviewHours": nearest_rank_percentile(review_latencies, 0.5),
+    }
 
     owners = [*MEMORY_ACTIVITY_AGENTS, "ecosystem", "other"]
     provenance: dict[str, dict[str, Any]] = {}
@@ -203,16 +341,19 @@ def memory_diagnostics_payload(db: sqlite3.Connection, now: dt.datetime | None =
             "category": category,
             "count": 0,
             "withSourceRef": 0,
+            "withSourceLocator": 0,
             "owners": {agent: 0 for agent in owners},
         })
         item["count"] += 1
         item["withSourceRef"] += int(bool(clean_text(row["source_ref"], 240)))
+        item["withSourceLocator"] += int(source_locator_kind(row["source_path"], row["source_ref"]) != "descriptive")
         item["owners"][owner] += 1
     provenance_rows = []
     for item in provenance.values():
         provenance_rows.append({
             **item,
             "coveragePct": round(item["withSourceRef"] / item["count"] * 100, 1) if item["count"] else None,
+            "locatorCoveragePct": round(item["withSourceLocator"] / item["count"] * 100, 1) if item["count"] else None,
         })
     provenance_rows.sort(key=lambda item: (-item["count"], item["category"]))
 
@@ -305,12 +446,42 @@ def memory_diagnostics_payload(db: sqlite3.Connection, now: dt.datetime | None =
             continue
         reuse_cells[(source, consumer)] = int(row["uses"] or 0)
 
+    reuse_outcomes = []
+    for agent in MEMORY_ACTIVITY_AGENTS:
+        selected_pairs = db.execute(
+            """SELECT retrieval_id,memory_id FROM memory_reuse_events
+               WHERE agent=? AND outcome='selected' AND time >= ?""",
+            (agent, iso(now - dt.timedelta(days=30))),
+        ).fetchall()
+        used_count = ignored_count = 0
+        for pair in selected_pairs:
+            outcomes = {
+                str(row["outcome"])
+                for row in db.execute(
+                    """SELECT outcome FROM memory_reuse_events
+                       WHERE retrieval_id=? AND memory_id=? AND outcome IN ('used','ignored')""",
+                    (pair["retrieval_id"], pair["memory_id"]),
+                ).fetchall()
+            }
+            used_count += int("used" in outcomes)
+            ignored_count += int("ignored" in outcomes)
+        selected_count = len(selected_pairs)
+        closed_count = used_count + ignored_count
+        reuse_outcomes.append({
+            "agent": agent,
+            "selected": selected_count,
+            "used": used_count,
+            "ignored": ignored_count,
+            "closureRatePct": round(closed_count / selected_count * 100, 1) if selected_count else None,
+        })
+
     return {
-        "schemaVersion": 1,
+        "schemaVersion": 2,
         "generatedAt": iso(now),
         "privacy": {"countsOnly": True, "contentIncluded": False, "rawIdentifiersIncluded": False},
         "trend30d": trend_rows,
         "reviewAging": list(review.values()),
+        "reviewQuality": review_quality,
         "provenanceMatrix": {"owners": owners, "rows": provenance_rows},
         "freshnessRunway": freshness,
         "lineage": lineage,
@@ -320,6 +491,7 @@ def memory_diagnostics_payload(db: sqlite3.Connection, now: dt.datetime | None =
                 {"sourceAgent": source, "consumerAgent": consumer, "uses": uses}
                 for (source, consumer), uses in sorted(reuse_cells.items())
             ],
+            "outcomes": reuse_outcomes,
         },
     }
 
@@ -735,8 +907,52 @@ def build(db: sqlite3.Connection) -> dict[str, Any]:
     return {"seen": seen, "added": added}
 
 
+def refresh_candidate_relation_metadata(db: sqlite3.Connection) -> dict[str, dict[str, Any]]:
+    rows = db.execute(
+        "SELECT * FROM memory_candidates WHERE status IN ('candidate','disputed') ORDER BY proposed_at"
+    ).fetchall()
+    relations = candidate_relation_map(rows)
+    for row in rows:
+        metadata = candidate_metadata(row)
+        relation = relations.get(str(row["id"]), {"relatedCandidateIds": [], "suggestedAction": "review"})
+        metadata["relatedCandidateIds"] = relation["relatedCandidateIds"][:8]
+        metadata["suggestedAction"] = relation["suggestedAction"]
+        db.execute(
+            "UPDATE memory_candidates SET metadata_json=? WHERE id=?",
+            (json.dumps(metadata, sort_keys=True), row["id"]),
+        )
+    return relations
+
+
 def propose(db: sqlite3.Connection, args: argparse.Namespace) -> dict[str, Any]:
     memory_type = args.type if args.type in ALLOWED_TYPES else "fact"
+    semantic_key = candidate_semantic_key({
+        "memory_type": memory_type,
+        "subject": args.subject,
+        "predicate": args.predicate,
+        "object_text": args.value,
+        "owner": args.owner,
+    })
+    semantic_match = next((
+        row
+        for row in db.execute(
+            "SELECT * FROM memory_candidates WHERE status IN ('candidate','disputed','active') ORDER BY proposed_at"
+        ).fetchall()
+        if candidate_semantic_key(row) == semantic_key
+    ), None)
+    if semantic_match:
+        metadata = candidate_metadata(semantic_match)
+        metadata["duplicateProposalCount"] = int(metadata.get("duplicateProposalCount") or 0) + 1
+        metadata["lastDuplicateProposedAt"] = iso()
+        db.execute(
+            "UPDATE memory_candidates SET metadata_json=? WHERE id=?",
+            (json.dumps(metadata, sort_keys=True), semantic_match["id"]),
+        )
+        db.commit()
+        return {
+            "id": semantic_match["id"], "status": semantic_match["status"],
+            "duplicate": True, "semanticDuplicate": True,
+        }
     digest = stable_hash(memory_type, args.subject, args.predicate, args.value, args.owner, args.source)
     row = db.execute("SELECT id,status FROM memory_candidates WHERE content_hash = ?", (digest,)).fetchone()
     if row:
@@ -763,8 +979,14 @@ def propose(db: sqlite3.Connection, args: argparse.Namespace) -> dict[str, Any]:
             source_state, json.dumps(metadata if isinstance(metadata, dict) else {}, sort_keys=True),
         ),
     )
+    relations = refresh_candidate_relation_metadata(db)
     db.commit()
-    return {"id": candidate_id, "status": "candidate", "duplicate": False}
+    relation = relations.get(candidate_id, {"relatedCandidateIds": [], "suggestedAction": "review"})
+    return {
+        "id": candidate_id, "status": "candidate", "duplicate": False,
+        "relatedCandidateIds": relation["relatedCandidateIds"],
+        "suggestedAction": relation["suggestedAction"],
+    }
 
 
 def brain_candidate_governance_ready(row: sqlite3.Row) -> bool:
@@ -789,6 +1011,7 @@ def candidate_metadata(row: sqlite3.Row) -> dict[str, Any]:
 def review(db: sqlite3.Connection, *, apply_safe: bool) -> dict[str, Any]:
     started = iso()
     rows = db.execute("SELECT * FROM memory_candidates WHERE status = 'candidate' ORDER BY proposed_at").fetchall()
+    relations = refresh_candidate_relation_metadata(db)
     promoted = disputed = 0
     for row in rows:
         conflict = db.execute(
@@ -827,9 +1050,18 @@ def review(db: sqlite3.Connection, *, apply_safe: bool) -> dict[str, Any]:
         (iso(),),
     ).rowcount
     completed = iso()
+    completed_at = parsed_time(completed) or utc_now()
+    overdue = sum(
+        parsed_time(row["proposed_at"]) is not None
+        and (completed_at - parsed_time(row["proposed_at"])).total_seconds() / 3600 >= MEMORY_REVIEW_SLA_HOURS
+        for row in rows
+    )
     report = {
         "candidatesSeen": len(rows), "promoted": promoted, "disputed": disputed,
         "pending": len(rows) - promoted - disputed, "expired": expired,
+        "reviewSlaHours": MEMORY_REVIEW_SLA_HOURS,
+        "overdue": overdue,
+        "relatedCandidates": sum(bool(item["relatedCandidateIds"]) for item in relations.values()),
     }
     db.execute(
         "INSERT INTO memory_reviews VALUES (?,?,?,?,?,?,?,?,?)",
@@ -844,6 +1076,11 @@ def candidate_rows(db: sqlite3.Connection, status: str = "candidate") -> dict[st
         "SELECT * FROM memory_candidates WHERE status = ? ORDER BY proposed_at LIMIT 100",
         (status,),
     ).fetchall()
+    pending_rows = db.execute(
+        "SELECT * FROM memory_candidates WHERE status IN ('candidate','disputed') ORDER BY proposed_at"
+    ).fetchall()
+    relations = candidate_relation_map(pending_rows)
+    now = utc_now()
     return {
         "status": status,
         "candidates": [
@@ -853,6 +1090,16 @@ def candidate_rows(db: sqlite3.Connection, status: str = "candidate") -> dict[st
                 "visibility": row["visibility"], "privacy": row["privacy"], "source": row["source_path"],
                 "evidence": row["evidence"], "confidence": row["confidence"], "proposedBy": row["proposed_by"],
                 "proposedAt": row["proposed_at"], "reviewReason": row["review_reason"],
+                "ageHours": round(max(0.0, (now - parsed_time(row["proposed_at"])).total_seconds() / 3600), 1)
+                if parsed_time(row["proposed_at"]) is not None else None,
+                "reviewSlaHours": MEMORY_REVIEW_SLA_HOURS,
+                "overdue": bool(
+                    parsed_time(row["proposed_at"]) is not None
+                    and (now - parsed_time(row["proposed_at"])).total_seconds() / 3600 >= MEMORY_REVIEW_SLA_HOURS
+                ),
+                "relatedCandidateIds": relations.get(str(row["id"]), {}).get("relatedCandidateIds", []),
+                "suggestedAction": relations.get(str(row["id"]), {}).get("suggestedAction", "review"),
+                "sourceLocator": source_locator_kind(row["source_path"], row["source_ref"]),
             }
             for row in rows
         ],
@@ -1102,14 +1349,14 @@ def record_reuse_outcome(db: sqlite3.Connection, args: argparse.Namespace) -> di
         raise SystemExit(f"Unknown memory {args.memory_id}.")
     if args.memory_id not in json.loads(retrieval["memory_ids_json"] or "[]"):
         raise SystemExit("The memory was not returned by the specified retrieval.")
-    if args.outcome == "used":
+    if args.outcome in {"used", "ignored"}:
         selected = db.execute(
             """SELECT id FROM memory_reuse_events
                WHERE retrieval_id=? AND memory_id=? AND outcome='selected'""",
             (args.retrieval_id, args.memory_id),
         ).fetchone()
         if not selected:
-            raise SystemExit("Record selected before recording used.")
+            raise SystemExit(f"Record selected before recording {args.outcome}.")
     existing = db.execute(
         "SELECT id FROM memory_reuse_events WHERE retrieval_id=? AND memory_id=? AND outcome=?",
         (args.retrieval_id, args.memory_id, args.outcome),

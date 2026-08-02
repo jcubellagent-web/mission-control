@@ -400,7 +400,7 @@ export type MemoryOperations = Record<string, unknown> & {
 export type MemoryHealthTone = "clear" | "watch" | "risk" | "idle";
 
 export type MemoryDiagnostics = {
-  schemaVersion: 1;
+  schemaVersion: 2;
   generatedAt: string;
   privacy: { countsOnly: true; contentIncluded: false; rawIdentifiersIncluded: false };
   trend30d: Array<{
@@ -412,13 +412,26 @@ export type MemoryDiagnostics = {
     provenanceCoveragePct: number | null;
   }>;
   reviewAging: Array<{ bucket: "<24h" | "1-3d" | "3-7d" | ">7d"; pending: number; disputed: number }>;
+  reviewQuality: {
+    slaHours: number;
+    overduePending: number;
+    relatedPending: number;
+    semanticDuplicatesAvoided30d: number;
+    reviewed30d: number;
+    accepted30d: number;
+    rejected30d: number;
+    acceptanceRatePct: number | null;
+    medianReviewHours: number | null;
+  };
   provenanceMatrix: {
     owners: Array<AgentId | "ecosystem" | "other">;
     rows: Array<{
       category: string;
       count: number;
       withSourceRef: number;
+      withSourceLocator: number;
       coveragePct: number | null;
+      locatorCoveragePct: number | null;
       owners: Record<string, number>;
     }>;
   };
@@ -442,6 +455,13 @@ export type MemoryDiagnostics = {
   reuseMatrix: {
     agents: Array<AgentId | "ecosystem">;
     cells: Array<{ sourceAgent: AgentId | "ecosystem"; consumerAgent: AgentId; uses: number }>;
+    outcomes: Array<{
+      agent: AgentId;
+      selected: number;
+      used: number;
+      ignored: number;
+      closureRatePct: number | null;
+    }>;
   };
 };
 

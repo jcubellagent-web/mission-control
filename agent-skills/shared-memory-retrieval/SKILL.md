@@ -76,6 +76,7 @@ If the registry is unavailable, the task ledger durably records `proposal-error`
 
 - Status: `memory_registry.py status`
 - Review queue: `memory_registry.py candidates --status candidate` and `--status disputed`
+- Candidate rows include a 72-hour review SLA, overdue state, verifiable source-locator class, and advisory related-candidate/supersession hints. Related hints never authorize automatic policy mutation; compare evidence and choose approve, supersede, or reject explicitly.
 - Approve: `memory_registry.py approve --id <candidate-id> --reviewer <agent>`
 - Supersede a verified conflict: add `--supersedes <active-memory-id>` to approval
 - Reject: `memory_registry.py reject --id <candidate-id> --reviewer <agent> --reason "<reason>"`
@@ -83,6 +84,8 @@ If the registry is unavailable, the task ledger durably records `proposal-error`
 - Governed review: `memory_registry.py review --apply-safe`
 - Refresh Control Tower sidecar: `memory_registry.py export`
 - Outcome history is aggregated into recall quality; raw reasons and memory contents are not displayed in Control Tower.
+- Semantically identical proposals from different sources reuse one candidate and record only bounded duplicate metadata. Token-overlap clustering is advisory and contradiction-aware; it never merges active records or auto-resolves preferences, procedures, policy, sensitive facts, or conflicts.
+- Every selected memory must close as exactly one `used` or `ignored` outcome. Control Tower reports counts-only per-agent closure rates so retrieval volume cannot masquerade as effective reuse.
 
 Do not publish raw memory content to Control Tower. It receives health, counts, retrieval latency/hit rate, review state, and source coverage only.
 

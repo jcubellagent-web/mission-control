@@ -196,7 +196,7 @@ def valid_memory_operations() -> dict:
             "joshex": "oversight SSH client",
         },
         "diagnostics": {
-            "schemaVersion": 1,
+            "schemaVersion": 2,
             "generatedAt": generated,
             "privacy": {
                 "countsOnly": True,
@@ -220,14 +220,27 @@ def valid_memory_operations() -> dict:
                 {"bucket": "3-7d", "pending": 0, "disputed": 0},
                 {"bucket": ">7d", "pending": 0, "disputed": 0},
             ],
+            "reviewQuality": {
+                "slaHours": 72,
+                "overduePending": 0,
+                "relatedPending": 0,
+                "semanticDuplicatesAvoided30d": 2,
+                "reviewed30d": 4,
+                "accepted30d": 3,
+                "rejected30d": 1,
+                "acceptanceRatePct": 75.0,
+                "medianReviewHours": 12.0,
+            },
             "provenanceMatrix": {
                 "owners": ["joshex", "josh2", "jaimes", "jain", "ecosystem", "other"],
                 "rows": [{
                     "category": "Task ledger",
                     "count": 10,
                     "withSourceRef": 9,
+                    "withSourceLocator": 10,
                     "owners": {"joshex": 4, "josh2": 3, "jaimes": 2, "jain": 1, "ecosystem": 0, "other": 0},
                     "coveragePct": 90.0,
+                    "locatorCoveragePct": 100.0,
                 }],
             },
             "freshnessRunway": {
@@ -255,6 +268,12 @@ def valid_memory_operations() -> dict:
             "reuseMatrix": {
                 "agents": ["joshex", "josh2", "jaimes", "jain", "ecosystem"],
                 "cells": [{"sourceAgent": "jaimes", "consumerAgent": "joshex", "uses": 1}],
+                "outcomes": [
+                    {"agent": "joshex", "selected": 2, "used": 1, "ignored": 1, "closureRatePct": 100.0},
+                    {"agent": "josh2", "selected": 0, "used": 0, "ignored": 0, "closureRatePct": None},
+                    {"agent": "jaimes", "selected": 1, "used": 1, "ignored": 0, "closureRatePct": 100.0},
+                    {"agent": "jain", "selected": 0, "used": 0, "ignored": 0, "closureRatePct": None},
+                ],
             },
         },
         "activity": {

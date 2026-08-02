@@ -434,12 +434,12 @@ def _sanitize_memory_diagnostics(value: Any, updated_at: dt.datetime) -> Dict[st
 
     if not isinstance(value, dict) or set(value) != {
         "schemaVersion", "generatedAt", "privacy", "trend30d", "reviewAging",
-        "provenanceMatrix", "freshnessRunway", "lineage", "reuseMatrix",
+        "reviewQuality", "provenanceMatrix", "freshnessRunway", "lineage", "reuseMatrix",
     }:
         return None
     generated_at = _memory_time(value.get("generatedAt"))
     if (
-        value.get("schemaVersion") != 1
+        value.get("schemaVersion") != 2
         or generated_at is None
         or abs(generated_at - updated_at) > dt.timedelta(seconds=2)
         or value.get("privacy") != {
@@ -501,6 +501,27 @@ def _sanitize_memory_diagnostics(value: Any, updated_at: dt.datetime) -> Dict[st
             return None
         clean_review.append({"bucket": expected_bucket, "pending": pending, "disputed": disputed})
 
+    review_quality = value.get("reviewQuality")
+    review_quality_fields = {
+        "slaHours", "overduePending", "relatedPending", "semanticDuplicatesAvoided30d",
+        "reviewed30d", "accepted30d", "rejected30d", "acceptanceRatePct", "medianReviewHours",
+    }
+    if not isinstance(review_quality, dict) or set(review_quality) != review_quality_fields:
+        return None
+    clean_review_quality: Dict[str, Any] = {}
+    for name in review_quality_fields - {"acceptanceRatePct", "medianReviewHours"}:
+        count = _memory_count(review_quality.get(name), 100_000)
+        if count is None:
+            return None
+        clean_review_quality[name] = count
+    for name, maximum in (("acceptanceRatePct", 100.0), ("medianReviewHours", 1_000_000.0)):
+        item = review_quality.get(name)
+        if item is not None and _memory_metric(item, maximum) is None:
+            return None
+        clean_review_quality[name] = item
+    if clean_review_quality["accepted30d"] + clean_review_quality["rejected30d"] != clean_review_quality["reviewed30d"]:
+        return None
+
     provenance = value.get("provenanceMatrix")
     if not isinstance(provenance, dict) or set(provenance) != {"owners", "rows"}:
         return None
@@ -511,22 +532,31 @@ def _sanitize_memory_diagnostics(value: Any, updated_at: dt.datetime) -> Dict[st
     clean_provenance_rows: list[Dict[str, Any]] = []
     seen_categories: set[str] = set()
     for row in rows:
-        if not isinstance(row, dict) or set(row) != {"category", "count", "withSourceRef", "owners", "coveragePct"}:
+        if not isinstance(row, dict) or set(row) != {
+            "category", "count", "withSourceRef", "withSourceLocator", "owners",
+            "coveragePct", "locatorCoveragePct",
+        }:
             return None
         category = row.get("category")
         count = _memory_count(row.get("count"), 100_000)
         with_ref = _memory_count(row.get("withSourceRef"), 100_000)
+        with_locator = _memory_count(row.get("withSourceLocator"), 100_000)
         coverage = row.get("coveragePct")
+        locator_coverage = row.get("locatorCoveragePct")
         owner_counts = row.get("owners")
         if (
             category not in MEMORY_DIAGNOSTIC_CATEGORIES
             or category in seen_categories
             or count is None
             or with_ref is None
+            or with_locator is None
             or with_ref > count
+            or with_locator > count
+            or with_locator < with_ref
             or not isinstance(owner_counts, dict)
             or set(owner_counts) != set(MEMORY_DIAGNOSTIC_OWNERS)
             or (coverage is not None and _memory_metric(coverage, 100.0) is None)
+            or (locator_coverage is not None and _memory_metric(locator_coverage, 100.0) is None)
         ):
             return None
         clean_owner_counts: Dict[str, int] = {}
@@ -542,8 +572,10 @@ def _sanitize_memory_diagnostics(value: Any, updated_at: dt.datetime) -> Dict[st
             "category": category,
             "count": count,
             "withSourceRef": with_ref,
+            "withSourceLocator": with_locator,
             "owners": clean_owner_counts,
             "coveragePct": coverage,
+            "locatorCoveragePct": locator_coverage,
         })
 
     freshness = value.get("freshnessRunway")
@@ -585,7 +617,7 @@ def _sanitize_memory_diagnostics(value: Any, updated_at: dt.datetime) -> Dict[st
     clean_lineage["chainBuckets"] = clean_chains
 
     reuse = value.get("reuseMatrix")
-    if not isinstance(reuse, dict) or set(reuse) != {"agents", "cells"}:
+    if not isinstance(reuse, dict) or set(reuse) != {"agents", "cells", "outcomes"}:
         return None
     if reuse.get("agents") != list(MEMORY_DIAGNOSTIC_REUSE_AGENTS):
         return None
@@ -613,8 +645,37 @@ def _sanitize_memory_diagnostics(value: Any, updated_at: dt.datetime) -> Dict[st
         seen_pairs.add(pair)
         clean_cells.append({"sourceAgent": source, "consumerAgent": consumer, "uses": uses})
 
+    raw_outcomes = reuse.get("outcomes")
+    if not isinstance(raw_outcomes, list) or len(raw_outcomes) != len(MEMORY_CANONICAL_AGENTS):
+        return None
+    clean_outcomes: list[Dict[str, Any]] = []
+    seen_agents: set[str] = set()
+    for row in raw_outcomes:
+        if not isinstance(row, dict) or set(row) != {"agent", "selected", "used", "ignored", "closureRatePct"}:
+            return None
+        agent = row.get("agent")
+        selected = _memory_count(row.get("selected"), 100_000)
+        used = _memory_count(row.get("used"), 100_000)
+        ignored = _memory_count(row.get("ignored"), 100_000)
+        closure_rate = row.get("closureRatePct")
+        if (
+            agent not in MEMORY_CANONICAL_AGENTS
+            or agent in seen_agents
+            or selected is None or used is None or ignored is None
+            or used + ignored > selected
+            or (closure_rate is not None and _memory_metric(closure_rate, 100.0) is None)
+        ):
+            return None
+        seen_agents.add(str(agent))
+        clean_outcomes.append({
+            "agent": agent, "selected": selected, "used": used, "ignored": ignored,
+            "closureRatePct": closure_rate,
+        })
+    if seen_agents != set(MEMORY_CANONICAL_AGENTS):
+        return None
+
     return {
-        "schemaVersion": 1,
+        "schemaVersion": 2,
         "generatedAt": value["generatedAt"],
         "privacy": {
             "countsOnly": True,
@@ -623,10 +684,15 @@ def _sanitize_memory_diagnostics(value: Any, updated_at: dt.datetime) -> Dict[st
         },
         "trend30d": clean_trend,
         "reviewAging": clean_review,
+        "reviewQuality": clean_review_quality,
         "provenanceMatrix": {"owners": list(MEMORY_DIAGNOSTIC_OWNERS), "rows": clean_provenance_rows},
         "freshnessRunway": clean_freshness,
         "lineage": clean_lineage,
-        "reuseMatrix": {"agents": list(MEMORY_DIAGNOSTIC_REUSE_AGENTS), "cells": clean_cells},
+        "reuseMatrix": {
+            "agents": list(MEMORY_DIAGNOSTIC_REUSE_AGENTS),
+            "cells": clean_cells,
+            "outcomes": clean_outcomes,
+        },
     }
 
 

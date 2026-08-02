@@ -270,7 +270,10 @@ class BrainMemoryRegistryTest(unittest.TestCase):
                 "injection_status", "source_state", "metadata_json",
             }.issubset(columns)
         )
-        self.assertEqual(legacy, ("", "legacy", "", 1, "not-applicable", "active", "{}"))
+        self.assertEqual(legacy[:6], ("", "legacy", "", 1, "not-applicable", "active"))
+        self.assertEqual(json.loads(legacy[6]), {
+            "relatedCandidateIds": [], "suggestedAction": "review",
+        })
         self.assertIsNotNone(deletion_table)
 
 

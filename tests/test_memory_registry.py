@@ -194,6 +194,45 @@ class MemoryRegistryTest(unittest.TestCase):
         self.assertEqual(review["promoted"], 0)
         self.assertEqual(review["pending"], 1)
 
+    def test_semantic_candidate_deduplication_ignores_source_path(self) -> None:
+        common = (
+            "--agent", "joshex", "--type", "procedure",
+            "--subject", "Shared artifact review", "--predicate", "requires",
+            "--value", "Review durable candidates before promotion", "--owner", "joshex",
+            "--visibility", "shared", "--privacy", "dashboard-safe",
+            "--evidence", "verified", "--confidence", "0.99",
+        )
+        first = self.cli("propose", *common, "--source", "docs/first.md")
+        second = self.cli("propose", *common, "--source", "docs/second.md")
+        self.assertEqual(first["id"], second["id"])
+        self.assertTrue(second["semanticDuplicate"])
+        connection = sqlite3.connect(self.database)
+        row = connection.execute(
+            "SELECT COUNT(*),metadata_json FROM memory_candidates WHERE id=?", (first["id"],)
+        ).fetchone()
+        connection.close()
+        self.assertEqual(row[0], 1)
+        self.assertEqual(json.loads(row[1])["duplicateProposalCount"], 1)
+
+    def test_related_candidates_are_advisory_and_symmetric(self) -> None:
+        first = self.cli(
+            "propose", "--agent", "joshex", "--type", "decision",
+            "--subject", "Team Cubell fantasy operations authority",
+            "--predicate", "standing authorization", "--value", "Routine changes only",
+            "--owner", "joshex", "--source", "user-direct:first",
+        )
+        second = self.cli(
+            "propose", "--agent", "joshex", "--type", "decision",
+            "--subject", "Team Cubell full management authority",
+            "--predicate", "standing authorization", "--value", "Full management authority",
+            "--owner", "joshex", "--source", "user-direct:second",
+        )
+        pending = {row["id"]: row for row in self.cli("candidates")["candidates"]}
+        self.assertIn(second["id"], pending[first["id"]]["relatedCandidateIds"])
+        self.assertIn(first["id"], pending[second["id"]]["relatedCandidateIds"])
+        self.assertEqual(pending[first["id"]]["suggestedAction"], "compare-for-supersession")
+        self.assertFalse(pending[first["id"]]["overdue"])
+
     def test_default_proposals_are_shared_while_personal_account_access_stays_private(self) -> None:
         shared = self.cli(
             "propose", "--agent", "jaimes", "--type", "fact",
@@ -275,6 +314,11 @@ class MemoryRegistryTest(unittest.TestCase):
             "--memory-id", memory_id, "--outcome", "used",
         )
         self.assertNotEqual(used_first.returncode, 0)
+        ignored_first = self.run_raw(
+            "reuse-outcome", "--agent", "jain", "--retrieval-id", preflight["retrievalId"],
+            "--memory-id", memory_id, "--outcome", "ignored",
+        )
+        self.assertNotEqual(ignored_first.returncode, 0)
         mismatch = self.run_raw(
             "reuse-outcome", "--agent", "jain", "--retrieval-id", preflight["retrievalId"],
             "--memory-id", memory_id, "--outcome", "selected", "--work-id", "work-b",
@@ -437,7 +481,7 @@ class MemoryRegistryTest(unittest.TestCase):
             diagnostics = memory_registry.memory_diagnostics_payload(db, fixed_now)
             db.close()
 
-        self.assertEqual(diagnostics["schemaVersion"], 1)
+        self.assertEqual(diagnostics["schemaVersion"], 2)
         self.assertTrue(diagnostics["privacy"]["countsOnly"])
         self.assertEqual(len(diagnostics["trend30d"]), 30)
         self.assertEqual(diagnostics["trend30d"][-1]["p95LatencyMs"], 8.0)
@@ -446,6 +490,8 @@ class MemoryRegistryTest(unittest.TestCase):
         self.assertEqual(aging["1-3d"]["pending"], 1)
         self.assertEqual(aging["3-7d"]["disputed"], 1)
         self.assertEqual(aging[">7d"]["pending"], 1)
+        self.assertEqual(diagnostics["reviewQuality"]["slaHours"], 72)
+        self.assertEqual(diagnostics["reviewQuality"]["overduePending"], 2)
         self.assertEqual(diagnostics["freshnessRunway"]["expiredExposure"], 1)
         self.assertEqual(diagnostics["freshnessRunway"]["next7d"], 1)
         self.assertEqual(diagnostics["freshnessRunway"]["days8to30"], 1)
@@ -454,6 +500,8 @@ class MemoryRegistryTest(unittest.TestCase):
         self.assertEqual(diagnostics["reuseMatrix"]["cells"], [{
             "sourceAgent": "jaimes", "consumerAgent": "jain", "uses": 1,
         }])
+        jain_outcomes = next(row for row in diagnostics["reuseMatrix"]["outcomes"] if row["agent"] == "jain")
+        self.assertEqual(jain_outcomes["selected"], 0)
         rendered = json.dumps(diagnostics)
         self.assertNotIn(parent_id, rendered)
         self.assertNotIn(child_id, rendered)

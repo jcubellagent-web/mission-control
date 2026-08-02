@@ -4058,7 +4058,7 @@ function sanitizedMemoryDiagnostics(value: unknown): MemoryDiagnostics | undefin
   if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
   const raw = value as Record<string, unknown>;
   const privacy = raw.privacy as Record<string, unknown> | undefined;
-  if (raw.schemaVersion !== 1 || !isStrictMemoryTimestamp(raw.generatedAt)
+  if (raw.schemaVersion !== 2 || !isStrictMemoryTimestamp(raw.generatedAt)
     || privacy?.countsOnly !== true || privacy?.contentIncluded !== false || privacy?.rawIdentifiersIncluded !== false) return undefined;
   const trendRows = Array.isArray(raw.trend30d) ? raw.trend30d : [];
   if (trendRows.length !== 30) return undefined;
@@ -4090,6 +4090,20 @@ function sanitizedMemoryDiagnostics(value: unknown): MemoryDiagnostics | undefin
     if (!bucket || pending == null || disputed == null || reviewAging.some((item) => item.bucket === bucket)) return undefined;
     reviewAging.push({ bucket, pending, disputed });
   }
+  const rawReviewQuality = raw.reviewQuality as Record<string, unknown> | undefined;
+  if (!rawReviewQuality) return undefined;
+  const reviewCountKeys = ["slaHours", "overduePending", "relatedPending", "semanticDuplicatesAvoided30d", "reviewed30d", "accepted30d", "rejected30d"] as const;
+  const reviewCounts = Object.fromEntries(reviewCountKeys.map((key) => [key, boundedMemoryCount(rawReviewQuality[key])])) as Record<typeof reviewCountKeys[number], number | null>;
+  const acceptanceRatePct = rawReviewQuality.acceptanceRatePct == null ? null : boundedMemoryMetric(rawReviewQuality.acceptanceRatePct, 100);
+  const medianReviewHours = rawReviewQuality.medianReviewHours == null ? null : boundedMemoryMetric(rawReviewQuality.medianReviewHours, 1_000_000);
+  if (reviewCountKeys.some((key) => reviewCounts[key] == null)
+    || (rawReviewQuality.acceptanceRatePct != null && acceptanceRatePct == null)
+    || (rawReviewQuality.medianReviewHours != null && medianReviewHours == null)) return undefined;
+  const reviewQuality: MemoryDiagnostics["reviewQuality"] = {
+    ...reviewCounts as Omit<MemoryDiagnostics["reviewQuality"], "acceptanceRatePct" | "medianReviewHours">,
+    acceptanceRatePct,
+    medianReviewHours,
+  };
   const rawProvenance = raw.provenanceMatrix as Record<string, unknown> | undefined;
   const ownerValues = Array.isArray(rawProvenance?.owners) ? rawProvenance.owners : [];
   const owners = ownerValues.filter((owner): owner is MemoryDiagnostics["provenanceMatrix"]["owners"][number] => typeof owner === "string" && MEMORY_DIAGNOSTIC_OWNERS.has(owner));
@@ -4103,16 +4117,20 @@ function sanitizedMemoryDiagnostics(value: unknown): MemoryDiagnostics | undefin
     const category = typeof row.category === "string" && MEMORY_DIAGNOSTIC_SOURCE_CATEGORIES.has(row.category) ? row.category : null;
     const count = boundedMemoryCount(row.count);
     const withSourceRef = boundedMemoryCount(row.withSourceRef);
+    const withSourceLocator = boundedMemoryCount(row.withSourceLocator);
     const coveragePct = row.coveragePct == null ? null : boundedMemoryMetric(row.coveragePct, 100);
+    const locatorCoveragePct = row.locatorCoveragePct == null ? null : boundedMemoryMetric(row.locatorCoveragePct, 100);
     const ownerCounts = row.owners && typeof row.owners === "object" && !Array.isArray(row.owners) ? row.owners as Record<string, unknown> : null;
-    if (!category || count == null || withSourceRef == null || !ownerCounts || (row.coveragePct != null && coveragePct == null)) return undefined;
+    if (!category || count == null || withSourceRef == null || withSourceLocator == null || !ownerCounts
+      || (row.coveragePct != null && coveragePct == null)
+      || (row.locatorCoveragePct != null && locatorCoveragePct == null)) return undefined;
     const safeOwners: Record<string, number> = {};
     for (const owner of owners) {
       const ownerCount = boundedMemoryCount(ownerCounts[owner]);
       if (ownerCount == null) return undefined;
       safeOwners[owner] = ownerCount;
     }
-    provenanceMatrix.rows.push({ category, count, withSourceRef, coveragePct, owners: safeOwners });
+    provenanceMatrix.rows.push({ category, count, withSourceRef, withSourceLocator, coveragePct, locatorCoveragePct, owners: safeOwners });
   }
   const rawFreshness = raw.freshnessRunway as Record<string, unknown> | undefined;
   if (!rawFreshness) return undefined;
@@ -4149,16 +4167,33 @@ function sanitizedMemoryDiagnostics(value: unknown): MemoryDiagnostics | undefin
     if (!sourceAgent || !consumerAgent || uses == null) return undefined;
     cells.push({ sourceAgent, consumerAgent, uses });
   }
+  const rawOutcomes = Array.isArray(rawReuse?.outcomes) ? rawReuse.outcomes : [];
+  if (rawOutcomes.length !== HERO_AGENT_ORDER.length) return undefined;
+  const outcomes: MemoryDiagnostics["reuseMatrix"]["outcomes"] = [];
+  for (const valueRow of rawOutcomes) {
+    if (!valueRow || typeof valueRow !== "object" || Array.isArray(valueRow)) return undefined;
+    const row = valueRow as Record<string, unknown>;
+    const agent = typeof row.agent === "string" && HERO_AGENT_ORDER.includes(row.agent as AgentId) ? row.agent as AgentId : null;
+    const selected = boundedMemoryCount(row.selected);
+    const used = boundedMemoryCount(row.used);
+    const ignored = boundedMemoryCount(row.ignored);
+    const closureRatePct = row.closureRatePct == null ? null : boundedMemoryMetric(row.closureRatePct, 100);
+    if (!agent || selected == null || used == null || ignored == null
+      || (row.closureRatePct != null && closureRatePct == null)
+      || outcomes.some((item) => item.agent === agent)) return undefined;
+    outcomes.push({ agent, selected, used, ignored, closureRatePct });
+  }
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     generatedAt: raw.generatedAt as string,
     privacy: { countsOnly: true, contentIncluded: false, rawIdentifiersIncluded: false },
     trend30d,
     reviewAging,
+    reviewQuality,
     provenanceMatrix,
     freshnessRunway: freshnessValues as MemoryDiagnostics["freshnessRunway"],
     lineage: { ...lineageValues, chainBuckets } as MemoryDiagnostics["lineage"],
-    reuseMatrix: { agents: reuseAgents, cells },
+    reuseMatrix: { agents: reuseAgents, cells, outcomes },
   };
 }
 
@@ -4519,13 +4554,15 @@ function MemoryDiagnosticsView({ diagnostics }: { diagnostics?: MemoryDiagnostic
 
       <div className="memory-diagnostics-grid">
         <article className="memory-diagnostic-panel is-review" data-memory-visual="review-aging">
-          <header><span>Review aging</span><strong>{diagnostics.reviewAging.reduce((sum, row) => sum + row.pending + row.disputed, 0)}</strong></header>
+          <header><span>Review aging</span><strong>{diagnostics.reviewQuality.overduePending} overdue</strong></header>
           <div className="memory-aging-bars">
             {diagnostics.reviewAging.map((row) => (
               <div key={row.bucket}><span>{row.bucket}</span><i><b style={{ width: `${(row.pending / maxReview) * 100}%` }} /><em style={{ width: `${(row.disputed / maxReview) * 100}%` }} /></i><strong>{row.pending + row.disputed}</strong></div>
             ))}
           </div>
-          <footer><i className="is-pending" /> pending <i className="is-disputed" /> disputed</footer>
+          <footer>
+            <i className="is-pending" /> pending <i className="is-disputed" /> disputed · {diagnostics.reviewQuality.relatedPending} related · {diagnostics.reviewQuality.semanticDuplicatesAvoided30d} duplicates avoided · {diagnostics.reviewQuality.acceptanceRatePct == null ? "—" : `${diagnostics.reviewQuality.acceptanceRatePct}%`} accepted · {diagnostics.reviewQuality.medianReviewHours == null ? "—" : `${diagnostics.reviewQuality.medianReviewHours}h`} median
+          </footer>
         </article>
 
         <article className="memory-diagnostic-panel is-freshness" data-memory-visual="freshness-runway">
@@ -4551,7 +4588,7 @@ function MemoryDiagnosticsView({ diagnostics }: { diagnostics?: MemoryDiagnostic
         </article>
 
         <article className="memory-diagnostic-panel is-provenance" data-memory-visual="provenance-matrix">
-          <header><span>Provenance coverage matrix</span><strong>{diagnostics.provenanceMatrix.rows.reduce((sum, row) => sum + row.count - row.withSourceRef, 0)} gaps</strong></header>
+          <header><span>Provenance coverage matrix</span><strong>{diagnostics.provenanceMatrix.rows.reduce((sum, row) => sum + row.count - row.withSourceLocator, 0)} locator gaps</strong></header>
           <div className="memory-matrix" role="table" aria-label="Active memory provenance by source category and owner">
             <div className="memory-matrix-row is-header" role="row"><span role="columnheader">Source</span>{diagnostics.provenanceMatrix.owners.map((owner) => <span key={owner} role="columnheader">{memoryOwnerLabel(owner)}</span>)}<span role="columnheader">Coverage</span></div>
             {diagnostics.provenanceMatrix.rows.map((row) => (
@@ -4561,7 +4598,7 @@ function MemoryDiagnosticsView({ diagnostics }: { diagnostics?: MemoryDiagnostic
                   const count = row.owners[owner] || 0;
                   return <span key={owner} role="cell" className={count ? "has-value" : ""} style={{ "--heat": count / maxProvenanceCell } as React.CSSProperties}>{count || "·"}</span>;
                 })}
-                <em role="cell" className={row.coveragePct != null && row.coveragePct < 95 ? "is-watch" : ""}>{row.coveragePct == null ? "—" : `${row.coveragePct}%`}</em>
+                <em role="cell" className={row.locatorCoveragePct != null && row.locatorCoveragePct < 95 ? "is-watch" : ""} title={`Exact source refs: ${row.coveragePct == null ? "—" : `${row.coveragePct}%`}`}>{row.locatorCoveragePct == null ? "—" : `${row.locatorCoveragePct}%`}</em>
               </div>
             ))}
           </div>
@@ -4581,7 +4618,9 @@ function MemoryDiagnosticsView({ diagnostics }: { diagnostics?: MemoryDiagnostic
               </div>
             ))}
           </div>
-          <footer>Rows identify memory ownership; columns identify the consuming agent.</footer>
+          <footer>
+            Rows identify memory ownership; columns identify the consuming agent. Outcome closure: {diagnostics.reuseMatrix.outcomes.map((row) => `${memoryOwnerLabel(row.agent)} ${row.closureRatePct == null ? "—" : `${row.closureRatePct}%`}`).join(" · ")}
+          </footer>
         </article>
       </div>
     </section>
