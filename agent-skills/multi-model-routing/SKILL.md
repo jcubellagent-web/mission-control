@@ -115,12 +115,19 @@ fresh-lane launcher on Josh 2.0; it forwards authenticated specialist execution
 to JAIMES:
 
 ```bash
-ssh josh2 'cd ~/.openclaw/workspace/mission-control && python3 scripts/model_lane.py --task-type <type> --title <safe-title> --objective <safe-objective> --prompt <sanitized-prompt> --privacy dashboard-safe --requester joshex --controller-work-id <owning-work-id> --controller-run-id <owning-run-id> --execute'
+ssh josh2 'cd ~/.openclaw/workspace/mission-control && python3 scripts/model_lane.py --task-type <type> --title <safe-title> --objective <safe-objective> --prompt <sanitized-prompt> --privacy dashboard-safe --requester joshex --controller-work-id <owning-work-id> --controller-run-id <owning-run-id> --result-file /private/tmp/model-lane-<work-id>.txt --execute'
 ```
 
 Use explicit `--requested-provider` and `--requested-model` only when Josh asks
 for one or when the automatic task classification is ambiguous. Capture the
 returned output and integrate it; do not hand the conversation to the worker.
+The launcher rejects whitespace-only or launcher-boilerplate-only output. Treat
+the lane as usable only when substantive stdout is non-empty. When a Codex-app
+tool stream yields or loses its returned text, read the controller-private
+`--result-file`, verify it is non-empty, and join it to the execution receipt;
+never substitute a receipt's success status for actual returned analysis. Keep
+result files under `/private/tmp` or `/tmp`, where the launcher enforces mode
+`0600`, and remove them after integration or rejection.
 Every real execution requires the exact controlling work/run pair. The launcher
 publishes the fresh lane as a nested worker, refreshes its heartbeat, updates a
 disclosed fallback model, and terminal-cleans it. `parent-owned` is reserved for

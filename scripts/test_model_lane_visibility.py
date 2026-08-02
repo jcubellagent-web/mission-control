@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import unittest
+from unittest.mock import patch
 
 import model_lane
 
@@ -36,7 +37,8 @@ class ModelLaneVisibilityTests(unittest.TestCase):
 
     def test_local_codex_lane_remains_under_requester(self) -> None:
         route = {"modelRoute": {"provider": "codex", "model": "gpt-5.6-terra"}}
-        self.assertEqual(model_lane.execution_agent(args(), route), "joshex")
+        with patch.object(model_lane.Path, "home", return_value=model_lane.Path("/Users/josh2.0")):
+            self.assertEqual(model_lane.execution_agent(args(), route), "joshex")
 
 
 if __name__ == "__main__":

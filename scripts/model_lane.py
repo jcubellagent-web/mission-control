@@ -30,6 +30,7 @@ JAIMES_REPO = "~/.openclaw/workspace/mission-control"
 CONTROL_TOWER_HOST = os.environ.get("MODEL_LANE_CONTROL_TOWER_HOST", "josh2.0@josh2")
 CONTROL_TOWER_REPO = "/Users/josh2.0/.openclaw/workspace/mission-control"
 LANE_HEARTBEAT_SECONDS = 30
+RESULT_ROOTS = (Path("/private/tmp"), Path("/tmp"))
 
 PROVIDER_MODEL_FAMILIES = {
     "codex": "codex",
@@ -61,6 +62,30 @@ def utc_stamp() -> str:
 def compact(text: str, limit: int = 240) -> str:
     value = " ".join(str(text or "").split())
     return value if len(value) <= limit else value[: limit - 1].rstrip() + "…"
+
+
+def substantive_output(text: str) -> str:
+    """Strip launcher identity lines and return only provider task output."""
+    kept = []
+    for line in str(text or "").splitlines():
+        lowered = line.strip().lower()
+        if lowered.startswith("active model/auth:") or lowered.startswith("route reason:"):
+            continue
+        kept.append(line)
+    return "\n".join(kept).strip()
+
+
+def persist_result(args: argparse.Namespace | None, output: str) -> None:
+    """Persist controller-private output for recovery from a lost caller stream."""
+    if args is None or not str(getattr(args, "result_file", "") or "").strip():
+        return
+    target = Path(str(args.result_file)).expanduser().resolve()
+    if not any(target == root or root in target.parents for root in RESULT_ROOTS):
+        raise RuntimeError("--result-file must be under /private/tmp or /tmp")
+    target.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    target.write_text(output.rstrip() + "\n", encoding="utf-8")
+    target.chmod(0o600)
+    print(f"Model Lane Result File: {target}", file=sys.stderr)
 
 
 def lane_work_id(args: argparse.Namespace) -> str:
@@ -595,6 +620,19 @@ def execute_verified(cmd: list[str], route: dict[str, Any]) -> int:
             f"({model_route.get('auth') or model_route.get('provider')})"
         )
         print(f"Route reason: {model_route.get('reason')}")
+    output = substantive_output(proc.stdout)
+    if not output:
+        print("Verified model lane failed: provider returned no substantive output.", file=sys.stderr)
+        if args is not None and not (cmd and cmd[0] == "ssh"):
+            record_execution_receipt(args, route, return_code=5, duration_ms=duration_ms, stdout=proc.stdout, metrics=metrics)
+        return 5
+    try:
+        persist_result(args, output)
+    except Exception as exc:
+        print(f"Verified model lane failed: result persistence error: {compact(str(exc), 300)}", file=sys.stderr)
+        if args is not None and not (cmd and cmd[0] == "ssh"):
+            record_execution_receipt(args, route, return_code=6, duration_ms=duration_ms, stdout=proc.stdout, metrics=metrics)
+        return 6
     if proc.stdout:
         print(proc.stdout, end="" if proc.stdout.endswith("\n") else "\n")
     if clean_stderr:
@@ -710,6 +748,11 @@ def main() -> int:
     parser.add_argument("--lane-id", default="", help="Optional idempotent lane id; generated when omitted.")
     parser.add_argument("--route-decision-id", default="", help="Route-decision receipt joined to this execution.")
     parser.add_argument("--request-signature", default="", help="Privacy-safe request signature from the router.")
+    parser.add_argument(
+        "--result-file",
+        default="",
+        help="Optional controller-private recovery file under /private/tmp or /tmp.",
+    )
     parser.add_argument(
         "--lane-visibility",
         default="required",

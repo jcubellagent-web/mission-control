@@ -752,6 +752,54 @@ def test_remote_child_model_mismatch_is_rejected(monkeypatch, capsys) -> None:
     assert "expected model grok-4.5" in capsys.readouterr().err
 
 
+def test_successful_lane_rejects_empty_substantive_output(monkeypatch, capsys) -> None:
+    lane = load_module("model_lane_empty_output", ROOT / "scripts" / "model_lane.py")
+
+    class Result:
+        returncode = 0
+        stdout = ""
+        stderr = ""
+
+    monkeypatch.setattr(lane.subprocess, "run", lambda *_args, **_kwargs: Result())
+    result = lane.execute_verified(
+        ["provider", "command"],
+        {"modelRoute": {"provider": "ollama", "model": "glm-5.2:cloud"}},
+    )
+    assert result == 5
+    assert "no substantive output" in capsys.readouterr().err
+
+
+def test_remote_lane_persists_private_recovery_output(monkeypatch, tmp_path) -> None:
+    lane = load_module("model_lane_result_recovery", ROOT / "scripts" / "model_lane.py")
+    result_file = Path("/private/tmp/model-lane-test-result.txt")
+
+    args = SimpleNamespace(result_file=str(result_file))
+
+    class Result:
+        returncode = 0
+        stdout = (
+            "Active Model/Auth: glm-5.2:cloud (Ollama runtime)\n"
+            "Route reason: technical strategy\n"
+            "Substantive specialist answer.\n"
+        )
+        stderr = ""
+
+    monkeypatch.setattr(lane.subprocess, "run", lambda *_args, **_kwargs: Result())
+    try:
+        result = lane.execute_verified(
+            ["ssh", "jaimes", "<redacted>"],
+            {
+                "_executionArgs": args,
+                "modelRoute": {"provider": "ollama", "model": "glm-5.2:cloud"},
+            },
+        )
+        assert result == 0
+        assert result_file.read_text().strip() == "Substantive specialist answer."
+        assert result_file.stat().st_mode & 0o777 == 0o600
+    finally:
+        result_file.unlink(missing_ok=True)
+
+
 def test_jaimes_lane_visibility_publishes_to_canonical_control_tower(monkeypatch) -> None:
     lane = load_module("model_lane_canonical_publish", ROOT / "scripts" / "model_lane.py")
     monkeypatch.setattr(lane.Path, "home", classmethod(lambda cls: Path("/Users/jc_agent")))
