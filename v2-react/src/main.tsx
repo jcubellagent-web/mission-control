@@ -826,6 +826,36 @@ function workerObjectiveForRoute(worker: ActiveModelRoute, activeWorks: ActiveWo
   ))?.objective || "Specialist reasoning lane";
 }
 
+function workerTelemetryForRoute(worker: ActiveModelRoute, activeWorks: ActiveWork[]) {
+  const work = activeWorks.find((candidate) => (
+    candidate.executionRole === "worker"
+    && candidate.workId === worker.workId
+    && candidate.runId === worker.runId
+  ));
+  const observed = `${work?.status || ""} ${work?.phase || ""}`.toLowerCase();
+  const stale = Date.now() - timeValue(worker.updatedAt) > AGENT_WORKER_STALE_MS;
+  const state = stale
+    ? "STALE"
+    : /block|error|fail/.test(observed)
+      ? "BLOCKED"
+      : /return|verif|review|complete|done/.test(observed)
+        ? "RETURNING"
+        : "ACTIVE";
+  const activity = compactText(missionText(work?.phase || work?.status || "Executing"), 16).toUpperCase();
+  return { activity, stale, state, work };
+}
+
+function workerCompactModelLabel(worker: ActiveModelRoute) {
+  const normalized = worker.modelId
+    .replace(/:cloud$/i, "")
+    .replace(/^gpt-/i, "GPT ")
+    .replace(/^glm-/i, "GLM ")
+    .replace(/^gemini-/i, "Gemini ")
+    .replace(/^grok-/i, "Grok ")
+    .replace(/-/g, " ");
+  return compactText(normalized || liveWorkModelLabel(CANONICAL_ROUTES[worker.modelFamily], worker.modelId), 14);
+}
+
 function liveWorkPresentationForAgent(
   agent: AgentId,
   status: AgentStatus | undefined,
@@ -4793,12 +4823,14 @@ function BrainAtlasEcosystemView({
               const agentMemory = agentRows.find((row) => row.agent === agent)?.memory;
               const memoryLive = Boolean(agentMemorySignal && memorySignalIsRecent(agentMemorySignal[1], activity?.motionWindowSeconds || 90));
               const workerModelLabels = workers.slice(0, 2).map((worker) => liveWorkModelLabel(CANONICAL_ROUTES[worker.modelFamily], worker.modelId));
+              const visibleWorkers = workers.slice(0, 2);
+              const hiddenWorkerCount = Math.max(0, workers.length - visibleWorkers.length);
               const routeLabel = liveWork.working ? liveWorkModelLabel(route, liveWork.status.model) : `${load.score}% load`;
               return (
                 <button
                   type="button"
                   key={`agent-node-${agent}`}
-                  className={`brain-agent-graph-node memory-flow-node is-agent agent-${agent} ${topology.position}${liveWork.working ? " is-working is-work-active" : ""}${selectedRow ? " is-selected" : ""}${agentLeases.length ? " has-lease" : ""}${activityMode === "received" ? " is-prompt-received" : ""}${memoryLive ? " is-memory-live" : ""}`}
+                  className={`brain-agent-graph-node memory-flow-node is-agent agent-${agent} ${topology.position}${liveWork.working ? " is-working is-work-active" : ""}${selectedRow ? " is-selected" : ""}${agentLeases.length ? " has-lease" : ""}${activityMode === "received" ? " is-prompt-received" : ""}${memoryLive ? " is-memory-live" : ""}${workers.length ? " has-live-workers" : ""}`}
                   data-agent={agent}
                   data-agent-node={agent}
                   data-agent-anchor={agent}
@@ -4833,10 +4865,44 @@ function BrainAtlasEcosystemView({
                     {agentLeases.length ? <LockKeyhole size={10} aria-label={`${agentLeases.length} active change lease`} /> : null}
                   </span>
                   <span className="brain-agent-node-objective">{compactText(nodeObjective, 42)}</span>
-                  <span className="brain-agent-node-meta">
-                    <em>{selectedRow ? `MEM ${agentMemory?.retrievals || 0}R · ${agentMemory?.selected || 0}S · ${agentMemory?.used || 0}U` : `${liveWork.working ? "Working" : agentOperatingState(liveWork.status)} · ${ageLabel(liveWork.status.updated_at)}`}</em>
-                    <b>{liveWork.working ? 1 : 0} run → {workers.length} lane{workers.length === 1 ? "" : "s"}</b>
-                  </span>
+                  {workers.length ? (
+                    <span className="brain-agent-worker-stack" role="group" aria-label={`${workers.length} active verified worker lane${workers.length === 1 ? "" : "s"} owned by ${AGENTS[agent].label}`}>
+                      <GitBranch className="brain-agent-worker-branch" size={11} aria-hidden="true" />
+                      {visibleWorkers.map((worker) => {
+                        const workerRoute = CANONICAL_ROUTES[worker.modelFamily];
+                        const workerLabel = liveWorkModelLabel(workerRoute, worker.modelId);
+                        const workerTelemetry = workerTelemetryForRoute(worker, activeWorks);
+                        const workerObjective = workerObjectiveForRoute(worker, activeWorks);
+                        const workerKey = `${worker.workId}:${worker.runId}:${worker.modelFamily}:${worker.modelId}`;
+                        const workerDescription = `${AGENTS[agent].label} child worker · ${workerLabel} · ${workerObjective} · ${workerTelemetry.activity} · ${workerTelemetry.state}`;
+                        return (
+                          <span
+                            key={workerKey}
+                            className={`brain-agent-worker-chip is-${worker.modelFamily} is-${workerTelemetry.state.toLowerCase()}`}
+                            role="img"
+                            aria-label={workerDescription}
+                            title={workerDescription}
+                            data-parent-agent={agent}
+                            data-worker-work-id={worker.workId}
+                            data-worker-run-id={worker.runId}
+                            data-model-family={worker.modelFamily}
+                            data-worker-state={workerTelemetry.state.toLowerCase()}
+                            style={{ "--worker-route-color": workerRoute.color } as React.CSSProperties}
+                          >
+                            <Bot size={10} aria-hidden="true" />
+                            <b>{workerCompactModelLabel(worker)}</b>
+                            <em>{workerTelemetry.state}</em>
+                          </span>
+                        );
+                      })}
+                      {hiddenWorkerCount ? <span className="brain-agent-worker-more" aria-label={`${hiddenWorkerCount} additional active worker lanes`}>+{hiddenWorkerCount}</span> : null}
+                    </span>
+                  ) : (
+                    <span className="brain-agent-node-meta">
+                      <em>{selectedRow ? `MEM ${agentMemory?.retrievals || 0}R · ${agentMemory?.selected || 0}S · ${agentMemory?.used || 0}U` : `${liveWork.working ? "Working" : agentOperatingState(liveWork.status)} · ${ageLabel(liveWork.status.updated_at)}`}</em>
+                      <b>{liveWork.working ? 1 : 0} run → 0 lanes</b>
+                    </span>
+                  )}
                   <span className="brain-agent-node-route" title={workerModelLabels.length ? `${routeLabel} controller · ${workerModelLabels.join(" + ")} workers` : `${routeLabel} controller`} style={{ "--route-color": route.color } as React.CSSProperties}>
                     {selectedRow && workerModelLabels.length ? `${routeLabel} + ${workerModelLabels.join(" + ")}` : routeLabel}
                   </span>
