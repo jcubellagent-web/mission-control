@@ -2,7 +2,7 @@
 """JAIMES Sorare fast lane refresh.
 
 Read-only cache refresh for launchd. Keeps Sorare artifacts warm so Telegram and
-Control Tower answers can start from fresh fixture/context/model state.
+Control Tower answers can start from fresh inventory/fixture/context/model state.
 No lineup submissions, bids, roster moves, or external messages are performed.
 """
 from __future__ import annotations
@@ -90,6 +90,16 @@ def main() -> int:
     try:
         steps = [
             (
+                "resource_audit",
+                [
+                    str(PY),
+                    str(Path(__file__).with_name("jaimes_sorare_resource_manager.py")),
+                    "--mode",
+                    "audit",
+                ],
+                180,
+            ),
+            (
                 "gw_context_refresh",
                 [
                     str(PY),
@@ -124,6 +134,15 @@ def main() -> int:
             "mode": args.mode,
             "ok": all(r["ok"] for r in results),
             "steps": results,
+            "resource_reoptimization_signal": next(
+                (
+                    "review-required"
+                    if '"reoptimize_required": true' in r.get("stdout_tail", "").lower()
+                    else "current"
+                )
+                for r in results
+                if r["name"] == "resource_audit"
+            ),
         }
         (ARTIFACT_DIR / "latest.json").write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n")
         print(json.dumps({"ok": summary["ok"], "steps": [{"name": r["name"], "ok": r["ok"], "exit_code": r["exit_code"]} for r in results]}, indent=2))
