@@ -115,6 +115,18 @@
       "severity": "p1"
     },
     {
+      "id": "ollama-route-qa-advisory",
+      "owner": "joshex",
+      "team": "GLM advisory review",
+      "activeFrom": "2026-08-03T21:00:00Z",
+      "schedule": {"minutes": [38], "hours": [0, 6, 12, 18]},
+      "command": ["python3", "scripts/ollama_advisory_review.py", "--workflow", "route-qa"],
+      "timeoutSeconds": 240,
+      "severity": "p2",
+      "alertAfterFailures": 2,
+      "skipDuringChangeLease": true
+    },
+    {
       "id": "telegram-inbox-contract-stress",
       "owner": "josh2",
       "team": "Telegram Inbox Contract QA",
