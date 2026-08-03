@@ -1259,6 +1259,7 @@ function App() {
   const [dataError, setDataError] = useState<string | null>(null);
   const [liveMode, setLiveMode] = useState<"connected" | "polling">("polling");
   const [quietMode, setQuietMode] = useState(true);
+  const [selectedAgent, setSelectedAgent] = useState<AgentId | null>(null);
   const [displayState, setDisplayState] = useState<ControlTowerDisplayState>({});
   const [nightModeOverride, setNightModeOverride] = useState<boolean | null>(null);
   const [clockNow, setClockNow] = useState(() => new Date());
@@ -1511,6 +1512,8 @@ function App() {
             quietMode={quietMode}
             onNavigate={navigateToPanel}
             liveCues={liveCues}
+            selectedAgent={selectedAgent}
+            onSelectedAgentChange={setSelectedAgent}
           />
         </section>
         <div className="right-rail">
@@ -1537,6 +1540,8 @@ function App() {
           qualityControl={state.qualityControl}
           maintenanceControl={state.maintenanceControl}
           capabilityInventory={state.capabilityInventory}
+          selectedAgent={selectedAgent}
+          onSelectedAgentChange={setSelectedAgent}
         />
         <MemoizedFinOpsDashboard
           wallet={state.agenticCrypto}
@@ -1559,6 +1564,8 @@ function BrainHero({
   quietMode,
   onNavigate,
   liveCues,
+  selectedAgent,
+  onSelectedAgentChange,
 }: {
   state: MissionControlState;
   statuses: Map<AgentId, AgentStatus>;
@@ -1566,6 +1573,8 @@ function BrainHero({
   quietMode: boolean;
   onNavigate: (target: AttentionTarget) => void;
   liveCues: LiveCueState;
+  selectedAgent: AgentId | null;
+  onSelectedAgentChange: (agent: AgentId | null) => void;
 }) {
   const { events, approvals } = state;
   const heroAgents = HERO_AGENT_ORDER;
@@ -1626,6 +1635,8 @@ function BrainHero({
                 activeModelRoutes={state.activeModelRoutes || []}
                 activeWorks={state.workHot?.activeWorks || []}
                 changed={Boolean(liveCues.rows[cueRowKey("agent", agent)])}
+                selected={selectedAgent === agent}
+                onSelect={() => onSelectedAgentChange(selectedAgent === agent ? null : agent)}
               />
             );
           })}
@@ -4659,6 +4670,8 @@ function BrainAtlasEcosystemView({
   proofRows,
   sourceChangeLeases,
   memoryOperations,
+  selectedAgent,
+  onSelectedAgentChange,
 }: {
   agentRows: BrainAtlasEcosystemAgentRow[];
   activeWorks: ActiveWork[];
@@ -4667,14 +4680,17 @@ function BrainAtlasEcosystemView({
   proofRows: BrainAtlasProofRow[];
   sourceChangeLeases: SourceChangeLease[];
   memoryOperations?: MissionControlState["memoryOperations"];
+  selectedAgent: AgentId | null;
+  onSelectedAgentChange: (agent: AgentId | null) => void;
 }) {
-  const [selectedAgent, setSelectedAgent] = useState<AgentId | null>(null);
   const [drawer, setDrawer] = useState<{ kind: "event"; row: BrainAtlasProofRow } | { kind: "lease"; lease: SourceChangeLease } | null>(null);
   const activeLeases = sourceChangeLeases.filter((lease) => !lease.expired && timeValue(lease.expiresAt) > Date.now());
   const hasActiveControllers = agentRows.some(({ liveWork, workers, agent }) =>
     liveWork.working || workers.length > 0 || activeLeases.some((lease) => lease.agent === agent),
   );
-  const selectedEvent = proofRows[0] || null;
+  const selectedEvent = (selectedAgent
+    ? proofRows.find((row) => (row.agentId || row.agent.id) === selectedAgent)
+    : null) || proofRows[0] || null;
   const retrievals = Number(activity?.counts.retrievals || 0);
   const selected = Number(activity?.counts.selected || 0);
   const used = Number(activity?.counts.used || 0);
@@ -4683,6 +4699,9 @@ function BrainAtlasEcosystemView({
   const durable = sanitizedNestedMemoryCount(memoryOperations, "registry", "active");
   const pending = sanitizedNestedMemoryCount(memoryOperations, "review", "pending");
   const helpful = sanitizedNestedMemoryCount(memoryOperations, "retrieval", "helpful30d");
+  const queries7d = sanitizedNestedMemoryCount(memoryOperations, "retrieval", "queries7d");
+  const selected30d = sanitizedNestedMemoryCount(memoryOperations, "retrieval", "selected30d");
+  const used30d = sanitizedNestedMemoryCount(memoryOperations, "retrieval", "used30d");
   const provenance = sanitizedNestedMemoryMetric(memoryOperations, "registry", "provenanceCoveragePct", 100);
   const activeEventIsRecent = Boolean(activeMemoryEvent && memorySignalIsRecent(activeMemoryEvent.observedAt, activity?.motionWindowSeconds || 90));
   const signal = activeEventIsRecent ? activeMemoryEvent?.signal || null : null;
@@ -4705,6 +4724,7 @@ function BrainAtlasEcosystemView({
       className={`brain-ecosystem-view brain-atlas-section is-unified${hasActiveControllers ? " has-active-controllers" : " is-idle"}${activeLeases.length ? " has-change-lease" : ""}`}
       data-atlas-region={"unified"}
       data-memory-signal={signal || "idle"}
+      data-selected-agent={selectedAgent || ""}
       aria-labelledby="brain-ecosystem-heading"
       aria-describedby="brain-ecosystem-description"
     >
@@ -4727,7 +4747,7 @@ function BrainAtlasEcosystemView({
             </div>
           </div>
 
-          <div className="brain-memory-core" aria-label="Governed shared memory lifecycle">
+          <div className={`brain-memory-core${selectedAgent ? " has-agent-focus" : ""}`} aria-label="Governed shared memory lifecycle">
             {agentRows.map(({ agent, liveWork, workers, load }, index) => {
               const topology = agentTopology[agent];
               const agentLeases = activeLeases.filter((lease) => lease.agent === agent);
@@ -4755,8 +4775,11 @@ function BrainAtlasEcosystemView({
                   data-memory-operation={agentMemorySignal?.[0] || "none"}
                   data-agent-load-tier={load.tier}
                   data-agent-load-score={load.score}
+                  data-work-id={liveWork.status.work_id || liveWork.activeWork?.id || ""}
+                  data-run-id={liveWork.status.run_id || ""}
+                  data-linked-selected={selectedRow ? "true" : "false"}
                   aria-pressed={selectedRow}
-                  onClick={() => setSelectedAgent((current) => current === agent ? null : agent)}
+                  onClick={() => onSelectedAgentChange(selectedAgent === agent ? null : agent)}
                   style={{ "--agent-node-index": index } as React.CSSProperties}
                 >
                   <i className="memory-flow-node-aura" aria-hidden="true" />
@@ -4805,7 +4828,7 @@ function BrainAtlasEcosystemView({
                 return (
                   <g key={`agent-topology-${agent}`} data-memory-operation={memoryOperation} data-memory-state={memoryLive ? "live" : "quiet"}>
                     <path
-                      className={`memory-flow-edge brain-topology-link agent-${agent}${isActive ? " is-active" : ""}${memoryLive ? " is-live is-memory-live" : ""}`}
+                      className={`memory-flow-edge brain-topology-link agent-${agent}${isActive ? " is-active" : ""}${memoryLive ? " is-live is-memory-live" : ""}${selectedAgent === agent ? " is-selected-agent" : selectedAgent ? " is-muted-agent" : ""}`}
                       d={topology.path}
                       data-agent={agent}
                       data-operation={memoryOperation}
@@ -4813,7 +4836,7 @@ function BrainAtlasEcosystemView({
                     />
                     {workLive ? (
                       <path
-                        className={`memory-flow-edge brain-topology-link agent-${agent} is-active is-live is-work-lifeline`}
+                        className={`memory-flow-edge brain-topology-link agent-${agent} is-active is-live is-work-lifeline${selectedAgent === agent ? " is-selected-agent" : selectedAgent ? " is-muted-agent" : ""}`}
                         d={topology.path}
                         transform={memoryLive ? "translate(0 3)" : undefined}
                         data-agent={agent}
@@ -4846,13 +4869,13 @@ function BrainAtlasEcosystemView({
                 </g>
               ))}
             </svg>
-            <article className={`brain-memory-node is-retrieve${signal === "retrieval" || signal === "hit" ? " is-live" : ""}`}><Search size={17} /><span><b>Retrieve</b><em>{retrievals} receipts</em></span></article>
+            <article className={`brain-memory-node is-retrieve${signal === "retrieval" || signal === "hit" ? " is-live" : ""}`}><Search size={17} /><span><b>Retrieve</b><em>{retrievals} recent · {queries7d} / 7d</em></span></article>
             <article className="brain-memory-node is-provenance"><BookOpen size={17} /><span><b>Provenance</b><em>{provenance == null ? "—" : `${provenance}%`} sourced</em></span></article>
             <article className={`brain-memory-node is-durable${signal === "promoted" ? " is-live" : ""}`}><ShieldCheck size={17} /><span><b>Durable</b><em>{durable} governed</em></span></article>
             <article className={`brain-memory-registry${signal ? " is-live" : ""}`}><Database size={28} /><b>Memory Registry</b><em>{durable} active · {provenance == null ? "—" : `${provenance}%`} sourced</em><i /></article>
-            <article className={`brain-memory-node is-selected${signal === "selected" || signal === "used" ? " is-live" : ""}`}><CheckCircle2 size={17} /><span><b>Selected</b><em>{selected} items</em></span></article>
-            <article className={`brain-memory-node is-used${signal === "used" ? " is-live" : ""}`}><Braces size={17} /><span><b>Used in work</b><em>{used} applications</em></span></article>
-            <article className={`brain-memory-node is-helpful${signal === "feedback" ? " is-live" : ""}`}><ThumbsUp size={17} /><span><b>Helpful</b><em>{helpful} outcomes</em></span></article>
+            <article className={`brain-memory-node is-selected${signal === "selected" || signal === "used" ? " is-live" : ""}`}><CheckCircle2 size={17} /><span><b>Selected</b><em>{selected} recent · {selected30d} / 30d</em></span></article>
+            <article className={`brain-memory-node is-used${signal === "used" ? " is-live" : ""}`}><Braces size={17} /><span><b>Used in work</b><em>{used} recent · {used30d} / 30d</em></span></article>
+            <article className={`brain-memory-node is-helpful${signal === "feedback" ? " is-live" : ""}`}><ThumbsUp size={17} /><span><b>Helpful</b><em>{helpful} outcomes · 30d</em></span></article>
             <article className={`brain-memory-node is-candidate${signal === "proposed" || signal === "corrected" ? " is-live" : ""}`}><FileCheck2 size={17} /><span><b>Candidate</b><em>{pending || proposed} pending</em></span></article>
           </div>
 
@@ -4915,6 +4938,8 @@ function BrainAtlasPanel({
   qualityControl,
   maintenanceControl,
   capabilityInventory,
+  selectedAgent,
+  onSelectedAgentChange,
 }: {
   atlas?: BrainAtlas;
   ownershipGraph?: TaskOwnershipGraph;
@@ -4929,6 +4954,8 @@ function BrainAtlasPanel({
   qualityControl?: Record<string, unknown>;
   maintenanceControl?: Record<string, unknown>;
   capabilityInventory?: MissionControlState["capabilityInventory"];
+  selectedAgent: AgentId | null;
+  onSelectedAgentChange: (agent: AgentId | null) => void;
 }) {
   const [focusId, setFocusId] = useState("all");
   const [atlasMode, setAtlasMode] = useState<"evidence" | "ownership" | "operations" | "diagnostics">("evidence");
@@ -5191,6 +5218,8 @@ function BrainAtlasPanel({
           proofRows={recentProofRows}
           sourceChangeLeases={sourceChangeLeases || []}
           memoryOperations={memoryOperations}
+          selectedAgent={selectedAgent}
+          onSelectedAgentChange={onSelectedAgentChange}
         />
       ) : atlasMode === "ownership" ? <OwnershipGraphView graph={ownershipGraph} /> : atlasMode === "operations" ? (
         <BrainAtlasOperationsView activeModelRoutes={activeModelRoutes} todayJobs={todayJobs} todayJobsMeta={todayJobsMeta} qualityControl={qualityControl} capabilityInventory={capabilityInventory} />
@@ -6280,6 +6309,8 @@ function AgentHeroCard({
   activeModelRoutes,
   activeWorks,
   changed,
+  selected,
+  onSelect,
 }: {
   agent: AgentId;
   liveWork: AgentLiveWorkPresentation;
@@ -6287,6 +6318,8 @@ function AgentHeroCard({
   activeModelRoutes: ActiveModelRoute[];
   activeWorks: ActiveWork[];
   changed?: boolean;
+  selected: boolean;
+  onSelect: () => void;
 }) {
   const { status, activeWork, activeFocus, visualState } = liveWork;
   const objectiveRef = useRef<HTMLHeadingElement | null>(null);
@@ -6340,13 +6373,27 @@ function AgentHeroCard({
   }, [headline.title]);
   return (
     <article
-      className={`agent-hero-card ${agentClass(agent)} ${freshness} ${statusClass(status.status)} is-state-${visualState} ${activeFocus ? "is-working-focus" : promptReceived ? "is-prompt-received" : "is-up-next-focus"} ${verifiedRoute ? "has-verified-route" : "is-route-pending"}${changedRowClass(changed)}`}
+      className={`agent-hero-card ${agentClass(agent)} ${freshness} ${statusClass(status.status)} is-state-${visualState} ${activeFocus ? "is-working-focus" : promptReceived ? "is-prompt-received" : "is-up-next-focus"} ${verifiedRoute ? "has-verified-route" : "is-route-pending"}${selected ? " is-linked-selected" : ""}${changedRowClass(changed)}`}
+      role="button"
+      tabIndex={0}
+      aria-pressed={selected}
+      onClick={onSelect}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onSelect();
+        }
+      }}
       data-agent={agent}
       data-agent-working={visualState === "working" ? "true" : "false"}
       data-agent-activity={activityMode || "quiet"}
       data-model-family={verifiedRoute?.id || "unverified"}
       data-model-verified={verifiedRoute ? "true" : "false"}
       data-worker-count={workerRoutes.length}
+      data-work-id={status.work_id || activeWork?.id || ""}
+      data-run-id={status.run_id || ""}
+      data-work-state={visualState}
+      data-linked-selected={selected ? "true" : "false"}
       style={{
         "--agent-pulse-speed": `${pulseSpeed}s`,
         "--agent-rail-speed": `${railSpeed}s`,
@@ -6388,7 +6435,6 @@ function AgentHeroCard({
                       data-model-family={worker.modelFamily}
                       data-worker-stale={stale ? "true" : "false"}
                       role="img"
-                      tabIndex={0}
                       aria-label={accessibleLabel}
                       title={accessibleLabel}
                       style={{ "--worker-route-color": workerRoute.color } as React.CSSProperties}

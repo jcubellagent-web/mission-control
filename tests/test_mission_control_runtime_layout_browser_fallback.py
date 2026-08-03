@@ -858,6 +858,38 @@ def test_layout_rejects_live_work_and_atlas_presence_mismatch() -> None:
     assert any("do not match Live Work working agents" in failure for failure in failures)
 
 
+def test_layout_rejects_live_work_and_atlas_shared_focus_mismatch() -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    memory = measurements["memory"]
+    assert isinstance(memory, dict)
+    board = memory["liveWorkAgents"]
+    atlas = memory["atlasAgentNodes"]
+    assert isinstance(board, list)
+    assert isinstance(atlas, list)
+    next(row for row in board if row.get("agent") == "josh2")["selected"] = True
+    next(row for row in atlas if row.get("agent") == "jaimes")["selected"] = True
+
+    failures = runtime_layout.validate_control_tower_layout(measurements, label="reference-2048")
+
+    assert any("selected agents" in failure and "do not match" in failure for failure in failures)
+
+
+def test_layout_rejects_live_work_and_atlas_work_identity_mismatch() -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    memory = measurements["memory"]
+    assert isinstance(memory, dict)
+    board = memory["liveWorkAgents"]
+    atlas = memory["atlasAgentNodes"]
+    assert isinstance(board, list)
+    assert isinstance(atlas, list)
+    next(row for row in board if row.get("agent") == "josh2")["workId"] = "work-board"
+    next(row for row in atlas if row.get("agent") == "josh2")["workId"] = "work-atlas"
+
+    failures = runtime_layout.validate_control_tower_layout(measurements, label="reference-2048")
+
+    assert any("work identity disagrees" in failure for failure in failures)
+
+
 def test_layout_rejects_unverified_controller_disguised_as_verified() -> None:
     measurements = valid_kiosk_legibility_measurements()
     memory = measurements["memory"]

@@ -253,6 +253,9 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
       workState: String(element.getAttribute('data-work-state') || ''),
       memoryState: String(element.getAttribute('data-memory-state') || ''),
       memoryOperation: String(element.getAttribute('data-memory-operation') || 'none'),
+      workId: String(element.getAttribute('data-work-id') || ''),
+      runId: String(element.getAttribute('data-run-id') || ''),
+      selected: element.getAttribute('data-linked-selected') === 'true',
       workClass: element.classList.contains('is-work-active'),
       memoryClass: element.classList.contains('is-memory-live'),
       memoryReceiptVisible: memoryReceiptOpacity > 0,
@@ -285,6 +288,10 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
       modelChipFamily: String(modelChip?.getAttribute('data-model-family') || ''),
       modelChipVerified: modelChip?.getAttribute('data-model-verified') === 'true',
       workerCount: Number(element.getAttribute('data-worker-count') || 0),
+      workId: String(element.getAttribute('data-work-id') || ''),
+      runId: String(element.getAttribute('data-run-id') || ''),
+      workState: String(element.getAttribute('data-work-state') || ''),
+      selected: element.getAttribute('data-linked-selected') === 'true',
       visibleWorkerCount: workerModels.length,
       workerFamilies: workerModels.map((worker) => String(worker.getAttribute('data-model-family') || '')),
       workerLabels: workerModels.map((worker) => String(worker.getAttribute('aria-label') || '').trim()),
@@ -1355,6 +1362,23 @@ def validate_control_tower_layout(
             f"{label}: Brain Atlas working agents {atlas_working} do not match "
             f"Live Work working agents {board_working}"
         )
+    atlas_selected = sorted(
+        str(node.get("agent") or "")
+        for node in atlas_agent_nodes
+        if isinstance(node, dict) and node.get("selected") is True
+    )
+    board_selected = sorted(
+        str(node.get("agent") or "")
+        for node in live_work_agents
+        if isinstance(node, dict) and node.get("selected") is True
+    )
+    if len(atlas_selected) > 1 or len(board_selected) > 1:
+        failures.append(f"{label}: shared agent focus exposes more than one selected agent")
+    if atlas_selected != board_selected:
+        failures.append(
+            f"{label}: Brain Atlas selected agents {atlas_selected} do not match "
+            f"Live Work selected agents {board_selected}"
+        )
     board_by_agent = {
         str(card.get("agent") or ""): card
         for card in live_work_agents
@@ -1380,6 +1404,10 @@ def validate_control_tower_layout(
         board_card = board_by_agent.get(agent, {})
         if str(node.get("activity") or "") != str(board_card.get("activity") or ""):
             failures.append(f"{label}: Brain Atlas {agent} activity label disagrees with Live Work")
+        if str(node.get("workId") or "") != str(board_card.get("workId") or ""):
+            failures.append(f"{label}: Brain Atlas {agent} work identity disagrees with Live Work")
+        if str(node.get("runId") or "") != str(board_card.get("runId") or ""):
+            failures.append(f"{label}: Brain Atlas {agent} run identity disagrees with Live Work")
         atlas_worker_count = int(_number(node.get("workerCount"), missing=-1.0))
         board_worker_count = int(_number(board_card.get("workerCount"), missing=-2.0))
         if atlas_worker_count != board_worker_count:

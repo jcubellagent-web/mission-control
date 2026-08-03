@@ -1109,6 +1109,19 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertIn("display: grid;", styles[styles.index("#brain-atlas .brain-ecosystem-view {"):])
         self.assertIn(".brain-micro-legend {\n  display: none;", styles)
 
+    def test_live_work_and_atlas_share_agent_focus_and_explicit_memory_windows(self) -> None:
+        main = (MISSION_CONTROL / "v2-react" / "src" / "main.tsx").read_text(encoding="utf-8")
+        styles = (MISSION_CONTROL / "v2-react" / "src" / "styles.css").read_text(encoding="utf-8")
+        self.assertIn("const [selectedAgent, setSelectedAgent] = useState<AgentId | null>(null);", main)
+        self.assertIn("onSelectedAgentChange={setSelectedAgent}", main)
+        self.assertIn('data-linked-selected={selected ? "true" : "false"}', main)
+        self.assertIn('data-linked-selected={selectedRow ? "true" : "false"}', main)
+        self.assertIn("{retrievals} recent · {queries7d} / 7d", main)
+        self.assertIn("{selected} recent · {selected30d} / 30d", main)
+        self.assertIn("{used} recent · {used30d} / 30d", main)
+        self.assertIn(".agent-hero-card.is-linked-selected", styles)
+        self.assertIn(".brain-topology-link.is-selected-agent", styles)
+
     def test_kiosk_respects_user_motion_preference_and_guard_protects_launcher(self) -> None:
         launcher = (MISSION_CONTROL / "scripts" / "open_mission_control_kiosk.sh").read_text(encoding="utf-8")
         guard = (MISSION_CONTROL / "scripts" / "control_tower_change_guard.py").read_text(encoding="utf-8")
