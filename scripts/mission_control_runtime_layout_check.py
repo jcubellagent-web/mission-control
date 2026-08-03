@@ -457,7 +457,7 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
     '.memory-flow-node-title, .brain-agent-node-heading strong, .brain-memory-node b, .brain-memory-registry b, .brain-atlas-proof-title',
     '.memory-flow-node-detail, .brain-agent-node-objective, .brain-agent-node-meta, .brain-agent-node-route, .brain-atlas-proof-detail, .brain-atlas-proof-time',
     '.brain-atlas-lane-label, .brain-agent-node-heading b, .brain-atlas-proof-column',
-    '.memory-flow-node, .brain-agent-graph-node, .brain-memory-node, .brain-memory-registry, .brain-atlas-proof-work, .brain-atlas-proof-receipt, .brain-atlas-proof-model',
+    '.memory-flow-node, .brain-atlas-proof-work, .brain-atlas-proof-receipt, .brain-atlas-proof-model, .brain-agent-graph-node, .brain-memory-node, .brain-memory-registry',
     '.brain-agent-graph-node, .brain-memory-node.is-selected, .brain-memory-node.is-helpful'
   );
   const visibleAtlasRegions = [...document.querySelectorAll('#brain-atlas [data-atlas-region]')].filter(visible);
