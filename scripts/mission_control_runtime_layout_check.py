@@ -231,6 +231,38 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
       filter: style.filter,
     };
   });
+  const directedFlowPaths = [...document.querySelectorAll('#brain-atlas .brain-memory-core path[data-flow-direction="forward"]')];
+  const flowNodeRects = [...document.querySelectorAll('#brain-atlas .brain-memory-core [data-flow-node]')].map((element) => ({
+    id: String(element.getAttribute('data-flow-node') || ''),
+    rect: element.getBoundingClientRect(),
+  }));
+  const flowPathCollisions = [];
+  let flowGeometryMeasuredCount = 0;
+  directedFlowPaths.forEach((path) => {
+    const from = String(path.getAttribute('data-flow-from') || '');
+    const to = String(path.getAttribute('data-flow-to') || '');
+    const matrix = path.getScreenCTM?.();
+    const length = path.getTotalLength?.() || 0;
+    if (!matrix || !length) return;
+    flowGeometryMeasuredCount += 1;
+    for (let index = 2; index <= 18; index += 1) {
+      const point = path.getPointAtLength(length * index / 20).matrixTransform(matrix);
+      const blocker = flowNodeRects.find(({id, rect}) => (
+        id && id !== from && id !== to
+        && point.x > rect.left + 2 && point.x < rect.right - 2
+        && point.y > rect.top + 2 && point.y < rect.bottom - 2
+      ));
+      if (blocker) {
+        flowPathCollisions.push(`${from}->${to}:${blocker.id}`);
+        break;
+      }
+    }
+  });
+  const directedFlowRoutes = directedFlowPaths.map((path) => ({
+    from: String(path.getAttribute('data-flow-from') || ''),
+    to: String(path.getAttribute('data-flow-to') || ''),
+    markerEnd: String(getComputedStyle(path).markerEnd || ''),
+  }));
     const atlasAgentNodes = [...document.querySelectorAll('#brain-atlas .memory-flow-node.is-agent')].map((element) => {
     const aura = element.querySelector('.memory-flow-node-aura');
     const presenceDot = element.querySelector('.memory-flow-presence-dot');
@@ -541,6 +573,12 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
       liveEdgeCount: memoryEdges.filter((edge) => edge.live).length,
       animatedEdgeCount: memoryEdges.filter((edge) => edge.animated).length,
       animatedInactiveCount: memoryEdges.filter((edge) => edge.animated && !edge.live).length,
+      directedFlowCount: directedFlowRoutes.length,
+      directedFlowRoutes,
+      directedFlowMissingArrowCount: directedFlowRoutes.filter((route) => !route.markerEnd || route.markerEnd === 'none').length,
+      flowNodeCount: flowNodeRects.length,
+      flowGeometryMeasuredCount,
+      flowPathCollisions: [...new Set(flowPathCollisions)],
       atlasAgentNodes,
       liveWorkAgents,
       workingAgentCount: Number(document.querySelector('#brain-atlas')?.getAttribute('data-working-agent-count') || 0),
@@ -1269,6 +1307,39 @@ def validate_control_tower_layout(
                 failures.append(f"{label}: live {operation} path lacks a visible moving dash")
     if int(_number(memory.get("animatedInactiveCount"), missing=-1.0)) != 0:
         failures.append(f"{label}: an unevidenced Brain Atlas path is animated")
+    directed_flow_count = int(_number(memory.get("directedFlowCount"), missing=-1.0))
+    if directed_flow_count < 13:
+        failures.append(f"{label}: Brain Atlas exposes {directed_flow_count} directed paths (requires at least 13)")
+    if int(_number(memory.get("directedFlowMissingArrowCount"), missing=-1.0)) != 0:
+        failures.append(f"{label}: a Brain Atlas directed path lacks a visible destination arrow")
+    if int(_number(memory.get("flowNodeCount"), missing=-1.0)) < 12:
+        failures.append(f"{label}: Brain Atlas flow-node identity coverage is incomplete")
+    if int(_number(memory.get("flowGeometryMeasuredCount"), missing=-1.0)) != directed_flow_count:
+        failures.append(f"{label}: Brain Atlas directed-path geometry was not fully measurable")
+    flow_path_collisions = memory.get("flowPathCollisions") if isinstance(memory.get("flowPathCollisions"), list) else None
+    if flow_path_collisions is None:
+        failures.append(f"{label}: Brain Atlas path-to-node collision measurements are missing")
+    elif flow_path_collisions:
+        failures.append(f"{label}: Brain Atlas directed paths cross unrelated nodes: {flow_path_collisions}")
+    directed_routes = memory.get("directedFlowRoutes") if isinstance(memory.get("directedFlowRoutes"), list) else []
+    route_pairs = {
+        (str(route.get("from") or ""), str(route.get("to") or ""))
+        for route in directed_routes
+        if isinstance(route, dict)
+    }
+    expected_lifecycle_routes = {
+        ("activity-bus", "retrieve"),
+        ("retrieve", "registry"),
+        ("provenance", "registry"),
+        ("registry", "selected"),
+        ("selected", "used"),
+        ("used", "helpful"),
+        ("helpful", "candidate"),
+        ("candidate", "durable"),
+        ("durable", "registry"),
+    }
+    if not expected_lifecycle_routes.issubset(route_pairs):
+        failures.append(f"{label}: Brain Atlas lifecycle is missing an explicit source-to-destination route")
     if flow_state in {"live", "work-live"} and not live_edges:
         failures.append(f"{label}: Brain Atlas reports live activity without an exact live path")
     if flow_state in {"idle", "unavailable"} and live_edges:
@@ -1990,6 +2061,26 @@ def self_test() -> int:
             "liveEdgeCount": 1,
             "animatedEdgeCount": 1,
             "animatedInactiveCount": 0,
+            "directedFlowCount": 13,
+            "directedFlowMissingArrowCount": 0,
+            "flowNodeCount": 12,
+            "flowGeometryMeasuredCount": 13,
+            "flowPathCollisions": [],
+            "directedFlowRoutes": [
+                {"from": "joshex", "to": "activity-bus", "markerEnd": "url(#brain-arrow-agent)"},
+                {"from": "josh2", "to": "activity-bus", "markerEnd": "url(#brain-arrow-agent)"},
+                {"from": "jaimes", "to": "activity-bus", "markerEnd": "url(#brain-arrow-agent)"},
+                {"from": "jain", "to": "activity-bus", "markerEnd": "url(#brain-arrow-agent)"},
+                {"from": "activity-bus", "to": "retrieve", "markerEnd": "url(#brain-arrow-agent)"},
+                {"from": "retrieve", "to": "registry", "markerEnd": "url(#brain-arrow-recall)"},
+                {"from": "provenance", "to": "registry", "markerEnd": "url(#brain-arrow-used)"},
+                {"from": "registry", "to": "selected", "markerEnd": "url(#brain-arrow-selected)"},
+                {"from": "selected", "to": "used", "markerEnd": "url(#brain-arrow-used)"},
+                {"from": "used", "to": "helpful", "markerEnd": "url(#brain-arrow-feedback)"},
+                {"from": "helpful", "to": "candidate", "markerEnd": "url(#brain-arrow-governed)"},
+                {"from": "candidate", "to": "durable", "markerEnd": "url(#brain-arrow-governed)"},
+                {"from": "durable", "to": "registry", "markerEnd": "url(#brain-arrow-governed)"},
+            ],
             "atlasAgentNodes": [
                 {"agent": "joshex", "layer": "memory", "working": False, "activity": "quiet", "workerCount": 0, "workerLaneCount": 0, "workerLaneFamily": "", "workState": "quiet", "memoryState": "idle", "memoryOperation": "retrieval", "workClass": False, "memoryClass": False, "memoryReceiptVisible": False, "auraAnimationName": "none", "presenceAnimationName": "none", "memoryAnimationName": "none", "workAnimated": False, "memoryAnimated": False, "animated": False},
                 {"agent": "josh2", "layer": "memory", "working": True, "activity": "thinking", "workerCount": 1, "workerLaneCount": 1, "workerLaneFamily": "ollama", "workState": "working", "memoryState": "live", "memoryOperation": "retrieval", "workClass": True, "memoryClass": True, "memoryReceiptVisible": True, "auraAnimationName": "memory-agent-presence-halo", "presenceAnimationName": "memory-agent-presence-dot", "memoryAnimationName": "none", "memoryFilter": "none", "memoryStrokeWidth": 3.1, "workAnimated": True, "memoryAnimated": False, "animated": True},

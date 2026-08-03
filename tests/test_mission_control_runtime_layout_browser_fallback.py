@@ -96,6 +96,26 @@ def valid_kiosk_legibility_measurements() -> dict[str, object]:
             "liveEdgeCount": 1,
             "animatedEdgeCount": 1,
             "animatedInactiveCount": 0,
+            "directedFlowCount": 13,
+            "directedFlowMissingArrowCount": 0,
+            "flowNodeCount": 12,
+            "flowGeometryMeasuredCount": 13,
+            "flowPathCollisions": [],
+            "directedFlowRoutes": [
+                {"from": "joshex", "to": "activity-bus", "markerEnd": "url(#brain-arrow-agent)"},
+                {"from": "josh2", "to": "activity-bus", "markerEnd": "url(#brain-arrow-agent)"},
+                {"from": "jaimes", "to": "activity-bus", "markerEnd": "url(#brain-arrow-agent)"},
+                {"from": "jain", "to": "activity-bus", "markerEnd": "url(#brain-arrow-agent)"},
+                {"from": "activity-bus", "to": "retrieve", "markerEnd": "url(#brain-arrow-agent)"},
+                {"from": "retrieve", "to": "registry", "markerEnd": "url(#brain-arrow-recall)"},
+                {"from": "provenance", "to": "registry", "markerEnd": "url(#brain-arrow-used)"},
+                {"from": "registry", "to": "selected", "markerEnd": "url(#brain-arrow-selected)"},
+                {"from": "selected", "to": "used", "markerEnd": "url(#brain-arrow-used)"},
+                {"from": "used", "to": "helpful", "markerEnd": "url(#brain-arrow-feedback)"},
+                {"from": "helpful", "to": "candidate", "markerEnd": "url(#brain-arrow-governed)"},
+                {"from": "candidate", "to": "durable", "markerEnd": "url(#brain-arrow-governed)"},
+                {"from": "durable", "to": "registry", "markerEnd": "url(#brain-arrow-governed)"},
+            ],
             "atlasAgentNodes": [
                 {"agent": "joshex", "layer": "memory", "working": False, "activity": "quiet", "workerCount": 0, "workerLaneCount": 0, "workerLaneFamily": "", "workState": "quiet", "memoryState": "idle", "memoryOperation": "retrieval", "workClass": False, "memoryClass": False, "memoryReceiptVisible": False, "auraAnimationName": "none", "presenceAnimationName": "none", "memoryAnimationName": "none", "workAnimated": False, "memoryAnimated": False, "animated": False},
                 {"agent": "josh2", "layer": "memory", "working": True, "activity": "thinking", "workerCount": 1, "workerLaneCount": 1, "workerLaneFamily": "antigravity", "workState": "working", "memoryState": "live", "memoryOperation": "retrieval", "workClass": True, "memoryClass": True, "memoryReceiptVisible": True, "auraAnimationName": "memory-agent-presence-halo", "presenceAnimationName": "memory-agent-presence-dot", "memoryAnimationName": "none", "memoryFilter": "none", "memoryStrokeWidth": 3.1, "workAnimated": True, "memoryAnimated": False, "animated": True},
@@ -856,6 +876,19 @@ def test_layout_rejects_live_work_and_atlas_presence_mismatch() -> None:
     failures = runtime_layout.validate_control_tower_layout(measurements, label="reference-2048")
 
     assert any("do not match Live Work working agents" in failure for failure in failures)
+
+
+def test_layout_rejects_ambiguous_or_occluded_brain_atlas_paths() -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    memory = measurements["memory"]
+    assert isinstance(memory, dict)
+    memory["directedFlowMissingArrowCount"] = 1
+    memory["flowPathCollisions"] = ["registry->selected:used"]
+
+    failures = runtime_layout.validate_control_tower_layout(measurements, label="reference-2048")
+
+    assert any("lacks a visible destination arrow" in failure for failure in failures)
+    assert any("directed paths cross unrelated nodes" in failure for failure in failures)
 
 
 def test_layout_rejects_live_work_and_atlas_shared_focus_mismatch() -> None:

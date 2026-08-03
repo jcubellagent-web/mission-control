@@ -7698,6 +7698,145 @@ p {
   }
 }
 
+/* Directional Brain Atlas topology: agent work merges at one activity bus,
+   then the governed memory lifecycle advances clockwise without crossings. */
+#brain-atlas .brain-memory-core > svg {
+  z-index: 1;
+}
+
+#brain-atlas .brain-memory-node,
+#brain-atlas .brain-memory-registry {
+  z-index: 3;
+}
+
+#brain-atlas .brain-agent-graph-node {
+  z-index: 4;
+}
+
+#brain-atlas .brain-memory-link {
+  stroke-dasharray: none;
+  opacity: 0.72;
+}
+
+#brain-atlas .brain-memory-link.is-live {
+  stroke-dasharray: 6 5;
+  opacity: 1;
+}
+
+#brain-atlas .brain-agent-bus,
+#brain-atlas .brain-agent-trunk {
+  fill: none;
+  stroke: rgba(126, 164, 183, 0.56);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+#brain-atlas .brain-agent-trunk {
+  stroke: rgba(220, 144, 220, 0.76);
+  stroke-width: 2;
+}
+
+#brain-atlas .brain-agent-bus-junction {
+  fill: #9cb8c5;
+  stroke: rgba(3, 17, 31, 0.96);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+#brain-atlas .brain-agent-bus-label {
+  fill: #8da8b5;
+  font-size: 7px;
+  font-weight: 850;
+  letter-spacing: 0.16em;
+}
+
+#brain-atlas .brain-topology-link {
+  stroke-width: 1.6;
+}
+
+#brain-atlas .brain-topology-link.is-active {
+  stroke-width: 2.1;
+}
+
+#brain-atlas .brain-topology-link.is-live {
+  stroke-width: 2.35;
+  stroke-dasharray: 5 4;
+}
+
+#brain-atlas #brain-arrow-agent path { fill: #9cb8c5; }
+#brain-atlas #brain-arrow-recall path { fill: #e195df; }
+#brain-atlas #brain-arrow-selected path { fill: #43dee3; }
+#brain-atlas #brain-arrow-used path { fill: #65d9ff; }
+#brain-atlas #brain-arrow-feedback path { fill: #c7ef34; }
+#brain-atlas #brain-arrow-governed path { fill: #c7b9af; }
+
+#brain-atlas .brain-memory-node.is-retrieve {
+  left: 30%;
+  top: 50%;
+  width: 190px;
+  min-height: 68px;
+  transform: translateY(-50%);
+}
+
+#brain-atlas .brain-memory-node.is-provenance {
+  left: 56%;
+  top: 0.5%;
+  width: 202px;
+  min-height: 68px;
+  transform: translateX(-50%);
+  background: rgba(4, 20, 35, 0.92);
+}
+
+#brain-atlas .brain-memory-node.is-durable {
+  left: 30%;
+  bottom: 1%;
+  width: 190px;
+  min-height: 68px;
+}
+
+#brain-atlas .brain-memory-node.is-candidate {
+  right: 23%;
+  bottom: 1%;
+  width: 202px;
+  min-height: 68px;
+}
+
+#brain-atlas .brain-memory-node.is-selected,
+#brain-atlas .brain-memory-node.is-used,
+#brain-atlas .brain-memory-node.is-helpful {
+  right: 1%;
+  width: 224px;
+  min-height: 76px;
+}
+
+#brain-atlas .brain-memory-node.is-selected { top: 1%; }
+#brain-atlas .brain-memory-node.is-used { top: 50%; transform: translateY(-50%); }
+#brain-atlas .brain-memory-node.is-helpful { bottom: 1%; }
+
+#brain-atlas .brain-memory-link.is-review,
+#brain-atlas .brain-memory-link.is-candidate,
+#brain-atlas .brain-memory-link.is-durable {
+  stroke: rgba(199, 185, 175, 0.62);
+  stroke-width: 1.55;
+}
+
+#brain-atlas .brain-memory-link.is-durable {
+  stroke: rgba(199, 239, 52, 0.62);
+}
+
+#brain-atlas .brain-memory-link.is-provenance {
+  stroke: rgba(139, 215, 255, 0.58);
+  stroke-dasharray: 3 4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #brain-atlas .brain-memory-link.is-live,
+  #brain-atlas .brain-topology-link.is-live {
+    stroke-dasharray: none;
+  }
+}
+
 .job-category-list {
   display: grid;
   gap: 3px;

@@ -1094,7 +1094,7 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertIn("brain-memory-link is-provenance", main)
         self.assertIn("brain-memory-link is-used", main)
         self.assertIn('brain-memory-packet is-selected-packet', main)
-        self.assertIn('M 912 42 C 912 60 912 74 912 88', main)
+        self.assertIn('M 894 52 V 84', main)
         self.assertIn('data-agent-anchor={agent}', main)
         self.assertIn('data-subagent-count={workers.length}', main)
         self.assertIn('brain-topology-link agent-${agent}', main)
@@ -1121,6 +1121,19 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertIn("{used} recent · {used30d} / 30d", main)
         self.assertIn(".agent-hero-card.is-linked-selected", styles)
         self.assertIn(".brain-topology-link.is-selected-agent", styles)
+
+    def test_brain_atlas_uses_one_directed_activity_bus_and_collision_safe_lifecycle(self) -> None:
+        main = (MISSION_CONTROL / "v2-react" / "src" / "main.tsx").read_text(encoding="utf-8")
+        runtime = (MISSION_CONTROL / "scripts" / "mission_control_runtime_layout_check.py").read_text(encoding="utf-8")
+        self.assertIn('className="brain-agent-bus"', main)
+        self.assertIn('data-flow-from="activity-bus" data-flow-to="retrieve"', main)
+        self.assertIn('data-flow-from="retrieve" data-flow-to="registry"', main)
+        self.assertIn('data-flow-from="registry" data-flow-to="selected"', main)
+        self.assertIn('data-flow-from="helpful" data-flow-to="candidate"', main)
+        self.assertIn('data-flow-from="candidate" data-flow-to="durable"', main)
+        self.assertIn('data-flow-from="durable" data-flow-to="registry"', main)
+        self.assertIn("directedFlowMissingArrowCount", runtime)
+        self.assertIn("flowPathCollisions", runtime)
 
     def test_kiosk_respects_user_motion_preference_and_guard_protects_launcher(self) -> None:
         launcher = (MISSION_CONTROL / "scripts" / "open_mission_control_kiosk.sh").read_text(encoding="utf-8")

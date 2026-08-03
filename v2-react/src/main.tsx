@@ -4713,10 +4713,10 @@ function BrainAtlasEcosystemView({
     { key: "verified", label: "Verified", icon: ShieldCheck, time: selectedEvent?.receipt.observedAt, count: proofRows.length },
   ];
   const agentTopology = {
-    joshex: { path: "M 218 30 C 326 30 414 72 488 96", position: "is-left-1" },
-    josh2: { path: "M 218 84 C 330 84 416 98 488 105", position: "is-left-2" },
-    jaimes: { path: "M 218 136 C 330 136 416 122 488 115", position: "is-left-3" },
-    jain: { path: "M 218 190 C 326 190 414 148 488 124", position: "is-left-4" },
+    joshex: { path: "M 260 28 H 274", position: "is-left-1" },
+    josh2: { path: "M 260 82 H 274", position: "is-left-2" },
+    jaimes: { path: "M 260 138 H 274", position: "is-left-3" },
+    jain: { path: "M 260 192 H 274", position: "is-left-4" },
   } satisfies Record<AgentId, { path: string; position: string }>;
 
   return (
@@ -4778,6 +4778,7 @@ function BrainAtlasEcosystemView({
                   data-work-id={liveWork.status.work_id || liveWork.activeWork?.id || ""}
                   data-run-id={liveWork.status.run_id || ""}
                   data-linked-selected={selectedRow ? "true" : "false"}
+                  data-flow-node={agent}
                   aria-pressed={selectedRow}
                   onClick={() => onSelectedAgentChange(selectedAgent === agent ? null : agent)}
                   style={{ "--agent-node-index": index } as React.CSSProperties}
@@ -4805,18 +4806,31 @@ function BrainAtlasEcosystemView({
             })}
             <svg viewBox="0 0 1000 220" preserveAspectRatio="none" aria-hidden="true" data-memory-source="governed-memory-registry">
               <title>Governed shared-memory activity and agent ecosystem paths</title>
-              <desc>Verified recall, selection, feedback, durable-memory, controller, worker, and model-route activity.</desc>
-              <path className={`memory-flow-edge brain-memory-link is-recall${signal === "retrieval" || signal === "hit" ? " is-live" : ""}`} d="M 398 24 C 430 34 458 76 488 100" data-operation={signal === "hit" ? "hit" : "retrieval"} data-observed-at={activity?.lastObservedAt.retrieval || ""} />
-              <path className="brain-memory-link is-provenance" d="M 500 42 C 512 54 532 62 548 70" data-operation="provenance" />
-              <path className="brain-memory-link is-durable" d="M 398 196 C 432 188 460 148 488 124" />
-              <path className={`memory-flow-edge brain-memory-link is-selected${signal === "selected" ? " is-live" : ""}`} d="M 632 98 C 714 76 790 22 860 22" data-operation="selected" data-observed-at={activity?.lastObservedAt.selected || ""} />
-              <path className={`memory-flow-edge brain-memory-link is-used${signal === "used" ? " is-live" : ""}`} d="M 912 42 C 912 60 912 74 912 88" data-operation="used" data-observed-at={activity?.lastObservedAt.used || ""} />
-              <path className="brain-memory-link is-candidate" d="M 624 138 C 656 158 686 180 714 184" />
-              <path className={`memory-flow-edge brain-memory-link is-feedback${signal === "feedback" ? " is-live" : ""}`} d="M 912 132 C 940 148 940 164 912 180" data-operation="feedback" data-observed-at={activity?.lastObservedAt.feedback || ""} />
-              <circle className={`brain-memory-packet is-recall-packet${signal === "retrieval" || signal === "hit" ? " is-live" : ""}`} r="4"><animateMotion dur="2.2s" repeatCount="indefinite" path="M 398 24 C 430 34 458 76 488 100" /></circle>
-              <circle className={`brain-memory-packet is-selected-packet${signal === "selected" ? " is-live" : ""}`} r="4"><animateMotion dur="1.55s" repeatCount="indefinite" path="M 632 98 C 714 76 790 22 860 22" /></circle>
-              <circle className={`brain-memory-packet is-used-packet${signal === "used" ? " is-live" : ""}`} r="4"><animateMotion dur="1.2s" repeatCount="indefinite" path="M 912 42 C 912 60 912 74 912 88" /></circle>
-              <circle className={`brain-memory-packet is-feedback-packet${signal === "feedback" ? " is-live" : ""}`} r="4"><animateMotion dur="1.45s" repeatCount="indefinite" path="M 912 132 C 940 148 940 164 912 180" /></circle>
+              <desc>Four agent branches feed one activity bus. Arrowed paths then show retrieval, selection, application, feedback, review, and durable promotion without crossing a node.</desc>
+              <defs>
+                <marker id="brain-arrow-agent" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 8 4 L 0 8 Z" /></marker>
+                <marker id="brain-arrow-recall" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 8 4 L 0 8 Z" /></marker>
+                <marker id="brain-arrow-selected" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 8 4 L 0 8 Z" /></marker>
+                <marker id="brain-arrow-used" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 8 4 L 0 8 Z" /></marker>
+                <marker id="brain-arrow-feedback" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 8 4 L 0 8 Z" /></marker>
+                <marker id="brain-arrow-governed" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 8 4 L 0 8 Z" /></marker>
+              </defs>
+              <path className="brain-agent-bus" d="M 274 28 V 192" data-flow-route="agent-activity-bus" />
+              <text className="brain-agent-bus-label" x="284" y="110" textAnchor="middle" transform="rotate(-90 284 110)">ACTIVITY BUS</text>
+              {[28, 82, 110, 138, 192].map((y) => <circle key={`bus-junction-${y}`} className="brain-agent-bus-junction" cx="274" cy={y} r="2.2" />)}
+              <path className="brain-agent-trunk" d="M 274 110 H 300" markerEnd="url(#brain-arrow-agent)" data-flow-direction="forward" data-flow-from="activity-bus" data-flow-to="retrieve" />
+              <path className={`memory-flow-edge brain-memory-link is-recall${signal === "retrieval" || signal === "hit" ? " is-live" : ""}`} d="M 466 110 C 470 110 474 107 478 102" markerEnd="url(#brain-arrow-recall)" data-flow-direction="forward" data-flow-from="retrieve" data-flow-to="registry" data-operation={signal === "hit" ? "hit" : "retrieval"} data-observed-at={activity?.lastObservedAt.retrieval || ""} />
+              <path className="brain-memory-link is-provenance" d="M 560 44 V 50" markerEnd="url(#brain-arrow-used)" data-flow-direction="forward" data-flow-from="provenance" data-flow-to="registry" data-operation="provenance" />
+              <path className={`memory-flow-edge brain-memory-link is-selected${signal === "selected" ? " is-live" : ""}`} d="M 635 80 C 686 61 744 36 798 28" markerEnd="url(#brain-arrow-selected)" data-flow-direction="forward" data-flow-from="registry" data-flow-to="selected" data-operation="selected" data-observed-at={activity?.lastObservedAt.selected || ""} />
+              <path className={`memory-flow-edge brain-memory-link is-used${signal === "used" ? " is-live" : ""}`} d="M 894 52 V 84" markerEnd="url(#brain-arrow-used)" data-flow-direction="forward" data-flow-from="selected" data-flow-to="used" data-operation="used" data-observed-at={activity?.lastObservedAt.used || ""} />
+              <path className={`memory-flow-edge brain-memory-link is-feedback${signal === "feedback" ? " is-live" : ""}`} d="M 894 136 V 168" markerEnd="url(#brain-arrow-feedback)" data-flow-direction="forward" data-flow-from="used" data-flow-to="helpful" data-operation="feedback" data-observed-at={activity?.lastObservedAt.feedback || ""} />
+              <path className="brain-memory-link is-candidate" d="M 798 194 H 772" markerEnd="url(#brain-arrow-governed)" data-flow-direction="forward" data-flow-from="helpful" data-flow-to="candidate" />
+              <path className="brain-memory-link is-review" d="M 596 194 H 466" markerEnd="url(#brain-arrow-governed)" data-flow-direction="forward" data-flow-from="candidate" data-flow-to="durable" />
+              <path className="brain-memory-link is-durable" d="M 466 184 C 500 174 514 158 526 148" markerEnd="url(#brain-arrow-governed)" data-flow-direction="forward" data-flow-from="durable" data-flow-to="registry" />
+              {signal === "retrieval" || signal === "hit" ? <circle className="brain-memory-packet is-recall-packet is-live" r="4"><animateMotion dur="1.4s" repeatCount="indefinite" path="M 466 110 C 470 110 474 107 478 102" /></circle> : null}
+              {signal === "selected" ? <circle className="brain-memory-packet is-selected-packet is-live" r="4"><animateMotion dur="1.55s" repeatCount="indefinite" path="M 635 80 C 686 61 744 36 798 28" /></circle> : null}
+              {signal === "used" ? <circle className="brain-memory-packet is-used-packet is-live" r="4"><animateMotion dur="1.2s" repeatCount="indefinite" path="M 894 52 V 84" /></circle> : null}
+              {signal === "feedback" ? <circle className="brain-memory-packet is-feedback-packet is-live" r="4"><animateMotion dur="1.25s" repeatCount="indefinite" path="M 894 136 V 168" /></circle> : null}
               {agentRows.map(({ agent, liveWork, workers }) => {
                 const topology = agentTopology[agent];
                 const latest = latestAgentMemorySignal(agentRows.find((row) => row.agent === agent)?.memory);
@@ -4833,18 +4847,11 @@ function BrainAtlasEcosystemView({
                       data-agent={agent}
                       data-operation={memoryOperation}
                       data-observed-at={latest?.[1] || ""}
+                      markerEnd="url(#brain-arrow-agent)"
+                      data-flow-direction="forward"
+                      data-flow-from={agent}
+                      data-flow-to="activity-bus"
                     />
-                    {workLive ? (
-                      <path
-                        className={`memory-flow-edge brain-topology-link agent-${agent} is-active is-live is-work-lifeline${selectedAgent === agent ? " is-selected-agent" : selectedAgent ? " is-muted-agent" : ""}`}
-                        d={topology.path}
-                        transform={memoryLive ? "translate(0 3)" : undefined}
-                        data-agent={agent}
-                        data-operation="live-work"
-                        data-observed-at={workObservedAt}
-                      />
-                    ) : null}
-                    {memoryLive ? <circle className={`brain-topology-packet agent-${agent} is-memory-live`} r="3"><animateMotion dur="1.6s" repeatCount="indefinite" path={topology.path} /></circle> : null}
                   </g>
                 );
               })}
@@ -4869,14 +4876,14 @@ function BrainAtlasEcosystemView({
                 </g>
               ))}
             </svg>
-            <article className={`brain-memory-node is-retrieve${signal === "retrieval" || signal === "hit" ? " is-live" : ""}`}><Search size={17} /><span><b>Retrieve</b><em>{retrievals} recent · {queries7d} / 7d</em></span></article>
-            <article className="brain-memory-node is-provenance"><BookOpen size={17} /><span><b>Provenance</b><em>{provenance == null ? "—" : `${provenance}%`} sourced</em></span></article>
-            <article className={`brain-memory-node is-durable${signal === "promoted" ? " is-live" : ""}`}><ShieldCheck size={17} /><span><b>Durable</b><em>{durable} governed</em></span></article>
-            <article className={`brain-memory-registry${signal ? " is-live" : ""}`}><Database size={28} /><b>Memory Registry</b><em>{durable} active · {provenance == null ? "—" : `${provenance}%`} sourced</em><i /></article>
-            <article className={`brain-memory-node is-selected${signal === "selected" || signal === "used" ? " is-live" : ""}`}><CheckCircle2 size={17} /><span><b>Selected</b><em>{selected} recent · {selected30d} / 30d</em></span></article>
-            <article className={`brain-memory-node is-used${signal === "used" ? " is-live" : ""}`}><Braces size={17} /><span><b>Used in work</b><em>{used} recent · {used30d} / 30d</em></span></article>
-            <article className={`brain-memory-node is-helpful${signal === "feedback" ? " is-live" : ""}`}><ThumbsUp size={17} /><span><b>Helpful</b><em>{helpful} outcomes · 30d</em></span></article>
-            <article className={`brain-memory-node is-candidate${signal === "proposed" || signal === "corrected" ? " is-live" : ""}`}><FileCheck2 size={17} /><span><b>Candidate</b><em>{pending || proposed} pending</em></span></article>
+            <article data-flow-node="retrieve" className={`brain-memory-node is-retrieve${signal === "retrieval" || signal === "hit" ? " is-live" : ""}`}><Search size={17} /><span><b>Retrieve</b><em>{retrievals} recent · {queries7d} / 7d</em></span></article>
+            <article data-flow-node="provenance" className="brain-memory-node is-provenance"><BookOpen size={17} /><span><b>Provenance</b><em>{provenance == null ? "—" : `${provenance}%`} sourced</em></span></article>
+            <article data-flow-node="durable" className={`brain-memory-node is-durable${signal === "promoted" ? " is-live" : ""}`}><ShieldCheck size={17} /><span><b>Durable</b><em>{durable} governed</em></span></article>
+            <article data-flow-node="registry" className={`brain-memory-registry${signal ? " is-live" : ""}`}><Database size={28} /><b>Memory Registry</b><em>{durable} active · {provenance == null ? "—" : `${provenance}%`} sourced</em><i /></article>
+            <article data-flow-node="selected" className={`brain-memory-node is-selected${signal === "selected" || signal === "used" ? " is-live" : ""}`}><CheckCircle2 size={17} /><span><b>Selected</b><em>{selected} recent · {selected30d} / 30d</em></span></article>
+            <article data-flow-node="used" className={`brain-memory-node is-used${signal === "used" ? " is-live" : ""}`}><Braces size={17} /><span><b>Used in work</b><em>{used} recent · {used30d} / 30d</em></span></article>
+            <article data-flow-node="helpful" className={`brain-memory-node is-helpful${signal === "feedback" ? " is-live" : ""}`}><ThumbsUp size={17} /><span><b>Helpful</b><em>{helpful} outcomes · 30d</em></span></article>
+            <article data-flow-node="candidate" className={`brain-memory-node is-candidate${signal === "proposed" || signal === "corrected" ? " is-live" : ""}`}><FileCheck2 size={17} /><span><b>Candidate</b><em>{pending || proposed} pending</em></span></article>
           </div>
 
         </div>
