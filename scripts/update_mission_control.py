@@ -323,6 +323,11 @@ MEMORY_DIAGNOSTIC_CATEGORIES = frozenset({
 })
 MEMORY_DIAGNOSTIC_OWNERS = ("joshex", "josh2", "jaimes", "jain", "ecosystem", "other")
 MEMORY_DIAGNOSTIC_REUSE_AGENTS = ("joshex", "josh2", "jaimes", "jain", "ecosystem")
+# Daily uses may consume selections made before the UTC day boundary, so the
+# diagnostics ratio is not a completion percentage and can legitimately exceed
+# 100. Keep it finite and bounded by the largest ratio possible from the
+# sanitizer's 100,000-event count ceiling (100,000 uses / 1 selection * 100).
+MEMORY_DIAGNOSTIC_SELECTED_USE_RATE_MAX = 10_000_000.0
 
 
 def _project_mapping(value: Any, fields: frozenset[str]) -> Dict[str, Any]:
@@ -535,7 +540,7 @@ def _sanitize_memory_diagnostics(value: Any, updated_at: dt.datetime) -> Dict[st
         for name, maximum in (
             ("hitRatePct", 100.0),
             ("p95LatencyMs", 60_000.0),
-            ("selectedUseRatePct", 100.0),
+            ("selectedUseRatePct", MEMORY_DIAGNOSTIC_SELECTED_USE_RATE_MAX),
             ("provenanceCoveragePct", 100.0),
         ):
             item = row.get(name)

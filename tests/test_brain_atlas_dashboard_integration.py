@@ -673,6 +673,16 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertEqual(0, clean["activity"]["counts"]["selected"])
         self.assertEqual(1, clean["activity"]["counts"]["used"])
 
+    def test_memory_operations_allows_daily_use_rate_above_one_hundred(self) -> None:
+        source = valid_memory_operations()
+        source["diagnostics"]["trend30d"][-1]["selectedUseRatePct"] = 107.4
+
+        clean = self.update.sanitize_memory_operations(source, "2026-07-18T16:01:00Z")
+
+        self.assertEqual("ready", clean["status"])
+        self.assertTrue(clean["source"]["verified"])
+        self.assertEqual(107.4, clean["diagnostics"]["trend30d"][-1]["selectedUseRatePct"])
+
     def test_memory_operations_rejects_content_and_unknown_fields_without_echo(self) -> None:
         secret = "private-memory-content-never-publish"
         mutations = []
