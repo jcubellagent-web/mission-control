@@ -17774,7 +17774,7 @@ body,
 
 .brain-ecosystem-shell {
   display: grid;
-  grid-template-columns: 106px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   min-width: 0;
   min-height: 0;
   overflow: hidden;
@@ -17871,7 +17871,7 @@ body,
 
 .brain-ecosystem-stage {
   display: grid;
-  grid-template-rows: 25px minmax(0, 1fr) minmax(80px, auto);
+  grid-template-rows: 38px minmax(0, 1fr);
   gap: 3px;
   min-width: 0;
   min-height: 0;
@@ -17879,7 +17879,7 @@ body,
   padding: 3px 0 0 7px;
 }
 .brain-ecosystem-view.has-active-controllers .brain-ecosystem-stage {
-  grid-template-rows: 25px minmax(155px, 1.45fr) minmax(92px, 0.55fr);
+  grid-template-rows: 38px minmax(0, 1fr);
 }
 #brain-atlas[data-memory-flow-state="live"] .brain-ecosystem-stage,
 #brain-atlas[data-memory-flow-state="work-live"] .brain-ecosystem-stage {
@@ -17980,10 +17980,10 @@ body,
   stroke-linecap: round;
   vector-effect: non-scaling-stroke;
 }
-.brain-topology-link.agent-joshex { stroke: color-mix(in srgb, var(--agent-joshex) 42%, transparent); }
-.brain-topology-link.agent-josh2 { stroke: color-mix(in srgb, var(--agent-josh2) 42%, transparent); }
-.brain-topology-link.agent-jaimes { stroke: color-mix(in srgb, var(--agent-jaimes) 42%, transparent); }
-.brain-topology-link.agent-jain { stroke: color-mix(in srgb, var(--agent-jain) 42%, transparent); }
+.brain-topology-link.agent-joshex { --agent-tone: var(--agent-joshex); stroke: color-mix(in srgb, var(--agent-joshex) 42%, transparent); }
+.brain-topology-link.agent-josh2 { --agent-tone: var(--agent-josh2); stroke: color-mix(in srgb, var(--agent-josh2) 42%, transparent); }
+.brain-topology-link.agent-jaimes { --agent-tone: var(--agent-jaimes); stroke: color-mix(in srgb, var(--agent-jaimes) 42%, transparent); }
+.brain-topology-link.agent-jain { --agent-tone: var(--agent-jain); stroke: color-mix(in srgb, var(--agent-jain) 42%, transparent); }
 .brain-topology-link.is-active { stroke-width: 1.35; }
 .brain-topology-link.is-live {
   stroke-width: 2.2;
@@ -18016,8 +18016,8 @@ body,
 .brain-memory-node b { font-size: 9.5px; }
 .brain-memory-node em { color: #9b9292; font-size: 7px; font-style: normal; }
 .brain-memory-node.is-live { border-width: 2px; filter: drop-shadow(0 0 7px currentColor); }
-.brain-memory-node.is-retrieve { left: 2%; top: 7%; color: #e195df; }
-.brain-memory-node.is-durable { left: 2%; bottom: 7%; color: #c7ef34; border-color: rgba(199, 239, 52, 0.46); }
+.brain-memory-node.is-retrieve { left: 21%; top: 7%; color: #e195df; }
+.brain-memory-node.is-durable { left: 21%; bottom: 7%; color: #c7ef34; border-color: rgba(199, 239, 52, 0.46); }
 .brain-memory-node.is-selected { right: 2%; top: 2%; color: #43dee3; border-color: rgba(67, 222, 227, 0.48); }
 .brain-memory-node.is-used { right: 2%; top: 50%; color: #65d9ff; border-color: rgba(101, 217, 255, 0.56); transform: translateY(-50%); }
 .brain-memory-node.is-helpful { right: 2%; bottom: 2%; color: #c7ef34; border-color: rgba(199, 239, 52, 0.48); }
@@ -18110,6 +18110,102 @@ body,
 .brain-memory-registry em { color: #a99ea5; font-size: 7.5px; font-style: normal; }
 .brain-memory-registry > i { width: 4px; height: 4px; border-radius: 50%; background: #fff; box-shadow: 0 0 8px #dc90dc; }
 .brain-memory-registry.is-live { animation: brain-registry-breathe 1.7s ease-in-out infinite; }
+
+/* Agent graph nodes replace the duplicated flat rail + internal anchor pair.
+   They reuse the Live Work card chassis language while remaining compact
+   enough for the kiosk graph. */
+.brain-agent-graph-node {
+  --agent-tone: var(--cyan);
+  --route-color: #7892a3;
+  position: absolute;
+  left: 0.8%;
+  z-index: 4;
+  display: grid;
+  grid-template-columns: 8px minmax(0, 1fr) auto;
+  grid-template-areas:
+    "status heading route"
+    "status objective objective"
+    "status meta meta";
+  gap: 2px 6px;
+  width: 224px;
+  min-height: 60px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--agent-tone) 44%, rgba(126, 164, 183, 0.28));
+  border-left: 3px solid var(--agent-tone);
+  border-radius: 8px;
+  background: linear-gradient(110deg, color-mix(in srgb, var(--agent-tone) 8%, #071a2a), #071a2a 56%, #061725);
+  padding: 5px 7px 5px 5px;
+  color: #e8f1f5;
+  text-align: left;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.018), 0 3px 10px rgba(0, 0, 0, 0.18);
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+.brain-agent-graph-node.agent-joshex { --agent-tone: var(--agent-joshex); }
+.brain-agent-graph-node.agent-josh2 { --agent-tone: var(--agent-josh2); }
+.brain-agent-graph-node.agent-jaimes { --agent-tone: var(--agent-jaimes); }
+.brain-agent-graph-node.agent-jain { --agent-tone: var(--agent-jain); }
+.brain-agent-graph-node.is-left-1 { top: 0; }
+.brain-agent-graph-node.is-left-2 { top: 25%; }
+.brain-agent-graph-node.is-left-3 { top: 50%; }
+.brain-agent-graph-node.is-left-4 { bottom: 0; }
+.brain-agent-graph-node:hover,
+.brain-agent-graph-node.is-selected {
+  border-color: color-mix(in srgb, var(--agent-tone) 78%, #fff 8%);
+  background: linear-gradient(110deg, color-mix(in srgb, var(--agent-tone) 15%, #082034), #082034 58%, #061725);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--agent-tone) 16%, transparent), 0 0 14px color-mix(in srgb, var(--agent-tone) 18%, transparent);
+}
+.brain-agent-graph-node:focus-visible { outline: 2px solid var(--agent-tone); outline-offset: 2px; }
+.brain-agent-graph-node.is-working { border-left-width: 4px; }
+.brain-agent-graph-node.has-lease { box-shadow: inset 0 0 0 1px rgba(255, 200, 87, 0.52), 0 0 12px rgba(255, 200, 87, 0.16); }
+.brain-agent-graph-node > .memory-flow-node-aura,
+.brain-agent-graph-node > .memory-flow-presence-dot,
+.brain-agent-graph-node > [class~="memory-flow-memory-receipt-check"] {
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.brain-agent-node-status { grid-area: status; align-self: center; width: 7px; height: 7px; }
+.brain-agent-node-heading { grid-area: heading; display: flex; align-items: center; gap: 4px; min-width: 0; }
+.brain-agent-node-heading > b {
+  flex: 0 0 auto;
+  border: 1px solid color-mix(in srgb, var(--agent-tone) 40%, transparent);
+  border-radius: 999px;
+  padding: 1px 4px;
+  color: var(--agent-tone);
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+.brain-agent-node-heading > strong { overflow: hidden; font-size: 9px; font-weight: 900; line-height: 1; text-overflow: ellipsis; white-space: nowrap; }
+.brain-agent-node-heading > svg { flex: 0 0 10px; color: #ffc857; }
+.brain-agent-node-objective { grid-area: objective; overflow: hidden; color: #cfdee5; font-size: 7px; font-weight: 760; line-height: 1.12; text-overflow: ellipsis; white-space: nowrap; }
+.brain-agent-node-meta { grid-area: meta; display: flex; align-items: center; justify-content: space-between; gap: 6px; min-width: 0; }
+.brain-agent-node-meta em,
+.brain-agent-node-meta b { overflow: hidden; font-size: 7px; line-height: 1; text-overflow: ellipsis; white-space: nowrap; }
+.brain-agent-node-meta em { color: #829aa7; font-style: normal; font-weight: 760; text-transform: uppercase; }
+.brain-agent-node-meta b { color: color-mix(in srgb, var(--agent-tone) 72%, #dbe8ed); font-weight: 850; }
+.brain-agent-node-route {
+  grid-area: route;
+  align-self: center;
+  max-width: 58px;
+  overflow: hidden;
+  border-left: 1px solid color-mix(in srgb, var(--route-color) 42%, transparent);
+  padding-left: 5px;
+  color: color-mix(in srgb, var(--route-color) 66%, #e8f1f5);
+  font-size: 7px;
+  font-weight: 850;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.brain-agent-node-lane-data { position: absolute; width: 0; height: 0; overflow: hidden; opacity: 0; pointer-events: none; }
 
 .brain-controller-grid {
   display: grid;
@@ -18360,7 +18456,7 @@ body,
 @keyframes brain-drawer-in { from { opacity: 0; transform: translateX(18px); } }
 
 @media (max-width: 1180px) {
-  .brain-ecosystem-shell { grid-template-columns: 100px minmax(0, 1fr); }
+  .brain-ecosystem-shell { grid-template-columns: minmax(0, 1fr); }
   .brain-controller-grid { grid-template-columns: minmax(0, 1fr); }
   .brain-memory-node { width: 106px; }
   .brain-memory-node.is-candidate { right: 23%; }
@@ -18369,7 +18465,7 @@ body,
 
 @media (max-width: 760px) {
   .brain-ecosystem-view { grid-template-rows: minmax(520px, 1fr) 48px 26px; overflow: auto; }
-  .brain-ecosystem-shell { grid-template-columns: 96px minmax(660px, 1fr); overflow-x: auto; }
+  .brain-ecosystem-shell { grid-template-columns: minmax(660px, 1fr); overflow-x: auto; }
   .brain-controller-grid { grid-template-columns: minmax(0, 1fr); }
   .brain-micro-legend { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
@@ -20396,11 +20492,11 @@ body,
 }
 
 #brain-atlas .brain-ecosystem-stage {
-  grid-template-rows: 38px minmax(170px, 1.45fr) minmax(92px, 0.55fr);
+  grid-template-rows: 38px minmax(0, 1fr);
 }
 
 #brain-atlas .brain-ecosystem-view.is-idle .brain-ecosystem-stage {
-  grid-template-rows: 38px minmax(190px, 1fr) minmax(84px, auto);
+  grid-template-rows: 38px minmax(0, 1fr);
 }
 
 #brain-atlas .brain-stage-toolbar .brain-atlas-section-header {

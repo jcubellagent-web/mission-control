@@ -4694,10 +4694,10 @@ function BrainAtlasEcosystemView({
     { key: "verified", label: "Verified", icon: ShieldCheck, time: selectedEvent?.receipt.observedAt, count: proofRows.length },
   ];
   const agentTopology = {
-    joshex: { path: "M 446 93 C 420 80 402 62 382 55", position: "is-upper-left" },
-    josh2: { path: "M 446 132 C 420 142 402 158 382 165", position: "is-lower-left" },
-    jaimes: { path: "M 554 93 C 580 80 598 62 618 55", position: "is-upper-right" },
-    jain: { path: "M 554 132 C 580 142 598 158 618 165", position: "is-lower-right" },
+    joshex: { path: "M 198 30 C 298 30 370 76 446 100", position: "is-left-1" },
+    josh2: { path: "M 198 84 C 302 84 370 98 446 108", position: "is-left-2" },
+    jaimes: { path: "M 198 136 C 302 136 370 122 446 116", position: "is-left-3" },
+    jain: { path: "M 198 190 C 298 190 370 144 446 124", position: "is-left-4" },
   } satisfies Record<AgentId, { path: string; position: string }>;
 
   return (
@@ -4709,30 +4709,6 @@ function BrainAtlasEcosystemView({
       aria-describedby="brain-ecosystem-description"
     >
       <div className="brain-ecosystem-shell">
-        <aside className="brain-agent-rail" aria-label="Agent ecosystem">
-          <strong>Agents</strong>
-          <div>
-            {agentRows.map(({ agent, liveWork, workers, load }) => {
-              const agentLeases = activeLeases.filter((lease) => lease.agent === agent);
-              const selectedRow = selectedAgent === agent;
-              return (
-                <button
-                  type="button"
-                  key={agent}
-                  className={`brain-agent-row agent-${agent}${liveWork.working ? " is-working" : ""}${selectedRow ? " is-selected" : ""}${agentLeases.length ? " has-lease" : ""}`}
-                  aria-pressed={selectedRow}
-                  onClick={() => setSelectedAgent((current) => current === agent ? null : agent)}
-                >
-                  <span className="brain-agent-avatar"><Bot size={15} /></span>
-                  <span className="brain-agent-copy"><b>{AGENTS[agent].label}</b><em>{liveWork.working ? "Running" : "Ready"}</em></span>
-                  {agentLeases.length ? <LockKeyhole className="brain-agent-lock" size={12} aria-label={`${agentLeases.length} active change lease`} /> : null}
-                  <span className="brain-agent-count">{liveWork.working ? 1 : 0} · {workers.length || load.score}</span>
-                </button>
-              );
-            })}
-          </div>
-        </aside>
-
         <div className="brain-ecosystem-stage memory-flow-map" data-atlas-layer="memory">
           <div className="brain-stage-toolbar">
             <div className="brain-atlas-section-header">
@@ -4752,16 +4728,68 @@ function BrainAtlasEcosystemView({
           </div>
 
           <div className="brain-memory-core" aria-label="Governed shared memory lifecycle">
+            {agentRows.map(({ agent, liveWork, workers, load }, index) => {
+              const topology = agentTopology[agent];
+              const agentLeases = activeLeases.filter((lease) => lease.agent === agent);
+              const selectedRow = selectedAgent === agent;
+              const route = verifiedRouteForAgentStatus(liveWork.status) || routeForAgentStatus(liveWork.status);
+              const nodeObjective = liveWork.activeWork?.title || liveWork.status.objective || `${AGENTS[agent].label} ready`;
+              const activityMode = agentActivityMode(liveWork) || "quiet";
+              const agentMemorySignal = latestAgentMemorySignal(agentRows.find((row) => row.agent === agent)?.memory);
+              const memoryLive = Boolean(agentMemorySignal && memorySignalIsRecent(agentMemorySignal[1], activity?.motionWindowSeconds || 90));
+              return (
+                <button
+                  type="button"
+                  key={`agent-node-${agent}`}
+                  className={`brain-agent-graph-node memory-flow-node is-agent agent-${agent} ${topology.position}${liveWork.working ? " is-working is-work-active" : ""}${selectedRow ? " is-selected" : ""}${agentLeases.length ? " has-lease" : ""}${activityMode === "received" ? " is-prompt-received" : ""}${memoryLive ? " is-memory-live" : ""}`}
+                  data-agent={agent}
+                  data-agent-node={agent}
+                  data-agent-anchor={agent}
+                  data-agent-working={liveWork.working ? "true" : "false"}
+                  data-agent-activity={activityMode}
+                  data-controller-active={liveWork.working ? "true" : "false"}
+                  data-subagent-count={workers.length}
+                  data-worker-count={workers.length}
+                  data-work-state={liveWork.working ? "working" : activityMode === "received" ? "received" : "quiet"}
+                  data-memory-state={memoryLive ? "live" : "quiet"}
+                  data-memory-operation={agentMemorySignal?.[0] || "none"}
+                  data-agent-load-tier={load.tier}
+                  data-agent-load-score={load.score}
+                  aria-pressed={selectedRow}
+                  onClick={() => setSelectedAgent((current) => current === agent ? null : agent)}
+                  style={{ "--agent-node-index": index } as React.CSSProperties}
+                >
+                  <i className="memory-flow-node-aura" aria-hidden="true" />
+                  <i className="memory-flow-presence-dot" aria-hidden="true" />
+                  <i className="memory-flow-memory-receipt-check" aria-hidden="true" />
+                  <span className={`brain-agent-node-status dot ${statusClass(liveWork.status.status)}`} aria-hidden="true" />
+                  <span className="brain-agent-node-heading">
+                    <b>{AGENTS[agent].roleBadge}</b>
+                    <strong>{AGENTS[agent].label}</strong>
+                    {agentLeases.length ? <LockKeyhole size={10} aria-label={`${agentLeases.length} active change lease`} /> : null}
+                  </span>
+                  <span className="brain-agent-node-objective">{compactText(nodeObjective, 42)}</span>
+                  <span className="brain-agent-node-meta">
+                    <em>{liveWork.working ? "Working" : agentOperatingState(liveWork.status)} · {ageLabel(liveWork.status.updated_at)}</em>
+                    <b>{liveWork.working ? 1 : 0} run → {workers.length} lane{workers.length === 1 ? "" : "s"}</b>
+                  </span>
+                  <span className="brain-agent-node-route" style={{ "--route-color": route.color } as React.CSSProperties}>
+                    {liveWork.working ? liveWorkModelLabel(route, liveWork.status.model) : `${load.score}% load`}
+                  </span>
+                  <span className="memory-flow-worker-lane brain-agent-node-lane-data" data-worker-count={workers.length} data-model-family={workers[0]?.modelFamily || ""} aria-hidden="true" />
+                </button>
+              );
+            })}
             <svg viewBox="0 0 1000 220" preserveAspectRatio="none" aria-hidden="true" data-memory-source="governed-memory-registry">
               <title>Governed shared-memory activity and agent ecosystem paths</title>
               <desc>Verified recall, selection, feedback, durable-memory, controller, worker, and model-route activity.</desc>
-              <path className={`memory-flow-edge brain-memory-link is-recall${signal === "retrieval" || signal === "hit" ? " is-live" : ""}`} d="M 136 24 C 260 24 340 84 446 104" data-operation={signal === "hit" ? "hit" : "retrieval"} data-observed-at={activity?.lastObservedAt.retrieval || ""} />
-              <path className="brain-memory-link is-durable" d="M 136 194 C 266 194 348 146 446 126" />
+              <path className={`memory-flow-edge brain-memory-link is-recall${signal === "retrieval" || signal === "hit" ? " is-live" : ""}`} d="M 336 24 C 374 34 406 82 446 104" data-operation={signal === "hit" ? "hit" : "retrieval"} data-observed-at={activity?.lastObservedAt.retrieval || ""} />
+              <path className="brain-memory-link is-durable" d="M 336 194 C 376 186 410 148 446 126" />
               <path className={`memory-flow-edge brain-memory-link is-selected${signal === "selected" ? " is-live" : ""}`} d="M 554 100 C 664 82 744 22 864 22" data-operation="selected" data-observed-at={activity?.lastObservedAt.selected || ""} />
               <path className={`memory-flow-edge brain-memory-link is-used${signal === "used" ? " is-live" : ""}`} d="M 930 38 C 930 58 930 72 930 92" data-operation="used" data-observed-at={activity?.lastObservedAt.used || ""} />
               <path className="brain-memory-link is-candidate" d="M 554 136 C 604 158 634 182 675 182" />
               <path className={`memory-flow-edge brain-memory-link is-feedback${signal === "feedback" ? " is-live" : ""}`} d="M 930 128 C 952 146 952 164 930 182" data-operation="feedback" data-observed-at={activity?.lastObservedAt.feedback || ""} />
-              <circle className={`brain-memory-packet is-recall-packet${signal === "retrieval" || signal === "hit" ? " is-live" : ""}`} r="4"><animateMotion dur="2.2s" repeatCount="indefinite" path="M 136 24 C 260 24 340 84 446 104" /></circle>
+              <circle className={`brain-memory-packet is-recall-packet${signal === "retrieval" || signal === "hit" ? " is-live" : ""}`} r="4"><animateMotion dur="2.2s" repeatCount="indefinite" path="M 336 24 C 374 34 406 82 446 104" /></circle>
               <circle className={`brain-memory-packet is-selected-packet${signal === "selected" ? " is-live" : ""}`} r="4"><animateMotion dur="1.55s" repeatCount="indefinite" path="M 554 100 C 664 82 744 22 864 22" /></circle>
               <circle className={`brain-memory-packet is-used-packet${signal === "used" ? " is-live" : ""}`} r="4"><animateMotion dur="1.2s" repeatCount="indefinite" path="M 930 38 C 930 58 930 72 930 92" /></circle>
               <circle className={`brain-memory-packet is-feedback-packet${signal === "feedback" ? " is-live" : ""}`} r="4"><animateMotion dur="1.45s" repeatCount="indefinite" path="M 930 128 C 952 146 952 164 930 182" /></circle>
@@ -4769,16 +4797,29 @@ function BrainAtlasEcosystemView({
                 const topology = agentTopology[agent];
                 const latest = latestAgentMemorySignal(agentRows.find((row) => row.agent === agent)?.memory);
                 const memoryLive = Boolean(latest && memorySignalIsRecent(latest[1], activity?.motionWindowSeconds || 90));
-                const isActive = liveWork.working || workers.length > 0 || memoryLive;
+                const workObservedAt = liveWork.activeWork?.updated_at || liveWork.status.updated_at;
+                const workLive = liveWork.working && memorySignalIsRecent(workObservedAt, activity?.motionWindowSeconds || 90);
+                const isActive = workLive || workers.length > 0 || memoryLive;
+                const memoryOperation = latest?.[0] || "none";
                 return (
-                  <g key={`agent-topology-${agent}`} data-memory-operation={latest?.[0] || "none"} data-memory-state={memoryLive ? "live" : "quiet"}>
+                  <g key={`agent-topology-${agent}`} data-memory-operation={memoryOperation} data-memory-state={memoryLive ? "live" : "quiet"}>
                     <path
                       className={`memory-flow-edge brain-topology-link agent-${agent}${isActive ? " is-active" : ""}${memoryLive ? " is-live is-memory-live" : ""}`}
                       d={topology.path}
                       data-agent={agent}
-                      data-operation={latest?.[0] || "none"}
+                      data-operation={memoryOperation}
                       data-observed-at={latest?.[1] || ""}
                     />
+                    {workLive ? (
+                      <path
+                        className={`memory-flow-edge brain-topology-link agent-${agent} is-active is-live is-work-lifeline`}
+                        d={topology.path}
+                        transform={memoryLive ? "translate(0 3)" : undefined}
+                        data-agent={agent}
+                        data-operation="live-work"
+                        data-observed-at={workObservedAt}
+                      />
+                    ) : null}
                     {memoryLive ? <circle className={`brain-topology-packet agent-${agent} is-memory-live`} r="3"><animateMotion dur="1.6s" repeatCount="indefinite" path={topology.path} /></circle> : null}
                   </g>
                 );
@@ -4811,91 +4852,8 @@ function BrainAtlasEcosystemView({
             <article className={`brain-memory-node is-used${signal === "used" ? " is-live" : ""}`}><Braces size={17} /><span><b>Used in work</b><em>{used} applications</em></span></article>
             <article className={`brain-memory-node is-helpful${signal === "feedback" ? " is-live" : ""}`}><ThumbsUp size={17} /><span><b>Helpful</b><em>{helpful} outcomes</em></span></article>
             <article className={`brain-memory-node is-candidate${signal === "proposed" || signal === "corrected" ? " is-live" : ""}`}><FileCheck2 size={17} /><span><b>Candidate</b><em>{pending || proposed} pending</em></span></article>
-            {agentRows.map(({ agent, liveWork, workers }) => {
-              const topology = agentTopology[agent];
-              const isActive = liveWork.working || workers.length > 0;
-              const agentLeases = activeLeases.filter((lease) => lease.agent === agent);
-              const controllerModel = liveWork.working ? liveWorkModelLabel(routeForAgentStatus(liveWork.status), liveWork.status.model) : "";
-              const laneModels = workers.slice(0, 3).map((worker) => liveWorkModelLabel(CANONICAL_ROUTES[worker.modelFamily], worker.modelId));
-              const visibleModels = Array.from(new Set([controllerModel, ...laneModels].filter(Boolean))).slice(0, 3);
-              return (
-                <article
-                  key={`agent-anchor-${agent}`}
-                  className={`brain-ecosystem-anchor agent-${agent} ${topology.position}${isActive ? " is-live" : ""}${agentLeases.length ? " has-lease" : ""}`}
-                  data-agent-anchor={agent}
-                  data-controller-active={liveWork.working ? "true" : "false"}
-                  data-subagent-count={workers.length}
-                >
-                  <span className="brain-anchor-agent"><Bot size={12} /><b>{AGENTS[agent].label}</b>{agentLeases.length ? <LockKeyhole size={9} /> : null}</span>
-                  <em>{isActive ? `${liveWork.working ? 1 : 0} run · ${workers.length} lane${workers.length === 1 ? "" : "s"}` : "ready"}</em>
-                  {visibleModels.length ? <span className="brain-anchor-satellites" aria-label={`${visibleModels.length} active model lane${visibleModels.length === 1 ? "" : "s"}`}>
-                    {visibleModels.map((model, index) => <i key={`${agent}-${model}-${index}`}>{model}</i>)}
-                  </span> : null}
-                </article>
-              );
-            })}
           </div>
 
-          <div className={`brain-controller-grid${hasActiveControllers ? " has-active-controllers" : " is-idle"}`} aria-label="Active agent controllers and worker lanes">
-            {agentRows.map(({ agent, liveWork, workers }) => {
-              const hiddenByFilter = selectedAgent && selectedAgent !== agent;
-              const controllerWorks = activeWorks.filter((work) => work.ownerAgent === agent && work.executionRole !== "worker");
-              const agentLeases = activeLeases.filter((lease) => lease.agent === agent);
-              const exactLease = agentLeases.find((lease) => lease.workId && lease.workId === liveWork.status.work_id) || agentLeases[0];
-              const activityMode = agentActivityMode(liveWork) || "quiet";
-              const agentMemorySignal = latestAgentMemorySignal(agentRows.find((row) => row.agent === agent)?.memory);
-              const memoryLive = Boolean(agentMemorySignal && memorySignalIsRecent(agentMemorySignal[1], activity?.motionWindowSeconds || 90));
-              const controllerLabel = liveWork.activeWork?.title || liveWork.status.objective || `${AGENTS[agent].label} ready`;
-              const lanes = workers.map((worker) => ({
-                id: `${worker.workId}:${worker.runId}`,
-                label: workerObjectiveForRoute(worker, activeWorks),
-                model: liveWorkModelLabel(CANONICAL_ROUTES[worker.modelFamily], worker.modelId),
-                workId: worker.workId,
-                running: true,
-              }));
-              if (liveWork.working) lanes.unshift({
-                id: `${liveWork.status.work_id || agent}:controller`,
-                label: controllerLabel,
-                model: liveWorkModelLabel(routeForAgentStatus(liveWork.status), liveWork.status.model),
-                workId: liveWork.status.work_id || "",
-                running: true,
-              });
-              if (!lanes.length && exactLease) lanes.push({ id: `${exactLease.id}:lease`, label: exactLease.objective, model: "Source", workId: exactLease.workId || "", running: true });
-              return (
-                <article
-                  key={agent}
-                  className={`brain-controller-card memory-flow-node ${"is-agent"} agent-${agent}${hiddenByFilter ? " is-muted" : ""}${exactLease ? " has-lease" : ""}${liveWork.working ? " is-work-active" : ""}${!lanes.length && !exactLease ? " is-quiet" : ""}${activityMode === "received" ? " is-prompt-received" : ""}${memoryLive ? " is-memory-live" : ""}`}
-                  data-agent={agent}
-                  data-agent-working={liveWork.working ? "true" : "false"}
-                  data-agent-activity={activityMode}
-                  data-worker-count={workers.length}
-                  data-work-state={liveWork.working ? "working" : activityMode === "received" ? "received" : "quiet"}
-                  data-memory-state={memoryLive ? "live" : "quiet"}
-                  data-memory-operation={agentMemorySignal?.[0] || "none"}
-                >
-                  <i className="memory-flow-node-aura" aria-hidden="true" />
-                  <i className="memory-flow-presence-dot" aria-hidden="true" />
-                  <i className="memory-flow-memory-receipt-check" aria-hidden="true" />
-                  <header>
-                    <span className="memory-flow-node-title"><b>{AGENTS[agent].label}</b><i />{compactText(controllerLabel, 30)}</span>
-                    {exactLease ? <button type="button" onClick={() => setDrawer({ kind: "lease", lease: exactLease })}><LockKeyhole size={10} />LEASED · {leaseRemaining(exactLease.expiresAt)}</button> : null}
-                    <em className="memory-flow-node-detail">Controller · {Math.max(controllerWorks.length, liveWork.working ? 1 : 0)} run{Math.max(controllerWorks.length, liveWork.working ? 1 : 0) === 1 ? "" : "s"} · {workers.length} lane{workers.length === 1 ? "" : "s"}</em>
-                  </header>
-                  <div className="brain-controller-lanes memory-flow-worker-lane" data-worker-count={workers.length} data-model-family={workers[0]?.modelFamily || ""}>
-                    {lanes.length ? lanes.slice(0, 4).map((lane) => {
-                      const laneLease = agentLeases.find((lease) => lease.workId && lease.workId === lane.workId) || (lane.id.endsWith(":lease") ? exactLease : undefined);
-                      return (
-                        <div key={lane.id} className={`brain-worker-lane${laneLease ? " has-lease" : ""}`}>
-                          {laneLease ? <LockKeyhole size={11} /> : <Bot size={11} />}
-                          <span>{compactText(lane.label, 34)}</span><small className="brain-atlas-lane-label">{lane.model}</small><b>RUNNING</b>
-                        </div>
-                      );
-                    }) : <p>No active lanes</p>}
-                  </div>
-                </article>
-              );
-            })}
-          </div>
         </div>
       </div>
 
