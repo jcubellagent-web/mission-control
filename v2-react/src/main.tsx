@@ -4671,6 +4671,9 @@ function BrainAtlasEcosystemView({
   const [selectedAgent, setSelectedAgent] = useState<AgentId | null>(null);
   const [drawer, setDrawer] = useState<{ kind: "event"; row: BrainAtlasProofRow } | { kind: "lease"; lease: SourceChangeLease } | null>(null);
   const activeLeases = sourceChangeLeases.filter((lease) => !lease.expired && timeValue(lease.expiresAt) > Date.now());
+  const hasActiveControllers = agentRows.some(({ liveWork, workers, agent }) =>
+    liveWork.working || workers.length > 0 || activeLeases.some((lease) => lease.agent === agent),
+  );
   const selectedEvent = proofRows[0] || null;
   const retrievals = Number(activity?.counts.retrievals || 0);
   const selected = Number(activity?.counts.selected || 0);
@@ -4692,7 +4695,7 @@ function BrainAtlasEcosystemView({
 
   return (
     <section
-      className={`brain-ecosystem-view brain-atlas-section is-unified${activeLeases.length ? " has-change-lease" : ""}`}
+      className={`brain-ecosystem-view brain-atlas-section is-unified${hasActiveControllers ? " has-active-controllers" : " is-idle"}${activeLeases.length ? " has-change-lease" : ""}`}
       data-atlas-region={"unified"}
       data-memory-signal={signal || "idle"}
       aria-labelledby="brain-ecosystem-heading"
@@ -4795,7 +4798,7 @@ function BrainAtlasEcosystemView({
             <article className={`brain-memory-node is-candidate${signal === "proposed" || signal === "corrected" ? " is-live" : ""}`}><FileCheck2 size={17} /><span><b>Candidate</b><em>{pending || proposed} pending</em></span></article>
           </div>
 
-          <div className="brain-controller-grid" aria-label="Active agent controllers and worker lanes">
+          <div className={`brain-controller-grid${hasActiveControllers ? " has-active-controllers" : " is-idle"}`} aria-label="Active agent controllers and worker lanes">
             {agentRows.map(({ agent, liveWork, workers }) => {
               const hiddenByFilter = selectedAgent && selectedAgent !== agent;
               const controllerWorks = activeWorks.filter((work) => work.ownerAgent === agent && work.executionRole !== "worker");
@@ -4823,7 +4826,7 @@ function BrainAtlasEcosystemView({
               return (
                 <article
                   key={agent}
-                  className={`brain-controller-card memory-flow-node ${"is-agent"} agent-${agent}${hiddenByFilter ? " is-muted" : ""}${exactLease ? " has-lease" : ""}${liveWork.working ? " is-work-active" : ""}${activityMode === "received" ? " is-prompt-received" : ""}${memoryLive ? " is-memory-live" : ""}`}
+                  className={`brain-controller-card memory-flow-node ${"is-agent"} agent-${agent}${hiddenByFilter ? " is-muted" : ""}${exactLease ? " has-lease" : ""}${liveWork.working ? " is-work-active" : ""}${!lanes.length && !exactLease ? " is-quiet" : ""}${activityMode === "received" ? " is-prompt-received" : ""}${memoryLive ? " is-memory-live" : ""}`}
                   data-agent={agent}
                   data-agent-working={liveWork.working ? "true" : "false"}
                   data-agent-activity={activityMode}

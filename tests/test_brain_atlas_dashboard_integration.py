@@ -1053,6 +1053,21 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertIn("flex: 1 1 auto;", styles)
         self.assertIn(".memory-flow-map {", styles)
 
+    def test_ecosystem_graph_bounds_icons_and_collapses_idle_controllers(self) -> None:
+        main = (MISSION_CONTROL / "v2-react" / "src" / "main.tsx").read_text(encoding="utf-8")
+        styles = (MISSION_CONTROL / "v2-react" / "src" / "styles.css").read_text(encoding="utf-8")
+
+        self.assertIn("const hasActiveControllers = agentRows.some", main)
+        self.assertIn('hasActiveControllers ? " has-active-controllers" : " is-idle"', main)
+        self.assertIn('!lanes.length && !exactLease ? " is-quiet" : ""', main)
+        self.assertIn(".brain-controller-grid.is-idle .brain-controller-card", styles)
+        self.assertIn(".brain-controller-grid.has-active-controllers .brain-controller-card.is-quiet", styles)
+        self.assertIn(".brain-memory-node > svg", styles)
+        self.assertIn(".brain-memory-registry > svg", styles)
+        self.assertIn(".memory-flow-map > svg {", styles)
+        self.assertNotIn("\n.memory-flow-map svg {", styles)
+        self.assertNotIn("#brain-atlas .memory-flow-map svg {", styles)
+
     def test_kiosk_respects_user_motion_preference_and_guard_protects_launcher(self) -> None:
         launcher = (MISSION_CONTROL / "scripts" / "open_mission_control_kiosk.sh").read_text(encoding="utf-8")
         guard = (MISSION_CONTROL / "scripts" / "control_tower_change_guard.py").read_text(encoding="utf-8")
