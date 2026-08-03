@@ -7837,6 +7837,116 @@ p {
   }
 }
 
+/* Unified Live Work + Brain Atlas trace contract. Agent selection stays
+   shared, while memory stages brighten only when counts-only telemetry
+   attributes that stage to the selected agent. */
+.brain-hero-controls .trace-detail-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-color: rgba(101, 217, 255, 0.42);
+  color: #9ce9ff;
+}
+
+.brain-hero.is-flight-deck .agent-memory-impact,
+.brain-hero.is-flight-deck .agent-change-lease {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  min-height: 20px;
+  border: 1px solid rgba(126, 164, 183, 0.22);
+  border-radius: 999px;
+  background: rgba(2, 13, 24, 0.74);
+  padding: 3px 6px;
+  color: #91a4ad;
+  font-size: 7.5px;
+  font-weight: 850;
+  letter-spacing: 0.035em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.brain-hero.is-flight-deck .agent-memory-impact > svg,
+.brain-hero.is-flight-deck .agent-change-lease > svg {
+  width: 10px !important;
+  height: 10px !important;
+  flex: 0 0 10px;
+}
+
+.brain-hero.is-flight-deck .agent-memory-impact > i {
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.5;
+}
+
+.brain-hero.is-flight-deck .agent-memory-impact.is-recalled { border-color: rgba(225, 149, 223, 0.44); color: #e195df; }
+.brain-hero.is-flight-deck .agent-memory-impact.is-selected { border-color: rgba(67, 222, 227, 0.44); color: #65d9ff; }
+.brain-hero.is-flight-deck .agent-memory-impact.is-used { border-color: rgba(199, 239, 52, 0.46); color: #c7ef34; }
+.brain-hero.is-flight-deck .agent-change-lease { border-color: rgba(255, 200, 87, 0.52); color: #ffc857; }
+
+.brain-hero.is-flight-deck .agent-hero-card.is-linked-selected .agent-memory-impact {
+  box-shadow: 0 0 8px color-mix(in srgb, currentColor 18%, transparent);
+}
+
+#brain-atlas .brain-memory-core.has-agent-focus .brain-memory-node:not(.is-trace-evidence),
+#brain-atlas .brain-memory-core.has-agent-focus .brain-memory-registry:not(.is-trace-evidence) {
+  opacity: 0.34;
+  filter: saturate(0.5);
+}
+
+#brain-atlas .brain-memory-core.has-agent-focus .brain-memory-link:not(.is-trace-evidence) {
+  opacity: 0.12;
+}
+
+#brain-atlas .brain-memory-core.has-agent-focus .brain-agent-trunk.is-trace-evidence,
+#brain-atlas .brain-memory-core.has-agent-focus .brain-memory-link.is-trace-evidence {
+  opacity: 1;
+  stroke-width: 2.45;
+}
+
+#brain-atlas .brain-memory-core.has-agent-focus .brain-memory-node.is-trace-evidence,
+#brain-atlas .brain-memory-core.has-agent-focus .brain-memory-registry.is-trace-evidence {
+  opacity: 1;
+  filter: saturate(1) drop-shadow(0 0 6px currentColor);
+}
+
+#brain-atlas .brain-agent-graph-node.is-selected .brain-agent-node-route {
+  max-width: 138px;
+}
+
+#brain-atlas .brain-ecosystem-view.has-trace-focus .brain-selected-event {
+  border-color: rgba(101, 217, 255, 0.62);
+  color: #bdefff;
+}
+
+#brain-atlas .brain-detail-drawer {
+  width: min(390px, 92%);
+}
+
+#brain-atlas .brain-detail-drawer dl {
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 10px;
+  font-size: 10px;
+}
+
+#brain-atlas .brain-detail-trace-path p:first-of-type {
+  color: #c8eef5;
+  font-weight: 760;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brain-hero-controls .trace-detail-button,
+  .brain-hero.is-flight-deck .agent-memory-impact,
+  #brain-atlas .brain-memory-core.has-agent-focus .brain-memory-node,
+  #brain-atlas .brain-memory-core.has-agent-focus .brain-memory-registry,
+  #brain-atlas .brain-memory-core.has-agent-focus .brain-memory-link {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
 .job-category-list {
   display: grid;
   gap: 3px;

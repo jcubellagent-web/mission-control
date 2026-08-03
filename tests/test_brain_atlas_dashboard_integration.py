@@ -1116,11 +1116,30 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertIn("onSelectedAgentChange={setSelectedAgent}", main)
         self.assertIn('data-linked-selected={selected ? "true" : "false"}', main)
         self.assertIn('data-linked-selected={selectedRow ? "true" : "false"}', main)
-        self.assertIn("{retrievals} recent · {queries7d} / 7d", main)
-        self.assertIn("{selected} recent · {selected30d} / 30d", main)
-        self.assertIn("{used} recent · {used30d} / 30d", main)
+        self.assertIn("{visibleRetrievals}", main)
+        self.assertIn("{visibleSelected}", main)
+        self.assertIn("{visibleUsed}", main)
         self.assertIn(".agent-hero-card.is-linked-selected", styles)
         self.assertIn(".brain-topology-link.is-selected-agent", styles)
+
+    def test_live_work_and_atlas_share_trace_details_memory_impact_and_lease_context(self) -> None:
+        main = (MISSION_CONTROL / "v2-react" / "src" / "main.tsx").read_text(encoding="utf-8")
+        styles = (MISSION_CONTROL / "v2-react" / "src" / "styles.css").read_text(encoding="utf-8")
+
+        self.assertIn("const [traceDetailRequest, setTraceDetailRequest] = useState(0);", main)
+        self.assertIn("onOpenSelectedTrace={() => setTraceDetailRequest((value) => value + 1)}", main)
+        self.assertIn("Open {AGENTS[selectedAgent].label} trace", main)
+        self.assertIn('className={`agent-memory-impact', main)
+        self.assertIn('data-memory-retrievals={memoryActivity?.retrievals || 0}', main)
+        self.assertIn('data-change-lease={activeLease ? "active" : "none"}', main)
+        self.assertIn('kind: "trace"; agent: AgentId', main)
+        self.assertIn("Unified work + memory trace", main)
+        self.assertIn("Controller →", main)
+        self.assertIn('data-trace-memory={selectedTraceHasMemory ? "observed"', main)
+        self.assertIn('is-trace-evidence', main)
+        self.assertIn(".agent-memory-impact.is-used", styles)
+        self.assertIn(".brain-memory-link.is-trace-evidence", styles)
+        self.assertIn(".brain-detail-trace-path", styles)
 
     def test_brain_atlas_uses_one_directed_activity_bus_and_collision_safe_lifecycle(self) -> None:
         main = (MISSION_CONTROL / "v2-react" / "src" / "main.tsx").read_text(encoding="utf-8")
