@@ -4748,15 +4748,16 @@ function BrainAtlasEcosystemView({
             <svg viewBox="0 0 1000 220" preserveAspectRatio="none" aria-hidden="true" data-memory-source="governed-memory-registry">
               <title>Governed shared-memory activity and agent ecosystem paths</title>
               <desc>Verified recall, selection, feedback, durable-memory, controller, worker, and model-route activity.</desc>
-              <path className="brain-memory-link is-recall" d="M 190 54 C 300 54 324 92 414 106" />
-              <path className="brain-memory-link is-durable" d="M 200 173 C 300 173 326 138 414 124" />
-              <path className="brain-memory-link is-selected" d="M 586 102 C 660 88 700 48 806 48" />
-              <path className="brain-memory-link is-used" d="M 586 112 C 682 112 732 112 806 112" />
-              <path className="brain-memory-link is-candidate" d="M 574 138 C 620 164 668 178 730 178" />
-              <path className="brain-memory-link is-feedback" d="M 874 130 C 928 142 934 164 914 184" />
-              <circle className={`brain-memory-packet is-recall-packet${signal === "retrieval" || signal === "hit" ? " is-live" : ""}`} r="4"><animateMotion dur="2.2s" repeatCount="indefinite" path="M 190 54 C 300 54 324 92 414 106" /></circle>
-              <circle className={`brain-memory-packet is-used-packet${signal === "selected" || signal === "used" ? " is-live" : ""}`} r="4"><animateMotion dur="1.35s" repeatCount="indefinite" path="M 586 112 C 682 112 732 112 806 112" /></circle>
-              <circle className={`brain-memory-packet is-feedback-packet${signal === "feedback" ? " is-live" : ""}`} r="4"><animateMotion dur="1.7s" repeatCount="indefinite" path="M 874 130 C 928 142 934 164 914 184" /></circle>
+              <path className="brain-memory-link is-recall" d="M 136 24 C 260 24 340 84 446 104" />
+              <path className="brain-memory-link is-durable" d="M 136 194 C 266 194 348 146 446 126" />
+              <path className="brain-memory-link is-selected" d="M 554 100 C 664 82 744 22 864 22" />
+              <path className="brain-memory-link is-used" d="M 930 38 C 930 58 930 72 930 92" />
+              <path className="brain-memory-link is-candidate" d="M 554 136 C 604 158 634 182 675 182" />
+              <path className="brain-memory-link is-feedback" d="M 930 128 C 952 146 952 164 930 182" />
+              <circle className={`brain-memory-packet is-recall-packet${signal === "retrieval" || signal === "hit" ? " is-live" : ""}`} r="4"><animateMotion dur="2.2s" repeatCount="indefinite" path="M 136 24 C 260 24 340 84 446 104" /></circle>
+              <circle className={`brain-memory-packet is-selected-packet${signal === "selected" ? " is-live" : ""}`} r="4"><animateMotion dur="1.55s" repeatCount="indefinite" path="M 554 100 C 664 82 744 22 864 22" /></circle>
+              <circle className={`brain-memory-packet is-used-packet${signal === "used" ? " is-live" : ""}`} r="4"><animateMotion dur="1.2s" repeatCount="indefinite" path="M 930 38 C 930 58 930 72 930 92" /></circle>
+              <circle className={`brain-memory-packet is-feedback-packet${signal === "feedback" ? " is-live" : ""}`} r="4"><animateMotion dur="1.45s" repeatCount="indefinite" path="M 930 128 C 952 146 952 164 930 182" /></circle>
               {agentRows.map((row, index) => {
                 const latest = latestAgentMemorySignal(row.memory);
                 const memoryLive = Boolean(latest && memorySignalIsRecent(latest[1], activity?.motionWindowSeconds || 90));

@@ -1075,6 +1075,8 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertIn("brain-agent-work-packet", main)
         self.assertIn("return memoryLive ? (", main)
         self.assertIn("brain-memory-link is-used", main)
+        self.assertIn('brain-memory-packet is-selected-packet', main)
+        self.assertIn('M 930 38 C 930 58 930 72 930 92', main)
         self.assertIn("grid-template-columns: minmax(0, 1fr);", styles)
         self.assertIn(".brain-controller-card:not(.is-quiet)", styles)
         self.assertIn("#brain-atlas .brain-ecosystem-view {", styles)
