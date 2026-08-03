@@ -960,7 +960,7 @@ def test_layout_rejects_live_path_that_is_too_subtle_to_read() -> None:
     assert isinstance(edges, list)
     live_edge = edges[0]
     assert isinstance(live_edge, dict)
-    live_edge.update({"strokeWidth": 2.2, "strokeDasharray": "none", "strokeLinecap": "butt", "stroke": "none"})
+    live_edge.update({"strokeWidth": 1.2, "strokeDasharray": "none", "strokeLinecap": "butt", "stroke": "none"})
 
     failures = runtime_layout.validate_control_tower_layout(measurements, label="reference-2048")
 
