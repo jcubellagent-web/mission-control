@@ -60,6 +60,26 @@ class HermesUpdatePipelineTests(unittest.TestCase):
         self.assertFalse(check["ok"])
         self.assertEqual(check["failedChecks"], ["telegramDelivery"])
 
+    def test_verify_rejects_disabled_patch_replay_when_policy_requires_it(self) -> None:
+        with tempfile.TemporaryDirectory() as directory, mock.patch.object(
+            pipeline, "run_canary_commands", return_value={"ok": True, "results": []}
+        ) as canary:
+            sandbox = Path(directory) / "candidate"
+            sandbox.mkdir()
+            manifest = {
+                "target": "b" * 40,
+                "sandbox": str(sandbox),
+                "observationMinutes": 60,
+                "sourceState": {"sourceClean": True},
+                "localPatchReplay": {"ok": True, "status": "disabled"},
+                "rollback": {"prepared": True},
+                "requiredGates": ["local-patch-replay", "canary-command"],
+            }
+            result = pipeline.verify(manifest, {"replayLocalPatches": True})
+        self.assertIn("local-patch-replay", result["failures"])
+        self.assertFalse(result["readyForObservation"])
+        canary.assert_not_called()
+
     def test_prepare_rejects_dirty_source(self) -> None:
         with tempfile.TemporaryDirectory() as directory, mock.patch.object(
             pipeline, "source_state", return_value={"sourceAccessible": True, "sourceClean": False}

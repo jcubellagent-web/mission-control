@@ -14,6 +14,8 @@ The daily JAIMES LaunchAgent `ai.jaimes.capability-upgrade-sweep` refreshes the 
 
 The Josh 2.0 LaunchAgent `ai.joshex.self-update-monitor` runs every five minutes. It verifies release-discovery freshness, both production runtimes, OpenCLAW gateway health, JAIMES Telegram health, the daily JAIMES sweep, and candidate-sandbox integrity. It records bounded metadata in `data/self-update-monitor.json` and publishes only status transitions. It cannot install or promote a release.
 
+The monitor copies only JAIMES's bounded `dashboard-safe metadata only` Capability Watch payload into Josh 2.0 when the owning-host timestamp is newer. Freshness is calculated from the payload timestamp, not the local copy time. Missing OpenCLAW or Hermes probes are attention states and must never produce a zero-recommendation `ok` result.
+
 ## Release flow
 
 1. **Discover.** Compare exact installed versions with npm's `latest` tag and the latest signed GitHub release. Do not use “commits behind main” as the stable-version decision.
@@ -45,6 +47,8 @@ python3 scripts/<product>_update_pipeline.py record-observation \
 ```
 
 `readyForPromotionReview` means the evidence is complete; it does not authorize promotion.
+
+Hermes verification re-applies the current `replayLocalPatches` policy. A manifest with missing, disabled, or conflicted carried-patch replay cannot pass the required replay gate, even if an older manifest recorded its own `ok` flag.
 
 ## Immediate operating decisions (2026-08-01)
 

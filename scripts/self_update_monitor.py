@@ -65,6 +65,61 @@ def age_seconds(path: Path) -> int | None:
         return None
 
 
+def timestamp_age_seconds(value: Any) -> int | None:
+    try:
+        parsed = dt.datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=dt.timezone.utc)
+        return max(0, int((utc_now() - parsed.astimezone(dt.timezone.utc)).total_seconds()))
+    except (TypeError, ValueError):
+        return None
+
+
+def remote_capability_watch(host: str, path: str) -> dict[str, Any]:
+    """Read the owning host's bounded dashboard-safe watch payload."""
+    code = """import json
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+if not path.is_file() or path.stat().st_size > 131072:
+    raise SystemExit(2)
+value = json.loads(path.read_text(encoding='utf-8'))
+allowed = {'updatedAt', 'checkedAt', 'status', 'summary', 'sources', 'recommendations', 'previews', 'privacy'}
+print(json.dumps({key: value.get(key) for key in allowed if key in value}))
+"""
+    remote = " ".join(
+        shlex.quote(part)
+        for part in ["/opt/homebrew/bin/python3", "-c", code, path]
+    )
+    result = run_capture(["ssh", host, remote], timeout=30)
+    if not result.get("ok"):
+        return {"ok": False, "reason": result.get("reason") or f"exit-{result.get('code')}"}
+    try:
+        value = json.loads(result.get("output") or "")
+    except (TypeError, json.JSONDecodeError):
+        return {"ok": False, "reason": "invalid-json"}
+    if not isinstance(value, dict) or value.get("privacy") != "dashboard-safe metadata only":
+        return {"ok": False, "reason": "invalid-payload"}
+    if timestamp_age_seconds(value.get("updatedAt")) is None:
+        return {"ok": False, "reason": "invalid-timestamp"}
+    return {"ok": True, "payload": value}
+
+
+def sync_remote_capability_watch(host: str, remote_path: str, local_path: Path = CAPABILITY_WATCH) -> dict[str, Any]:
+    result = remote_capability_watch(host, remote_path)
+    if not result.get("ok"):
+        return result
+    remote = result["payload"]
+    local = read_json(local_path, {})
+    remote_stamp = timestamp_age_seconds(remote.get("updatedAt"))
+    local_stamp = timestamp_age_seconds(local.get("updatedAt")) if isinstance(local, dict) else None
+    updated = local_stamp is None or (remote_stamp is not None and remote_stamp < local_stamp)
+    if updated:
+        write_json(local_path, remote)
+    return {"ok": True, "updated": updated, "remoteAgeSeconds": remote_stamp}
+
+
 def latest_manifest(directory: Path) -> dict[str, Any]:
     paths = sorted(directory.glob("candidate-*.json"), key=lambda path: path.stat().st_mtime, reverse=True)
     if not paths:
@@ -130,7 +185,7 @@ def publish_transition(payload: dict[str, Any], previous: dict[str, Any]) -> Non
     script = ROOT / "scripts" / "agent_publish.py"
     if not script.exists():
         return
-    status = "failed" if payload.get("status") == "attention" else "done"
+    status = "error" if payload.get("status") == "attention" else "done"
     run([
         sys.executable, str(script), "--agent", "joshex", "--type", "status",
         "--status", status, "--title", "Self-update monitor",
@@ -141,11 +196,14 @@ def publish_transition(payload: dict[str, Any], previous: dict[str, Any]) -> Non
 
 def build(config: dict[str, Any]) -> dict[str, Any]:
     max_watch_age = int(config.get("capabilityWatchMaxAgeSeconds") or 93600)
-    watch_age = age_seconds(CAPABILITY_WATCH)
     jaimes = str(config.get("jaimesHost") or "jaimes")
     jaimes_root = str(config.get("jaimesMissionControl") or "/Users/jc_agent/.openclaw/workspace/mission-control")
     job = str(config.get("jaimesCapabilityJob") or "ai.jaimes.capability-upgrade-sweep")
+    watch_sync = sync_remote_capability_watch(jaimes, f"{jaimes_root}/data/capability-watch.json")
+    watch_payload = read_json(CAPABILITY_WATCH, {})
+    watch_age = timestamp_age_seconds(watch_payload.get("updatedAt")) if isinstance(watch_payload, dict) else None
     checks = {
+        "jaimesCapabilityWatchSync": watch_sync,
         "capabilityWatchFresh": {"ok": watch_age is not None and watch_age <= max_watch_age, "ageSeconds": watch_age, "maxAgeSeconds": max_watch_age},
         "openclawVersion": run(["openclaw", "--version"], timeout=15),
         "openclawUpdateStatus": run(["openclaw", "update", "status", "--json"], timeout=45),

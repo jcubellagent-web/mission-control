@@ -192,20 +192,31 @@ def observation_check(manifest: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def verify(manifest: dict[str, Any]) -> dict[str, Any]:
+def verify(manifest: dict[str, Any], config: dict[str, Any] | None = None) -> dict[str, Any]:
     sandbox = Path(manifest["sandbox"])
     replay = manifest.get("localPatchReplay") if isinstance(manifest.get("localPatchReplay"), dict) else {}
+    required_gates = manifest.get("requiredGates") if isinstance(manifest.get("requiredGates"), list) else []
+    replay_required_by_manifest = "local-patch-replay" in required_gates
+    replay_required_by_config = bool(config.get("replayLocalPatches", True)) if isinstance(config, dict) else False
+    replay_required = replay_required_by_manifest or replay_required_by_config
+    replay_ok = bool(replay.get("ok")) and (not replay_required or replay.get("status") == "applied")
     checks = {
         "candidate-worktree": {"ok": sandbox.is_dir()},
         "static-compile": run([sys.executable, "-m", "compileall", "-q", "."], cwd=sandbox, timeout=300),
         "git-diff-check": run(["git", "diff", "--check"], cwd=sandbox),
-        "local-patch-replay": {"ok": bool(replay.get("ok")), "status": replay.get("status"), "detail": replay.get("detail", "")},
-        "canary-command": run_canary_commands(manifest, sandbox) if replay.get("ok") else {"ok": False, "detail": "Skipped because carried patches did not replay cleanly."},
+        "local-patch-replay": {
+            "ok": replay_ok,
+            "status": replay.get("status") or "missing",
+            "detail": replay.get("detail", "") or ("Required carried patches were not applied." if replay_required and not replay_ok else ""),
+        },
+        "canary-command": run_canary_commands(manifest, sandbox) if replay_ok else {"ok": False, "detail": "Skipped because required carried patches did not replay cleanly."},
         "rollback-manifest": {"ok": bool(manifest.get("rollback", {}).get("prepared"))},
         "observation-evidence": observation_check(manifest),
     }
     checks["source-clean"] = {"ok": bool(manifest.get("sourceState", {}).get("sourceClean"))}
-    failures = [name for name in manifest["requiredGates"] if not checks.get(name, {}).get("ok")]
+    failures = [name for name in required_gates if not checks.get(name, {}).get("ok")]
+    if replay_required_by_config and not replay_required_by_manifest:
+        failures.append("local-patch-replay-policy")
     pre_observation_failures = [name for name in failures if name != "observation-evidence"]
     return {
         "checkedAt": now(),
@@ -256,7 +267,7 @@ def main() -> int:
         return 0
     if not args.manifest:
         parser.error("--manifest is required for verify")
-    print(json.dumps(verify(read_json(Path(args.manifest))), indent=2))
+    print(json.dumps(verify(read_json(Path(args.manifest)), config), indent=2))
     return 0
 
 

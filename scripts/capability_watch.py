@@ -166,7 +166,15 @@ def installed_summary(inventory: dict[str, Any]) -> dict[str, Any]:
 def build_recommendations(sources: dict[str, Any]) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     openclaw = sources.get("openclawUpdate") or {}
-    if openclaw.get("updateAvailable"):
+    if openclaw.get("ok") is not True:
+        rows.append({
+            "id": "openclaw-update-check-failed",
+            "status": "attention",
+            "title": "OpenCLAW update check needs attention",
+            "detail": openclaw.get("detail") or "OpenCLAW runtime or update metadata is unavailable.",
+            "owner": "Josh 2.0 / J.A.I.N",
+        })
+    elif openclaw.get("updateAvailable"):
         rows.append({
             "id": "openclaw-update-available",
             "status": "upgrade",
@@ -178,7 +186,15 @@ def build_recommendations(sources: dict[str, Any]) -> list[dict[str, Any]]:
     hermes_release = sources.get("hermesLatestRelease") or {}
     installed_tag = hermes_release_tag(str(hermes.get("version") or ""))
     latest_tag = hermes_release.get("tag")
-    if installed_tag and latest_tag and installed_tag != latest_tag:
+    if hermes.get("ok") is not True:
+        rows.append({
+            "id": "hermes-update-check-failed",
+            "status": "attention",
+            "title": "Hermes update check needs attention",
+            "detail": hermes.get("detail") or "Hermes runtime or update metadata is unavailable.",
+            "owner": "JAIMES",
+        })
+    elif installed_tag and latest_tag and installed_tag != latest_tag:
         rows.append({
             "id": "hermes-stable-update-available",
             "status": "upgrade",
@@ -186,15 +202,13 @@ def build_recommendations(sources: dict[str, Any]) -> list[dict[str, Any]]:
             "detail": f"{installed_tag} -> {latest_tag}; prepare and verify the carried-patch candidate before promotion.",
             "owner": "JAIMES",
         })
-    elif hermes.get("status") == "attention" and hermes.get("version"):
-        rows.append({
-            "id": "hermes-update-check-failed",
-            "status": "attention",
-            "title": "Hermes update check needs attention",
-            "detail": hermes.get("detail") or "Hermes update check failed.",
-            "owner": "JAIMES",
-        })
     return rows
+
+
+def recommendation_status(recommendations: list[dict[str, Any]]) -> str:
+    if any(row.get("status") == "attention" for row in recommendations):
+        return "attention"
+    return "watch" if recommendations else "ok"
 
 
 def build_previews(sources: dict[str, Any]) -> list[dict[str, Any]]:
@@ -253,7 +267,7 @@ def main() -> int:
     payload = {
         "updatedAt": now,
         "checkedAt": now,
-        "status": "watch" if recommendations else "ok",
+        "status": recommendation_status(recommendations),
         "summary": f"{len(recommendations)} capability recommendation(s); {sources['installed']['openclawNodes']} OpenCLAW node(s), {sources['installed']['hermesNodes']} Hermes node(s).",
         "sources": sources,
         "recommendations": recommendations[:12],

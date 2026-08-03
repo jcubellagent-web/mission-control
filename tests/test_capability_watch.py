@@ -39,6 +39,7 @@ def test_openclaw_status_parses_current_nested_registry_and_availability() -> No
 
 def test_hermes_recommendation_compares_stable_tags_not_main_commit_count() -> None:
     sources = {
+        "openclawUpdate": {"ok": True, "updateAvailable": False},
         "hermesUpdate": {
             "ok": True,
             "status": "watch",
@@ -58,6 +59,22 @@ def test_hermes_recommendation_compares_stable_tags_not_main_commit_count() -> N
 
 
 def test_beta_is_preview_not_action_required() -> None:
-    sources = {"openclawNpm": {"distTags": {"latest": "2026.7.1-2", "beta": "2026.7.2-beta.5"}}}
+    sources = {
+        "openclawUpdate": {"ok": True, "updateAvailable": False},
+        "hermesUpdate": {"ok": True, "status": "ok"},
+        "openclawNpm": {"distTags": {"latest": "2026.7.1-2", "beta": "2026.7.2-beta.5"}},
+    }
     assert watch.build_recommendations(sources) == []
     assert watch.build_previews(sources)[0]["status"] == "preview"
+
+
+def test_missing_runtime_probes_fail_closed() -> None:
+    recommendations = watch.build_recommendations({
+        "openclawUpdate": {"ok": False, "status": "missing", "detail": "not installed"},
+        "hermesUpdate": {"ok": False, "status": "attention", "version": "", "detail": "not installed"},
+    })
+    assert [row["id"] for row in recommendations] == [
+        "openclaw-update-check-failed",
+        "hermes-update-check-failed",
+    ]
+    assert watch.recommendation_status(recommendations) == "attention"
