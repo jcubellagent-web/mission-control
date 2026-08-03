@@ -18337,31 +18337,34 @@ body,
 }
 
 .brain-memory-registry {
+  --registry-tone: #62d6c7;
   left: 56%;
   top: 50%;
   display: grid;
   place-items: center;
-  width: 176px;
-  height: 176px;
+  width: 150px;
+  height: 150px;
+  border-color: rgba(98, 214, 199, 0.68);
   border-radius: 50%;
-  color: #dc90dc;
+  background: rgba(4, 24, 37, 0.98);
+  color: var(--registry-tone);
   transform: translate(-50%, -50%);
-  box-shadow: 0 0 18px rgba(220, 144, 220, 0.28), inset 0 0 16px rgba(220, 144, 220, 0.06);
+  box-shadow: 0 0 13px rgba(98, 214, 199, 0.2), inset 0 0 14px rgba(98, 214, 199, 0.05);
 }
-.brain-memory-registry > svg { width: 47px !important; height: 47px !important; }
+.brain-memory-registry > svg { width: 40px !important; height: 40px !important; }
 .brain-memory-registry::before,
 .brain-memory-registry::after {
   content: "";
   position: absolute;
-  inset: -10px;
-  border: 1px dashed rgba(220, 144, 220, 0.72);
+  inset: -8px;
+  border: 1px dashed rgba(98, 214, 199, 0.68);
   border-radius: 50%;
   animation: brain-registry-spin 16s linear infinite;
 }
-.brain-memory-registry::after { inset: -17px; border-color: rgba(67, 222, 227, 0.15); animation-direction: reverse; }
-.brain-memory-registry b { color: #e7e1df; font-size: 16px; }
-.brain-memory-registry em { color: #b0a5ac; font-size: 10.5px; font-style: normal; }
-.brain-memory-registry > i { width: 4px; height: 4px; border-radius: 50%; background: #fff; box-shadow: 0 0 8px #dc90dc; }
+.brain-memory-registry::after { inset: -14px; border-color: rgba(85, 215, 255, 0.14); animation-direction: reverse; }
+.brain-memory-registry b { color: #e7f2f0; font-size: 14.5px; }
+.brain-memory-registry em { color: #9fb8b7; font-size: 9.75px; font-style: normal; }
+.brain-memory-registry > i { width: 4px; height: 4px; border-radius: 50%; background: #fff; box-shadow: 0 0 7px var(--registry-tone); }
 .brain-memory-registry.is-live { animation: brain-registry-breathe 1.7s ease-in-out infinite; }
 
 /* Agent graph nodes replace the duplicated flat rail + internal anchor pair.
@@ -18712,7 +18715,7 @@ body,
 
 @keyframes brain-memory-dash { to { stroke-dashoffset: -20; } }
 @keyframes brain-registry-spin { to { transform: rotate(360deg); } }
-@keyframes brain-registry-breathe { 50% { filter: drop-shadow(0 0 9px rgba(220, 144, 220, 0.72)); } }
+@keyframes brain-registry-breathe { 50% { filter: drop-shadow(0 0 8px rgba(98, 214, 199, 0.66)); } }
 @keyframes brain-lease-pulse { 50% { opacity: 0.42; } }
 @keyframes brain-lifecycle-pulse { 50% { transform: scale(1.08); } }
 @keyframes brain-drawer-in { from { opacity: 0; transform: translateX(18px); } }
@@ -20852,8 +20855,8 @@ body,
 }
 
 #brain-atlas .brain-memory-registry {
-  width: 188px;
-  height: 188px;
+  width: 160px;
+  height: 160px;
 }
 
 #brain-atlas .brain-memory-node {
