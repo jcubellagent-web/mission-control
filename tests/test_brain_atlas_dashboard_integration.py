@@ -1068,6 +1068,19 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertNotIn("\n.memory-flow-map svg {", styles)
         self.assertNotIn("#brain-atlas .memory-flow-map svg {", styles)
 
+    def test_ecosystem_graph_keeps_memory_and_work_in_one_hero_canvas(self) -> None:
+        main = (MISSION_CONTROL / "v2-react" / "src" / "main.tsx").read_text()
+        styles = (MISSION_CONTROL / "v2-react" / "src" / "styles.css").read_text()
+        self.assertIn("Used in work", main)
+        self.assertIn("brain-agent-work-packet", main)
+        self.assertIn("return memoryLive ? (", main)
+        self.assertIn("brain-memory-link is-used", main)
+        self.assertIn("grid-template-columns: minmax(0, 1fr);", styles)
+        self.assertIn(".brain-controller-card:not(.is-quiet)", styles)
+        self.assertIn("#brain-atlas .brain-ecosystem-view {", styles)
+        self.assertIn("display: grid;", styles[styles.index("#brain-atlas .brain-ecosystem-view {"):])
+        self.assertIn(".brain-micro-legend {\n  display: none;", styles)
+
     def test_kiosk_respects_user_motion_preference_and_guard_protects_launcher(self) -> None:
         launcher = (MISSION_CONTROL / "scripts" / "open_mission_control_kiosk.sh").read_text(encoding="utf-8")
         guard = (MISSION_CONTROL / "scripts" / "control_tower_change_guard.py").read_text(encoding="utf-8")
