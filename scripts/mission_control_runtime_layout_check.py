@@ -307,9 +307,9 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
     const description = describedBy ? document.getElementById(describedBy) : null;
     const graph = element.querySelector(graphSelector);
     const graphRect = visible(graph) ? graph.getBoundingClientRect() : null;
-    const svg = graph?.querySelector('svg');
+    const svg = graph?.querySelector('svg[data-memory-source="governed-memory-registry"]') || graph?.querySelector('svg');
     const fillAnchorRects = svg && fillAnchorSelector
-      ? [...svg.querySelectorAll(fillAnchorSelector)]
+      ? [...graph.querySelectorAll(fillAnchorSelector)]
           .filter(visible)
           .map((anchor) => anchor.getBoundingClientRect())
           .filter((anchorRect) => anchorRect.width > 0 && anchorRect.height > 0)
@@ -526,8 +526,8 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
       mapAnimationName: memoryMapStyle?.animationName || 'none',
       mapAnimated: Boolean(memoryMapStyle && memoryMapStyle.animationName !== 'none'),
       mapBoxShadow: memoryMapStyle?.boxShadow || 'none',
-      evidenceSource: document.querySelector('#brain-atlas .memory-flow-map svg')?.getAttribute('data-memory-source')
-        || document.querySelector('#brain-atlas .memory-flow-map svg')?.getAttribute('data-evidence-source')
+      evidenceSource: document.querySelector('#brain-atlas .memory-flow-map svg[data-memory-source]')?.getAttribute('data-memory-source')
+        || document.querySelector('#brain-atlas .memory-flow-map svg[data-evidence-source]')?.getAttribute('data-evidence-source')
         || '',
       edges: memoryEdges,
       liveEdgeCount: memoryEdges.filter((edge) => edge.live).length,

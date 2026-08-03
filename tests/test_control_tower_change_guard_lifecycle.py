@@ -67,6 +67,12 @@ def test_host_runtime_helpers_are_guarded_source() -> None:
     assert bridge.issubset(set(GUARD.PYTHON_COMPILE_PATHS))
 
 
+def test_cli_begin_does_not_reacquire_the_lifecycle_mutex() -> None:
+    source = MODULE_PATH.read_text()
+    assert 'if args.command == "begin":\n        begin(' in source
+    assert 'if args.command == "begin":\n        with source_lifecycle_lock()' not in source
+
+
 def test_guard_covers_jcu10_lifecycle_brain_and_schema_paths() -> None:
     source_paths = set(GUARD.SOURCE_PATHS)
     compile_paths = set(GUARD.PYTHON_COMPILE_PATHS)

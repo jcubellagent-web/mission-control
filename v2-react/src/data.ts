@@ -1,5 +1,5 @@
 import { arrayValue, booleanValue, isAgentId, isRecord, recordValue, stringValue } from "./dataAdapters";
-import type { ActiveModelRoute, ActiveWork, AgentEvent, AgentId, AgentJob, AgentStatus, Approval, CanonicalModelFamily, ControlTowerHot, MissionControlState, SignalItem, TodayJobEvidence, TodayJobOccurrence, TodayJobOutcome, TodayJobsMeta } from "./types";
+import type { ActiveModelRoute, ActiveWork, AgentEvent, AgentId, AgentJob, AgentStatus, Approval, CanonicalModelFamily, ControlTowerHot, MissionControlState, SignalItem, SourceChangeLease, TodayJobEvidence, TodayJobOccurrence, TodayJobOutcome, TodayJobsMeta } from "./types";
 
 const JOB_ROW_LIMIT = 64;
 const LIVE_ROW_WINDOW_MS = 2 * 60 * 60 * 1000;
@@ -158,6 +158,33 @@ function normalizeHotProjection(value: unknown): ControlTowerHot | undefined {
     activeWorks,
     activeModelRoutes,
   };
+}
+
+function normalizeSourceChangeLeases(value: unknown): SourceChangeLease[] {
+  return arrayValue(value)
+    .filter(isRecord)
+    .map((row): SourceChangeLease | null => {
+      const agent = stringValue(row.agent);
+      const mode = stringValue(row.mode);
+      const id = stringValue(row.id);
+      const startedAt = stringValue(row.startedAt);
+      const expiresAt = stringValue(row.expiresAt);
+      if (!isAgentId(agent) || !["canonical", "scoped"].includes(mode) || !id || !startedAt || !expiresAt) return null;
+      return {
+        id,
+        mode: mode as SourceChangeLease["mode"],
+        agent,
+        objective: stringValue(row.objective, "Source change"),
+        startedAt,
+        expiresAt,
+        expired: booleanValue(row.expired) || !unexpired(expiresAt),
+        taskId: stringValue(row.taskId) || undefined,
+        workId: stringValue(row.workId) || undefined,
+        runId: stringValue(row.runId) || undefined,
+        scopes: arrayValue(row.scopes).map((scope) => stringValue(scope)).filter(Boolean).slice(0, 6),
+      };
+    })
+    .filter((row): row is SourceChangeLease => Boolean(row && !row.expired));
 }
 
 function hotStatus(work: ActiveWork): AgentStatus {
@@ -706,6 +733,7 @@ async function loadFallback(): Promise<MissionControlState> {
     codingVisibility: dashboard?.codingVisibility,
     trackedTasks: Array.isArray(dashboard?.trackedTasks) ? dashboard.trackedTasks : [],
     agentBus: Array.isArray(dashboard?.agentBus) ? dashboard.agentBus : [],
+    sourceChangeLeases: normalizeSourceChangeLeases(dashboard?.sourceChangeLeases),
     signalHealth: sidecars.signalHealth,
     signals: sidecars.signals,
   };

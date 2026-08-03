@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import datetime as dt
 from pathlib import Path
 
 
@@ -10,6 +11,71 @@ SPEC = importlib.util.spec_from_file_location("update_mission_control_under_test
 assert SPEC and SPEC.loader
 subject = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(subject)
+
+
+def test_source_change_leases_are_dashboard_safe_and_exclude_expired(tmp_path, monkeypatch) -> None:
+    now = dt.datetime.now(dt.timezone.utc)
+    active_start = (now - dt.timedelta(minutes=5)).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    active_expiry = (now + dt.timedelta(minutes=25)).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    expired_at = (now - dt.timedelta(minutes=1)).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    canonical_path = tmp_path / "control-tower-change-lock.json"
+    scoped_path = tmp_path / "scoped-change-leases.json"
+    canonical_path.write_text(json.dumps({
+        "agent": "joshex",
+        "objective": "Implement Brain Atlas ecosystem graph",
+        "startedAt": active_start,
+        "expiresAt": active_expiry,
+        "taskBinding": {"taskId": "task-atlas", "workId": "work-atlas", "runId": "run-atlas"},
+        "token": "must-never-reach-dashboard",
+        "backupDir": "/private/backup",
+        "pid": 4242,
+    }))
+    scoped_path.write_text(json.dumps({"leases": [
+        {
+            "agent": "jain",
+            "objective": "Update scheduler lane",
+            "startedAt": active_start,
+            "expiresAt": active_expiry,
+            "scopes": ["scripts/scheduler.py", "/private/path", "../escape"],
+            "taskBinding": {"workId": "work-scheduler"},
+            "token": "also-private",
+        },
+        {
+            "agent": "josh2",
+            "objective": "Old work",
+            "startedAt": active_start,
+            "expiresAt": expired_at,
+        },
+    ]}))
+    monkeypatch.setattr(subject, "SOURCE_CHANGE_LEASE_PATH", canonical_path)
+    monkeypatch.setattr(subject, "SCOPED_CHANGE_LEASES_PATH", scoped_path)
+
+    leases = subject.source_change_leases()
+
+    assert len(leases) == 2
+    assert {lease["mode"] for lease in leases} == {"canonical", "scoped"}
+    assert all("token" not in lease and "backupDir" not in lease and "pid" not in lease for lease in leases)
+    scoped = next(lease for lease in leases if lease["mode"] == "scoped")
+    assert scoped["scopes"] == ["scripts/scheduler.py"]
+    assert all(lease["expired"] is False for lease in leases)
+
+
+def test_live_projection_includes_safe_change_leases() -> None:
+    lease = {
+        "id": "lease-public-id",
+        "mode": "canonical",
+        "agent": "joshex",
+        "objective": "Brain Atlas",
+        "startedAt": "2026-08-02T12:00:00Z",
+        "expiresAt": "2026-08-02T12:45:00Z",
+        "expired": False,
+        "taskId": "task-atlas",
+        "workId": "work-atlas",
+        "runId": "run-atlas",
+        "scopes": [],
+    }
+
+    assert subject.build_live_dashboard({"sourceChangeLeases": [lease]})["sourceChangeLeases"] == [lease]
 
 
 def test_live_projection_keeps_only_rendered_hot_path_fields() -> None:

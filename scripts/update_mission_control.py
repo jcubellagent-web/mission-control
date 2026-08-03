@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import datetime as dt
 import fcntl
+import hashlib
 import json
 import math
 import os
@@ -101,6 +102,8 @@ HERMES_RECEIPT_CACHE_PATH = DATA_DIR / "hermes-execution-receipts.json"
 TELEGRAM_INBOX_QA_PATH = DATA_DIR / "telegram-inbox-qa.json"
 ADAPTIVE_QUALITY_CONTROL_PATH = DATA_DIR / "adaptive-quality-control.json"
 MAINTENANCE_PORTFOLIO_PATH = DATA_DIR / "maintenance-portfolio.json"
+SOURCE_CHANGE_LEASE_PATH = Path.home() / ".openclaw" / "state" / "control-tower-change-lock.json"
+SCOPED_CHANGE_LEASES_PATH = Path.home() / ".openclaw" / "state" / "scoped-change-leases.json"
 
 
 def atomic_write_json(path: Path, payload: Any, *, compact: bool = False) -> None:
@@ -171,13 +174,67 @@ def source_freshness() -> Dict[str, Any]:
     return {"latest": latest_iso, "sources": rows}
 
 
+def _safe_change_lease(value: Any, mode: str, index: int = 0) -> Dict[str, Any] | None:
+    """Project lease ownership without tokens, backups, PIDs, branches, or repository paths."""
+    if not isinstance(value, dict) or mode not in {"canonical", "scoped"}:
+        return None
+    agent = str(value.get("agent") or "").strip().lower()
+    if agent not in {"joshex", "josh2", "jaimes", "jain"}:
+        return None
+    started_at = str(value.get("startedAt") or "").strip()
+    expires_at = str(value.get("expiresAt") or "").strip()
+    if not started_at or not expires_at:
+        return None
+    try:
+        expired = dt.datetime.fromisoformat(expires_at.replace("Z", "+00:00")) <= dt.datetime.now(dt.timezone.utc)
+    except ValueError:
+        return None
+    binding = value.get("taskBinding") if isinstance(value.get("taskBinding"), dict) else {}
+    raw_scopes = value.get("scopes") if isinstance(value.get("scopes"), list) else []
+    scopes = []
+    for item in raw_scopes[:6]:
+        scope = str(item or "").strip().replace("\\", "/")
+        if scope and len(scope) <= 120 and not scope.startswith("/") and ".." not in scope.split("/"):
+            scopes.append(scope)
+    objective = plain_dashboard_text(str(value.get("objective") or "Source change"), 160)
+    identity = "|".join((mode, agent, str(binding.get("workId") or ""), started_at, str(index)))
+    return {
+        "id": hashlib.sha256(identity.encode("utf-8")).hexdigest()[:16],
+        "mode": mode,
+        "agent": agent,
+        "objective": objective,
+        "startedAt": started_at,
+        "expiresAt": expires_at,
+        "expired": expired,
+        "taskId": plain_dashboard_text(str(binding.get("taskId") or ""), 160) or None,
+        "workId": plain_dashboard_text(str(binding.get("workId") or ""), 160) or None,
+        "runId": plain_dashboard_text(str(binding.get("runId") or ""), 160) or None,
+        "scopes": scopes,
+    }
+
+
+def source_change_leases() -> List[Dict[str, Any]]:
+    leases: List[Dict[str, Any]] = []
+    canonical = load_json_file(SOURCE_CHANGE_LEASE_PATH, {})
+    projected = _safe_change_lease(canonical, "canonical")
+    if projected and not projected["expired"]:
+        leases.append(projected)
+    scoped = load_json_file(SCOPED_CHANGE_LEASES_PATH, {})
+    rows = scoped.get("leases") if isinstance(scoped, dict) and isinstance(scoped.get("leases"), list) else []
+    for index, row in enumerate(rows[:12]):
+        projected = _safe_change_lease(row, "scoped", index)
+        if projected and not projected["expired"]:
+            leases.append(projected)
+    return sorted(leases, key=lambda row: (row["expiresAt"], row["agent"], row["id"]))
+
+
 LIVE_DASHBOARD_KEYS = {
     "actionRequired", "agentBrainFeeds", "agentBus", "agentContextRegistry", "agentControl",
     "brainAtlas", "brainFeed", "capabilityInventory", "capabilityStack", "capabilityWatch", "codingVisibility",
     "codexJobs", "generatedAt", "jaimesBrainFeed", "jainBrainFeed", "joshBrainFeed",
     "lastUpdated", "liveObjectives", "machineHealth", "memoryOperations", "modelRouter", "modelUsage",
     "maintenanceControl", "qualityControl", "recentActivity", "reliabilityUpgrades", "runtimeLayout", "sharedOperatingLayer", "sourceFreshness",
-    "sourceUpdatedAt", "taskOwnershipGraph", "telegramInboxQa", "trackedTasks",
+    "sourceUpdatedAt", "sourceChangeLeases", "taskOwnershipGraph", "telegramInboxQa", "trackedTasks",
     "todayJobs", "todayJobsMeta",
 }
 
@@ -7006,6 +7063,7 @@ def main() -> None:
         load_json_file(BRAIN_ATLAS_PATH, {}),
         now_iso,
     )
+    dashboard["sourceChangeLeases"] = source_change_leases()
     # The ownership graph reconciles exact IDs internally, then exposes only
     # hashed graph nodes and dashboard-safe labels. A source failure is a
     # visible unavailable state, never a partial or inferred relationship.

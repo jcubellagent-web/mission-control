@@ -711,8 +711,7 @@ def main() -> None:
     sub.add_parser("recover-expired")
     args = parser.parse_args()
     if args.command == "begin":
-        with source_lifecycle_lock():
-            begin(args.agent, args.objective, args.task_id, args.work_id, args.run_id)
+        begin(args.agent, args.objective, args.task_id, args.work_id, args.run_id)
     elif args.command == "status": status()
     elif args.command == "renew": renew(args.token)
     elif args.command == "extend-snapshot": extend_snapshot(args.token)

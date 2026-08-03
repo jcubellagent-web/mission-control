@@ -1094,6 +1094,9 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertIn("from handoff_receipt_bridge import receipt_state, terminal_result_receipt", source)
         self.assertIn('"brainAtlas"', source)
 
+    def test_brain_atlas_consumes_the_safe_change_lease_projection(self) -> None:
+        self.assertIn("normalizeSourceChangeLeases(dashboard?.sourceChangeLeases)", (MISSION_CONTROL / "v2-react" / "src" / "data.ts").read_text())
+
 
 if __name__ == "__main__":
     unittest.main()

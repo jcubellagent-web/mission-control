@@ -84,6 +84,20 @@ export type ControlTowerHot = {
   activeModelRoutes: ActiveModelRoute[];
 };
 
+export type SourceChangeLease = {
+  id: string;
+  mode: "canonical" | "scoped";
+  agent: AgentId;
+  objective: string;
+  startedAt: string;
+  expiresAt: string;
+  expired: boolean;
+  taskId?: string;
+  workId?: string;
+  runId?: string;
+  scopes: string[];
+};
+
 export type AgentEvent = {
   id: string;
   agent_id: AgentId;
@@ -474,6 +488,7 @@ export type MissionControlState = {
   todayJobsMeta?: TodayJobsMeta;
   workHot?: ControlTowerHot;
   activeModelRoutes?: ActiveModelRoute[];
+  sourceChangeLeases?: SourceChangeLease[];
   approvals: Approval[];
   operationalAlerts: OperationalAlert[];
   agenticCrypto?: AgenticCryptoWallet;
