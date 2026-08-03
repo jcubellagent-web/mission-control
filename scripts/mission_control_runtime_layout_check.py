@@ -1245,7 +1245,10 @@ def validate_control_tower_layout(
                 f"{label}: live {operation} path evidence is {age_seconds:g}s old "
                 f"(requires -5s to {MEMORY_ACTIVITY_MAX_AGE_SECONDS:g}s)"
             )
-        if _number(edge.get("strokeWidth")) < 4:
+        # Compact topology links terminate on visible agent anchors; a 2px live
+        # stroke remains legible at kiosk scale without recreating the former
+        # heavy, disconnected controller fan-out.
+        if _number(edge.get("strokeWidth")) < 2:
             failures.append(f"{label}: live {operation} path is not visually pronounced enough")
         if str(edge.get("strokeLinecap") or "") != "round":
             failures.append(f"{label}: live {operation} path lacks a rounded travel beacon")

@@ -17958,12 +17958,16 @@ body,
   stroke-linecap: round;
   stroke-dasharray: 5 5;
   vector-effect: non-scaling-stroke;
-  animation: brain-memory-dash var(--atlas-system-duration) linear infinite;
+  animation: none;
 }
 .brain-memory-link.is-recall { stroke: rgba(220, 144, 220, 0.82); }
 .brain-memory-link.is-selected { stroke: rgba(67, 222, 227, 0.82); }
 .brain-memory-link.is-used { stroke: rgba(101, 217, 255, 0.88); stroke-width: 1.6; }
 .brain-memory-link.is-feedback { stroke: rgba(199, 239, 52, 0.82); }
+.brain-memory-link.is-live {
+  stroke-width: 2.2;
+  animation: memory-flow-travel 1.9s linear infinite;
+}
 .brain-memory-packet { fill: #f2b5ec; opacity: 0.24; filter: drop-shadow(0 0 5px #dc90dc); }
 .brain-memory-packet.is-live { opacity: 1; }
 .brain-memory-packet.is-selected-packet { fill: #43dee3; filter: drop-shadow(0 0 6px #43dee3); }
@@ -17980,12 +17984,13 @@ body,
 .brain-topology-link.agent-josh2 { stroke: color-mix(in srgb, var(--agent-josh2) 42%, transparent); }
 .brain-topology-link.agent-jaimes { stroke: color-mix(in srgb, var(--agent-jaimes) 42%, transparent); }
 .brain-topology-link.agent-jain { stroke: color-mix(in srgb, var(--agent-jain) 42%, transparent); }
+.brain-topology-link.is-active { stroke-width: 1.35; }
 .brain-topology-link.is-live {
-  stroke-width: 1.8;
+  stroke-width: 2.2;
   stroke-dasharray: 5 4;
   animation: memory-flow-travel 1.9s linear infinite;
 }
-.brain-topology-link.is-memory-live { stroke-width: 2.2; }
+.brain-topology-link.is-memory-live { filter: none; }
 .brain-topology-packet { filter: drop-shadow(0 0 5px currentColor); }
 .brain-topology-packet.agent-joshex { color: var(--agent-joshex); fill: var(--agent-joshex); }
 .brain-topology-packet.agent-josh2 { color: var(--agent-josh2); fill: var(--agent-josh2); }

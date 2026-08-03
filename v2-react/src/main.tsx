@@ -4684,7 +4684,8 @@ function BrainAtlasEcosystemView({
   const pending = sanitizedNestedMemoryCount(memoryOperations, "review", "pending");
   const helpful = sanitizedNestedMemoryCount(memoryOperations, "retrieval", "helpful30d");
   const provenance = sanitizedNestedMemoryMetric(memoryOperations, "registry", "provenanceCoveragePct", 100);
-  const signal = activeMemoryEvent?.signal || null;
+  const activeEventIsRecent = Boolean(activeMemoryEvent && memorySignalIsRecent(activeMemoryEvent.observedAt, activity?.motionWindowSeconds || 90));
+  const signal = activeEventIsRecent ? activeMemoryEvent?.signal || null : null;
   const lifecycle = [
     { key: "retrieval", label: "Retrieved", icon: Search, time: activity?.lastObservedAt.retrieval, count: retrievals },
     { key: "selected", label: "Selected", icon: CheckCircle2, time: activity?.lastObservedAt.selected, count: selected },
@@ -4754,12 +4755,12 @@ function BrainAtlasEcosystemView({
             <svg viewBox="0 0 1000 220" preserveAspectRatio="none" aria-hidden="true" data-memory-source="governed-memory-registry">
               <title>Governed shared-memory activity and agent ecosystem paths</title>
               <desc>Verified recall, selection, feedback, durable-memory, controller, worker, and model-route activity.</desc>
-              <path className="brain-memory-link is-recall" d="M 136 24 C 260 24 340 84 446 104" />
+              <path className={`memory-flow-edge brain-memory-link is-recall${signal === "retrieval" || signal === "hit" ? " is-live" : ""}`} d="M 136 24 C 260 24 340 84 446 104" data-operation={signal === "hit" ? "hit" : "retrieval"} data-observed-at={activity?.lastObservedAt.retrieval || ""} />
               <path className="brain-memory-link is-durable" d="M 136 194 C 266 194 348 146 446 126" />
-              <path className="brain-memory-link is-selected" d="M 554 100 C 664 82 744 22 864 22" />
-              <path className="brain-memory-link is-used" d="M 930 38 C 930 58 930 72 930 92" />
+              <path className={`memory-flow-edge brain-memory-link is-selected${signal === "selected" ? " is-live" : ""}`} d="M 554 100 C 664 82 744 22 864 22" data-operation="selected" data-observed-at={activity?.lastObservedAt.selected || ""} />
+              <path className={`memory-flow-edge brain-memory-link is-used${signal === "used" ? " is-live" : ""}`} d="M 930 38 C 930 58 930 72 930 92" data-operation="used" data-observed-at={activity?.lastObservedAt.used || ""} />
               <path className="brain-memory-link is-candidate" d="M 554 136 C 604 158 634 182 675 182" />
-              <path className="brain-memory-link is-feedback" d="M 930 128 C 952 146 952 164 930 182" />
+              <path className={`memory-flow-edge brain-memory-link is-feedback${signal === "feedback" ? " is-live" : ""}`} d="M 930 128 C 952 146 952 164 930 182" data-operation="feedback" data-observed-at={activity?.lastObservedAt.feedback || ""} />
               <circle className={`brain-memory-packet is-recall-packet${signal === "retrieval" || signal === "hit" ? " is-live" : ""}`} r="4"><animateMotion dur="2.2s" repeatCount="indefinite" path="M 136 24 C 260 24 340 84 446 104" /></circle>
               <circle className={`brain-memory-packet is-selected-packet${signal === "selected" ? " is-live" : ""}`} r="4"><animateMotion dur="1.55s" repeatCount="indefinite" path="M 554 100 C 664 82 744 22 864 22" /></circle>
               <circle className={`brain-memory-packet is-used-packet${signal === "used" ? " is-live" : ""}`} r="4"><animateMotion dur="1.2s" repeatCount="indefinite" path="M 930 38 C 930 58 930 72 930 92" /></circle>
@@ -4771,7 +4772,13 @@ function BrainAtlasEcosystemView({
                 const isActive = liveWork.working || workers.length > 0 || memoryLive;
                 return (
                   <g key={`agent-topology-${agent}`} data-memory-operation={latest?.[0] || "none"} data-memory-state={memoryLive ? "live" : "quiet"}>
-                    <path className={`brain-topology-link agent-${agent}${isActive ? " is-live" : ""}${memoryLive ? " is-memory-live" : ""}`} d={topology.path} />
+                    <path
+                      className={`memory-flow-edge brain-topology-link agent-${agent}${isActive ? " is-active" : ""}${memoryLive ? " is-live is-memory-live" : ""}`}
+                      d={topology.path}
+                      data-agent={agent}
+                      data-operation={latest?.[0] || "none"}
+                      data-observed-at={latest?.[1] || ""}
+                    />
                     {memoryLive ? <circle className={`brain-topology-packet agent-${agent} is-memory-live`} r="3"><animateMotion dur="1.6s" repeatCount="indefinite" path={topology.path} /></circle> : null}
                   </g>
                 );

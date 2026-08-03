@@ -1079,6 +1079,8 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertIn('data-subagent-count={workers.length}', main)
         self.assertIn('brain-topology-link agent-${agent}', main)
         self.assertIn('data-memory-state={memoryLive ? "live" : "quiet"}', main)
+        self.assertIn("const activeEventIsRecent = Boolean", main)
+        self.assertIn('memory-flow-edge brain-memory-link is-recall', main)
         self.assertNotIn("brain-agent-work-packet", main)
         self.assertIn('.brain-ecosystem-anchor.is-live', styles)
         self.assertIn("grid-template-columns: minmax(0, 1fr);", styles)
