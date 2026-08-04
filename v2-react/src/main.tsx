@@ -5091,20 +5091,31 @@ function BrainAtlasEcosystemView({
                 return (
                   <g key={`agent-topology-${agent}`} data-agent-route={routeLive ? "live" : isActive ? "active-stale" : "idle"} data-memory-operation={memoryOperation} data-memory-state={memoryLive ? "live" : "quiet"}>
                     <path
-                      className={`memory-flow-edge brain-topology-link agent-${agent}${isActive ? " is-active" : ""}${routeLive ? " is-work-live is-live" : ""}${memoryLive ? " is-live is-memory-live" : ""}${activeMemoryAgent === agent ? " is-active-memory-agent" : ""}${selectedAgent === agent ? " is-selected-agent" : selectedAgent ? " is-muted-agent" : ""}`}
+                      className={`memory-flow-edge brain-topology-link agent-${agent}${isActive ? " is-active" : ""}${memoryLive ? " is-live is-memory-live" : ""}${activeMemoryAgent === agent ? " is-active-memory-agent" : ""}${selectedAgent === agent ? " is-selected-agent" : selectedAgent ? " is-muted-agent" : ""}`}
                       d={topology.path}
                       data-agent={agent}
-                      data-operation={routeLive ? "live-work" : memoryOperation}
-                      data-observed-at={routeLive ? routeEvidenceAt : latest?.[1] || ""}
+                      data-operation={memoryOperation}
+                      data-observed-at={latest?.[1] || ""}
                       markerEnd="url(#brain-arrow-agent)"
                       data-flow-direction="forward"
                       data-flow-from={agent}
                       data-flow-to="activity-bus"
                     />
                     {routeLive ? (
-                      <circle className={`brain-topology-packet agent-${agent} is-work-live`} r="3.7" data-agent={agent} data-route-packet="work">
-                        <animateMotion dur={`${1.1 + HERO_AGENT_ORDER.indexOf(agent) * 0.11}s`} repeatCount="indefinite" path={topology.path} />
-                      </circle>
+                      <>
+                        <path
+                          className={`brain-work-route-link agent-${agent} is-work-live`}
+                          d={topology.path}
+                          data-agent={agent}
+                          data-operation="live-work"
+                          data-observed-at={routeEvidenceAt}
+                          data-work-route-live="true"
+                          markerEnd="url(#brain-arrow-agent)"
+                        />
+                        <circle className={`brain-topology-packet agent-${agent} is-work-live`} r="3.7" data-agent={agent} data-route-packet="work">
+                          <animateMotion dur={`${1.1 + HERO_AGENT_ORDER.indexOf(agent) * 0.11}s`} repeatCount="indefinite" path={topology.path} />
+                        </circle>
+                      </>
                     ) : null}
                   </g>
                 );

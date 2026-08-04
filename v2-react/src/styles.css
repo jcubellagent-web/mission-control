@@ -21149,7 +21149,9 @@ body,
 #brain-atlas .brain-agent-bus-junction.agent-jaimes.is-active { fill: var(--agent-jaimes); }
 #brain-atlas .brain-agent-bus-junction.agent-jain.is-active { fill: var(--agent-jain); }
 
-#brain-atlas .brain-topology-link.is-work-live {
+#brain-atlas .brain-work-route-link.is-work-live {
+  fill: none;
+  stroke: var(--agent-tone);
   stroke-width: 2.7;
   stroke-dasharray: 4 4;
   opacity: 1;
@@ -21173,7 +21175,7 @@ body,
   #brain-atlas .brain-agent-bus.is-active,
   #brain-atlas .brain-agent-bus.is-memory-active,
   #brain-atlas .brain-agent-trunk.is-active-route,
-  #brain-atlas .brain-topology-link.is-work-live {
+  #brain-atlas .brain-work-route-link.is-work-live {
     stroke-dasharray: none;
     animation: none !important;
   }
