@@ -1067,7 +1067,8 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         main = (MISSION_CONTROL / "v2-react" / "src" / "main.tsx").read_text(encoding="utf-8")
         styles = (MISSION_CONTROL / "v2-react" / "src" / "styles.css").read_text(encoding="utf-8")
 
-        self.assertIn("const hasActiveControllers = agentRows.some", main)
+        self.assertIn("const activeAgentIds = agentRows", main)
+        self.assertIn("const hasActiveControllers = activeAgentIds.length > 0", main)
         self.assertIn('hasActiveControllers ? " has-active-controllers" : " is-idle"', main)
         self.assertNotIn('className={`brain-controller-grid', main)
         self.assertIn('brain-agent-graph-node memory-flow-node is-agent', main)
@@ -1153,7 +1154,7 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
     def test_brain_atlas_uses_one_directed_activity_bus_and_collision_safe_lifecycle(self) -> None:
         main = (MISSION_CONTROL / "v2-react" / "src" / "main.tsx").read_text(encoding="utf-8")
         runtime = (MISSION_CONTROL / "scripts" / "mission_control_runtime_layout_check.py").read_text(encoding="utf-8")
-        self.assertIn('className="brain-agent-bus"', main)
+        self.assertIn('className={`brain-agent-bus${hasActiveControllers ? " is-active" : ""}', main)
         self.assertIn('data-flow-from="activity-bus" data-flow-to="retrieve"', main)
         self.assertIn('data-flow-from="retrieve" data-flow-to="registry"', main)
         self.assertIn('data-flow-from="registry" data-flow-to="selected"', main)
@@ -1162,6 +1163,30 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertIn('data-flow-from="durable" data-flow-to="registry"', main)
         self.assertIn("directedFlowMissingArrowCount", runtime)
         self.assertIn("flowPathCollisions", runtime)
+
+    def test_brain_atlas_exposes_telemetry_backed_active_agent_routes_without_clicks(self) -> None:
+        main = (MISSION_CONTROL / "v2-react" / "src" / "main.tsx").read_text(encoding="utf-8")
+        styles = (MISSION_CONTROL / "v2-react" / "src" / "styles.css").read_text(encoding="utf-8")
+
+        self.assertIn("const activeAgentIds = agentRows", main)
+        self.assertIn('data-active-agent-count={activeAgentIds.length}', main)
+        self.assertIn('data-active-agents={activeAgentIds.join(",")}', main)
+        self.assertIn('data-active-memory-agent={activeMemoryAgent || ""}', main)
+        self.assertIn('className="brain-active-route-summary"', main)
+        self.assertIn('data-agent-route-state={memoryRouteActive ? "memory-live" : routeActive ? "work-live" : "idle"}', main)
+        self.assertIn('brain-agent-node-route${routeActive ? " is-route-active-label" : ""}', main)
+        self.assertIn('data-agent-route={routeLive ? "live" : isActive ? "active-stale" : "idle"}', main)
+        self.assertIn('data-route-packet="work"', main)
+        self.assertIn("memorySignalIsRecent(workObservedAt", main)
+        self.assertIn("memorySignalIsRecent(routeEvidenceAt", main)
+        self.assertIn('data-operation={routeLive ? "live-work" : memoryOperation}', main)
+        self.assertIn("#brain-atlas .brain-agent-graph-node.is-route-active", styles)
+        self.assertIn("#brain-atlas .brain-topology-link.is-work-live", styles)
+        self.assertIn("#brain-atlas .brain-agent-bus.is-active", styles)
+        self.assertIn("#brain-atlas .brain-topology-packet.is-work-live", styles)
+        reduced_motion = styles[styles.rindex("@media (prefers-reduced-motion: reduce)"):]
+        self.assertIn("#brain-atlas .brain-topology-packet.is-work-live", reduced_motion)
+        self.assertIn("display: none;", reduced_motion)
 
     def test_kiosk_respects_user_motion_preference_and_guard_protects_launcher(self) -> None:
         launcher = (MISSION_CONTROL / "scripts" / "open_mission_control_kiosk.sh").read_text(encoding="utf-8")
