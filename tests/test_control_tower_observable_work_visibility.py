@@ -8,6 +8,36 @@ STYLES = ROOT / "v2-react" / "src" / "styles.css"
 
 
 class ObservableWorkVisibilityTests(unittest.TestCase):
+    def test_live_work_board_adapts_row_density_from_verified_state(self) -> None:
+        source = MAIN.read_text(encoding="utf-8")
+        styles = STYLES.read_text(encoding="utf-8")
+        density = source[source.index("type AgentExpansionMap"):source.index("function workerObjectiveForRoute")]
+        board = source[source.index("function BrainHero("):source.index("type LiveRunInspectorRow")]
+        card = source[source.index("function AgentHeroCard("):source.index("type MetricTone")]
+
+        self.assertIn("AGENT_ROW_COLLAPSE_DELAY_MS = 1_800", density)
+        self.assertIn("function agentRowRequestsExpansion", density)
+        self.assertIn("activityMode", density)
+        self.assertIn("hasFreshActiveStatus", density)
+        self.assertIn("isFreshActiveTimestamp(liveWork.status.updated_at)", density)
+        self.assertIn('liveWork.visualState === "waiting"', density)
+        self.assertIn('liveWork.visualState === "blocked"', density)
+        self.assertIn("hasActiveWorker", density)
+        self.assertIn("hasActiveLease", density)
+        self.assertNotIn("awaiting instruction", density.lower())
+        self.assertIn("function useAdaptiveAgentExpansion", density)
+        self.assertIn("window.setTimeout", density)
+        self.assertIn("function adaptiveAgentGridRows", density)
+        self.assertIn('"minmax(44px, 0.5fr)"', density)
+        self.assertIn('className="brain-agent-grid is-adaptive-density"', board)
+        self.assertIn('"--agent-grid-rows": agentGridRows', board)
+        self.assertIn('density={expandedRows[agent] ? "expanded" : "compact"}', board)
+        self.assertIn('data-density={density}', card)
+        self.assertIn(".brain-agent-grid.is-adaptive-density", styles)
+        self.assertIn("transition: grid-template-rows 360ms", styles)
+        self.assertIn(".agent-hero-card.is-density-compact", styles)
+        self.assertIn("@media (prefers-reduced-motion: reduce)", styles)
+
     def test_run_inspector_is_bounded_and_reuses_existing_detail_disclosure(self) -> None:
         source = MAIN.read_text(encoding="utf-8")
         details = source[source.index("{showDetails ? ("):source.index("function objectRows")]

@@ -818,6 +818,88 @@ function verifiedWorkerRoutesForAgent(
     .sort((left, right) => timeValue(right.updatedAt) - timeValue(left.updatedAt));
 }
 
+type AgentExpansionMap = Record<AgentId, boolean>;
+
+const AGENT_ROW_COLLAPSE_DELAY_MS = 1_800;
+
+function agentRowRequestsExpansion(
+  agent: AgentId,
+  liveWork: AgentLiveWorkPresentation,
+  activeModelRoutes: ActiveModelRoute[],
+  sourceChangeLeases: SourceChangeLease[],
+) {
+  const activityMode = agentActivityMode(liveWork);
+  const statusValue = String(liveWork.status.status || "").toLowerCase();
+  const hasFreshActiveStatus = Boolean(
+    (liveWork.status.active || statusValue === "active" || statusValue === "working")
+    && isFreshActiveTimestamp(liveWork.status.updated_at)
+  );
+  const hasActiveWorker = verifiedWorkerRoutesForAgent(agent, liveWork.status, activeModelRoutes).length > 0;
+  const hasActiveLease = sourceChangeLeases.some((lease) => (
+    lease.agent === agent && !lease.expired && timeValue(lease.expiresAt) > Date.now()
+  ));
+  return Boolean(
+    activityMode
+    || hasFreshActiveStatus
+    || liveWork.activeFocus
+    || liveWork.visualState === "working"
+    || liveWork.visualState === "waiting"
+    || liveWork.visualState === "blocked"
+    || hasActiveWorker
+    || hasActiveLease
+  );
+}
+
+function useAdaptiveAgentExpansion(targets: AgentExpansionMap) {
+  const [retained, setRetained] = useState<AgentExpansionMap>(targets);
+  const targetRef = useRef(targets);
+  const collapseTimers = useRef<Partial<Record<AgentId, number>>>({});
+  const targetKey = HERO_AGENT_ORDER.map((agent) => (targets[agent] ? "1" : "0")).join("");
+  targetRef.current = targets;
+
+  useEffect(() => {
+    HERO_AGENT_ORDER.forEach((agent) => {
+      const timer = collapseTimers.current[agent];
+      if (targets[agent]) {
+        if (timer !== undefined) {
+          window.clearTimeout(timer);
+          delete collapseTimers.current[agent];
+        }
+        setRetained((current) => current[agent] ? current : { ...current, [agent]: true });
+        return;
+      }
+      if (!retained[agent] || timer !== undefined) return;
+      collapseTimers.current[agent] = window.setTimeout(() => {
+        delete collapseTimers.current[agent];
+        if (targetRef.current[agent]) return;
+        setRetained((current) => current[agent] ? { ...current, [agent]: false } : current);
+      }, AGENT_ROW_COLLAPSE_DELAY_MS);
+    });
+  }, [targetKey, retained, targets]);
+
+  useEffect(() => () => {
+    Object.values(collapseTimers.current).forEach((timer) => window.clearTimeout(timer));
+  }, []);
+
+  return HERO_AGENT_ORDER.reduce<AgentExpansionMap>((result, agent) => {
+    result[agent] = targets[agent] || retained[agent];
+    return result;
+  }, {} as AgentExpansionMap);
+}
+
+function adaptiveAgentGridRows(expanded: AgentExpansionMap) {
+  const expandedCount = HERO_AGENT_ORDER.filter((agent) => expanded[agent]).length;
+  if (expandedCount === 0 || expandedCount === HERO_AGENT_ORDER.length) {
+    return HERO_AGENT_ORDER.map(() => "minmax(0px, 1fr)").join(" ");
+  }
+  const expandedWeight = expandedCount === 1 ? 1.75 : expandedCount === 2 ? 1.35 : 1;
+  return HERO_AGENT_ORDER.map((agent) => (
+    expanded[agent]
+      ? `minmax(0px, ${expandedWeight}fr)`
+      : "minmax(44px, 0.5fr)"
+  )).join(" ");
+}
+
 function workerObjectiveForRoute(worker: ActiveModelRoute, activeWorks: ActiveWork[]) {
   return activeWorks.find((work) => (
     work.executionRole === "worker"
@@ -1624,6 +1706,20 @@ function BrainHero({
     const timer = window.setInterval(() => setNowMs(Date.now()), 30_000);
     return () => window.clearInterval(timer);
   }, []);
+  const activeModelRoutes = state.activeModelRoutes || [];
+  const sourceChangeLeases = state.sourceChangeLeases || [];
+  const heroRows = heroAgents.map((agent) => ({
+    agent,
+    liveWork: liveWorkPresentationForAgent(agent, statuses.get(agent), workItems),
+    idleContext: buildAgentIdleContext(agent, state, nowMs),
+  }));
+  const expansionTargets = heroRows.reduce<AgentExpansionMap>((result, row) => {
+    result[row.agent] = agentRowRequestsExpansion(row.agent, row.liveWork, activeModelRoutes, sourceChangeLeases);
+    return result;
+  }, {} as AgentExpansionMap);
+  const expandedRows = useAdaptiveAgentExpansion(expansionTargets);
+  const expandedRowCount = heroAgents.filter((agent) => expandedRows[agent]).length;
+  const agentGridRows = adaptiveAgentGridRows(expandedRows);
   const activityScore = Math.min(10, activeAgents * 2 + activeJobs + pendingApprovals.length * 2 + recentActivity);
   const laserSpeed = Math.max(5, 24 - activityScore * 1.9);
   const laserOpacity = Math.min(1, 0.42 + activityScore * 0.06);
@@ -1662,20 +1758,23 @@ function BrainHero({
 
       <div className="brain-agent-stage">
         <AgentHandoffBeams state={state} />
-        <div className="brain-agent-grid">
-          {heroAgents.map((agent) => {
-            const liveWork = liveWorkPresentationForAgent(agent, statuses.get(agent), workItems);
-            const idleContext = buildAgentIdleContext(agent, state, nowMs);
+        <div
+          className="brain-agent-grid is-adaptive-density"
+          data-expanded-row-count={expandedRowCount}
+          style={{ "--agent-grid-rows": agentGridRows } as React.CSSProperties}
+        >
+          {heroRows.map(({ agent, liveWork, idleContext }) => {
             return (
               <AgentHeroCard
                 key={agent}
                 agent={agent}
                 liveWork={liveWork}
                 idleContext={idleContext}
-                activeModelRoutes={state.activeModelRoutes || []}
+                activeModelRoutes={activeModelRoutes}
                 activeWorks={state.workHot?.activeWorks || []}
                 memoryActivity={state.memoryOperations?.activity?.agents.find((row) => row.agent === agent)}
-                sourceChangeLeases={state.sourceChangeLeases || []}
+                sourceChangeLeases={sourceChangeLeases}
+                density={expandedRows[agent] ? "expanded" : "compact"}
                 changed={Boolean(liveCues.rows[cueRowKey("agent", agent)])}
                 selected={selectedAgent === agent}
                 onSelect={() => onSelectedAgentChange(selectedAgent === agent ? null : agent)}
@@ -6444,6 +6543,7 @@ function AgentHeroCard({
   activeWorks,
   memoryActivity,
   sourceChangeLeases,
+  density,
   changed,
   selected,
   onSelect,
@@ -6455,6 +6555,7 @@ function AgentHeroCard({
   activeWorks: ActiveWork[];
   memoryActivity?: MemoryActivity["agents"][number];
   sourceChangeLeases: SourceChangeLease[];
+  density: "expanded" | "compact";
   changed?: boolean;
   selected: boolean;
   onSelect: () => void;
@@ -6515,10 +6616,11 @@ function AgentHeroCard({
   }, [headline.title]);
   return (
     <article
-      className={`agent-hero-card ${agentClass(agent)} ${freshness} ${statusClass(status.status)} is-state-${visualState} ${activeFocus ? "is-working-focus" : promptReceived ? "is-prompt-received" : "is-up-next-focus"} ${verifiedRoute ? "has-verified-route" : "is-route-pending"}${selected ? " is-linked-selected" : ""}${changedRowClass(changed)}`}
+      className={`agent-hero-card ${agentClass(agent)} ${freshness} ${statusClass(status.status)} is-state-${visualState} is-density-${density} ${activeFocus ? "is-working-focus" : promptReceived ? "is-prompt-received" : "is-up-next-focus"} ${verifiedRoute ? "has-verified-route" : "is-route-pending"}${selected ? " is-linked-selected" : ""}${changedRowClass(changed)}`}
       role="button"
       tabIndex={0}
       aria-pressed={selected}
+      aria-label={`${AGENTS[agent].label}. ${headline.title}. ${agentOperatingState(status)}.`}
       onClick={onSelect}
       onKeyDown={(event) => {
         if (event.key === "Enter" || event.key === " ") {
@@ -6539,6 +6641,7 @@ function AgentHeroCard({
       data-work-id={status.work_id || activeWork?.id || ""}
       data-run-id={status.run_id || ""}
       data-work-state={visualState}
+      data-density={density}
       data-linked-selected={selected ? "true" : "false"}
       style={{
         "--agent-pulse-speed": `${pulseSpeed}s`,
