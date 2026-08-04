@@ -35,6 +35,16 @@ single non-in-season card. Model outputs are ranking and portfolio signals, not
 guaranteed or expected points. After an approved change, resubmit only affected
 entries and then authenticate a full 10/10 card-set diff before reporting success.
 
+## Probable-starter and DNP safety
+
+Pitcher eligibility requires an official MLB probable-pitcher assignment whose
+game time falls inside the exact Sorare fixture timestamps. ESPN-only probable
+listings are retained as provisional diagnostics but cannot make an SP, or an
+RP card used for starter workload, lineup-eligible. Official MLB-only and
+cross-source matches are confirmed. The lineup pipeline fails closed when the
+official schedule cannot be fetched, and the final pre-lock pass must refetch
+both sources so stale rotation projections cannot create a preventable DNP.
+
 ## XP allocation procedure
 
 JAIMES may generate a proposed XP plan from current Championship exposure,
