@@ -45,6 +45,7 @@ def test_sync_remote_capability_watch_preserves_remote_timestamp(monkeypatch, tm
         "sources": {},
         "recommendations": [],
         "previews": [],
+        "fastLane": {"status": "watch", "summary": "one fast-track release"},
         "privacy": "dashboard-safe metadata only",
     }
     monkeypatch.setattr(monitor, "remote_capability_watch", lambda *args: {"ok": True, "payload": remote})
@@ -52,6 +53,7 @@ def test_sync_remote_capability_watch_preserves_remote_timestamp(monkeypatch, tm
     assert result["ok"] is True
     assert result["updated"] is True
     assert json.loads(local.read_text())["updatedAt"] == "2026-08-03T12:00:00Z"
+    assert json.loads(local.read_text())["fastLane"]["summary"] == "one fast-track release"
 
 
 def test_latest_remote_manifest_parses_dashboard_safe_probe(monkeypatch):

@@ -5,16 +5,19 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import os
 import re
 import shutil
 import subprocess
 import sys
 import urllib.request
+import urllib.parse
 from pathlib import Path
 from typing import Any
 
 
-ROOT = Path(__file__).resolve().parents[1]
+SOURCE_ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(os.environ.get("MISSION_CONTROL_RUNTIME_ROOT") or SOURCE_ROOT).expanduser().resolve()
 DATA_DIR = ROOT / "data"
 OUT = DATA_DIR / "capability-watch.json"
 INVENTORY = DATA_DIR / "capability-inventory.json"
@@ -33,12 +36,17 @@ def read_json(path: Path, default: Any) -> Any:
 
 def write_json(path: Path, data: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, indent=2, sort_keys=False) + "\n", encoding="utf-8")
+    temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    try:
+        temporary.write_text(json.dumps(data, indent=2, sort_keys=False) + "\n", encoding="utf-8")
+        os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
 
 
 def compact(value: Any, limit: int = 220) -> str:
     text = " ".join(str(value or "").split())
-    return text if len(text) <= limit else text[: max(0, limit - 1)].rstrip() + "..."
+    return text if len(text) <= limit else text[: max(0, limit - 3)].rstrip() + "..."
 
 
 def parse_json_output(out: str) -> Any | None:
@@ -89,6 +97,7 @@ def release_summary(result: dict[str, Any]) -> dict[str, Any]:
         "name": compact(data.get("name"), 120),
         "publishedAt": data.get("published_at"),
         "url": data.get("html_url"),
+        "notes": compact(data.get("body"), 6000),
         "detail": result.get("detail"),
     }
 
@@ -261,6 +270,12 @@ def main() -> int:
     if not args.no_network:
         sources["openclawNpm"] = npm_dist_tags("openclaw")
         sources["openclawLatestRelease"] = release_summary(fetch_json("https://api.github.com/repos/openclaw/openclaw/releases/latest"))
+        beta = (sources["openclawNpm"].get("distTags") or {}).get("beta")
+        if beta:
+            beta_tag = urllib.parse.quote(f"v{beta}", safe="")
+            sources["openclawPreviewRelease"] = release_summary(fetch_json(
+                f"https://api.github.com/repos/openclaw/openclaw/releases/tags/{beta_tag}"
+            ))
         sources["hermesLatestRelease"] = release_summary(fetch_json("https://api.github.com/repos/NousResearch/Hermes-Agent/releases/latest"))
     recommendations = build_recommendations(sources)
     previews = build_previews(sources)

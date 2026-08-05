@@ -64,15 +64,20 @@ def production_baseline() -> dict[str, Any]:
     }
 
 
+def is_prerelease(target: str) -> bool:
+    return bool(re.search(r"(?:alpha|beta|rc|dev|preview)", target, re.IGNORECASE))
+
+
 def reject_prerelease(target: str, config: dict[str, Any]) -> None:
-    if config.get("allowPrereleasePromotion"):
+    if config.get("allowPrereleasePreparation"):
         return
-    if re.search(r"(?:alpha|beta|rc|dev|preview)", target, re.IGNORECASE):
-        raise RuntimeError("Production candidate must be an exact stable OpenCLAW version")
+    if is_prerelease(target):
+        raise RuntimeError("Preview candidate preparation is disabled")
 
 
 def prepare(config: dict[str, Any], target: str, evidence_dir: Path) -> dict[str, Any]:
     reject_prerelease(target, config)
+    preview = is_prerelease(target)
     baseline = production_baseline()
     if not baseline["ok"] or not baseline.get("version"):
         raise RuntimeError("Refusing to prepare without a healthy production baseline")
@@ -86,6 +91,7 @@ def prepare(config: dict[str, Any], target: str, evidence_dir: Path) -> dict[str
         "version": 1,
         "createdAt": now(),
         "target": target,
+        "releaseChannel": "preview" if preview else "stable",
         "sandbox": str(sandbox),
         "candidate": str(candidate),
         "productionBaseline": baseline,
@@ -95,7 +101,7 @@ def prepare(config: dict[str, Any], target: str, evidence_dir: Path) -> dict[str
         "criticalSurfaces": config.get("criticalSurfaces") or [],
         "requiredGates": config["requiredGates"],
         "observationMinutes": int(config["observationMinutes"]),
-        "promotion": {"automatic": False, "status": "manual-review-required"},
+        "promotion": {"automatic": False, "status": "preview-only" if preview else "manual-review-required"},
         "rollback": {"version": baseline["version"], "prepared": True},
     }
     path = evidence_dir / f"candidate-{re.sub(r'[^A-Za-z0-9_.-]', '-', target)}.json"
@@ -145,14 +151,16 @@ def verify(manifest: dict[str, Any]) -> dict[str, Any]:
     }
     failures = [name for name in manifest["requiredGates"] if not checks.get(name, {}).get("ok")]
     pre_observation_failures = [name for name in failures if name != "observation-evidence"]
+    preview = manifest.get("releaseChannel") == "preview" or is_prerelease(str(manifest.get("target") or ""))
     return {
         "checkedAt": now(),
         "target": manifest["target"],
         "checks": checks,
         "readyForObservation": not pre_observation_failures,
-        "readyForPromotionReview": not failures,
+        "readyForPromotionReview": not failures and not preview,
+        "eligibleForProductionReview": not preview,
         "failures": failures,
-        "promotion": "manual-review-required",
+        "promotion": "preview-only" if preview else "manual-review-required",
     }
 
 

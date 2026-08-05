@@ -11,11 +11,16 @@ watch = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(watch)
 
 
-def test_release_summary_excludes_release_body() -> None:
+def test_release_summary_bounds_public_release_notes() -> None:
     result = watch.release_summary({"ok": True, "status": "ok", "data": {"tag_name": "v1", "name": "Release", "published_at": "2026-07-25T00:00:00Z", "html_url": "https://example.test/release", "body": "unbounded release notes"}})
     assert result["tag"] == "v1"
     assert "body" not in result
-    assert "unbounded" not in str(result)
+    assert result["notes"] == "unbounded release notes"
+
+
+def test_release_summary_caps_public_notes() -> None:
+    result = watch.release_summary({"ok": True, "status": "ok", "data": {"body": "x" * 9000}})
+    assert len(result["notes"]) <= 6000
 
 
 def test_openclaw_status_parses_current_nested_registry_and_availability() -> None:

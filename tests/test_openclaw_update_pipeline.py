@@ -15,9 +15,25 @@ SPEC.loader.exec_module(pipeline)
 
 
 class OpenClawUpdatePipelineTests(unittest.TestCase):
-    def test_prerelease_is_rejected_for_production(self) -> None:
-        with self.assertRaisesRegex(RuntimeError, "stable"):
-            pipeline.reject_prerelease("2026.7.2-beta.5", {"allowPrereleasePromotion": False})
+    def test_prerelease_is_rejected_when_preparation_is_disabled(self) -> None:
+        with self.assertRaisesRegex(RuntimeError, "disabled"):
+            pipeline.reject_prerelease("2026.7.2-beta.5", {"allowPrereleasePreparation": False})
+
+    def test_prerelease_can_be_prepared_but_never_promoted(self) -> None:
+        pipeline.reject_prerelease("2026.7.2-beta.5", {"allowPrereleasePreparation": True})
+        manifest = {
+            "target": "2026.7.2-beta.5",
+            "releaseChannel": "preview",
+            "productionBaseline": {"ok": True},
+            "candidateInstall": {"ok": True},
+            "candidateVersion": {"ok": True},
+            "rollback": {"prepared": True},
+            "requiredGates": [],
+        }
+        result = pipeline.verify(manifest)
+        self.assertFalse(result["readyForPromotionReview"])
+        self.assertFalse(result["eligibleForProductionReview"])
+        self.assertEqual(result["promotion"], "preview-only")
 
     def test_verify_fails_closed_without_observation(self) -> None:
         manifest = {
@@ -53,6 +69,7 @@ class OpenClawUpdatePipelineTests(unittest.TestCase):
         config = json.loads((MODULE_PATH.parents[1] / "config" / "openclaw-update-pipeline.json").read_text())
         self.assertFalse(config["automaticPromotion"])
         self.assertFalse(config["allowPrereleasePromotion"])
+        self.assertTrue(config["allowPrereleasePreparation"])
         self.assertEqual(config["productionMutation"], "manual-only")
 
 

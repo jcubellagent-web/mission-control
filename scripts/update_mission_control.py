@@ -5795,12 +5795,14 @@ def build_capability_watch_capability(capability_watch: Dict[str, Any] | None) -
         return None
     recommendations = capability_watch.get("recommendations") if isinstance(capability_watch.get("recommendations"), list) else []
     attention = [row for row in recommendations if isinstance(row, dict) and row.get("status") in {"new", "upgrade", "attention"}]
+    fast_lane = capability_watch.get("fastLane") if isinstance(capability_watch.get("fastLane"), dict) else {}
+    lane_detail = plain_dashboard_text(fast_lane.get("summary") or "", 140)
     return {
         "id": "capability-watch",
         "name": "Capability Watch",
         "status": "watch" if attention else capability_watch.get("status") or "ok",
         "summary": capability_watch.get("summary") or f"{len(recommendations)} recommendation(s) tracked",
-        "detail": f"Updated {plain_dashboard_text(capability_watch.get('checkedAt') or capability_watch.get('updatedAt') or 'pending', 80)}",
+        "detail": (f"{lane_detail} · " if lane_detail else "") + f"Updated {plain_dashboard_text(capability_watch.get('checkedAt') or capability_watch.get('updatedAt') or 'pending', 80)}",
     }
 
 

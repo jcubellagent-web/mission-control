@@ -85,7 +85,7 @@ path = Path(sys.argv[1])
 if not path.is_file() or path.stat().st_size > 131072:
     raise SystemExit(2)
 value = json.loads(path.read_text(encoding='utf-8'))
-allowed = {'updatedAt', 'checkedAt', 'status', 'summary', 'sources', 'recommendations', 'previews', 'privacy'}
+allowed = {'updatedAt', 'checkedAt', 'status', 'summary', 'sources', 'recommendations', 'previews', 'fastLane', 'privacy'}
 print(json.dumps({key: value.get(key) for key in allowed if key in value}))
 """
     remote = " ".join(

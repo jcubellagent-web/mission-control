@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "enabled": true,
+  "owner": "jaimes",
+  "automaticCandidatePreparation": true,
+  "automaticProductionPromotion": false,
+  "productionMutation": "manual-only",
+  "allowedPrerequisiteExecutables": ["node"],
+  "statePath": "data/capability-release-lane.json",
+  "historyPath": "data/capability-release-history.jsonl",
+  "lockPath": "data/capability-release-lane.lock",
+  "thresholds": {
+    "fastTrack": 7,
+    "test": 4
+  },
+  "slas": {
+    "detectionMinutes": 180,
+    "fastTrackCandidateHours": 12,
+    "testCandidateHours": 24,
+    "routineReviewHours": 72
+  },
+  "channels": {
+    "stableAutoPrepare": true,
+    "previewAutoPrepare": true,
+    "previewProductionEligible": false
+  },
+  "signals": [
+    {
+      "id": "reliability-recovery",
+      "weight": 4,
+      "patterns": ["crash", "recovery", "durable", "dead-letter", "restart", "rollback", "state integrity", "delivery"]
+    },
+    {
+      "id": "security-boundary",
+      "weight": 4,
+      "patterns": ["security", "credential", "ssrf", "redaction", "authorization", "permission", "cve"]
+    },
+    {
+      "id": "agent-coordination",
+      "weight": 3,
+      "patterns": ["agent-to-agent", "a2a", "delegation", "subagent", "multi-agent"]
+    },
+    {
+      "id": "governance-approvals",
+      "weight": 3,
+      "patterns": ["approval", "policy", "audit", "circuit breaker"]
+    },
+    {
+      "id": "memory-context",
+      "weight": 3,
+      "patterns": ["memory", "compression", "compaction", "context", "session"]
+    },
+    {
+      "id": "observability-research",
+      "weight": 2,
+      "patterns": ["telemetry", "webhook", "citation", "fact-check", "diagnostic", "trace"]
+    },
+    {
+      "id": "workflow-integration",
+      "weight": 2,
+      "patterns": ["automation", "cron", "schedule", "mcp", "telegram", "gateway"]
+    },
+    {
+      "id": "performance",
+      "weight": 1,
+      "patterns": ["performance", "faster", "latency", "cpu", "cache"]
+    }
+  ],
+  "products": {
+    "openclaw": {
+      "pipeline": "scripts/openclaw_update_pipeline.py",
+      "stableEvidenceDir": "data/openclaw-update-evidence",
+      "requirements": []
+    },
+    "hermes": {
+      "pipeline": "scripts/hermes_update_pipeline.py",
+      "stableEvidenceDir": "data/hermes-update-evidence",
+      "requirements": [
+        {
+          "id": "node-26",
+          "whenPatterns": ["node 26 required", "node.js 26 required"],
+          "executable": "node",
+          "minimumMajor": 26
+        }
+      ]
+    }
+  }
+}
