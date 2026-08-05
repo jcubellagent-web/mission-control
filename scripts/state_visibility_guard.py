@@ -13,6 +13,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 WORKSPACE = ROOT.parent
 DATA = ROOT / "data"
+HOT_WORK_PATH = DATA / "control-tower-hot.json"
 WATCH_FILES = {
     "brainFeed": DATA / "brain-feed.json",
     "jaimesBrainFeed": DATA / "jaimes-brain-feed.json",
@@ -52,7 +53,27 @@ def active_feed_age_minutes(path: Path, now: dt.datetime) -> float | None:
     updated_at = parse_timestamp(payload.get("updatedAt") or payload.get("timestamp"))
     if updated_at is None:
         return float("inf")
-    return max(0.0, (now - updated_at).total_seconds() / 60)
+    feed_age = max(0.0, (now - updated_at).total_seconds() / 60)
+    work_id = str(payload.get("workId") or "").strip()
+    run_id = str(payload.get("runId") or "").strip()
+    if not work_id or not run_id:
+        return feed_age
+    try:
+        hot = json.loads(HOT_WORK_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return feed_age
+    active_works = hot.get("activeWorks") if isinstance(hot, dict) else []
+    for work in active_works if isinstance(active_works, list) else []:
+        if not isinstance(work, dict):
+            continue
+        if str(work.get("workId") or "") != work_id or str(work.get("runId") or "") != run_id:
+            continue
+        work_updated_at = parse_timestamp(work.get("updatedAt"))
+        if work_updated_at is None:
+            continue
+        work_age = max(0.0, (now - work_updated_at).total_seconds() / 60)
+        return min(feed_age, work_age)
+    return feed_age
 
 
 def run(cmd: list[str], *, cwd: Path | None = None, timeout: int = 120) -> dict:

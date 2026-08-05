@@ -47,6 +47,52 @@ def test_stale_active_feed_is_detected(tmp_path) -> None:
     assert age is not None and age >= 20
 
 
+def test_fresh_exact_work_receipt_keeps_delegation_feed_current(tmp_path) -> None:
+    module = load_guard_module()
+    now = datetime.now(timezone.utc)
+    old = now - timedelta(minutes=25)
+    feed = tmp_path / "feed.json"
+    write_feed(feed, active=True, status="working", updated_at=old)
+    payload = json.loads(feed.read_text(encoding="utf-8"))
+    payload.update({"workId": "work-1", "runId": "run-1"})
+    feed.write_text(json.dumps(payload), encoding="utf-8")
+    hot = tmp_path / "control-tower-hot.json"
+    hot.write_text(json.dumps({
+        "activeWorks": [{
+            "workId": "work-1",
+            "runId": "run-1",
+            "updatedAt": (now - timedelta(minutes=1)).isoformat().replace("+00:00", "Z"),
+        }],
+    }), encoding="utf-8")
+    module.HOT_WORK_PATH = hot
+
+    age = module.active_feed_age_minutes(feed, now)
+    assert age is not None and age < 2
+
+
+def test_fresh_receipt_for_different_run_does_not_mask_stale_feed(tmp_path) -> None:
+    module = load_guard_module()
+    now = datetime.now(timezone.utc)
+    old = now - timedelta(minutes=25)
+    feed = tmp_path / "feed.json"
+    write_feed(feed, active=True, status="working", updated_at=old)
+    payload = json.loads(feed.read_text(encoding="utf-8"))
+    payload.update({"workId": "work-1", "runId": "run-1"})
+    feed.write_text(json.dumps(payload), encoding="utf-8")
+    hot = tmp_path / "control-tower-hot.json"
+    hot.write_text(json.dumps({
+        "activeWorks": [{
+            "workId": "work-1",
+            "runId": "run-2",
+            "updatedAt": now.isoformat().replace("+00:00", "Z"),
+        }],
+    }), encoding="utf-8")
+    module.HOT_WORK_PATH = hot
+
+    age = module.active_feed_age_minutes(feed, now)
+    assert age is not None and age >= 20
+
+
 def test_invalid_active_feed_shape_fails_closed(tmp_path) -> None:
     module = load_guard_module()
     feed = tmp_path / "feed.json"
