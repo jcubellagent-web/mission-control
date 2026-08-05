@@ -128,7 +128,8 @@ class ObservableWorkVisibilityTests(unittest.TestCase):
         styles = STYLES.read_text(encoding="utf-8")
         card = source[source.index("function AgentHeroCard("):source.index("type MetricTone")]
 
-        self.assertIn('<span className="agent-objective-main">{headline.title}</span>', card)
+        self.assertIn('className="agent-objective-main is-headline-entry">{headline.title}</span>', card)
+        self.assertEqual(card.count('className="agent-objective-main is-headline-entry"'), 1)
         self.assertIn("title={headline.description}", card)
         self.assertNotIn("agent-objective-description", card)
         self.assertNotIn("agent-support-note", card)
