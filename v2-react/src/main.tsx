@@ -799,14 +799,20 @@ function verifiedWorkerRoutesForAgent(
   agent: AgentId,
   status: AgentStatus,
   activeModelRoutes: ActiveModelRoute[],
+  controllerWorks: ActiveWork[] = [],
 ) {
+  const controllerKeys = new Set([
+    status.work_id && status.run_id ? `${status.work_id}:${status.run_id}` : "",
+    ...controllerWorks
+      .filter((work) => work.ownerAgent === agent && work.executionRole !== "worker")
+      .map((work) => `${work.workId}:${work.runId}`),
+  ].filter(Boolean));
   return activeModelRoutes
     .filter((worker) => (
       worker.ownerAgent === agent
       && worker.routeVerified === true
       && worker.executionRole === "worker"
-      && worker.controllerWorkId === status.work_id
-      && worker.controllerRunId === status.run_id
+      && controllerKeys.has(`${worker.controllerWorkId}:${worker.controllerRunId}`)
       && (!worker.leaseUntil || timeValue(worker.leaseUntil) > Date.now())
     ))
     .filter((worker, index, rows) => rows.findIndex((candidate) => (
@@ -822,6 +828,41 @@ function workerRouteIsFresh(worker: ActiveModelRoute) {
   return Date.now() - timeValue(worker.updatedAt) <= AGENT_WORKER_STALE_MS;
 }
 
+function activeControllerWorksForAgent(agent: AgentId, activeWorks: ActiveWork[]) {
+  return activeWorks
+    .filter((work) => work.ownerAgent === agent && work.executionRole !== "worker")
+    .sort((left, right) => timeValue(right.updatedAt) - timeValue(left.updatedAt));
+}
+
+function useRotatingControllerWork(controllerWorks: ActiveWork[]) {
+  const workKey = controllerWorks.map((work) => `${work.workId}:${work.runId}`).join("|");
+  const [index, setIndex] = useState(0);
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+    if (!media) return;
+    const sync = () => setReducedMotion(media.matches);
+    sync();
+    media.addEventListener?.("change", sync);
+    return () => media.removeEventListener?.("change", sync);
+  }, []);
+
+  useEffect(() => setIndex(0), [workKey]);
+  useEffect(() => {
+    if (controllerWorks.length <= 1 || reducedMotion) return;
+    const timer = window.setInterval(() => setIndex((current) => (current + 1) % controllerWorks.length), 7_000);
+    return () => window.clearInterval(timer);
+  }, [controllerWorks.length, reducedMotion, workKey]);
+
+  const resolvedIndex = controllerWorks.length ? index % controllerWorks.length : 0;
+  return {
+    work: controllerWorks[resolvedIndex],
+    index: resolvedIndex,
+    rotating: controllerWorks.length > 1 && !reducedMotion,
+  };
+}
+
 type AgentExpansionMap = Record<AgentId, boolean>;
 
 const AGENT_ROW_COLLAPSE_DELAY_MS = 1_800;
@@ -830,6 +871,7 @@ function agentRowRequestsExpansion(
   agent: AgentId,
   liveWork: AgentLiveWorkPresentation,
   activeModelRoutes: ActiveModelRoute[],
+  activeWorks: ActiveWork[],
   sourceChangeLeases: SourceChangeLease[],
 ) {
   const activityMode = agentActivityMode(liveWork);
@@ -838,7 +880,8 @@ function agentRowRequestsExpansion(
     (liveWork.status.active || statusValue === "active" || statusValue === "working")
     && isFreshActiveTimestamp(liveWork.status.updated_at)
   );
-  const hasActiveWorker = verifiedWorkerRoutesForAgent(agent, liveWork.status, activeModelRoutes).length > 0;
+  const controllerWorks = activeControllerWorksForAgent(agent, activeWorks);
+  const hasActiveWorker = verifiedWorkerRoutesForAgent(agent, liveWork.status, activeModelRoutes, controllerWorks).length > 0;
   const hasActiveLease = sourceChangeLeases.some((lease) => (
     lease.agent === agent && !lease.expired && timeValue(lease.expiresAt) > Date.now()
   ));
@@ -849,6 +892,7 @@ function agentRowRequestsExpansion(
     || liveWork.visualState === "working"
     || liveWork.visualState === "waiting"
     || liveWork.visualState === "blocked"
+    || controllerWorks.length > 1
     || hasActiveWorker
     || hasActiveLease
   );
@@ -1735,7 +1779,7 @@ function BrainHero({
     idleContext: buildAgentIdleContext(agent, state, nowMs),
   }));
   const expansionTargets = heroRows.reduce<AgentExpansionMap>((result, row) => {
-    result[row.agent] = agentRowRequestsExpansion(row.agent, row.liveWork, activeModelRoutes, sourceChangeLeases);
+    result[row.agent] = agentRowRequestsExpansion(row.agent, row.liveWork, activeModelRoutes, state.workHot?.activeWorks || [], sourceChangeLeases);
     return result;
   }, {} as AgentExpansionMap);
   const expandedRows = useAdaptiveAgentExpansion(expansionTargets);
@@ -4806,6 +4850,7 @@ type BrainAtlasEcosystemAgentRow = {
   liveWork: AgentLiveWorkPresentation;
   load: BrainAtlasLoad;
   memory: MemoryActivity["agents"][number];
+  controllers: ActiveWork[];
   workers: ActiveModelRoute[];
 };
 
@@ -4850,11 +4895,13 @@ function BrainAtlasEcosystemView({
   const [drawer, setDrawer] = useState<{ kind: "trace"; agent: AgentId } | { kind: "event"; row: BrainAtlasProofRow } | { kind: "lease"; lease: SourceChangeLease } | null>(null);
   const activeLeases = sourceChangeLeases.filter((lease) => !lease.expired && timeValue(lease.expiresAt) > Date.now());
   const activeAgentIds = agentRows
-    .filter(({ liveWork, workers }) => liveWork.working || workers.some(workerRouteIsFresh))
+    .filter(({ liveWork, controllers, workers }) => liveWork.working || controllers.length > 0 || workers.some(workerRouteIsFresh))
     .map(({ agent }) => agent);
   const activeAgentSet = new Set(activeAgentIds);
   const hasActiveControllers = activeAgentIds.length > 0;
   const activeAgentSummary = activeAgentIds.map((agent) => AGENTS[agent].label).join(" + ");
+  const activeControllerCount = agentRows.reduce((total, row) => total + row.controllers.length, 0);
+  const activeWorkerCount = agentRows.reduce((total, row) => total + row.workers.length, 0);
   const selectedEvent = selectedAgent
     ? proofRows.find((row) => (row.agentId || row.agent.id) === selectedAgent) || null
     : proofRows[0] || null;
@@ -4933,7 +4980,7 @@ function BrainAtlasEcosystemView({
                 <span className="brain-active-route-summary" role="status" aria-label={`${activeAgentIds.length} active agent route${activeAgentIds.length === 1 ? "" : "s"}: ${activeAgentSummary}`}>
                   <Radio size={11} aria-hidden="true" />
                   <b>{activeAgentIds.length} ACTIVE</b>
-                  <em>{activeAgentSummary} · {activeMemoryAgent ? "MEMORY LIVE" : "WORK LIVE · MEMORY QUIET"}</em>
+                  <em>{activeAgentSummary} · {activeControllerCount} TASK{activeControllerCount === 1 ? "" : "S"}{activeWorkerCount ? ` · ${activeWorkerCount} WORKER${activeWorkerCount === 1 ? "" : "S"}` : ""} · {activeMemoryAgent ? "MEMORY LIVE" : "WORK LIVE · MEMORY QUIET"}</em>
                 </span>
               ) : null}
               {activeLeases.map((lease) => (
@@ -4948,12 +4995,12 @@ function BrainAtlasEcosystemView({
           </div>
 
           <div className={`brain-memory-core${selectedTraceHasMemory ? " has-agent-focus has-trace-memory" : selectedAgent ? " has-work-focus" : ""}`} aria-label="Governed shared memory lifecycle">
-            {agentRows.map(({ agent, liveWork, workers, load }, index) => {
+            {agentRows.map(({ agent, liveWork, controllers, workers, load }, index) => {
               const topology = agentTopology[agent];
               const agentLeases = activeLeases.filter((lease) => lease.agent === agent);
               const selectedRow = selectedAgent === agent;
               const route = verifiedRouteForAgentStatus(liveWork.status) || routeForAgentStatus(liveWork.status);
-              const nodeObjective = liveWork.activeWork?.title || liveWork.status.objective || `${AGENTS[agent].label} ready`;
+              const nodeObjective = controllers[0]?.objective || liveWork.activeWork?.title || liveWork.status.objective || `${AGENTS[agent].label} ready`;
               const activityMode = agentActivityMode(liveWork) || "quiet";
               const agentMemorySignal = latestAgentMemorySignal(agentRows.find((row) => row.agent === agent)?.memory);
               const agentMemory = agentRows.find((row) => row.agent === agent)?.memory;
@@ -4966,7 +5013,9 @@ function BrainAtlasEcosystemView({
               const memoryRouteActive = activeMemoryAgent === agent;
               const routeStateLabel = memoryRouteActive
                 ? "MEMORY LIVE"
-                : workers.length
+                : controllers.length > 1
+                  ? `${controllers.length} ACTIVE TASKS${workers.length ? ` · ${workers.length} WORKER${workers.length === 1 ? "" : "S"}` : ""}`
+                  : workers.length
                   ? `${workers.length} ACTIVE LANE${workers.length === 1 ? "" : "S"}`
                   : agentLeases.length
                     ? "LEASED CHANGE"
@@ -4981,7 +5030,7 @@ function BrainAtlasEcosystemView({
                 <button
                   type="button"
                   key={`agent-node-${agent}`}
-                  className={`brain-agent-graph-node memory-flow-node is-agent agent-${agent} ${topology.position}${liveWork.working ? " is-working is-work-active" : ""}${routeActive ? " is-route-active" : " is-route-idle"}${memoryRouteActive ? " is-active-memory-route" : ""}${selectedRow ? " is-selected" : ""}${agentLeases.length ? " has-lease" : ""}${activityMode === "received" ? " is-prompt-received" : ""}${memoryLive ? " is-memory-live" : ""}${workers.length ? " has-live-workers" : ""}`}
+                  className={`brain-agent-graph-node memory-flow-node is-agent agent-${agent} ${topology.position}${liveWork.working ? " is-working is-work-active" : ""}${routeActive ? " is-route-active" : " is-route-idle"}${memoryRouteActive ? " is-active-memory-route" : ""}${selectedRow ? " is-selected" : ""}${agentLeases.length ? " has-lease" : ""}${activityMode === "received" ? " is-prompt-received" : ""}${memoryLive ? " is-memory-live" : ""}${workers.length ? " has-live-workers" : ""}${controllers.length > 1 ? " has-concurrent-work" : ""}`}
                   data-agent={agent}
                   data-agent-node={agent}
                   data-agent-anchor={agent}
@@ -4989,6 +5038,7 @@ function BrainAtlasEcosystemView({
                   data-agent-route-state={memoryRouteActive ? "memory-live" : routeActive ? "work-live" : "idle"}
                   data-agent-activity={activityMode}
                   data-controller-active={liveWork.working ? "true" : "false"}
+                  data-controller-count={controllers.length}
                   data-subagent-count={workers.length}
                   data-worker-count={workers.length}
                   data-work-state={liveWork.working ? "working" : activityMode === "received" ? "received" : "quiet"}
@@ -5020,6 +5070,11 @@ function BrainAtlasEcosystemView({
                   {workers.length ? (
                     <span className="brain-agent-worker-stack" role="group" aria-label={`${workers.length} active verified worker lane${workers.length === 1 ? "" : "s"} owned by ${AGENTS[agent].label}`}>
                       <GitBranch className="brain-agent-worker-branch" size={11} aria-hidden="true" />
+                      <span className="brain-agent-concurrency" aria-label={`${controllers.length} active task${controllers.length === 1 ? "" : "s"} and ${workers.length} verified worker lane${workers.length === 1 ? "" : "s"}`}>
+                        <Waypoints size={10} aria-hidden="true" />
+                        <b>{controllers.length || 1}T</b>
+                        <em>{workers.length}W</em>
+                      </span>
                       {visibleWorkers.map((worker) => {
                         const workerRoute = CANONICAL_ROUTES[worker.modelFamily];
                         const workerLabel = liveWorkModelLabel(workerRoute, worker.modelId);
@@ -5052,7 +5107,7 @@ function BrainAtlasEcosystemView({
                   ) : (
                     <span className="brain-agent-node-meta">
                       <em>{selectedRow ? `MEM ${agentMemory?.retrievals || 0}R · ${agentMemory?.selected || 0}S · ${agentMemory?.used || 0}U` : `${liveWork.working ? "Working" : agentOperatingState(liveWork.status)} · ${ageLabel(liveWork.status.updated_at)}`}</em>
-                      <b>{liveWork.working ? 1 : 0} run → 0 lanes</b>
+                      <b>{controllers.length || (liveWork.working ? 1 : 0)} task{(controllers.length || (liveWork.working ? 1 : 0)) === 1 ? "" : "s"} → 0 lanes</b>
                     </span>
                   )}
                   <span className={`brain-agent-node-route${routeActive ? " is-route-active-label" : ""}`} title={`${routeStateLabel} · ${workerModelLabels.length ? `${routeLabel} controller · ${workerModelLabels.join(" + ")} workers` : `${routeLabel} controller`}`} style={{ "--route-color": route.color } as React.CSSProperties}>
@@ -5348,9 +5403,13 @@ function BrainAtlasPanel({
     liveWorkPresentationForAgent(agent, statusByAgent.get(agent), workItems),
   ]));
   const workingAgentIds = new Set(HERO_AGENT_ORDER.filter((agent) => liveWorkByAgent.get(agent)?.working));
+  const controllerWorksByAgent = new Map(HERO_AGENT_ORDER.map((agent) => [
+    agent,
+    activeControllerWorksForAgent(agent, activeWorks || []),
+  ]));
   const workerRoutesByAgent = new Map(HERO_AGENT_ORDER.map((agent) => {
     const liveWork = liveWorkByAgent.get(agent)!;
-    return [agent, verifiedWorkerRoutesForAgent(agent, liveWork.status, activeModelRoutes || [])];
+    return [agent, verifiedWorkerRoutesForAgent(agent, liveWork.status, activeModelRoutes || [], controllerWorksByAgent.get(agent) || [])];
   }));
   const workingAgentCount = workingAgentIds.size;
   const liveWorkLifelineCount = HERO_AGENT_ORDER.filter((agent) => {
@@ -5384,6 +5443,7 @@ function BrainAtlasPanel({
     liveWork: liveWorkByAgent.get(agent)!,
     load: loadByAgent.get(agent)!,
     memory: flowAgents.find((row) => row.agent === agent)!,
+    controllers: controllerWorksByAgent.get(agent) || [],
     workers: workerRoutesByAgent.get(agent) || [],
   }));
   const agentMemorySignals = new Map(flowAgents.map((row) => [row.agent, latestAgentMemorySignal(row)]));
@@ -6645,7 +6705,10 @@ function AgentHeroCard({
   const verifiedRoute = verifiedRouteForAgentStatus(status);
   const route = verifiedRoute || routeForAgentStatus(status);
   const controllerModelLabel = verifiedRoute ? liveWorkModelLabel(verifiedRoute, status.model) : "Unverified model";
-  const workerRoutes = verifiedWorkerRoutesForAgent(agent, status, activeModelRoutes);
+  const controllerWorks = activeControllerWorksForAgent(agent, activeWorks);
+  const rotatedController = useRotatingControllerWork(controllerWorks);
+  const controllerCount = controllerWorks.length || (activeFocus ? 1 : 0);
+  const workerRoutes = verifiedWorkerRoutesForAgent(agent, status, activeModelRoutes, controllerWorks);
   const visibleWorkerRoutes = workerRoutes.slice(0, MAX_VISIBLE_AGENT_WORKERS);
   const hiddenWorkerCount = Math.max(0, workerRoutes.length - visibleWorkerRoutes.length);
   const activeLease = sourceChangeLeases.find((lease) => (
@@ -6654,16 +6717,39 @@ function AgentHeroCard({
   const memoryImpactLabel = `${memoryActivity?.retrievals || 0} recalled · ${memoryActivity?.selected || 0} selected · ${memoryActivity?.used || 0} used`;
   const activeWorkFresh = activeWork?.state === "working" && isFreshActiveTimestamp(activeWork.updated_at);
   const activeWorkDetail = activeWorkFresh ? activeWork : undefined;
+  const displayedController = rotatedController.work;
+  const displayedStatus = displayedController ? {
+    ...status,
+    status: displayedController.status,
+    objective: displayedController.objective,
+    detail: displayedController.detail || displayedController.phase,
+    current_tool: displayedController.tool,
+    phase: displayedController.phase,
+    work_id: displayedController.workId,
+    run_id: displayedController.runId,
+    updated_at: displayedController.updatedAt,
+  } : status;
+  const displayedWork: WorkItem | undefined = displayedController ? {
+    id: displayedController.workId,
+    agent_id: agent,
+    title: displayedController.objective,
+    detail: displayedController.detail || displayedController.phase,
+    state: /block|error|fail/.test(displayedController.status.toLowerCase()) ? "blocked" : "working",
+    updated_at: displayedController.updatedAt,
+    source: "agent",
+    target: "brain-feed",
+    priority: 60,
+  } : activeWorkDetail;
   const idleBriefRows = [
     ...idleContext.nextBullets.slice(0, 4),
     { label: "Last", text: compactText(idleContext.complete, 84) },
     { label: "Next", text: compactText(idleContext.countdown ? `${idleContext.countdown} + ${idleContext.nextTitle}` : idleContext.nextTitle, 84) },
   ];
-  const activeReadout = activeAgentReadout(status, activeWorkDetail);
+  const activeReadout = activeAgentReadout(displayedStatus, displayedWork);
   const activityMode = agentActivityMode(liveWork);
   const promptReceived = activityMode === "received";
   const headline = agentHeadline(activeFocus, promptReceived, activeReadout, idleContext, idleBriefRows);
-  const stepTrail = stepTrailForAgent(status, activeFocus, activeWork);
+  const stepTrail = stepTrailForAgent(displayedStatus, activeFocus, displayedWork);
   const showStepTrail = activeFocus || visualState === "waiting" || visualState === "blocked";
   const updateAgeMs = Math.max(0, Date.now() - timeValue(status.updated_at));
   const hotness = Math.max(0, 1 - Math.min(updateAgeMs, 12 * 60_000) / (12 * 60_000));
@@ -6712,12 +6798,15 @@ function AgentHeroCard({
       data-model-family={verifiedRoute?.id || "unverified"}
       data-model-verified={verifiedRoute ? "true" : "false"}
       data-worker-count={workerRoutes.length}
+      data-controller-count={controllerCount}
+      data-headline-index={controllerCount > 1 ? rotatedController.index + 1 : 1}
+      data-headline-rotating={rotatedController.rotating ? "true" : "false"}
       data-memory-retrievals={memoryActivity?.retrievals || 0}
       data-memory-selected={memoryActivity?.selected || 0}
       data-memory-used={memoryActivity?.used || 0}
       data-change-lease={activeLease ? "active" : "none"}
-      data-work-id={status.work_id || activeWork?.id || ""}
-      data-run-id={status.run_id || ""}
+      data-work-id={displayedStatus.work_id || displayedWork?.id || ""}
+      data-run-id={displayedStatus.run_id || ""}
       data-work-state={visualState}
       data-density={density}
       data-linked-selected={selected ? "true" : "false"}
@@ -6773,6 +6862,13 @@ function AgentHeroCard({
                 {hiddenWorkerCount ? <span className="agent-worker-overflow" aria-label={`${hiddenWorkerCount} more active model workers`}>+{hiddenWorkerCount}</span> : null}
               </span>
             ) : null}
+            {controllerCount > 1 || workerRoutes.length ? (
+              <span className="agent-concurrency-chip" aria-label={`${controllerCount} active task${controllerCount === 1 ? "" : "s"} and ${workerRoutes.length} verified worker lane${workerRoutes.length === 1 ? "" : "s"}`}>
+                <Waypoints aria-hidden="true" />
+                <b>{controllerCount} task{controllerCount === 1 ? "" : "s"}</b>
+                {workerRoutes.length ? <em>{workerRoutes.length} worker{workerRoutes.length === 1 ? "" : "s"}</em> : null}
+              </span>
+            ) : null}
             <span className={`agent-memory-impact${memoryActivity?.used ? " is-used" : memoryActivity?.selected ? " is-selected" : memoryActivity?.retrievals ? " is-recalled" : " is-quiet"}`} title={memoryImpactLabel} aria-label={`Memory impact: ${memoryImpactLabel}`}>
               <Database aria-hidden="true" />
               <b>{memoryActivity?.retrievals || 0}R</b><i />
@@ -6812,23 +6908,33 @@ function AgentHeroCard({
         } as React.CSSProperties}
       >
         <span className="agent-objective-text">
-          <span className="agent-objective-main">{headline.title}</span>
+          {controllerCount > 1 ? (
+            <span className="agent-headline-rotation" aria-label={`Showing active task ${rotatedController.index + 1} of ${controllerCount}`}>
+              <b>{rotatedController.index + 1}/{controllerCount}</b>
+              <em>{rotatedController.rotating ? "rotating" : `${controllerCount} active`}</em>
+            </span>
+          ) : null}
+          <span key={displayedController?.workId || headline.title} className="agent-objective-main is-headline-entry">{headline.title}</span>
         </span>
         {activityMode ? (
           <span className={`agent-activity-indicator is-${activityMode}`} role="status" aria-label={`${AGENTS[agent].label} is ${activityMode}`}>
             <span className="agent-activity-wave" aria-hidden="true"><i /><i /><i /></span>
             <strong>{activityMode === "received" ? "Received" : activityMode === "thinking" ? "Thinking" : "Working"}</strong>
-            {workerRoutes.length ? <em>{workerRoutes.length} lane{workerRoutes.length === 1 ? "" : "s"}</em> : null}
+            {controllerCount > 1 || workerRoutes.length ? <em>{controllerCount} task{controllerCount === 1 ? "" : "s"}{workerRoutes.length ? ` · ${workerRoutes.length} worker${workerRoutes.length === 1 ? "" : "s"}` : ""}</em> : null}
           </span>
         ) : null}
       </h3>
       <div className="agent-workflow-lane" title={workerRoutes.length ? "Verified active specialist workers attached to this controller work" : activeFocus ? "Current verified workflow phase" : "Next known work state"}>
         <span aria-hidden="true" />
         <div>
-          <strong>{workerRoutes.length
+          <strong>{controllerCount > 1
+            ? `${controllerCount} active tasks`
+            : workerRoutes.length
             ? `${visibleWorkerRoutes.map((worker) => liveWorkModelLabel(CANONICAL_ROUTES[worker.modelFamily], worker.modelId)).join(" + ")} · ${workerRoutes.length} lane${workerRoutes.length === 1 ? "" : "s"}`
             : activeFocus ? "Primary workflow" : "Next workflow"}</strong>
-          <em>{workerRoutes.length
+          <em>{controllerCount > 1
+            ? `Showing ${rotatedController.index + 1} of ${controllerCount}${workerRoutes.length ? ` · ${workerRoutes.length} verified worker${workerRoutes.length === 1 ? "" : "s"}` : ""}`
+            : workerRoutes.length
             ? visibleWorkerRoutes.map((worker) => compactText(workerObjectiveForRoute(worker, activeWorks), 28)).join(" · ")
             : activeFocus
               ? stepTrail.find((step) => step.state === "current")?.label || "Current step"

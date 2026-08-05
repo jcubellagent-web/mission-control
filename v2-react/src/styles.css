@@ -21184,3 +21184,171 @@ body,
     display: none;
   }
 }
+
+/* Control Tower v13 — truthful concurrent work, readable leases, one calm headline. */
+.brain-hero.is-flight-deck .agent-model-stack {
+  flex-wrap: wrap;
+  overflow: visible;
+}
+
+.brain-hero.is-flight-deck .agent-controller-model {
+  flex: 0 1 auto;
+  max-width: min(190px, 42%);
+}
+
+.brain-hero.is-flight-deck .agent-memory-impact,
+.brain-hero.is-flight-deck .agent-change-lease,
+.brain-hero.is-flight-deck .agent-concurrency-chip {
+  flex: 0 0 auto;
+}
+
+.brain-hero.is-flight-deck .agent-change-lease {
+  min-width: max-content;
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.brain-hero.is-flight-deck .agent-concurrency-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: max-content;
+  height: 18px;
+  border: 1px solid color-mix(in srgb, var(--agent-tone, var(--cyan)) 54%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--agent-tone, var(--cyan)) 10%, rgba(3, 16, 28, 0.96));
+  padding: 0 7px;
+  color: color-mix(in srgb, var(--agent-tone, var(--cyan)) 80%, #fff);
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: 0.035em;
+  white-space: nowrap;
+}
+
+.brain-hero.is-flight-deck .agent-concurrency-chip svg {
+  width: 10px;
+  height: 10px;
+}
+
+.brain-hero.is-flight-deck .agent-concurrency-chip em {
+  color: #b8cbd4;
+  font-size: inherit;
+  font-style: normal;
+}
+
+.brain-hero.is-flight-deck .agent-headline-rotation {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: 0 0 auto;
+  min-width: max-content;
+  margin-right: 9px;
+  border: 1px solid color-mix(in srgb, var(--agent-tone, var(--cyan)) 54%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--agent-tone, var(--cyan)) 10%, rgba(3, 16, 28, 0.96));
+  padding: 4px 8px;
+  color: color-mix(in srgb, var(--agent-tone, var(--cyan)) 84%, #fff);
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+.brain-hero.is-flight-deck .agent-headline-rotation em {
+  color: #8fa8b4;
+  font-size: 7px;
+  font-style: normal;
+}
+
+.brain-hero.is-flight-deck .agent-objective-main.is-headline-entry {
+  animation: agent-headline-enter 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes agent-headline-enter {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+#brain-atlas .brain-stage-toolbar > div {
+  flex: 0 1 auto;
+  overflow: visible;
+}
+
+#brain-atlas .brain-active-route-summary {
+  flex: 1 1 130px;
+  min-width: 0;
+}
+
+#brain-atlas .brain-selected-event {
+  flex: 1 1 130px;
+  min-width: 72px;
+}
+
+#brain-atlas .brain-lease-chip {
+  flex: 0 0 auto;
+  min-width: max-content;
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+#brain-atlas .brain-agent-node-heading > strong {
+  flex: 1 1 auto;
+}
+
+#brain-atlas .brain-agent-concurrency {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex: 0 0 auto;
+  min-width: max-content;
+  height: 18px;
+  border: 1px solid color-mix(in srgb, var(--agent-tone) 58%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--agent-tone) 12%, rgba(3, 16, 28, 0.96));
+  padding: 0 6px;
+  color: color-mix(in srgb, var(--agent-tone) 84%, #fff);
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 900;
+  line-height: 1;
+}
+
+#brain-atlas .brain-agent-concurrency svg {
+  width: 10px;
+  height: 10px;
+}
+
+#brain-atlas .brain-agent-concurrency b,
+#brain-atlas .brain-agent-concurrency em {
+  padding: 0;
+  border: 0;
+  color: inherit;
+  font-size: inherit;
+  font-style: normal;
+  letter-spacing: 0;
+}
+
+#brain-atlas .brain-agent-concurrency em {
+  color: #b8cbd4;
+}
+
+#brain-atlas .brain-agent-graph-node.has-concurrent-work {
+  border-right-color: color-mix(in srgb, var(--agent-tone) 74%, #fff 8%);
+  box-shadow: inset -3px 0 0 color-mix(in srgb, var(--agent-tone) 45%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brain-hero.is-flight-deck .agent-objective-main.is-headline-entry {
+    animation: none;
+  }
+
+  #brain-atlas .brain-topology-packet.is-work-live {
+    display: none;
+  }
+}

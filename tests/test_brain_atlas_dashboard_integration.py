@@ -1160,6 +1160,30 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertIn(".brain-memory-link.is-trace-evidence", styles)
         self.assertIn(".brain-detail-trace-path", styles)
 
+    def test_live_work_and_atlas_expose_concurrent_controller_work_without_clipping_leases(self) -> None:
+        main = (MISSION_CONTROL / "v2-react" / "src" / "main.tsx").read_text(encoding="utf-8")
+        styles = (MISSION_CONTROL / "v2-react" / "src" / "styles.css").read_text(encoding="utf-8")
+
+        self.assertIn("function activeControllerWorksForAgent(", main)
+        self.assertIn("function useRotatingControllerWork(", main)
+        self.assertIn("window.setInterval", main)
+        self.assertIn("7_000", main)
+        self.assertIn("prefers-reduced-motion: reduce", main)
+        self.assertIn("data-controller-count={controllerCount}", main)
+        self.assertIn("data-headline-index={controllerCount > 1 ? rotatedController.index + 1 : 1}", main)
+        self.assertIn("data-headline-rotating={rotatedController.rotating ? \"true\" : \"false\"}", main)
+        self.assertIn('className="agent-headline-rotation"', main)
+        self.assertIn('className="agent-concurrency-chip"', main)
+        self.assertIn('className="brain-agent-concurrency"', main)
+        self.assertIn("controllerWorksByAgent", main)
+        self.assertIn("verifiedWorkerRoutesForAgent(agent, liveWork.status, activeModelRoutes, controllerWorks)", main)
+        self.assertIn(".brain-hero.is-flight-deck .agent-change-lease {", styles)
+        self.assertIn("min-width: max-content;", styles)
+        self.assertIn("#brain-atlas .brain-lease-chip {", styles)
+        lease_rule = styles[styles.rindex("#brain-atlas .brain-lease-chip {"):]
+        self.assertIn("flex: 0 0 auto;", lease_rule)
+        self.assertIn("overflow: visible;", lease_rule)
+
     def test_brain_atlas_uses_one_directed_activity_bus_and_collision_safe_lifecycle(self) -> None:
         main = (MISSION_CONTROL / "v2-react" / "src" / "main.tsx").read_text(encoding="utf-8")
         runtime = (MISSION_CONTROL / "scripts" / "mission_control_runtime_layout_check.py").read_text(encoding="utf-8")
@@ -1178,7 +1202,7 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         styles = (MISSION_CONTROL / "v2-react" / "src" / "styles.css").read_text(encoding="utf-8")
 
         self.assertIn("const activeAgentIds = agentRows", main)
-        self.assertIn('.filter(({ liveWork, workers }) => liveWork.working || workers.some(workerRouteIsFresh))', main)
+        self.assertIn('.filter(({ liveWork, controllers, workers }) => liveWork.working || controllers.length > 0 || workers.some(workerRouteIsFresh))', main)
         self.assertNotIn('workers.length > 0 || activeLeases.some', main)
         self.assertIn('data-active-agent-count={activeAgentIds.length}', main)
         self.assertIn('data-active-agents={activeAgentIds.join(",")}', main)
