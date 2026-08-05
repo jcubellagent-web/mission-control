@@ -213,7 +213,7 @@ def build(config: dict[str, Any]) -> dict[str, Any]:
         "jaimesCapabilityJob": run(["ssh", jaimes, f"launchctl print gui/$(id -u)/{job}"], timeout=30),
     }
     candidates = {
-        "openclaw": latest_manifest(ROOT / "data" / "openclaw-update-evidence"),
+        "openclaw": latest_remote_manifest(jaimes, f"{jaimes_root}/data/openclaw-update-evidence"),
         "hermes": latest_remote_manifest(jaimes, f"{jaimes_root}/data/hermes-update-evidence"),
     }
     failures = [name for name, result in checks.items() if not result.get("ok")]

@@ -73,3 +73,28 @@ def test_latest_remote_manifest_parses_dashboard_safe_probe(monkeypatch):
     assert result["healthy"] is True
     assert result["target"] == "abc123"
     assert "sandbox" not in result
+
+
+def test_build_reads_both_candidate_types_from_jaimes(monkeypatch, tmp_path):
+    watch = tmp_path / "watch.json"
+    watch.write_text(json.dumps({"updatedAt": monitor.iso()}))
+    monkeypatch.setattr(monitor, "CAPABILITY_WATCH", watch)
+    monkeypatch.setattr(monitor, "sync_remote_capability_watch", lambda *args: {"ok": True, "updated": False})
+    monkeypatch.setattr(monitor, "run", lambda *args, **kwargs: {"ok": True})
+    directories = []
+
+    def remote_manifest(_host, directory):
+        directories.append(directory)
+        return {"present": True, "healthy": True, "target": directory}
+
+    monkeypatch.setattr(monitor, "latest_remote_manifest", remote_manifest)
+    result = monitor.build({
+        "jaimesHost": "jaimes",
+        "jaimesMissionControl": "/jaimes/mission-control",
+        "capabilityWatchMaxAgeSeconds": 100,
+    })
+    assert result["status"] == "ok"
+    assert directories == [
+        "/jaimes/mission-control/data/openclaw-update-evidence",
+        "/jaimes/mission-control/data/hermes-update-evidence",
+    ]
