@@ -20,7 +20,10 @@ SOURCE_ROOT = Path(__file__).resolve().parents[1]
 ROOT = Path(os.environ.get("MISSION_CONTROL_RUNTIME_ROOT") or SOURCE_ROOT).expanduser().resolve()
 DEFAULT_CONFIG = SOURCE_ROOT / "config" / "capability-release-lane.json"
 DEFAULT_WATCH = ROOT / "data" / "capability-watch.json"
-ACTIVE_STATUSES = {"fast-track", "test", "routine", "candidate-prepared", "blocked-prerequisite", "prepare-failed"}
+ACTIVE_STATUSES = {
+    "fast-track", "test", "routine", "candidate-prepared", "blocked-prerequisite",
+    "blocked-carried-patches", "prepare-failed",
+}
 
 
 def now_dt() -> dt.datetime:
@@ -216,10 +219,21 @@ def should_prepare(assessment: dict[str, Any], config: dict[str, Any]) -> bool:
     return bool(channels.get("stableAutoPrepare"))
 
 
-def already_prepared(rows: list[dict[str, Any]], product: str, channel: str, release: str) -> bool:
+def candidate_manifest_state(product: str, manifest: dict[str, Any]) -> dict[str, Any]:
+    if product == "hermes":
+        replay = manifest.get("localPatchReplay") if isinstance(manifest.get("localPatchReplay"), dict) else {}
+        if replay and replay.get("ok") is False:
+            return {
+                "status": "blocked-carried-patches",
+                "failure": replay.get("detail") or "Required carried patches did not replay cleanly.",
+            }
+    return {"status": "candidate-prepared"}
+
+
+def existing_candidate_state(rows: list[dict[str, Any]], product: str, channel: str, release: str) -> dict[str, Any] | None:
     for row in reversed(rows):
         if not (
-            row.get("event") == "candidate-prepared"
+            row.get("event") in {"candidate-prepared", "blocked-carried-patches"}
             and row.get("product") == product
             and row.get("channel") == channel
             and row.get("release") == release
@@ -227,8 +241,15 @@ def already_prepared(rows: list[dict[str, Any]], product: str, channel: str, rel
             continue
         manifest_path = Path(str(row.get("manifest") or ""))
         manifest = read_json(manifest_path, {}) if manifest_path.is_file() else {}
-        return bool(manifest) and Path(str(manifest.get("sandbox") or "")).is_dir()
-    return False
+        if bool(manifest) and Path(str(manifest.get("sandbox") or "")).is_dir():
+            return {"manifest": str(manifest_path), **candidate_manifest_state(product, manifest)}
+        return None
+    return None
+
+
+def already_prepared(rows: list[dict[str, Any]], product: str, channel: str, release: str) -> bool:
+    state = existing_candidate_state(rows, product, channel, release)
+    return bool(state and state.get("status") == "candidate-prepared")
 
 
 def acquire_lock(lock: Any, wait_seconds: float = 30.0) -> bool:
@@ -254,7 +275,14 @@ def prepare_candidate(assessment: dict[str, Any], config: dict[str, Any]) -> dic
     evidence_dir = resolve_runtime_path(str(product_config.get("stableEvidenceDir") or f"data/{assessment['product']}-update-evidence"))
     result = run([sys.executable, str(pipeline), "prepare", "--target", target, "--evidence-dir", str(evidence_dir)])
     payload = result.get("json") if isinstance(result.get("json"), dict) else {}
-    return {"ok": bool(result.get("ok")) and bool(payload.get("manifest")), "manifest": payload.get("manifest"), "detail": result.get("detail")}
+    ok = bool(result.get("ok")) and bool(payload.get("manifest"))
+    state = candidate_manifest_state(assessment["product"], payload) if ok else {"status": "prepare-failed"}
+    return {
+        "ok": ok,
+        "manifest": payload.get("manifest"),
+        "detail": state.get("failure") or result.get("detail"),
+        "status": state["status"],
+    }
 
 
 def assess(watch: dict[str, Any], config: dict[str, Any], previous: dict[str, Any], history: list[dict[str, Any]], prepare: bool) -> tuple[dict[str, Any], list[dict[str, Any]]]:
@@ -290,15 +318,18 @@ def assess(watch: dict[str, Any], config: dict[str, Any], previous: dict[str, An
                 "event": "candidate-superseded", "time": iso(), "product": row["product"], "channel": row["channel"],
                 "release": previous_row.get("release"), "supersededBy": release_id,
             })
-        same_release = already_prepared(history + events, row["product"], row["channel"], release_id)
-        if same_release:
-            assessment["status"] = "candidate-prepared"
+        existing = existing_candidate_state(history + events, row["product"], row["channel"], release_id)
+        if existing:
+            assessment["status"] = existing["status"]
+            assessment["manifest"] = existing["manifest"]
+            if existing.get("failure"):
+                assessment["failure"] = existing["failure"]
             assessment["idempotent"] = True
         elif prepare and not blockers and should_prepare(assessment, config) and assessment["status"] != "metadata-mismatch":
             prepared = prepare_candidate(assessment, config)
-            assessment["status"] = "candidate-prepared" if prepared.get("ok") else "prepare-failed"
+            assessment["status"] = prepared.get("status") if prepared.get("ok") else "prepare-failed"
             assessment["manifest"] = prepared.get("manifest")
-            if not prepared.get("ok"):
+            if assessment["status"] != "candidate-prepared":
                 assessment["failure"] = prepared.get("detail")
             events.append({
                 "event": assessment["status"], "time": iso(), "product": row["product"], "channel": row["channel"],

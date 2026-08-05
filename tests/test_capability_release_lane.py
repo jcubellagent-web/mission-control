@@ -120,6 +120,37 @@ def test_missing_candidate_sandbox_is_reprepared(tmp_path: Path) -> None:
     assert lane.already_prepared(history, "openclaw", "preview", "2026.7.2-beta.7") is False
 
 
+def test_hermes_patch_conflict_is_blocked_and_idempotent(tmp_path: Path) -> None:
+    sandbox = tmp_path / "sandbox"
+    sandbox.mkdir()
+    manifest = tmp_path / "candidate.json"
+    manifest.write_text(
+        '{"sandbox": "' + str(sandbox) + '", "localPatchReplay": '
+        '{"ok": false, "status": "conflict", "detail": "carried patch conflict"}}'
+    )
+    history = [{
+        "event": "candidate-prepared", "product": "hermes", "channel": "stable",
+        "release": "2026.8.3", "manifest": str(manifest),
+    }]
+    payload = {
+        "sources": {
+            "hermesUpdate": {"version": "Hermes Agent v0.19.0 (2026.7.20)"},
+            "hermesLatestRelease": {
+                "ok": True, "tag": "v2026.8.3", "name": "Hermes v0.20.0",
+                "notes": "durable recovery and security improvements",
+            },
+        }
+    }
+    with mock.patch.object(lane, "prepare_candidate") as prepare:
+        state, _events = lane.assess(payload, config(), {}, history, prepare=True)
+    hermes = next(row for row in state["assessments"] if row["product"] == "hermes")
+    assert hermes["status"] == "blocked-carried-patches"
+    assert hermes["failure"] == "carried patch conflict"
+    assert hermes["idempotent"] is True
+    assert state["status"] == "attention"
+    prepare.assert_not_called()
+
+
 def test_config_never_allows_automatic_production_promotion() -> None:
     real = lane.read_json(MODULE_PATH.parents[1] / "config" / "capability-release-lane.json", {})
     assert real["automaticProductionPromotion"] is False
