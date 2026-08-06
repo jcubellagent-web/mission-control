@@ -5546,11 +5546,17 @@ function BrainAtlasPanel({
   const count = (key: keyof MemoryActivity["counts"]) => Number(activity?.counts[key] || 0);
   const recent = (key: MemorySignalKey) => memorySignalIsRecent(activity?.lastObservedAt[key], motionWindowSeconds);
   const latestSignal = latestMemorySignal(activity);
-  const latestSignalRecent = latestSignal ? memorySignalIsRecent(latestSignal[1], motionWindowSeconds) : false;
+  // A receipt remains recent for the motion window, but is only "live" while
+  // its exact lifecycle path is being rendered. Keeping those states separate
+  // prevents the shell from advertising animation after the packet has ended.
+  const exactMemoryPathLive = Boolean(
+    activeMemoryEvent
+    && memorySignalIsRecent(activeMemoryEvent.observedAt, motionWindowSeconds),
+  );
   const activityStateLabel = !activity
     ? "Memory telemetry unavailable"
     : latestSignal
-      ? `${latestSignalRecent ? "Live" : "Idle"} - ${MEMORY_SIGNAL_LABELS[latestSignal[0]]} ${ageLabel(latestSignal[1])}`
+      ? `${exactMemoryPathLive ? "Live" : "Idle"} - ${MEMORY_SIGNAL_LABELS[latestSignal[0]]} ${ageLabel(latestSignal[1])}`
       : `Idle - no activity in ${activity.windowMinutes}m`;
   const retrievals = count("retrievals");
   const hits = count("hits");
@@ -5581,7 +5587,7 @@ function BrainAtlasPanel({
   ]));
   const systemLoad = brainAtlasSystemLoad(HERO_AGENT_ORDER.map((agent) => loadByAgent.get(agent)!));
   const loadDisclosure = `${systemLoad.label} load (${systemLoad.score}/4): derived from verified working agents, fresh claimed-work priority, and current step/tool signals. Moving paths represent recent governed memory receipts only; neither signal depicts private reasoning.`;
-  const headerActivityStateLabel = workingAgentCount > 0 && activity && !latestSignalRecent
+  const headerActivityStateLabel = workingAgentCount > 0 && activity && !exactMemoryPathLive
     ? "Memory quiet"
     : activityStateLabel;
   const flowAgents = HERO_AGENT_ORDER.map((agent) => byAgent.get(agent) || {
@@ -5708,12 +5714,12 @@ function BrainAtlasPanel({
   return (
     <section
       id="brain-atlas"
-      className={`brain-atlas-panel is-${displayTone}${workingAgentCount ? " has-active-work" : ""}${latestSignalRecent ? " has-live-memory-flow" : ""}${liveWorkLifelineCount ? " has-live-work-flow" : ""}`}
+      className={`brain-atlas-panel is-${displayTone}${workingAgentCount ? " has-active-work" : ""}${exactMemoryPathLive ? " has-live-memory-flow" : ""}${liveWorkLifelineCount ? " has-live-work-flow" : ""}`}
       data-atlas-view="unified"
       data-atlas-mode={atlasMode}
       data-atlas-view-tone={selectedTone}
       data-atlas-mode-tone={displayTone}
-      data-memory-flow-state={latestSignalRecent ? "live" : activity ? "idle" : "unavailable"}
+      data-memory-flow-state={exactMemoryPathLive ? "live" : activity ? "idle" : "unavailable"}
       data-exact-proof-state={proofState}
       data-working-agent-count={workingAgentCount}
       data-load-tier={systemLoad.tier}
@@ -5729,7 +5735,7 @@ function BrainAtlasPanel({
           <strong>{systemLoad.tier === "idle" ? "IDLE / LIGHT WORK" : `${systemLoad.label.toUpperCase()} ACTIVITY`}</strong>
           <span>{(activeWorks || []).filter((work) => work.executionRole !== "worker").length} RUNS · {(activeModelRoutes || []).filter((route) => route.executionRole === "worker" && route.routeVerified).length} WORKER LANES</span>
         </div>
-        <span className={`brain-atlas-state is-${displayTone}${latestSignalRecent && atlasMode === "evidence" ? " is-live" : ""}`} title={atlasMode === "ownership" ? "Exact ownership and handoff reconciliation" : atlasMode === "operations" ? "Verified model routes, scheduled outcomes, and governed quality telemetry" : atlasMode === "diagnostics" ? "Counts-only trends, review pressure, provenance, freshness, lineage, and reuse" : loadDisclosure} aria-live="polite">
+        <span className={`brain-atlas-state is-${displayTone}${exactMemoryPathLive && atlasMode === "evidence" ? " is-live" : ""}`} title={atlasMode === "ownership" ? "Exact ownership and handoff reconciliation" : atlasMode === "operations" ? "Verified model routes, scheduled outcomes, and governed quality telemetry" : atlasMode === "diagnostics" ? "Counts-only trends, review pressure, provenance, freshness, lineage, and reuse" : loadDisclosure} aria-live="polite">
           <span className="brain-atlas-load-meter" role="img" aria-label={`${systemLoad.label} ecosystem load, ${systemLoad.score} of 4`}>
             {Array.from({ length: 4 }, (_, index) => <i key={index} className={index < systemLoad.score ? "is-lit" : ""} />)}
           </span>
