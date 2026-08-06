@@ -21455,7 +21455,7 @@ body,
   text-overflow: ellipsis;
   white-space: nowrap;
   animation: brain-memory-topic-roll 7.5s ease-in-out infinite;
-  animation-delay: calc(var(--topic-index) * 2.5s);
+  animation-delay: calc(var(--topic-index) * -2.5s);
 }
 
 #brain-atlas .brain-memory-topic-viewport li::before {
@@ -21467,6 +21467,11 @@ body,
 #brain-atlas .brain-memory-node[data-topic-count="1"] .brain-memory-topic-viewport li {
   opacity: 1;
   animation: none;
+}
+
+#brain-atlas .brain-memory-node[data-topic-count="2"] .brain-memory-topic-viewport li {
+  animation-name: brain-memory-topic-roll-two;
+  animation-duration: 5s;
 }
 
 #brain-atlas .brain-memory-node footer {
@@ -21498,9 +21503,15 @@ body,
 }
 
 @keyframes brain-memory-topic-roll {
-  0%, 8% { opacity: 0; transform: translateY(5px); }
-  14%, 28% { opacity: 1; transform: translateY(0); }
-  34%, 100% { opacity: 0; transform: translateY(-5px); }
+  0%, 27% { opacity: 1; transform: translateY(0); }
+  33%, 94% { opacity: 0; transform: translateY(-4px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes brain-memory-topic-roll-two {
+  0%, 43% { opacity: 1; transform: translateY(0); }
+  50%, 93% { opacity: 0; transform: translateY(-4px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
 .brain-hero.is-flight-deck .agent-workflow-next-title {
