@@ -6664,7 +6664,7 @@ function headlineTitle(value: string, maxLength = 34) {
 }
 
 function briefOutputForHeadline(title: string, rows: AgentBriefRow[]) {
-  const text = `${title} ${rows.map((row) => row.text).join(" ")}`.toLowerCase();
+  const text = `${title} ${rows.map((row) => missionText(row?.text)).join(" ")}`.toLowerCase();
   if (/gmail|inbox|email|mail triage|unread/.test(text)) return "Urgent-only inbox review.";
   if (/fantasy|waiver|roster|injury|pitcher|player|baseball/.test(text)) return "Checks injuries, waivers, and roster moves.";
   if (/daily mission|missions|claim|reward|sorare/.test(text)) return "Checks missions, rewards, and blockers.";
@@ -6675,10 +6675,10 @@ function briefOutputForHeadline(title: string, rows: AgentBriefRow[]) {
   if (/signal|intelligence|news|newsletter|breaking/.test(text)) return "Dedupes sources into high-signal alerts.";
   if (/memory|backup|sync|manifest|recovery/.test(text)) return "Checks memory freshness and sync.";
   if (/hermes|jaimes|jain|agent control|openclaw|route|capability/.test(text)) return "Checks routes, ownership, and handoffs.";
-  const row = rows.find((item) => item.label.toLowerCase() === "output")
-    || rows.find((item) => item.label.toLowerCase() === "checks")
+  const row = rows.find((item) => String(item?.label || "").toLowerCase() === "output")
+    || rows.find((item) => String(item?.label || "").toLowerCase() === "checks")
     || rows[0];
-  return headlineShortText(row?.text.replace(/^a\s+/i, "").replace(/\.$/, "") || "Reports the result.", 76);
+  return headlineShortText(missionText(row?.text).replace(/^a\s+/i, "").replace(/\.$/, "") || "Reports the result.", 76);
 }
 
 function activeWorkPlaceholder(value?: string | null) {
@@ -6802,7 +6802,7 @@ function nextReadoutSummary(value?: string | null) {
 }
 
 function briefText(rows: AgentBriefRow[], labels: string[], fallback: string, maxLength = 118) {
-  const match = rows.find((row) => labels.some((label) => row.label.toLowerCase() === label.toLowerCase()));
+  const match = rows.find((row) => labels.some((label) => String(row?.label || "").toLowerCase() === label.toLowerCase()));
   return readoutSummary(match?.text || fallback, fallback, maxLength);
 }
 

@@ -151,6 +151,16 @@ class ObservableWorkVisibilityTests(unittest.TestCase):
         self.assertIn(".memory-flow-edge.is-historical-reuse", styles)
         self.assertIn("animation: none !important;", styles)
 
+    def test_live_work_headlines_tolerate_incomplete_brief_rows(self) -> None:
+        source = MAIN.read_text(encoding="utf-8")
+        helper = source[source.index("function briefOutputForHeadline("):source.index("function activeWorkPlaceholder(")]
+        brief_text = source[source.index("function briefText("):source.index("function buildAgentInsights(")]
+
+        self.assertIn('missionText(row?.text)', helper)
+        self.assertIn('String(item?.label || "").toLowerCase()', helper)
+        self.assertIn('missionText(row?.text).replace', helper)
+        self.assertIn('String(row?.label || "").toLowerCase()', brief_text)
+
 
 if __name__ == "__main__":
     unittest.main()
