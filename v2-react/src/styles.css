@@ -7897,7 +7897,9 @@ p {
 }
 
 #brain-atlas .brain-memory-core.has-agent-focus .brain-memory-link:not(.is-trace-evidence) {
-  opacity: 0.12;
+  /* Keep the governed topology legible even when the selected agent has no
+     receipt for a particular stage. At kiosk distance, 12% reads as a gap. */
+  opacity: 0.42;
 }
 
 #brain-atlas .brain-memory-core.has-agent-focus .brain-agent-trunk.is-trace-evidence,
