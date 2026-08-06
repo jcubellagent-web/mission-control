@@ -6908,19 +6908,22 @@ function AgentHeroCard({
         } as React.CSSProperties}
       >
         <span className="agent-objective-text">
-          {controllerCount > 1 ? (
-            <span className="agent-headline-rotation" aria-label={`Showing active task ${rotatedController.index + 1} of ${controllerCount}`}>
-              <b>{rotatedController.index + 1}/{controllerCount}</b>
-              <em>{rotatedController.rotating ? "rotating" : `${controllerCount} active`}</em>
-            </span>
-          ) : null}
           <span key={displayedController?.workId || headline.title} className="agent-objective-main is-headline-entry">{headline.title}</span>
         </span>
-        {activityMode ? (
-          <span className={`agent-activity-indicator is-${activityMode}`} role="status" aria-label={`${AGENTS[agent].label} is ${activityMode}`}>
-            <span className="agent-activity-wave" aria-hidden="true"><i /><i /><i /></span>
-            <strong>{activityMode === "received" ? "Received" : activityMode === "thinking" ? "Thinking" : "Working"}</strong>
-            {controllerCount > 1 || workerRoutes.length ? <em>{controllerCount} task{controllerCount === 1 ? "" : "s"}{workerRoutes.length ? ` · ${workerRoutes.length} worker${workerRoutes.length === 1 ? "" : "s"}` : ""}</em> : null}
+        {activityMode || controllerCount > 1 ? (
+          <span className="agent-activity-stack">
+            {controllerCount > 1 ? (
+              <span className="agent-rotation-counter" aria-label={`Showing active task ${rotatedController.index + 1} of ${controllerCount}`}>
+                {rotatedController.index + 1}/{controllerCount}
+              </span>
+            ) : null}
+            {activityMode ? (
+              <span className={`agent-activity-indicator is-${activityMode}`} role="status" aria-label={`${AGENTS[agent].label} is ${activityMode}`}>
+                <span className="agent-activity-wave" aria-hidden="true"><i /><i /><i /></span>
+                <strong>{activityMode === "received" ? "Received" : activityMode === "thinking" ? "Thinking" : "Working"}</strong>
+                {controllerCount > 1 || workerRoutes.length ? <em>{controllerCount} task{controllerCount === 1 ? "" : "s"}{workerRoutes.length ? ` · ${workerRoutes.length} worker${workerRoutes.length === 1 ? "" : "s"}` : ""}</em> : null}
+              </span>
+            ) : null}
           </span>
         ) : null}
       </h3>

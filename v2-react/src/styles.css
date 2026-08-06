@@ -21238,31 +21238,27 @@ body,
   font-style: normal;
 }
 
-.brain-hero.is-flight-deck .agent-headline-rotation {
+.brain-hero.is-flight-deck .agent-activity-stack {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: max-content;
+}
+
+.brain-hero.is-flight-deck .agent-rotation-counter {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  flex: 0 0 auto;
-  min-width: max-content;
-  margin-right: 9px;
   border: 1px solid color-mix(in srgb, var(--agent-tone, var(--cyan)) 54%, transparent);
   border-radius: 999px;
   background: color-mix(in srgb, var(--agent-tone, var(--cyan)) 10%, rgba(3, 16, 28, 0.96));
-  padding: 4px 8px;
+  padding: 3px 8px;
   color: color-mix(in srgb, var(--agent-tone, var(--cyan)) 84%, #fff);
-  font-size: 9px;
-  font-style: normal;
+  font-size: 10px;
   font-weight: 900;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
   line-height: 1;
-  text-transform: uppercase;
-  vertical-align: middle;
-}
-
-.brain-hero.is-flight-deck .agent-headline-rotation em {
-  color: #8fa8b4;
-  font-size: 7px;
-  font-style: normal;
 }
 
 .brain-hero.is-flight-deck .agent-objective-main.is-headline-entry {
