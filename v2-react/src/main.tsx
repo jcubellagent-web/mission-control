@@ -2826,18 +2826,15 @@ function providerSummaryLabel(provider: any) {
 function providerConsumptionLabel(provider: any) {
   const key = providerKey(provider);
   if (key !== "ollama") return providerDisplayBlurb(provider);
-  const quotaWindow = providerLimitRows(provider).find((window: any) => /week/i.test(String(window?.label || window?.id || "")))
-    || providerLimitRows(provider)[0];
-  const quota = quotaWindow
-    ? `Quota ${providerWindowValue(quotaWindow)}`
-    : "Quota telemetry unavailable";
   const calls = Math.max(0, Number(provider?.callsWeekly || 0));
+  const today = Math.max(0, Number(provider?.callsToday || 0));
   const tokens = compactInt(provider?.totalTokens);
-  const receipts = [
-    calls > 0 ? `${calls} verified receipt calls` : null,
-    tokens ? `${tokens} receipt tok` : null,
+  const metrics = [
+    today > 0 ? `${today} direct Cloud calls today` : null,
+    calls > 0 ? `${calls} verified calls this week` : null,
+    tokens ? `${tokens} direct API tokens` : null,
   ].filter(Boolean).join(" · ");
-  return receipts ? `${quota} · ${receipts}` : quota;
+  return metrics ? `${metrics} · Account quota unavailable` : "Account quota unavailable";
 }
 
 function providerUpdatedLabel(provider: any) {
@@ -3184,6 +3181,7 @@ function FinOpsDashboard({
                   .filter((row) => row.modelFamily === key)
                   .sort((left, right) => timeValue(right.updatedAt) - timeValue(left.updatedAt))[0];
                 const pct = providerUtilizationPct(provider);
+                const directCallsToday = Math.max(0, Number(provider?.callsToday || 0));
                 const receiptActivityScore = providerActivityScore(
                   provider,
                   active,
@@ -3191,9 +3189,9 @@ function FinOpsDashboard({
                   maximumProviderActivity,
                   maxSubscription,
                 );
-                // FinOps heat represents actual provider consumption for GLM,
-                // not routing coverage or the count of metadata receipts.
-                const activityScore = key === "ollama" ? pct : receiptActivityScore;
+                // Ollama has direct Cloud API metrics but no supported account
+                // quota endpoint. Its heat reflects verified request activity.
+                const activityScore = receiptActivityScore;
                 const heatLabel = providerHeatLabel(provider, active, liveRoute?.updatedAt);
                 const tone = providerTone(provider);
                 const topModel = providerTopModels(provider)[0];
@@ -3206,9 +3204,9 @@ function FinOpsDashboard({
                   : key === "antigravity"
                     ? "Planning, review, and long-context work"
                     : "Signals, news, and X research";
-                const purposeLabel = key === "ollama" ? "Consumption" : "Purpose";
+                const purposeLabel = key === "ollama" ? "Direct API metrics" : "Purpose";
                 const activityDetail = key === "ollama"
-                  ? `${pct}% quota used · receipt activity kept separate`
+                  ? `${directCallsToday} direct Cloud calls today · account quota unavailable`
                   : `${activityScore}% live heat · ${heatLabel}`;
                 const ProviderIcon = key === "codex" ? Braces : key === "antigravity" ? Sparkles : key === "ollama" ? Bot : Radio;
                 return (
@@ -3236,8 +3234,8 @@ function FinOpsDashboard({
                         <p><span>Current model</span><em title={currentModel}>{currentModel}</em></p>
                       </div>
                       <div className="finops-provider-utilization">
-                        <span>Utilization</span>
-                        <strong>{pct}%</strong>
+                        <span>{key === "ollama" ? "Direct calls" : "Utilization"}</span>
+                        <strong>{key === "ollama" ? directCallsToday : `${pct}%`}</strong>
                       </div>
                     </div>
                     <p className="finops-provider-purpose"><span>{purposeLabel}</span><em title={purpose}>{purpose}</em></p>
@@ -3245,7 +3243,7 @@ function FinOpsDashboard({
                       <strong>{stateLabel}<small>{activityDetail}</small></strong>
                       <i
                         className="finops-segment-meter"
-                        aria-label={key === "ollama" ? `${pct}% quota consumption` : `${activityScore}% recent activity intensity`}
+                        aria-label={key === "ollama" ? `${directCallsToday} direct Cloud calls today` : `${activityScore}% recent activity intensity`}
                       >
                         {Array.from({ length: 10 }, (_, index) => <b key={index} className={index < Math.ceil(activityScore / 10) ? "is-filled" : ""} />)}
                       </i>

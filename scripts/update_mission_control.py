@@ -6294,14 +6294,11 @@ def fetch_codexbar_limits(provider: str = "codex") -> Dict[str, Any]:
                 capture_output=True, text=True, timeout=20,
             )
         if proc.returncode != 0 or not proc.stdout.strip():
-            # Ollama's browser-cookie quota window is independent from its
-            # signed-in inference runtime. Report the distinction instead of
-            # falsely marking a verified cloud route unavailable.
+            # Ollama exposes direct per-request metrics through its authenticated
+            # runtime, but does not expose a supported account-quota endpoint.
+            # Never present a browser-derived projection as provider consumption.
             if provider == "ollama":
-                projection = read_projected_codexbar_quota(provider)
                 verified = verify_ollama_cloud_runtime()
-                if projection.get("quotaTelemetryStatus") == "fresh":
-                    return projected_ollama_limits(projection, runtime_verified=verified)
                 if verified:
                     empty.update({
                         "available": True,
@@ -6309,11 +6306,10 @@ def fetch_codexbar_limits(provider: str = "codex") -> Dict[str, Any]:
                         "authStatus": "ok",
                         "accountLabel": "ollama",
                         "plan": "cloud subscription",
-                        "dataConfidence": "runtime-verified; exact quota unavailable on this host",
-                        "lastError": "CodexBar quota cookie unavailable; Ollama Cloud inference verified",
-                        "quotaTelemetryStatus": projection.get("quotaTelemetryStatus"),
-                        "quotaTelemetryAgeSeconds": projection.get("quotaTelemetryAgeSeconds"),
-                        "quotaTelemetryReceivedAt": projection.get("quotaTelemetryReceivedAt"),
+                        "codexbarSource": "ollama-runtime-direct",
+                        "dataConfidence": "direct-request-metrics; account-quota-unavailable",
+                        "lastError": "Ollama does not provide account quota telemetry through its supported API; direct Cloud request metrics are recorded separately.",
+                        "quotaTelemetryStatus": "unavailable",
                     })
                     return empty
             empty["lastError"] = " ".join(
