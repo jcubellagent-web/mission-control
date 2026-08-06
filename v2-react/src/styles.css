@@ -16813,17 +16813,20 @@ body,
 
 #finops-dashboard.finops-quiet-layout .finops-provider-state {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(48px, 0.8fr);
   align-items: center;
   gap: 10px;
   min-width: 0;
 }
 
 #finops-dashboard.finops-quiet-layout .finops-provider-state strong {
+  min-width: 0;
+  overflow: hidden;
   color: var(--route-color);
   font-size: 10.5px;
   line-height: 1;
   letter-spacing: 0.045em;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
