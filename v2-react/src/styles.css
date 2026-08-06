@@ -21073,8 +21073,22 @@ body,
 }
 
 #brain-atlas .brain-memory-registry {
-  width: 160px;
-  height: 160px;
+  left: 51%;
+  width: 128px;
+  height: 128px;
+}
+
+#brain-atlas .brain-memory-registry > svg {
+  width: 32px !important;
+  height: 32px !important;
+}
+
+#brain-atlas .brain-memory-registry b {
+  font-size: 13px;
+}
+
+#brain-atlas .brain-memory-registry em {
+  font-size: 8.75px;
 }
 
 #brain-atlas .brain-memory-node {
@@ -21087,6 +21101,16 @@ body,
 #brain-atlas .brain-memory-node.is-helpful {
   width: 224px;
   min-height: 76px;
+}
+
+/* Keep the smaller registry on a clear central axis and preserve a visible
+   gutter between the bottom lifecycle cards. */
+#brain-atlas .brain-memory-node.is-provenance {
+  left: 51%;
+}
+
+#brain-atlas .brain-memory-node.is-candidate {
+  right: 21%;
 }
 
 #brain-atlas .brain-memory-node b {
