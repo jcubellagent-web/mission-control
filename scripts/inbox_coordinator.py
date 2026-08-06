@@ -417,7 +417,7 @@ FALLBACK_LADDERS: dict[str, tuple[str, ...]] = {
     "grok": ("gemini", "terra"),
     "jaimes": ("glm", "terra"),
     "luna": ("terra",),
-    "terra": ("sol", "luna"),
+    "terra": ("luna",),
     "sol": ("terra", "luna"),
     "gpt-5.5": ("terra", "luna"),
     "gpt-5.4-mini": ("luna", "terra"),
