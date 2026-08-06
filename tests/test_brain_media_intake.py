@@ -10,6 +10,7 @@ import os
 import re
 import sqlite3
 import stat
+import subprocess
 import sys
 import tempfile
 import types
@@ -922,6 +923,44 @@ class BrainMediaIntakeTest(unittest.TestCase):
         self.assertIn("pdf-parser-unavailable", pdf_result["warnings"])
         self.assertFalse(image_result["supported"])
         self.assertIn("ocr-unavailable", image_result["warnings"])
+
+    def test_anydoc_is_preferred_for_safe_office_documents(self) -> None:
+        document = self.source("safe.docx", b"safe fixture")
+        completed = types.SimpleNamespace(returncode=0, stdout="# Pilot\nanydoc evidence\n", stderr="")
+        with mock.patch.object(brain.subprocess, "run", return_value=completed) as run:
+            result = brain.extract_local(document, "office-document", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+        self.assertTrue(result["supported"])
+        self.assertEqual(result["method"], "anydoc-local")
+        self.assertEqual(result["toolVersion"], "anydoc-0.1.6")
+        self.assertIn("anydoc evidence", result["text"])
+        self.assertEqual(run.call_args.args[0][:3], ["npx", "--no-install", brain.ANYDOC_PACKAGE])
+        self.assertLessEqual(run.call_args.kwargs["timeout"], brain.ANYDOC_TIMEOUT_SECONDS)
+
+    def test_anydoc_failure_falls_back_to_bounded_ooxml(self) -> None:
+        document = self.source("fallback.docx", b"safe fixture")
+        failed = types.SimpleNamespace(returncode=1, stdout="", stderr="conversion failed")
+        with (
+            mock.patch.object(brain.subprocess, "run", return_value=failed),
+            mock.patch.object(brain, "ooxml_text", return_value="fallback evidence"),
+        ):
+            result = brain.extract_local(document, "office-document", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+        self.assertTrue(result["supported"])
+        self.assertEqual(result["method"], "ooxml-xml")
+        self.assertIn("anydoc-failed", result["warnings"])
+        self.assertIn("anydoc-fallback-ooxml", result["warnings"])
+
+    def test_anydoc_timeout_falls_back_without_extending_budget(self) -> None:
+        document = self.source("timeout.docx", b"safe fixture")
+        with (
+            mock.patch.object(brain.subprocess, "run", side_effect=subprocess.TimeoutExpired("anydoc", 30)),
+            mock.patch.object(brain, "ooxml_text", return_value="fallback evidence"),
+        ):
+            result = brain.extract_local(
+                document, "office-document", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", timeout_seconds=90,
+            )
+        self.assertEqual(result["method"], "ooxml-xml")
+        self.assertIn("anydoc-timeout", result["warnings"])
+        self.assertIn("anydoc-fallback-ooxml", result["warnings"])
 
     def test_private_source_cannot_auto_promote_and_reference_only_tombstones_registry_candidate(self) -> None:
         import memory_registry

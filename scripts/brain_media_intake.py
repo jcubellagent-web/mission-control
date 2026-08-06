@@ -37,7 +37,7 @@ from xml.etree import ElementTree
 
 SCHEMA_VERSION = 6
 LIFECYCLE_VERSION = 3
-EXTRACTION_VERSION = "brain-local-v3"
+EXTRACTION_VERSION = "brain-local-v4"
 OPENCLAW_VERSION = "2026.7.1"
 OPENCLAW_INGRESS_ORIGINAL_SHA256 = "a4657f4f771fbc1b95f321c99c0ad89a181cb7df35493aae2d791674d2f015ac"
 OPENCLAW_HOOK_PATCH_VERSION = 5
@@ -59,6 +59,8 @@ MAX_ARCHIVE_ENTRIES = 1000
 MAX_ARCHIVE_UNCOMPRESSED = 200 * 1024 * 1024
 MAX_ARCHIVE_RATIO = 100
 MAX_EXTRACTED_CHARS = 2_000_000
+ANYDOC_PACKAGE = "@firecrawl/anydoc@0.1.6"
+ANYDOC_TIMEOUT_SECONDS = 15.0
 MAX_ATTACHMENTS_PER_SUBMISSION = 20
 MAX_SUBMISSION_BYTES = 250 * 1024 * 1024
 FORGET_TTL_SECONDS = 600
@@ -587,6 +589,32 @@ def local_tool_version(executable: str, version_args: Sequence[str]) -> str:
     return rendered or "version-unavailable"
 
 
+def extract_anydoc(path: Path, *, timeout_seconds: float | None = None) -> tuple[str, list[str]]:
+    """Run the pinned, cache-only anydoc CLI after intake safety gates pass.
+
+    The CLI is deliberately invoked through ``npx --no-install``: extraction
+    never downloads a package at document-processing time.  A missing cached
+    package is a normal, observable fallback condition.
+    """
+    bounded_timeout = max(1.0, min(ANYDOC_TIMEOUT_SECONDS, float(timeout_seconds or ANYDOC_TIMEOUT_SECONDS)))
+    try:
+        completed = subprocess.run(
+            ["npx", "--no-install", ANYDOC_PACKAGE, str(path)],
+            capture_output=True,
+            text=True,
+            timeout=bounded_timeout,
+            check=False,
+        )
+    except subprocess.TimeoutExpired:
+        return "", ["anydoc-timeout"]
+    except OSError:
+        return "", ["anydoc-unavailable"]
+    if completed.returncode != 0:
+        return "", ["anydoc-failed"]
+    text = str(completed.stdout or "")[:MAX_EXTRACTED_CHARS]
+    return (text, []) if text.strip() else ("", ["anydoc-empty-output"])
+
+
 def extract_local(
     path: Path,
     media_class: str,
@@ -606,9 +634,16 @@ def extract_local(
         method, confidence, coverage = "bounded-text", 0.99, "full"
         model_route, tool_version = "local-deterministic", f"python-{sys.version_info.major}.{sys.version_info.minor}"
     elif media_class in {"office-document", "spreadsheet", "presentation"}:
-        text = ooxml_text(path)
-        method, confidence, coverage = "ooxml-xml", 0.92, "text-and-tables" if text else "none"
-        model_route, tool_version = "local-deterministic", f"python-stdlib-{sys.version_info.major}.{sys.version_info.minor}"
+        text, anydoc_warnings = extract_anydoc(path, timeout_seconds=timeout_seconds)
+        warnings.extend(anydoc_warnings)
+        if text:
+            method, confidence, coverage = "anydoc-local", 0.94, "structured-markdown"
+            model_route, tool_version = "local-tool", "anydoc-0.1.6"
+        else:
+            text = ooxml_text(path)
+            method, confidence, coverage = "ooxml-xml", 0.92, "text-and-tables" if text else "none"
+            model_route, tool_version = "local-deterministic", f"python-stdlib-{sys.version_info.major}.{sys.version_info.minor}"
+            warnings.append("anydoc-fallback-ooxml")
         if not text:
             warnings.append("no-extractable-office-text")
     elif mime_type == "application/pdf":
