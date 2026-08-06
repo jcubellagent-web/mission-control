@@ -13,6 +13,7 @@ def test_ollama_finops_distinguishes_quota_from_receipt_activity() -> None:
     assert "receipt activity kept separate" in source
     assert "const activityScore = key === \"ollama\" ? pct : receiptActivityScore" in source
     assert 'aria-label={key === "ollama" ? `${pct}% quota consumption`' in source
+    assert "Math.round(windowPct * 10) / 10" in source
 
 
 def test_ollama_finops_does_not_render_governance_coverage_as_consumption() -> None:

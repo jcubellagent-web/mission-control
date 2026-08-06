@@ -2649,10 +2649,10 @@ function activeProviderKeys(statuses: AgentStatus[], routes: ActiveModelRoute[])
 
 function providerUtilizationPct(provider: any) {
   const explicit = Number(provider?.dailyUtilizationPct ?? provider?.monthlyUtilizationPct);
-  if (Number.isFinite(explicit) && explicit > 0) return Math.min(100, Math.round(explicit));
+  if (Number.isFinite(explicit) && explicit > 0) return Math.min(100, Math.round(explicit * 10) / 10);
   const windows = providerLimitRows(provider);
   const windowPct = Math.max(...windows.map((window) => Number(window?.usedPercent || 0)).filter(Number.isFinite), 0);
-  if (windowPct > 0) return Math.min(100, Math.round(windowPct));
+  if (windowPct > 0) return Math.min(100, Math.round(windowPct * 10) / 10);
   const spend = Number(provider?.dailySpendUsd ?? provider?.monthlySpendUsd ?? 0);
   const cap = Number(provider?.dailyCapUsd ?? provider?.monthlyCapUsd ?? 0);
   if (Number.isFinite(spend) && Number.isFinite(cap) && cap > 0) return Math.min(100, Math.round((spend / cap) * 100));
