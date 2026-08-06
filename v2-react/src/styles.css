@@ -16700,6 +16700,8 @@ body,
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto auto;
   gap: 5px;
+  box-sizing: border-box;
+  max-width: 100%;
   min-width: 0;
   min-height: 0;
   overflow: hidden;
@@ -16778,7 +16780,7 @@ body,
   display: grid;
   justify-items: end;
   gap: 3px;
-  min-width: 52px;
+  min-width: 0;
 }
 
 #finops-dashboard.finops-quiet-layout .finops-provider-utilization span {
