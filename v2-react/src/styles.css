@@ -21075,24 +21075,24 @@ body,
 }
 
 #brain-atlas .brain-memory-registry {
-  /* Match the established SVG flow axis: this is the graph's focal hub, not
-     a small floating badge. The reduced diameter still clears Candidate. */
-  left: 56%;
-  width: 142px;
-  height: 142px;
+  /* Preserve a readable hub while clearing Provenance above and Candidate
+     below on the physical kiosk. */
+  left: 58%;
+  width: 126px;
+  height: 126px;
 }
 
 #brain-atlas .brain-memory-registry > svg {
-  width: 36px !important;
-  height: 36px !important;
+  width: 32px !important;
+  height: 32px !important;
 }
 
 #brain-atlas .brain-memory-registry b {
-  font-size: 14px;
+  font-size: 13px;
 }
 
 #brain-atlas .brain-memory-registry em {
-  font-size: 9.25px;
+  font-size: 8.5px;
 }
 
 #brain-atlas .brain-memory-node {
@@ -21115,7 +21115,7 @@ body,
 }
 
 #brain-atlas .brain-memory-node.is-candidate {
-  right: 21%;
+  right: 23%;
 }
 
 #brain-atlas .brain-memory-node b {
