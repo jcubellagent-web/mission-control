@@ -547,6 +547,9 @@ def test_surplus_ollama_quota_expands_glm_first_stop_weighting(monkeypatch) -> N
     [
         "code-review", "repository-review", "implementation-plan",
         "diagnostic-analysis", "quality-review", "risk-review", "second-opinion",
+        "api-contract-review", "schema-review", "incident-postmortem",
+        "dependency-advisory", "adr-draft", "observability-strategy",
+        "migration-planning", "test-plan-review", "data-schema-quality-review",
     ],
 )
 def test_core_technical_work_is_glm_first_below_surplus_threshold(monkeypatch, task_type) -> None:

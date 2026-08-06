@@ -63,8 +63,11 @@ reasoning out first and reserve GPT for orchestration, execution, and synthesis.
 - GLM 5.2 Cloud: architecture, repository analysis, debugging hypotheses,
   multi-file and implementation planning, structured code/repository review,
   diagnosis, technical strategy, quality/risk review, long-context technical
-  analysis, and parallel technical second opinions. These core technical routes
-  stay GLM-first at any usable allowance; GLM does not edit or execute.
+  analysis, parallel technical second opinions, API/schema review, sanitized
+  incident post-mortem synthesis, dependency advisory, ADR drafting,
+  observability strategy, migration planning, test-plan review, and data-schema
+  quality review. These core technical routes stay GLM-first at any usable
+  allowance; GLM does not edit or execute.
 - GLM surplus boost: when fresh Ollama session and weekly allowance both leave at
   least 80% remaining, route otherwise-generic strategy work to GLM first too.
   Generic/UI review and summaries remain Gemini work; private context and
@@ -74,6 +77,11 @@ reasoning out first and reserve GPT for orchestration, execution, and synthesis.
   GLM-OCR only for local OCR after its dedicated canary passes.
 - Codex: private data, tools, connectors, repo edits, terminal work, permissions,
   side effects, approval handling, high-stakes integration, and final proof.
+
+For the expanded advisory categories, send only dashboard-safe material:
+sanitized timelines for post-mortems; manifest and public-advisory metadata for
+dependency review; and structural schemas, contracts, or telemetry descriptions.
+Never send credentials, raw production logs, customer data, or account content.
 
 ## Runtime Resilience
 

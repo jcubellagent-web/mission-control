@@ -53,7 +53,7 @@
     "providerRoles": {
       "codex": "OpenAI Codex OAuth/subscription: Luna for bounded Inbox coordination, Terra for execution, and Sol only for earned hard/high-blast work. Codex owns code edits, repo work, shell/tools, Control Tower/OpenCLAW, auth-sensitive workflows, and final verification.",
       "gemini": "Antigravity-authenticated Gemini subscription: dashboard-safe reading, summarizing, comparison, second-pass review, report cleanup, and research digestion when privacy permits.",
-      "ollama": "Ollama GLM 5.2 Cloud is first-stop for substantive dashboard-safe technical analysis, repository/code review, diagnosis, implementation planning, technical strategy, and technical second opinions. Local Qwen handles bounded private/offline drafting and extraction without a cloud quota gate.",
+      "ollama": "Ollama GLM 5.2 Cloud is first-stop for substantive dashboard-safe technical analysis, repository/code review, diagnosis, implementation planning, technical strategy, technical second opinions, API/schema review, sanitized incident post-mortems, dependency advisory, ADR drafting, observability strategy, migration planning, test-plan review, and data-schema quality review. Local Qwen handles bounded private/offline drafting and extraction without a cloud quota gate.",
       "xai": "Grok/xAI specialist: X-native research, current-events/social signals, creator posts, crypto/news pulse, public reaction, market narrative, and zeitgeist checks.",
       "openrouter": "Fallback/specialist route only; not primary spend."
     },
@@ -115,6 +115,15 @@
       "quality-review",
       "risk-review",
       "second-opinion",
+      "api-contract-review",
+      "schema-review",
+      "incident-postmortem",
+      "dependency-advisory",
+      "adr-draft",
+      "observability-strategy",
+      "migration-planning",
+      "test-plan-review",
+      "data-schema-quality-review",
       "sorare-analytics",
       "sorare-strategy",
       "sorare-review"
@@ -184,7 +193,7 @@
     ],
     "guardrail": "Codex/OpenAI remains default execution model, but JOSHeX on the personal MacBook is not the default execution host. Prefer Josh 2.0 or JAIMES for ecosystem execution and heavier work. GLM Cloud, Gemini, xAI, and OpenRouter receive sanitized dashboard-safe specialist work only; local Ollama may receive bounded private/offline drafts on JAIMES. JOSHeX owns private-Mac-only work, coordination, approvals, and final review.",
     "cookieKeychainDisambiguation": "A visible alert mentioning cookie.codex, Codex cookies, Keychain Not Found, or a keychain cannot be found means macOS/Codex keychain work on the device. It is not Sorare cookie freshness unless the user explicitly says Sorare.",
-    "dailyUtilizationPolicy": "Use real task-matched specialist capacity rather than manufacturing calls. GLM 5.2 Cloud is the standing first-stop for substantive dashboard-safe technical analysis, repository/code review, diagnosis, planning, technical strategy, quality/risk review, and technical second opinions whenever the runtime is healthy and allowance is not exhausted. Gemini remains first-stop for summaries, digests, generic/readability review, and synthesis; Grok for current public/X signals; local Ollama for bounded private/offline work; Codex for execution and final integration.",
+    "dailyUtilizationPolicy": "Use real task-matched specialist capacity rather than manufacturing calls. GLM 5.2 Cloud is the standing first-stop for substantive dashboard-safe technical analysis, repository/code review, diagnosis, planning, technical strategy, quality/risk review, technical second opinions, API/schema review, sanitized incident post-mortems, dependency advisory, ADR drafting, observability strategy, migration planning, test-plan review, and data-schema quality review whenever the runtime is healthy and allowance is not exhausted. Gemini remains first-stop for summaries, digests, generic/readability review, and synthesis; Grok for current public/X signals; local Ollama for bounded private/offline work; Codex for execution and final integration.",
     "ollamaGlmSurplusPolicy": "The 80% surplus boost applies only to otherwise-generic strategy work. Core technical work remains GLM-first at any usable allowance. Unknown quota is usable only with verified runtime health; exhausted quota or failed runtime follows the disclosed GLM -> Gemini Pro -> Codex Terra ladder.",
     "jaimesGeminiRoute": "JAIMES should use Gemini first for dashboard-safe summaries, reports, digests, log summaries, stale-task compression, and model/readability evaluations. Use Gemini Flash for routine throughput and Gemini Pro for explicit deeper compact evaluation. Codex/OpenAI remains the executor for repo edits, private connectors, terminal actions, approvals, and final integration.",
     "telegramDisclosurePolicy": "Josh 2.0 and JAIMES must make the active model/auth route visible in Telegram. Start substantive replies with Active Model/Auth and route reason; explicit model switches must verify a fresh lane before work.",
