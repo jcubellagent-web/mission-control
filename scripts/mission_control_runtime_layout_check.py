@@ -184,6 +184,7 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
     return {
       provider: element.getAttribute('data-provider'),
       active: element.getAttribute('data-active'),
+      activityScore: Number(element.getAttribute('data-activity-score')),
       width: round(rect.width),
       height: round(rect.height),
       overflowX: round(Math.max(0, element.scrollWidth - element.clientWidth)),
@@ -1660,24 +1661,22 @@ def validate_kiosk_legibility(measurements: Any) -> list[str]:
     for key, label, minimum in provider_contract:
         failures.extend(_font_and_clipping_failures(finops.get(key), label=label, minimum=minimum))
 
-    if not finops.get("ledgerPresent"):
-        failures.append(f"{KIOSK_PROBE_LABEL}: FinOps model ledger is missing")
-    else:
-        ledger_overflow_x = _number(finops.get("ledgerOverflowX"))
-        ledger_overflow_y = _number(finops.get("ledgerOverflowY"))
-        if ledger_overflow_x > 1:
-            failures.append(f"{KIOSK_PROBE_LABEL}: FinOps model ledger horizontal overflow is {_px(ledger_overflow_x)}")
-        if ledger_overflow_y > 1:
-            failures.append(f"{KIOSK_PROBE_LABEL}: FinOps model ledger vertical overflow is {_px(ledger_overflow_y)}")
-        ledger_rows = int(_number(finops.get("ledgerRowCount"), missing=0.0))
-        if not 1 <= ledger_rows <= 9:
-            failures.append(f"{KIOSK_PROBE_LABEL}: FinOps model ledger renders {ledger_rows} rows (requires 1-9)")
-        minimum_row_height = _number(finops.get("ledgerRowMinHeight"))
-        if minimum_row_height < KIOSK_LEGIBILITY_THRESHOLDS["ledgerRowHeight"]:
+    if finops.get("ledgerPresent"):
+        failures.append(f"{KIOSK_PROBE_LABEL}: FinOps model ledger must be absent from the provider-first overview")
+
+    activity_scores = []
+    for provider in provider_geometry:
+        if not isinstance(provider, dict):
+            continue
+        score = _number(provider.get("activityScore"), missing=-1.0)
+        if score < 0 or score > 100:
             failures.append(
-                f"{KIOSK_PROBE_LABEL}: FinOps model ledger row height is {_px(minimum_row_height)} "
-                f"(requires >= {_px(KIOSK_LEGIBILITY_THRESHOLDS['ledgerRowHeight'])})"
+                f"{KIOSK_PROBE_LABEL}: {provider.get('provider') or 'provider'} activity heat score is invalid"
             )
+        else:
+            activity_scores.append(score)
+    if len(activity_scores) != 4:
+        failures.append(f"{KIOSK_PROBE_LABEL}: FinOps provider activity heatmap is incomplete")
 
     if not finops.get("healthPresent"):
         failures.append(f"{KIOSK_PROBE_LABEL}: FinOps health rail is missing")
@@ -2161,15 +2160,15 @@ def self_test() -> int:
             "metricCounts": [5],
             "providerCount": 4,
             "providerGeometry": [
-                {"provider": "codex", "width": 199, "height": 124, "overflowX": 0, "overflowY": 0, "routeColor": "#65D1D5"},
-                {"provider": "antigravity", "width": 199, "height": 124, "overflowX": 0, "overflowY": 0, "routeColor": "#72D69A"},
-                {"provider": "ollama", "width": 199, "height": 124, "overflowX": 0, "overflowY": 0, "routeColor": "#A8ABB3"},
-                {"provider": "grok", "width": 199, "height": 124, "overflowX": 0, "overflowY": 0, "routeColor": "#1677FF"},
+                {"provider": "codex", "activityScore": 100, "width": 199, "height": 124, "overflowX": 0, "overflowY": 0, "routeColor": "#65D1D5"},
+                {"provider": "antigravity", "activityScore": 41, "width": 199, "height": 124, "overflowX": 0, "overflowY": 0, "routeColor": "#72D69A"},
+                {"provider": "ollama", "activityScore": 76, "width": 199, "height": 124, "overflowX": 0, "overflowY": 0, "routeColor": "#A8ABB3"},
+                {"provider": "grok", "activityScore": 35, "width": 199, "height": 124, "overflowX": 0, "overflowY": 0, "routeColor": "#1677FF"},
             ],
             "providerNames": [{"fontSize": 12, "clipped": False}],
             "providerBodies": [{"fontSize": 8, "clipped": False}],
             "providerMetadata": [{"fontSize": 8, "clipped": False}],
-            "ledgerPresent": True,
+            "ledgerPresent": False,
             "ledgerOverflowX": 0,
             "ledgerOverflowY": 0,
             "ledgerRowCount": 9,

@@ -237,6 +237,90 @@ def test_materialized_occurrences_are_chronological_and_use_exact_outcomes() -> 
     assert meta["counts"] == {"complete": 1, "skipped": 1, "broken": 1, "pending": 2}
 
 
+def test_last_success_keeps_due_slot_complete_when_scheduler_is_already_running_again() -> None:
+    rows, _ = materialize_today_jobs([
+        _definition(
+            "Fast restart",
+            8,
+            run_status="running",
+            last_run="2026-07-17T08:04:00-04:00",
+            can_verify_run=True,
+        )
+    ], now=dt.datetime(2026, 7, 17, 8, 10, tzinfo=ET))
+
+    assert rows[0]["outcome"] == "complete"
+    assert rows[0]["runStatus"] == "done"
+
+
+def test_latest_due_slot_uses_last_success_before_definition_running_state() -> None:
+    definition = {
+        **_definition(
+            "Recurring restart",
+            8,
+            run_status="running",
+            last_run="2026-07-17T10:04:00-04:00",
+            can_verify_run=True,
+        ),
+        "scheduleSpec": {"kind": "cron", "expression": "0 8,10,12 * * *"},
+    }
+
+    rows, _ = materialize_today_jobs(
+        [definition], now=dt.datetime(2026, 7, 17, 10, 10, tzinfo=ET)
+    )
+    by_time = {row["scheduledTime"]: row for row in rows}
+
+    assert by_time["10:00 AM"]["outcome"] == "complete"
+    assert by_time["10:00 AM"]["runStatus"] == "done"
+    assert by_time["12:00 PM"]["runStatus"] == "scheduled"
+
+
+def test_running_receipt_does_not_override_matching_terminal_last_run() -> None:
+    definition = {
+        **_definition(
+            "Receipt restart",
+            8,
+            run_status="running",
+            last_run="2026-07-17T08:04:00-04:00",
+            can_verify_run=True,
+        ),
+        "runReceipts": [
+            {"scheduledAt": "2026-07-17T08:00:00-04:00", "startedAt": "2026-07-17T08:00:01-04:00", "status": "running"},
+        ],
+    }
+
+    rows, _ = materialize_today_jobs(
+        [definition], now=dt.datetime(2026, 7, 17, 8, 10, tzinfo=ET)
+    )
+
+    assert rows[0]["outcome"] == "complete"
+    assert rows[0]["runStatus"] == "done"
+
+
+def test_old_running_receipt_is_not_left_running_after_later_success() -> None:
+    definition = {
+        **_definition(
+            "Stale claim",
+            8,
+            run_status="running",
+            last_run="2026-07-17T10:04:00-04:00",
+            can_verify_run=True,
+        ),
+        "scheduleSpec": {"kind": "cron", "expression": "0 8,10 * * *"},
+        "runReceipts": [
+            {"scheduledAt": "2026-07-17T08:00:00-04:00", "startedAt": "2026-07-17T08:00:01-04:00", "status": "running"},
+        ],
+    }
+
+    rows, _ = materialize_today_jobs(
+        [definition], now=dt.datetime(2026, 7, 17, 10, 20, tzinfo=ET)
+    )
+    by_time = {row["scheduledTime"]: row for row in rows}
+
+    assert by_time["8:00 AM"]["outcome"] == "pending"
+    assert by_time["8:00 AM"]["runStatus"] == "unverified"
+    assert by_time["10:00 AM"]["outcome"] == "complete"
+
+
 def test_due_occurrences_stop_looking_pending_after_the_grace_window() -> None:
     now = dt.datetime(2026, 7, 17, 10, 10, tzinfo=ET)
     definitions = [

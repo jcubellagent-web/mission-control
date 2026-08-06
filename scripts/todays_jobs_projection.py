@@ -992,7 +992,8 @@ def _occurrence_outcome(
     if scheduled > now:
         return "pending", "scheduled"
     receipt = _receipt_evidence(definition, scheduled)
-    if receipt is not None:
+    running_receipt = bool(receipt and receipt[0] == "pending" and receipt[1] == "running")
+    if receipt is not None and not running_receipt:
         return receipt[0], receipt[1]
     multi_done = _multi_run_evidence(definition, scheduled)
     if multi_done is True:
@@ -1002,8 +1003,6 @@ def _occurrence_outcome(
     # latest result.
     if fixed == "broken" and (occurrence_count == 1 or scheduled == latest_due):
         return fixed, run_status
-    if fixed == "pending" and run_status in {"running", "working"} and (occurrence_count == 1 or scheduled == latest_due):
-        return "pending", "running"
     tolerance = _occurrence_tolerance(definition)
     if multi_done is False:
         if now <= scheduled + tolerance:
@@ -1015,6 +1014,18 @@ def _occurrence_outcome(
             return "complete", "done"
         if occurrence_count == 1 and last_run >= scheduled - tolerance:
             return "complete", "done"
+    if running_receipt:
+        if now <= scheduled + _coverage_freshness(definition):
+            return "pending", "running"
+        if last_run and last_run.date() == scheduled.date() and last_run > scheduled:
+            return "pending", "unverified"
+        return "broken", "timeout"
+    # A scheduler can already be running its next attempt while its lastRun is
+    # the terminal evidence for the due slot. Preserve that completed slot;
+    # definition-level "running" is only authoritative when no success
+    # timestamp can be matched to the occurrence.
+    if fixed == "pending" and run_status in {"running", "working"} and (occurrence_count == 1 or scheduled == latest_due):
+        return "pending", "running"
     if occurrence_count > 1 and scheduled not in {latest_due, evidence_target}:
         return "pending", "unverified"
     if now <= scheduled + tolerance:

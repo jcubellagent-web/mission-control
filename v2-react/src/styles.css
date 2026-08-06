@@ -20547,6 +20547,144 @@ body,
   }
 }
 
+/* FinOps activity heatmap: provider routes are the primary operational read. */
+#finops-dashboard.finops-quiet-layout .finops-ledger-table {
+  display: none !important;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-main-grid {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-provider-simple {
+  position: relative;
+  isolation: isolate;
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--route-color) var(--activity-strength), #071827), #071827 72%) !important;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--route-color) var(--activity-strength), transparent),
+    inset 0 -42px 58px color-mix(in srgb, var(--route-color) var(--activity-strength), transparent),
+    0 0 var(--activity-glow) color-mix(in srgb, var(--route-color) var(--activity-strength), transparent) !important;
+  opacity: .82;
+  transition: background-color 700ms ease, border-color 700ms ease, box-shadow 700ms ease, opacity 700ms ease !important;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-provider-simple::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 18% 20%, color-mix(in srgb, var(--route-color) 72%, transparent), transparent 48%),
+    linear-gradient(180deg, color-mix(in srgb, var(--route-color) 26%, transparent), transparent 70%);
+  content: "";
+  opacity: var(--activity-alpha);
+  pointer-events: none;
+  transition: opacity 700ms ease !important;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-provider-simple.is-active {
+  border-color: color-mix(in srgb, var(--route-color) 92%, white) !important;
+  opacity: 1;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-provider-state strong {
+  display: grid;
+  gap: 2px;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-provider-state strong small {
+  color: #a9bac5;
+  font-size: 7px;
+  font-weight: 850;
+  letter-spacing: .045em;
+  text-transform: uppercase;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-wallet-total small {
+  overflow: hidden;
+  color: #8ea6b3;
+  font-size: 7px;
+  font-weight: 800;
+  line-height: 1;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-wallet-total.is-stale strong {
+  color: #d8aa63 !important;
+  font-size: 17px !important;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-wallet-total[data-wallet-freshness="error"] strong {
+  color: #ff716c !important;
+}
+
+.today-jobs-sync.is-stale > span {
+  background: #d8aa63;
+  box-shadow: 0 0 8px rgba(216, 170, 99, .38);
+}
+
+.today-jobs-sync.is-stale strong {
+  color: #e1b66e;
+}
+
+@media (min-width: 1501px) {
+  .kiosk-grid > #finops-dashboard .finops-command-grid {
+    grid-template-rows: 66px minmax(0, 1fr) !important;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-wallet-summary {
+    grid-template-columns: .82fr 1.28fr 1fr !important;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-overview {
+    grid-template-rows: 46px minmax(0, 1fr) !important;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-main-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-provider-grid {
+    gap: 6px !important;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-provider-simple {
+    gap: 6px;
+    padding: 9px 11px;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-provider-identity {
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-provider-glyph {
+    width: 38px;
+    height: 38px;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-provider-glyph svg {
+    width: 36px;
+    height: 36px;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-provider-name > strong {
+    font-size: 15px;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-provider-name p,
+  .kiosk-grid > #finops-dashboard .finops-provider-purpose {
+    font-size: 10px !important;
+  }
+
+  .kiosk-grid > #finops-dashboard .finops-provider-utilization strong {
+    font-size: 21px;
+  }
+}
+
 /* Idle cards are availability signals, not live route activity. Keep their copy neutral. */
 .brain-hero.is-flight-deck .agent-hero-card.is-up-next-focus.has-verified-route .agent-objective-main {
   color: #f4fbff !important;

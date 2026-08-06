@@ -196,15 +196,15 @@ def valid_kiosk_legibility_measurements() -> dict[str, object]:
             "metricCounts": [5],
             "providerCount": 4,
             "providerGeometry": [
-                {"provider": "codex", "width": 199, "height": 124, "overflowX": 0, "overflowY": 0, "routeColor": "#65D1D5"},
-                {"provider": "antigravity", "width": 199, "height": 124, "overflowX": 0, "overflowY": 0, "routeColor": "#72D69A"},
-                {"provider": "ollama", "width": 199, "height": 124, "overflowX": 0, "overflowY": 0, "routeColor": "#A8ABB3"},
-                {"provider": "grok", "width": 199, "height": 124, "overflowX": 0, "overflowY": 0, "routeColor": "#1677FF"},
+                {"provider": "codex", "activityScore": 100, "width": 199, "height": 124, "overflowX": 0, "overflowY": 0, "routeColor": "#65D1D5"},
+                {"provider": "antigravity", "activityScore": 41, "width": 199, "height": 124, "overflowX": 0, "overflowY": 0, "routeColor": "#72D69A"},
+                {"provider": "ollama", "activityScore": 76, "width": 199, "height": 124, "overflowX": 0, "overflowY": 0, "routeColor": "#A8ABB3"},
+                {"provider": "grok", "activityScore": 35, "width": 199, "height": 124, "overflowX": 0, "overflowY": 0, "routeColor": "#1677FF"},
             ],
             "providerNames": [{"fontSize": 12, "clipped": False}],
             "providerBodies": [{"fontSize": 8, "clipped": False}],
             "providerMetadata": [{"fontSize": 8, "clipped": False}],
-            "ledgerPresent": True,
+            "ledgerPresent": False,
             "ledgerOverflowX": 0,
             "ledgerOverflowY": 0,
             "ledgerRowCount": 9,
@@ -1081,6 +1081,7 @@ def test_kiosk_legibility_reports_every_regression() -> None:
     provider_geometry[0]["height"] = 117
     provider_geometry[0]["overflowX"] = 2
     provider_geometry[0]["routeColor"] = "#FFFFFF"
+    provider_geometry[0]["activityScore"] = 120
     finops["providerNames"] = [{"fontSize": 11.5, "clipped": True}]
     finops["providerBodies"] = [{"fontSize": 7.5, "clipped": True}]
     finops["providerMetadata"] = [{"fontSize": 7.5, "clipped": True}]
@@ -1144,10 +1145,7 @@ def test_kiosk_legibility_reports_every_regression() -> None:
         "FinOps provider body has 1 clipped",
         "FinOps provider metadata minimum font",
         "FinOps provider metadata has 1 clipped",
-        "FinOps model ledger horizontal overflow",
-        "FinOps model ledger vertical overflow",
-        "FinOps model ledger renders 10 rows",
-        "FinOps model ledger row height",
+        "codex activity heat score is invalid",
         "FinOps health rail has 3 cells",
         "FinOps health rail height",
         "FinOps health rail content overflows",
@@ -1171,7 +1169,6 @@ def test_kiosk_legibility_reports_every_regression() -> None:
         (("memory", "evidenceSource"), "Brain Atlas memory flow is not registry-verified"),
         (("liveWork", "objectives"), "Live Work objective measurements are missing"),
         (("finops", "providerMetadata"), "FinOps provider metadata measurements are missing"),
-        (("finops", "ledgerPresent"), "FinOps model ledger is missing"),
         (("finops", "healthPresent"), "FinOps health rail is missing"),
         (("finops", "providerGeometry"), "FinOps provider identities are incomplete"),
         (("todayJobs", "pendingSummaryReason"), "Today's Jobs pending summary does not explain future versus failed"),
@@ -1191,5 +1188,39 @@ def test_kiosk_legibility_fails_closed_when_required_measurements_are_missing(
     assert any(expected in failure for failure in failures)
 
 
+def test_kiosk_legibility_rejects_retired_model_ledger() -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    measurements["finops"]["ledgerPresent"] = True
+
+    failures = runtime_layout.validate_kiosk_legibility(measurements)
+
+    assert any("model ledger must be absent" in failure for failure in failures)
+
+
+def test_kiosk_legibility_requires_activity_heat_for_every_provider() -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    measurements["finops"]["providerGeometry"][2].pop("activityScore")
+
+    failures = runtime_layout.validate_kiosk_legibility(measurements)
+
+    assert any("ollama activity heat score is invalid" in failure for failure in failures)
+
+
 def test_zero_future_summary_keeps_the_future_work_explanation() -> None:
     assert "No future work remains today; no future occurrences are open or overdue." in REACT_MAIN_PATH.read_text()
+
+
+def test_finops_overview_is_provider_first_and_wallet_refresh_is_fail_closed() -> None:
+    source = REACT_MAIN_PATH.read_text()
+
+    assert "Model ledger" not in source
+    assert 'data-activity-score={activityScore}' in source
+    assert 'data-wallet-freshness={freshness.status}' in source
+    assert "if (!response.ok) throw new Error" in source
+
+
+def test_today_jobs_sync_badge_exposes_projection_freshness() -> None:
+    source = REACT_MAIN_PATH.read_text()
+
+    assert 'projectionAgeMs <= 3 * 60_000' in source
+    assert 'projectionIsFresh ? "Live auto-sync" : "Sync delayed"' in source

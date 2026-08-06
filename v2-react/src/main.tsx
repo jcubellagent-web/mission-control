@@ -1430,6 +1430,7 @@ function App() {
   const [state, setState] = useState<MissionControlState>(EMPTY_STATE);
   const [loading, setLoading] = useState(true);
   const [dataError, setDataError] = useState<string | null>(null);
+  const [walletRefreshFailed, setWalletRefreshFailed] = useState(false);
   const [liveMode, setLiveMode] = useState<"connected" | "polling">("polling");
   const [quietMode, setQuietMode] = useState(true);
   const [selectedAgent, setSelectedAgent] = useState<AgentId | null>(null);
@@ -1515,12 +1516,15 @@ function App() {
   const refreshAgenticCrypto = useCallback(async (showLoading = true) => {
     if (showLoading) setLoading(true);
     try {
-      await fetch("/actions/agentic-crypto-refresh?mode=lightweight", { method: "POST", cache: "no-store" });
+      const response = await fetch("/actions/agentic-crypto-refresh?mode=lightweight", { method: "POST", cache: "no-store" });
+      if (!response.ok) throw new Error(`Wallet refresh returned ${response.status}`);
       invalidateMissionControlSidecars();
+      await refresh(false);
+      setWalletRefreshFailed(false);
     } catch (error) {
       console.warn(error);
+      setWalletRefreshFailed(true);
     } finally {
-      await refresh(false);
       if (showLoading) setLoading(false);
     }
   }, [refresh]);
@@ -1730,6 +1734,7 @@ function App() {
           statuses={state.statuses}
           activeModelRoutes={state.activeModelRoutes || []}
           loading={loading}
+          walletRefreshFailed={walletRefreshFailed}
           onRefresh={() => refreshAgenticCrypto(true)}
         />
       </section>
@@ -2259,7 +2264,8 @@ function signalRows(signals: SignalItem[], newsletter: boolean) {
     .slice(0, 5);
 }
 
-function cryptoFreshness(wallet?: AgenticCryptoWallet) {
+function cryptoFreshness(wallet?: AgenticCryptoWallet, refreshFailed = false) {
+  if (refreshFailed) return { label: "refresh failed", status: "error", tone: "risk" };
   if (!wallet?.updatedAt) return { label: "not loaded", status: "stale", tone: "watch" };
   const age = Date.now() - timeValue(wallet.updatedAt);
   const reportedStatus = String(wallet.status || wallet.summary?.freshnessStatus || "").toLowerCase();
@@ -2269,6 +2275,13 @@ function cryptoFreshness(wallet?: AgenticCryptoWallet) {
   }
   if (age > 15 * 60 * 1000) return { label: "stale", status: "stale", tone: "watch" };
   return { label: "fresh", status: "fresh", tone: "clear" };
+}
+
+function walletValueLabel(wallet: AgenticCryptoWallet | undefined, freshness: ReturnType<typeof cryptoFreshness>) {
+  const raw = wallet?.summary?.liquidEstimatedUsd;
+  const available = typeof raw === "number" && Number.isFinite(raw);
+  if (!available || freshness.status === "error") return "Unavailable";
+  return fmtCurrencyExact(raw);
 }
 
 function cryptoStatusClass(value?: string | null) {
@@ -2645,6 +2658,21 @@ function providerUtilizationPct(provider: any) {
   return 0;
 }
 
+function providerActivityVolume(provider: any) {
+  const today = Math.max(0, Number(provider?.callsToday || 0));
+  const weekly = Math.max(0, Number(provider?.callsWeekly || 0));
+  const sessions = Math.max(0, Number(provider?.sessions || 0));
+  return today * 6 + weekly + sessions * 0.35;
+}
+
+function providerActivityScore(provider: any, active: boolean, maximumVolume: number) {
+  const volume = providerActivityVolume(provider);
+  const normalized = maximumVolume > 0
+    ? Math.round((Math.log1p(volume) / Math.log1p(maximumVolume)) * 78)
+    : 0;
+  return Math.max(active ? 92 : volume > 0 ? 14 : 5, Math.min(100, normalized + (active ? 18 : 0)));
+}
+
 function providerLimitRows(provider: any) {
   const windows = Array.isArray(provider?.usageWindows) ? provider.usageWindows : [];
   return windows
@@ -2921,6 +2949,7 @@ function FinOpsDashboard({
   statuses,
   activeModelRoutes,
   loading,
+  walletRefreshFailed,
   onRefresh,
 }: {
   wallet?: AgenticCryptoWallet;
@@ -2929,10 +2958,13 @@ function FinOpsDashboard({
   statuses: AgentStatus[];
   activeModelRoutes: ActiveModelRoute[];
   loading: boolean;
+  walletRefreshFailed: boolean;
   onRefresh: () => void;
 }) {
-  const freshness = cryptoFreshness(wallet);
+  const freshness = cryptoFreshness(wallet, walletRefreshFailed);
   const summary = wallet?.summary || {};
+  const walletDisplayValue = walletValueLabel(wallet, freshness);
+  const walletValueIsCurrent = freshness.status === "fresh";
   const goal = walletTradingGoal(wallet);
   const providers = providerRows(modelUsage, modelRouter);
   const activeKeys = activeProviderKeys(statuses, activeModelRoutes);
@@ -2940,7 +2972,6 @@ function FinOpsDashboard({
   const usagePressure = usagePressureLabel(providers);
   const allModelRows = (modelUsage?.breakdown?.length ? modelUsage.breakdown : modelUsage?.topModels || [])
     .filter((model: any) => model && String(model.name || "").trim());
-  const modelRows = allModelRows.slice(0, 9);
   const meteredDaily = numericOrZero((modelUsage as any)?.metered?.daily ?? modelUsage?.daily);
   const usageEquivalentWeekly = numericOrZero((modelUsage as any)?.usageEquivalent?.weekly ?? modelUsage?.weeklyRunRate?.subscriptionUsageEquivalentWeekly);
   const projectedEquivalentMonthly = numericOrZero(modelUsage?.weeklyRunRate?.subscriptionUsageEquivalentProjectedMonthly ?? modelUsage?.weeklyRunRate?.projectedMonthly);
@@ -2959,15 +2990,7 @@ function FinOpsDashboard({
   const providerRisks = providers.filter((provider) => providerTone(provider) === "risk").length;
   const riskCount = routeAlerts.length + walletErrors.length + providerRisks;
   const budgetWatchCount = providers.filter((provider) => providerTone(provider) !== "clear").length;
-  const modelIdentity = (value: unknown) => String(value || "")
-    .trim()
-    .toLowerCase()
-    .replace(/^(openai|google|xai|local|ollama)\//, "");
-  const activeModelIds = new Set(
-    activeModelRoutes
-      .filter((route) => route.routeVerified && (!route.leaseUntil || timeValue(route.leaseUntil) > Date.now()))
-      .map((route) => modelIdentity(route.modelId)),
-  );
+  const maximumProviderActivity = Math.max(...providers.map(providerActivityVolume), 1);
   const subscriptionMix = providers.map(providerSubscriptionMonthly);
   const maxSubscription = Math.max(...subscriptionMix, 1);
   const walletActions = [
@@ -3025,9 +3048,14 @@ function FinOpsDashboard({
       <div className="finops-command-grid">
         <section className="finops-wallet-rail" data-finops-region="wallet">
           <div className="finops-wallet-summary">
-            <div className="finops-wallet-total" aria-label="Liquid crypto wallet value">
+            <div
+              className={`finops-wallet-total is-${walletValueIsCurrent ? "current" : "stale"}`}
+              aria-label={`${walletValueIsCurrent ? "Current" : "Last known"} liquid crypto wallet value, ${freshness.label}`}
+              data-wallet-freshness={freshness.status}
+            >
               <span>Liquid wallet</span>
-              <strong>{fmtCurrencyExact(summary.liquidEstimatedUsd)}</strong>
+              <strong>{walletDisplayValue}</strong>
+              <small>{walletValueIsCurrent ? `Verified ${fmtTime(wallet?.updatedAt)}` : `${missionText(freshness.label)} · ${fmtTime(wallet?.updatedAt)}`}</small>
             </div>
             <div className="finops-wallet-target">
               <div className="wallet-target-head">
@@ -3101,6 +3129,7 @@ function FinOpsDashboard({
                 const route = routeForProvider(provider) || CANONICAL_ROUTES.codex;
                 const active = Boolean(key && activeKeys.has(key));
                 const pct = providerUtilizationPct(provider);
+                const activityScore = providerActivityScore(provider, active, maximumProviderActivity);
                 const tone = providerTone(provider);
                 const topModel = providerTopModels(provider)[0];
                 const currentModel = providerModelLabel({ name: topModel?.name || provider.lastModelUsed || "Route ready" });
@@ -3121,9 +3150,16 @@ function FinOpsDashboard({
                     key={provider.id || key}
                     data-provider={key || undefined}
                     data-active={active ? "true" : "false"}
+                    data-activity-score={activityScore}
                     data-finops-region="provider"
                     className={`finops-provider-simple is-${tone} ${active ? "is-active" : "is-idle"}`}
-                    style={routeCssProperties(route) as React.CSSProperties}
+                    style={{
+                      ...routeCssProperties(route),
+                      "--activity-score": activityScore,
+                      "--activity-alpha": (0.045 + activityScore * 0.0022).toFixed(3),
+                      "--activity-strength": `${Math.round(8 + activityScore * 0.45)}%`,
+                      "--activity-glow": `${Math.round(4 + activityScore * 0.12)}px`,
+                    } as React.CSSProperties}
                   >
                     <div className="finops-provider-identity">
                       <span className="finops-provider-glyph" aria-hidden="true"><ProviderIcon size={39} strokeWidth={1.55} /></span>
@@ -3138,9 +3174,9 @@ function FinOpsDashboard({
                     </div>
                     <p className="finops-provider-purpose"><span>Purpose</span><em title={purpose}>{purpose}</em></p>
                     <footer className="finops-provider-state">
-                      <strong>{stateLabel}</strong>
-                      <i className="finops-segment-meter" aria-label={`${pct}% utilized`}>
-                        {Array.from({ length: 10 }, (_, index) => <b key={index} className={index < Math.ceil(pct / 10) ? "is-filled" : ""} />)}
+                      <strong>{stateLabel}<small>{activityScore}% activity</small></strong>
+                      <i className="finops-segment-meter" aria-label={`${activityScore}% recent activity intensity`}>
+                        {Array.from({ length: 10 }, (_, index) => <b key={index} className={index < Math.ceil(activityScore / 10) ? "is-filled" : ""} />)}
                       </i>
                     </footer>
                   </article>
@@ -3151,40 +3187,6 @@ function FinOpsDashboard({
                   <p>Route data will appear after the next model-usage refresh.</p>
                 </article>
               )}
-            </div>
-            <div className="finops-ledger-table" data-finops-region="ledger" aria-label="Model usage ledger">
-              <header>
-                <div className="finops-ledger-title">
-                  <strong>Model ledger</strong>
-                  <em>{modelRows.length}/{allModelRows.length} tracked</em>
-                </div>
-                <div className="finops-ledger-columns" aria-hidden="true">
-                  <span>Model</span><span>Route</span><span>Tokens</span><span>Cost</span><span>Window</span>
-                </div>
-              </header>
-              <div className="finops-ledger-rows">
-                {modelRows.length ? modelRows.map((model: any) => {
-                  const modelRoute = routeForProvider({ id: model.source, label: model.name, model: model.name });
-                  const modelActive = activeModelIds.has(modelIdentity(model.name));
-                  return (
-                    <article
-                      key={`${model.source || "source"}-${model.name}`}
-                      data-model={providerModelLabel(model)}
-                      data-active={modelActive ? "true" : "false"}
-                      className={`finops-ledger-row${modelActive ? " is-active-route" : ""}`}
-                      style={modelRoute ? routeCssProperties(modelRoute) as React.CSSProperties : undefined}
-                    >
-                      <strong>{providerModelLabel(model)}</strong>
-                      <span>{modelRoute?.label || missionText(String(model.source || "tracked"))}</span>
-                      <span>{compactInt(model.totalTokens) || "0"}</span>
-                      <span>{fmtCurrencyExact(modelUsageCost(model))}</span>
-                      <span>{Number(model.sessions) > 0 ? `${model.sessions} sess` : Number(model.callsWeekly) > 0 ? `${model.callsWeekly} calls` : modelUsageWindowLabel(model)}</span>
-                    </article>
-                  );
-                }) : (
-                  <p className="finops-ledger-empty">No model ledger rows are loaded yet.</p>
-                )}
-              </div>
             </div>
           </div>
         </section>
@@ -7940,6 +7942,9 @@ function JobsRail({
   const rows = [...sourceRows].sort((a, b) => scheduledSortValue(a) - scheduledSortValue(b));
   const nowMs = clockNow.getTime();
   const projectionIsToday = !todayJobsMeta?.date || todayJobsMeta.date === etDateKey(clockNow);
+  const projectionGeneratedAt = timeValue(todayJobsMeta?.generatedAt);
+  const projectionAgeMs = projectionGeneratedAt ? nowMs - projectionGeneratedAt : Number.POSITIVE_INFINITY;
+  const projectionIsFresh = projectionIsToday && projectionAgeMs >= -60_000 && projectionAgeMs <= 3 * 60_000;
   const counts = rows.reduce<Record<TodayJobOutcome, number>>((totals, job) => {
     totals[job.outcome] += 1;
     return totals;
@@ -8084,7 +8089,7 @@ function JobsRail({
   const minuteKey = Math.floor(nowMs / 60_000);
   const followKey = `${todayJobsMeta?.date || "fallback"}|${todayJobsMeta?.nextOccurrenceId || nowIndex}|${rows.length}|${nowIndex}`;
   useEffect(() => {
-    if (!projectionIsToday) return undefined;
+    if (!projectionIsFresh) return undefined;
     const frame = window.requestAnimationFrame(() => {
       const scroller = scrollRef.current;
       if (!scroller) return;
@@ -8095,7 +8100,7 @@ function JobsRail({
       if (centerNow(firstCenter ? "auto" : "smooth")) hasCenteredRef.current = true;
     });
     return () => window.cancelAnimationFrame(frame);
-  }, [centerNow, followKey, minuteKey, projectionIsToday]);
+  }, [centerNow, followKey, minuteKey, projectionIsFresh]);
 
   return (
     <aside id="today-jobs" className={`jobs-rail jobs-occurrence-rail${sectionCueClass("jobs", liveCues)}`}>
@@ -8105,10 +8110,15 @@ function JobsRail({
           <p>Daily execution ledger</p>
           <h2>Today's Jobs</h2>
         </div>
-        <div className="today-jobs-sync" title={`Projection refreshed ${fmtTime(todayJobsMeta?.generatedAt)}`}>
+        <div
+          className={`today-jobs-sync${projectionIsFresh ? "" : " is-stale"}`}
+          title={`Projection refreshed ${fmtTime(todayJobsMeta?.generatedAt)}`}
+          role="status"
+          aria-live="polite"
+        >
           <span aria-hidden="true" />
-          <strong>Live auto-sync</strong>
-          <em>{todayJobsMeta?.date || "ET"}</em>
+          <strong>{projectionIsFresh ? "Live auto-sync" : "Sync delayed"}</strong>
+          <em>{projectionIsFresh ? todayJobsMeta?.date || "ET" : `Last ${fmtTime(todayJobsMeta?.generatedAt)}`}</em>
         </div>
       </header>
       <div className="today-jobs-summary" aria-label={`${rows.length} job occurrences today`}>
@@ -8168,14 +8178,14 @@ function JobsRail({
             if (["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "].includes(event.key)) pauseAutoFollow();
           }}
         >
-          {!projectionIsToday ? <TodayJobsNowMarker ref={nowDividerRef} label={nowLabel} stale /> : null}
+          {!projectionIsFresh ? <TodayJobsNowMarker ref={nowDividerRef} label={nowLabel} stale /> : null}
           {rows.length ? rows.map((job, index) => {
             const reason = todayJobReason(job, nowMs);
             const interactive = job.outcome !== "complete";
             const tooltipKey = `row-${job.occurrenceId}`;
             return (
               <React.Fragment key={job.occurrenceId}>
-                {projectionIsToday && index === nowIndex ? <TodayJobsNowMarker ref={nowDividerRef} label={nowLabel} /> : null}
+                {projectionIsFresh && index === nowIndex ? <TodayJobsNowMarker ref={nowDividerRef} label={nowLabel} /> : null}
                 <article
                   className={`today-job-row is-${job.outcome}${interactive ? " has-reason" : ""}${changedRowClass(Boolean(liveCues.rows[cueRowKey("today-job", job.occurrenceId)]))}`}
                   role="row"
@@ -8213,7 +8223,7 @@ function JobsRail({
           }) : (
             <div className="today-jobs-empty">No recurring job occurrences are published for today yet.</div>
           )}
-          {projectionIsToday && rows.length && nowIndex === rows.length ? <TodayJobsNowMarker ref={nowDividerRef} label={nowLabel} /> : null}
+          {projectionIsFresh && rows.length && nowIndex === rows.length ? <TodayJobsNowMarker ref={nowDividerRef} label={nowLabel} /> : null}
         </div>
       </div>
       <TodayJobsTooltip tooltip={tooltip} />
