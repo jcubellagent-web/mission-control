@@ -74,6 +74,36 @@ The primary Telegram group is `J.A.I.N Control Center` (`-1003589561528`).
 
 Always show the model route plainly: Gemini when sufficient and safe, Codex/OpenCLAW for execution or private/device work, Grok/xAI for X-native/current-events work.
 
+## JAIMES Ops Alert Gate
+
+Topic `17` is a human-escalation surface, not a raw cron-output or first-failure
+sink. Routine health, retry, recovery, and reconciliation output stays local and
+dashboard-safe. A JAIMES-owned job may send an alert to Topic `17` only when it
+needs a concrete action from Josh that the ecosystem cannot safely complete.
+
+Before delivery, the owning job must:
+
+1. classify the failure as transient, safely repairable, approval-bound,
+   authentication-bound, or externally blocked;
+2. run the bounded safe recovery defined for that subsystem, including retry,
+   service restart, state reconciliation, or authenticated readback when
+   applicable;
+3. verify the post-recovery state from the canonical health probe or exact
+   destination receipt; and
+4. keep the result silent when recovery succeeds.
+
+Do not send first-observation SSH disconnects, monitor execution errors, stale
+sidecars, or kiosk/render failures to Telegram. Confirm them after recovery and
+at least one fresh probe. Jobs that only report routine maintenance or
+repairable drift deliver locally and publish Control Tower evidence instead of
+posting to Topic `17`.
+
+An allowed Topic `17` escalation must say what autonomous recovery was tried,
+why it stopped, and the exact action or approval Josh must provide. Do not ask
+Josh to inspect logs, retry a command, or repair a service that the owning agent
+can operate itself. Authentication, MFA, irreversible external actions, and
+broader permission changes still follow their dedicated approval policies.
+
 ## Operational Health Authority
 
 - Control Tower and its checked-in health probe are the operational source of truth. For JAIMES Telegram health, use `scripts/jaimes_telegram_health.py --dry-run` and report its current `gatewayState`, `telegramState`, `fastAckState`, `activeCardCount`, `terminalIssueCount`, and `strandedLifecycleCount` fields before interpreting lower-level history.
