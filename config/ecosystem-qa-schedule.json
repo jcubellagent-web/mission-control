@@ -30,6 +30,16 @@
       "severity": "p0"
     },
     {
+      "id": "shared-source-resume",
+      "owner": "josh2",
+      "team": "Shared source continuation",
+      "schedule": {"intervalMinutes": 2, "offset": 1},
+      "command": ["python3", "scripts/shared_source_resume.py", "tick"],
+      "timeoutSeconds": 45,
+      "severity": "p1",
+      "alertAfterFailures": 2
+    },
+    {
       "id": "runtime-service-probe",
       "owner": "josh2",
       "team": "Runtime SRE",

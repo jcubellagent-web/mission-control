@@ -15,11 +15,20 @@ Use this before any shared ecosystem change. Runtime data refreshes and ordinary
 3. Stop on remote divergence or authored source changes. Generated
    `docs/handoffs/` records are operational audit churn and do not own unrelated
    source; preserve them for the audit reconciler.
-4. Create or confirm the task with `--work-scope shared-source`.
-5. For disjoint work, create a linked Git worktree on a non-`main` task branch
+4. When an otherwise-authorized change is blocked only by an active shared
+   source lease, register a dashboard-safe continuation instead of asking Josh
+   to re-submit it later:
+   `python3 scripts/shared_source_resume.py defer --owner <owner> --title "<safe title>" --objective "<safe objective>" --approval <state>`.
+   The Josh 2.0 canonical scheduler checks every two minutes and creates one
+   fresh queued `shared-source` task only after both global/scoped lease checks
+   and a new canonical preflight pass. It never replays raw prompts, bypasses
+   approval, or edits source automatically. Do not create a duplicate manual
+   task while the continuation is deferred.
+5. Create or confirm the task with `--work-scope shared-source`.
+6. For disjoint work, create a linked Git worktree on a non-`main` task branch
    from current `origin/main`, then acquire path claims with the exact identity:
    `python3 scripts/scoped_change_guard.py begin --agent <agent> --objective "<specific change>" --task-id <task-id> --work-id <work-id> --run-id <run-id> --repo <worktree> --scope <path> [--scope <path>]`
-6. Use `control_tower_change_guard.py begin` only for direct canonical edits or
+7. Use `control_tower_change_guard.py begin` only for direct canonical edits or
    the short canonical integration/push critical section. An active global
    integration lease blocks new scoped leases; scoped parent/child overlaps
    block one another, while disjoint claims may proceed concurrently.
