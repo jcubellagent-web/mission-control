@@ -20,9 +20,10 @@ final answer.
    below 20% or projected to run out early. Zero means `exhausted` until Josh
    applies a reset. Once no reset credits remain, weekly remaining at or below
    20% or a projected early exhaustion means `conserve`.
-   Read Antigravity and Ollama allowance from the same CodexBar projection when
-   available. A quota-cookie failure is not an inference failure: require a
-   separate verified runtime health result and label exact allowance unknown.
+   Read Antigravity allowance from CodexBar when available. Ollama exposes
+   direct per-request metrics but no supported account-quota endpoint: require
+   verified runtime health, record direct request metrics, and label account
+   quota unavailable rather than projecting it from a browser session.
 3. Verify the selected provider and exact model. Never infer success from a
    configured catalog entry and never describe a requested route as an executed
    route.

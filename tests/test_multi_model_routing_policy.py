@@ -478,7 +478,7 @@ def test_ollama_quota_is_a_fresh_soft_signal_and_exhaustion_falls_back(tmp_path,
     assert [row["provider"] for row in selected["fallbackRoutes"]] == ["codex"]
 
 
-def test_stale_local_ollama_quota_uses_canonical_allowlisted_projection(tmp_path, monkeypatch) -> None:
+def test_stale_local_ollama_quota_remains_unknown_without_a_provider_endpoint(tmp_path, monkeypatch) -> None:
     route = load_module("agent_route_glm_canonical_quota", ROOT / "scripts" / "agent_route.py")
     usage = tmp_path / "modelUsage.json"
     usage.write_text(json.dumps({"codexbarLimits": {"ollama": {
@@ -488,33 +488,16 @@ def test_stale_local_ollama_quota_uses_canonical_allowlisted_projection(tmp_path
         "usageWindows": [{"label": "Weekly", "remainingPercent": 98.8}],
     }}}))
     monkeypatch.setattr(route, "MODEL_USAGE_PATH", usage)
-    monkeypatch.setattr(route, "canonical_ollama_allowance_limits", lambda: {
-        "available": True,
-        "status": "ready",
-        "quotaTelemetryStatus": "fresh",
-        "codexbarUpdatedAt": "2026-07-24T23:05:00Z",
-        "usageWindows": [
-            {"label": "Session", "remainingPercent": 99.5},
-            {"label": "Weekly", "remainingPercent": 98.7},
-        ],
-    })
-
     healthy, reason = route.ollama_live_allowance_status(
         route.dt.datetime(2026, 7, 24, 23, 6, tzinfo=route.dt.timezone.utc)
     )
-    assert healthy is True
-    assert "Control Tower" in reason
-    assert "98.7% remaining" in reason
+    assert healthy is None
+    assert "stale" in reason
 
     payload = json.loads(usage.read_text())
     payload["codexbarLimits"]["ollama"].update({"available": False, "status": "error"})
     payload["codexbarLimits"]["ollama"]["codexbarUpdatedAt"] = "2026-07-24T23:05:00Z"
     usage.write_text(json.dumps(payload))
-    monkeypatch.setattr(
-        route,
-        "canonical_ollama_allowance_limits",
-        lambda: (_ for _ in ()).throw(AssertionError("explicit local failure must not use remote quota")),
-    )
     healthy, reason = route.ollama_live_allowance_status(
         route.dt.datetime(2026, 7, 24, 23, 6, tzinfo=route.dt.timezone.utc)
     )
@@ -522,37 +505,9 @@ def test_stale_local_ollama_quota_uses_canonical_allowlisted_projection(tmp_path
     assert "error" in reason
 
 
-def test_canonical_ollama_lookup_uses_control_tower_account(monkeypatch) -> None:
+def test_ollama_account_quota_is_not_inferred_from_a_control_tower_projection(monkeypatch) -> None:
     route = load_module("agent_route_glm_canonical_host", ROOT / "scripts" / "agent_route.py")
-    monkeypatch.setattr(route.Path, "home", classmethod(lambda cls: Path("/Users/jc_agent")))
-    commands = []
-
-    class Result:
-        returncode = 0
-        stderr = ""
-        stdout = json.dumps({
-            "schemaVersion": 1,
-            "provider": "ollama",
-            "observedAt": "2026-07-24T23:05:00Z",
-            "exportedAt": "2026-07-24T23:05:10Z",
-            "windows": [{"label": "Weekly", "remainingPercent": 98.7}],
-            "unexpectedIdentity": "drop-me",
-        })
-
-    def fake_run(command, **_kwargs):
-        commands.append(command)
-        return Result()
-
-    monkeypatch.setattr(route.subprocess, "run", fake_run)
-    limits = route.canonical_ollama_allowance_limits()
-
-    assert commands[0][commands[0].index("ConnectTimeout=5") + 1] == "josh2.0@josh2"
-    assert commands[0][-2:] == [
-        "cat",
-        "/Users/josh2.0/.openclaw/workspace/mission-control/data/codexbar-quota-ollama.json",
-    ]
-    assert limits is not None
-    assert "unexpectedIdentity" not in limits
+    assert not hasattr(route, "canonical_ollama_allowance_limits")
 
 
 def test_surplus_ollama_quota_expands_glm_first_stop_weighting(monkeypatch) -> None:
