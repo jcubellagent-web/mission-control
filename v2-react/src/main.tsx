@@ -2278,10 +2278,13 @@ function cryptoFreshness(wallet?: AgenticCryptoWallet, refreshFailed = false) {
   return { label: "fresh", status: "fresh", tone: "clear" };
 }
 
-function walletValueLabel(wallet: AgenticCryptoWallet | undefined, freshness: ReturnType<typeof cryptoFreshness>) {
+function walletValueLabel(wallet: AgenticCryptoWallet | undefined) {
   const raw = wallet?.summary?.liquidEstimatedUsd;
   const available = typeof raw === "number" && Number.isFinite(raw);
-  if (!available || freshness.status === "error") return "Unavailable";
+  // A failed refresh changes freshness, not the last verified observation. Keep
+  // the finite value visible and let the surrounding status/aria copy identify
+  // it as last known rather than replacing useful data with "Unavailable".
+  if (!available) return "Unavailable";
   return fmtCurrencyExact(raw);
 }
 
@@ -3012,7 +3015,7 @@ function FinOpsDashboard({
 }) {
   const freshness = cryptoFreshness(wallet, walletRefreshFailed);
   const summary = wallet?.summary || {};
-  const walletDisplayValue = walletValueLabel(wallet, freshness);
+  const walletDisplayValue = walletValueLabel(wallet);
   const walletValueIsCurrent = freshness.status === "fresh";
   const goal = walletTradingGoal(wallet);
   const providers = providerRows(modelUsage, modelRouter);

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import math
 import sys
 from pathlib import Path
@@ -196,3 +197,44 @@ def test_total_estimated_usd_must_reconcile() -> None:
 
     with pytest.raises(RuntimeError, match="liquid-plus-NFT"):
         wallet.validate_wallet_sidecar(sidecar)
+
+
+def test_refresh_failure_preserves_last_verified_balance(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    out = tmp_path / "agentic-crypto-wallet.json"
+    dash = tmp_path / "dashboard-data.json"
+    verified_at = "2026-08-05T02:16:31Z"
+    out.write_text(json.dumps({
+        "updatedAt": verified_at,
+        "status": "fresh",
+        "summary": {
+            "freshnessStatus": "fresh",
+            "lastRefreshed": verified_at,
+            "liquidEstimatedUsd": 379.93,
+        },
+        "errors": [],
+    }))
+    dash.write_text(json.dumps({"agenticCryptoWallet": {}}))
+    monkeypatch.setattr(wallet, "OUT", out)
+    monkeypatch.setattr(wallet, "DASH", dash)
+    monkeypatch.setattr(wallet, "now", lambda: "2026-08-06T03:00:00Z")
+
+    assert wallet.publish_refresh_failure() is True
+
+    published = json.loads(out.read_text())
+    assert published["updatedAt"] == verified_at
+    assert published["summary"]["lastRefreshed"] == verified_at
+    assert published["summary"]["liquidEstimatedUsd"] == 379.93
+    assert published["summary"]["freshnessStatus"] == "attention"
+    assert published["status"] == "attention"
+    assert published["lastRefreshAttemptStatus"] == "failed"
+    assert "0x" not in published["errors"][0]
+    assert json.loads(dash.read_text())["agenticCryptoWallet"] == published
+
+
+def test_refresh_failure_without_verified_balance_does_not_publish(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    out = tmp_path / "agentic-crypto-wallet.json"
+    out.write_text(json.dumps({"summary": {}}))
+    monkeypatch.setattr(wallet, "OUT", out)
+
+    assert wallet.publish_refresh_failure() is False
+    assert json.loads(out.read_text()) == {"summary": {}}

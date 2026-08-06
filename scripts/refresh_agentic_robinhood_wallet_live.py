@@ -65,6 +65,38 @@ def atomic(path: Path, payload: dict[str, Any]) -> None:
             pass
 
 
+def publish_refresh_failure() -> bool:
+    """Preserve the last verified valuation while exposing a safe failure state."""
+    if not OUT.exists():
+        return False
+    try:
+        sidecar = json.loads(OUT.read_text())
+    except (OSError, json.JSONDecodeError):
+        return False
+    summary = sidecar.get("summary")
+    if not isinstance(summary, dict) or not isinstance(summary.get("liquidEstimatedUsd"), (int, float)):
+        return False
+
+    attempted_at = now()
+    message = "Robinhood Chain indexer unavailable; showing last verified balance."
+    sidecar["status"] = "attention"
+    sidecar["lastRefreshAttemptAt"] = attempted_at
+    sidecar["lastRefreshAttemptStatus"] = "failed"
+    summary["freshnessStatus"] = "attention"
+    errors = [str(item) for item in sidecar.get("errors", []) if str(item).strip() and str(item) != message]
+    sidecar["errors"] = (errors + [message])[-4:]
+    atomic(OUT, sidecar)
+
+    if DASH.exists():
+        try:
+            dashboard = json.loads(DASH.read_text())
+        except (OSError, json.JSONDecodeError):
+            return True
+        dashboard["agenticCryptoWallet"] = sidecar
+        atomic(DASH, dashboard)
+    return True
+
+
 def get_json(url: str, attempts: int = 3) -> Any:
     last: Exception | None = None
     for attempt in range(attempts):
@@ -611,7 +643,11 @@ def main() -> int:
         print(json.dumps({"ok": True, "status": "already-running"}, sort_keys=True))
         return 0
     try:
-        return refresh_wallet()
+        try:
+            return refresh_wallet()
+        except Exception:
+            publish_refresh_failure()
+            raise
     finally:
         fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
         lock.close()
