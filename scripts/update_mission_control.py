@@ -311,13 +311,10 @@ MEMORY_ACTIVITY_PRIVACY_CONTRACT = {
     "reasonsIncluded": False,
     "countsOnly": False,
     "sanitizedTopicLabelsIncluded": True,
-    "topicTaxonomy": "bounded-dashboard-safe-categories",
+    "topicTaxonomy": "bounded-dashboard-safe-event-summaries",
 }
 MEMORY_ACTIVITY_TOPIC_FIELDS = ("retrieval", "selected", "used", "feedback", "proposed", "promoted")
-MEMORY_ACTIVITY_TOPIC_LABELS = frozenset({
-    "Control Tower visibility", "Shared memory operations", "Agent routing & workers",
-    "Task coordination", "Scheduled work", "Agent runtime health", "Operational memory",
-})
+MEMORY_ACTIVITY_SUMMARY = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 &+().,:'/-]{0,71}$")
 MEMORY_ACTIVITY_AGENT_FIELDS = frozenset({
     "agent", "retrievals", "hits", "misses", "selected", "used", "crossAgentUsed",
     "lastRetrievalAt", "lastSelectedAt", "lastUsedAt", "lastCrossAgentUsedAt",
@@ -1050,7 +1047,8 @@ def sanitize_memory_operations(value: Any, now_iso: str) -> Dict[str, Any]:
             label = row.get("label")
             observed_at = _memory_time(row.get("observedAt"))
             if (
-                label not in MEMORY_ACTIVITY_TOPIC_LABELS
+                not isinstance(label, str)
+                or not MEMORY_ACTIVITY_SUMMARY.fullmatch(label)
                 or label in seen_labels
                 or observed_at is None
                 or not window_start <= observed_at <= generated_at

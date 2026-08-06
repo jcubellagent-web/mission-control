@@ -522,7 +522,7 @@ class MemoryRegistryTest(unittest.TestCase):
         self.assertTrue(activity["source"]["verified"])
         self.assertFalse(activity["privacy"]["countsOnly"])
         self.assertTrue(activity["privacy"]["sanitizedTopicLabelsIncluded"])
-        self.assertEqual(activity["privacy"]["topicTaxonomy"], "bounded-dashboard-safe-categories")
+        self.assertEqual(activity["privacy"]["topicTaxonomy"], "bounded-dashboard-safe-event-summaries")
         self.assertFalse(activity["privacy"]["queryIncluded"])
         self.assertFalse(activity["privacy"]["contentIncluded"])
         self.assertFalse(activity["privacy"]["rawIdentifiersIncluded"])
@@ -533,7 +533,7 @@ class MemoryRegistryTest(unittest.TestCase):
             next(row for row in activity["agents"] if row["agent"] == "joshex")["retrievals"],
             1,
         )
-        self.assertEqual(activity["topicSummaries"]["retrieval"][0]["label"], "Operational memory")
+        self.assertEqual(activity["topicSummaries"]["retrieval"][0]["label"], "Privacy fixture live activity")
 
         rendered = json.dumps(status)
         self.assertNotIn(private_query, rendered)
@@ -541,7 +541,18 @@ class MemoryRegistryTest(unittest.TestCase):
         self.assertNotIn(retrieval["retrievalId"], rendered)
         self.assertNotIn(memory_id, rendered)
         self.assertNotIn("events", activity)
-        self.assertNotIn("Privacy fixture live activity", rendered)
+        self.assertNotIn("raw-query-marker", rendered)
+
+    def test_activity_summary_removes_raw_identifiers_and_links(self) -> None:
+        memory_id = self.create_memory(
+            "Selected Brain Atlas layout task-1234567890abcdef https://private.example/path",
+            privacy="dashboard-safe",
+        )
+        self.cli("retrieve", "--agent", "joshex", "--query", "Brain Atlas layout", "--limit", "3")
+        status = json.loads(Path(self.env["MEMORY_OPERATIONS_PATH"]).read_text(encoding="utf-8"))
+        summary = status["activity"]["topicSummaries"]["retrieval"][0]["label"]
+        self.assertEqual(summary, "Privacy fixture Selected Brain Atlas layout")
+        self.assertNotIn(memory_id, json.dumps(status["activity"]))
 
     def test_activity_topics_exclude_owner_private_subjects(self) -> None:
         self.create_memory("private-topic-marker", privacy="agent-private")

@@ -369,7 +369,7 @@ export type MemoryActivity = {
     reasonsIncluded: false;
     countsOnly: false;
     sanitizedTopicLabelsIncluded: true;
-    topicTaxonomy: "bounded-dashboard-safe-categories";
+    topicTaxonomy: "bounded-dashboard-safe-event-summaries";
   };
   counts: {
     retrievals: number;

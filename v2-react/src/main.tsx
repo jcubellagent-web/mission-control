@@ -4019,10 +4019,7 @@ const MEMORY_PRIVACY_KEYS = [
   "reasonsIncluded", "countsOnly", "sanitizedTopicLabelsIncluded", "topicTaxonomy",
 ];
 const MEMORY_TOPIC_KEYS = ["retrieval", "selected", "used", "feedback", "proposed", "promoted"] as const;
-const MEMORY_TOPIC_LABELS = new Set([
-  "Control Tower visibility", "Shared memory operations", "Agent routing & workers",
-  "Task coordination", "Scheduled work", "Agent runtime health", "Operational memory",
-]);
+const MEMORY_EVENT_SUMMARY = /^[A-Za-z0-9][A-Za-z0-9 &+().,:'/-]{0,71}$/;
 const MEMORY_AGENT_KEYS = [
   "agent", "retrievals", "hits", "misses", "selected", "used", "crossAgentUsed",
   "lastRetrievalAt", "lastSelectedAt", "lastUsedAt", "lastCrossAgentUsedAt",
@@ -4143,7 +4140,7 @@ function sanitizedMemoryActivity(value: unknown): MemoryActivity | undefined {
     || !privacy
     || privacy.countsOnly !== false
     || privacy.sanitizedTopicLabelsIncluded !== true
-    || privacy.topicTaxonomy !== "bounded-dashboard-safe-categories"
+    || privacy.topicTaxonomy !== "bounded-dashboard-safe-event-summaries"
     || privacy.queryIncluded !== false
     || privacy.contentIncluded !== false
     || privacy.rawIdentifiersIncluded !== false
@@ -4198,7 +4195,7 @@ function sanitizedMemoryActivity(value: unknown): MemoryActivity | undefined {
     topicSummaries[key] = [];
     for (const value of rows) {
       const row = exactMemoryRecord(value, ["label", "observedAt"]);
-      if (!row || typeof row.label !== "string" || !MEMORY_TOPIC_LABELS.has(row.label)
+      if (!row || typeof row.label !== "string" || !MEMORY_EVENT_SUMMARY.test(row.label)
         || seenLabels.has(row.label) || !isStrictMemoryTimestamp(row.observedAt)
         || !memoryTimestampFitsWindow(row.observedAt, generatedAtMs, windowMinutes)) return undefined;
       seenLabels.add(row.label);
@@ -4316,7 +4313,7 @@ function sanitizedMemoryActivity(value: unknown): MemoryActivity | undefined {
       reasonsIncluded: false,
       countsOnly: false,
       sanitizedTopicLabelsIncluded: true,
-      topicTaxonomy: "bounded-dashboard-safe-categories",
+      topicTaxonomy: "bounded-dashboard-safe-event-summaries",
     },
     counts,
     lastObservedAt,
@@ -5053,7 +5050,7 @@ function BrainAtlasEcosystemView({
     };
     return activeBySignal[signal].includes(node);
   };
-  const topicLabels = (key: keyof MemoryActivity["topicSummaries"]) =>
+  const eventSummaryLabels = (key: keyof MemoryActivity["topicSummaries"]) =>
     (activity?.topicSummaries[key] || []).map((row) => row.label);
   const renderMemoryNode = (
     node: Exclude<AtlasMemoryNode, "registry"> | "provenance",
@@ -5079,16 +5076,16 @@ function BrainAtlasEcosystemView({
           <strong>{total}</strong>
         </header>
         <div className="brain-memory-topic-viewport" aria-live={live ? "polite" : "off"}>
-          {live && topics.length ? (
+          {topics.length ? (
             <>
-              <i className="brain-memory-topic-cursor" aria-hidden="true" />
+              {live ? <i className="brain-memory-topic-cursor" aria-hidden="true" /> : null}
               <ul style={{ "--topic-count": topics.length } as React.CSSProperties}>
                 {topics.map((topic, index) => <li key={topic} style={{ "--topic-index": index } as React.CSSProperties}>{topic}</li>)}
               </ul>
             </>
           ) : <span>{detail}</span>}
         </div>
-        <footer>{live ? recent : detail}</footer>
+        <footer>{live ? recent : topics.length ? "latest recorded" : detail}</footer>
       </article>
     );
   };
@@ -5374,14 +5371,14 @@ function BrainAtlasEcosystemView({
                 </g>
               ))}
             </svg>
-            {renderMemoryNode("retrieve", "Retrieve", <Search size={17} />, queries7d, `${visibleRetrievals} recent`, `${visibleRetrievals} retrieved`, topicLabels("retrieval"), Boolean(selectedAgent && traceRetrievals))}
+            {renderMemoryNode("retrieve", "Retrieve", <Search size={17} />, queries7d, `${visibleRetrievals} recent`, `${visibleRetrievals} retrieved`, eventSummaryLabels("retrieval"), Boolean(selectedAgent && traceRetrievals))}
             {renderMemoryNode("provenance", "Provenance", <BookOpen size={17} />, provenance == null ? "—" : `${provenance}%`, "verified sources", "source coverage", [], selectedTraceHasMemory)}
-            {renderMemoryNode("durable", "Durable", <ShieldCheck size={17} />, durable, "governed total", `${activity?.counts.promoted || 0} promoted`, topicLabels("promoted"))}
+            {renderMemoryNode("durable", "Durable", <ShieldCheck size={17} />, durable, "governed total", `${activity?.counts.promoted || 0} promoted`, eventSummaryLabels("promoted"))}
             <article data-flow-node="registry" data-node-live={memoryNodeIsActive("registry") ? "true" : "false"} className={`brain-memory-registry${memoryNodeIsActive("registry") ? " is-live" : ""}${selectedTraceHasMemory ? " is-trace-evidence" : ""}`}><Database size={28} /><b>Memory Registry</b><em>{selectedAgent ? `${visibleRetrievals} recalled · ${visibleUsed} used` : `${durable} active · ${provenance == null ? "—" : `${provenance}%`} sourced`}</em><i /></article>
-            {renderMemoryNode("selected", "Selected", <CheckCircle2 size={17} />, selected30d, `${visibleSelected} recent`, `${visibleSelected} selected`, topicLabels("selected"), Boolean(selectedAgent && traceSelected))}
-            {renderMemoryNode("used", "Used in work", <Braces size={17} />, used30d, `${visibleUsed} recent`, `${visibleUsed} applied`, topicLabels("used"), Boolean(selectedAgent && traceUsed))}
-            {renderMemoryNode("helpful", "Helpful", <ThumbsUp size={17} />, helpful, "outcomes · 30d", `${feedback} feedback`, topicLabels("feedback"))}
-            {renderMemoryNode("candidate", "Candidate", <FileCheck2 size={17} />, pending || proposed, "pending review", `${proposed} proposed`, topicLabels("proposed"))}
+            {renderMemoryNode("selected", "Selected", <CheckCircle2 size={17} />, selected30d, `${visibleSelected} recent`, `${visibleSelected} selected`, eventSummaryLabels("selected"), Boolean(selectedAgent && traceSelected))}
+            {renderMemoryNode("used", "Used in work", <Braces size={17} />, used30d, `${visibleUsed} recent`, `${visibleUsed} applied`, eventSummaryLabels("used"), Boolean(selectedAgent && traceUsed))}
+            {renderMemoryNode("helpful", "Helpful", <ThumbsUp size={17} />, helpful, "outcomes · 30d", `${feedback} feedback`, eventSummaryLabels("feedback"))}
+            {renderMemoryNode("candidate", "Candidate", <FileCheck2 size={17} />, pending || proposed, "pending review", `${proposed} proposed`, eventSummaryLabels("proposed"))}
           </div>
 
         </div>

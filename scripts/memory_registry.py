@@ -1472,27 +1472,38 @@ def privacy_audit_payload(db: sqlite3.Connection) -> dict[str, Any]:
     }
 
 
-def dashboard_memory_topic(subject: str | None) -> str:
-    """Collapse a dashboard-safe subject into a bounded operational label."""
+def dashboard_memory_summary(subject: str | None) -> str:
+    """Return a concise description of a dashboard-safe memory event.
 
-    text = str(subject or "").lower()
-    taxonomy = (
-        (("control tower", "brain atlas", "live work"), "Control Tower visibility"),
-        (("shared memory", "memory registry", "retrieval", "memory governance"), "Shared memory operations"),
-        (("subagent", "worker lane", "model routing", "agent routing"), "Agent routing & workers"),
-        (("change lease", "closeout", "handoff", "task coordination"), "Task coordination"),
-        (("today job", "scheduled", "schedule", "cron"), "Scheduled work"),
-        (("runtime health", "heartbeat", "openclaw", "hermes"), "Agent runtime health"),
+    Only subjects from records already marked dashboard-safe/public reach this
+    function. The extra filtering prevents URLs, email addresses, filesystem
+    paths, and opaque workflow identifiers from leaking into the kiosk while
+    preserving the plain-language description of what memory was involved.
+    """
+
+    text = clean_text(subject, 180)
+    text = re.sub(r"https?://\S+|www\.\S+", " ", text, flags=re.IGNORECASE)
+    text = re.sub(r"\b[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}\b", " ", text)
+    text = re.sub(
+        r"\b(?:task|work|run|retrieval|memory|candidate)-[a-z0-9-]{8,}\b",
+        " ",
+        text,
+        flags=re.IGNORECASE,
     )
-    for needles, label in taxonomy:
-        if any(needle in text for needle in needles):
-            return label
-    return "Operational memory"
+    text = re.sub(r"\b[0-9a-f]{16,}\b", " ", text, flags=re.IGNORECASE)
+    text = re.sub(r"(?:^|\s)(?:~?/|\.\.?/)[^\s]+", " ", text)
+    text = re.sub(r"[^A-Za-z0-9 &+().,:'/-]+", " ", text)
+    text = re.sub(r"\s+", " ", text).strip(" -—:;,.\t\n")
+    if not text:
+        return "Memory event"
+    if len(text) > 72:
+        text = text[:72].rsplit(" ", 1)[0].rstrip(" -—:;,.\t\n")
+    return text or "Memory event"
 
 
 def _append_topic(target: dict[str, list[dict[str, str]]], key: str, subject: str | None, observed_at: str | None) -> None:
     if observed_at:
-        target[key].append({"label": dashboard_memory_topic(subject), "observedAt": str(observed_at)})
+        target[key].append({"label": dashboard_memory_summary(subject), "observedAt": str(observed_at)})
 
 
 def _bounded_topics(rows: list[dict[str, str]]) -> list[dict[str, str]]:
@@ -1511,8 +1522,8 @@ def _bounded_topics(rows: list[dict[str, str]]) -> list[dict[str, str]]:
 def memory_activity_payload(db: sqlite3.Connection) -> dict[str, Any]:
     """Return bounded, dashboard-safe telemetry for the Control Tower Atlas.
 
-    The dashboard receives counts and a fixed taxonomy derived only from
-    records already marked dashboard-safe/public. It never receives queries,
+    The dashboard receives counts and concise event descriptions derived only
+    from records already marked dashboard-safe/public. It never receives queries,
     memory content, private subjects, raw identifiers, source paths, feedback
     reasons, or workflow context hashes.
     """
@@ -1686,7 +1697,7 @@ def memory_activity_payload(db: sqlite3.Connection) -> dict[str, Any]:
             "reasonsIncluded": False,
             "countsOnly": False,
             "sanitizedTopicLabelsIncluded": True,
-            "topicTaxonomy": "bounded-dashboard-safe-categories",
+            "topicTaxonomy": "bounded-dashboard-safe-event-summaries",
         },
         "counts": {
             "retrievals": int(retrieval["total"] or 0),

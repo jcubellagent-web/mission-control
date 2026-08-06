@@ -21352,7 +21352,7 @@ body,
   }
 }
 
-/* Memory nodes expose bounded operational topics without competing with the
+/* Memory nodes expose bounded event descriptions without competing with the
    graph. A moving packet is only present while both connected endpoints share
    the same live state. */
 #brain-atlas .brain-memory-node {
@@ -21459,6 +21459,14 @@ body,
   opacity: 0;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+#brain-atlas .brain-memory-topic-viewport li:first-child {
+  opacity: 0.72;
+}
+
+#brain-atlas .brain-memory-node.is-live .brain-memory-topic-viewport li {
+  opacity: 0;
   animation: brain-memory-topic-roll 7.5s ease-in-out infinite;
   animation-delay: calc(var(--topic-index) * -2.5s);
 }
@@ -21469,12 +21477,12 @@ body,
   color: currentColor;
 }
 
-#brain-atlas .brain-memory-node[data-topic-count="1"] .brain-memory-topic-viewport li {
+#brain-atlas .brain-memory-node.is-live[data-topic-count="1"] .brain-memory-topic-viewport li {
   opacity: 1;
   animation: none;
 }
 
-#brain-atlas .brain-memory-node[data-topic-count="2"] .brain-memory-topic-viewport li {
+#brain-atlas .brain-memory-node.is-live[data-topic-count="2"] .brain-memory-topic-viewport li {
   animation-name: brain-memory-topic-roll-two;
   animation-duration: 5s;
 }

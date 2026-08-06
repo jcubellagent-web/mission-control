@@ -289,7 +289,7 @@ def valid_memory_operations() -> dict:
                 "reasonsIncluded": False,
                 "countsOnly": False,
                 "sanitizedTopicLabelsIncluded": True,
-                "topicTaxonomy": "bounded-dashboard-safe-categories",
+                "topicTaxonomy": "bounded-dashboard-safe-event-summaries",
             },
             "counts": {
                 "retrievals": 1,
@@ -321,10 +321,10 @@ def valid_memory_operations() -> dict:
                 "promoted": None,
             },
             "topicSummaries": {
-                "retrieval": [{"label": "Shared memory operations", "observedAt": retrieval_at}],
-                "selected": [{"label": "Shared memory operations", "observedAt": "2026-07-18T15:59:05Z"}],
-                "used": [{"label": "Shared memory operations", "observedAt": "2026-07-18T15:59:10Z"}],
-                "feedback": [{"label": "Shared memory operations", "observedAt": "2026-07-18T15:59:10Z"}],
+                "retrieval": [{"label": "Brain Atlas layout guidance", "observedAt": retrieval_at}],
+                "selected": [{"label": "Brain Atlas layout guidance", "observedAt": "2026-07-18T15:59:05Z"}],
+                "used": [{"label": "Brain Atlas layout guidance", "observedAt": "2026-07-18T15:59:10Z"}],
+                "feedback": [{"label": "Brain Atlas layout guidance", "observedAt": "2026-07-18T15:59:10Z"}],
                 "proposed": [],
                 "promoted": [],
             },
@@ -1210,7 +1210,7 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertIn("directedFlowMissingArrowCount", runtime)
         self.assertIn("flowPathCollisions", runtime)
 
-    def test_memory_nodes_show_safe_topics_totals_and_only_animate_complete_routes(self) -> None:
+    def test_memory_nodes_show_safe_event_summaries_totals_and_only_animate_complete_routes(self) -> None:
         main = (MISSION_CONTROL / "v2-react" / "src" / "main.tsx").read_text(encoding="utf-8")
         styles = (MISSION_CONTROL / "v2-react" / "src" / "styles.css").read_text(encoding="utf-8")
         self.assertIn("const memoryNodeIsActive =", main)
@@ -1218,10 +1218,14 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertIn('promoted: ["candidate", "durable", "registry"]', main)
         self.assertIn('memoryNodeIsActive("used") && memoryNodeIsActive("helpful")', main)
         self.assertIn('className="brain-memory-topic-cursor"', main)
+        self.assertIn("const eventSummaryLabels =", main)
+        self.assertIn('{topics.length ? (', main)
+        self.assertIn('topics.length ? "latest recorded"', main)
         self.assertIn('data-topic-count={topics.length}', main)
         self.assertIn('data-total={total}', main)
         self.assertNotIn('"by agent"', main)
         self.assertIn("brain-memory-topic-roll", styles)
+        self.assertIn(".brain-memory-topic-viewport li:first-child", styles)
         self.assertIn("#brain-atlas .brain-memory-packet", styles)
 
     def test_live_work_next_column_uses_actual_scheduled_occurrence(self) -> None:
