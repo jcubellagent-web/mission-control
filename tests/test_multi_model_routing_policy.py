@@ -302,11 +302,107 @@ def model_args(*, transport: str = "auto") -> SimpleNamespace:
         requested_model="",
         requested_reason="",
         codex_allowance="auto",
+        priority="normal",
+        complexity="auto",
+        blast_radius="auto",
+        context_packet="",
         controller_work_id="controller-work",
         controller_run_id="controller-run",
         lane_id="test-model-lane",
         lane_visibility="required",
     )
+
+
+def test_codex_tier_policy_defaults_to_terra_and_earns_sol_only_for_hard_high_blast() -> None:
+    route = load_module("agent_route_codex_tiers", ROOT / "scripts" / "agent_route.py")
+    args = route.build_parser().parse_args([
+        "--task-type", "repo-patch", "--title", "Patch", "--objective", "Patch safely",
+    ])
+    assert route.codex_model_for(args) == "gpt-5.6-terra"
+    args.complexity = "hard"
+    args.blast_radius = "low"
+    args.priority = "critical"
+    assert route.codex_model_for(args) == "gpt-5.6-terra"
+    args.blast_radius = "high"
+    assert route.codex_model_for(args) == "gpt-5.6-sol"
+
+
+def test_sol_review_requires_complete_parent_bound_context_packet(tmp_path) -> None:
+    lane = load_module("model_lane_sol_context", ROOT / "scripts" / "model_lane.py")
+    args = model_args(transport="codex")
+    args.requested_provider = "codex"
+    args.requested_model = "gpt-5.6-sol"
+    args.priority = "high"
+    args.complexity = "hard"
+    args.blast_radius = "high"
+    args.capability = ["high-blast-radius"]
+    route = {"modelRoute": {"provider": "codex", "model": "gpt-5.6-sol"}}
+    with pytest.raises(SystemExit, match="requires --context-packet"):
+        lane.validate_sol_context_packet(args, route)
+
+    packet = tmp_path / "sol-context.json"
+    packet.write_text(json.dumps({
+        "trigger": "hard-high-blast",
+        "parentWorkId": args.controller_work_id,
+        "parentRunId": args.controller_run_id,
+        "objective": "Review a high-blast migration",
+        "constraints": ["Read-only review"],
+        "authoritativeFiles": ["AGENTS.md"],
+        "evidence": ["Focused tests pass"],
+        "attemptedApproaches": ["Terra prepared the implementation plan"],
+        "question": "What failure mode remains?",
+        "requestedOutput": "Assessment with actionable risks",
+    }))
+    args.context_packet = str(packet)
+    lane.RESULT_ROOTS = (tmp_path,)
+    args.sol_context_packet_data = lane.validate_sol_context_packet(args, route)
+    command = lane.command_for(args, route)
+    assert command[:2] == ["codex", "exec"]
+    assert "--ignore-user-config" in command
+    assert command[command.index("--sandbox") + 1] == "read-only"
+    assert "--ephemeral" in command
+    assert command[command.index("--disable") + 1] == "multi_agent"
+    assert command[command.index("-m") + 1] == "gpt-5.6-sol"
+    prompt = command[-1]
+    assert "STRUCTURED PARENT CONTEXT" in prompt
+    assert args.controller_work_id in prompt
+    assert "The Terra parent remains task owner" in prompt
+
+
+def test_sol_context_rejects_parent_mismatch_and_private_keys(tmp_path) -> None:
+    lane = load_module("model_lane_sol_context_reject", ROOT / "scripts" / "model_lane.py")
+    args = model_args(transport="codex")
+    args.requested_model = "gpt-5.6-sol"
+    args.context_packet = str(tmp_path / "sol-context.json")
+    args.complexity = "hard"
+    args.blast_radius = "high"
+    args.priority = "high"
+    args.capability = ["high-blast-radius"]
+    lane.RESULT_ROOTS = (tmp_path,)
+    route = {"modelRoute": {"provider": "codex", "model": "gpt-5.6-sol"}}
+    base = {
+        "trigger": "hard-high-blast", "parentWorkId": "wrong", "parentRunId": args.controller_run_id,
+        "objective": "Review", "constraints": ["Read-only"], "authoritativeFiles": ["AGENTS.md"],
+        "evidence": ["Evidence"], "attemptedApproaches": ["Plan"], "question": "Risk?",
+        "requestedOutput": "Assessment",
+    }
+    Path(args.context_packet).write_text(json.dumps(base))
+    with pytest.raises(SystemExit, match="must match the controlling task"):
+        lane.validate_sol_context_packet(args, route)
+    base["parentWorkId"] = args.controller_work_id
+    base["credential"] = "redacted-but-forbidden"
+    Path(args.context_packet).write_text(json.dumps(base))
+    with pytest.raises(SystemExit, match="forbidden private-data key"):
+        lane.validate_sol_context_packet(args, route)
+
+
+def test_checked_in_policy_keeps_terra_owner_and_sol_bounded() -> None:
+    agents = " ".join((ROOT / "AGENTS.md").read_text().split())
+    skill = " ".join((ROOT / "agent-skills" / "multi-model-routing" / "SKILL.md").read_text().split())
+    assert "keep that root lane as task owner" in agents
+    assert "Routine length, file count, urgency, generic review" in skill
+    assert "explicit-josh-request" in skill
+    assert "read-only, ephemeral, no-subagent execution" in skill
 
 
 def test_codex_app_specialists_forward_to_jaimes_with_redacted_preview(monkeypatch) -> None:

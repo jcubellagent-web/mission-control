@@ -307,13 +307,26 @@ Josh approved this default policy for Codex-app, Josh 2.0, and JAIMES work:
   first at 20% or less or when pace predicts early exhaustion. Never spend a
   specialist call merely to create artificial balance; match it to the task.
 
-- Use `openai/gpt-5.6-terra` with medium thinking as the default trusted execution route.
+- Use `openai/gpt-5.6-terra` with medium thinking as the default trusted execution route and keep
+  that root lane as task owner, tool user, editor, integrator, and final verifier for the life of
+  the task. Never silently replace an active Terra conversation with another Codex tier.
 - Downshift routine status, tiny edits, quick checks, and bounded low-risk work to
   `openai/gpt-5.6-luna` with low/medium thinking when speed matters more than depth.
 - Use Terra with medium/high thinking for normal operations, debugging, repo edits,
   Control Tower work, and multi-step coordination.
-- Upshift to `openai/gpt-5.6-sol` only for hard architecture, gnarly failures,
-  security-sensitive review, high-blast-radius changes, or earned judgment.
+- Use `openai/gpt-5.6-sol` only as a fresh, bounded, read-only review child of Terra. A Sol lane is
+  earned by exactly one of: hard complexity plus high blast radius plus a high/critical or named
+  high-blast signal; two materially different failed Terra approaches on the same hard blocker;
+  security-critical review with high blast radius; conflicting authoritative evidence for a
+  high-stakes decision; or Josh explicitly requesting Sol. Length, file count, urgency, generic
+  review, or a first failed attempt never earn Sol.
+- Every Sol child must receive a dashboard-safe structured packet containing the exact parent
+  work/run IDs, objective, constraints, authoritative files, evidence, attempted approaches,
+  precise review question, and requested output. Launch it through `scripts/model_lane.py` with
+  the exact Sol model, a declared trigger, read-only/ephemeral execution, and no nested subagents.
+  Accept the pass only after exact-model execution and substantive output are verified. Terra
+  integrates the result, reruns applicable checks, and discloses a failed or unavailable Sol lane;
+  an explicit Sol request fails closed instead of silently substituting another model.
 - Keep `openai/gpt-5.5` as a stable compatibility fallback, not the normal default.
 - Until the stable Codex channel supports GPT-5.6, keep Josh 2.0 on
   `@openai/codex@alpha` and point the OpenCLAW Codex plugin app server at

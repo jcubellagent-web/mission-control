@@ -11,6 +11,7 @@ import datetime as dt
 import hashlib
 import json
 import os
+import re
 import shlex
 import subprocess
 import sys
@@ -31,6 +32,40 @@ CONTROL_TOWER_HOST = os.environ.get("MODEL_LANE_CONTROL_TOWER_HOST", "josh2.0@jo
 CONTROL_TOWER_REPO = "/Users/josh2.0/.openclaw/workspace/mission-control"
 LANE_HEARTBEAT_SECONDS = 30
 RESULT_ROOTS = (Path("/private/tmp"), Path("/tmp"))
+SOL_MODEL = "gpt-5.6-sol"
+SOL_REVIEW_TRIGGERS = {
+    "hard-high-blast",
+    "terra-retry-exhausted",
+    "security-critical-review",
+    "conflicting-high-stakes-evidence",
+    "explicit-josh-request",
+}
+SOL_CONTEXT_STRING_FIELDS = {
+    "trigger",
+    "objective",
+    "question",
+    "requestedOutput",
+    "parentWorkId",
+    "parentRunId",
+}
+SOL_CONTEXT_LIST_FIELDS = {
+    "constraints",
+    "authoritativeFiles",
+    "evidence",
+    "attemptedApproaches",
+}
+SOL_CONTEXT_FORBIDDEN_KEYS = {
+    "password",
+    "secret",
+    "token",
+    "cookie",
+    "oauth",
+    "credential",
+    "privatekey",
+    "seedphrase",
+    "rawemail",
+    "rawconnectorcontent",
+}
 
 PROVIDER_MODEL_FAMILIES = {
     "codex": "codex",
@@ -62,6 +97,95 @@ def utc_stamp() -> str:
 def compact(text: str, limit: int = 240) -> str:
     value = " ".join(str(text or "").split())
     return value if len(value) <= limit else value[: limit - 1].rstrip() + "…"
+
+
+def normalized_model(value: str) -> str:
+    model = str(value or "").strip().lower()
+    for prefix in ("openai-codex/", "openai/", "codex/"):
+        if model.startswith(prefix):
+            return model[len(prefix):]
+    return model
+
+
+def _forbidden_context_key(value: Any) -> str:
+    if isinstance(value, dict):
+        for key, child in value.items():
+            normalized = re.sub(r"[^a-z]", "", str(key).lower())
+            if normalized in SOL_CONTEXT_FORBIDDEN_KEYS:
+                return str(key)
+            nested = _forbidden_context_key(child)
+            if nested:
+                return nested
+    elif isinstance(value, list):
+        for child in value:
+            nested = _forbidden_context_key(child)
+            if nested:
+                return nested
+    return ""
+
+
+def validate_sol_context_packet(args: argparse.Namespace, route: dict[str, Any]) -> dict[str, Any] | None:
+    """Require a complete, parent-bound, dashboard-safe packet for every Sol lane."""
+    selected = route.get("modelRoute") or {}
+    if normalized_model(selected.get("model") or getattr(args, "requested_model", "")) != SOL_MODEL:
+        return None
+    if str(getattr(args, "privacy", "") or "") != "dashboard-safe":
+        raise SystemExit("A Sol review lane accepts only explicitly sanitized dashboard-safe context.")
+    raw_path = str(getattr(args, "context_packet", "") or "").strip()
+    if not raw_path:
+        raise SystemExit("A Sol review lane requires --context-packet with the complete parent handoff.")
+    path = Path(raw_path).expanduser().resolve()
+    if not any(path == root or root in path.parents for root in RESULT_ROOTS):
+        raise SystemExit("--context-packet must be under /private/tmp or /tmp")
+    try:
+        packet = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise SystemExit(f"Sol context packet is unreadable or invalid JSON: {compact(str(exc), 200)}") from exc
+    if not isinstance(packet, dict):
+        raise SystemExit("Sol context packet must be a JSON object.")
+    for field in sorted(SOL_CONTEXT_STRING_FIELDS):
+        if not str(packet.get(field) or "").strip():
+            raise SystemExit(f"Sol context packet requires non-empty {field}.")
+    for field in sorted(SOL_CONTEXT_LIST_FIELDS):
+        values = packet.get(field)
+        if not isinstance(values, list) or not values or not all(str(value).strip() for value in values):
+            raise SystemExit(f"Sol context packet requires a non-empty string list for {field}.")
+    if packet["parentWorkId"] != str(getattr(args, "controller_work_id", "") or "") or packet[
+        "parentRunId"
+    ] != str(getattr(args, "controller_run_id", "") or ""):
+        raise SystemExit("Sol context packet parentWorkId/parentRunId must match the controlling task exactly.")
+    forbidden = _forbidden_context_key(packet)
+    if forbidden:
+        raise SystemExit(f"Sol context packet contains forbidden private-data key: {forbidden}.")
+
+    trigger = str(packet["trigger"]).strip()
+    if trigger not in SOL_REVIEW_TRIGGERS:
+        raise SystemExit(f"Unsupported Sol escalation trigger: {trigger}.")
+    complexity = str(getattr(args, "complexity", "auto") or "auto")
+    blast_radius = str(getattr(args, "blast_radius", "auto") or "auto")
+    priority = str(getattr(args, "priority", "normal") or "normal")
+    capabilities = {str(value).strip().lower() for value in (getattr(args, "capability", []) or [])}
+    if trigger == "hard-high-blast" and not (
+        complexity == "hard"
+        and blast_radius == "high"
+        and (priority in {"high", "critical"} or capabilities & {"high-blast-radius", "incident-command", "security-critical", "production-migration"})
+    ):
+        raise SystemExit("hard-high-blast Sol review requires hard complexity, high blast radius, and a high/critical signal.")
+    if trigger == "terra-retry-exhausted" and not (
+        complexity == "hard" and len(packet["attemptedApproaches"]) >= 2
+    ):
+        raise SystemExit("terra-retry-exhausted requires hard complexity and two materially different attempted approaches.")
+    if trigger == "security-critical-review" and not (
+        blast_radius == "high" and "security-critical" in capabilities
+    ):
+        raise SystemExit("security-critical-review requires high blast radius and the security-critical capability.")
+    if trigger == "conflicting-high-stakes-evidence" and not (
+        blast_radius == "high" and len(packet["evidence"]) >= 2
+    ):
+        raise SystemExit("conflicting-high-stakes-evidence requires high blast radius and at least two evidence items.")
+    if trigger == "explicit-josh-request" and "explicit-josh-sol-request" not in capabilities:
+        raise SystemExit("explicit-josh-request requires the explicit-josh-sol-request capability marker.")
+    return packet
 
 
 def substantive_output(text: str) -> str:
@@ -298,6 +422,12 @@ def route_for(args: argparse.Namespace) -> dict[str, Any]:
         args.requester,
         "--codex-allowance",
         args.codex_allowance,
+        "--priority",
+        str(getattr(args, "priority", "normal") or "normal"),
+        "--complexity",
+        str(getattr(args, "complexity", "auto") or "auto"),
+        "--blast-radius",
+        str(getattr(args, "blast_radius", "auto") or "auto"),
     ]
     for cap in args.capability or []:
         cmd += ["--capability", cap]
@@ -368,6 +498,19 @@ def checkpoint_text(args: argparse.Namespace, route: dict[str, Any]) -> str:
 
 
 def build_prompt(args: argparse.Namespace, route: dict[str, Any]) -> str:
+    packet = getattr(args, "sol_context_packet_data", None)
+    packet_text = ""
+    if isinstance(packet, dict):
+        packet_text = """
+
+SOL REVIEW CONTRACT:
+- You are a bounded, read-only reviewer. Do not edit files, invoke subagents, or take side effects.
+- Treat the structured parent packet below as the complete handoff. Do not infer missing private context.
+- Return sections named Assessment, Evidence, Recommendation, Risks, and Required Follow-up.
+- The Terra parent remains task owner, executor, integrator, and final verifier.
+
+STRUCTURED PARENT CONTEXT:
+""" + json.dumps(packet, indent=2, sort_keys=True)
     header = f"""You are working in a fresh model lane for Josh.
 
 The launcher owns runtime-model verification. Do not infer, debate, or restate
@@ -378,6 +521,7 @@ authentication fails, the fail-closed launcher will reject the run.
 
 TASK:
 {args.prompt or args.objective}
+{packet_text}
 """
     return header
 
@@ -445,7 +589,12 @@ def command_for(args: argparse.Namespace, route: dict[str, Any]) -> list[str]:
         ]
 
     if args.transport == "codex" or (args.transport == "auto" and provider == "codex"):
-        return ["codex", "exec", "-m", model or "gpt-5.5", prompt]
+        effort = "high" if normalized_model(model) == SOL_MODEL else "medium"
+        return [
+            "codex", "exec", "--ignore-user-config", "--sandbox", "read-only",
+            "--ephemeral", "--disable", "multi_agent", "-c",
+            f'model_reasoning_effort="{effort}"', "-m", model or "gpt-5.5", prompt,
+        ]
 
     if provider == "gemini":
         return [
@@ -742,6 +891,14 @@ def main() -> int:
     parser.add_argument("--requested-model", default="")
     parser.add_argument("--requested-reason", default="requested by Josh")
     parser.add_argument("--codex-allowance", default="auto", choices=["auto", "normal", "conserve", "exhausted"])
+    parser.add_argument("--priority", default="normal", choices=["low", "normal", "high", "critical"])
+    parser.add_argument("--complexity", default="auto", choices=["auto", "bounded", "multi-step", "hard"])
+    parser.add_argument("--blast-radius", default="auto", choices=["auto", "low", "medium", "high"])
+    parser.add_argument(
+        "--context-packet",
+        default="",
+        help="Dashboard-safe JSON handoff required for every gpt-5.6-sol review lane.",
+    )
     parser.add_argument("--transport", default="auto", choices=["auto", "hermes", "codex", "openclaw"])
     parser.add_argument("--controller-work-id", default="", help="Exact controlling Live Work id for this separate lane.")
     parser.add_argument("--controller-run-id", default="", help="Exact controlling Live Work run id for this separate lane.")
@@ -763,6 +920,7 @@ def main() -> int:
     args = parser.parse_args()
 
     route = route_for(args)
+    args.sol_context_packet_data = validate_sol_context_packet(args, route)
     if not args.route_decision_id:
         args.route_decision_id = str((route.get("routeTelemetry") or {}).get("routeDecisionId") or "")
     if not args.request_signature:

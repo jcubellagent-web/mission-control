@@ -85,6 +85,33 @@ Never send credentials, raw production logs, customer data, or account content.
 
 ## Runtime Resilience
 
+### Codex Tier Escalation
+
+- Keep the owning Codex lane on `gpt-5.6-terra` with medium reasoning for the
+  full task. Changing the model selector in an active task is not an escalation
+  mechanism because it weakens continuity and obscures ownership.
+- Launch `gpt-5.6-sol` only as a fresh bounded review child when one declared
+  trigger is true: `hard-high-blast`, `terra-retry-exhausted`,
+  `security-critical-review`, `conflicting-high-stakes-evidence`, or
+  `explicit-josh-request`. Routine length, file count, urgency, generic review,
+  and a first unsuccessful Terra attempt are not triggers.
+- The Sol launcher requires a dashboard-safe JSON context packet under
+  `/private/tmp` or `/tmp` with `trigger`, `parentWorkId`, `parentRunId`,
+  `objective`, `constraints`, `authoritativeFiles`, `evidence`,
+  `attemptedApproaches`, `question`, and `requestedOutput`. The IDs must match
+  the controlling task exactly. Never include secrets, credentials, OAuth or
+  cookie material, wallet data, raw email, or raw connector/account content.
+- Invoke `scripts/model_lane.py` with `--requested-provider codex`,
+  `--requested-model gpt-5.6-sol`, the matching `--complexity`,
+  `--blast-radius`, `--priority`, and capability signal, plus
+  `--context-packet`, `--controller-work-id`, and `--controller-run-id`.
+  The launcher forces read-only, ephemeral, no-subagent execution. Explicit Sol
+  requests are exact and fail closed; never attach an automatic fallback.
+- Terra evaluates the returned Assessment, Evidence, Recommendation, Risks,
+  and Required Follow-up, performs all edits and tools itself, and independently
+  verifies the final result. Do not claim Sol was used unless the exact-model
+  lane returned substantive output successfully.
+
 - Automatic Gemini routes use: selected Gemini -> GLM 5.2 Cloud -> Codex Terra.
 - Automatic GLM routes use: GLM 5.2 Cloud -> Gemini Pro High -> Codex Terra.
 - Check the selected model before work. If execution then fails, announce the

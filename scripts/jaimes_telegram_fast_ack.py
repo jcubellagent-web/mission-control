@@ -44,7 +44,7 @@ CONTROL_CENTER_CHAT_ID = "-1003589561528"
 JAIMES_CONTROL_CENTER_TOPICS: set[str] = set()
 JAIMES_DIRECT_MENTION_TOPICS = {"1"}
 JAIMES_MENTION_RE = re.compile(r"(?:^|[\s,.:;!?()\[\]{}])@jaimes(?=$|[\s,.:;!?()\[\]{}])", re.I)
-DEFAULT_MODEL = "openai-codex/gpt-5.6-sol"
+DEFAULT_MODEL = "openai-codex/gpt-5.6-terra"
 DEFAULT_ROUTE = "JAIMES Telegram -> Hermes task"
 STALE_BOOTSTRAP_SECONDS = 120
 HANDOFF_RECEIPT_TTL_SECONDS = 90

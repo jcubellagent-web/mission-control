@@ -37,6 +37,11 @@ def load_module():
     return module
 
 
+def test_missing_runtime_metadata_falls_back_to_terra_not_sol():
+    watcher = load_module()
+    assert watcher.DEFAULT_MODEL == "openai-codex/gpt-5.6-terra"
+
+
 def test_empty_synthetic_user_rows_are_ignored(tmp_path, monkeypatch):
     watcher = load_module()
     db = tmp_path / "state.db"
