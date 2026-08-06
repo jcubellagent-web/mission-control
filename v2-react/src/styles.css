@@ -20565,7 +20565,7 @@ body,
     inset 0 0 0 1px color-mix(in srgb, var(--route-color) var(--activity-strength), transparent),
     inset 0 -42px 58px color-mix(in srgb, var(--route-color) var(--activity-strength), transparent),
     0 0 var(--activity-glow) color-mix(in srgb, var(--route-color) var(--activity-strength), transparent) !important;
-  opacity: .82;
+  opacity: var(--activity-opacity);
   transition: background-color 700ms ease, border-color 700ms ease, box-shadow 700ms ease, opacity 700ms ease !important;
 }
 
@@ -20584,8 +20584,32 @@ body,
 }
 
 #finops-dashboard.finops-quiet-layout .finops-provider-simple.is-active {
-  border-color: color-mix(in srgb, var(--route-color) 92%, white) !important;
-  opacity: 1;
+  border-color: color-mix(in srgb, var(--route-color) var(--activity-strength), white 16%) !important;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-provider-simple[data-heat="hot"]::before {
+  animation: finops-heat-breathe 2.8s ease-in-out infinite alternate;
+}
+
+@keyframes finops-heat-breathe {
+  from { opacity: calc(var(--activity-alpha) * .78); }
+  to { opacity: var(--activity-alpha); }
+}
+
+.today-job-row.is-live-runtime {
+  background: linear-gradient(90deg, rgba(0, 203, 255, .13), rgba(3, 20, 32, .72));
+  box-shadow: inset 3px 0 0 #00cbff, inset 0 0 18px rgba(0, 203, 255, .08);
+}
+
+.today-job-row.is-live-runtime time {
+  color: #79e9ff;
+  font-weight: 950;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #finops-dashboard.finops-quiet-layout .finops-provider-simple[data-heat="hot"]::before {
+    animation: none;
+  }
 }
 
 #finops-dashboard.finops-quiet-layout .finops-provider-state strong {

@@ -1704,6 +1704,7 @@ function App() {
             jobs={state.jobs}
             todayJobs={state.todayJobs}
             todayJobsMeta={state.todayJobsMeta}
+            activeWorks={state.workHot?.activeWorks}
             statuses={state.statuses}
             quietMode={quietMode}
             liveCues={liveCues}
@@ -2659,18 +2660,52 @@ function providerUtilizationPct(provider: any) {
 }
 
 function providerActivityVolume(provider: any) {
-  const today = Math.max(0, Number(provider?.callsToday || 0));
   const weekly = Math.max(0, Number(provider?.callsWeekly || 0));
   const sessions = Math.max(0, Number(provider?.sessions || 0));
-  return today * 6 + weekly + sessions * 0.35;
+  const tokens = Math.max(0, Number(provider?.totalTokens || 0));
+  return weekly + sessions * 0.35 + Math.log1p(tokens / 2_500) * 4;
 }
 
-function providerActivityScore(provider: any, active: boolean, maximumVolume: number) {
+function providerActivityScore(
+  provider: any,
+  active: boolean,
+  routeUpdatedAt: string | undefined,
+  maximumVolume: number,
+  maximumMonthlyCost: number,
+  nowMs = Date.now(),
+) {
   const volume = providerActivityVolume(provider);
-  const normalized = maximumVolume > 0
-    ? Math.round((Math.log1p(volume) / Math.log1p(maximumVolume)) * 78)
+  const volumePressure = maximumVolume > 0
+    ? Math.log1p(volume) / Math.log1p(maximumVolume)
     : 0;
-  return Math.max(active ? 92 : volume > 0 ? 14 : 5, Math.min(100, normalized + (active ? 18 : 0)));
+  const monthlyCost = Math.max(0, providerSubscriptionMonthly(provider));
+  const costPressure = maximumMonthlyCost > 0 ? Math.sqrt(monthlyCost / maximumMonthlyCost) : 0;
+  const lastActivityAt = [provider?.lastActivityAt, routeUpdatedAt]
+    .map(timeValue)
+    .filter((value) => value > 0)
+    .sort((left, right) => right - left)[0] || 0;
+  const ageMinutes = lastActivityAt ? Math.max(0, (nowMs - lastActivityAt) / 60_000) : Number.POSITIVE_INFINITY;
+  const recency = ageMinutes <= 2 ? 1 : ageMinutes <= 180 ? Math.exp(-(ageMinutes - 2) / 18) : 0;
+  const recentBurst = Math.min(1,
+    Math.max(0, Number(provider?.callsLast5m || 0)) * 0.5
+    + Math.max(0, Number(provider?.callsLast30m || 0)) * 0.08
+    + Math.max(0, Number(provider?.callsLast2h || 0)) * 0.015,
+  );
+  const liveSignal = Math.max(active ? 1 : 0, recency, recentBurst);
+  const activeHeat = liveSignal * (42 + volumePressure * 24 + costPressure * 25);
+  const residualHeat = liveSignal > 0.05 ? 0 : volumePressure * 8;
+  return Math.max(4, Math.min(100, Math.round(4 + activeHeat + residualHeat)));
+}
+
+function providerHeatLabel(provider: any, active: boolean, routeUpdatedAt?: string) {
+  if (active) return "live route";
+  const lastAt = Math.max(timeValue(provider?.lastActivityAt), timeValue(routeUpdatedAt));
+  if (!lastAt) return "idle";
+  const minutes = Math.max(0, (Date.now() - lastAt) / 60_000);
+  if (minutes < 5) return "active now";
+  if (minutes < 60) return `${Math.max(5, Math.round(minutes / 5) * 5)}m ago`;
+  if (minutes < 180) return `${Math.round(minutes / 60)}h ago`;
+  return "idle";
 }
 
 function providerLimitRows(provider: any) {
@@ -3128,8 +3163,18 @@ function FinOpsDashboard({
                 const key = providerKey(provider);
                 const route = routeForProvider(provider) || CANONICAL_ROUTES.codex;
                 const active = Boolean(key && activeKeys.has(key));
+                const liveRoute = activeModelRoutes
+                  .filter((row) => row.modelFamily === key)
+                  .sort((left, right) => timeValue(right.updatedAt) - timeValue(left.updatedAt))[0];
                 const pct = providerUtilizationPct(provider);
-                const activityScore = providerActivityScore(provider, active, maximumProviderActivity);
+                const activityScore = providerActivityScore(
+                  provider,
+                  active,
+                  liveRoute?.updatedAt,
+                  maximumProviderActivity,
+                  maxSubscription,
+                );
+                const heatLabel = providerHeatLabel(provider, active, liveRoute?.updatedAt);
                 const tone = providerTone(provider);
                 const topModel = providerTopModels(provider)[0];
                 const currentModel = providerModelLabel({ name: topModel?.name || provider.lastModelUsed || "Route ready" });
@@ -3151,14 +3196,16 @@ function FinOpsDashboard({
                     data-provider={key || undefined}
                     data-active={active ? "true" : "false"}
                     data-activity-score={activityScore}
+                    data-heat={activityScore >= 68 ? "hot" : activityScore >= 28 ? "warm" : "cool"}
                     data-finops-region="provider"
                     className={`finops-provider-simple is-${tone} ${active ? "is-active" : "is-idle"}`}
                     style={{
                       ...routeCssProperties(route),
                       "--activity-score": activityScore,
-                      "--activity-alpha": (0.045 + activityScore * 0.0022).toFixed(3),
-                      "--activity-strength": `${Math.round(8 + activityScore * 0.45)}%`,
-                      "--activity-glow": `${Math.round(4 + activityScore * 0.12)}px`,
+                      "--activity-alpha": (0.01 + activityScore * 0.0048).toFixed(3),
+                      "--activity-strength": `${Math.round(2 + activityScore * 0.7)}%`,
+                      "--activity-glow": `${Math.round(activityScore * 0.3)}px`,
+                      "--activity-opacity": (0.56 + activityScore * 0.0044).toFixed(3),
                     } as React.CSSProperties}
                   >
                     <div className="finops-provider-identity">
@@ -3174,7 +3221,7 @@ function FinOpsDashboard({
                     </div>
                     <p className="finops-provider-purpose"><span>Purpose</span><em title={purpose}>{purpose}</em></p>
                     <footer className="finops-provider-state">
-                      <strong>{stateLabel}<small>{activityScore}% activity</small></strong>
+                      <strong>{stateLabel}<small>{activityScore}% live heat · {heatLabel}</small></strong>
                       <i className="finops-segment-meter" aria-label={`${activityScore}% recent activity intensity`}>
                         {Array.from({ length: 10 }, (_, index) => <b key={index} className={index < Math.ceil(activityScore / 10) ? "is-filled" : ""} />)}
                       </i>
@@ -7912,6 +7959,7 @@ function JobsRail({
   jobs,
   todayJobs,
   todayJobsMeta,
+  activeWorks = [],
   statuses,
   quietMode,
   liveCues,
@@ -7919,6 +7967,7 @@ function JobsRail({
   jobs: MissionControlState["jobs"];
   todayJobs?: TodayJobOccurrence[];
   todayJobsMeta?: TodayJobsMeta;
+  activeWorks?: ActiveWork[];
   statuses: AgentStatus[];
   quietMode: boolean;
   liveCues: LiveCueState;
@@ -7938,7 +7987,42 @@ function JobsRail({
     return () => window.clearInterval(timer);
   }, []);
 
-  const sourceRows = Array.isArray(todayJobs) ? todayJobs : jobsFallbackOccurrences(jobs);
+  const liveRows = activeWorks
+    .filter((work) => String(work.status || "").toLowerCase() === "active")
+    .filter((work) => !work.stale && (!work.leaseUntil || timeValue(work.leaseUntil) > clockNow.getTime()))
+    .map((work): TodayJobOccurrence => ({
+      occurrenceId: `live-work:${work.workId}:${work.runId}`,
+      definitionId: work.workId,
+      name: String(work.objective || work.detail || "Active work").replace(/^Task active:\s*/i, ""),
+      owner: work.ownerLabel || work.ownerAgent,
+      agent: work.ownerAgent,
+      source: "control-tower-hot",
+      sourceLabel: work.executionRole === "worker" ? "Live specialist lane" : "Live Work ledger",
+      category: work.executionRole === "worker" ? "Specialist execution" : "Active work",
+      description: work.detail,
+      scheduledAt: work.createdAt || work.updatedAt,
+      scheduledTime: "NOW",
+      schedule: work.phase || "Live",
+      outcome: "pending",
+      runStatus: "running",
+      lastRun: work.updatedAt,
+      durationMs: Math.max(0, clockNow.getTime() - timeValue(work.createdAt || work.updatedAt)),
+      transient: true,
+      liveUntil: work.leaseUntil,
+      startedAt: work.createdAt,
+      evidence: {
+        source: "leased Live Work ledger",
+        status: "running",
+        at: work.updatedAt,
+        summary: "Authoritative active work; this row is removed automatically when the run ends or its lease expires.",
+      },
+    }));
+  const scheduledRows = Array.isArray(todayJobs) ? todayJobs : jobsFallbackOccurrences(jobs);
+  const scheduledKeys = new Set(scheduledRows.map((row) => `${row.definitionId || ""}|${row.name}`.toLowerCase()));
+  const sourceRows = [
+    ...scheduledRows,
+    ...liveRows.filter((row) => !scheduledKeys.has(`${row.definitionId || ""}|${row.name}`.toLowerCase())),
+  ];
   const rows = [...sourceRows].sort((a, b) => scheduledSortValue(a) - scheduledSortValue(b));
   const nowMs = clockNow.getTime();
   const projectionIsToday = !todayJobsMeta?.date || todayJobsMeta.date === etDateKey(clockNow);
@@ -8187,7 +8271,7 @@ function JobsRail({
               <React.Fragment key={job.occurrenceId}>
                 {projectionIsFresh && index === nowIndex ? <TodayJobsNowMarker ref={nowDividerRef} label={nowLabel} /> : null}
                 <article
-                  className={`today-job-row is-${job.outcome}${interactive ? " has-reason" : ""}${changedRowClass(Boolean(liveCues.rows[cueRowKey("today-job", job.occurrenceId)]))}`}
+                  className={`today-job-row is-${job.outcome}${job.transient ? " is-live-runtime" : ""}${interactive ? " has-reason" : ""}${changedRowClass(Boolean(liveCues.rows[cueRowKey("today-job", job.occurrenceId)]))}`}
                   role="row"
                   data-outcome={job.outcome}
                   data-reason-kind={interactive ? reason.kind : undefined}

@@ -30,11 +30,18 @@ def test_receipts_reconcile_usage_and_latest_disposition(monkeypatch, tmp_path):
     receipts = tmp_path / "receipts.jsonl"
     receipts.write_text("\n".join([
         json.dumps({"event": "execution", "receiptId": "r1", "recordedAt": "2026-07-31T10:00:00Z", "provider": "ollama", "model": "glm-5.2:cloud", "outcome": "success", "inputTokens": 100, "outputTokens": 50, "durationMs": 900, "canary": False, "integrationDisposition": "pending"}),
+        json.dumps({"event": "execution", "receiptId": "r2", "recordedAt": "2026-07-31T11:58:00Z", "provider": "gemini", "model": "gemini-test", "outcome": "success", "inputTokens": 20, "outputTokens": 10, "durationMs": 300, "canary": False, "integrationDisposition": "pending"}),
         json.dumps({"event": "disposition", "receiptId": "r1", "recordedAt": "2026-07-31T11:00:00Z", "integrationDisposition": "integrated", "integrationReasonCode": "used"}),
     ]) + "\n")
     monkeypatch.setattr(dashboard, "MODEL_LANE_RECEIPTS_PATH", receipts)
     summary = dashboard.build_model_lane_receipt_summary(now)
-    assert summary["modelRows"][0]["totalTokens"] == 150
+    rows = {row["name"]: row for row in summary["modelRows"]}
+    assert rows["glm-5.2:cloud"]["totalTokens"] == 150
+    assert rows["glm-5.2:cloud"]["callsLast5m"] == 0
+    assert rows["glm-5.2:cloud"]["callsLast2h"] == 1
+    assert rows["glm-5.2:cloud"]["lastActivityAt"] == "2026-07-31T10:00:00Z"
+    assert rows["gemini-test"]["callsLast5m"] == 1
+    assert rows["gemini-test"]["callsLast30m"] == 1
     assert summary["executions"][0]["integrationDisposition"] == "integrated"
 
 

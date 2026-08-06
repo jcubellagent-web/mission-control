@@ -169,6 +169,9 @@ export type TodayJobOccurrence = {
   rolledUp?: boolean;
   expectedRuns?: number;
   completedRuns?: number;
+  transient?: boolean;
+  liveUntil?: string;
+  startedAt?: string;
 };
 
 export type TodayJobsMeta = {
@@ -805,6 +808,10 @@ export type ProviderBudget = {
   usageEquivalentMonthlyUsd?: number;
   callsToday?: number;
   callsWeekly?: number;
+  callsLast5m?: number;
+  callsLast30m?: number;
+  callsLast2h?: number;
+  lastActivityAt?: string;
   sessions?: number;
   totalTokens?: number;
   inputTokens?: number;

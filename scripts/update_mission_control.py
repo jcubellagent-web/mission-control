@@ -18,6 +18,7 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 from typing import Any, Dict, List
+from zoneinfo import ZoneInfo
 
 _SCRIPT_DIR = Path(__file__).resolve().parent
 if str(_SCRIPT_DIR) not in sys.path:
@@ -2494,6 +2495,7 @@ def _jsonl_rows(path: Path) -> List[Dict[str, Any]]:
 def build_model_lane_receipt_summary(now: dt.datetime | None = None) -> Dict[str, Any]:
     """Project metadata-only receipts into weekly usage and integration quality."""
     current = (now or dt.datetime.now(dt.timezone.utc)).astimezone(dt.timezone.utc)
+    current_et_day = current.astimezone(ZoneInfo("America/New_York")).date()
     cutoff = current - dt.timedelta(days=7)
     dispositions: Dict[str, Dict[str, Any]] = {}
     executions: List[Dict[str, Any]] = []
@@ -2519,10 +2521,32 @@ def build_model_lane_receipt_summary(now: dt.datetime | None = None) -> Dict[str
             executions.append(merged)
     by_model: Dict[tuple[str, str], Dict[str, Any]] = {}
     for row in executions:
+        try:
+            recorded = dt.datetime.fromisoformat(str(row.get("recordedAt") or "").replace("Z", "+00:00"))
+        except ValueError:
+            continue
         key = (str(row.get("provider") or "unknown"), str(row.get("model") or "unknown"))
-        bucket = by_model.setdefault(key, {"calls": 0, "today": 0, "success": 0, "input": 0, "output": 0, "duration": 0})
+        bucket = by_model.setdefault(key, {
+            "calls": 0,
+            "today": 0,
+            "last5m": 0,
+            "last30m": 0,
+            "last2h": 0,
+            "lastActivityAt": None,
+            "success": 0,
+            "input": 0,
+            "output": 0,
+            "duration": 0,
+        })
         bucket["calls"] += 1
-        bucket["today"] += int(str(row.get("recordedAt") or "")[:10] == current.date().isoformat())
+        bucket["today"] += int(recorded.astimezone(ZoneInfo("America/New_York")).date() == current_et_day)
+        age = max(dt.timedelta(0), current - recorded)
+        bucket["last5m"] += int(age <= dt.timedelta(minutes=5))
+        bucket["last30m"] += int(age <= dt.timedelta(minutes=30))
+        bucket["last2h"] += int(age <= dt.timedelta(hours=2))
+        recorded_at = str(row.get("recordedAt") or "")
+        if recorded_at and (not bucket["lastActivityAt"] or recorded_at > bucket["lastActivityAt"]):
+            bucket["lastActivityAt"] = recorded_at
         bucket["success"] += int(row.get("outcome") == "success")
         bucket["input"] += int(row.get("inputTokens") or row.get("estimatedPromptTokens") or 0)
         bucket["output"] += int(row.get("outputTokens") or round(int(row.get("outputCharacters") or 0) / 4))
@@ -2535,6 +2559,10 @@ def build_model_lane_receipt_summary(now: dt.datetime | None = None) -> Dict[str
         "sessionCost": 0.0,
         "callsWeekly": values["calls"],
         "callsToday": values["today"],
+        "callsLast5m": values["last5m"],
+        "callsLast30m": values["last30m"],
+        "callsLast2h": values["last2h"],
+        "lastActivityAt": values["lastActivityAt"],
         "sessions": values["calls"],
         "inputTokens": values["input"],
         "outputTokens": values["output"],
@@ -2673,6 +2701,10 @@ def build_provider_usage_breakdown(
             "inferredRemainingCallEquivalent": budget.get("probeInferredRemainingCallEquivalent"),
             "callsToday": 0,
             "callsWeekly": 0,
+            "callsLast5m": 0,
+            "callsLast30m": 0,
+            "callsLast2h": 0,
+            "lastActivityAt": None,
             "sessions": 0,
             "totalTokens": 0,
             "inputTokens": 0,
@@ -2704,6 +2736,14 @@ def build_provider_usage_breakdown(
         row["sessions"] += sessions
         row["callsToday"] += int(item.get("callsToday") or 0)
         row["callsWeekly"] += int(item.get("callsWeekly") or 0)
+        row["callsLast5m"] += int(item.get("callsLast5m") or 0)
+        row["callsLast30m"] += int(item.get("callsLast30m") or 0)
+        row["callsLast2h"] += int(item.get("callsLast2h") or 0)
+        item_last_activity = str(item.get("lastActivityAt") or item.get("lastRunAt") or "")
+        if item_last_activity and (
+            not row.get("lastActivityAt") or item_last_activity > str(row.get("lastActivityAt"))
+        ):
+            row["lastActivityAt"] = item_last_activity
         row["totalTokens"] += tokens
         row["inputTokens"] += int(item.get("inputTokens") or 0)
         row["outputTokens"] += int(item.get("outputTokens") or 0)
@@ -2716,6 +2756,9 @@ def build_provider_usage_breakdown(
             "marginalCost": round(float(item.get("marginalCost") or 0.0), 6),
             "sessions": sessions,
             "callsWeekly": int(item.get("callsWeekly") or 0),
+            "callsLast5m": int(item.get("callsLast5m") or 0),
+            "callsLast30m": int(item.get("callsLast30m") or 0),
+            "lastActivityAt": item_last_activity or None,
             "totalTokens": tokens,
         })
 
