@@ -304,6 +304,20 @@ MEMORY_PRIVACY_CONTRACT = {
     "reasonsIncluded": False,
     "countsOnly": True,
 }
+MEMORY_ACTIVITY_PRIVACY_CONTRACT = {
+    "queryIncluded": False,
+    "contentIncluded": False,
+    "rawIdentifiersIncluded": False,
+    "reasonsIncluded": False,
+    "countsOnly": False,
+    "sanitizedTopicLabelsIncluded": True,
+    "topicTaxonomy": "bounded-dashboard-safe-categories",
+}
+MEMORY_ACTIVITY_TOPIC_FIELDS = ("retrieval", "selected", "used", "feedback", "proposed", "promoted")
+MEMORY_ACTIVITY_TOPIC_LABELS = frozenset({
+    "Control Tower visibility", "Shared memory operations", "Agent routing & workers",
+    "Task coordination", "Scheduled work", "Agent runtime health", "Operational memory",
+})
 MEMORY_ACTIVITY_AGENT_FIELDS = frozenset({
     "agent", "retrievals", "hits", "misses", "selected", "used", "crossAgentUsed",
     "lastRetrievalAt", "lastSelectedAt", "lastUsedAt", "lastCrossAgentUsedAt",
@@ -415,9 +429,10 @@ def _memory_operations_unavailable(now_iso: str) -> Dict[str, Any]:
             "windowMinutes": 30,
             "motionWindowSeconds": 90,
             "source": {"name": "governed-memory-registry", "verified": False},
-            "privacy": dict(MEMORY_PRIVACY_CONTRACT),
+            "privacy": dict(MEMORY_ACTIVITY_PRIVACY_CONTRACT),
             "counts": zero_counts,
             "lastObservedAt": no_times,
+            "topicSummaries": {name: [] for name in MEMORY_ACTIVITY_TOPIC_FIELDS},
             "agents": [
                 {
                     "agent": agent,
@@ -952,7 +967,7 @@ def sanitize_memory_operations(value: Any, now_iso: str) -> Dict[str, Any]:
     activity = value.get("activity")
     activity_fields = {
         "schemaVersion", "generatedAt", "windowMinutes", "motionWindowSeconds",
-        "source", "privacy", "counts", "lastObservedAt", "agents", "reuseLinks",
+        "source", "privacy", "counts", "lastObservedAt", "topicSummaries", "agents", "reuseLinks",
     }
     if not isinstance(activity, dict) or set(activity) != activity_fields:
         return fallback
@@ -970,7 +985,7 @@ def sanitize_memory_operations(value: Any, now_iso: str) -> Dict[str, Any]:
         or motion_seconds < 15
         or motion_seconds > window_minutes * 60
         or activity.get("source") != {"name": "governed-memory-registry", "verified": True}
-        or activity.get("privacy") != MEMORY_PRIVACY_CONTRACT
+        or activity.get("privacy") != MEMORY_ACTIVITY_PRIVACY_CONTRACT
     ):
         return fallback
 
@@ -1018,6 +1033,32 @@ def sanitize_memory_operations(value: Any, now_iso: str) -> Dict[str, Any]:
         ):
             return fallback
         clean_times[signal] = raw_time
+
+    raw_topics = activity.get("topicSummaries")
+    if not isinstance(raw_topics, dict) or set(raw_topics) != set(MEMORY_ACTIVITY_TOPIC_FIELDS):
+        return fallback
+    clean_topics: Dict[str, list[Dict[str, str]]] = {}
+    for topic_key in MEMORY_ACTIVITY_TOPIC_FIELDS:
+        rows = raw_topics.get(topic_key)
+        if not isinstance(rows, list) or len(rows) > 3:
+            return fallback
+        clean_rows: list[Dict[str, str]] = []
+        seen_labels: set[str] = set()
+        for row in rows:
+            if not isinstance(row, dict) or set(row) != {"label", "observedAt"}:
+                return fallback
+            label = row.get("label")
+            observed_at = _memory_time(row.get("observedAt"))
+            if (
+                label not in MEMORY_ACTIVITY_TOPIC_LABELS
+                or label in seen_labels
+                or observed_at is None
+                or not window_start <= observed_at <= generated_at
+            ):
+                return fallback
+            seen_labels.add(str(label))
+            clean_rows.append({"label": str(label), "observedAt": row["observedAt"]})
+        clean_topics[topic_key] = clean_rows
 
     raw_agents = activity.get("agents")
     if not isinstance(raw_agents, list) or len(raw_agents) != len(MEMORY_CANONICAL_AGENTS):
@@ -1167,9 +1208,10 @@ def sanitize_memory_operations(value: Any, now_iso: str) -> Dict[str, Any]:
             "windowMinutes": window_minutes,
             "motionWindowSeconds": motion_seconds,
             "source": {"name": "governed-memory-registry", "verified": True},
-            "privacy": dict(MEMORY_PRIVACY_CONTRACT),
+            "privacy": dict(MEMORY_ACTIVITY_PRIVACY_CONTRACT),
             "counts": clean_counts,
             "lastObservedAt": clean_times,
+            "topicSummaries": clean_topics,
             "agents": [clean_agents_by_id[agent] for agent in MEMORY_CANONICAL_AGENTS],
             "reuseLinks": clean_links,
         },

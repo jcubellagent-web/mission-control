@@ -508,7 +508,7 @@ class MemoryRegistryTest(unittest.TestCase):
         self.assertNotIn("Private parent marker", rendered)
         self.assertNotIn("custom-policy-source", rendered)
 
-    def test_activity_export_is_counts_only_and_updates_on_retrieval(self) -> None:
+    def test_activity_export_is_dashboard_safe_and_updates_on_retrieval(self) -> None:
         memory_id = self.create_memory("live activity", privacy="dashboard-safe")
         private_query = "Privacy fixture live activity raw-query-marker"
         retrieval = self.cli(
@@ -520,7 +520,9 @@ class MemoryRegistryTest(unittest.TestCase):
 
         self.assertEqual(activity["schemaVersion"], 2)
         self.assertTrue(activity["source"]["verified"])
-        self.assertTrue(activity["privacy"]["countsOnly"])
+        self.assertFalse(activity["privacy"]["countsOnly"])
+        self.assertTrue(activity["privacy"]["sanitizedTopicLabelsIncluded"])
+        self.assertEqual(activity["privacy"]["topicTaxonomy"], "bounded-dashboard-safe-categories")
         self.assertFalse(activity["privacy"]["queryIncluded"])
         self.assertFalse(activity["privacy"]["contentIncluded"])
         self.assertFalse(activity["privacy"]["rawIdentifiersIncluded"])
@@ -531,6 +533,7 @@ class MemoryRegistryTest(unittest.TestCase):
             next(row for row in activity["agents"] if row["agent"] == "joshex")["retrievals"],
             1,
         )
+        self.assertEqual(activity["topicSummaries"]["retrieval"][0]["label"], "Operational memory")
 
         rendered = json.dumps(status)
         self.assertNotIn(private_query, rendered)
@@ -538,6 +541,15 @@ class MemoryRegistryTest(unittest.TestCase):
         self.assertNotIn(retrieval["retrievalId"], rendered)
         self.assertNotIn(memory_id, rendered)
         self.assertNotIn("events", activity)
+        self.assertNotIn("Privacy fixture live activity", rendered)
+
+    def test_activity_topics_exclude_owner_private_subjects(self) -> None:
+        self.create_memory("private-topic-marker", privacy="agent-private")
+        self.cli("retrieve", "--agent", "jaimes", "--query", "Privacy fixture private-topic-marker", "--limit", "3")
+        status = json.loads(Path(self.env["MEMORY_OPERATIONS_PATH"]).read_text(encoding="utf-8"))
+        rendered = json.dumps(status["activity"])
+        self.assertNotIn("private-topic-marker", rendered)
+        self.assertEqual(status["activity"]["topicSummaries"]["retrieval"], [])
 
     def test_activity_export_attributes_explicit_cross_agent_use_without_memory_identifiers(self) -> None:
         memory_id = self.create_memory("cross agent reuse", privacy="dashboard-safe", owner="jaimes")

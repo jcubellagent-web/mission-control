@@ -351,6 +351,11 @@ export type MemoryReuseLink = {
   lastUsedAt: string;
 };
 
+export type MemoryActivityTopic = {
+  label: string;
+  observedAt: string;
+};
+
 export type MemoryActivity = {
   schemaVersion: 2;
   generatedAt: string;
@@ -362,7 +367,9 @@ export type MemoryActivity = {
     contentIncluded: false;
     rawIdentifiersIncluded: false;
     reasonsIncluded: false;
-    countsOnly: true;
+    countsOnly: false;
+    sanitizedTopicLabelsIncluded: true;
+    topicTaxonomy: "bounded-dashboard-safe-categories";
   };
   counts: {
     retrievals: number;
@@ -392,6 +399,14 @@ export type MemoryActivity = {
     corrected: string | null;
     proposed: string | null;
     promoted: string | null;
+  };
+  topicSummaries: {
+    retrieval: MemoryActivityTopic[];
+    selected: MemoryActivityTopic[];
+    used: MemoryActivityTopic[];
+    feedback: MemoryActivityTopic[];
+    proposed: MemoryActivityTopic[];
+    promoted: MemoryActivityTopic[];
   };
   agents: MemoryActivityAgent[];
   reuseLinks: MemoryReuseLink[];

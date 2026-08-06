@@ -1472,12 +1472,49 @@ def privacy_audit_payload(db: sqlite3.Connection) -> dict[str, Any]:
     }
 
 
-def memory_activity_payload(db: sqlite3.Connection) -> dict[str, Any]:
-    """Return bounded, counts-only telemetry for the Control Tower Atlas.
+def dashboard_memory_topic(subject: str | None) -> str:
+    """Collapse a dashboard-safe subject into a bounded operational label."""
 
-    The dashboard can show that a governed memory operation happened, but it
-    never receives queries, memory content, raw identifiers, source paths,
-    feedback reasons, or workflow context hashes.
+    text = str(subject or "").lower()
+    taxonomy = (
+        (("control tower", "brain atlas", "live work"), "Control Tower visibility"),
+        (("shared memory", "memory registry", "retrieval", "memory governance"), "Shared memory operations"),
+        (("subagent", "worker lane", "model routing", "agent routing"), "Agent routing & workers"),
+        (("change lease", "closeout", "handoff", "task coordination"), "Task coordination"),
+        (("today job", "scheduled", "schedule", "cron"), "Scheduled work"),
+        (("runtime health", "heartbeat", "openclaw", "hermes"), "Agent runtime health"),
+    )
+    for needles, label in taxonomy:
+        if any(needle in text for needle in needles):
+            return label
+    return "Operational memory"
+
+
+def _append_topic(target: dict[str, list[dict[str, str]]], key: str, subject: str | None, observed_at: str | None) -> None:
+    if observed_at:
+        target[key].append({"label": dashboard_memory_topic(subject), "observedAt": str(observed_at)})
+
+
+def _bounded_topics(rows: list[dict[str, str]]) -> list[dict[str, str]]:
+    output: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for row in sorted(rows, key=lambda item: item["observedAt"], reverse=True):
+        if row["label"] in seen:
+            continue
+        output.append(row)
+        seen.add(row["label"])
+        if len(output) == 3:
+            break
+    return output
+
+
+def memory_activity_payload(db: sqlite3.Connection) -> dict[str, Any]:
+    """Return bounded, dashboard-safe telemetry for the Control Tower Atlas.
+
+    The dashboard receives counts and a fixed taxonomy derived only from
+    records already marked dashboard-safe/public. It never receives queries,
+    memory content, private subjects, raw identifiers, source paths, feedback
+    reasons, or workflow context hashes.
     """
 
     now = utc_now()
@@ -1522,6 +1559,49 @@ def memory_activity_payload(db: sqlite3.Connection) -> dict[str, Any]:
            FROM memory_candidates""",
         (window_start, window_start, window_start, window_start),
     ).fetchone()
+    topic_rows: dict[str, list[dict[str, str]]] = {
+        "retrieval": [], "selected": [], "used": [], "feedback": [], "proposed": [], "promoted": [],
+    }
+    safe_record_subjects = {
+        row["id"]: row["subject"]
+        for row in db.execute(
+            "SELECT id,subject FROM memory_records WHERE lower(privacy) IN ('dashboard-safe','public')"
+        ).fetchall()
+    }
+    for row in db.execute(
+        "SELECT time,memory_ids_json FROM retrieval_events WHERE time >= ? ORDER BY time DESC LIMIT 80",
+        (window_start,),
+    ).fetchall():
+        try:
+            memory_ids = json.loads(row["memory_ids_json"] or "[]")
+        except (TypeError, ValueError, json.JSONDecodeError):
+            memory_ids = []
+        for memory_id in memory_ids[:3]:
+            subject = safe_record_subjects.get(str(memory_id))
+            if subject:
+                _append_topic(topic_rows, "retrieval", subject, row["time"])
+    for row in db.execute(
+        "SELECT time,memory_id,outcome FROM memory_reuse_events WHERE time >= ? ORDER BY time DESC LIMIT 80",
+        (window_start,),
+    ).fetchall():
+        subject = safe_record_subjects.get(row["memory_id"])
+        if subject and row["outcome"] in {"selected", "used"}:
+            _append_topic(topic_rows, str(row["outcome"]), subject, row["time"])
+    for row in db.execute(
+        "SELECT time,memory_id,outcome FROM memory_feedback WHERE time >= ? ORDER BY time DESC LIMIT 80",
+        (window_start,),
+    ).fetchall():
+        subject = safe_record_subjects.get(row["memory_id"])
+        if subject and row["outcome"] == "helpful":
+            _append_topic(topic_rows, "feedback", subject, row["time"])
+    for row in db.execute(
+        "SELECT subject,status,proposed_at,reviewed_at FROM memory_candidates WHERE lower(privacy) IN ('dashboard-safe','public') AND (proposed_at >= ? OR reviewed_at >= ?) ORDER BY COALESCE(reviewed_at, proposed_at) DESC LIMIT 80",
+        (window_start, window_start),
+    ).fetchall():
+        if row["proposed_at"] and row["proposed_at"] >= window_start:
+            _append_topic(topic_rows, "proposed", row["subject"], row["proposed_at"])
+        if row["status"] == "active" and row["reviewed_at"] and row["reviewed_at"] >= window_start:
+            _append_topic(topic_rows, "promoted", row["subject"], row["reviewed_at"])
     agent_rows = {
         canonical_agent(row["agent"]): row
         for row in db.execute(
@@ -1604,7 +1684,9 @@ def memory_activity_payload(db: sqlite3.Connection) -> dict[str, Any]:
             "contentIncluded": False,
             "rawIdentifiersIncluded": False,
             "reasonsIncluded": False,
-            "countsOnly": True,
+            "countsOnly": False,
+            "sanitizedTopicLabelsIncluded": True,
+            "topicTaxonomy": "bounded-dashboard-safe-categories",
         },
         "counts": {
             "retrievals": int(retrieval["total"] or 0),
@@ -1635,6 +1717,7 @@ def memory_activity_payload(db: sqlite3.Connection) -> dict[str, Any]:
             "proposed": candidates["last_proposed_at"],
             "promoted": candidates["last_promoted_at"],
         },
+        "topicSummaries": {key: _bounded_topics(rows) for key, rows in topic_rows.items()},
         "agents": agents,
         "reuseLinks": sorted(reuse_links.values(), key=lambda row: (row["sourceAgent"], row["consumerAgent"])),
     }

@@ -3989,13 +3989,18 @@ const MEMORY_SIGNAL_KEYS: MemorySignalKey[] = [
 ];
 const MEMORY_ACTIVITY_KEYS = [
   "schemaVersion", "generatedAt", "windowMinutes", "motionWindowSeconds",
-  "source", "privacy", "counts", "lastObservedAt", "agents", "reuseLinks",
+  "source", "privacy", "counts", "lastObservedAt", "topicSummaries", "agents", "reuseLinks",
 ];
 const MEMORY_SOURCE_KEYS = ["name", "verified"];
 const MEMORY_PRIVACY_KEYS = [
   "queryIncluded", "contentIncluded", "rawIdentifiersIncluded",
-  "reasonsIncluded", "countsOnly",
+  "reasonsIncluded", "countsOnly", "sanitizedTopicLabelsIncluded", "topicTaxonomy",
 ];
+const MEMORY_TOPIC_KEYS = ["retrieval", "selected", "used", "feedback", "proposed", "promoted"] as const;
+const MEMORY_TOPIC_LABELS = new Set([
+  "Control Tower visibility", "Shared memory operations", "Agent routing & workers",
+  "Task coordination", "Scheduled work", "Agent runtime health", "Operational memory",
+]);
 const MEMORY_AGENT_KEYS = [
   "agent", "retrievals", "hits", "misses", "selected", "used", "crossAgentUsed",
   "lastRetrievalAt", "lastSelectedAt", "lastUsedAt", "lastCrossAgentUsedAt",
@@ -4105,8 +4110,8 @@ function sanitizedMemoryActivity(value: unknown): MemoryActivity | undefined {
   if (motionWindowSeconds === null || motionWindowSeconds < 15 || motionWindowSeconds > 100) return undefined;
 
   // Source/privacy fields are schema assertions, not a trust boundary. The
-  // frontend validates the complete counts-only shape and rebuilds a new,
-  // narrow object instead of retaining any self-declared or unexpected data.
+  // frontend validates the complete bounded shape and rebuilds a new narrow
+  // object rather than retaining self-declared or unexpected data.
   const source = exactMemoryRecord(activity.source, MEMORY_SOURCE_KEYS);
   const privacy = exactMemoryRecord(activity.privacy, MEMORY_PRIVACY_KEYS);
   if (
@@ -4114,7 +4119,9 @@ function sanitizedMemoryActivity(value: unknown): MemoryActivity | undefined {
     || source.name !== "governed-memory-registry"
     || source.verified !== true
     || !privacy
-    || privacy.countsOnly !== true
+    || privacy.countsOnly !== false
+    || privacy.sanitizedTopicLabelsIncluded !== true
+    || privacy.topicTaxonomy !== "bounded-dashboard-safe-categories"
     || privacy.queryIncluded !== false
     || privacy.contentIncluded !== false
     || privacy.rawIdentifiersIncluded !== false
@@ -4157,6 +4164,24 @@ function sanitizedMemoryActivity(value: unknown): MemoryActivity | undefined {
   };
   for (const [signal, countKey] of Object.entries(timestampCounts) as Array<[MemorySignalKey, MemoryCountKey]>) {
     if ((counts[countKey] === 0) !== (lastObservedAt[signal] === null)) return undefined;
+  }
+
+  const rawTopicSummaries = exactMemoryRecord(activity.topicSummaries, [...MEMORY_TOPIC_KEYS]);
+  if (!rawTopicSummaries) return undefined;
+  const topicSummaries = {} as MemoryActivity["topicSummaries"];
+  for (const key of MEMORY_TOPIC_KEYS) {
+    const rows = rawTopicSummaries[key];
+    if (!Array.isArray(rows) || rows.length > 3) return undefined;
+    const seenLabels = new Set<string>();
+    topicSummaries[key] = [];
+    for (const value of rows) {
+      const row = exactMemoryRecord(value, ["label", "observedAt"]);
+      if (!row || typeof row.label !== "string" || !MEMORY_TOPIC_LABELS.has(row.label)
+        || seenLabels.has(row.label) || !isStrictMemoryTimestamp(row.observedAt)
+        || !memoryTimestampFitsWindow(row.observedAt, generatedAtMs, windowMinutes)) return undefined;
+      seenLabels.add(row.label);
+      topicSummaries[key].push({ label: row.label, observedAt: row.observedAt });
+    }
   }
 
   if (!Array.isArray(activity.agents) || activity.agents.length !== HERO_AGENT_ORDER.length) return undefined;
@@ -4267,10 +4292,13 @@ function sanitizedMemoryActivity(value: unknown): MemoryActivity | undefined {
       contentIncluded: false,
       rawIdentifiersIncluded: false,
       reasonsIncluded: false,
-      countsOnly: true,
+      countsOnly: false,
+      sanitizedTopicLabelsIncluded: true,
+      topicTaxonomy: "bounded-dashboard-safe-categories",
     },
     counts,
     lastObservedAt,
+    topicSummaries,
     agents: agents.sort((a, b) => HERO_AGENT_ORDER.indexOf(a.agent) - HERO_AGENT_ORDER.indexOf(b.agent)),
     reuseLinks: reuseLinks.sort((a, b) => `${a.sourceAgent}:${a.consumerAgent}`.localeCompare(`${b.sourceAgent}:${b.consumerAgent}`)),
   };
@@ -4985,6 +5013,63 @@ function BrainAtlasEcosystemView({
   const activeMemoryAgent = activeEventIsRecent
     ? activeMemoryEvent?.consumerAgent || activeMemoryEvent?.agent || activeMemoryEvent?.sourceAgent || null
     : null;
+  type AtlasMemoryNode = "retrieve" | "registry" | "selected" | "used" | "helpful" | "candidate" | "durable";
+  const memoryNodeIsActive = (node: AtlasMemoryNode) => {
+    if (!signal) return false;
+    const activeBySignal: Record<MemorySignalKey, AtlasMemoryNode[]> = {
+      retrieval: ["retrieve", "registry"],
+      hit: ["retrieve", "registry"],
+      miss: ["retrieve", "registry"],
+      selected: ["registry", "selected"],
+      reuseIgnored: ["registry", "selected"],
+      used: ["selected", "used"],
+      crossAgentUsed: ["selected", "used"],
+      feedback: ["used", "helpful"],
+      corrected: ["helpful", "candidate"],
+      proposed: ["helpful", "candidate"],
+      promoted: ["candidate", "durable", "registry"],
+    };
+    return activeBySignal[signal].includes(node);
+  };
+  const topicLabels = (key: keyof MemoryActivity["topicSummaries"]) =>
+    (activity?.topicSummaries[key] || []).map((row) => row.label);
+  const renderMemoryNode = (
+    node: Exclude<AtlasMemoryNode, "registry"> | "provenance",
+    label: string,
+    icon: React.ReactNode,
+    total: string | number,
+    detail: string,
+    recent: string,
+    topics: string[],
+    traceEvidence = false,
+  ) => {
+    const live = node === "provenance" ? false : memoryNodeIsActive(node);
+    return (
+      <article
+        data-flow-node={node}
+        data-node-live={live ? "true" : "false"}
+        data-topic-count={topics.length}
+        data-total={total}
+        className={`brain-memory-node is-${node}${live ? " is-live" : ""}${traceEvidence ? " is-trace-evidence" : ""}`}
+      >
+        <header className="brain-memory-node-head">
+          <span>{icon}<b>{label}</b></span>
+          <strong>{total}</strong>
+        </header>
+        <div className="brain-memory-topic-viewport" aria-live={live ? "polite" : "off"}>
+          {live && topics.length ? (
+            <>
+              <i className="brain-memory-topic-cursor" aria-hidden="true" />
+              <ul style={{ "--topic-count": topics.length } as React.CSSProperties}>
+                {topics.map((topic, index) => <li key={topic} style={{ "--topic-index": index } as React.CSSProperties}>{topic}</li>)}
+              </ul>
+            </>
+          ) : <span>{detail}</span>}
+        </div>
+        <footer>{live ? recent : detail}</footer>
+      </article>
+    );
+  };
   const lifecycle = [
     { key: "retrieval", label: "Retrieved", icon: Search, time: activity?.lastObservedAt.retrieval, count: retrievals },
     { key: "selected", label: "Selected", icon: CheckCircle2, time: activity?.lastObservedAt.selected, count: selected },
@@ -5185,18 +5270,21 @@ function BrainAtlasEcosystemView({
               })}
               <circle className={`brain-agent-bus-junction is-trunk${hasActiveControllers ? " is-active" : ""}`} cx="274" cy="110" r={hasActiveControllers ? 3.2 : 2.2} />
               <path className={`brain-agent-trunk${activeMemoryAgent ? " is-active-route" : ""}${selectedTraceHasMemory ? " is-trace-evidence" : ""}`} d="M 274 110 H 300" markerEnd="url(#brain-arrow-agent)" data-flow-direction="forward" data-flow-from="activity-bus" data-flow-to="retrieve" />
-              <path className={`memory-flow-edge brain-memory-link is-recall${signal === "retrieval" || signal === "hit" ? " is-live" : ""}${selectedAgent && traceRetrievals ? " is-trace-evidence" : ""}`} d="M 466 110 C 470 110 474 107 478 102" markerEnd="url(#brain-arrow-recall)" data-flow-direction="forward" data-flow-from="retrieve" data-flow-to="registry" data-operation={signal === "hit" ? "hit" : "retrieval"} data-observed-at={activity?.lastObservedAt.retrieval || ""} />
+              <path className={`memory-flow-edge brain-memory-link is-recall${memoryNodeIsActive("retrieve") && memoryNodeIsActive("registry") ? " is-live" : ""}${selectedAgent && traceRetrievals ? " is-trace-evidence" : ""}`} d="M 466 110 C 470 110 474 107 478 102" markerEnd="url(#brain-arrow-recall)" data-flow-direction="forward" data-flow-from="retrieve" data-flow-to="registry" data-operation={signal === "hit" ? "hit" : "retrieval"} data-observed-at={activity?.lastObservedAt.retrieval || ""} />
               <path className={`brain-memory-link is-provenance${selectedTraceHasMemory ? " is-trace-evidence" : ""}`} d="M 560 44 V 50" markerEnd="url(#brain-arrow-used)" data-flow-direction="forward" data-flow-from="provenance" data-flow-to="registry" data-operation="provenance" />
-              <path className={`memory-flow-edge brain-memory-link is-selected${signal === "selected" ? " is-live" : ""}${selectedAgent && traceSelected ? " is-trace-evidence" : ""}`} d="M 635 80 C 686 61 744 36 798 28" markerEnd="url(#brain-arrow-selected)" data-flow-direction="forward" data-flow-from="registry" data-flow-to="selected" data-operation="selected" data-observed-at={activity?.lastObservedAt.selected || ""} />
-              <path className={`memory-flow-edge brain-memory-link is-used${signal === "used" ? " is-live" : ""}${selectedAgent && traceUsed ? " is-trace-evidence" : ""}`} d="M 894 52 V 84" markerEnd="url(#brain-arrow-used)" data-flow-direction="forward" data-flow-from="selected" data-flow-to="used" data-operation="used" data-observed-at={activity?.lastObservedAt.used || ""} />
-              <path className={`memory-flow-edge brain-memory-link is-feedback${signal === "feedback" ? " is-live" : ""}`} d="M 894 136 V 168" markerEnd="url(#brain-arrow-feedback)" data-flow-direction="forward" data-flow-from="used" data-flow-to="helpful" data-operation="feedback" data-observed-at={activity?.lastObservedAt.feedback || ""} />
-              <path className="brain-memory-link is-candidate" d="M 798 194 H 772" markerEnd="url(#brain-arrow-governed)" data-flow-direction="forward" data-flow-from="helpful" data-flow-to="candidate" />
-              <path className="brain-memory-link is-review" d="M 596 194 H 466" markerEnd="url(#brain-arrow-governed)" data-flow-direction="forward" data-flow-from="candidate" data-flow-to="durable" />
-              <path className="brain-memory-link is-durable" d="M 466 184 C 500 174 514 158 526 148" markerEnd="url(#brain-arrow-governed)" data-flow-direction="forward" data-flow-from="durable" data-flow-to="registry" />
-              {signal === "retrieval" || signal === "hit" ? <circle className="brain-memory-packet is-recall-packet is-live" r="4"><animateMotion dur="1.4s" repeatCount="indefinite" path="M 466 110 C 470 110 474 107 478 102" /></circle> : null}
-              {signal === "selected" ? <circle className="brain-memory-packet is-selected-packet is-live" r="4"><animateMotion dur="1.55s" repeatCount="indefinite" path="M 635 80 C 686 61 744 36 798 28" /></circle> : null}
-              {signal === "used" ? <circle className="brain-memory-packet is-used-packet is-live" r="4"><animateMotion dur="1.2s" repeatCount="indefinite" path="M 894 52 V 84" /></circle> : null}
-              {signal === "feedback" ? <circle className="brain-memory-packet is-feedback-packet is-live" r="4"><animateMotion dur="1.25s" repeatCount="indefinite" path="M 894 136 V 168" /></circle> : null}
+              <path className={`memory-flow-edge brain-memory-link is-selected${memoryNodeIsActive("registry") && memoryNodeIsActive("selected") ? " is-live" : ""}${selectedAgent && traceSelected ? " is-trace-evidence" : ""}`} d="M 635 80 C 686 61 744 36 798 28" markerEnd="url(#brain-arrow-selected)" data-flow-direction="forward" data-flow-from="registry" data-flow-to="selected" data-operation="selected" data-observed-at={activity?.lastObservedAt.selected || ""} />
+              <path className={`memory-flow-edge brain-memory-link is-used${memoryNodeIsActive("selected") && memoryNodeIsActive("used") ? " is-live" : ""}${selectedAgent && traceUsed ? " is-trace-evidence" : ""}`} d="M 894 52 V 84" markerEnd="url(#brain-arrow-used)" data-flow-direction="forward" data-flow-from="selected" data-flow-to="used" data-operation="used" data-observed-at={activity?.lastObservedAt.used || ""} />
+              <path className={`memory-flow-edge brain-memory-link is-feedback${memoryNodeIsActive("used") && memoryNodeIsActive("helpful") ? " is-live" : ""}`} d="M 894 136 V 168" markerEnd="url(#brain-arrow-feedback)" data-flow-direction="forward" data-flow-from="used" data-flow-to="helpful" data-operation="feedback" data-observed-at={activity?.lastObservedAt.feedback || ""} />
+              <path className={`memory-flow-edge brain-memory-link is-candidate${memoryNodeIsActive("helpful") && memoryNodeIsActive("candidate") ? " is-live" : ""}`} d="M 798 194 H 772" markerEnd="url(#brain-arrow-governed)" data-flow-direction="forward" data-flow-from="helpful" data-flow-to="candidate" />
+              <path className={`memory-flow-edge brain-memory-link is-review${memoryNodeIsActive("candidate") && memoryNodeIsActive("durable") ? " is-live" : ""}`} d="M 596 194 H 466" markerEnd="url(#brain-arrow-governed)" data-flow-direction="forward" data-flow-from="candidate" data-flow-to="durable" />
+              <path className={`memory-flow-edge brain-memory-link is-durable${memoryNodeIsActive("durable") && memoryNodeIsActive("registry") ? " is-live" : ""}`} d="M 466 184 C 500 174 514 158 526 148" markerEnd="url(#brain-arrow-governed)" data-flow-direction="forward" data-flow-from="durable" data-flow-to="registry" />
+              {memoryNodeIsActive("retrieve") && memoryNodeIsActive("registry") ? <circle className="brain-memory-packet is-recall-packet is-live" r="4"><animateMotion dur="1.4s" repeatCount="indefinite" path="M 466 110 C 470 110 474 107 478 102" /></circle> : null}
+              {memoryNodeIsActive("registry") && memoryNodeIsActive("selected") ? <circle className="brain-memory-packet is-selected-packet is-live" r="4"><animateMotion dur="1.55s" repeatCount="indefinite" path="M 635 80 C 686 61 744 36 798 28" /></circle> : null}
+              {memoryNodeIsActive("selected") && memoryNodeIsActive("used") ? <circle className="brain-memory-packet is-used-packet is-live" r="4"><animateMotion dur="1.2s" repeatCount="indefinite" path="M 894 52 V 84" /></circle> : null}
+              {memoryNodeIsActive("used") && memoryNodeIsActive("helpful") ? <circle className="brain-memory-packet is-feedback-packet is-live" r="4"><animateMotion dur="1.25s" repeatCount="indefinite" path="M 894 136 V 168" /></circle> : null}
+              {memoryNodeIsActive("helpful") && memoryNodeIsActive("candidate") ? <circle className="brain-memory-packet is-feedback-packet is-live" r="4"><animateMotion dur="1.25s" repeatCount="indefinite" path="M 798 194 H 772" /></circle> : null}
+              {memoryNodeIsActive("candidate") && memoryNodeIsActive("durable") ? <circle className="brain-memory-packet is-feedback-packet is-live" r="4"><animateMotion dur="1.35s" repeatCount="indefinite" path="M 596 194 H 466" /></circle> : null}
+              {memoryNodeIsActive("durable") && memoryNodeIsActive("registry") ? <circle className="brain-memory-packet is-feedback-packet is-live" r="4"><animateMotion dur="1.45s" repeatCount="indefinite" path="M 466 184 C 500 174 514 158 526 148" /></circle> : null}
               {agentRows.map(({ agent, liveWork, workers }) => {
                 const topology = agentTopology[agent];
                 const freshWorkers = workers.filter(workerRouteIsFresh);
@@ -5264,14 +5352,14 @@ function BrainAtlasEcosystemView({
                 </g>
               ))}
             </svg>
-            <article data-flow-node="retrieve" className={`brain-memory-node is-retrieve${signal === "retrieval" || signal === "hit" ? " is-live" : ""}${selectedAgent && traceRetrievals ? " is-trace-evidence" : ""}`}><Search size={17} /><span><b>Retrieve</b><em>{visibleRetrievals} {selectedAgent ? "by agent" : `recent · ${queries7d} / 7d`}</em></span></article>
-            <article data-flow-node="provenance" className={`brain-memory-node is-provenance${selectedTraceHasMemory ? " is-trace-evidence" : ""}`}><BookOpen size={17} /><span><b>Provenance</b><em>{provenance == null ? "—" : `${provenance}%`} sourced</em></span></article>
-            <article data-flow-node="durable" className={`brain-memory-node is-durable${signal === "promoted" ? " is-live" : ""}`}><ShieldCheck size={17} /><span><b>Durable</b><em>{durable} governed</em></span></article>
-            <article data-flow-node="registry" className={`brain-memory-registry${signal ? " is-live" : ""}${selectedTraceHasMemory ? " is-trace-evidence" : ""}`}><Database size={28} /><b>Memory Registry</b><em>{selectedAgent ? `${visibleRetrievals} recalled · ${visibleUsed} used` : `${durable} active · ${provenance == null ? "—" : `${provenance}%`} sourced`}</em><i /></article>
-            <article data-flow-node="selected" className={`brain-memory-node is-selected${signal === "selected" || signal === "used" ? " is-live" : ""}${selectedAgent && traceSelected ? " is-trace-evidence" : ""}`}><CheckCircle2 size={17} /><span><b>Selected</b><em>{visibleSelected} {selectedAgent ? "by agent" : `recent · ${selected30d} / 30d`}</em></span></article>
-            <article data-flow-node="used" className={`brain-memory-node is-used${signal === "used" ? " is-live" : ""}${selectedAgent && traceUsed ? " is-trace-evidence" : ""}`}><Braces size={17} /><span><b>Used in work</b><em>{visibleUsed} {selectedAgent ? "by agent" : `recent · ${used30d} / 30d`}</em></span></article>
-            <article data-flow-node="helpful" className={`brain-memory-node is-helpful${signal === "feedback" ? " is-live" : ""}`}><ThumbsUp size={17} /><span><b>Helpful</b><em>{helpful} outcomes · 30d</em></span></article>
-            <article data-flow-node="candidate" className={`brain-memory-node is-candidate${signal === "proposed" || signal === "corrected" ? " is-live" : ""}`}><FileCheck2 size={17} /><span><b>Candidate</b><em>{pending || proposed} pending</em></span></article>
+            {renderMemoryNode("retrieve", "Retrieve", <Search size={17} />, queries7d, `${visibleRetrievals} recent`, `${visibleRetrievals} retrieved`, topicLabels("retrieval"), Boolean(selectedAgent && traceRetrievals))}
+            {renderMemoryNode("provenance", "Provenance", <BookOpen size={17} />, provenance == null ? "—" : `${provenance}%`, "verified sources", "source coverage", [], selectedTraceHasMemory)}
+            {renderMemoryNode("durable", "Durable", <ShieldCheck size={17} />, durable, "governed total", `${activity?.counts.promoted || 0} promoted`, topicLabels("promoted"))}
+            <article data-flow-node="registry" data-node-live={memoryNodeIsActive("registry") ? "true" : "false"} className={`brain-memory-registry${memoryNodeIsActive("registry") ? " is-live" : ""}${selectedTraceHasMemory ? " is-trace-evidence" : ""}`}><Database size={28} /><b>Memory Registry</b><em>{selectedAgent ? `${visibleRetrievals} recalled · ${visibleUsed} used` : `${durable} active · ${provenance == null ? "—" : `${provenance}%`} sourced`}</em><i /></article>
+            {renderMemoryNode("selected", "Selected", <CheckCircle2 size={17} />, selected30d, `${visibleSelected} recent`, `${visibleSelected} selected`, topicLabels("selected"), Boolean(selectedAgent && traceSelected))}
+            {renderMemoryNode("used", "Used in work", <Braces size={17} />, used30d, `${visibleUsed} recent`, `${visibleUsed} applied`, topicLabels("used"), Boolean(selectedAgent && traceUsed))}
+            {renderMemoryNode("helpful", "Helpful", <ThumbsUp size={17} />, helpful, "outcomes · 30d", `${feedback} feedback`, topicLabels("feedback"))}
+            {renderMemoryNode("candidate", "Candidate", <FileCheck2 size={17} />, pending || proposed, "pending review", `${proposed} proposed`, topicLabels("proposed"))}
           </div>
 
         </div>
@@ -6390,6 +6478,29 @@ function jobIsSchedulable(job: MissionControlState["jobs"][number]) {
   return true;
 }
 
+function todayJobAgentId(job: TodayJobOccurrence): AgentId | null {
+  const owner = String(job.agent || job.owner || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  if (owner === "joshex" || owner === "codex") return "joshex";
+  if (owner === "josh2" || owner === "josh20" || owner === "josh") return "josh2";
+  if (owner === "jaimes") return "jaimes";
+  if (owner === "jain") return "jain";
+  return null;
+}
+
+function todayJobNextAt(job: TodayJobOccurrence, nowMs: number): number | null {
+  const scheduledAt = job.scheduledAt ? Date.parse(job.scheduledAt) : NaN;
+  if (Number.isFinite(scheduledAt) && scheduledAt > nowMs) return scheduledAt;
+  const scheduledMinutes = scheduledMinutesEt(job);
+  if (scheduledMinutes == null) return null;
+  const deltaMinutes = scheduledMinutes - currentEtMinutes(new Date(nowMs));
+  return deltaMinutes > 0 ? nowMs + deltaMinutes * 60_000 : null;
+}
+
+function scheduledWorkTitle(value?: string | null) {
+  const safe = missionText(value).replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
+  return safe.replace(/\b[a-z]/g, (letter) => letter.toUpperCase());
+}
+
 function buildAgentIdleContext(agent: AgentId, state: MissionControlState, nowMs: number): AgentIdleContext {
   const agentJobs = state.jobs.filter((job) => job.agent_id === agent);
   const completedJob = [...agentJobs]
@@ -6402,6 +6513,20 @@ function buildAgentIdleContext(agent: AgentId, state: MissionControlState, nowMs
     completedJob?.title || completedEvent?.title,
     agent === "joshex" ? "No recent JOSHeX completion reported" : `No recent ${AGENTS[agent].label} completion reported`,
   );
+  const nextTodayJob = (state.todayJobs || [])
+    .filter((job) => job.outcome === "pending" && todayJobAgentId(job) === agent)
+    .map((job) => ({ job, nextAt: todayJobNextAt(job, nowMs) }))
+    .filter((row): row is { job: TodayJobOccurrence; nextAt: number } => Boolean(row.nextAt))
+    .sort((a, b) => a.nextAt - b.nextAt)[0];
+  if (nextTodayJob) {
+    return {
+      complete,
+      nextTitle: compactTaskText(scheduledWorkTitle(nextTodayJob.job.name), "Scheduled task"),
+      nextBullets: [compactTaskText(nextTodayJob.job.description, "Scheduled by Today Jobs")],
+      nextAt: nextTodayJob.nextAt,
+      countdown: countdownLabel(nextTodayJob.nextAt, nowMs),
+    };
+  }
   const nextCandidates = agentJobs
     .filter(jobIsSchedulable)
     .map((job) => ({ job, nextAt: nextScheduleFromJob(job, nowMs) }))
@@ -6411,7 +6536,7 @@ function buildAgentIdleContext(agent: AgentId, state: MissionControlState, nowMs
   if (!next) {
     return {
       complete,
-      nextTitle: "no upcoming, awaiting instruction",
+      nextTitle: "No scheduled work",
       nextBullets: expectedNextBullets(null, agent),
       countdown: "",
     };
@@ -6976,21 +7101,17 @@ function AgentHeroCard({
           </span>
         ) : null}
       </h3>
-      <div className="agent-workflow-lane" title={workerRoutes.length ? "Verified active specialist workers attached to this controller work" : activeFocus ? "Current verified workflow phase" : "Next known work state"}>
+      <div className="agent-workflow-lane" title={idleContext.nextAt ? `Next scheduled work: ${idleContext.nextTitle}` : "No scheduled work currently reported"}>
         <span aria-hidden="true" />
         <div>
-          <strong>{controllerCount > 1
-            ? `${controllerCount} active tasks`
-            : workerRoutes.length
-            ? `${visibleWorkerRoutes.map((worker) => liveWorkModelLabel(CANONICAL_ROUTES[worker.modelFamily], worker.modelId)).join(" + ")} · ${workerRoutes.length} lane${workerRoutes.length === 1 ? "" : "s"}`
-            : activeFocus ? "Primary workflow" : "Next workflow"}</strong>
-          <em>{controllerCount > 1
-            ? `Showing ${rotatedController.index + 1} of ${controllerCount}${workerRoutes.length ? ` · ${workerRoutes.length} verified worker${workerRoutes.length === 1 ? "" : "s"}` : ""}`
-            : workerRoutes.length
-            ? visibleWorkerRoutes.map((worker) => compactText(workerObjectiveForRoute(worker, activeWorks), 28)).join(" · ")
-            : activeFocus
-              ? stepTrail.find((step) => step.state === "current")?.label || "Current step"
-              : compactText(idleContext.nextTitle, 36)}</em>
+          <strong className="agent-workflow-next-title">{compactText(idleContext.nextTitle, 38)}</strong>
+          <em className="agent-workflow-next-meta">{idleContext.nextAt
+            ? `Next · ${idleContext.countdown || atlasClock(new Date(idleContext.nextAt).toISOString())}${controllerCount ? ` · ${controllerCount} active task${controllerCount === 1 ? "" : "s"}` : ""}${workerRoutes.length ? ` · ${workerRoutes.length} worker${workerRoutes.length === 1 ? "" : "s"}` : ""}`
+            : controllerCount
+              ? `${controllerCount} active task${controllerCount === 1 ? "" : "s"} · queue clear afterward`
+              : workerRoutes.length
+                ? `${workerRoutes.length} active worker${workerRoutes.length === 1 ? "" : "s"} · queue clear afterward`
+                : "Queue clear · awaiting instruction"}</em>
         </div>
       </div>
     </article>

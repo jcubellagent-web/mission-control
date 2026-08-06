@@ -287,7 +287,9 @@ def valid_memory_operations() -> dict:
                 "contentIncluded": False,
                 "rawIdentifiersIncluded": False,
                 "reasonsIncluded": False,
-                "countsOnly": True,
+                "countsOnly": False,
+                "sanitizedTopicLabelsIncluded": True,
+                "topicTaxonomy": "bounded-dashboard-safe-categories",
             },
             "counts": {
                 "retrievals": 1,
@@ -317,6 +319,14 @@ def valid_memory_operations() -> dict:
                 "corrected": None,
                 "proposed": None,
                 "promoted": None,
+            },
+            "topicSummaries": {
+                "retrieval": [{"label": "Shared memory operations", "observedAt": retrieval_at}],
+                "selected": [{"label": "Shared memory operations", "observedAt": "2026-07-18T15:59:05Z"}],
+                "used": [{"label": "Shared memory operations", "observedAt": "2026-07-18T15:59:10Z"}],
+                "feedback": [{"label": "Shared memory operations", "observedAt": "2026-07-18T15:59:10Z"}],
+                "proposed": [],
+                "promoted": [],
             },
             "agents": [
                 {
@@ -1199,6 +1209,29 @@ class BrainAtlasDashboardIntegrationTests(unittest.TestCase):
         self.assertIn('data-flow-from="durable" data-flow-to="registry"', main)
         self.assertIn("directedFlowMissingArrowCount", runtime)
         self.assertIn("flowPathCollisions", runtime)
+
+    def test_memory_nodes_show_safe_topics_totals_and_only_animate_complete_routes(self) -> None:
+        main = (MISSION_CONTROL / "v2-react" / "src" / "main.tsx").read_text(encoding="utf-8")
+        styles = (MISSION_CONTROL / "v2-react" / "src" / "styles.css").read_text(encoding="utf-8")
+        self.assertIn("const memoryNodeIsActive =", main)
+        self.assertIn('feedback: ["used", "helpful"]', main)
+        self.assertIn('promoted: ["candidate", "durable", "registry"]', main)
+        self.assertIn('memoryNodeIsActive("used") && memoryNodeIsActive("helpful")', main)
+        self.assertIn('className="brain-memory-topic-cursor"', main)
+        self.assertIn('data-topic-count={topics.length}', main)
+        self.assertIn('data-total={total}', main)
+        self.assertNotIn('"by agent"', main)
+        self.assertIn("brain-memory-topic-roll", styles)
+        self.assertIn("#brain-atlas .brain-memory-packet", styles)
+
+    def test_live_work_next_column_uses_actual_scheduled_occurrence(self) -> None:
+        main = (MISSION_CONTROL / "v2-react" / "src" / "main.tsx").read_text(encoding="utf-8")
+        self.assertIn("function todayJobAgentId(", main)
+        self.assertIn("function todayJobNextAt(", main)
+        self.assertIn("const nextTodayJob = (state.todayJobs || [])", main)
+        self.assertIn('className="agent-workflow-next-title"', main)
+        self.assertIn("Next scheduled work:", main)
+        self.assertNotIn(': activeFocus ? "Primary workflow" : "Next workflow"', main)
 
     def test_brain_atlas_exposes_telemetry_backed_active_agent_routes_without_clicks(self) -> None:
         main = (MISSION_CONTROL / "v2-react" / "src" / "main.tsx").read_text(encoding="utf-8")
