@@ -3206,7 +3206,7 @@ function FinOpsDashboard({
                     : "Signals, news, and X research";
                 const purposeLabel = key === "ollama" ? "Direct API metrics" : "Purpose";
                 const activityDetail = key === "ollama"
-                  ? `${directCallsToday} direct Cloud calls today · account quota unavailable`
+                  ? `${directCallsToday} calls today · quota unavailable`
                   : `${activityScore}% live heat · ${heatLabel}`;
                 const ProviderIcon = key === "codex" ? Braces : key === "antigravity" ? Sparkles : key === "ollama" ? Bot : Radio;
                 return (
