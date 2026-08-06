@@ -2823,6 +2823,23 @@ function providerSummaryLabel(provider: any) {
   return "usage tracked live";
 }
 
+function providerConsumptionLabel(provider: any) {
+  const key = providerKey(provider);
+  if (key !== "ollama") return providerDisplayBlurb(provider);
+  const quotaWindow = providerLimitRows(provider).find((window: any) => /week/i.test(String(window?.label || window?.id || "")))
+    || providerLimitRows(provider)[0];
+  const quota = quotaWindow
+    ? `Quota ${providerWindowValue(quotaWindow)}`
+    : "Quota telemetry unavailable";
+  const calls = Math.max(0, Number(provider?.callsWeekly || 0));
+  const tokens = compactInt(provider?.totalTokens);
+  const receipts = [
+    calls > 0 ? `${calls} verified receipt calls` : null,
+    tokens ? `${tokens} receipt tok` : null,
+  ].filter(Boolean).join(" · ");
+  return receipts ? `${quota} · ${receipts}` : quota;
+}
+
 function providerUpdatedLabel(provider: any) {
   if (provider?.codexbarUpdatedAt) return fmtTime(provider.codexbarUpdatedAt);
   return provider?.codexbarSource ? `Source ${missionText(String(provider.codexbarSource))}` : "Route telemetry";
@@ -3167,28 +3184,32 @@ function FinOpsDashboard({
                   .filter((row) => row.modelFamily === key)
                   .sort((left, right) => timeValue(right.updatedAt) - timeValue(left.updatedAt))[0];
                 const pct = providerUtilizationPct(provider);
-                const activityScore = providerActivityScore(
+                const receiptActivityScore = providerActivityScore(
                   provider,
                   active,
                   liveRoute?.updatedAt,
                   maximumProviderActivity,
                   maxSubscription,
                 );
+                // FinOps heat represents actual provider consumption for GLM,
+                // not routing coverage or the count of metadata receipts.
+                const activityScore = key === "ollama" ? pct : receiptActivityScore;
                 const heatLabel = providerHeatLabel(provider, active, liveRoute?.updatedAt);
                 const tone = providerTone(provider);
                 const topModel = providerTopModels(provider)[0];
                 const currentModel = providerModelLabel({ name: topModel?.name || provider.lastModelUsed || "Route ready" });
                 const stateLabel = tone === "risk" ? "BLOCKED" : active ? "ACTIVE" : key === "ollama" ? "CLOUD · IDLE" : "IDLE";
-                const ollamaGovernance = key === "ollama" ? modelUsage?.ollamaGovernance : undefined;
-                const purpose = key === "codex"
+                const purpose = key === "ollama"
+                  ? providerConsumptionLabel(provider)
+                  : key === "codex"
                   ? "Code, verify, and system changes"
                   : key === "antigravity"
                     ? "Planning, review, and long-context work"
-                    : key === "ollama"
-                      ? ollamaGovernance?.coveragePct != null
-                        ? `GLM ${ollamaGovernance.coveragePct}% eligible coverage · ${ollamaGovernance.nonCanaryAttempts || 0} verified attempts`
-                        : "GLM Cloud technical analysis and offline utility"
-                      : "Signals, news, and X research";
+                    : "Signals, news, and X research";
+                const purposeLabel = key === "ollama" ? "Consumption" : "Purpose";
+                const activityDetail = key === "ollama"
+                  ? `${pct}% quota used · receipt activity kept separate`
+                  : `${activityScore}% live heat · ${heatLabel}`;
                 const ProviderIcon = key === "codex" ? Braces : key === "antigravity" ? Sparkles : key === "ollama" ? Bot : Radio;
                 return (
                   <article
@@ -3219,10 +3240,13 @@ function FinOpsDashboard({
                         <strong>{pct}%</strong>
                       </div>
                     </div>
-                    <p className="finops-provider-purpose"><span>Purpose</span><em title={purpose}>{purpose}</em></p>
+                    <p className="finops-provider-purpose"><span>{purposeLabel}</span><em title={purpose}>{purpose}</em></p>
                     <footer className="finops-provider-state">
-                      <strong>{stateLabel}<small>{activityScore}% live heat · {heatLabel}</small></strong>
-                      <i className="finops-segment-meter" aria-label={`${activityScore}% recent activity intensity`}>
+                      <strong>{stateLabel}<small>{activityDetail}</small></strong>
+                      <i
+                        className="finops-segment-meter"
+                        aria-label={key === "ollama" ? `${pct}% quota consumption` : `${activityScore}% recent activity intensity`}
+                      >
                         {Array.from({ length: 10 }, (_, index) => <b key={index} className={index < Math.ceil(activityScore / 10) ? "is-filled" : ""} />)}
                       </i>
                     </footer>
