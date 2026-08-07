@@ -21344,6 +21344,45 @@ body,
   font-weight: 950 !important;
 }
 
+/* The identity rail is a label, not a miniature dashboard. Keep the live
+   status dot at the edge while centering a name that is readable at kiosk
+   distance. */
+.brain-hero.is-flight-deck .agent-hero-card header {
+  position: relative !important;
+  display: flex !important;
+  align-self: stretch !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 100% !important;
+}
+
+.brain-hero.is-flight-deck .agent-hero-card header > .dot {
+  position: absolute !important;
+  left: 0 !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+}
+
+.brain-hero.is-flight-deck .agent-hero-card .agent-name-lockup {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 0 !important;
+  height: 100% !important;
+}
+
+.brain-hero.is-flight-deck .agent-hero-card .agent-name-lockup strong {
+  display: block !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  text-align: center !important;
+  font-size: clamp(18px, 1.65vw, 28px) !important;
+  line-height: 1 !important;
+  letter-spacing: -0.025em !important;
+}
+
 .brain-hero.is-flight-deck .agent-hero-card.is-density-compact {
   grid-template-columns: minmax(102px, 0.13fr) minmax(0, 1fr) !important;
   grid-template-areas: "agent objective" !important;
@@ -21354,6 +21393,10 @@ body,
 .brain-hero.is-flight-deck .agent-hero-card.is-density-compact.is-working-focus .agent-objective-main {
   font-size: clamp(13px, 1.05vw, 17px) !important;
   font-weight: 900 !important;
+}
+
+.brain-hero.is-flight-deck .agent-hero-card.is-density-compact .agent-name-lockup strong {
+  font-size: clamp(16px, 1.3vw, 22px) !important;
 }
 
 /* A fresh verified route is immediate execution evidence. It lights the card
