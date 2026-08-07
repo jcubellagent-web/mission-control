@@ -14,6 +14,8 @@
     "dev": "vite --host 127.0.0.1 --port 5174 --strictPort",
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1 --port 4174",
+    "test:visual": "playwright test",
+    "test:chromatic": "chromatic --playwright",
     "preview:ci": "vite preview --host 127.0.0.1 --port 5174 --strictPort",
     "check:routes": "python3 scripts/ecosystem_qa_benchmark.py --route-only",
     "check:runtime": "python3 scripts/mission_control_runtime_layout_check.py",
