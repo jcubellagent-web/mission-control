@@ -63,6 +63,7 @@ SOURCE_PATHS = (
     "scripts/ecosystem_qa_scheduler.py",
     "scripts/shared_source_resume.py",
     "scripts/test_shared_source_resume.py",
+    "scripts/test_control_tower_change_guard.py",
     "scripts/ecosystem_qa_supervisor.py",
     "scripts/ecosystem_proposal_ledger.py",
     "scripts/continuous_maintenance.py",
@@ -168,6 +169,7 @@ PYTHON_COMPILE_PATHS = (
     "scripts/ecosystem_qa_scheduler.py",
     "scripts/shared_source_resume.py",
     "scripts/test_shared_source_resume.py",
+    "scripts/test_control_tower_change_guard.py",
     "scripts/ecosystem_runtime_probe.py",
     "scripts/refresh_agentic_robinhood_wallet_live.py",
     "scripts/telegram_response_contract_stress.py",
@@ -185,7 +187,11 @@ TASKS_PATH = ROOT / "data" / "agent-task-queue.json"
 CLOSEOUT_DIR = STATE_DIR / "agent-source-closeouts"
 LIFECYCLE_LOCK_PATH = STATE_DIR / "agent-source-lifecycle.lock"
 TERMINAL_TASK_STATUSES = {"done", "blocked", "error", "cancelled"}
-VALID_CLOSEOUT_OUTCOMES = {"finished", "aborted", "expired-orphan-recovered"}
+VALID_CLOSEOUT_OUTCOMES = {"finished", "aborted", "expired-orphan-recovered", "orphan-recovered"}
+# Owners must renew while they hold a clean source lease. This is deliberately
+# much shorter than the 45-minute fallback TTL, but long enough for a normal
+# command or verification step to complete.
+ORPHAN_RECOVERY_GRACE_MINUTES = 10
 
 
 @contextmanager
@@ -278,6 +284,13 @@ def now() -> dt.datetime:
 
 def iso(value: dt.datetime | None = None) -> str:
     return (value or now()).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def time_value(value: object) -> float:
+    try:
+        return dt.datetime.fromisoformat(str(value).replace("Z", "+00:00")).timestamp()
+    except (TypeError, ValueError):
+        return 0
 
 
 def run(args: list[str], *, check: bool = True, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
@@ -431,6 +444,7 @@ def _begin_locked(agent: str, objective: str, task_id: str = "", work_id: str = 
         "objective": objective,
         "token": token,
         "startedAt": iso(),
+        "lastRenewedAt": iso(),
         "expiresAt": iso(now() + dt.timedelta(minutes=LEASE_MINUTES)),
         "ownerPid": os.getppid(),
         "pushApproval": standing_push_approval(agent),
@@ -462,6 +476,7 @@ def renew(token: str) -> None:
     if lease_expired(payload):
         raise SystemExit("Expired Control Tower change lease requires safe recovery.")
     payload["expiresAt"] = iso(now() + dt.timedelta(minutes=LEASE_MINUTES))
+    payload["lastRenewedAt"] = iso()
     LOCK_PATH.write_text(json.dumps(payload, indent=2) + "\n")
     print(json.dumps({"ok": True, "lease": public_lease(payload)}, indent=2))
 
@@ -585,14 +600,42 @@ def release_evidence(payload: dict, outcome: str, detail: str) -> Path:
     return evidence
 
 
-def recovery_ready(payload: dict) -> tuple[bool, str]:
+def lease_task_is_terminal_or_stale(payload: dict) -> tuple[bool, str]:
+    binding = payload.get("taskBinding") if isinstance(payload.get("taskBinding"), dict) else {}
+    task_id = str(binding.get("taskId") or "")
+    try:
+        tasks = json.loads(TASKS_PATH.read_text()).get("tasks", [])
+    except (FileNotFoundError, json.JSONDecodeError, OSError):
+        return False, "task ledger is unavailable"
+    task = next((row for row in tasks if isinstance(row, dict) and row.get("id") == task_id), None)
+    if not task:
+        return True, "bound task is absent from the task ledger"
+    if str(task.get("status") or "") in TERMINAL_TASK_STATUSES:
+        return True, f"bound task is terminal ({task.get('status')})"
+    activity = max(time_value(task.get(key)) for key in ("lastHeartbeatAt", "heartbeatAt", "lastActivityAt", "updatedAt"))
+    if activity <= 0:
+        return True, "bound task has no active heartbeat"
+    stale_after = ORPHAN_RECOVERY_GRACE_MINUTES * 60
+    if now().timestamp() - activity >= stale_after:
+        return True, "bound task heartbeat is stale"
+    return False, "bound task is still reporting a fresh heartbeat"
+
+
+def recovery_ready(payload: dict, *, allow_early_orphan: bool = False) -> tuple[bool, str]:
     if not lease_expired(payload):
-        return False, "lease has not expired"
+        if not allow_early_orphan:
+            return False, "lease has not expired"
+        last_renewed = time_value(payload.get("lastRenewedAt") or payload.get("startedAt"))
+        if not last_renewed or now().timestamp() - last_renewed < ORPHAN_RECOVERY_GRACE_MINUTES * 60:
+            return False, "lease has a recent owner renewal"
     if process_is_alive(payload.get("ownerPid")):
         return False, "owner process is still present"
     if source_changes():
         return False, "canonical source has unresolved changes"
-    return True, "expired owner is absent and source is clean"
+    task_ok, task_reason = lease_task_is_terminal_or_stale(payload)
+    if not task_ok:
+        return False, task_reason
+    return True, f"owner is absent, source is clean, and {task_reason}"
 
 
 def recover_expired() -> None:
@@ -606,6 +649,25 @@ def recover_expired() -> None:
     evidence = release_evidence(payload, "expired-orphan-recovered", reason)
     receipt = write_receipt(
         payload, outcome="expired-orphan-recovered", detail=reason, recorded_at=iso(),
+        head_commit=(run(["git", "rev-parse", "HEAD"]).stdout.strip() if payload.get("taskBinding") else ""), source_clean=True,
+        origin_synced=True, evidence=str(evidence),
+    )
+    LOCK_PATH.unlink(missing_ok=True)
+    print(json.dumps({"ok": True, "recovered": True, "evidence": str(evidence), "receipt": str(receipt or "")}, indent=2))
+
+
+def recover_orphan() -> None:
+    """Recover a dead, clean source lease without waiting for its full TTL."""
+    payload = read_lock()
+    if not payload:
+        print(json.dumps({"ok": True, "recovered": False, "lease": None}, indent=2))
+        return
+    allowed, reason = recovery_ready(payload, allow_early_orphan=True)
+    if not allowed:
+        raise SystemExit(json.dumps({"ok": False, "reason": reason, "lease": public_lease(payload)}, indent=2))
+    evidence = release_evidence(payload, "orphan-recovered", reason)
+    receipt = write_receipt(
+        payload, outcome="orphan-recovered", detail=reason, recorded_at=iso(),
         head_commit=(run(["git", "rev-parse", "HEAD"]).stdout.strip() if payload.get("taskBinding") else ""), source_clean=True,
         origin_synced=True, evidence=str(evidence),
     )
@@ -713,6 +775,7 @@ def main() -> None:
     approve.add_argument("--token", required=True)
     approve.add_argument("--approval-ref", required=True)
     sub.add_parser("recover-expired")
+    sub.add_parser("recover-orphan")
     args = parser.parse_args()
     if args.command == "begin":
         begin(args.agent, args.objective, args.task_id, args.work_id, args.run_id)
@@ -724,6 +787,7 @@ def main() -> None:
     elif args.command == "abort": abort(args.token)
     elif args.command == "approve-push": approve_push(args.token, args.approval_ref)
     elif args.command == "recover-expired": recover_expired()
+    elif args.command == "recover-orphan": recover_orphan()
 
 
 if __name__ == "__main__":

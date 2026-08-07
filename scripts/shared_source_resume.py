@@ -185,6 +185,11 @@ def create_continuation(entry: dict[str, Any]) -> tuple[bool, str, str]:
 
 def resume_one(entry: dict[str, Any]) -> tuple[bool, str, str]:
     leases = active_leases()
+    # A dead owner should not hold the whole source queue for the remaining TTL.
+    # The guard itself remains authoritative and writes the recovery receipt.
+    if leases.get("global") and not leases.get("scoped"):
+        run_json([sys.executable, "scripts/control_tower_change_guard.py", "recover-orphan"])
+        leases = active_leases()
     if leases.get("global") or leases.get("scoped"):
         return False, "deferred", json.dumps({"blockedBy": public_blockers(leases)})
     code, preflight, detail = run_json([

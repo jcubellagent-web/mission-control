@@ -71,13 +71,15 @@ def test_provider_breakdown_projects_recent_activity_without_content() -> None:
     assert ollama["lastActivityAt"] == "2026-08-06T01:00:00Z"
 
 
-def test_ui_heat_is_recency_and_cost_weighted_and_jobs_consume_live_leases() -> None:
+def test_ui_heat_uses_live_request_windows_and_jobs_consume_live_leases() -> None:
     ui_source = (ROOT / "v2-react" / "src" / "main.tsx").read_text(encoding="utf-8")
 
     assert "callsLast5m" in ui_source
-    assert "costPressure" in ui_source
-    assert "Math.exp(-(ageMinutes - 2) / 18)" in ui_source
-    assert "active ? 92" not in ui_source
+    assert "providerLiveActivity" in ui_source
+    assert "calls30m - calls5m" in ui_source
+    assert "calls2h - calls30m" in ui_source
+    assert "costPressure" not in ui_source
+    assert "Math.exp(-(ageMinutes - 2) / 18)" not in ui_source
     assert "activeWorks={state.workHot?.activeWorks}" in ui_source
     assert "timeValue(work.leaseUntil) > clockNow.getTime()" in ui_source
     assert "is-live-runtime" in ui_source

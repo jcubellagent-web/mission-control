@@ -21647,14 +21647,17 @@ body,
 .brain-hero.is-flight-deck .agent-rotation-counter {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   border: 1px solid color-mix(in srgb, var(--agent-tone, var(--cyan)) 54%, transparent);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--agent-tone, var(--cyan)) 10%, rgba(3, 16, 28, 0.96));
-  padding: 3px 8px;
-  color: color-mix(in srgb, var(--agent-tone, var(--cyan)) 84%, #fff);
-  font-size: 10px;
+  background: color-mix(in srgb, var(--agent-tone, var(--cyan)) 18%, rgba(3, 16, 28, 0.96));
+  box-shadow: 0 0 12px color-mix(in srgb, var(--agent-tone, var(--cyan)) 24%, transparent);
+  min-height: 25px;
+  padding: 4px 10px;
+  color: color-mix(in srgb, var(--agent-tone, var(--cyan)) 92%, #fff);
+  font-size: 14px;
   font-weight: 900;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   line-height: 1;
 }
 

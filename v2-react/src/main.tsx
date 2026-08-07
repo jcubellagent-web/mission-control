@@ -2662,42 +2662,21 @@ function providerUtilizationPct(provider: any) {
   return 0;
 }
 
-function providerActivityVolume(provider: any) {
-  const weekly = Math.max(0, Number(provider?.callsWeekly || 0));
-  const sessions = Math.max(0, Number(provider?.sessions || 0));
-  const tokens = Math.max(0, Number(provider?.totalTokens || 0));
-  return weekly + sessions * 0.35 + Math.log1p(tokens / 2_500) * 4;
+function providerLiveActivity(provider: any) {
+  // The API windows are cumulative. Convert them into a short-window weighted
+  // rate so historical sessions, spend, and stale route state never warm a tile.
+  const calls5m = Math.max(0, Number(provider?.callsLast5m || 0));
+  const calls30m = Math.max(calls5m, Number(provider?.callsLast30m || 0));
+  const calls2h = Math.max(calls30m, Number(provider?.callsLast2h || 0));
+  return calls5m + (calls30m - calls5m) * 0.25 + (calls2h - calls30m) * 0.05;
 }
 
-function providerActivityScore(
-  provider: any,
-  active: boolean,
-  routeUpdatedAt: string | undefined,
-  maximumVolume: number,
-  maximumMonthlyCost: number,
-  nowMs = Date.now(),
-) {
-  const volume = providerActivityVolume(provider);
-  const volumePressure = maximumVolume > 0
-    ? Math.log1p(volume) / Math.log1p(maximumVolume)
-    : 0;
-  const monthlyCost = Math.max(0, providerSubscriptionMonthly(provider));
-  const costPressure = maximumMonthlyCost > 0 ? Math.sqrt(monthlyCost / maximumMonthlyCost) : 0;
-  const lastActivityAt = [provider?.lastActivityAt, routeUpdatedAt]
-    .map(timeValue)
-    .filter((value) => value > 0)
-    .sort((left, right) => right - left)[0] || 0;
-  const ageMinutes = lastActivityAt ? Math.max(0, (nowMs - lastActivityAt) / 60_000) : Number.POSITIVE_INFINITY;
-  const recency = ageMinutes <= 2 ? 1 : ageMinutes <= 180 ? Math.exp(-(ageMinutes - 2) / 18) : 0;
-  const recentBurst = Math.min(1,
-    Math.max(0, Number(provider?.callsLast5m || 0)) * 0.5
-    + Math.max(0, Number(provider?.callsLast30m || 0)) * 0.08
-    + Math.max(0, Number(provider?.callsLast2h || 0)) * 0.015,
-  );
-  const liveSignal = Math.max(active ? 1 : 0, recency, recentBurst);
-  const activeHeat = liveSignal * (42 + volumePressure * 24 + costPressure * 25);
-  const residualHeat = liveSignal > 0.05 ? 0 : volumePressure * 8;
-  return Math.max(4, Math.min(100, Math.round(4 + activeHeat + residualHeat)));
+function providerActivityScore(provider: any, maximumLiveActivity: number) {
+  const liveActivity = providerLiveActivity(provider);
+  if (liveActivity <= 0 || maximumLiveActivity <= 0) return 0;
+  // Preserve differences between active providers while making the current
+  // leader visibly deepest. Zero live requests must remain unheated.
+  return Math.min(100, Math.round(18 + Math.sqrt(liveActivity / maximumLiveActivity) * 82));
 }
 
 function providerHeatLabel(provider: any, active: boolean, routeUpdatedAt?: string) {
@@ -3042,7 +3021,7 @@ function FinOpsDashboard({
   const providerRisks = providers.filter((provider) => providerTone(provider) === "risk").length;
   const riskCount = routeAlerts.length + walletErrors.length + providerRisks;
   const budgetWatchCount = providers.filter((provider) => providerTone(provider) !== "clear").length;
-  const maximumProviderActivity = Math.max(...providers.map(providerActivityVolume), 1);
+  const maximumProviderActivity = Math.max(...providers.map(providerLiveActivity), 0);
   const subscriptionMix = providers.map(providerSubscriptionMonthly);
   const maxSubscription = Math.max(...subscriptionMix, 1);
   const walletActions = [
@@ -3185,13 +3164,7 @@ function FinOpsDashboard({
                   .sort((left, right) => timeValue(right.updatedAt) - timeValue(left.updatedAt))[0];
                 const pct = providerUtilizationPct(provider);
                 const directCallsToday = Math.max(0, Number(provider?.callsToday || 0));
-                const receiptActivityScore = providerActivityScore(
-                  provider,
-                  active,
-                  liveRoute?.updatedAt,
-                  maximumProviderActivity,
-                  maxSubscription,
-                );
+                const receiptActivityScore = providerActivityScore(provider, maximumProviderActivity);
                 // Ollama has direct Cloud API metrics but no supported account
                 // quota endpoint. Its heat reflects verified request activity.
                 const activityScore = receiptActivityScore;
