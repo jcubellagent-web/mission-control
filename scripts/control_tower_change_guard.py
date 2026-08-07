@@ -294,7 +294,10 @@ def time_value(value: object) -> float:
 
 
 def run(args: list[str], *, check: bool = True, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
-    proc = subprocess.run(args, cwd=ROOT, text=True, capture_output=True, env=env, check=False)
+    # Verification commands are untrusted child processes from the guard's
+    # perspective. Isolating their session prevents a broad test cleanup from
+    # terminating the lease owner before it can write its closeout receipt.
+    proc = subprocess.run(args, cwd=ROOT, text=True, capture_output=True, env=env, check=False, start_new_session=True)
     if check and proc.returncode:
         if proc.stdout.strip():
             print(proc.stdout.strip(), file=sys.stderr)
