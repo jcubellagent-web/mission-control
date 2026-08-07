@@ -2726,7 +2726,10 @@ function providerActivityScore(provider: any) {
   const calls5m = Math.max(0, Number(provider?.callsLast5m || 0));
   const calls30m = Math.max(calls5m, Number(provider?.callsLast30m || 0));
   const additional30mCalls = calls30m - calls5m;
-  return Math.min(100, Math.round(calls5m * 36 + additional30mCalls * 9));
+  // One active call is light activity. The meter only reaches hot territory
+  // after sustained work, rather than treating ordinary specialist use as a
+  // high-volume stream.
+  return Math.min(100, Math.round(calls5m * 18 + additional30mCalls * 4));
 }
 
 function providerHeatLabel(provider: any, active: boolean, routeUpdatedAt?: string) {
