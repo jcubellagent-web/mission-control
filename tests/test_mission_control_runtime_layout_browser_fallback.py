@@ -456,6 +456,22 @@ def test_kiosk_legibility_accepts_exact_contract_boundaries() -> None:
     ) == []
 
 
+def test_kiosk_legibility_accepts_labelled_stale_timeline() -> None:
+    measurements = valid_kiosk_legibility_measurements()
+    today_jobs = measurements["todayJobs"]
+    assert isinstance(today_jobs, dict)
+    today_jobs.update({
+        "nowMarkerPresent": False,
+        "nowMarkerLabel": "",
+        "staleNowMarkerPresent": True,
+        "staleNowMarkerLabel": "Today timeline is awaiting a fresh schedule",
+        "followNowState": "ready",
+        "nowCenterDelta": None,
+    })
+
+    assert runtime_layout.validate_kiosk_legibility(measurements) == []
+
+
 def test_layout_rejects_legacy_tabs_or_missing_simultaneous_layers() -> None:
     measurements = valid_kiosk_legibility_measurements()
     view = measurements["brainAtlasView"]
@@ -1154,8 +1170,7 @@ def test_kiosk_legibility_reports_every_regression() -> None:
         "Today's Jobs has missing non-green explanations",
         "Today's Jobs exposes an invalid object/undefined explanation",
         "Today's Jobs pending summary does not explain future versus failed",
-        "Today's Jobs current-time marker is missing or unlabeled",
-        "Today's Jobs auto-follow state is ready",
+        "Today's Jobs current-time or stale-timeline marker is missing",
         "Today's Jobs rowgroup contains a non-row timeline child",
     )
     assert all(any(fragment in failure for failure in failures) for fragment in expected_fragments)
