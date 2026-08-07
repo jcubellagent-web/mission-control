@@ -26,8 +26,20 @@ def test_wallet_refresh_is_async_single_flight_and_never_spawn_sync() -> None:
 def test_wallet_refresh_keeps_output_bounded() -> None:
     source = (ROOT / "vite.config.ts").read_text(encoding="utf-8")
 
-    assert "walletRefreshOutputLimit" in source
-    assert ".slice(0, walletRefreshOutputLimit)" in source
+    assert "refreshOutputLimit" in source
+    assert ".slice(0, refreshOutputLimit)" in source
+
+
+def test_model_usage_refresh_is_async_single_flight_and_keeps_command_output_private() -> None:
+    source = (ROOT / "vite.config.ts").read_text(encoding="utf-8")
+
+    assert "modelUsageRefreshInFlight" in source
+    assert "if (modelUsageRefreshInFlight) return modelUsageRefreshInFlight" in source
+    assert 'spawn("python3", ["scripts/update_mission_control.py"]' in source
+    assert 'pathname === "/actions/model-usage-refresh"' in source
+    assert "model usage refresh timed out" in source
+    assert 'error: "CodexBar usage refresh failed"' in source
+    assert "Do not return command output" in source
 
 
 def test_wallet_refresh_uses_host_wide_single_flight_lock(monkeypatch, tmp_path, capsys) -> None:

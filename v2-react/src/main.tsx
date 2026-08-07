@@ -1459,6 +1459,8 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [dataError, setDataError] = useState<string | null>(null);
   const [walletRefreshFailed, setWalletRefreshFailed] = useState(false);
+  const [modelUsageRefreshLoading, setModelUsageRefreshLoading] = useState(false);
+  const [modelUsageRefreshFailed, setModelUsageRefreshFailed] = useState(false);
   const [liveMode, setLiveMode] = useState<"connected" | "polling">("polling");
   const [quietMode, setQuietMode] = useState(true);
   const [selectedAgent, setSelectedAgent] = useState<AgentId | null>(null);
@@ -1554,6 +1556,22 @@ function App() {
       setWalletRefreshFailed(true);
     } finally {
       if (showLoading) setLoading(false);
+    }
+  }, [refresh]);
+
+  const refreshModelUsage = useCallback(async () => {
+    setModelUsageRefreshLoading(true);
+    try {
+      const response = await fetch("/actions/model-usage-refresh", { method: "POST", cache: "no-store" });
+      if (!response.ok) throw new Error(`CodexBar usage refresh returned ${response.status}`);
+      invalidateMissionControlSidecars();
+      await refresh(false);
+      setModelUsageRefreshFailed(false);
+    } catch (error) {
+      console.warn(error);
+      setModelUsageRefreshFailed(true);
+    } finally {
+      setModelUsageRefreshLoading(false);
     }
   }, [refresh]);
 
@@ -1765,6 +1783,9 @@ function App() {
           loading={loading}
           walletRefreshFailed={walletRefreshFailed}
           onRefresh={() => refreshAgenticCrypto(true)}
+          modelUsageRefreshLoading={modelUsageRefreshLoading}
+          modelUsageRefreshFailed={modelUsageRefreshFailed}
+          onModelUsageRefresh={refreshModelUsage}
         />
       </section>
     </main>
@@ -3041,6 +3062,9 @@ function FinOpsDashboard({
   loading,
   walletRefreshFailed,
   onRefresh,
+  modelUsageRefreshLoading,
+  modelUsageRefreshFailed,
+  onModelUsageRefresh,
 }: {
   wallet?: AgenticCryptoWallet;
   modelUsage?: MissionControlState["modelUsage"];
@@ -3050,6 +3074,9 @@ function FinOpsDashboard({
   loading: boolean;
   walletRefreshFailed: boolean;
   onRefresh: () => void;
+  modelUsageRefreshLoading: boolean;
+  modelUsageRefreshFailed: boolean;
+  onModelUsageRefresh: () => void;
 }) {
   const freshness = cryptoFreshness(wallet, walletRefreshFailed);
   const summary = wallet?.summary || {};
@@ -3075,6 +3102,14 @@ function FinOpsDashboard({
   const codexProvider = providers.find((provider) => providerKey(provider) === "codex");
   const codexPressurePct = providerVerifiedAllowance(codexProvider).percent || 0;
   const modelUpdatedAt = modelUsage?.lastUpdated || modelRouter?.updatedAt;
+  const codexbarUpdatedAt = Object.values(modelUsage?.codexbarLimits || {})
+    .map((row: any) => String(row?.codexbarUpdatedAt || ""))
+    .filter(Boolean)
+    .sort()
+    .at(-1);
+  const codexbarFreshness = codexbarUpdatedAt
+    ? `CodexBar ${fmtTime(codexbarUpdatedAt)}`
+    : "CodexBar awaiting data";
   const routeAlerts = Array.isArray((modelRouter as any)?.routeAlerts) ? (modelRouter as any).routeAlerts : [];
   const walletErrors = Array.isArray((wallet as any)?.errors) ? (wallet as any).errors : [];
   const providerRisks = providers.filter((provider) => providerTone(provider) === "risk").length;
@@ -3127,9 +3162,12 @@ function FinOpsDashboard({
         </div>
         <div className="finops-actions">
           <span className={`crypto-status ${cryptoStatusClass(freshness.status)}`}><ShieldCheck size={13} />Wallet {freshness.label}</span>
-          <span><Timer size={13} />Auto-refresh 5m</span>
+          <span className={`crypto-status ${modelUsageRefreshFailed ? "is-risk" : "is-clear"}`} title="Usage limits are read directly from the authenticated CodexBar profile on Josh 2.0."><Timer size={13} />{modelUsageRefreshFailed ? "CodexBar refresh failed" : codexbarFreshness}</span>
           <button type="button" onClick={onRefresh} disabled={loading} aria-busy={loading} title="Refresh read-only wallet inventory">
             <RefreshCw size={13} className={loading ? "spin" : ""} /> {loading ? "Refreshing…" : "Refresh wallet"}
+          </button>
+          <button type="button" onClick={onModelUsageRefresh} disabled={modelUsageRefreshLoading} aria-busy={modelUsageRefreshLoading} title="Read current provider allowance directly from CodexBar and refresh FinOps">
+            <RefreshCw size={13} className={modelUsageRefreshLoading ? "spin" : ""} /> {modelUsageRefreshLoading ? "Reading CodexBar…" : "Refresh usage"}
           </button>
         </div>
       </header>

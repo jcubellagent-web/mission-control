@@ -30,13 +30,15 @@ const liveWatchFiles = [
   "agent-heartbeats.json",
 ];
 const walletRefreshTimeoutMs = 60_000;
-const walletRefreshOutputLimit = 64 * 1024;
-type WalletRefreshResult = { status: number; stdout: string; stderr: string; timedOut: boolean };
-let walletRefreshInFlight: Promise<WalletRefreshResult> | null = null;
+const modelUsageRefreshTimeoutMs = 130_000;
+const refreshOutputLimit = 64 * 1024;
+type RefreshResult = { status: number; stdout: string; stderr: string; timedOut: boolean };
+let walletRefreshInFlight: Promise<RefreshResult> | null = null;
+let modelUsageRefreshInFlight: Promise<RefreshResult> | null = null;
 
 function boundedAppend(current: string, chunk: unknown) {
-  if (current.length >= walletRefreshOutputLimit) return current;
-  return (current + String(chunk ?? "")).slice(0, walletRefreshOutputLimit);
+  if (current.length >= refreshOutputLimit) return current;
+  return (current + String(chunk ?? "")).slice(0, refreshOutputLimit);
 }
 
 function contentEtag(body: Buffer | string) {
@@ -108,10 +110,10 @@ function liveEventsProjection() {
   });
 }
 
-function runWalletRefresh(): Promise<WalletRefreshResult> {
+function runWalletRefresh(): Promise<RefreshResult> {
   if (walletRefreshInFlight) return walletRefreshInFlight;
   //JAIMES: Keep wallet refresh single-flight and asynchronous so scheduled refreshes never freeze Control Tower HTTP/SSE.
-  const operation = new Promise<WalletRefreshResult>((resolveResult) => {
+  const operation = new Promise<RefreshResult>((resolveResult) => {
     const child = spawn("python3", ["scripts/refresh_agentic_robinhood_wallet_live.py"], {
       cwd: __dirname,
       stdio: ["ignore", "pipe", "pipe"],
@@ -153,6 +155,54 @@ function runWalletRefresh(): Promise<WalletRefreshResult> {
     walletRefreshInFlight = null;
   });
   return walletRefreshInFlight;
+}
+
+function runModelUsageRefresh(): Promise<RefreshResult> {
+  if (modelUsageRefreshInFlight) return modelUsageRefreshInFlight;
+  // Control Tower owns this local endpoint. It reads the already-authenticated
+  // CodexBar account state on Josh 2.0 and publishes only dashboard-safe usage.
+  const operation = new Promise<RefreshResult>((resolveResult) => {
+    const child = spawn("python3", ["scripts/update_mission_control.py"], {
+      cwd: __dirname,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    let stdout = "";
+    let stderr = "";
+    let settled = false;
+    let timedOut = false;
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+    let forceKill: ReturnType<typeof setTimeout> | undefined;
+    const finish = (result: RefreshResult) => {
+      if (settled) return;
+      settled = true;
+      if (timeout) clearTimeout(timeout);
+      if (forceKill) clearTimeout(forceKill);
+      resolveResult(result);
+    };
+    child.stdout?.on("data", (chunk) => { stdout = boundedAppend(stdout, chunk); });
+    child.stderr?.on("data", (chunk) => { stderr = boundedAppend(stderr, chunk); });
+    child.on("error", (error) => finish({ status: 125, stdout, stderr: boundedAppend(stderr, error.message), timedOut: false }));
+    child.on("close", (code) => finish({
+      status: timedOut ? 124 : (code ?? 125),
+      stdout,
+      stderr,
+      timedOut,
+    }));
+    timeout = setTimeout(() => {
+      timedOut = true;
+      stderr = boundedAppend(stderr, "model usage refresh timed out");
+      child.kill("SIGTERM");
+      forceKill = setTimeout(() => {
+        if (child.exitCode === null && child.signalCode === null) child.kill("SIGKILL");
+      }, 5_000);
+      forceKill.unref?.();
+    }, modelUsageRefreshTimeoutMs);
+    timeout.unref?.();
+  });
+  modelUsageRefreshInFlight = operation.finally(() => {
+    modelUsageRefreshInFlight = null;
+  });
+  return modelUsageRefreshInFlight;
 }
 
 function liveSourcePayload() {
@@ -259,6 +309,33 @@ function serveMissionControlFiles(req: any, res: any, next: any) {
       res.setHeader("Content-Type", "application/json; charset=utf-8");
       res.setHeader("Cache-Control", "no-store");
       res.end(JSON.stringify({ ok: false, error: String(error?.message || "wallet refresh failed").slice(0, 500) }));
+    });
+    return;
+  }
+
+  if (pathname === "/actions/model-usage-refresh") {
+    void runModelUsageRefresh().then((result) => {
+      if (res.writableEnded) return;
+      res.setHeader("Content-Type", "application/json; charset=utf-8");
+      res.setHeader("Cache-Control", "no-store");
+      if (result.status === 0) {
+        // Do not return command output: usage is read back through the existing
+        // authenticated, dashboard-safe modelUsage sidecar.
+        res.end(JSON.stringify({ ok: true }));
+      } else {
+        res.statusCode = 500;
+        res.end(JSON.stringify({
+          ok: false,
+          error: "CodexBar usage refresh failed",
+          timedOut: result.timedOut,
+        }));
+      }
+    }).catch(() => {
+      if (res.writableEnded) return;
+      res.statusCode = 500;
+      res.setHeader("Content-Type", "application/json; charset=utf-8");
+      res.setHeader("Cache-Control", "no-store");
+      res.end(JSON.stringify({ ok: false, error: "CodexBar usage refresh failed" }));
     });
     return;
   }

@@ -4418,12 +4418,21 @@ def fetch_model_usage() -> Dict[str, Any] | None:
             "subscriptionUsageEquivalentProjectedMonthly": round(subscription_usage_equiv_weekly * (30 / 7), 2),
         }
 
-        codexbar_limits = {
-            "codex": fetch_codexbar_limits("codex"),
-            "gemini": fetch_codexbar_limits("gemini"),
-            "ollama": fetch_codexbar_limits("ollama"),
-            "xai": fetch_codexbar_limits("grok"),
-        }
+        # These are independent reads from the authenticated local CodexBar
+        # profile (or the supported provider runtime). Fetch concurrently so a
+        # user-requested live FinOps refresh is bounded by the slowest provider,
+        # not the sum of four provider timeouts.
+        with _cf.ThreadPoolExecutor(max_workers=4) as _pool:
+            _f_codex = _pool.submit(fetch_codexbar_limits, "codex")
+            _f_gemini = _pool.submit(fetch_codexbar_limits, "gemini")
+            _f_ollama_limits = _pool.submit(fetch_codexbar_limits, "ollama")
+            _f_xai = _pool.submit(fetch_codexbar_limits, "grok")
+            codexbar_limits = {
+                "codex": _f_codex.result(),
+                "gemini": _f_gemini.result(),
+                "ollama": _f_ollama_limits.result(),
+                "xai": _f_xai.result(),
+            }
         ollama_governance = build_ollama_governance(lane_receipts, codexbar_limits["ollama"])
         for provider_row in provider_breakdown:
             if provider_row.get("id") == "ollama":
