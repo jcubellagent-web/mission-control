@@ -250,13 +250,13 @@ class SchedulerTests(unittest.TestCase):
             script = (
                 "import pathlib,time; "
                 f"p=pathlib.Path({str(marker)!r}); "
-                "first=not p.exists(); p.touch(); time.sleep(0.15) if first else None"
+                "first=not p.exists(); p.touch(); time.sleep(0.6) if first else None"
             )
             with mock.patch.object(subject, "LOCK_DIR", root / "locks"):
                 result = subject.run_job({
                     "id": "retry-timeout",
                     "command": [sys.executable, "-c", script],
-                    "timeoutSeconds": 0.05,
+                    "timeoutSeconds": 0.3,
                     "maxAttempts": 2,
                     "retryOnStatuses": ["timeout"],
                 })
