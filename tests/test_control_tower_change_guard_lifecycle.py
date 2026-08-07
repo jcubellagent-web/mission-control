@@ -363,6 +363,7 @@ def test_process_interruption_uses_finally_style_abort(tmp_path: Path, monkeypat
 def test_expired_orphan_recovers_only_when_owner_absent_and_source_clean(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     payload = lease(tmp_path, expired=True)
     monkeypatch.setattr(GUARD, "process_is_alive", lambda _pid: False)
+    monkeypatch.setattr(GUARD, "lease_task_is_terminal_or_stale", lambda _payload: (True, "test task is stale"))
 
     GUARD.recover_expired()
 
