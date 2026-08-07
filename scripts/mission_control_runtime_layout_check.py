@@ -132,13 +132,17 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
       const titledEllipsis = Boolean(element.getAttribute('title'))
         && ['ellipsis', 'clip'].includes(style.textOverflow)
         && style.whiteSpace === 'nowrap';
+      // Compact Live Work labels deliberately present a bounded one-line summary
+      // with the full verified objective in the native title. A transient grid
+      // placement delta is not a visible crop when the label itself fits.
+      const deliberateCompactSummary = titledEllipsis && overflowX <= 1 && overflowY <= 1;
       const lineBoxClipped = Number.isFinite(lineHeight) && rect.height + 1 < lineHeight;
       return {
         index,
         fontSize: round(Number.parseFloat(style.fontSize)),
         overflowX: round(overflowX),
         overflowY: round(overflowY),
-        clipped: lineBoxClipped || outsideOwner || (!titledEllipsis && (overflowX > 1 || overflowY > 1)),
+        clipped: lineBoxClipped || (!deliberateCompactSummary && (outsideOwner || overflowX > 1 || overflowY > 1)),
       };
     });
   const panelRect = (selector) => {

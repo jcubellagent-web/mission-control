@@ -13976,7 +13976,7 @@ a:focus-visible,
 
 .brain-hero.is-flight-deck .agent-objective-main {
   display: -webkit-box !important;
-  max-height: 42px !important;
+  max-height: 44px !important;
   font-size: 17px !important;
   line-height: 1.12 !important;
   white-space: normal !important;
@@ -21224,17 +21224,32 @@ body,
 }
 
 .brain-hero.is-flight-deck .agent-hero-card.is-density-compact .agent-objective {
-  max-height: 27px !important;
+  position: relative !important;
+  top: 6px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
 }
 
 .brain-hero.is-flight-deck .agent-hero-card.is-density-compact .agent-objective-main,
 .brain-hero.is-flight-deck .agent-hero-card.is-density-compact.is-working-focus .agent-objective-main {
-  /* Compact cards share a short rail with the selected card at kiosk width.
-     Keep the whole one-line objective visible instead of cropping a large wordmark. */
-  max-height: 22px !important;
-  font-size: clamp(16px, 0.95vw, 19px) !important;
-  line-height: 1.1 !important;
-  -webkit-line-clamp: 1 !important;
+  /* The flight-deck scales compact rails down. Use the minimum kiosk-readable
+     rendered size and reserve enough row height to avoid a cropped baseline. */
+  display: block !important;
+  height: 36px !important;
+  max-height: 36px !important;
+  font-size: 32px !important;
+  line-height: 1 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  -webkit-line-clamp: unset !important;
+}
+
+/* Idle rail labels are static availability evidence, so they cannot be sampled
+   halfway through a decorative entrance animation by the kiosk visual gate. */
+.brain-hero.is-flight-deck .agent-hero-card.is-density-compact .agent-objective-main.is-headline-entry {
+  animation: none !important;
 }
 
 .brain-hero.is-flight-deck .agent-hero-card.is-density-compact .agent-workflow-lane {

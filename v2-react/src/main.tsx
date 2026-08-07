@@ -5323,17 +5323,22 @@ function BrainAtlasEcosystemView({
                   workLive ? workObservedAt : "",
                   ...freshWorkers.map((worker) => worker.updatedAt),
                 ].filter(Boolean).sort((left, right) => timeValue(right) - timeValue(left))[0] || "";
-                const routeLive = Boolean(workLive || freshWorkers.length > 0);
+                // A provider/worker heartbeat may remain fresh enough for a card,
+                // but topology motion requires the stricter exact activity window.
+                const routeLive = Boolean(
+                  routeEvidenceAt
+                  && Date.now() - timeValue(routeEvidenceAt) <= (activity?.motionWindowSeconds || 90) * 1000,
+                );
                 const isActive = activeAgentSet.has(agent) || memoryLive;
                 const memoryOperation = latest?.[0] || "none";
                 return (
                   <g key={`agent-topology-${agent}`} data-agent-route={routeLive ? "live" : isActive ? "active-stale" : "idle"} data-memory-operation={memoryOperation} data-memory-state={memoryLive ? "live" : "quiet"}>
                     <path
-                      className={`memory-flow-edge brain-topology-link agent-${agent}${isActive ? " is-active" : ""}${memoryLive ? " is-live is-memory-live" : ""}${activeMemoryAgent === agent ? " is-active-memory-agent" : ""}${selectedAgent === agent ? " is-selected-agent" : selectedAgent ? " is-muted-agent" : ""}`}
+                      className={`memory-flow-edge brain-topology-link agent-${agent}${isActive ? " is-active" : ""}${memoryLive ? " is-live is-memory-live" : ""}${routeLive ? " is-live is-work-live" : ""}${activeMemoryAgent === agent ? " is-active-memory-agent" : ""}${selectedAgent === agent ? " is-selected-agent" : selectedAgent ? " is-muted-agent" : ""}`}
                       d={topology.path}
                       data-agent={agent}
-                      data-operation={memoryOperation}
-                      data-observed-at={latest?.[1] || ""}
+                      data-operation={routeLive ? "live-work" : memoryOperation}
+                      data-observed-at={routeLive ? routeEvidenceAt : latest?.[1] || ""}
                       markerEnd="url(#brain-arrow-agent)"
                       data-flow-direction="forward"
                       data-flow-from={agent}
@@ -5587,17 +5592,22 @@ function BrainAtlasPanel({
     const liveWork = liveWorkByAgent.get(agent)!;
     return [agent, verifiedWorkerRoutesForAgent(agent, liveWork.status, activeModelRoutes || [], controllerWorksByAgent.get(agent) || [])];
   }));
+  const exactWorkPathLive = HERO_AGENT_ORDER.some((agent) => {
+    const liveWork = liveWorkByAgent.get(agent)!;
+    const controllerObservedAt = liveWork.activeWork?.updated_at || liveWork.status.updated_at;
+    const evidenceTimes = [
+      liveWork.working ? controllerObservedAt : "",
+      ...(workerRoutesByAgent.get(agent) || []).map((route) => route.updatedAt),
+    ].filter(Boolean);
+    return evidenceTimes.some((observedAt) => Date.now() - timeValue(observedAt) <= motionWindowSeconds * 1000);
+  });
   const workingAgentCount = workingAgentIds.size;
-  const liveWorkLifelineCount = HERO_AGENT_ORDER.filter((agent) => {
-    const liveWork = liveWorkByAgent.get(agent);
-    return Boolean(liveWork?.working || workerRoutesByAgent.get(agent)?.some(workerRouteIsFresh));
-  }).length;
   const loadByAgent = new Map(HERO_AGENT_ORDER.map((agent) => [
     agent,
     brainAtlasAgentLoad(agent, liveWorkByAgent.get(agent)!, workItems),
   ]));
   const systemLoad = brainAtlasSystemLoad(HERO_AGENT_ORDER.map((agent) => loadByAgent.get(agent)!));
-  const loadDisclosure = `${systemLoad.label} load (${systemLoad.score}/4): derived from verified working agents, fresh claimed-work priority, and current step/tool signals. Moving paths represent recent governed memory receipts only; neither signal depicts private reasoning.`;
+  const loadDisclosure = `${systemLoad.label} load (${systemLoad.score}/4): derived from verified working agents, fresh claimed-work priority, and current step/tool signals. Moving paths represent fresh observable work or governed memory receipts only, never private reasoning.`;
   const headerActivityStateLabel = workingAgentCount > 0 && activity && !exactMemoryPathLive
     ? "Memory quiet"
     : activityStateLabel;
@@ -5725,12 +5735,12 @@ function BrainAtlasPanel({
   return (
     <section
       id="brain-atlas"
-      className={`brain-atlas-panel is-${displayTone}${workingAgentCount ? " has-active-work" : ""}${exactMemoryPathLive ? " has-live-memory-flow" : ""}${liveWorkLifelineCount ? " has-live-work-flow" : ""}`}
+      className={`brain-atlas-panel is-${displayTone}${workingAgentCount ? " has-active-work" : ""}${exactMemoryPathLive ? " has-live-memory-flow" : ""}${exactWorkPathLive ? " has-live-work-flow" : ""}`}
       data-atlas-view="unified"
       data-atlas-mode={atlasMode}
       data-atlas-view-tone={selectedTone}
       data-atlas-mode-tone={displayTone}
-      data-memory-flow-state={exactMemoryPathLive ? "live" : liveWorkLifelineCount ? "work-live" : activity ? "idle" : "unavailable"}
+      data-memory-flow-state={exactMemoryPathLive ? "live" : exactWorkPathLive ? "work-live" : activity ? "idle" : "unavailable"}
       data-exact-proof-state={proofState}
       data-working-agent-count={workingAgentCount}
       data-load-tier={systemLoad.tier}
@@ -6968,6 +6978,9 @@ function AgentHeroCard({
   const activityMode = agentActivityMode(liveWork);
   const promptReceived = activityMode === "received";
   const headline = agentHeadline(activeFocus, promptReceived, activeReadout, idleContext, idleBriefRows);
+  // Compact rails retain the kiosk's minimum readable type size. Summarize the
+  // verified objective rather than allowing long copy to clip in that narrow lane.
+  const visibleHeadline = density === "compact" ? headlineShortText(headline.title, 28) : headline.title;
   const stepTrail = stepTrailForAgent(displayedStatus, activeFocus, displayedWork);
   const showStepTrail = activeFocus || visualState === "waiting" || visualState === "blocked";
   const activityEvidence = liveActivityEvidence(displayedStatus, displayedWork, recentEvent, idleContext, activeFocus);
@@ -7137,7 +7150,7 @@ function AgentHeroCard({
         } as React.CSSProperties}
       >
         <span className="agent-objective-text">
-          <span key={displayedController?.workId || headline.title} className="agent-objective-main is-headline-entry">{headline.title}</span>
+          <span key={displayedController?.workId || headline.title} className="agent-objective-main is-headline-entry" title={headline.title}>{visibleHeadline}</span>
         </span>
         {activityMode || controllerCount > 1 ? (
           <span className="agent-activity-stack">
