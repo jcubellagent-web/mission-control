@@ -83,3 +83,12 @@ def test_ui_heat_uses_live_request_windows_and_jobs_consume_live_leases() -> Non
     assert "activeWorks={state.workHot?.activeWorks}" in ui_source
     assert "timeValue(work.leaseUntil) > clockNow.getTime()" in ui_source
     assert "is-live-runtime" in ui_source
+
+
+def test_live_work_rotation_counter_has_prominent_visual_hierarchy() -> None:
+    css = (ROOT / "v2-react" / "src" / "styles.css").read_text(encoding="utf-8")
+    counter = css.split(".brain-hero.is-flight-deck .agent-rotation-counter", 1)[1].split("}", 1)[0]
+
+    assert "font-size: 20px" in counter
+    assert "min-height: 34px" in counter
+    assert "border: 2px" in counter

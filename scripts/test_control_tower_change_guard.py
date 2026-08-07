@@ -55,6 +55,11 @@ class OrphanRecoveryTests(unittest.TestCase):
         self.assertFalse(allowed)
         self.assertIn("unresolved changes", reason)
 
+    def test_control_tower_closeout_requires_strict_rendered_visual_qc(self) -> None:
+        source = Path(guard.__file__).read_text(encoding="utf-8")
+        self.assertIn('"--strict-browser", "--strict-visual"', source)
+        self.assertIn('"/tmp/control-tower-change-guard.png"', source)
+
 
 if __name__ == "__main__":
     unittest.main()

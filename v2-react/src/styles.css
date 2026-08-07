@@ -21002,10 +21002,11 @@ body,
 
 #brain-atlas .brain-stage-toolbar .brain-atlas-section-header p {
   margin: 0;
-  height: 16px;
+  min-height: 16px;
+  height: auto;
   font-size: 10px;
   line-height: 12px;
-  overflow: visible;
+  overflow: hidden;
 }
 
 #brain-atlas .brain-controller-card .memory-flow-node-title,
@@ -21648,14 +21649,14 @@ body,
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid color-mix(in srgb, var(--agent-tone, var(--cyan)) 54%, transparent);
+  border: 2px solid color-mix(in srgb, var(--agent-tone, var(--cyan)) 72%, transparent);
   border-radius: 999px;
   background: color-mix(in srgb, var(--agent-tone, var(--cyan)) 18%, rgba(3, 16, 28, 0.96));
-  box-shadow: 0 0 12px color-mix(in srgb, var(--agent-tone, var(--cyan)) 24%, transparent);
-  min-height: 25px;
-  padding: 4px 10px;
-  color: color-mix(in srgb, var(--agent-tone, var(--cyan)) 92%, #fff);
-  font-size: 14px;
+  box-shadow: 0 0 18px color-mix(in srgb, var(--agent-tone, var(--cyan)) 42%, transparent);
+  min-height: 34px;
+  padding: 5px 14px;
+  color: #fff;
+  font-size: 20px;
   font-weight: 900;
   letter-spacing: 0.06em;
   line-height: 1;
