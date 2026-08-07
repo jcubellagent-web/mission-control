@@ -1045,6 +1045,27 @@ def test_antigravity_status_requires_proxy_model_discovery(monkeypatch) -> None:
     assert ready["proxy"]["status"] == "ready"
 
 
+def test_antigravity_status_normalizes_tabular_model_rows(monkeypatch) -> None:
+    helper = load_module("gemini_agent_tabular_models", ROOT / "scripts" / "gemini_agent.py")
+    monkeypatch.setattr(helper.Path, "home", classmethod(lambda cls: Path("/Users/jc_agent")))
+    monkeypatch.setattr(helper.shutil, "which", lambda _name: "/opt/homebrew/bin/agy")
+
+    def tabular_models(command, timeout, stdin_text=None):
+        if "--version" in command:
+            return 0, "1.1.11\n", ""
+        if "models" in command:
+            return 0, "gemini-3.6-flash-medium\tGemini 3.6 Flash (Medium)\ngemini-3.1-pro-high\tGemini 3.1 Pro (High)\n", ""
+        return 0, json.dumps({"data": [
+            {"id": "gemini-3.6-flash-medium"},
+            {"id": "gemini-3.1-pro-high"},
+        ]}), ""
+
+    monkeypatch.setattr(helper, "run", tabular_models)
+    status = helper.cli_status()
+    assert status["models"] == ["gemini-3.6-flash-medium", "gemini-3.1-pro-high"]
+    assert status["status"] == "installed"
+
+
 def test_shared_skill_requires_real_verified_dispatch() -> None:
     skill = " ".join((ROOT / "agent-skills" / "multi-model-routing" / "SKILL.md").read_text().lower().split())
     assert "never infer success" in skill

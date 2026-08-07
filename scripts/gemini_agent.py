@@ -108,6 +108,25 @@ def proxy_status(local: bool) -> dict[str, Any]:
     }
 
 
+def model_ids_from_cli(output: str) -> list[str]:
+    """Normalize ``agy models`` rows without treating their display labels as IDs.
+
+    Current Antigravity output is tabular (``<id>\t<display name>``). The
+    routing health check must compare the leading model identifier with the
+    required catalog, otherwise a healthy subscription lane is falsely marked
+    outdated and may be avoided by the router.
+    """
+    ids: list[str] = []
+    for line in output.splitlines():
+        value = line.strip()
+        if not value:
+            continue
+        model_id = value.split(None, 1)[0].strip()
+        if model_id:
+            ids.append(model_id)
+    return ids
+
+
 def cli_status() -> dict[str, Any]:
     local = Path.home().name == "jc_agent"
     path = shutil.which("agy") if local else "jaimes:/opt/homebrew/bin/agy"
@@ -134,7 +153,7 @@ def cli_status() -> dict[str, Any]:
     version_code, version_out, version_err = run(version_cmd, timeout=10)
     models_code, models_out, models_err = run(models_cmd, timeout=20)
     version_text = (version_out or version_err).strip()
-    models = [line.strip() for line in models_out.splitlines() if line.strip()]
+    models = model_ids_from_cli(models_out)
     status["version"] = version_text.splitlines()[0] if version_code == 0 and version_text else ""
     status["models"] = models
     proxy = proxy_status(local)
