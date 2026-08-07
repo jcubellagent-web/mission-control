@@ -58,6 +58,9 @@ test("renders the approved desktop Control Tower", async ({ page }) => {
 
   await expect(page.locator("main")).toBeVisible();
   await expect(page.locator("#today-jobs")).toBeVisible();
+  await expect(page.locator(".agent-activity-evidence").first()).toBeVisible();
+  await expect(page.locator(".agent-hero-card[data-work-motion]").first()).toHaveAttribute("data-work-motion", /live|paused/);
+  await expect(page.locator("#brain-atlas [data-agent-route]").first()).toHaveAttribute("data-agent-route", /live|active-stale|idle/);
 });
 
 test("renders the approved mobile Control Tower", async ({ page }) => {

@@ -2583,6 +2583,63 @@ p {
   display: block;
 }
 
+/* Motion is evidence-bound. A card can remain visible when its signal ages,
+   but its travel and pulse never imply that stale work is still executing. */
+.agent-hero-card[data-work-motion="paused"] .agent-pulse-ring,
+.agent-hero-card[data-work-motion="paused"] .agent-live-rail::after {
+  animation: none !important;
+}
+
+.agent-hero-card[data-activity-freshness="stale"] .agent-live-rail {
+  opacity: 0.36;
+}
+
+.agent-activity-evidence {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  min-width: 0;
+  padding: 5px 6px;
+  border: 1px solid color-mix(in srgb, var(--agent-state-color) 20%, transparent);
+  border-radius: 6px;
+  background: rgba(2, 13, 24, 0.5);
+}
+
+.agent-activity-evidence span {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.agent-activity-evidence b,
+.agent-activity-evidence em {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.agent-activity-evidence b {
+  color: color-mix(in srgb, var(--agent-state-color) 82%, #d9f6ff);
+  font-size: 6.5px;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.agent-activity-evidence em {
+  color: #b8d3df;
+  font-size: 8px;
+  font-style: normal;
+  line-height: 1.2;
+}
+
+.agent-activity-evidence .is-next {
+  grid-column: 1 / -1;
+  padding-top: 3px;
+  border-top: 1px solid rgba(101, 205, 245, 0.1);
+}
+
 @keyframes agent-pulse-ring {
   0%,
   100% {

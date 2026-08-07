@@ -1027,6 +1027,34 @@ function stepTrailForAgent(status: AgentStatus, activeFocus: boolean, activeWork
   ];
 }
 
+function liveActivityEvidence(
+  status: AgentStatus,
+  activeWork: WorkItem | undefined,
+  event: AgentEvent | undefined,
+  idleContext: AgentIdleContext,
+  active: boolean,
+) {
+  const observedAt = activeWork?.updated_at || status.updated_at;
+  const fresh = active && isFreshActiveTimestamp(observedAt);
+  const phase = compactText(missionText(status.phase || activeWork?.detail || status.status || "Awaiting signal"), 26);
+  const eventLabel = event
+    ? compactText(missionText(event.title || event.detail || event.event_type || "Verified update"), 38)
+    : "No matching receipt yet";
+  const next = active
+    ? "Next: heartbeat or phase update"
+    : idleContext.nextAt
+      ? `Next: ${compactText(idleContext.nextTitle, 30)}`
+      : "Next: instruction or schedule";
+  return {
+    phase,
+    eventLabel,
+    observedAt,
+    freshness: fresh ? "fresh" : observedAt ? "stale" : "missing",
+    source: compactText(missionText(status.source || "Josh 2.0 local sidecar"), 28),
+    next,
+  };
+}
+
 function textMentionsAgent(text: string, agent: AgentId) {
   const normalized = text.toLowerCase();
   if (agent === "joshex") return /\bjoshex\b|\bcodex\b/.test(normalized);
@@ -1835,6 +1863,9 @@ function BrainHero({
           style={{ "--agent-grid-rows": agentGridRows } as React.CSSProperties}
         >
           {heroRows.map(({ agent, liveWork, idleContext }) => {
+            const recentEvent = events.find((event) => event.agent_id === agent && (
+              !liveWork.activeWork?.id || !event.work_id || event.work_id === liveWork.activeWork.id
+            ));
             return (
               <AgentHeroCard
                 key={agent}
@@ -1844,6 +1875,7 @@ function BrainHero({
                 activeModelRoutes={activeModelRoutes}
                 activeWorks={state.workHot?.activeWorks || []}
                 memoryActivity={state.memoryOperations?.activity?.agents.find((row) => row.agent === agent)}
+                recentEvent={recentEvent}
                 sourceChangeLeases={sourceChangeLeases}
                 density={expandedRows[agent] ? "expanded" : "compact"}
                 changed={Boolean(liveCues.rows[cueRowKey("agent", agent)])}
@@ -6865,6 +6897,7 @@ function AgentHeroCard({
   activeModelRoutes,
   activeWorks,
   memoryActivity,
+  recentEvent,
   sourceChangeLeases,
   density,
   changed,
@@ -6877,6 +6910,7 @@ function AgentHeroCard({
   activeModelRoutes: ActiveModelRoute[];
   activeWorks: ActiveWork[];
   memoryActivity?: MemoryActivity["agents"][number];
+  recentEvent?: AgentEvent;
   sourceChangeLeases: SourceChangeLease[];
   density: "expanded" | "compact";
   changed?: boolean;
@@ -6936,6 +6970,7 @@ function AgentHeroCard({
   const headline = agentHeadline(activeFocus, promptReceived, activeReadout, idleContext, idleBriefRows);
   const stepTrail = stepTrailForAgent(displayedStatus, activeFocus, displayedWork);
   const showStepTrail = activeFocus || visualState === "waiting" || visualState === "blocked";
+  const activityEvidence = liveActivityEvidence(displayedStatus, displayedWork, recentEvent, idleContext, activeFocus);
   const updateAgeMs = Math.max(0, Date.now() - timeValue(status.updated_at));
   const hotness = Math.max(0, 1 - Math.min(updateAgeMs, 12 * 60_000) / (12 * 60_000));
   const pulseSpeed = activeFocus
@@ -6993,6 +7028,8 @@ function AgentHeroCard({
       data-work-id={displayedStatus.work_id || displayedWork?.id || ""}
       data-run-id={displayedStatus.run_id || ""}
       data-work-state={visualState}
+      data-activity-freshness={activityEvidence.freshness}
+      data-work-motion={activityEvidence.freshness === "fresh" ? "live" : "paused"}
       data-density={density}
       data-linked-selected={selected ? "true" : "false"}
       style={{
@@ -7082,6 +7119,13 @@ function AgentHeroCard({
               <b>{step.label}</b>
             </span>
           )) : null}
+      </div>
+      <div className="agent-activity-evidence" aria-label={`${AGENTS[agent].label} observable activity evidence`}>
+        <span><b>Phase</b><em>{activityEvidence.phase}</em></span>
+        <span><b>Observed</b><em>{activityEvidence.observedAt ? `${ageLabel(activityEvidence.observedAt)} · ${activityEvidence.freshness}` : "No timestamp"}</em></span>
+        <span><b>Receipt</b><em>{activityEvidence.eventLabel}</em></span>
+        <span><b>Source</b><em>{activityEvidence.source}</em></span>
+        <span className="is-next"><b>{activityEvidence.next}</b></span>
       </div>
       <h3
         ref={objectiveRef}
