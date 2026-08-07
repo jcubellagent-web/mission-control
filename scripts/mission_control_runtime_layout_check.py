@@ -194,6 +194,7 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
   });
   const jobsScroller = document.querySelector('#today-jobs .today-jobs-scroll');
   const nowMarker = document.querySelector('#today-jobs [data-now-marker="current"]');
+  const staleNowMarker = document.querySelector('#today-jobs [data-now-marker="stale"]');
   const nonGreenRows = [...document.querySelectorAll('#today-jobs .today-job-row:not(.is-complete)')];
   const nonGreenSummaries = [...document.querySelectorAll('#today-jobs .today-jobs-summary [data-reason-trigger="true"]')];
   const reasonTriggers = [...document.querySelectorAll('#today-jobs [data-reason-trigger="true"]')];
@@ -653,6 +654,8 @@ KIOSK_LEGIBILITY_EVALUATION = r"""() => {
       ].join(' ').trim(),
       nowMarkerPresent: Boolean(nowMarker),
       nowMarkerLabel: nowMarker?.getAttribute('aria-label') || '',
+      staleNowMarkerPresent: Boolean(staleNowMarker),
+      staleNowMarkerLabel: staleNowMarker?.getAttribute('aria-label') || '',
       scrollOverflowY: jobsScroller ? round(Math.max(0, jobsScroller.scrollHeight - jobsScroller.clientHeight)) : null,
       nowCenterDelta: jobsRect && nowRect
         ? round(Math.abs((nowRect.top + nowRect.height / 2) - (jobsRect.top + jobsRect.height / 2)))
@@ -1191,8 +1194,12 @@ def validate_control_tower_layout(
     elif proof_state in {"empty", "unavailable"}:
         if proof_rows:
             failures.append(f"{label}: Brain Atlas {proof_state} proof state still renders exact proof rows")
-        if not proof_empty_text:
-            failures.append(f"{label}: Brain Atlas {proof_state} proof state lacks an explanatory message")
+        # The unified operator surface deliberately keeps exact proof rows out
+        # of the visible map. Require its visible status disclosure instead of
+        # asserting against hidden SVG content.
+        explanation = "no exact receipts" if proof_state == "empty" else "source unavailable"
+        if explanation not in status_text:
+            failures.append(f"{label}: Brain Atlas {proof_state} proof state lacks a visible explanation")
     else:
         failures.append(f"{label}: Brain Atlas exact proof state is missing or invalid")
     known_agents = {"joshex", "josh2", "jaimes", "jain"}
@@ -1710,11 +1717,21 @@ def validate_kiosk_legibility(measurements: Any) -> list[str]:
     pending_reason = str(today_jobs.get("pendingSummaryReason") or "").lower()
     if "future work" not in pending_reason or "past occurrences" not in pending_reason:
         failures.append(f"{KIOSK_PROBE_LABEL}: Today's Jobs pending summary does not explain future versus failed")
-    if not today_jobs.get("nowMarkerPresent") or "current time" not in str(today_jobs.get("nowMarkerLabel") or "").lower():
-        failures.append(f"{KIOSK_PROBE_LABEL}: Today's Jobs current-time marker is missing or unlabeled")
-    if today_jobs.get("followNowState") not in {"centered", "all-visible"}:
-        failures.append(f"{KIOSK_PROBE_LABEL}: Today's Jobs auto-follow state is {today_jobs.get('followNowState')}")
-    if _number(today_jobs.get("scrollOverflowY"), missing=0.0) > 1 and _number(today_jobs.get("nowCenterDelta")) > 32:
+    fresh_marker_present = today_jobs.get("nowMarkerPresent") is True
+    stale_marker_present = today_jobs.get("staleNowMarkerPresent") is True
+    if fresh_marker_present:
+        if "current time" not in str(today_jobs.get("nowMarkerLabel") or "").lower():
+            failures.append(f"{KIOSK_PROBE_LABEL}: Today's Jobs current-time marker is unlabeled")
+        if today_jobs.get("followNowState") not in {"centered", "all-visible"}:
+            failures.append(f"{KIOSK_PROBE_LABEL}: Today's Jobs auto-follow state is {today_jobs.get('followNowState')}")
+    elif stale_marker_present:
+        if "awaiting a fresh schedule" not in str(today_jobs.get("staleNowMarkerLabel") or "").lower():
+            failures.append(f"{KIOSK_PROBE_LABEL}: Today's Jobs stale timeline marker is unlabeled")
+        if today_jobs.get("followNowState") != "ready":
+            failures.append(f"{KIOSK_PROBE_LABEL}: Today's Jobs stale timeline state is {today_jobs.get('followNowState')}")
+    else:
+        failures.append(f"{KIOSK_PROBE_LABEL}: Today's Jobs current-time or stale-timeline marker is missing")
+    if fresh_marker_present and _number(today_jobs.get("scrollOverflowY"), missing=0.0) > 1 and _number(today_jobs.get("nowCenterDelta")) > 32:
         failures.append(
             f"{KIOSK_PROBE_LABEL}: Today's Jobs current-time marker is {_px(_number(today_jobs.get('nowCenterDelta')))} from center"
         )
