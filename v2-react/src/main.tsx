@@ -2685,7 +2685,11 @@ function providerRows(modelUsage?: MissionControlState["modelUsage"], modelRoute
 function activeProviderKeys(statuses: AgentStatus[], routes: ActiveModelRoute[]) {
   const keys = new Set<string>();
   routes
-    .filter((route) => route.routeVerified && (!route.leaseUntil || timeValue(route.leaseUntil) > Date.now()))
+    .filter((route) => (
+      route.routeVerified
+      && isFreshActiveTimestamp(route.updatedAt)
+      && (!route.leaseUntil || timeValue(route.leaseUntil) > Date.now())
+    ))
     .forEach((route) => keys.add(route.modelFamily));
   if (keys.size) return keys;
   statuses
@@ -3260,16 +3264,18 @@ function FinOpsDashboard({
                   .sort((left, right) => timeValue(right.updatedAt) - timeValue(left.updatedAt))[0];
                 const directCallsToday = Math.max(0, Number(provider?.callsToday || 0));
                 const receiptActivityScore = providerActivityScore(provider);
-                // Ollama has direct Cloud API metrics but no supported account
-                // quota endpoint. Its heat reflects verified request activity.
+                // Request heat stays tied to direct telemetry. A fresh verified
+                // route gets a distinct visual state while aggregation catches
+                // up; that must never be represented as request or quota use.
                 const activityScore = receiptActivityScore;
+                const routeVisualScore = active ? Math.max(activityScore, 32) : activityScore;
                 const recentCalls = providerRecentCallCounts(provider);
                 const heatLabel = providerHeatLabel(provider, active, liveRoute?.updatedAt);
                 const allowance = providerVerifiedAllowance(provider);
                 const tone = providerTone(provider);
                 const topModel = providerTopModels(provider)[0];
                 const currentModel = providerModelLabel({ name: topModel?.name || provider.lastModelUsed || "Route ready" });
-                const stateLabel = tone === "risk" ? "BLOCKED" : active ? "ACTIVE" : key === "ollama" ? "CLOUD · IDLE" : "IDLE";
+                const stateLabel = tone === "risk" ? "BLOCKED" : active ? recentCalls.calls5m ? "ACTIVE · REQUESTS" : "ACTIVE · SYNCING" : key === "ollama" ? "CLOUD · IDLE" : "IDLE";
                 const purpose = key === "ollama"
                   ? providerConsumptionLabel(provider)
                   : key === "codex"
@@ -3278,7 +3284,9 @@ function FinOpsDashboard({
                     ? "Planning, review, and long-context work"
                     : "Signals, news, and X research";
                 const purposeLabel = key === "ollama" ? "Direct API metrics" : "Purpose";
-                const activityDetail = recentCalls.calls30m
+                const activityDetail = active && !recentCalls.calls30m
+                  ? "Verified route active · request telemetry syncing"
+                  : recentCalls.calls30m
                   ? `${recentCalls.calls5m} call${recentCalls.calls5m === 1 ? "" : "s"} / 5m · ${recentCalls.calls30m} / 30m · ${heatLabel}`
                   : `No calls / 30m · ${heatLabel}`;
                 const ProviderIcon = key === "codex" ? Braces : key === "antigravity" ? Sparkles : key === "ollama" ? Bot : Radio;
@@ -3287,18 +3295,19 @@ function FinOpsDashboard({
                     key={provider.id || key}
                     data-provider={key || undefined}
                     data-active={active ? "true" : "false"}
+                    data-route-state={active ? recentCalls.calls5m ? "active-with-requests" : "active-syncing" : "idle"}
                     data-activity-score={activityScore}
                     data-quota-state={allowance.verified ? "verified" : "unavailable"}
                     data-heat={activityScore >= 68 ? "hot" : activityScore >= 28 ? "warm" : "cool"}
                     data-finops-region="provider"
-                    className={`finops-provider-simple is-${tone} ${active ? "is-active" : "is-idle"}`}
+                    className={`finops-provider-simple is-${tone} ${active ? "is-active is-route-active" : "is-idle"}`}
                     style={{
                       ...routeCssProperties(route),
                       "--activity-score": activityScore,
-                      "--activity-alpha": (0.01 + activityScore * 0.0048).toFixed(3),
-                      "--activity-strength": `${Math.round(2 + activityScore * 0.7)}%`,
-                      "--activity-glow": `${Math.round(activityScore * 0.3)}px`,
-                      "--activity-opacity": (0.56 + activityScore * 0.0044).toFixed(3),
+                      "--activity-alpha": (0.01 + routeVisualScore * 0.0048).toFixed(3),
+                      "--activity-strength": `${Math.round(2 + routeVisualScore * 0.7)}%`,
+                      "--activity-glow": `${Math.round(routeVisualScore * 0.3)}px`,
+                      "--activity-opacity": (0.56 + routeVisualScore * 0.0044).toFixed(3),
                     } as React.CSSProperties}
                   >
                     <div className="finops-provider-identity">

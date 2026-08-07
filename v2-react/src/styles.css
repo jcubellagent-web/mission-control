@@ -21221,10 +21221,22 @@ body,
 }
 
 .brain-hero.is-flight-deck .agent-hero-card.is-density-compact {
+  display: grid !important;
+  grid-template-columns: minmax(178px, 0.24fr) minmax(0, 1fr) minmax(142px, 0.2fr) !important;
+  grid-template-areas: "agent objective next" !important;
+  align-items: center !important;
   min-height: 44px !important;
   padding: 4px 10px !important;
-  column-gap: 10px !important;
+  gap: 8px 12px !important;
   opacity: 0.78;
+}
+
+.brain-hero.is-flight-deck .agent-hero-card.is-density-compact header { grid-area: agent; }
+.brain-hero.is-flight-deck .agent-hero-card.is-density-compact .agent-objective { grid-area: objective; }
+.brain-hero.is-flight-deck .agent-hero-card.is-density-compact .agent-workflow-lane { grid-area: next; }
+.brain-hero.is-flight-deck .agent-hero-card.is-density-compact .agent-step-trail,
+.brain-hero.is-flight-deck .agent-hero-card.is-density-compact .agent-activity-evidence {
+  display: none !important;
 }
 
 .brain-hero.is-flight-deck .agent-hero-card.is-density-compact .agent-model-stack {
@@ -21253,21 +21265,21 @@ body,
 
 .brain-hero.is-flight-deck .agent-hero-card.is-density-compact .agent-objective {
   position: relative !important;
-  top: 6px !important;
-  height: 36px !important;
-  min-height: 36px !important;
-  max-height: 36px !important;
+  top: auto !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  max-height: 24px !important;
 }
 
 .brain-hero.is-flight-deck .agent-hero-card.is-density-compact .agent-objective-main,
 .brain-hero.is-flight-deck .agent-hero-card.is-density-compact.is-working-focus .agent-objective-main {
-  /* The flight-deck scales compact rails down. Use the minimum kiosk-readable
-     rendered size and reserve enough row height to avoid a cropped baseline. */
+  /* Compact cards use the same visual scale as the compressed row, so a title
+     cannot spill into the next agent's lane. */
   display: block !important;
-  height: 36px !important;
-  max-height: 36px !important;
-  font-size: 32px !important;
-  line-height: 1 !important;
+  height: 24px !important;
+  max-height: 24px !important;
+  font-size: clamp(12px, 0.95vw, 16px) !important;
+  line-height: 1.15 !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
@@ -21282,7 +21294,8 @@ body,
 
 .brain-hero.is-flight-deck .agent-hero-card.is-density-compact .agent-workflow-lane {
   min-height: 0 !important;
-  padding-left: 8px !important;
+  padding-left: 10px !important;
+  border-left: 1px solid rgba(117, 197, 226, 0.14) !important;
 }
 
 .brain-hero.is-flight-deck .agent-hero-card.is-density-compact .agent-workflow-lane strong {
@@ -21297,6 +21310,20 @@ body,
 
 .brain-hero.is-flight-deck .agent-hero-card.is-density-expanded {
   opacity: 1;
+}
+
+/* A fresh verified route is immediate execution evidence. It lights the card
+   while request aggregation catches up, but its meter remains based solely on
+   real request counts and allowance is never inferred. */
+#finops-dashboard.finops-quiet-layout .finops-provider-simple.is-route-active {
+  border-color: color-mix(in srgb, var(--route-color) 58%, #ffffff 12%) !important;
+  background: color-mix(in srgb, var(--route-color) 9%, var(--finops-raised)) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--route-color) 28%, transparent), 0 0 16px color-mix(in srgb, var(--route-color) 22%, transparent) !important;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-provider-simple[data-route-state="active-syncing"]::before {
+  opacity: 0.42 !important;
+  animation: finops-heat-breathe 2.4s ease-in-out infinite alternate;
 }
 
 @media (max-width: 980px) {
