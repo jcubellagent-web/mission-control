@@ -96,3 +96,10 @@ def test_live_work_rotation_counter_has_prominent_visual_hierarchy() -> None:
     assert "width: 100%" in counter
     stack = css.split(".brain-hero.is-flight-deck .agent-activity-stack", 1)[1].split("}", 1)[0]
     assert "align-items: stretch" in stack
+
+
+def test_brain_atlas_marks_verified_live_work_independently_of_memory_receipts() -> None:
+    source = (ROOT / "v2-react" / "src" / "main.tsx").read_text()
+    assert 'data-memory-flow-state={exactMemoryPathLive ? "live" : liveWorkLifelineCount ? "work-live"' in source
+    assert "const executionPathLive = workActive;" in source
+    assert '${executionPathLive ? " is-live" : ""}' in source

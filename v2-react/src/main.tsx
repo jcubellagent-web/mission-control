@@ -5698,7 +5698,7 @@ function BrainAtlasPanel({
       data-atlas-mode={atlasMode}
       data-atlas-view-tone={selectedTone}
       data-atlas-mode-tone={displayTone}
-      data-memory-flow-state={exactMemoryPathLive ? "live" : activity ? "idle" : "unavailable"}
+      data-memory-flow-state={exactMemoryPathLive ? "live" : liveWorkLifelineCount ? "work-live" : activity ? "idle" : "unavailable"}
       data-exact-proof-state={proofState}
       data-working-agent-count={workingAgentCount}
       data-load-tier={systemLoad.tier}
@@ -5902,11 +5902,15 @@ function BrainAtlasPanel({
               const liveWork = liveWorkByAgent.get(row.agent);
               const workObservedAt = liveWork?.activeWork?.updated_at || liveWork?.status.updated_at;
               const workActive = Boolean(liveWork?.working);
+              // Verified Live Work is a first-class Atlas signal.  It does not
+              // depend on a memory receipt being fresh, and remains visually
+              // distinct from the governed-memory paths below.
               const workLinked = Boolean(workActive && memorySignalIsRecent(workObservedAt, motionWindowSeconds));
+              const executionPathLive = workActive;
               return (
                 <React.Fragment key={`agent-flow-${row.agent}`}>
                   <path
-                    className={`memory-flow-edge is-work-lifeline agent-${row.agent}${workActive ? " is-linked" : ""}${workLinked ? " is-live" : ""}`}
+                    className={`memory-flow-edge is-work-lifeline agent-${row.agent}${workActive ? " is-linked" : ""}${executionPathLive ? " is-live" : ""}`}
                     data-agent={row.agent}
                     data-operation="live-work"
                     data-work-id={workLinked ? liveWork?.activeWork?.id || undefined : undefined}
