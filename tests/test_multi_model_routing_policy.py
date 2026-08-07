@@ -825,7 +825,9 @@ def test_successful_lane_rejects_empty_substantive_output(monkeypatch, capsys) -
 
 def test_remote_lane_persists_private_recovery_output(monkeypatch, tmp_path) -> None:
     lane = load_module("model_lane_result_recovery", ROOT / "scripts" / "model_lane.py")
-    result_file = tmp_path / "model-lane-test-result.txt"
+    # Mirror the production contract: specialist output may persist only in a
+    # private temporary directory, never in pytest's broader system temp tree.
+    result_file = Path("/private/tmp") / f"model-lane-test-result-{tmp_path.name}.txt"
 
     args = SimpleNamespace(result_file=str(result_file))
 
