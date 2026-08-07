@@ -21639,7 +21639,7 @@ body,
 .brain-hero.is-flight-deck .agent-activity-stack {
   display: inline-flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   gap: 5px;
   min-width: max-content;
@@ -21648,6 +21648,7 @@ body,
 .brain-hero.is-flight-deck .agent-rotation-counter {
   display: inline-flex;
   align-items: center;
+  align-self: stretch;
   justify-content: center;
   border: 2px solid color-mix(in srgb, var(--agent-tone, var(--cyan)) 72%, transparent);
   border-radius: 999px;
@@ -21655,6 +21656,8 @@ body,
   box-shadow: 0 0 18px color-mix(in srgb, var(--agent-tone, var(--cyan)) 42%, transparent);
   min-height: 34px;
   padding: 5px 14px;
+  box-sizing: border-box;
+  width: 100%;
   color: #fff;
   font-size: 20px;
   font-weight: 900;

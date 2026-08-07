@@ -5526,6 +5526,12 @@ function BrainAtlasPanel({
     activeMemoryEvent
     && memorySignalIsRecent(activeMemoryEvent.observedAt, motionWindowSeconds),
   );
+  // Animate only the lifecycle currently represented by the rendered packet.
+  // A recent receipt remains visible as evidence, but must not leave a path
+  // looking live once that packet has completed.
+  const memorySignalPathIsLive = (signal: MemorySignalKey) => Boolean(
+    exactMemoryPathLive && activeMemoryEvent?.signal === signal,
+  );
   const activityStateLabel = !activity
     ? "Memory telemetry unavailable"
     : latestSignal
@@ -5917,12 +5923,12 @@ function BrainAtlasPanel({
                 </React.Fragment>
               );
             })}
-            <path className={`memory-flow-edge is-hit${recent("hit") ? " is-live" : ""}`} data-operation="hit" data-observed-at={activity?.lastObservedAt.hit || undefined} d={`M ${brainAtlasWideX(372)} 119 C ${brainAtlasWideX(392)} 119, ${brainAtlasWideX(408)} 119, ${brainAtlasWideX(430)} 119`} />
-            <path className={`memory-flow-edge is-used${recent("used") ? " is-live" : ""}`} data-operation="used" data-observed-at={activity?.lastObservedAt.used || undefined} d={`M ${brainAtlasWideX(576)} 119 C ${brainAtlasWideX(610)} 119, ${brainAtlasWideX(606)} 58, ${brainAtlasWideX(640)} 58`} />
-            <path className={`memory-flow-edge is-feedback${recent("feedback") ? " is-live" : ""}`} data-operation="feedback" data-observed-at={activity?.lastObservedAt.feedback || undefined} d={`M ${brainAtlasWideX(576)} 119 C ${brainAtlasWideX(610)} 119, ${brainAtlasWideX(606)} 181, ${brainAtlasWideX(640)} 181`} />
-            <path className={`memory-flow-edge is-proposed${candidateIsRecent ? " is-live" : ""}`} data-operation="proposed" data-observed-at={candidateObservedAt || undefined} d={`M ${brainAtlasWideX(784)} 181 C ${brainAtlasWideX(802)} 181, ${brainAtlasWideX(812)} 181, ${brainAtlasWideX(830)} 181`} />
-            <path className={`memory-flow-edge is-promoted${recent("promoted") ? " is-live" : ""}`} data-operation="promoted" data-observed-at={activity?.lastObservedAt.promoted || undefined} d={`M ${brainAtlasWideX(902)} 154 C ${brainAtlasWideX(902)} 134, ${brainAtlasWideX(902)} 103, ${brainAtlasWideX(902)} 84`} />
-            <path className={`memory-flow-edge is-promoted is-return${recent("promoted") ? " is-live" : ""}`} data-operation="promoted" data-observed-at={activity?.lastObservedAt.promoted || undefined} d={`M ${brainAtlasWideX(830)} 57 C ${brainAtlasWideX(756)} 10, ${brainAtlasWideX(514)} 10, ${brainAtlasWideX(504)} 92`} />
+            <path className={`memory-flow-edge is-hit${memorySignalPathIsLive("hit") ? " is-live" : ""}`} data-operation="hit" data-observed-at={activity?.lastObservedAt.hit || undefined} d={`M ${brainAtlasWideX(372)} 119 C ${brainAtlasWideX(392)} 119, ${brainAtlasWideX(408)} 119, ${brainAtlasWideX(430)} 119`} />
+            <path className={`memory-flow-edge is-used${memorySignalPathIsLive("used") ? " is-live" : ""}`} data-operation="used" data-observed-at={activity?.lastObservedAt.used || undefined} d={`M ${brainAtlasWideX(576)} 119 C ${brainAtlasWideX(610)} 119, ${brainAtlasWideX(606)} 58, ${brainAtlasWideX(640)} 58`} />
+            <path className={`memory-flow-edge is-feedback${memorySignalPathIsLive("feedback") ? " is-live" : ""}`} data-operation="feedback" data-observed-at={activity?.lastObservedAt.feedback || undefined} d={`M ${brainAtlasWideX(576)} 119 C ${brainAtlasWideX(610)} 119, ${brainAtlasWideX(606)} 181, ${brainAtlasWideX(640)} 181`} />
+            <path className={`memory-flow-edge is-proposed${memorySignalPathIsLive("proposed") || memorySignalPathIsLive("corrected") ? " is-live" : ""}`} data-operation="proposed" data-observed-at={candidateObservedAt || undefined} d={`M ${brainAtlasWideX(784)} 181 C ${brainAtlasWideX(802)} 181, ${brainAtlasWideX(812)} 181, ${brainAtlasWideX(830)} 181`} />
+            <path className={`memory-flow-edge is-promoted${memorySignalPathIsLive("promoted") ? " is-live" : ""}`} data-operation="promoted" data-observed-at={activity?.lastObservedAt.promoted || undefined} d={`M ${brainAtlasWideX(902)} 154 C ${brainAtlasWideX(902)} 134, ${brainAtlasWideX(902)} 103, ${brainAtlasWideX(902)} 84`} />
+            <path className={`memory-flow-edge is-promoted is-return${memorySignalPathIsLive("promoted") ? " is-live" : ""}`} data-operation="promoted" data-observed-at={activity?.lastObservedAt.promoted || undefined} d={`M ${brainAtlasWideX(830)} 57 C ${brainAtlasWideX(756)} 10, ${brainAtlasWideX(514)} 10, ${brainAtlasWideX(504)} 92`} />
             </g>
             {activeMemoryEvent ? (
               <g

@@ -92,3 +92,7 @@ def test_live_work_rotation_counter_has_prominent_visual_hierarchy() -> None:
     assert "font-size: 20px" in counter
     assert "min-height: 34px" in counter
     assert "border: 2px" in counter
+    assert "align-self: stretch" in counter
+    assert "width: 100%" in counter
+    stack = css.split(".brain-hero.is-flight-deck .agent-activity-stack", 1)[1].split("}", 1)[0]
+    assert "align-items: stretch" in stack
