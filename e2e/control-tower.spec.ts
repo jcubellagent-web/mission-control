@@ -8,6 +8,7 @@ const hotFixture = readFileSync(resolve(__dirname, "../tests/fixtures/control-to
 const fixtureEvents = JSON.stringify({ source: "Chromatic fixture", events: [] });
 
 async function installDeterministicDashboardFixture(page: Page) {
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.addInitScript(() => {
     const fixedNow = new Date("2026-01-01T12:00:00.000Z").valueOf();
     const NativeDate = Date;
@@ -42,11 +43,27 @@ async function installDeterministicDashboardFixture(page: Page) {
   }));
 }
 
-test("loads the Control Tower shell", async ({ page }) => {
+async function openControlTower(page: Page) {
   await installDeterministicDashboardFixture(page);
   await page.goto("/");
 
   await expect(page).toHaveTitle("Josh 2.0 | Control Tower");
   await expect(page.locator("#root")).not.toBeEmpty();
+  await expect(page.locator("#today-jobs")).toBeVisible();
+}
+
+test("renders the approved desktop Control Tower", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await openControlTower(page);
+
+  await expect(page.locator("main")).toBeVisible();
+  await expect(page.locator("#today-jobs")).toBeVisible();
+});
+
+test("renders the approved mobile Control Tower", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await openControlTower(page);
+
+  await expect(page.locator("main")).toBeVisible();
   await expect(page.locator("#today-jobs")).toBeVisible();
 });
