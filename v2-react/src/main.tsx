@@ -2694,6 +2694,30 @@ function providerUtilizationPct(provider: any) {
   return 0;
 }
 
+function providerVerifiedAllowance(provider: any) {
+  // An allowance window is the only supported source for a provider-level
+  // percentage. Usage-equivalent cost, request counts, and a live route are
+  // intentionally not allowed to manufacture a quota value.
+  const windows = providerLimitRows(provider);
+  const measured = windows
+    .map((window: any) => ({ window, percent: Number(window?.usedPercent) }))
+    .filter(({ percent }) => Number.isFinite(percent));
+  if (!measured.length) {
+    const quotaUnavailable = providerKey(provider) === "ollama" || provider?.quotaTelemetryStatus === "unavailable";
+    return {
+      verified: false,
+      percent: null as number | null,
+      label: quotaUnavailable ? "Quota unavailable" : "Allowance not reported",
+    };
+  }
+  const mostUsed = measured.sort((left, right) => right.percent - left.percent)[0];
+  return {
+    verified: true,
+    percent: Math.min(100, Math.round(mostUsed.percent * 10) / 10),
+    label: String(mostUsed.window?.label || "Allowance"),
+  };
+}
+
 function providerLiveActivity(provider: any) {
   // The API windows are cumulative. Convert them into a short-window weighted
   // rate so historical sessions, spend, and stale route state never warm a tile.
@@ -3046,7 +3070,7 @@ function FinOpsDashboard({
     : "--";
   const codexMode = String(modelRouter?.codexAllowanceMode || modelRouter?.policy?.codexAllowanceMode || modelUsage?.routerPolicy?.codexAllowanceMode || "normal");
   const codexProvider = providers.find((provider) => providerKey(provider) === "codex");
-  const codexPressurePct = providerUtilizationPct(codexProvider);
+  const codexPressurePct = providerVerifiedAllowance(codexProvider).percent || 0;
   const modelUpdatedAt = modelUsage?.lastUpdated || modelRouter?.updatedAt;
   const routeAlerts = Array.isArray((modelRouter as any)?.routeAlerts) ? (modelRouter as any).routeAlerts : [];
   const walletErrors = Array.isArray((wallet as any)?.errors) ? (wallet as any).errors : [];
@@ -3194,13 +3218,13 @@ function FinOpsDashboard({
                 const liveRoute = activeModelRoutes
                   .filter((row) => row.modelFamily === key)
                   .sort((left, right) => timeValue(right.updatedAt) - timeValue(left.updatedAt))[0];
-                const pct = providerUtilizationPct(provider);
                 const directCallsToday = Math.max(0, Number(provider?.callsToday || 0));
                 const receiptActivityScore = providerActivityScore(provider, maximumProviderActivity);
                 // Ollama has direct Cloud API metrics but no supported account
                 // quota endpoint. Its heat reflects verified request activity.
                 const activityScore = receiptActivityScore;
                 const heatLabel = providerHeatLabel(provider, active, liveRoute?.updatedAt);
+                const allowance = providerVerifiedAllowance(provider);
                 const tone = providerTone(provider);
                 const topModel = providerTopModels(provider)[0];
                 const currentModel = providerModelLabel({ name: topModel?.name || provider.lastModelUsed || "Route ready" });
@@ -3214,8 +3238,8 @@ function FinOpsDashboard({
                     : "Signals, news, and X research";
                 const purposeLabel = key === "ollama" ? "Direct API metrics" : "Purpose";
                 const activityDetail = key === "ollama"
-                  ? `${directCallsToday} calls today · quota unavailable`
-                  : `${activityScore}% live heat · ${heatLabel}`;
+                  ? `${directCallsToday} calls today · ${activityScore}% request heat`
+                  : `${activityScore}% request heat · ${heatLabel}`;
                 const ProviderIcon = key === "codex" ? Braces : key === "antigravity" ? Sparkles : key === "ollama" ? Bot : Radio;
                 return (
                   <article
@@ -3223,6 +3247,7 @@ function FinOpsDashboard({
                     data-provider={key || undefined}
                     data-active={active ? "true" : "false"}
                     data-activity-score={activityScore}
+                    data-quota-state={allowance.verified ? "verified" : "unavailable"}
                     data-heat={activityScore >= 68 ? "hot" : activityScore >= 28 ? "warm" : "cool"}
                     data-finops-region="provider"
                     className={`finops-provider-simple is-${tone} ${active ? "is-active" : "is-idle"}`}
@@ -3242,11 +3267,12 @@ function FinOpsDashboard({
                         <p><span>Current model</span><em title={currentModel}>{currentModel}</em></p>
                       </div>
                       <div className="finops-provider-utilization">
-                        <span>{key === "ollama" ? "Direct calls" : "Utilization"}</span>
-                        <strong>{key === "ollama" ? directCallsToday : `${pct}%`}</strong>
+                        <span>Live heat</span>
+                        <strong>{`${activityScore}%`}</strong>
                       </div>
                     </div>
                     <p className="finops-provider-purpose"><span>{purposeLabel}</span><em title={purpose}>{purpose}</em></p>
+                    <p className="finops-provider-quota"><span>Allowance</span><em title={allowance.label}>{allowance.verified ? `${allowance.label} · ${allowance.percent}% used` : allowance.label}</em></p>
                     <footer className="finops-provider-state">
                       <strong>{stateLabel}<small>{activityDetail}</small></strong>
                       <i

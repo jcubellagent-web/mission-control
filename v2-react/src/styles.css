@@ -16487,6 +16487,7 @@ body,
 #finops-dashboard.finops-quiet-layout .finops-metric-band article > span,
 #finops-dashboard.finops-quiet-layout .finops-provider-name p span,
 #finops-dashboard.finops-quiet-layout .finops-provider-purpose span,
+#finops-dashboard.finops-quiet-layout .finops-provider-quota span,
 #finops-dashboard.finops-quiet-layout .finops-provider-utilization span,
 #finops-dashboard.finops-quiet-layout .finops-health-rail article span {
   color: var(--finops-label) !important;
@@ -16757,7 +16758,7 @@ body,
 
 #finops-dashboard.finops-quiet-layout .finops-provider-simple {
   display: grid;
-  grid-template-rows: minmax(0, 1fr) auto auto;
+  grid-template-rows: minmax(0, 1fr) auto auto auto;
   gap: 5px;
   box-sizing: border-box;
   max-width: 100%;
@@ -16868,6 +16869,33 @@ body,
 
 #finops-dashboard.finops-quiet-layout .finops-provider-purpose span {
   flex: 0 0 auto;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-provider-quota {
+  display: flex !important;
+  gap: 6px !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  color: #9ab0bb !important;
+  font-size: 9px !important;
+  font-weight: 800 !important;
+  line-height: 1.1 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-provider-quota span {
+  flex: 0 0 auto;
+}
+
+#finops-dashboard.finops-quiet-layout .finops-provider-quota em {
+  min-width: 0;
+  overflow: hidden;
+  color: #c6d7de;
+  font-style: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 #finops-dashboard.finops-quiet-layout .finops-provider-state {

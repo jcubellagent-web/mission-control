@@ -61,6 +61,11 @@ test("renders the approved desktop Control Tower", async ({ page }) => {
   await expect(page.locator(".agent-activity-evidence").first()).toBeVisible();
   await expect(page.locator(".agent-hero-card[data-work-motion]").first()).toHaveAttribute("data-work-motion", /live|paused/);
   await expect(page.locator("#brain-atlas [data-agent-route]").first()).toHaveAttribute("data-agent-route", /live|active-stale|idle/);
+  const providers = page.locator("#finops-dashboard [data-finops-region='provider']");
+  await expect(providers).toHaveCount(4);
+  await expect(providers.first().locator(".finops-provider-utilization span")).toHaveText("Live heat");
+  await expect(providers.first()).toHaveAttribute("data-quota-state", /verified|unavailable/);
+  await expect(providers.filter({ hasText: "Ollama" }).locator(".finops-provider-quota")).toContainText("Quota unavailable");
 });
 
 test("renders the approved mobile Control Tower", async ({ page }) => {
