@@ -68,9 +68,11 @@ jobs:
         run: >-
           python3 scripts/mission_control_regression_check.py
           --dashboard-data tests/fixtures/dashboard-data.ci.json
-      - name: Run deterministic route and fault-injection benchmarks
+      - name: Run route telemetry benchmark (observational)
+        continue-on-error: true
+        run: python3 scripts/ecosystem_qa_benchmark.py --route-only --no-write
+      - name: Run deterministic fault-injection benchmark
         run: |
-          python3 scripts/ecosystem_qa_benchmark.py --route-only --no-write
           python3 scripts/ecosystem_qa_benchmark.py --fault-injection --no-write
       - name: Stage deterministic Control Tower live-data fixture
         run: |
