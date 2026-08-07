@@ -21229,9 +21229,11 @@ body,
 
 .brain-hero.is-flight-deck .agent-hero-card.is-density-compact .agent-objective-main,
 .brain-hero.is-flight-deck .agent-hero-card.is-density-compact.is-working-focus .agent-objective-main {
-  max-height: 26px !important;
-  font-size: 24px !important;
-  line-height: 1.08 !important;
+  /* Compact cards share a short rail with the selected card at kiosk width.
+     Keep the whole one-line objective visible instead of cropping a large wordmark. */
+  max-height: 22px !important;
+  font-size: clamp(16px, 0.95vw, 19px) !important;
+  line-height: 1.1 !important;
   -webkit-line-clamp: 1 !important;
 }
 
