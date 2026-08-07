@@ -6,6 +6,11 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+
 jobs:
   regression:
     runs-on: ubuntu-latest
@@ -43,6 +48,22 @@ jobs:
         run: python3 -m pytest -q tests scripts/test_telegram_approval_extraction.py
       - name: Build current React Control Tower
         run: npm run build
+      - name: Generate Control Tower build provenance
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/attest@v4
+        with:
+          subject-path: 'dist/v2-react/**'
+      - name: Run Playwright visual smoke coverage
+        run: npm run test:visual
+      - name: Upload Chromatic visual test archive
+        env:
+          CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+        run: |
+          if [[ -n "$CHROMATIC_PROJECT_TOKEN" ]]; then
+            npm run test:chromatic
+          else
+            echo "Chromatic project token is not configured; upload skipped."
+          fi
       - name: Run static UI/data regression checks
         run: >-
           python3 scripts/mission_control_regression_check.py
