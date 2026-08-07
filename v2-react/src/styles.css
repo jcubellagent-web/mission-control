@@ -21312,6 +21312,50 @@ body,
   opacity: 1;
 }
 
+/* Live Work Board operator pass: the job headline is the decision surface.
+   Model pills, micro-counters, step strips, and next-up copy stay available in
+   the detail surface, but do not compete with the current work at kiosk size. */
+.brain-hero.is-flight-deck .agent-hero-card {
+  grid-template-columns: minmax(122px, 0.16fr) minmax(0, 1fr) !important;
+  grid-template-areas: "agent objective" "agent objective" !important;
+  column-gap: 14px !important;
+}
+
+.brain-hero.is-flight-deck .agent-hero-card .agent-model-stack,
+.brain-hero.is-flight-deck .agent-hero-card .agent-step-trail,
+.brain-hero.is-flight-deck .agent-hero-card .agent-activity-evidence,
+.brain-hero.is-flight-deck .agent-hero-card .agent-workflow-lane {
+  display: none !important;
+}
+
+.brain-hero.is-flight-deck .agent-hero-card header {
+  grid-template-columns: 8px minmax(0, 1fr) !important;
+  gap: 6px !important;
+}
+
+.brain-hero.is-flight-deck .agent-hero-card header em,
+.brain-hero.is-flight-deck .agent-hero-card .agent-role-badge {
+  display: none !important;
+}
+
+.brain-hero.is-flight-deck .agent-hero-card .agent-name-lockup strong {
+  color: #f7fdff !important;
+  font-size: clamp(14px, 1.08vw, 18px) !important;
+  font-weight: 950 !important;
+}
+
+.brain-hero.is-flight-deck .agent-hero-card.is-density-compact {
+  grid-template-columns: minmax(102px, 0.13fr) minmax(0, 1fr) !important;
+  grid-template-areas: "agent objective" !important;
+  column-gap: 10px !important;
+}
+
+.brain-hero.is-flight-deck .agent-hero-card.is-density-compact .agent-objective-main,
+.brain-hero.is-flight-deck .agent-hero-card.is-density-compact.is-working-focus .agent-objective-main {
+  font-size: clamp(13px, 1.05vw, 17px) !important;
+  font-weight: 900 !important;
+}
+
 /* A fresh verified route is immediate execution evidence. It lights the card
    while request aggregation catches up, but its meter remains based solely on
    real request counts and allowance is never inferred. */
