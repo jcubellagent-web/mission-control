@@ -5107,6 +5107,11 @@ function BrainAtlasEcosystemView({
   const activeMemoryAgent = activeEventIsRecent
     ? activeMemoryEvent?.consumerAgent || activeMemoryEvent?.agent || activeMemoryEvent?.sourceAgent || null
     : null;
+  // The Atlas is an activity display, not a static topology diagram.  A line is
+  // only useful when its exact observable connection is active; historical
+  // counts stay on the cards and in the trace drawer instead of becoming
+  // implied, always-on relationships.
+  const showActivityBus = hasActiveControllers || Boolean(activeMemoryAgent);
   type AtlasMemoryNode = "retrieve" | "registry" | "selected" | "used" | "helpful" | "candidate" | "durable";
   const memoryNodeIsActive = (node: AtlasMemoryNode) => {
     if (!signal) return false;
@@ -5356,22 +5361,21 @@ function BrainAtlasEcosystemView({
                 <marker id="brain-arrow-feedback" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 8 4 L 0 8 Z" /></marker>
                 <marker id="brain-arrow-governed" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 8 4 L 0 8 Z" /></marker>
               </defs>
-              <path className={`brain-agent-bus${hasActiveControllers ? " is-active" : ""}${activeMemoryAgent ? " is-memory-active" : ""}`} d="M 274 28 V 192" data-flow-route="agent-activity-bus" data-active-agent-count={activeAgentIds.length} />
-              <text className={`brain-agent-bus-label${hasActiveControllers ? " is-active" : ""}`} x="284" y="110" textAnchor="middle" transform="rotate(-90 284 110)">{hasActiveControllers ? `${activeAgentIds.length} ACTIVE ROUTE${activeAgentIds.length === 1 ? "" : "S"}` : "ACTIVITY BUS"}</text>
-              {HERO_AGENT_ORDER.map((agent, index) => {
+              {showActivityBus ? <path className={`brain-agent-bus${hasActiveControllers ? " is-active" : ""}${activeMemoryAgent ? " is-memory-active" : ""}`} d="M 274 28 V 192" data-flow-route="agent-activity-bus" data-active-agent-count={activeAgentIds.length} /> : null}
+              {showActivityBus ? <text className={`brain-agent-bus-label${hasActiveControllers ? " is-active" : ""}`} x="284" y="110" textAnchor="middle" transform="rotate(-90 284 110)">{`${activeAgentIds.length} ACTIVE ROUTE${activeAgentIds.length === 1 ? "" : "S"}`}</text> : null}
+              {showActivityBus ? HERO_AGENT_ORDER.map((agent, index) => {
                 const y = [28, 82, 138, 192][index];
                 return <circle key={`bus-junction-${agent}`} className={`brain-agent-bus-junction agent-${agent}${activeAgentSet.has(agent) ? " is-active" : ""}${activeMemoryAgent === agent ? " is-memory-active" : ""}`} cx="274" cy={y} r={activeAgentSet.has(agent) ? 3.6 : 2.2} data-agent={agent} />;
-              })}
-              <circle className={`brain-agent-bus-junction is-trunk${hasActiveControllers ? " is-active" : ""}`} cx="274" cy="110" r={hasActiveControllers ? 3.2 : 2.2} />
-              <path className={`brain-agent-trunk${activeMemoryAgent ? " is-active-route" : ""}${selectedTraceHasMemory ? " is-trace-evidence" : ""}`} d="M 274 110 H 300" markerEnd="url(#brain-arrow-agent)" data-flow-direction="forward" data-flow-from="activity-bus" data-flow-to="retrieve" />
-              <path className={`memory-flow-edge brain-memory-link is-recall${memoryNodeIsActive("retrieve") && memoryNodeIsActive("registry") ? " is-live" : ""}${selectedAgent && traceRetrievals ? " is-trace-evidence" : ""}`} d="M 466 110 C 478 110 490 107 504 102" markerEnd="url(#brain-arrow-recall)" data-flow-direction="forward" data-flow-from="retrieve" data-flow-to="registry" data-operation={signal === "hit" ? "hit" : "retrieval"} data-observed-at={activity?.lastObservedAt.retrieval || ""} />
-              <path className={`brain-memory-link is-provenance${selectedTraceHasMemory ? " is-trace-evidence" : ""}`} d="M 560 60 V 76" markerEnd="url(#brain-arrow-used)" data-flow-direction="forward" data-flow-from="provenance" data-flow-to="registry" data-operation="provenance" />
-              <path className={`memory-flow-edge brain-memory-link is-selected${memoryNodeIsActive("registry") && memoryNodeIsActive("selected") ? " is-live" : ""}${selectedAgent && traceSelected ? " is-trace-evidence" : ""}`} d="M 635 80 C 686 61 744 36 798 28" markerEnd="url(#brain-arrow-selected)" data-flow-direction="forward" data-flow-from="registry" data-flow-to="selected" data-operation="selected" data-observed-at={activity?.lastObservedAt.selected || ""} />
-              <path className={`memory-flow-edge brain-memory-link is-used${memoryNodeIsActive("selected") && memoryNodeIsActive("used") ? " is-live" : ""}${selectedAgent && traceUsed ? " is-trace-evidence" : ""}`} d="M 894 52 V 84" markerEnd="url(#brain-arrow-used)" data-flow-direction="forward" data-flow-from="selected" data-flow-to="used" data-operation="used" data-observed-at={activity?.lastObservedAt.used || ""} />
-              <path className={`memory-flow-edge brain-memory-link is-feedback${memoryNodeIsActive("used") && memoryNodeIsActive("helpful") ? " is-live" : ""}`} d="M 894 136 V 168" markerEnd="url(#brain-arrow-feedback)" data-flow-direction="forward" data-flow-from="used" data-flow-to="helpful" data-operation="feedback" data-observed-at={activity?.lastObservedAt.feedback || ""} />
-              <path className={`memory-flow-edge brain-memory-link is-candidate${memoryNodeIsActive("helpful") && memoryNodeIsActive("candidate") ? " is-live" : ""}`} d="M 798 194 H 760" markerEnd="url(#brain-arrow-governed)" data-flow-direction="forward" data-flow-from="helpful" data-flow-to="candidate" />
-              <path className={`memory-flow-edge brain-memory-link is-review${memoryNodeIsActive("candidate") && memoryNodeIsActive("durable") ? " is-live" : ""}`} d="M 620 194 H 466" markerEnd="url(#brain-arrow-governed)" data-flow-direction="forward" data-flow-from="candidate" data-flow-to="durable" />
-              <path className={`memory-flow-edge brain-memory-link is-durable${memoryNodeIsActive("durable") && memoryNodeIsActive("registry") ? " is-live" : ""}`} d="M 466 184 C 500 174 514 158 526 148" markerEnd="url(#brain-arrow-governed)" data-flow-direction="forward" data-flow-from="durable" data-flow-to="registry" />
+              }) : null}
+              {activeMemoryAgent ? <circle className={`brain-agent-bus-junction is-trunk is-active`} cx="274" cy="110" r="3.2" /> : null}
+              {activeMemoryAgent ? <path className="brain-agent-trunk is-active-route" d="M 274 110 H 300" markerEnd="url(#brain-arrow-agent)" data-flow-direction="forward" data-flow-from="activity-bus" data-flow-to="retrieve" /> : null}
+              {memoryNodeIsActive("retrieve") && memoryNodeIsActive("registry") ? <path className="memory-flow-edge brain-memory-link is-recall is-live" d="M 466 110 C 478 110 490 107 504 102" markerEnd="url(#brain-arrow-recall)" data-flow-direction="forward" data-flow-from="retrieve" data-flow-to="registry" data-operation={signal === "hit" ? "hit" : "retrieval"} data-observed-at={activity?.lastObservedAt.retrieval || ""} /> : null}
+              {memoryNodeIsActive("registry") && memoryNodeIsActive("selected") ? <path className="memory-flow-edge brain-memory-link is-selected is-live" d="M 635 80 C 686 61 744 36 798 28" markerEnd="url(#brain-arrow-selected)" data-flow-direction="forward" data-flow-from="registry" data-flow-to="selected" data-operation="selected" data-observed-at={activity?.lastObservedAt.selected || ""} /> : null}
+              {memoryNodeIsActive("selected") && memoryNodeIsActive("used") ? <path className="memory-flow-edge brain-memory-link is-used is-live" d="M 894 52 V 84" markerEnd="url(#brain-arrow-used)" data-flow-direction="forward" data-flow-from="selected" data-flow-to="used" data-operation="used" data-observed-at={activity?.lastObservedAt.used || ""} /> : null}
+              {memoryNodeIsActive("used") && memoryNodeIsActive("helpful") ? <path className="memory-flow-edge brain-memory-link is-feedback is-live" d="M 894 136 V 168" markerEnd="url(#brain-arrow-feedback)" data-flow-direction="forward" data-flow-from="used" data-flow-to="helpful" data-operation="feedback" data-observed-at={activity?.lastObservedAt.feedback || ""} /> : null}
+              {memoryNodeIsActive("helpful") && memoryNodeIsActive("candidate") ? <path className="memory-flow-edge brain-memory-link is-candidate is-live" d="M 798 194 H 760" markerEnd="url(#brain-arrow-governed)" data-flow-direction="forward" data-flow-from="helpful" data-flow-to="candidate" /> : null}
+              {memoryNodeIsActive("candidate") && memoryNodeIsActive("durable") ? <path className="memory-flow-edge brain-memory-link is-review is-live" d="M 620 194 H 466" markerEnd="url(#brain-arrow-governed)" data-flow-direction="forward" data-flow-from="candidate" data-flow-to="durable" /> : null}
+              {memoryNodeIsActive("durable") && memoryNodeIsActive("registry") ? <path className="memory-flow-edge brain-memory-link is-durable is-live" d="M 466 184 C 500 174 514 158 526 148" markerEnd="url(#brain-arrow-governed)" data-flow-direction="forward" data-flow-from="durable" data-flow-to="registry" /> : null}
               {memoryNodeIsActive("retrieve") && memoryNodeIsActive("registry") ? <circle className="brain-memory-packet is-recall-packet is-live" r="4"><animateMotion dur="1.4s" repeatCount="indefinite" path="M 466 110 C 478 110 490 107 504 102" /></circle> : null}
               {memoryNodeIsActive("registry") && memoryNodeIsActive("selected") ? <circle className="brain-memory-packet is-selected-packet is-live" r="4"><animateMotion dur="1.55s" repeatCount="indefinite" path="M 635 80 C 686 61 744 36 798 28" /></circle> : null}
               {memoryNodeIsActive("selected") && memoryNodeIsActive("used") ? <circle className="brain-memory-packet is-used-packet is-live" r="4"><animateMotion dur="1.2s" repeatCount="indefinite" path="M 894 52 V 84" /></circle> : null}
@@ -5397,10 +5401,11 @@ function BrainAtlasEcosystemView({
                   && Date.now() - timeValue(routeEvidenceAt) <= (activity?.motionWindowSeconds || 90) * 1000,
                 );
                 const isActive = activeAgentSet.has(agent) || memoryLive;
+                const connectivityLive = routeLive || memoryLive;
                 const memoryOperation = latest?.[0] || "none";
                 return (
                   <g key={`agent-topology-${agent}`} data-agent-route={routeLive ? "live" : isActive ? "active-stale" : "idle"} data-memory-operation={memoryOperation} data-memory-state={memoryLive ? "live" : "quiet"}>
-                    <path
+                    {connectivityLive ? <path
                       className={`memory-flow-edge brain-topology-link agent-${agent}${isActive ? " is-active" : ""}${memoryLive ? " is-live is-memory-live" : ""}${routeLive ? " is-live is-work-live" : ""}${activeMemoryAgent === agent ? " is-active-memory-agent" : ""}${selectedAgent === agent ? " is-selected-agent" : selectedAgent ? " is-muted-agent" : ""}`}
                       d={topology.path}
                       data-agent={agent}
@@ -5410,7 +5415,7 @@ function BrainAtlasEcosystemView({
                       data-flow-direction="forward"
                       data-flow-from={agent}
                       data-flow-to="activity-bus"
-                    />
+                    /> : null}
                     {routeLive ? (
                       <>
                         <path
