@@ -2732,6 +2732,12 @@ function providerActivityScore(provider: any) {
   return Math.min(100, Math.round(calls5m * 18 + additional30mCalls * 4));
 }
 
+function providerRecentCallCounts(provider: any) {
+  const calls5m = Math.max(0, Number(provider?.callsLast5m || 0));
+  const calls30m = Math.max(calls5m, Number(provider?.callsLast30m || 0));
+  return { calls5m, calls30m };
+}
+
 function providerHeatLabel(provider: any, active: boolean, routeUpdatedAt?: string) {
   if (active) return "live route";
   const lastAt = Math.max(timeValue(provider?.lastActivityAt), timeValue(routeUpdatedAt));
@@ -3219,6 +3225,7 @@ function FinOpsDashboard({
                 // Ollama has direct Cloud API metrics but no supported account
                 // quota endpoint. Its heat reflects verified request activity.
                 const activityScore = receiptActivityScore;
+                const recentCalls = providerRecentCallCounts(provider);
                 const heatLabel = providerHeatLabel(provider, active, liveRoute?.updatedAt);
                 const allowance = providerVerifiedAllowance(provider);
                 const tone = providerTone(provider);
@@ -3233,9 +3240,9 @@ function FinOpsDashboard({
                     ? "Planning, review, and long-context work"
                     : "Signals, news, and X research";
                 const purposeLabel = key === "ollama" ? "Direct API metrics" : "Purpose";
-                const activityDetail = key === "ollama"
-                  ? `${directCallsToday} calls today · ${activityScore}% request heat`
-                  : `${activityScore}% request heat · ${heatLabel}`;
+                const activityDetail = recentCalls.calls30m
+                  ? `${recentCalls.calls5m} call${recentCalls.calls5m === 1 ? "" : "s"} / 5m · ${recentCalls.calls30m} / 30m · ${heatLabel}`
+                  : `No calls / 30m · ${heatLabel}`;
                 const ProviderIcon = key === "codex" ? Braces : key === "antigravity" ? Sparkles : key === "ollama" ? Bot : Radio;
                 return (
                   <article
@@ -3263,8 +3270,8 @@ function FinOpsDashboard({
                         <p><span>Current model</span><em title={currentModel}>{currentModel}</em></p>
                       </div>
                       <div className="finops-provider-utilization">
-                        <span>Live heat</span>
-                        <strong>{`${activityScore}%`}</strong>
+                        <span>Calls · 5m / 30m</span>
+                        <strong title={`${recentCalls.calls5m} calls in five minutes; ${recentCalls.calls30m} calls in thirty minutes`}>{`${recentCalls.calls5m} / ${recentCalls.calls30m}`}</strong>
                       </div>
                     </div>
                     <p className="finops-provider-purpose"><span>{purposeLabel}</span><em title={purpose}>{purpose}</em></p>
