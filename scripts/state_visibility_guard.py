@@ -16,6 +16,7 @@ DATA = ROOT / "data"
 HOT_WORK_PATH = DATA / "control-tower-hot.json"
 WATCH_FILES = {
     "brainFeed": DATA / "brain-feed.json",
+    "joshexBrainFeed": DATA / "joshex-brain-feed.json",
     "jaimesBrainFeed": DATA / "jaimes-brain-feed.json",
     "jainBrainFeed": DATA / "jain-brain-feed.json",
     "heartbeats": DATA / "agent-heartbeats.json",
@@ -23,7 +24,7 @@ WATCH_FILES = {
     "projectContext": DATA / "project-context-registry.json",
     "agentContext": DATA / "agent-context-registry.json",
 }
-AGENT_FEED_NAMES = {"brainFeed", "jaimesBrainFeed", "jainBrainFeed"}
+AGENT_FEED_NAMES = {"brainFeed", "joshexBrainFeed", "jaimesBrainFeed", "jainBrainFeed"}
 STALE_MINUTES = 20
 
 
@@ -76,6 +77,38 @@ def active_feed_age_minutes(path: Path, now: dt.datetime) -> float | None:
     return feed_age
 
 
+def active_feed_has_current_work(path: Path) -> bool:
+    """Require a fresh JOSHeX claim to have an exact leased-work projection.
+
+    JOSHeX can publish a local status sidecar independently of the dedicated
+    host feeds.  That must not be treated as visible work unless its exact
+    work/run identity is also present in the canonical live-work ledger.
+    """
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        hot = json.loads(HOT_WORK_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    if not isinstance(payload, dict) or not isinstance(hot, dict):
+        return False
+    status = str(payload.get("status") or "").strip().lower()
+    active = payload.get("active") is True or status in {"active", "working", "running", "queued", "waiting"}
+    if not active:
+        return True
+    work_id = str(payload.get("workId") or "").strip()
+    run_id = str(payload.get("runId") or "").strip()
+    if not work_id or not run_id:
+        return False
+    active_works = hot.get("activeWorks") if isinstance(hot.get("activeWorks"), list) else []
+    return any(
+        isinstance(work, dict)
+        and str(work.get("workId") or "") == work_id
+        and str(work.get("runId") or "") == run_id
+        and work.get("stale") is not True
+        for work in active_works
+    )
+
+
 def run(cmd: list[str], *, cwd: Path | None = None, timeout: int = 120) -> dict:
     proc = subprocess.run(
         cmd,
@@ -109,6 +142,8 @@ def control_tower_issues() -> list[str]:
             age_minutes = (now.timestamp() - path.stat().st_mtime) / 60
         if age_minutes > STALE_MINUTES:
             issues.append(f"{name} stale")
+        if name == "joshexBrainFeed" and not active_feed_has_current_work(path):
+            issues.append("joshexBrainFeed active without current leased work")
     return issues
 
 

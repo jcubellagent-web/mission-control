@@ -99,3 +99,26 @@ def test_invalid_active_feed_shape_fails_closed(tmp_path) -> None:
     feed.write_text("not-json", encoding="utf-8")
 
     assert module.active_feed_age_minutes(feed, datetime.now(timezone.utc)) == float("inf")
+
+
+def test_active_joshex_feed_requires_exact_live_work_identity(tmp_path) -> None:
+    module = load_guard_module()
+    now = datetime.now(timezone.utc)
+    feed = tmp_path / "joshex-brain-feed.json"
+    write_feed(feed, active=True, status="active", updated_at=now)
+    hot = tmp_path / "control-tower-hot.json"
+    hot.write_text(json.dumps({"activeWorks": []}), encoding="utf-8")
+    module.HOT_WORK_PATH = hot
+
+    assert module.active_feed_has_current_work(feed) is False
+
+    payload = json.loads(feed.read_text(encoding="utf-8"))
+    payload.update({"workId": "work-current", "runId": "run-current"})
+    feed.write_text(json.dumps(payload), encoding="utf-8")
+    hot.write_text(json.dumps({"activeWorks": [{
+        "workId": "work-current",
+        "runId": "run-current",
+        "stale": False,
+    }]}), encoding="utf-8")
+
+    assert module.active_feed_has_current_work(feed) is True
