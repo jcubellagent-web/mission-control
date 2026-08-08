@@ -200,6 +200,27 @@ class AgentPublishWorkContractTests(unittest.TestCase):
             agent_publish.dashboard_text("Failed at scripts/worker.py:41"),
         )
 
+    def test_terminal_joshex_publish_clears_matching_personal_activity(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            sidecar = Path(raw) / "personal-codex.json"
+            sidecar.write_text(json.dumps({
+                "status": "working",
+                "workId": "work-1",
+                "runId": "run-1",
+                "patchStatus": {"status": "working"},
+            }), encoding="utf-8")
+            event = {
+                "agent": "joshex", "status": "done", "workId": "work-1", "runId": "run-1",
+                "title": "Completed work", "detail": "Verified", "tool": "Codex", "time": "2026-08-08T02:30:00Z",
+                "leaseUntil": None,
+            }
+            with mock.patch.object(agent_publish, "PERSONAL_CODEX_PATH", sidecar):
+                agent_publish.sync_personal_codex_lifecycle(event)
+            payload = json.loads(sidecar.read_text(encoding="utf-8"))
+            self.assertEqual(payload["status"], "ready")
+            self.assertIsNone(payload["workId"])
+            self.assertEqual(payload["patchStatus"]["status"], "ready")
+
     def test_agent_task_cli_drives_one_exact_work_to_terminal(self) -> None:
         root = Path(agent_task.ROOT)
         with tempfile.TemporaryDirectory() as raw:

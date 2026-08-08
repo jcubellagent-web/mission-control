@@ -28,6 +28,7 @@ CODEX_JOBS_PATH = DATA_DIR / "codex-jobs.json"
 DECISIONS_PATH = DATA_DIR / "decisions.json"
 HANDOFF_QUEUE_PATH = DATA_DIR / "handoff-queue.json"
 DAILY_ROLLUP_PATH = DATA_DIR / "daily-rollup.json"
+PERSONAL_CODEX_PATH = DATA_DIR / "personal-codex.json"
 HANDOFF_DIR = Path(os.environ.get("CONTROL_TOWER_HANDOFF_DIR", ROOT / "docs" / "handoffs"))
 BRAIN_FEED_PATHS = {
     "josh": DATA_DIR / "brain-feed.json",
@@ -654,6 +655,61 @@ def publish_local_brain_feed(event: dict[str, Any]) -> None:
     write_json(path, payload)
 
 
+def sync_personal_codex_lifecycle(event: dict[str, Any]) -> None:
+    """Keep the Personal Codex panel from retaining a completed live claim.
+
+    This sidecar is a presentation aid, not a canonical work source.  It may
+    mirror the current JOSHeX lifecycle, but a terminal event must clear its
+    active-looking fields unless it belongs to a newer work/run.
+    """
+    if event["agent"] != "joshex":
+        return
+    existing = read_json(PERSONAL_CODEX_PATH, {})
+    if not isinstance(existing, dict):
+        existing = {}
+    current_work = str(existing.get("workId") or "").strip()
+    current_run = str(existing.get("runId") or "").strip()
+    exact_current = (not current_work and not current_run) or (
+        current_work == event["workId"] and current_run == event["runId"]
+    )
+    active = event["status"] in STATUS_TO_ACTIVE
+    terminal = event["status"] in WORK_TERMINAL_STATUSES
+    if terminal and not exact_current:
+        return
+
+    patch_status = existing.get("patchStatus") if isinstance(existing.get("patchStatus"), dict) else {}
+    if active:
+        payload = {
+            **existing,
+            "status": "working",
+            "objective": event["title"],
+            "summary": event.get("detail") or event["title"],
+            "mode": event.get("tool") or "agent_publish.py",
+            "updatedAt": event["time"],
+            "workId": event["workId"],
+            "runId": event["runId"],
+            "leaseUntil": event.get("leaseUntil"),
+            "patchStatus": {**patch_status, "status": "working", "updatedAt": event["time"]},
+        }
+    elif terminal:
+        terminal_status = "needs_josh" if event["status"] in {"blocked", "error"} else "ready"
+        payload = {
+            **existing,
+            "status": terminal_status,
+            "objective": "JOSHeX ready; no active canonical work" if terminal_status == "ready" else event["title"],
+            "summary": event.get("detail") or event["title"],
+            "mode": "Control Tower lifecycle complete",
+            "updatedAt": event["time"],
+            "workId": None,
+            "runId": None,
+            "leaseUntil": None,
+            "patchStatus": {**patch_status, "status": terminal_status, "updatedAt": event["time"]},
+        }
+    else:
+        return
+    write_json(PERSONAL_CODEX_PATH, payload)
+
+
 def mirror_publish_heartbeat(event: dict[str, Any]) -> None:
     """A Brain Feed publish is also a live check-in for that agent."""
     record = {
@@ -856,6 +912,7 @@ def main() -> int:
         append_handoff_record(event, target, handoff)
     if args.brain_feed:
         publish_local_brain_feed(event)
+        sync_personal_codex_lifecycle(event)
         mirror_publish_heartbeat(event)
     if args.rollup:
         generate_daily_rollup()

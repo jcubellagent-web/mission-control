@@ -3535,6 +3535,12 @@ def apply_tracked_tasks_to_agent_feeds(
     for task in tracked_tasks:
         if str(task.get("status") or "active").lower() != "active":
             continue
+        # Task markdown is a historical intake record, not a live execution
+        # lease.  It may decorate a ready feed, but can never resurrect active
+        # work after its dated update is stale.
+        task_stamp = task.get("updatedAt") or task.get("requestedAt")
+        if task_stamp and not is_recent_ts(task_stamp, hours=2):
+            continue
         owner = str(task.get("owner") or "JOSH 2.0")
         key = owner_to_key.get(owner)
         if not key:

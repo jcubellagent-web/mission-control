@@ -761,6 +761,16 @@ function activeWorkForAgent(agent: AgentId, workItems: WorkItem[]) {
 }
 
 function agentHasFreshWorkFocus(status: AgentStatus, activeWork?: WorkItem) {
+  // Live animation is an execution assertion, not a best-effort inference.
+  // Require the exact canonical work/run identity and a currently valid lease
+  // before a status sidecar or historical task can make an agent look active.
+  const hasExactLiveLease = Boolean(
+    status.work_id
+    && status.run_id
+    && status.lease_until
+    && timeValue(status.lease_until) > Date.now(),
+  );
+  if (!hasExactLiveLease) return false;
   if (!hasPublishedActiveObjective(status, activeWork)) return false;
   const activeWorkFresh = activeWork?.state === "working" && isFreshActiveTimestamp(activeWork.updated_at);
   const statusWorkingFresh = ["active", "working"].includes(String(status.status || "").toLowerCase())

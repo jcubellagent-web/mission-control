@@ -119,6 +119,30 @@ def test_active_joshex_feed_requires_exact_live_work_identity(tmp_path) -> None:
         "workId": "work-current",
         "runId": "run-current",
         "stale": False,
+        "leaseUntil": (now + timedelta(minutes=5)).isoformat().replace("+00:00", "Z"),
     }]}), encoding="utf-8")
 
     assert module.active_feed_has_current_work(feed) is True
+
+
+def test_repair_clears_stale_personal_codex_activity(tmp_path) -> None:
+    module = load_guard_module()
+    personal = tmp_path / "personal-codex.json"
+    personal.write_text(json.dumps({
+        "status": "working",
+        "objective": "Old task still showing",
+        "workId": "old-work",
+        "runId": "old-run",
+        "patchStatus": {"status": "active"},
+    }), encoding="utf-8")
+    hot = tmp_path / "control-tower-hot.json"
+    hot.write_text(json.dumps({"activeWorks": []}), encoding="utf-8")
+    module.PERSONAL_CODEX_PATH = personal
+    module.HOT_WORK_PATH = hot
+
+    result = module.repair_personal_codex_activity()
+    repaired = json.loads(personal.read_text(encoding="utf-8"))
+    assert result["changed"] is True
+    assert repaired["status"] == "ready"
+    assert repaired["workId"] is None and repaired["runId"] is None
+    assert repaired["patchStatus"]["status"] == "ready"

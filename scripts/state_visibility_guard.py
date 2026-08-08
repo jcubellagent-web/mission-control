@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 WORKSPACE = ROOT.parent
 DATA = ROOT / "data"
 HOT_WORK_PATH = DATA / "control-tower-hot.json"
+PERSONAL_CODEX_PATH = DATA / "personal-codex.json"
 WATCH_FILES = {
     "brainFeed": DATA / "brain-feed.json",
     "joshexBrainFeed": DATA / "joshex-brain-feed.json",
@@ -100,13 +101,50 @@ def active_feed_has_current_work(path: Path) -> bool:
     if not work_id or not run_id:
         return False
     active_works = hot.get("activeWorks") if isinstance(hot.get("activeWorks"), list) else []
+    now = dt.datetime.now(dt.timezone.utc)
     return any(
         isinstance(work, dict)
         and str(work.get("workId") or "") == work_id
         and str(work.get("runId") or "") == run_id
         and work.get("stale") is not True
+        and (lease_until := parse_timestamp(work.get("leaseUntil"))) is not None
+        and lease_until > now
         for work in active_works
     )
+
+
+def repair_personal_codex_activity() -> dict:
+    """Clear stale Personal Codex activity without deleting its history.
+
+    The personal sidecar is allowed to mirror an exact JOSHeX leased work
+    record.  Any other active-looking state is stale presentation data and
+    must fail closed before the dashboard is regenerated.
+    """
+    try:
+        personal = json.loads(PERSONAL_CODEX_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {"kind": "personal_codex_lifecycle", "ok": True, "changed": False}
+    if not isinstance(personal, dict):
+        return {"kind": "personal_codex_lifecycle", "ok": False, "changed": False}
+    status = str(personal.get("status") or "").strip().lower()
+    patch = personal.get("patchStatus") if isinstance(personal.get("patchStatus"), dict) else {}
+    active_claim = status in {"active", "working", "running"} or str(patch.get("status") or "").lower() in {"active", "working", "running"}
+    if not active_claim or active_feed_has_current_work(PERSONAL_CODEX_PATH):
+        return {"kind": "personal_codex_lifecycle", "ok": True, "changed": False}
+    now = dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    personal.update({
+        "status": "ready",
+        "objective": "JOSHeX ready; no active canonical work",
+        "summary": "Historical activity retained; live state requires an exact active leased work record.",
+        "mode": "Control Tower lifecycle guard",
+        "updatedAt": now,
+        "workId": None,
+        "runId": None,
+        "leaseUntil": None,
+        "patchStatus": {**patch, "status": "ready", "updatedAt": now},
+    })
+    PERSONAL_CODEX_PATH.write_text(json.dumps(personal, indent=2) + "\n", encoding="utf-8")
+    return {"kind": "personal_codex_lifecycle", "ok": True, "changed": True}
 
 
 def run(cmd: list[str], *, cwd: Path | None = None, timeout: int = 120) -> dict:
@@ -159,6 +197,7 @@ def main() -> int:
         actions.append(run([sys.executable, "scripts/jaimes_brain_feed_poller.py"], cwd=WORKSPACE, timeout=90))
 
     if args.repair:
+        actions.append(repair_personal_codex_activity())
         actions.append(run([sys.executable, "scripts/project_context_registry.py"], cwd=ROOT, timeout=45))
         actions.append(run([sys.executable, "scripts/agent_context_registry.py"], cwd=ROOT, timeout=45))
         actions.append(run([sys.executable, "scripts/update_mission_control.py"], cwd=ROOT, timeout=120))
