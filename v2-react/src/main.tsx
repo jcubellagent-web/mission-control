@@ -844,6 +844,17 @@ function activeControllerWorksForAgent(agent: AgentId, activeWorks: ActiveWork[]
     .sort((left, right) => timeValue(right.updatedAt) - timeValue(left.updatedAt));
 }
 
+// A leased controller record is the canonical proof that an agent is executing
+// work. Keep this predicate shared by the board and Brain Atlas selection path
+// so a late availability heartbeat cannot make the two surfaces disagree.
+function hasExactLeasedController(agent: AgentId, activeWorks: ActiveWork[] = []) {
+  return activeControllerWorksForAgent(agent, activeWorks).some((work) => (
+    !work.stale
+    && Boolean(work.leaseUntil)
+    && timeValue(work.leaseUntil) > Date.now()
+  ));
+}
+
 function useRotatingControllerWork(controllerWorks: ActiveWork[]) {
   const workKey = controllerWorks.map((work) => `${work.workId}:${work.runId}`).join("|");
   const [index, setIndex] = useState(0);
@@ -1000,10 +1011,12 @@ function liveWorkPresentationForAgent(
   agent: AgentId,
   status: AgentStatus | undefined,
   workItems: WorkItem[],
+  activeWorks: ActiveWork[] = [],
 ): AgentLiveWorkPresentation {
   const resolvedStatus = status || offlineStatus(agent);
   const activeWork = activeWorkForAgent(agent, workItems);
-  const activeFocus = agentHasFreshWorkFocus(resolvedStatus, activeWork);
+  const activeFocus = agentHasFreshWorkFocus(resolvedStatus, activeWork)
+    || hasExactLeasedController(agent, activeWorks);
   const visualState = agentVisualState(resolvedStatus, activeFocus, activeWork);
   return {
     status: resolvedStatus,
@@ -1649,8 +1662,13 @@ function App() {
   }, [state.statuses]);
   const liveWorkItems = useMemo(() => buildWorkItems(state), [state]);
   const workingAgentIds = useMemo(() => HERO_AGENT_ORDER.filter((agent) => (
-    liveWorkPresentationForAgent(agent, statusByAgent.get(agent), liveWorkItems).working
-  )), [statusByAgent, liveWorkItems]);
+    liveWorkPresentationForAgent(
+      agent,
+      statusByAgent.get(agent),
+      liveWorkItems,
+      state.workHot?.activeWorks || [],
+    ).working
+  )), [statusByAgent, liveWorkItems, state.workHot?.activeWorks]);
   const synchronizedSelectedAgent = synchronizedAgentFocus(selectedAgent, workingAgentIds);
 
   const decisionCount = useMemo(() => state.approvals.filter((row) => row.status === "pending").length, [state.approvals]);
@@ -1840,7 +1858,12 @@ function BrainHero({
   const sourceChangeLeases = state.sourceChangeLeases || [];
   const heroRows = heroAgents.map((agent) => ({
     agent,
-    liveWork: liveWorkPresentationForAgent(agent, statuses.get(agent), workItems),
+    liveWork: liveWorkPresentationForAgent(
+      agent,
+      statuses.get(agent),
+      workItems,
+      state.workHot?.activeWorks || [],
+    ),
     idleContext: buildAgentIdleContext(agent, state, nowMs),
   }));
   const expansionTargets = heroRows.reduce<AgentExpansionMap>((result, row) => {
@@ -5672,7 +5695,7 @@ function BrainAtlasPanel({
   const statusByAgent = new Map(statuses.map((row) => [row.agent_id, row]));
   const liveWorkByAgent = new Map(HERO_AGENT_ORDER.map((agent) => [
     agent,
-    liveWorkPresentationForAgent(agent, statusByAgent.get(agent), workItems),
+    liveWorkPresentationForAgent(agent, statusByAgent.get(agent), workItems, activeWorks || []),
   ]));
   const workingAgentIds = new Set(HERO_AGENT_ORDER.filter((agent) => liveWorkByAgent.get(agent)?.working));
   const controllerWorksByAgent = new Map(HERO_AGENT_ORDER.map((agent) => [
@@ -7031,11 +7054,7 @@ function AgentHeroCard({
   // exact controller must lead the row even when a ready heartbeat arrives
   // after its work event; otherwise the row can say "Next: no scheduled work"
   // while its own counter shows active tasks.
-  const controllerFocus = controllerWorks.some((work) => (
-    !work.stale
-    && Boolean(work.leaseUntil)
-    && timeValue(work.leaseUntil) > Date.now()
-  ));
+  const controllerFocus = hasExactLeasedController(agent, activeWorks);
   const effectiveActiveFocus = activeFocus || controllerFocus;
   const effectiveVisualState: AgentVisualState = effectiveActiveFocus ? "working" : visualState;
   const controllerCount = controllerWorks.length || (effectiveActiveFocus ? 1 : 0);
