@@ -7027,7 +7027,18 @@ function AgentHeroCard({
   const controllerModelLabel = verifiedRoute ? liveWorkModelLabel(verifiedRoute, status.model) : "Unverified model";
   const controllerWorks = activeControllerWorksForAgent(agent, activeWorks);
   const rotatedController = useRotatingControllerWork(controllerWorks);
-  const controllerCount = controllerWorks.length || (activeFocus ? 1 : 0);
+  // The hot work ledger is authoritative for current controller work. A fresh
+  // exact controller must lead the row even when a ready heartbeat arrives
+  // after its work event; otherwise the row can say "Next: no scheduled work"
+  // while its own counter shows active tasks.
+  const controllerFocus = controllerWorks.some((work) => (
+    !work.stale
+    && Boolean(work.leaseUntil)
+    && timeValue(work.leaseUntil) > Date.now()
+  ));
+  const effectiveActiveFocus = activeFocus || controllerFocus;
+  const effectiveVisualState: AgentVisualState = effectiveActiveFocus ? "working" : visualState;
+  const controllerCount = controllerWorks.length || (effectiveActiveFocus ? 1 : 0);
   const workerRoutes = verifiedWorkerRoutesForAgent(agent, status, activeModelRoutes, controllerWorks);
   const visibleWorkerRoutes = workerRoutes.slice(0, MAX_VISIBLE_AGENT_WORKERS);
   const hiddenWorkerCount = Math.max(0, workerRoutes.length - visibleWorkerRoutes.length);
@@ -7068,21 +7079,21 @@ function AgentHeroCard({
   const activeReadout = activeAgentReadout(displayedStatus, displayedWork);
   const activityMode = agentActivityMode(liveWork);
   const promptReceived = activityMode === "received";
-  const headline = agentHeadline(activeFocus, promptReceived, activeReadout, idleContext, idleBriefRows);
+  const headline = agentHeadline(effectiveActiveFocus, promptReceived, activeReadout, idleContext, idleBriefRows);
   // Compact rails retain the kiosk's minimum readable type size. Summarize the
   // verified objective rather than allowing long copy to clip in that narrow lane.
   const visibleHeadline = density === "compact" ? headlineShortText(headline.title, 28) : headline.title;
-  const stepTrail = stepTrailForAgent(displayedStatus, activeFocus, displayedWork);
-  const showStepTrail = activeFocus || visualState === "waiting" || visualState === "blocked";
-  const activityEvidence = liveActivityEvidence(displayedStatus, displayedWork, recentEvent, idleContext, activeFocus);
+  const stepTrail = stepTrailForAgent(displayedStatus, effectiveActiveFocus, displayedWork);
+  const showStepTrail = effectiveActiveFocus || effectiveVisualState === "waiting" || effectiveVisualState === "blocked";
+  const activityEvidence = liveActivityEvidence(displayedStatus, displayedWork, recentEvent, idleContext, effectiveActiveFocus);
   const updateAgeMs = Math.max(0, Date.now() - timeValue(status.updated_at));
   const hotness = Math.max(0, 1 - Math.min(updateAgeMs, 12 * 60_000) / (12 * 60_000));
-  const pulseSpeed = activeFocus
+  const pulseSpeed = effectiveActiveFocus
     ? Math.max(1.05, 1.75 - hotness * 0.45)
-    : visualState === "waiting" || visualState === "blocked"
+    : effectiveVisualState === "waiting" || effectiveVisualState === "blocked"
       ? 2.35
       : 0;
-  const railSpeed = activeFocus ? Math.max(1.6, 2.8 - hotness * 0.7) : 2.8;
+  const railSpeed = effectiveActiveFocus ? Math.max(1.6, 2.8 - hotness * 0.7) : 2.8;
   useEffect(() => {
     const measure = () => {
       const node = objectiveRef.current;
@@ -7104,7 +7115,7 @@ function AgentHeroCard({
   }, [headline.title]);
   return (
     <article
-      className={`agent-hero-card ${agentClass(agent)} ${freshness} ${statusClass(status.status)} is-state-${visualState} is-density-${density} ${activeFocus ? "is-working-focus" : promptReceived ? "is-prompt-received" : "is-up-next-focus"} ${verifiedRoute ? "has-verified-route" : "is-route-pending"}${selected ? " is-linked-selected" : ""}${changedRowClass(changed)}`}
+      className={`agent-hero-card ${agentClass(agent)} ${freshness} ${statusClass(status.status)} is-state-${effectiveVisualState} is-density-${density} ${effectiveActiveFocus ? "is-working-focus" : promptReceived ? "is-prompt-received" : "is-up-next-focus"} ${verifiedRoute ? "has-verified-route" : "is-route-pending"}${selected ? " is-linked-selected" : ""}${changedRowClass(changed)}`}
       role="button"
       tabIndex={0}
       aria-pressed={selected}
@@ -7117,7 +7128,7 @@ function AgentHeroCard({
         }
       }}
       data-agent={agent}
-      data-agent-working={visualState === "working" ? "true" : "false"}
+      data-agent-working={effectiveVisualState === "working" ? "true" : "false"}
       data-agent-activity={activityMode || "quiet"}
       data-model-family={verifiedRoute?.id || "unverified"}
       data-model-verified={verifiedRoute ? "true" : "false"}
@@ -7131,7 +7142,7 @@ function AgentHeroCard({
       data-change-lease={activeLease ? "active" : "none"}
       data-work-id={displayedStatus.work_id || displayedWork?.id || ""}
       data-run-id={displayedStatus.run_id || ""}
-      data-work-state={visualState}
+      data-work-state={effectiveVisualState}
       data-activity-freshness={activityEvidence.freshness}
       data-work-motion={activityEvidence.freshness === "fresh" ? "live" : "paused"}
       data-density={density}

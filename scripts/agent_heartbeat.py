@@ -6,7 +6,6 @@ import argparse
 import datetime as dt
 import fcntl
 import json
-import subprocess
 import sys
 from pathlib import Path
 from typing import Any
@@ -124,22 +123,11 @@ def write_heartbeat(args: argparse.Namespace) -> dict[str, Any]:
         data["staleAfterMinutes"] = args.stale_after
         write_json(HEARTBEATS_PATH, refresh_stale(data))
         fcntl.flock(lock, fcntl.LOCK_UN)
-    if args.brain_feed:
-        publish_status = "active" if args.status == "active" else "ready" if args.status in {"ok", "ready"} else "info"
-        cmd = [
-            sys.executable, str(ROOT / "scripts" / "agent_publish.py"),
-            "--agent", agent,
-            "--type", "status",
-            "--status", publish_status,
-            "--title", heartbeat_title(agent, args.status),
-            "--tool", "status check",
-            "--detail", heartbeat_detail(agent, args.status, args.summary),
-            "--brain-feed",
-            "--rollup",
-        ]
-        if args.v2:
-            cmd.append("--v2")
-        subprocess.run(cmd, cwd=ROOT, check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    # A heartbeat establishes availability only.  It must never manufacture an
+    # ad-hoc active work record: callers with real work publish the exact
+    # work/run lifecycle separately through agent_publish.py.  The historical
+    # --brain-feed switch is retained for compatibility because dashboard
+    # generation reads this heartbeat sidecar directly.
     return record
 
 
