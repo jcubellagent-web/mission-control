@@ -287,7 +287,8 @@ READ_ONLY_REQUEST = re.compile(
     re.I,
 )
 MUTATION_SIGNAL = re.compile(
-    r"\b(?:fix|patch|changes?|edit|implement|deploy|repair|restart|recover|build|code)\b",
+    r"\b(?:fix|patch|changes?|edit|implement|deploy|repair|restart|recover|build|code|"
+    r"render|publish|post|upload|schedule|export|delete)\b",
     re.I,
 )
 NEGATED_MUTATION_SIGNAL = re.compile(
@@ -611,10 +612,16 @@ def classify_route(prompt: str, privacy: str) -> tuple[str, str]:
             "structured code review",
             "parallel technical reasoning",
             "technical second opinion",
+            "content preproduction",
+            "content script planning",
+            "social content planning",
+            "production brief",
+            "fcc content packet",
         )
     )
     glm_mutation = re.search(
-        r"\b(?:fix|patch|edit|implement|deploy|repair|restart|recover|build)\b",
+        r"\b(?:fix|patch|edit|implement|deploy|repair|restart|recover|build|"
+        r"render|publish|post|upload|schedule|export|delete)\b",
         mutation_text,
     )
     model_routing_audit = bool(

@@ -27,6 +27,13 @@ class AdvisoryManifestTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             subject.read_manifest(self.write(payload), "fcc-release-qa")
 
+    def test_fcc_preproduction_manifest_is_allowlisted_and_rejects_account_data(self) -> None:
+        payload = {"schemaVersion": 1, "workflow": "fcc-preproduction", "contentLabel": "candidate-01", "approvedFactSummary": ["approved fact"], "creativeObjective": "draft", "platformTargets": ["tiktok"], "constraints": ["no spoiler"], "knownRisks": ["visual QA pending"]}
+        self.assertEqual(subject.read_manifest(self.write(payload), "fcc-preproduction"), payload)
+        payload["accountHandle"] = "must-reject"
+        with self.assertRaises(ValueError):
+            subject.read_manifest(self.write(payload), "fcc-preproduction")
+
     def test_route_snapshot_is_allowlisted(self) -> None:
         snapshot = subject.route_qa_snapshot()
         self.assertEqual(set(snapshot), {"schemaVersion", "workflow", "routeQuality", "ollamaGovernance"})

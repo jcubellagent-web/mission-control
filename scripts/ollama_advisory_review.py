@@ -40,6 +40,12 @@ WORKFLOWS: dict[str, dict[str, Any]] = {
         "objective": "Review a sanitized Final Card Club release manifest for technical release risks. This is advisory only: no publishing, account access, CI mutation, or approval authority.",
         "fields": {"schemaVersion", "workflow", "releaseLabel", "artifactChecks", "validationSummary", "knownRisks"},
     },
+    "fcc-preproduction": {
+        "task_type": "content-preproduction",
+        "title": "Final Card Club preproduction advisory",
+        "objective": "Create a dashboard-safe Final Card Club text preproduction packet from approved facts and constraints. This is advisory only: no source footage access, visual or audio QA, rendering, filesystem mutation, account access, publishing, approval, or final-verification authority.",
+        "fields": {"schemaVersion", "workflow", "contentLabel", "approvedFactSummary", "creativeObjective", "platformTargets", "constraints", "knownRisks"},
+    },
 }
 
 

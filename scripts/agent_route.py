@@ -105,6 +105,11 @@ GLM_FIRST_TASK_TYPES = {
     "migration-planning",
     "test-plan-review",
     "data-schema-quality-review",
+    "content-preproduction",
+    "content-script-planning",
+    "social-content-planning",
+    "production-brief",
+    "fcc-content-packet",
     "sorare-analytics",
     "sorare-strategy",
     "sorare-review",
@@ -118,6 +123,8 @@ GLM_FIRST_CAPABILITIES = {
     "technical-review",
     "diagnostic-review",
     "implementation-planning",
+    "content-preproduction",
+    "social-content-planning",
 }
 
 # Expand GLM into adjacent read-only reasoning only while fresh Ollama quota is
