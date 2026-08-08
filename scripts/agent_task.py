@@ -57,7 +57,7 @@ SOURCE_LEASE_PATH = SOURCE_STATE_DIR / "control-tower-change-lock.json"
 SCOPED_SOURCE_LEASES_PATH = SOURCE_STATE_DIR / "scoped-change-leases.json"
 SOURCE_CLOSEOUT_DIR = SOURCE_STATE_DIR / "agent-source-closeouts"
 SOURCE_LIFECYCLE_LOCK_PATH = SOURCE_STATE_DIR / "agent-source-lifecycle.lock"
-VALID_SOURCE_OUTCOMES = {"finished", "aborted", "expired-orphan-recovered"}
+VALID_SOURCE_OUTCOMES = {"finished", "aborted", "expired-orphan-recovered", "orphan-recovered"}
 CANONICAL_TASK_HOST = os.environ.get("CONTROL_TOWER_CANONICAL_HOST", "josh2.0@josh2")
 CANONICAL_TASK_ROOT = os.environ.get(
     "CONTROL_TOWER_CANONICAL_ROOT",
