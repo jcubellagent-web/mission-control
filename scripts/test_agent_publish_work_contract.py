@@ -246,8 +246,16 @@ class AgentPublishWorkContractTests(unittest.TestCase):
             updated_at = dt.datetime.fromisoformat(active_work["updatedAt"].replace("Z", "+00:00"))
             self.assertEqual((lease_until - updated_at).total_seconds(), 900)
             for command in ("heartbeat", "complete"):
+                terminal_args = (
+                    [
+                        "--artifact-outcome", "no-artifact-needed",
+                        "--artifact-reason", "Temporary lifecycle fixture leaves no durable artifact.",
+                    ]
+                    if command == "complete"
+                    else []
+                )
                 subprocess.run(
-                    base + [command, "--id", task["id"], "--agent", "jaimes"],
+                    base + [command, "--id", task["id"], "--agent", "jaimes", *terminal_args],
                     cwd=root,
                     env=environment,
                     check=True,
